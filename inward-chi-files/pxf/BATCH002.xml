@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CTSInwardData>
+    <Batch>
+        <BatchId>BATCH002</BatchId>
+        <PresentingBankName>XYZ Bank</PresentingBankName>
+        <TotalCheque>5</TotalCheque>
+        <FileId>FILE002</FileId>
+
+        <Cheques>
+
+            <Cheque>
+                <ChequeNumber>CHQ002001</ChequeNumber>
+                <BatchId>BATCH002</BatchId>
+                <AccountNumber>20020001</AccountNumber>
+                <ChequeDate>2026-08-31</ChequeDate>
+                <DrawerName>Priya Nair</DrawerName>
+                <ChequeAmount>11000.00</ChequeAmount>
+                <MicrCode>600310002001</MicrCode>
+            </Cheque>
+
+            <Cheque>
+                <ChequeNumber>CHQ002002</ChequeNumber>
+                <BatchId>BATCH002</BatchId>
+                <AccountNumber>20020002</AccountNumber>
+                <ChequeDate>2026-08-30</ChequeDate>
+                <DrawerName>Arjun Mehta</DrawerName>
+                <ChequeAmount>6700.00</ChequeAmount>
+                <MicrCode>600310002002</MicrCode>
+            </Cheque>
+
+            <Cheque>
+                <ChequeNumber>CHQ002003</ChequeNumber>
+                <BatchId>BATCH002</BatchId>
+                <AccountNumber>20020003</AccountNumber>
+                <ChequeDate>2026-08-29</ChequeDate>
+                <DrawerName>Neha Kapoor</DrawerName>
+                <ChequeAmount>18400.00</ChequeAmount>
+                <MicrCode>600310002003</MicrCode>
+            </Cheque>
+
+            <Cheque>
+                <ChequeNumber>CHQ002004</ChequeNumber>
+                <BatchId>BATCH002</BatchId>
+                <AccountNumber>20020004</AccountNumber>
+                <ChequeDate>2026-08-28</ChequeDate>
+                <DrawerName>Kiran Patel</DrawerName>
+                <ChequeAmount>13250.00</ChequeAmount>
+                <MicrCode>600311002004</MicrCode>
+            </Cheque>
+
+            <Cheque>
+                <ChequeNumber>CHQ002005</ChequeNumber>
+                <BatchId>BATCH002</BatchId>
+                <AccountNumber>20020005</AccountNumber>
+                <ChequeDate>2026-08-27</ChequeDate>
+                <DrawerName>Deepak Verma</DrawerName>
+                <ChequeAmount>9700.00</ChequeAmount>
+                <MicrCode>600310002005</MicrCode>
+            </Cheque>
+
+        </Cheques>
+    </Batch>
+</CTSInwardData>

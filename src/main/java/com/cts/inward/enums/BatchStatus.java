@@ -1,0 +1,5 @@
+package com.cts.inward.enums;
+
+public enum BatchStatus {
+    RECEIVED, PARSED, MAKER_PROCESSING, SENT_TO_CHECKER, CHECKER_PROCESSING, RETURNED_TO_MAKER, ACCEPTED, REJECTED
+}

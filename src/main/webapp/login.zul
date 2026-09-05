@@ -1,6 +1,48 @@
-<?page title="Auto Generated index.zul"?>
-<window title="Hello World!!" border="normal" width="200px">
+<?xml version="1.0" encoding="UTF-8"?>
 
-<label value="You are using: ${desktop.webApp.version}"/>
+<zk>
 
-</window>
+    <window
+       title="CTS Login"
+   	   border="none"
+       width="420px"
+       style="margin:100px auto;"
+       apply="com.cts.admin.controller.LoginComposer">
+
+        <vlayout
+            spacing="15px"
+            style="padding:40px;">
+
+            <label
+                value="CTS Invoice System"
+                style="font-size:24px; font-weight:bold;"/>
+
+            <label
+                value="Login"
+                style="font-size:18px;"/>
+
+            <textbox
+                id="username"
+                placeholder="Username"
+                width="100%"/>
+
+            <textbox
+                id="password"
+                type="password"
+                placeholder="Password"
+                width="100%"/>
+
+            <button
+                id="loginButton"
+                label="Login"
+                width="100%"/>
+
+            <label
+                id="loginMessage"
+                style="color:red;"/>
+
+        </vlayout>
+
+    </window>
+
+</zk>

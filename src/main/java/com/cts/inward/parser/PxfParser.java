@@ -1,9 +1,9 @@
 package com.cts.inward.parser;
 
-import com.cts.inward.model.NpciBatchData;
+import com.cts.inward.dto.PxfParserResult;
 
 public interface PxfParser {
 
-    NpciBatchData parse(String filePath);
+	 PxfParserResult parse(String filePath);
     
 }

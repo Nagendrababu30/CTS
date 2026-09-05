@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?init class="com.cts.admin.controller.LayoutInit"
+        pageTitle="Checker Dashboard"
+        active="dashboard"?>
+
+<?init class="org.zkoss.zk.ui.util.Composition"
+        arg0="/zul/common/layout.zul"?>
+
+<zk>
+
+    <div
+        self="@define(content)"
+        width="100%"
+        height="100%"
+        sclass="content">
+
+        <label
+            value="Checker Dashboard"
+            sclass="page-title" />
+
+        <div>
+
+            <!--
+                Put your existing Checker Dashboard
+                cards, tables, buttons, etc. here.
+            -->
+
+        </div>
+
+    </div>
+
+</zk>

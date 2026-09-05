@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<zk xmlns:n="native">
+
+    <div
+        sclass="sidebar">
+
+        <!-- ================================================= -->
+        <!-- INWARD MAKER                                      -->
+        <!-- ================================================= -->
+
+        <vlayout
+            visible="${arg.roleName eq 'INWARD_MAKER'}"
+            width="100%"
+            spacing="0px">
+
+            <!-- Dashboard -->
+            <a
+                href="/zul/inward-maker/dashboard.zul"
+                sclass="${arg.active eq 'dashboard' ? 'menu-item active-menu' : 'menu-item'}">
+
+                <n:i class="fa-solid fa-house menu-icon"></n:i>
+
+                <label
+                    value="Dashboard"
+                    sclass="menu-label" />
+
+            </a>
+
+
+            <!-- MICR Repair -->
+            <a
+                href="/zul/inward-maker/micr-repair.zul"
+                sclass="${arg.active eq 'micr-repair' ? 'menu-item active-menu' : 'menu-item'}">
+
+                <n:i class="fa-solid fa-wrench menu-icon"></n:i>
+
+                <label
+                    value="MICR Repair"
+                    sclass="menu-label" />
+
+            </a>
+
+
+            <!-- Data Entry -->
+            <a
+                href="/zul/inward-maker/data-entry.zul"
+                sclass="${arg.active eq 'data-entry' ? 'menu-item active-menu' : 'menu-item'}">
+
+                <n:i class="fa-regular fa-pen-to-square menu-icon"></n:i>
+
+                <label
+                    value="Data Entry"
+                    sclass="menu-label" />
+
+            </a>
+
+
+            <!-- Send to Checker -->
+            <a
+                href="/zul/inward-maker/send-to-checker.zul"
+                sclass="${arg.active eq 'send-to-checker' ? 'menu-item active-menu' : 'menu-item'}">
+
+                <n:i class="fa-regular fa-paper-plane menu-icon"></n:i>
+
+                <label
+                    value="Send to Checker"
+                    sclass="menu-label" />
+
+            </a>
+
+
+            <!-- Reports -->
+            <a
+                href="/zul/inward-maker/reports.zul"
+                sclass="${arg.active eq 'reports' ? 'menu-item active-menu' : 'menu-item'}">
+
+                <n:i class="fa-solid fa-chart-simple menu-icon"></n:i>
+
+                <label
+                    value="Reports"
+                    sclass="menu-label" />
+
+            </a>
+
+        </vlayout>
+
+
+        <!-- ================================================= -->
+        <!-- INWARD CHECKER                                     -->
+        <!-- ================================================= -->
+
+        <vlayout
+            visible="${arg.roleName eq 'INWARD_CHECKER'}"
+            width="100%"
+            spacing="0px">
+
+            <!-- Dashboard -->
+            <a
+                href="/zul/inward-checker/dashboard.zul"
+                sclass="${arg.active eq 'dashboard' ? 'menu-item active-menu' : 'menu-item'}">
+
+                <n:i class="fa-solid fa-house menu-icon"></n:i>
+
+                <label
+                    value="Dashboard"
+                    sclass="menu-label" />
+
+            </a>
+
+
+            <!-- Verify Batch -->
+            <a
+                href="/zul/inward-checker/verification.zul"
+                sclass="${arg.active eq 'verification' ? 'menu-item active-menu' : 'menu-item'}">
+
+                <n:i class="fa-regular fa-clipboard menu-icon"></n:i>
+
+                <label
+                    value="Verify Batch"
+                    sclass="menu-label" />
+
+            </a>
+
+
+            <!-- Reports -->
+            <a
+                href="/zul/inward-checker/reports.zul"
+                sclass="${arg.active eq 'reports' ? 'menu-item active-menu' : 'menu-item'}">
+
+                <n:i class="fa-solid fa-chart-simple menu-icon"></n:i>
+
+                <label
+                    value="Reports"
+                    sclass="menu-label" />
+
+            </a>
+
+        </vlayout>
+
+
+        <!-- ================================================= -->
+        <!-- ADMIN                                              -->
+        <!-- ================================================= -->
+
+        <vlayout
+            visible="${arg.roleName eq 'ADMIN'}"
+            width="100%"
+            spacing="0px">
+
+            <a
+                href="/zul/admin/adminDashboard.zul"
+                sclass="${arg.active eq 'dashboard' ? 'menu-item active-menu' : 'menu-item'}">
+
+                <n:i class="fa-solid fa-house menu-icon"></n:i>
+
+                <label
+                    value="Dashboard"
+                    sclass="menu-label" />
+
+            </a>
+
+
+            <a
+                href="/zul/admin/roleManagement.zul"
+                sclass="${arg.active eq 'role-management' ? 'menu-item active-menu' : 'menu-item'}">
+
+                <n:i class="fa-solid fa-user-shield menu-icon"></n:i>
+
+                <label
+                    value="Role Management"
+                    sclass="menu-label" />
+
+            </a>
+
+
+            <a
+                href="/zul/admin/userManagement.zul"
+                sclass="${arg.active eq 'user-management' ? 'menu-item active-menu' : 'menu-item'}">
+
+                <n:i class="fa-solid fa-users menu-icon"></n:i>
+
+                <label
+                    value="User Management"
+                    sclass="menu-label" />
+
+            </a>
+
+
+            <a
+                href="/zul/admin/batchMonitoring.zul"
+                sclass="${arg.active eq 'batch-monitoring' ? 'menu-item active-menu' : 'menu-item'}">
+
+                <n:i class="fa-solid fa-list-check menu-icon"></n:i>
+
+                <label
+                    value="Batch Monitoring"
+                    sclass="menu-label" />
+
+            </a>
+
+
+            <a
+                href="/zul/admin/auditLogs.zul"
+                sclass="${arg.active eq 'audit-logs' ? 'menu-item active-menu' : 'menu-item'}">
+
+                <n:i class="fa-solid fa-clock-rotate-left menu-icon"></n:i>
+
+                <label
+                    value="Audit Logs"
+                    sclass="menu-label" />
+
+            </a>
+
+        </vlayout>
+
+    </div>
+
+</zk>

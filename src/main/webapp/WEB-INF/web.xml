@@ -45,6 +45,6 @@
 		<welcome-file>default.htm</welcome-file>
 		<welcome-file>default.jsp</welcome-file>
 		<welcome-file>default.xhtml</welcome-file>
-		<welcome-file>index.zul</welcome-file>
+		<welcome-file>zul/common/layout.zul</welcome-file>
 	</welcome-file-list>
 </web-app>

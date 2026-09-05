@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<zk>
+
+    <window
+        title="Access Denied"
+        border="normal"
+        width="500px"
+        style="margin:120px auto;">
+
+        <vlayout
+            spacing="20px"
+            style="padding:40px; text-align:center;">
+
+            <label
+                value="Access Denied"
+                style="font-size:28px; font-weight:bold; color:#dc3545;" />
+
+            <label
+                value="You are not authorized to access this page."
+                style="font-size:16px;" />
+
+            <button
+                label="Go To Dashboard"
+                onClick="history.back();"
+                width="180px" />
+
+        </vlayout>
+
+    </window>
+
+</zk>

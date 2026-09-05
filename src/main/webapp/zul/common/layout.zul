@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<zk xmlns:n="native">
+
+    <style src="/css/common/common.css" />
+
+    <n:link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+    <borderlayout
+        width="100%"
+        height="100%"
+        apply="com.cts.admin.controller.AuthorizationComposer">
+
+        <north
+            height="70px"
+            border="none">
+
+            <apply
+                templateURI="/zul/common/header.zul"
+                pageTitle="${requestScope.pageTitle}" />
+
+        </north>
+
+
+        <west
+            width="300px"
+            border="none">
+
+            <apply
+                templateURI="/zul/common/side-bar.zul"
+                roleName="${requestScope.roleName}"
+                roleId="${requestScope.roleId}"
+                active="${requestScope.active}" />
+
+        </west>
+
+
+        <center
+            border="none"
+            autoscroll="true">
+
+            <div
+                width="100%"
+                height="100%">
+
+                <div
+                    self="@insert(content)"
+                    width="100%"
+                    height="100%" />
+
+            </div>
+
+        </center>
+
+    </borderlayout>
+
+</zk>

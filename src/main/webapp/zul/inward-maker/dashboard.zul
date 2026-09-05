@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?init class="com.cts.admin.controller.LayoutInit"
+        pageTitle="Inward Maker Dashboard"
+        active="dashboard"?>
+
+<?init class="org.zkoss.zk.ui.util.Composition"
+        arg0="/zul/common/layout.zul"?>
+
+<zk>
+
+	 <style src="/css/inward/maker/dashboard.css"/>
+
+    <div
+        self="@define(content)"
+        width="100%"
+        height="100%"
+        sclass="content">
+
+        <vlayout
+            apply="com.cts.inward.controller.DashboardController"
+            spacing="20px"
+            sclass="content-layout"
+            hflex="1">
+
+            <label
+                value="Dashboard"
+                sclass="page-title"/>
+
+
+            <!-- Summary Cards -->
+
+            <hlayout
+                spacing="20px"
+                width="100%">
+
+                <!-- Received Batches -->
+
+                <hlayout
+                    hflex="1"
+                    sclass="summary-card"
+                    valign="middle">
+
+                    <vlayout
+                        sclass="card-icon-container icon-blue">
+
+                        <label
+                            sclass="z-icon-folder-o"/>
+
+                    </vlayout>
+
+                    <vlayout spacing="2px">
+
+                        <label
+                            value="Received batches"
+                            sclass="card-label"/>
+
+                        <label
+                            id="receivedCountLabel"
+                            value="0"
+                            sclass="card-value text-blue"/>
+
+                    </vlayout>
+
+                </hlayout>
+
+
+                <!-- Available Processing -->
+
+                <hlayout
+                    hflex="1"
+                    sclass="summary-card"
+                    valign="middle">
+
+                    <vlayout
+                        sclass="card-icon-container icon-purple">
+
+                        <label
+                            sclass="z-icon-cog"/>
+
+                    </vlayout>
+
+                    <vlayout spacing="2px">
+
+                        <label
+                            value="Available Processing"
+                            sclass="card-label"/>
+
+                        <label
+                            id="pendingCountLabel"
+                            value="0"
+                            sclass="card-value text-purple"/>
+
+                    </vlayout>
+
+                </hlayout>
+
+
+                <!-- Submitted to Checker -->
+
+                <hlayout
+                    hflex="1"
+                    sclass="summary-card"
+                    valign="middle">
+
+                    <vlayout
+                        sclass="card-icon-container icon-green">
+
+                        <label
+                            sclass="z-icon-paper-plane-o"/>
+
+                    </vlayout>
+
+                    <vlayout spacing="2px">
+
+                        <label
+                            value="Submitted to Checker"
+                            sclass="card-label"/>
+
+                        <label
+                            id="submittedCountLabel"
+                            value="0"
+                            sclass="card-value text-green"/>
+
+                    </vlayout>
+
+                </hlayout>
+
+            </hlayout>
+
+
+            <!-- Data Table Panel -->
+
+            <vlayout
+                sclass="table-panel"
+                spacing="0">
+
+                <hlayout
+                    sclass="table-header"
+                    valign="middle"
+                    width="100%">
+
+                    <label
+                        value="Batches"
+                        sclass="table-title"/>
+
+                    <hlayout
+                        hflex="1"/>
+
+                    <label
+                        value="Filter Status:"
+                        sclass="filter-label"/>
+
+                    <button
+                        id="allBtn"
+                        label="All"
+                        sclass="filter-btn active-filter"/>
+
+                    <button
+                        id="availableBtn"
+                        label="Available"
+                        sclass="filter-btn"/>
+
+                    <button
+                        id="lockedBtn"
+                        label="Locked"
+                        sclass="filter-btn"/>
+
+                </hlayout>
+
+
+                <grid
+                    id="batchesGrid"
+                    sclass="custom-grid"
+                    emptyMessage="No batches found."
+                    mold="paging"
+                    pageSize="10">
+
+                    <columns>
+
+                        <column
+                            label="Batch ID"/>
+
+                        <column
+                            label="Total Cheque Count"
+                            align="center"/>
+
+                        <column
+                            label="Status"
+                            align="center"/>
+
+                        <column
+                            label="User ID"
+                            align="center"/>
+
+                        <column
+                            label="Action"
+                            align="center"/>
+
+                    </columns>
+
+                    <rows/>
+
+                </grid>
+
+            </vlayout>
+
+        </vlayout>
+
+    </div>
+
+</zk>

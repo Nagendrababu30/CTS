@@ -3,6 +3,7 @@ package com.cts.inward.service;
 import java.nio.file.Path;
 import java.util.List;
 
+import com.cts.inward.dto.PxfParserResult;
 import com.cts.inward.enums.FileType;
 import com.cts.inward.model.ChequeImage;
 import com.cts.inward.model.ChequeImagePaths;
@@ -114,13 +115,19 @@ public class FileProcessingServiceImpl
     @Override
     public void processPxfFile(String filePath) {
 
-        NpciBatchData batchData =
+        PxfParserResult result =
                 pxfParser.parse(filePath);
+
+        NpciBatchData batchData =
+                result.getBatchData();
+
+        List<NpciChequeData> chequeDataList =
+                result.getChequeDataList();
 
         batchService.saveBatch(batchData);
 
         for (NpciChequeData chequeData :
-                batchData.getCheques()) {
+                chequeDataList) {
 
             chequeService.saveCheque(
                     chequeData);

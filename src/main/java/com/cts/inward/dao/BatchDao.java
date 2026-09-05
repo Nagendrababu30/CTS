@@ -1,5 +1,7 @@
 package com.cts.inward.dao;
 
+import java.util.List;
+
 import com.cts.inward.model.NpciBatchData;
 
 /**
@@ -8,6 +10,8 @@ import com.cts.inward.model.NpciBatchData;
  */
 public interface BatchDao {
 
-	void saveBatch(NpciBatchData batchData);
+	 void saveBatch(NpciBatchData batchData);
+
+	 List<NpciBatchData> getAllBatches();
 	
 }

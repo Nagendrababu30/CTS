@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<zk xmlns:n="native">
+
+    <div
+        sclass="app-header header-container"
+        apply="com.cts.admin.controller.LogoutComposer">
+
+
+        <!-- ================================================= -->
+        <!-- LEFT SECTION                                     -->
+        <!-- ================================================= -->
+
+        <hlayout
+            spacing="12px"
+            valign="middle">
+
+            <span
+                sclass="header-logo-icon">
+
+                <n:i
+                    class="fa-solid fa-bars-staggered">
+                </n:i>
+
+            </span>
+
+
+            <label
+                value="${arg.pageTitle}"
+                sclass="header-title" />
+
+        </hlayout>
+
+
+        <!-- ================================================= -->
+        <!-- RIGHT SECTION                                    -->
+        <!-- ================================================= -->
+
+        <hlayout
+            spacing="25px"
+            valign="middle">
+
+
+            <!-- DATE -->
+
+            <hlayout
+                spacing="6px"
+                valign="middle">
+
+                <n:i
+                    class="fa-regular fa-calendar header-icon-meta">
+                </n:i>
+
+                <label
+                    value="Date :"
+                    sclass="header-meta-text" />
+
+                <label
+                    value="21-06-2025"
+                    sclass="header-meta-val" />
+
+            </hlayout>
+
+
+            <!-- LAST LOGIN -->
+
+            <hlayout
+                spacing="6px"
+                valign="middle">
+
+                <n:i
+                    class="fa-regular fa-clock header-icon-meta">
+                </n:i>
+
+                <label
+                    value="Last Login :"
+                    sclass="header-meta-text" />
+
+                <label
+                    value="21-06-2025 09:15 AM"
+                    sclass="header-meta-val" />
+
+            </hlayout>
+
+
+            <!-- ================================================= -->
+            <!-- NOTIFICATION                                      -->
+            <!-- ================================================= -->
+
+            <div
+                id="notificationArea"
+                sclass="notification-area"
+                > <!-- apply="com.cts.controller.NotificationComposer"> --> 
+
+
+                <div
+                    id="notificationWrapper"
+                    sclass="notification-wrapper">
+
+                    <n:i
+                        class="fa-regular fa-bell header-icon-bell">
+                    </n:i>
+
+
+                    <label
+                        id="notificationBadge"
+                        value="0"
+                        sclass="badge-notification"
+                         visible="true"/> <!-- visible="false" -->
+
+                </div>
+
+
+                <!-- NOTIFICATION POPUP -->
+
+                <popup
+                    id="notificationPopup"
+                    sclass="notification-popup">
+
+
+                    <div
+                        sclass="notification-header">
+
+                        <label
+                            value="Notifications"
+                            sclass="notification-title" />
+
+                        <button
+                            id="markAllReadButton"
+                            label="Mark all as read"
+                            sclass="notification-mark-read-button" />
+
+                    </div>
+
+
+                    <div
+                        sclass="notification-body">
+
+                        <!-- <label
+                            id="notificationEmptyMessage"
+                            value="No notifications"
+                            sclass="notification-empty-message" />
+
+                        <vlayout
+                            id="notificationList"
+                            sclass="notification-list"
+                            spacing="0px" /> -->
+                            
+                       	<vlayout
+                            id="notificationList"
+                            sclass="notification-list"
+                            spacing="0px">
+
+                            <!-- Notification 1 -->
+                            <div
+                                sclass="notification-item unread">
+
+                                <label
+                                    value="Batch received"
+                                    sclass="notification-item-title" />
+
+                                <label
+                                    value="A new batch has been received."
+                                    sclass="notification-item-message" />
+
+                                <label
+                                    value="10 minutes ago"
+                                    sclass="notification-item-time" />
+
+                            </div>
+
+
+                            <!-- Notification 2 -->
+                            <div
+                                sclass="notification-item unread">
+
+                                <label
+                                    value="Batch pending"
+                                    sclass="notification-item-title" />
+
+                                <label
+                                    value="A batch is waiting for checker verification."
+                                    sclass="notification-item-message" />
+
+                                <label
+                                    value="30 minutes ago"
+                                    sclass="notification-item-time" />
+
+                            </div>
+
+                        </vlayout>
+
+                    </div>
+
+                </popup>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- USER ICON                                         -->
+            <!-- ================================================= -->
+
+            <div
+                id="userWrapper"
+                sclass="user-wrapper">
+
+                <n:i
+                    class="fa-regular fa-circle-user header-icon-user">
+                </n:i>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- LOGOUT POPUP                                      -->
+            <!-- ================================================= -->
+
+            <popup
+                id="logoutPopup"
+                sclass="logout-popup">
+
+                <button
+                    id="logoutButton"
+                    label="Logout"
+                    iconSclass="fa-solid fa-right-from-bracket"
+                    sclass="popup-logout-button" />
+
+            </popup>
+
+
+        </hlayout>
+
+    </div>
+
+</zk>

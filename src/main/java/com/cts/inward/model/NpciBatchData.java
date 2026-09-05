@@ -1,6 +1,5 @@
 package com.cts.inward.model;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -9,33 +8,40 @@ import java.util.Objects;
  */
 public class NpciBatchData {
 
-	private String batchId;
+	private long batchId;
+	private long fileId;
 	private String presentingBankName;
-	private int totalCheque;
-	private String fileId;
-	private List<NpciChequeData> cheques;
-
-	private NpciBatchData(String batchId, String presentingBankName, int totalCheque, String fileId,
-			List<NpciChequeData> cheques) {
+	private int totalCheques;
+	
+	private NpciBatchData() {
+		
+	}
+	
+	public NpciBatchData(long batchId, long fileId, String presentingBankName, int totalCheques) {
 		this.batchId = batchId;
-		this.presentingBankName = presentingBankName;
-		this.totalCheque = totalCheque;
 		this.fileId = fileId;
-		this.cheques = cheques;
+		this.presentingBankName = presentingBankName;
+		this.totalCheques = totalCheques;
 	}
+	
+	public static NpciBatchData of() {
+		return new NpciBatchData();
+	} 
 
-	public static NpciBatchData of(String batchId, String presentingBankName, int totalCheque, String fileId,
-			List<NpciChequeData> cheques) {
-		// TODO Auto-generated method stub
-		return new NpciBatchData(batchId, presentingBankName, totalCheque, fileId, cheques);
-	}
-
-	public String getBatchId() {
+	public long getBatchId() {
 		return batchId;
 	}
 
-	public void setBatchId(String batchId) {
+	public void setBatchId(long batchId) {
 		this.batchId = batchId;
+	}
+
+	public long getFileId() {
+		return fileId;
+	}
+
+	public void setFileId(long fileId) {
+		this.fileId = fileId;
 	}
 
 	public String getPresentingBankName() {
@@ -46,39 +52,23 @@ public class NpciBatchData {
 		this.presentingBankName = presentingBankName;
 	}
 
-	public int getTotalCheque() {
-		return totalCheque;
+	public int getTotalCheques() {
+		return totalCheques;
 	}
 
-	public void setTotalCheque(int totalCheque) {
-		this.totalCheque = totalCheque;
-	}
-
-	public String getFileId() {
-		return fileId;
-	}
-
-	public void setFileId(String fileId) {
-		this.fileId = fileId;
-	}
-
-	public List<NpciChequeData> getCheques() {
-		return cheques;
-	}
-
-	public void setCheques(List<NpciChequeData> cheques) {
-		this.cheques = cheques;
+	public void setTotalCheques(int totalCheques) {
+		this.totalCheques = totalCheques;
 	}
 
 	@Override
 	public String toString() {
-		return "NpciBatchData [batchId=" + batchId + ", presentingBankName=" + presentingBankName + ", totalCheque="
-				+ totalCheque + ", fileId=" + fileId + ", cheques=" + cheques + "]";
+		return "NpciBatchData [batchId=" + batchId + ", fileId=" + fileId + ", presentingBankName=" + presentingBankName
+				+ ", totalCheques=" + totalCheques + "]";
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(batchId, cheques, fileId, presentingBankName, Integer.valueOf(totalCheque));
+		return Objects.hash(batchId, fileId, presentingBankName, totalCheques);
 	}
 
 	@Override
@@ -90,11 +80,8 @@ public class NpciBatchData {
 		if (getClass() != obj.getClass())
 			return false;
 		NpciBatchData other = (NpciBatchData) obj;
-		return Objects.equals(batchId, other.batchId) && Objects.equals(cheques, other.cheques)
-				&& Objects.equals(fileId, other.fileId) && Objects.equals(presentingBankName, other.presentingBankName)
-				&& totalCheque == other.totalCheque;
+		return batchId == other.batchId && fileId == other.fileId
+				&& Objects.equals(presentingBankName, other.presentingBankName) && totalCheques == other.totalCheques;
 	}
 	
-	
-
 }

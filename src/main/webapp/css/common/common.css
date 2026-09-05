@@ -1,0 +1,1290 @@
+/* =========================================================
+   GLOBAL PAGE RESET
+   ========================================================= */
+
+/* =========================================================
+   COMMON LAYOUT ROOT
+   ========================================================= */
+
+.layout-root {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    overflow: hidden;
+    background-color: #f5f7fa;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   ZK ROOT PAGE
+   ========================================================= */
+
+.z-page {
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background-color: #f5f7fa !important;
+}
+
+
+/* =========================================================
+   ZK BORDERLAYOUT
+   ========================================================= */
+
+.z-borderlayout {
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background-color: #f5f7fa !important;
+}
+
+
+/* =========================================================
+   HEADER / NORTH REGION
+   ========================================================= */
+
+.z-borderlayout > .z-north {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background-color: #071422 !important;
+    overflow: visible !important;
+}
+
+.z-north-body {
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background-color: #071422 !important;
+    overflow: visible !important;
+}
+
+
+/* =========================================================
+   HEADER INCLUDE
+   ========================================================= */
+
+.z-north .z-include,
+.z-north .z-include-content {
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background-color: #071422 !important;
+    overflow: visible !important;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.app-header,
+.header-container {
+    width: 100% !important;
+    height: 70px !important;
+    min-height: 70px !important;
+
+    margin: 0 !important;
+    padding: 0 24px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    box-sizing: border-box !important;
+
+    background-color: #071422 !important;
+
+    border: none !important;
+    border-bottom: 1px solid #26384b !important;
+
+    /*
+     * IMPORTANT:
+     * Must be visible so the logout popup
+     * can appear below the header.
+     */
+    overflow: visible !important;
+
+    position: relative !important;
+    z-index: 1000 !important;
+}
+
+
+/* =========================================================
+   HEADER LEFT SECTION
+   ========================================================= */
+
+.app-header > .z-hlayout:first-child,
+.header-container > .z-hlayout:first-child {
+    display: flex !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+}
+
+
+/* =========================================================
+   HEADER LOGO ICON
+   ========================================================= */
+
+.header-logo-icon {
+    width: 46px !important;
+    height: 46px !important;
+
+    min-width: 46px !important;
+    min-height: 46px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    background-color: #0d6efd !important;
+
+    color: #ffffff !important;
+
+    border-radius: 10px !important;
+
+    flex-shrink: 0 !important;
+}
+
+.header-logo-icon i {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    color: #ffffff !important;
+
+    font-size: 19px !important;
+
+    line-height: 1 !important;
+}
+
+
+/* =========================================================
+   HEADER TITLE
+   ========================================================= */
+
+.header-title {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    color: #ffffff !important;
+
+    font-size: 22px !important;
+    font-weight: 700 !important;
+
+    line-height: 1 !important;
+
+    white-space: nowrap !important;
+}
+
+
+/* =========================================================
+   HEADER RIGHT SECTION
+   ========================================================= */
+
+.app-header > .z-hlayout:last-child,
+.header-container > .z-hlayout:last-child {
+    display: flex !important;
+    align-items: center !important;
+
+    flex-shrink: 0 !important;
+
+    overflow: visible !important;
+}
+
+
+/* =========================================================
+   HEADER META ICON
+   ========================================================= */
+
+.header-icon-meta {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    color: #aebdce !important;
+
+    font-size: 15px !important;
+
+    line-height: 1 !important;
+}
+
+
+/* =========================================================
+   HEADER META TEXT
+   ========================================================= */
+
+.header-meta-text {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    color: #aebdce !important;
+
+    font-size: 14px !important;
+    font-weight: 400 !important;
+
+    line-height: 1 !important;
+
+    white-space: nowrap !important;
+}
+
+
+/* =========================================================
+   HEADER META VALUE
+   ========================================================= */
+
+.header-meta-val {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    color: #ffffff !important;
+
+    font-size: 14px !important;
+    font-weight: 500 !important;
+
+    line-height: 1 !important;
+
+    white-space: nowrap !important;
+}
+
+/* =========================================================
+   NOTIFICATION AREA
+   ========================================================= */
+
+.notification-area {
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    overflow: visible !important;
+}
+
+
+/* =========================================================
+   NOTIFICATION BELL
+   ========================================================= */
+
+.notification-wrapper {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    min-height: 30px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    position: relative !important;
+
+    background: transparent !important;
+    border: none !important;
+
+    cursor: pointer !important;
+
+    overflow: visible !important;
+}
+
+.header-icon-bell {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    color: #dbe5ef !important;
+
+    font-size: 23px !important;
+    line-height: 1 !important;
+
+    cursor: pointer !important;
+
+    transition: color 0.15s ease !important;
+}
+
+.notification-wrapper:hover .header-icon-bell {
+    color: #ffffff !important;
+}
+
+
+/* =========================================================
+   NOTIFICATION BADGE
+   ========================================================= */
+
+.badge-notification {
+    position: absolute !important;
+
+    top: -7px !important;
+    right: -7px !important;
+
+    min-width: 19px !important;
+    height: 19px !important;
+
+    padding: 0 5px !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    box-sizing: border-box !important;
+
+    background-color: #dc3545 !important;
+    color: #ffffff !important;
+
+    border-radius: 50% !important;
+
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+
+    line-height: 19px !important;
+
+    pointer-events: none !important;
+}
+
+
+/* =========================================================
+   NOTIFICATION POPUP
+   ========================================================= */
+
+.notification-popup {
+    width: 390px !important;
+    min-width: 390px !important;
+    max-width: 390px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    background-color: #ffffff !important;
+
+    border: 1px solid #e1e5ea !important;
+
+    border-radius: 8px !important;
+
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.15) !important;
+
+    overflow: hidden !important;
+
+    z-index: 3000 !important;
+}
+
+
+/* =========================================================
+   POPUP HEADER
+   ========================================================= */
+
+.notification-header {
+    width: 100% !important;
+    min-height: 52px !important;
+
+    margin: 0 !important;
+    padding: 0 16px !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+
+    box-sizing: border-box !important;
+
+    background-color: #ffffff !important;
+
+    border-bottom: 1px solid #e5e7eb !important;
+}
+
+.notification-title {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    color: #111827 !important;
+
+    font-family: Arial, Helvetica, sans-serif !important;
+
+    font-size: 16px !important;
+    font-weight: 700 !important;
+
+    line-height: 1 !important;
+}
+
+
+/* =========================================================
+   MARK ALL READ
+   ========================================================= */
+
+.notification-mark-read-button {
+    margin: 0 !important;
+    padding: 5px 8px !important;
+
+    background: transparent !important;
+    border: none !important;
+
+    color: #0d6efd !important;
+
+    font-family: Arial, Helvetica, sans-serif !important;
+
+    font-size: 12px !important;
+    font-weight: 500 !important;
+
+    cursor: pointer !important;
+}
+
+.notification-mark-read-button:hover {
+    color: #0b5ed7 !important;
+    background-color: #f3f6fa !important;
+}
+
+
+/* =========================================================
+   NOTIFICATION BODY
+   ========================================================= */
+
+.notification-body {
+    width: 100% !important;
+
+    max-height: 420px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    box-sizing: border-box !important;
+
+    background-color: #ffffff !important;
+
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.notification-empty-message {
+    width: 100% !important;
+
+    margin: 0 !important;
+    padding: 35px 20px !important;
+
+    box-sizing: border-box !important;
+
+    color: #6b7280 !important;
+
+    font-family: Arial, Helvetica, sans-serif !important;
+
+    font-size: 14px !important;
+    font-weight: 400 !important;
+
+    text-align: center !important;
+}
+
+
+/* =========================================================
+   NOTIFICATION LIST
+   ========================================================= */
+
+.notification-list {
+    width: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* =========================================================
+   INDIVIDUAL NOTIFICATION
+   ========================================================= */
+
+.notification-item {
+    width: 100% !important;
+
+    margin: 0 !important;
+    padding: 13px 16px !important;
+
+    box-sizing: border-box !important;
+
+    border-bottom: 1px solid #edf0f3 !important;
+
+    background-color: #ffffff !important;
+
+    cursor: pointer !important;
+}
+
+.notification-item:hover {
+    background-color: #f8fafc !important;
+}
+
+.notification-item.unread {
+    background-color: #f4f8ff !important;
+}
+
+.notification-item.read {
+    background-color: #ffffff !important;
+}
+
+
+/* =========================================================
+   NOTIFICATION TEXT
+   ========================================================= */
+
+.notification-item-title {
+    display: block !important;
+
+    margin: 0 0 4px 0 !important;
+    padding: 0 !important;
+
+    color: #111827 !important;
+
+    font-family: Arial, Helvetica, sans-serif !important;
+
+    font-size: 14px !important;
+    font-weight: 700 !important;
+
+    line-height: 1.3 !important;
+}
+
+.notification-item-message {
+    display: block !important;
+
+    margin: 0 0 6px 0 !important;
+    padding: 0 !important;
+
+    color: #4b5563 !important;
+
+    font-family: Arial, Helvetica, sans-serif !important;
+
+    font-size: 13px !important;
+    font-weight: 400 !important;
+
+    line-height: 1.4 !important;
+}
+
+.notification-item-time {
+    display: block !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    color: #9ca3af !important;
+
+    font-family: Arial, Helvetica, sans-serif !important;
+
+    font-size: 11px !important;
+    font-weight: 400 !important;
+
+    line-height: 1.2 !important;
+}
+
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+.notification-body::-webkit-scrollbar {
+    width: 5px;
+}
+
+.notification-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.notification-body::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 5px;
+}
+
+
+
+
+/* =========================================================
+   USER ICON WRAPPER
+   ========================================================= */
+
+.user-wrapper {
+    width: 30px !important;
+    height: 30px !important;
+
+    min-width: 30px !important;
+    min-height: 30px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    cursor: pointer !important;
+
+    background: transparent !important;
+
+    border: none !important;
+
+    position: relative !important;
+
+    overflow: visible !important;
+}
+
+
+/* =========================================================
+   USER ICON
+   ========================================================= */
+
+.header-icon-user {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    color: #dbe5ef !important;
+
+    font-size: 23px !important;
+
+    line-height: 1 !important;
+
+    cursor: pointer !important;
+
+    transition: color 0.15s ease !important;
+}
+
+
+/* =========================================================
+   USER ICON HOVER
+   ========================================================= */
+
+.user-wrapper:hover .header-icon-user {
+    color: #ffffff !important;
+}
+
+
+/* =========================================================
+   LOGOUT POPUP
+   ========================================================= */
+
+.logout-popup {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    background-color: #ffffff !important;
+
+    border: none !important;
+
+    border-radius: 4px !important;
+
+    box-shadow:
+        0 3px 10px rgba(0, 0, 0, 0.20) !important;
+
+    overflow: hidden !important;
+
+    z-index: 2000 !important;
+}
+
+
+/* =========================================================
+   POPUP CONTENT
+   ========================================================= */
+
+.logout-popup .z-popup-content {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    background-color: #ffffff !important;
+
+    border: none !important;
+}
+
+
+/* =========================================================
+   LOGOUT BUTTON
+   ========================================================= */
+
+.popup-logout-button {
+    width: 140px !important;
+    height: 48px !important;
+
+    min-width: 140px !important;
+    min-height: 48px !important;
+
+    margin: 0 !important;
+    padding: 0 18px !important;
+
+    display: flex !important;
+    align-items: center !important;
+
+    background-color: #ffffff !important;
+
+    border: none !important;
+    border-radius: 0 !important;
+
+    color: #071422 !important;
+
+    font-family: Arial, Helvetica, sans-serif !important;
+
+    font-size: 16px !important;
+    font-weight: 400 !important;
+
+    text-align: left !important;
+
+    cursor: pointer !important;
+
+    box-shadow: none !important;
+}
+
+
+/* =========================================================
+   LOGOUT BUTTON HOVER
+   ========================================================= */
+
+.popup-logout-button:hover {
+    background-color: #f2f4f7 !important;
+
+    color: #071422 !important;
+}
+
+
+/* =========================================================
+   LOGOUT BUTTON FOCUS
+   ========================================================= */
+
+.popup-logout-button:focus {
+    outline: none !important;
+
+    background-color: #ffffff !important;
+
+    color: #071422 !important;
+}
+
+
+/* =========================================================
+   LOGOUT BUTTON ACTIVE
+   ========================================================= */
+
+.popup-logout-button:active {
+    background-color: #e9ecef !important;
+
+    color: #071422 !important;
+}
+
+
+/* =========================================================
+   LOGOUT ICON
+   ========================================================= */
+
+.popup-logout-button .z-icon {
+    margin-right: 10px !important;
+
+    color: #071422 !important;
+
+    font-size: 15px !important;
+}
+
+
+/* =========================================================
+   SIDEBAR / WEST REGION
+   ========================================================= */
+
+.z-borderlayout > .z-west {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: none !important;
+
+    background-color: #071422 !important;
+
+    overflow: hidden !important;
+}
+
+.z-west-body {
+    width: 100% !important;
+    height: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: none !important;
+
+    background-color: #071422 !important;
+
+    overflow: hidden !important;
+}
+
+
+/* =========================================================
+   SIDEBAR INCLUDE
+   ========================================================= */
+
+.z-west .z-include,
+.z-west .z-include-content {
+    width: 100% !important;
+    height: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: none !important;
+
+    background-color: #071422 !important;
+}
+
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.sidebar {
+    width: 100% !important;
+    height: 100% !important;
+
+    margin: 0 !important;
+
+    padding: 20px 0 0 0 !important;
+
+    box-sizing: border-box !important;
+
+    background-color: #071422 !important;
+
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+
+/* =========================================================
+   SIDEBAR ROLE CONTAINER
+   ========================================================= */
+
+.sidebar > div {
+    width: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    box-sizing: border-box !important;
+}
+
+
+/* =========================================================
+   SIDEBAR MENU ITEM
+   ========================================================= */
+
+a.z-a.menu-item {
+    display: flex !important;
+    align-items: center !important;
+
+    width: calc(100% - 14px) !important;
+
+    height: 48px !important;
+    min-height: 48px !important;
+
+    margin: 4px 14px 4px 0 !important;
+
+    padding: 0 28px !important;
+
+    box-sizing: border-box !important;
+
+    color: #8fa8c2 !important;
+
+    background-color: transparent !important;
+
+    border: none !important;
+    outline: none !important;
+
+    border-radius: 0 8px 8px 0 !important;
+
+    font-family: Arial, Helvetica, sans-serif !important;
+
+    font-size: 16px !important;
+    font-weight: 400 !important;
+
+    line-height: 1 !important;
+
+    text-decoration: none !important;
+
+    cursor: pointer !important;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
+}
+
+
+/* =========================================================
+   SIDEBAR MENU HOVER
+   ========================================================= */
+
+a.z-a.menu-item:hover {
+    background-color: #0e2238 !important;
+
+    color: #ffffff !important;
+
+    text-decoration: none !important;
+}
+
+
+/* =========================================================
+   SIDEBAR ACTIVE MENU
+   ========================================================= */
+
+a.z-a.menu-item.active-menu {
+    background-color: #0d6efd !important;
+
+    color: #ffffff !important;
+
+    text-decoration: none !important;
+}
+
+
+/* =========================================================
+   ACTIVE MENU HOVER
+   ========================================================= */
+
+a.z-a.menu-item.active-menu:hover {
+    background-color: #0d6efd !important;
+
+    color: #ffffff !important;
+}
+
+
+/* =========================================================
+   SIDEBAR LABEL
+   ========================================================= */
+
+a.z-a.menu-item .z-label {
+    display: inline-block !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    color: inherit !important;
+
+    font-family: Arial, Helvetica, sans-serif !important;
+
+    font-size: 16px !important;
+    font-weight: 400 !important;
+
+    line-height: 1.2 !important;
+
+    text-decoration: none !important;
+
+    cursor: pointer !important;
+}
+
+
+/* =========================================================
+   SIDEBAR ICON
+   ========================================================= */
+
+a.z-a.menu-item .menu-icon {
+    width: 20px !important;
+    min-width: 20px !important;
+
+    height: 20px !important;
+
+    margin: 0 14px 0 0 !important;
+    padding: 0 !important;
+
+    display: inline-flex !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    color: inherit !important;
+
+    font-size: 16px !important;
+
+    line-height: 1 !important;
+
+    flex-shrink: 0 !important;
+}
+
+
+/* =========================================================
+   SIDEBAR FONT AWESOME ICONS
+   ========================================================= */
+
+a.z-a.menu-item i {
+    color: inherit !important;
+}
+
+
+/* =========================================================
+   CENTER REGION
+   ========================================================= */
+
+.z-borderlayout > .z-center {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: none !important;
+
+    background-color: #f5f7fa !important;
+
+    overflow: hidden !important;
+}
+
+.z-center-body {
+    width: 100% !important;
+    height: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: none !important;
+
+    background-color: #f5f7fa !important;
+
+    overflow: hidden !important;
+}
+
+
+/* =========================================================
+   MAIN CONTENT
+   ========================================================= */
+
+.content {
+    width: 100% !important;
+    height: 100% !important;
+
+    margin: 0 !important;
+
+    padding: 60px !important;
+
+    box-sizing: border-box !important;
+
+    background-color: #f5f7fa !important;
+
+    overflow: auto !important;
+}
+
+
+/* =========================================================
+   PAGE TITLE
+   ========================================================= */
+
+.page-title {
+    display: block !important;
+
+    margin: 0 0 10px 0 !important;
+    padding: 0 !important;
+
+    color: #111827 !important;
+
+    font-family: Arial, Helvetica, sans-serif !important;
+
+    font-size: 30px !important;
+    font-weight: 700 !important;
+
+    line-height: 1.2 !important;
+}
+
+
+/* =========================================================
+   GENERAL ZK LABEL
+   ========================================================= */
+
+.z-label {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+
+/* =========================================================
+   ZK WINDOW / PANEL RESET
+   ========================================================= */
+
+.z-window {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: none !important;
+
+    box-sizing: border-box !important;
+}
+
+.z-window-content {
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: none !important;
+}
+
+
+/* =========================================================
+   GENERAL BUTTON
+   ========================================================= */
+
+.z-button {
+    box-sizing: border-box;
+
+    border-radius: 6px;
+
+    font-family: Arial, Helvetica, sans-serif;
+
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   ROLE SELECTION PAGE
+   ========================================================= */
+
+.role-page {
+    width: 100%;
+    height: 100%;
+
+    margin: 0;
+    padding: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    background-color: #f5f7fa;
+}
+
+.role-title {
+    color: #1e293b;
+
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.role-subtitle {
+    color: #6b7280;
+
+    font-size: 14px;
+}
+
+.role-button {
+    margin: 10px;
+
+    padding: 10px 20px;
+
+    border: none;
+
+    border-radius: 6px;
+
+    background-color: #0d6efd;
+
+    color: #ffffff;
+
+    font-size: 14px;
+
+    cursor: pointer;
+}
+
+.role-button:hover {
+    background-color: #0b5ed7;
+}
+
+
+/* =========================================================
+   SCROLLBARS
+   ========================================================= */
+
+.sidebar::-webkit-scrollbar,
+.content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track,
+.content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: #243447;
+
+    border-radius: 6px;
+}
+
+.content::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+
+    border-radius: 6px;
+}
+
+
+/* =========================================================
+   RESPONSIVE — TABLET
+   ========================================================= */
+
+@media screen and (max-width: 1000px) {
+
+    .app-header,
+    .header-container {
+        padding: 0 16px !important;
+    }
+
+    .header-meta-text,
+    .header-meta-val {
+        font-size: 12px !important;
+    }
+
+    .header-title {
+        font-size: 18px !important;
+    }
+}
+
+
+/* =========================================================
+   RESPONSIVE — MOBILE
+   ========================================================= */
+
+@media screen and (max-width: 700px) {
+
+    .header-title {
+        font-size: 14px !important;
+    }
+
+    .header-meta-text,
+    .header-meta-val,
+    .header-icon-meta {
+        display: none !important;
+    }
+
+    .app-header,
+    .header-container {
+        padding: 0 12px !important;
+    }
+
+    .content {
+        padding: 20px !important;
+    }
+
+    .sidebar {
+        padding-top: 10px !important;
+    }
+
+    a.z-a.menu-item {
+        padding-left: 18px !important;
+        padding-right: 18px !important;
+    }
+
+    .logout-popup {
+        min-width: 140px !important;
+    }
+}

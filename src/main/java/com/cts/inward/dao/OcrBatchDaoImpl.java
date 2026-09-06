@@ -37,7 +37,7 @@ public class OcrBatchDaoImpl implements OcrBatchDao {
                 PreparedStatement statement =
                         connection.prepareStatement(sql)) {
 
-            statement.setString(
+            statement.setLong(
                     1,
                     batchData.getBatchId());
 

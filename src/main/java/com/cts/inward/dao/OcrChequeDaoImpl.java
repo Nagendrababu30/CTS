@@ -38,7 +38,7 @@ public class OcrChequeDaoImpl implements OcrChequeDao {
                 PreparedStatement statement =
                         connection.prepareStatement(sql)) {
 
-            statement.setString(
+            statement.setLong(
                     1,
                     chequeData.getBatchId());
 

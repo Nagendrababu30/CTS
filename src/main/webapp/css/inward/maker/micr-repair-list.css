@@ -1,0 +1,119 @@
+.micr-repair-list-content {
+    padding: 25px;
+    box-sizing: border-box;
+    background: #f4f7fc;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #172b4d;
+    margin-bottom: 5px;
+}
+
+.page-description {
+    display: block;
+    margin-bottom: 20px;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.micr-repair-panel {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid #dce3ee;
+    border-radius: 7px;
+    overflow: hidden;
+}
+
+.table-header {
+    min-height: 58px;
+    padding: 0 20px;
+    box-sizing: border-box;
+    background: #ffffff;
+    border-bottom: 1px solid #dce3ee;
+}
+
+.table-title {
+    color: #172b4d;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.micr-repair-grid {
+    width: 100%;
+    border: none;
+}
+
+.micr-repair-grid .z-columns {
+    background: #f8fafc;
+}
+
+.micr-repair-grid .z-column {
+    background: #f8fafc;
+    color: #172b4d;
+    font-weight: bold;
+    border-bottom: 1px solid #dce3ee;
+}
+
+.micr-repair-grid .z-column-content {
+    color: #172b4d !important;
+    font-weight: bold;
+    padding: 14px 15px;
+}
+
+.micr-repair-grid .z-row {
+    height: 58px;
+    border-bottom: 1px solid #e1e6ed;
+}
+
+.micr-repair-grid .z-row-content {
+    padding: 10px 15px;
+    vertical-align: middle;
+}
+
+.micr-error-count {
+    display: inline-block;
+    min-width: 30px;
+    padding: 5px 10px;
+    text-align: center;
+    background: #ffd6d6;
+    color: #b42318;
+    border-radius: 12px;
+    font-weight: bold;
+}
+
+.repair-button {
+    background: #2455d6 !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 4px !important;
+    padding: 8px 18px !important;
+    font-size: 13px !important;
+    font-weight: bold !important;
+    cursor: pointer;
+}
+
+.repair-button:hover {
+    background: #1745b8 !important;
+}
+
+.micr-repair-grid .z-paging {
+    background: #ffffff;
+    border-top: 1px solid #e1e6ed;
+    padding: 10px;
+}
+
+/* Empty state */
+
+.empty-message {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 50px 20px;
+    text-align: center;
+    color: #64748b;
+    font-size: 15px;
+    font-weight: 500;
+    background: #ffffff;
+}

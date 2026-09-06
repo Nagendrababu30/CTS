@@ -1,0 +1,368 @@
+.micr-repair-content {
+    padding: 25px;
+    box-sizing: border-box;
+    background: #f4f7fc;
+    overflow: auto;
+}
+
+
+/* =========================
+   TOP INFORMATION
+   ========================= */
+
+.top-information {
+    margin-bottom: 10px;
+}
+
+.batch-label {
+    font-size: 16px;
+    font-weight: bold;
+    color: #172b4d;
+}
+
+.cheque-counter {
+    margin-left: 20px;
+    font-size: 16px;
+    color: #2455d6;
+    font-weight: bold;
+}
+
+
+/* =========================
+   IMAGE BUTTONS
+   ========================= */
+
+.image-buttons {
+    margin-bottom: 15px;
+}
+
+.image-button {
+    min-width: 125px;
+    height: 52px;
+
+    background: #ffffff !important;
+    color: #27364d !important;
+
+    border: 1px solid #d9e1ec !important;
+    border-radius: 6px !important;
+
+    font-size: 16px !important;
+    font-weight: 500 !important;
+
+    box-shadow: none !important;
+}
+
+.image-button:hover {
+    background: #f5f8fc !important;
+}
+
+.image-button-active {
+    background: #0754b8 !important;
+    color: #ffffff !important;
+    border-color: #0754b8 !important;
+    font-weight: bold !important;
+}
+
+
+/* =========================
+   MAIN AREA
+   ========================= */
+
+.repair-area {
+    width: 100%;
+}
+
+.image-panel {
+    background: #ffffff;
+    border: 1px solid #dce3ee;
+    border-radius: 7px;
+}
+
+.image-container {
+    padding: 24px;
+    box-sizing: border-box;
+    background: #ffffff;
+}
+
+.image-header {
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.bank-name {
+    color: #2455d6;
+    font-size: 23px;
+    font-weight: bold;
+}
+
+.image-cheque-number {
+    margin-left: auto;
+    color: #172b4d;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.cheque-image {
+    width: 100%;
+    height: 430px;
+    object-fit: contain;
+    border: 1px solid #dce3ee;
+    background: #effdf3;
+}
+
+
+/* =========================
+   DETAILS PANEL
+   ========================= */
+
+.details-panel {
+    background: #f8fafc;
+    border: 1px solid #dce3ee;
+    border-radius: 7px;
+}
+
+.details-layout {
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+.details-title {
+    color: #27364d;
+    font-size: 25px;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+
+/* =========================
+   SECTIONS
+   ========================= */
+
+.section-title {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 5px;
+    margin-bottom: 7px;
+}
+
+.npci-title {
+    color: #475569;
+}
+
+.ocr-title {
+    color: #2455d6;
+    margin-top: 14px;
+}
+
+
+/* =========================
+   FIELD LABELS
+   ========================= */
+
+.field-label {
+    display: block;
+    color: #27364d;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 7px;
+    margin-bottom: 4px;
+}
+
+
+/* =========================
+   NPCI READ ONLY
+   ========================= */
+
+.readonly-field {
+    width: 100%;
+
+    background: #eef2f7 !important;
+    color: #27364d !important;
+
+    border: 1px solid #d9e1ec !important;
+    border-radius: 5px !important;
+
+    font-size: 14px !important;
+}
+
+.npci-micr-field {
+    font-weight: bold !important;
+    background: #e9eef5 !important;
+}
+
+
+/* =========================
+   OCR NORMAL FIELD
+   ========================= */
+
+.ocr-field {
+    width: 100%;
+
+    background: #ffffff !important;
+    color: #27364d !important;
+
+    border: 1px solid #d9e1ec !important;
+    border-radius: 5px !important;
+
+    font-size: 14px !important;
+}
+
+
+/* =========================
+   OCR ERROR FIELD
+   ========================= */
+
+.ocr-error {
+    background: #fff1f1 !important;
+    color: #b42318 !important;
+
+    border: 1px solid #ef4444 !important;
+
+    box-shadow: 0 0 0 1px #ef4444 !important;
+
+    font-weight: bold !important;
+}
+
+
+/* =========================
+   CORRECTED MICR
+   ========================= */
+
+.corrected-label {
+    color: #2455d6 !important;
+    margin-top: 12px;
+}
+
+.corrected-field {
+    width: 100%;
+
+    background: #ffffff !important;
+    color: #172b4d !important;
+
+    border: 2px solid #2455d6 !important;
+    border-radius: 5px !important;
+
+    font-weight: bold !important;
+}
+
+
+/* =========================
+   NAVIGATION BUTTONS
+   ========================= */
+
+.navigation-buttons {
+    margin-top: 18px;
+    padding-bottom: 10px;
+}
+
+.secondary-button {
+    min-width: 110px;
+
+    background: #ffffff !important;
+    color: #64748b !important;
+
+    border: 1px solid #d9e1ec !important;
+    border-radius: 5px !important;
+
+    padding: 9px 18px !important;
+
+    font-size: 14px !important;
+    font-weight: 600 !important;
+
+    box-shadow: none !important;
+}
+
+.secondary-button:hover {
+    background: #f1f5f9 !important;
+}
+
+
+/* =========================
+   SAVE & NEXT
+   ========================= */
+
+.save-next-button {
+    min-width: 130px;
+
+    background: #2455d6 !important;
+    color: #ffffff !important;
+
+    border: 1px solid #2455d6 !important;
+    border-radius: 5px !important;
+
+    padding: 9px 18px !important;
+
+    font-size: 14px !important;
+    font-weight: bold !important;
+}
+
+.save-next-button:hover {
+    background: #1745b8 !important;
+}
+
+
+/* =========================
+   RETURN
+   ========================= */
+
+.return-button {
+    min-width: 100px;
+
+    background: #ffffff !important;
+    color: #b42318 !important;
+
+    border: 1px solid #f0a6a0 !important;
+    border-radius: 5px !important;
+
+    padding: 9px 18px !important;
+
+    font-size: 14px !important;
+    font-weight: bold !important;
+
+    box-shadow: none !important;
+}
+
+.return-button:hover {
+    background: #fff1f1 !important;
+    color: #912018 !important;
+}
+
+.return-window {
+    background: #ffffff;
+    border: 1px solid #dce3ee;
+    border-radius: 7px;
+}
+
+.return-form {
+    padding: 25px;
+    box-sizing: border-box;
+}
+
+.return-field-label {
+    color: #27364d;
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 5px;
+    margin-bottom: 4px;
+}
+
+.return-form .z-combobox-input {
+    height: 38px;
+    border: 1px solid #d9e1ec !important;
+    border-radius: 5px !important;
+    background: #ffffff !important;
+    color: #27364d !important;
+}
+
+.return-form .z-textbox {
+    border: 1px solid #d9e1ec !important;
+    border-radius: 5px !important;
+    background: #ffffff !important;
+    color: #27364d !important;
+    padding: 8px !important;
+}
+
+.return-window-buttons {
+    margin-top: 12px;
+}

@@ -19,7 +19,7 @@ public class BatchDaoImpl implements BatchDao {
         this.dataSource = dataSource;
     }
 
-    public static BatchDao of() {
+	public static BatchDao of() {
         return new BatchDaoImpl(
                 ConnectionPool.getDataSource());
     }

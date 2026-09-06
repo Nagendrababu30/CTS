@@ -9,7 +9,7 @@
 
 <zk>
 
-	 <style src="/css/inward/maker/dashboard.css"/>
+    <style src="/css/inward/maker/dashboard.css"/>
 
     <div
         self="@define(content)"
@@ -96,7 +96,7 @@
                 </hlayout>
 
 
-                <!-- Submitted to Checker -->
+                <!-- My Batches -->
 
                 <hlayout
                     hflex="1"
@@ -107,18 +107,18 @@
                         sclass="card-icon-container icon-green">
 
                         <label
-                            sclass="z-icon-paper-plane-o"/>
+                            sclass="z-icon-folder-open"/>
 
                     </vlayout>
 
                     <vlayout spacing="2px">
 
                         <label
-                            value="Submitted to Checker"
+                            value="My Batches"
                             sclass="card-label"/>
 
                         <label
-                            id="submittedCountLabel"
+                            id="myBatchesCountLabel"
                             value="0"
                             sclass="card-value text-green"/>
 
@@ -162,8 +162,8 @@
                         sclass="filter-btn"/>
 
                     <button
-                        id="lockedBtn"
-                        label="Locked"
+                        id="myBatchesBtn"
+                        label="My Batches"
                         sclass="filter-btn"/>
 
                 </hlayout>

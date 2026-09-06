@@ -132,12 +132,15 @@ public class PxfParserImpl implements PxfParser {
             XMLStreamReader reader) throws Exception {
 
         String chequeNumber = null;
-        String batchId = null;
+        long batchId = 0;
         String accountNumber = null;
         LocalDate chequeDate = null;
         String drawerName = null;
         BigDecimal chequeAmount = null;
         String micrCode = null;
+        String cityCode = null;
+        String bankCode = null;
+        String branchCode = null;
 
         while (reader.hasNext()) {
 
@@ -166,7 +169,8 @@ public class PxfParserImpl implements PxfParser {
 
             case "BatchId":
                 batchId =
-                        reader.getElementText();
+                        Long.parseLong(
+                                reader.getElementText());
                 break;
 
             case "AccountNumber":
@@ -196,6 +200,21 @@ public class PxfParserImpl implements PxfParser {
                         reader.getElementText();
                 break;
 
+            case "CityCode":
+                cityCode =
+                        reader.getElementText();
+                break;
+
+            case "BankCode":
+                bankCode =
+                        reader.getElementText();
+                break;
+
+            case "BranchCode":
+                branchCode =
+                        reader.getElementText();
+                break;
+
             default:
                 break;
             }
@@ -208,6 +227,9 @@ public class PxfParserImpl implements PxfParser {
                 chequeDate,
                 drawerName,
                 chequeAmount,
-                micrCode);
+                micrCode,
+                cityCode,
+                bankCode,
+                branchCode);
     }
 }

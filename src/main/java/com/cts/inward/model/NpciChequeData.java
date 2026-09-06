@@ -6,21 +6,27 @@ import java.time.LocalDate;
 public class NpciChequeData {
 
     private final String chequeNumber;
-    private final String batchId;
+    private final long batchId;
     private final String accountNumber;
     private final LocalDate chequeDate;
     private final String drawerName;
     private final BigDecimal chequeAmount;
     private final String micrCode;
+    private String cityCode;
+    private String bankCode;
+    private String branchCode;
 
     private NpciChequeData(
             String chequeNumber,
-            String batchId,
+            long batchId,
             String accountNumber,
             LocalDate chequeDate,
             String drawerName,
             BigDecimal chequeAmount,
-            String micrCode) {
+            String micrCode,
+            String cityCode,
+            String bankCode,
+            String branchCode) {
 
         this.chequeNumber = chequeNumber;
         this.batchId = batchId;
@@ -29,16 +35,22 @@ public class NpciChequeData {
         this.drawerName = drawerName;
         this.chequeAmount = chequeAmount;
         this.micrCode = micrCode;
+        this.cityCode = cityCode;
+        this.bankCode = bankCode;
+        this.branchCode = branchCode;
     }
 
     public static NpciChequeData of(
             String chequeNumber,
-            String batchId,
+            long batchId,
             String accountNumber,
             LocalDate chequeDate,
             String drawerName,
             BigDecimal chequeAmount,
-            String micrCode) {
+            String micrCode,
+            String cityCode,
+            String bankCode,
+            String branchCode) {
 
         return new NpciChequeData(
                 chequeNumber,
@@ -47,14 +59,17 @@ public class NpciChequeData {
                 chequeDate,
                 drawerName,
                 chequeAmount,
-                micrCode);
+                micrCode,
+                cityCode,
+                bankCode,
+                branchCode);
     }
 
     public String getChequeNumber() {
         return chequeNumber;
     }
 
-    public String getBatchId() {
+    public long getBatchId() {
         return batchId;
     }
 
@@ -76,5 +91,17 @@ public class NpciChequeData {
 
     public String getMicrCode() {
         return micrCode;
+    }
+
+    public String getCityCode() {
+        return cityCode;
+    }
+
+    public String getBankCode() {
+        return bankCode;
+    }
+
+    public String getBranchCode() {
+        return branchCode;
     }
 }

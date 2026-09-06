@@ -55,7 +55,7 @@ public class OcrParserImpl implements OcrParser {
     private OcrBatchData readBatch(
             XMLStreamReader reader) throws Exception {
 
-        String batchId = null;
+        long batchId = 0;
         String presentingBankName = null;
         int totalCheque = 0;
         String fileId = null;
@@ -75,7 +75,8 @@ public class OcrParserImpl implements OcrParser {
             switch (elementName) {
 
             case "BatchId":
-                batchId = reader.getElementText();
+                batchId = Long.parseLong(
+                        reader.getElementText());
                 break;
 
             case "PresentingBankName":
@@ -119,7 +120,7 @@ public class OcrParserImpl implements OcrParser {
             XMLStreamReader reader) throws Exception {
 
         String chequeNumber = null;
-        String batchId = null;
+        long batchId = 0;
         String accountNumber = null;
         LocalDate chequeDate = null;
         String drawerName = null;
@@ -152,7 +153,8 @@ public class OcrParserImpl implements OcrParser {
                 break;
 
             case "BatchId":
-                batchId = reader.getElementText();
+                batchId = Long.parseLong(
+                        reader.getElementText());
                 break;
 
             case "AccountNumber":

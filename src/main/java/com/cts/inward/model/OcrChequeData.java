@@ -6,7 +6,7 @@ import java.time.LocalDate;
 public class OcrChequeData {
 
     private final String chequeNumber;
-    private final String batchId;
+    private final long batchId;
     private final String accountNumber;
     private final LocalDate chequeDate;
     private final String drawerName;
@@ -18,7 +18,7 @@ public class OcrChequeData {
 
     private OcrChequeData(
             String chequeNumber,
-            String batchId,
+            long batchId,
             String accountNumber,
             LocalDate chequeDate,
             String drawerName,
@@ -42,7 +42,7 @@ public class OcrChequeData {
 
     public static OcrChequeData of(
             String chequeNumber,
-            String batchId,
+            long batchId,
             String accountNumber,
             LocalDate chequeDate,
             String drawerName,
@@ -69,7 +69,7 @@ public class OcrChequeData {
         return chequeNumber;
     }
 
-    public String getBatchId() {
+    public long getBatchId() {
         return batchId;
     }
 

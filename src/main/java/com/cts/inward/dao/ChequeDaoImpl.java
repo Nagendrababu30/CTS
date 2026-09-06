@@ -47,7 +47,7 @@ public class ChequeDaoImpl implements ChequeDao {
                     1,
                     cheque.getChequeNumber());
 
-            statement.setString(
+            statement.setLong(
                     2,
                     cheque.getBatchId());
 

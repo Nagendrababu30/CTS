@@ -21,7 +21,9 @@ public class AuthorizationComposer
 
     static {
 
+        // =========================================================
         // ADMIN
+        // =========================================================
 
         PAGE_PERMISSIONS.put(
                 "/zul/admin/adminDashboard.zul",
@@ -48,16 +50,50 @@ public class AuthorizationComposer
                 "ADMIN");
 
 
+        // =========================================================
         // INWARD MAKER
+        // =========================================================
 
         PAGE_PERMISSIONS.put(
                 "/zul/inward-maker/dashboard.zul",
                 "INWARD_MAKER");
 
+        /*
+         * MICR Repair queue page.
+         *
+         * This was missing previously and caused:
+         *
+         * /zul/inward-maker/micr-repair-list.zul
+         *              ↓
+         *          Access Denied
+         */
+        PAGE_PERMISSIONS.put(
+                "/zul/inward-maker/micr-repair-list.zul",
+                "INWARD_MAKER");
+
+        /*
+         * MICR Repair detail page.
+         */
+        
+        PAGE_PERMISSIONS.put(
+                "/zul/inward-maker/micr-repair-list.zul",
+                "INWARD_MAKER");
+        
         PAGE_PERMISSIONS.put(
                 "/zul/inward-maker/micr-repair.zul",
                 "INWARD_MAKER");
 
+        /*
+         * Data Entry page.
+         */
+        PAGE_PERMISSIONS.put(
+                "/zul/inward-maker/data-entry.zul",
+                "INWARD_MAKER");
+
+        /*
+         * These pages can remain protected if they still exist,
+         * but they are no longer displayed in the Maker sidebar.
+         */
         PAGE_PERMISSIONS.put(
                 "/zul/inward-maker/send-to-checker.zul",
                 "INWARD_MAKER");
@@ -67,7 +103,9 @@ public class AuthorizationComposer
                 "INWARD_MAKER");
 
 
+        // =========================================================
         // INWARD CHECKER
+        // =========================================================
 
         PAGE_PERMISSIONS.put(
                 "/zul/inward-checker/dashboard.zul",
@@ -82,7 +120,9 @@ public class AuthorizationComposer
                 "INWARD_CHECKER");
 
 
+        // =========================================================
         // OUTWARD MAKER
+        // =========================================================
 
         PAGE_PERMISSIONS.put(
                 "/zul/outward/outward-maker/makerDashboard.zul",
@@ -105,7 +145,9 @@ public class AuthorizationComposer
                 "OUTWARD_MAKER");
 
 
+        // =========================================================
         // OUTWARD CHECKER
+        // =========================================================
 
         PAGE_PERMISSIONS.put(
                 "/zul/outward/outward-checker/checkerDashboard.zul",
@@ -181,9 +223,23 @@ public class AuthorizationComposer
 
     private void checkAuthorization() {
 
+        Execution execution =
+                Executions.getCurrent();
+
+        if (execution == null) {
+            Executions.sendRedirect(
+                    "/login.zul");
+            return;
+        }
+
         Session session =
-                Executions.getCurrent()
-                        .getSession();
+                execution.getSession();
+
+        if (session == null) {
+            Executions.sendRedirect(
+                    "/login.zul");
+            return;
+        }
 
         User loggedInUser =
                 (User) session.getAttribute(
@@ -199,7 +255,7 @@ public class AuthorizationComposer
 
 
         String currentPage =
-                Executions.getCurrent()
+                execution
                         .getDesktop()
                         .getRequestPath();
 

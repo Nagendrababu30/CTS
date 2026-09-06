@@ -30,7 +30,7 @@
 
             <!-- MICR Repair -->
             <a
-                href="/zul/inward-maker/micr-repair.zul"
+                href="/zul/inward-maker/micr-repair-list.zul"
                 sclass="${arg.active eq 'micr-repair' ? 'menu-item active-menu' : 'menu-item'}">
 
                 <n:i class="fa-solid fa-wrench menu-icon"></n:i>

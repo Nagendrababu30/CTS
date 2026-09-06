@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?init class="com.cts.admin.controller.LayoutInit"
+        pageTitle="MICR Repair"
+        active="micr-repair"?>
+
+<?init class="org.zkoss.zk.ui.util.Composition"
+        arg0="/zul/common/layout.zul"?>
+
+<zk>
+
+    <style src="/css/inward/maker/micr-repair-list.css" />
+
+    <div
+        self="@define(content)"
+        width="100%"
+        height="100%"
+        sclass="content">
+
+        <vlayout
+            width="100%"
+            height="100%"
+            apply="com.cts.inward.controller.MicrRepairListController"
+            sclass="micr-repair-list-content">
+
+            <label
+                value="MICR Repair"
+                sclass="page-title" />
+
+            <label
+                value="Batches requiring MICR verification and repair"
+                sclass="page-description" />
+
+            <panel
+                width="100%"
+                border="normal"
+                sclass="micr-repair-panel">
+
+                <panelchildren>
+
+                    <vlayout
+                        width="100%"
+                        spacing="0px">
+
+                        <hlayout
+                            width="100%"
+                            valign="middle"
+                            sclass="table-header">
+
+                            <label
+                                value="MICR Repair Batches"
+                                sclass="table-title" />
+
+                        </hlayout>
+
+                        <grid
+                            id="micrRepairGrid"
+                            width="100%"
+                            mold="paging"
+                            pageSize="10"
+                            sclass="micr-repair-grid">
+
+                            <columns>
+                                <column label="Batch ID" width="20%" />
+                                <column label="Total Cheques" width="25%" />
+                                <column label="MICR Error" width="25%" />
+                                <column label="Action" width="30%" />
+                            </columns>
+
+                            <rows id="micrRepairRows" />
+
+                        </grid>
+
+                        <label
+                            id="emptyMessage"
+                            value="No MICR repairs pending."
+                            visible="false"
+                            sclass="empty-message" />
+
+                    </vlayout>
+
+                </panelchildren>
+
+            </panel>
+
+        </vlayout>
+
+    </div>
+
+</zk>

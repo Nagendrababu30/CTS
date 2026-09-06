@@ -4,14 +4,14 @@ import java.util.List;
 
 public class OcrBatchData {
 
-    private final String batchId;
+    private final long batchId;
     private final String presentingBankName;
     private final int totalCheque;
     private final String fileId;
     private final List<OcrChequeData> cheques;
 
     private OcrBatchData(
-            String batchId,
+            long batchId,
             String presentingBankName,
             int totalCheque,
             String fileId,
@@ -25,7 +25,7 @@ public class OcrBatchData {
     }
 
     public static OcrBatchData of(
-            String batchId,
+            long batchId,
             String presentingBankName,
             int totalCheque,
             String fileId,
@@ -39,7 +39,7 @@ public class OcrBatchData {
                 cheques);
     }
 
-    public String getBatchId() {
+    public long getBatchId() {
         return batchId;
     }
 

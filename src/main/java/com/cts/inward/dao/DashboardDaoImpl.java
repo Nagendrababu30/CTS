@@ -19,7 +19,7 @@ public class DashboardDaoImpl
     @Override
     public List<DashboardBatchDto> getDashboardBatches() {
 
-        String sql = """
+    	String sql = """
                 SELECT
                     b.batch_id,
                     b.total_cheques,
@@ -65,10 +65,12 @@ public class DashboardDaoImpl
                 ) l
                     ON b.batch_id = l.batch_id
 
+               
+                WHERE h.batch_status != 'SENT_TO_CHECKER'
+
                 ORDER BY
                     b.batch_id
                 """;
-
 
         List<DashboardBatchDto> batches =
                 new ArrayList<>();

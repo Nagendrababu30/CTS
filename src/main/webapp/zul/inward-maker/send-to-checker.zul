@@ -15,10 +15,84 @@
         height="100%"
         sclass="content">
 
-        <label
-            value="Send to Checker"
-            sclass="page-title" />
 
+    <style src="/css/inward/maker/sendtochecker.css"/>
+    <window apply="com.cts.inward.controller.SendToCheckerController" height="100%" sclass="main-window">
+        
+        <vlayout sclass="content-container">
+            
+            <!-- Top Alert Message -->
+            <hlayout sclass="alert-box" spacing="0">
+                <label sclass="z-icon-info-circle alert-icon" />
+                <label value="The following batches are verified by Inward Maker and ready to be submitted to Inward Checker." sclass="alert-text"/>
+            </hlayout>
+
+            <!-- Main Grid -->
+            <grid id="batchesGrid" emptyMessage="No batches ready to be submitted." sclass="custom-grid">
+                <columns sclass="custom-columns">
+                    <column label="Batch ID" sclass="custom-column" />
+                    <column label="Total Cheques" sclass="custom-column" />
+                    <column label="Status" sclass="custom-column" />
+                    <column label="Action" sclass="custom-column" />
+                </columns>
+                <rows id="batchRows" />
+            </grid>
+
+            <!-- Bottom Note -->
+            <hlayout sclass="note-box" spacing="0">
+                <label sclass="z-icon-info-circle note-icon" />
+                <label value="Submitting a batch forwards it immediately to the Inward Checker queue." sclass="note-text"/>
+            </hlayout>
+
+        </vlayout>
+        
+        <!--  Confirmation Modal -->
+        <window id="confirmModal" title="Submit Batch to Checker?" visible="false" 
+                width="450px" border="normal" position="center" closable="false">
+            <vlayout sclass="modal-vlayout">
+                <label id="confirmMessage" sclass="confirm-msg" />
+                <hlayout sclass="modal-btn-container" spacing="15px">
+                    <button id="cancelBtn" label="Cancel" sclass="btn-cancel" />
+                    <button id="confirmSendBtn" label="Confirm &amp; Send" sclass="btn-submit" />
+                </hlayout>
+            </vlayout>
+        </window>
+
+       
+        <!-- Success Modal-->
+        
+        <window id="successModal" visible="false" width="400px" border="normal" 
+                position="center" closable="false">
+            <vlayout sclass="modal-vlayout" style="padding: 30px;">
+                
+                <!-- Green Check Icon -->
+                <hbox sclass="success-icon-bg" pack="center" align="center">
+                    <label sclass="z-icon-check success-icon"/>
+                </hbox>
+                
+                <label value="Sent to Checker Successfully" sclass="success-title"/>
+                
+                <!-- ID and Status Details -->
+                <grid sclass="details-grid">
+                    <rows>
+                        <row sclass="details-row">
+                            <label value="Batch ID" sclass="details-label"/>
+                            <label id="successBatchIdLbl" sclass="details-value"/>
+                        </row>
+                        <row sclass="details-row">
+                            <label value="Status" sclass="details-label"/>
+                            <label value=": Sent to Checker" sclass="details-value-green" />
+                        </row>
+                    </rows>
+                </grid>
+                
+                <label value="The batch has been successfully sent to the Inward Checker for verification." sclass="success-note"/>
+                
+                <button id="okBtn" label="OK" sclass="btn-ok" />
+            </vlayout>
+        </window>
+    </window>
+        
     </div>
 
 </zk>

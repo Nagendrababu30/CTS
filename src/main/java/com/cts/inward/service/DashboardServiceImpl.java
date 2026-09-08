@@ -32,4 +32,16 @@ public class DashboardServiceImpl
                 batchId,
                 userId);
     }
+
+    @Override
+    public boolean updateBatchStatus(
+            Long batchId,
+            String batchStatus,
+            Long userId) {
+
+        return dashboardDao.updateBatchStatus(
+                batchId,
+                batchStatus,
+                userId);
+    }
 }

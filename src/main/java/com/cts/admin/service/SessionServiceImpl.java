@@ -64,7 +64,12 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public List<Session> getAllSessions() {
-        return sessionDAO.getAllSessions();
+    public List<Session> getAllSessions(int limit, int offset) {
+        return sessionDAO.getAllSessions(limit, offset);
+    }
+
+    @Override
+    public int getSessionCount() {
+        return sessionDAO.getSessionCount();
     }
 }

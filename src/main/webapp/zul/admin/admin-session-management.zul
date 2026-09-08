@@ -12,7 +12,10 @@
     <style src="/css/admin/sessionManagement.css"/>
 
     <div
-        self="@define(content)">
+        self="@define(content)"
+        width="100%"
+        height="100%"
+        sclass="content">
 
         <!-- ============================================================
              SESSION MANAGEMENT PAGE
@@ -170,6 +173,12 @@
                     </listhead>
 
                 </listbox>
+
+                <paging
+                    id="sessionHistoryPaging"
+                    pageSize="5"
+                    detailed="true"
+                    sclass="session-history-paging"/>
 
             </vlayout>
 

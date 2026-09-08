@@ -12,5 +12,7 @@ public interface SessionDAO {
 
     Session getActiveSession();
 
-    List<Session> getAllSessions();
+    List<Session> getAllSessions(int limit, int offset);
+
+    int getSessionCount();
 }

@@ -1,5 +1,7 @@
 package com.cts.inward.service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import com.cts.inward.dao.ChequeDao;
@@ -68,4 +70,11 @@ public class ChequeServiceImpl
             String chequeId) {
         return null;
     }
+    
+	@Override
+	public void updateCheque(String chequeNumber, long batchId, String accountNumber,
+			BigDecimal amount, LocalDate chequeDate) {
+
+		chequeDao.updateCheque(chequeNumber, batchId, accountNumber, amount, chequeDate);
+	}
 }

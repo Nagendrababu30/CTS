@@ -15,6 +15,7 @@ import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Messagebox;
+import org.zkoss.zul.Paging;
 import org.zkoss.zul.Vlayout;
 import org.zkoss.zul.Window;
 
@@ -42,6 +43,9 @@ public class SessionManagementController
     private Button  beginSessionButton;
     private Button  endSessionButton;
     private Listbox sessionHistoryListbox;
+    private Paging  sessionHistoryPaging;
+
+    private static final int PAGE_SIZE = 5;
 
     // =========================================================
     // END SESSION MODAL
@@ -80,6 +84,8 @@ public class SessionManagementController
         beginSessionButton    = (Button)  comp.getFellow("beginSessionButton");
         endSessionButton      = (Button)  comp.getFellow("endSessionButton");
         sessionHistoryListbox = (Listbox) comp.getFellow("sessionHistoryListbox");
+        sessionHistoryPaging  = (Paging)  comp.getFellow("sessionHistoryPaging");
+        sessionHistoryPaging.setPageSize(PAGE_SIZE);
 
         endSessionModal   = (Window) comp.getFellow("endSessionModal");
         modalCloseButton  = (Button) endSessionModal.getFellow("modalCloseButton");
@@ -88,7 +94,7 @@ public class SessionManagementController
 
         registerEvents();
         loadSessionState();
-        loadSessionHistory();
+        loadSessionHistory(0);
     }
 
     // =========================================================
@@ -154,6 +160,15 @@ public class SessionManagementController
                         endSession();
                     }
                 });
+
+        sessionHistoryPaging.addEventListener("onPaging",
+                new EventListener<Event>() {
+                    @Override
+                    public void onEvent(Event event) throws Exception {
+                        int activePage = sessionHistoryPaging.getActivePage();
+                        loadSessionHistory(activePage * PAGE_SIZE);
+                    }
+                });
     }
 
     // =========================================================
@@ -173,7 +188,7 @@ public class SessionManagementController
                     Messagebox.INFORMATION);
 
             loadSessionState();
-            loadSessionHistory();
+            loadSessionHistory(0);
 
         } catch (IllegalStateException e) {
 
@@ -255,7 +270,7 @@ public class SessionManagementController
                         Messagebox.EXCLAMATION);
 
                 loadSessionState();
-                loadSessionHistory();
+                loadSessionHistory(0);
                 return;
             }
 
@@ -283,7 +298,7 @@ public class SessionManagementController
             }
 
             loadSessionState();
-            loadSessionHistory();
+            loadSessionHistory(0);
 
         } catch (Exception e) {
 
@@ -344,12 +359,15 @@ public class SessionManagementController
     // LOAD SESSION HISTORY
     // =========================================================
 
-    private void loadSessionHistory() {
+    private void loadSessionHistory(int offset) {
 
         sessionHistoryListbox.getItems().clear();
 
+        int total = sessionService.getSessionCount();
+        sessionHistoryPaging.setTotalSize(total);
+
         List<com.cts.admin.model.Session> sessions =
-                sessionService.getAllSessions();
+                sessionService.getAllSessions(PAGE_SIZE, offset);
 
         if (sessions == null || sessions.isEmpty()) {
             return;

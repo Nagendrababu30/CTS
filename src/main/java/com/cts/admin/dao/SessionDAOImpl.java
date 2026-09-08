@@ -138,9 +138,9 @@ public class SessionDAOImpl implements SessionDAO {
 
 
     @Override
-    public List<Session> getAllSessions() {
+    public List<com.cts.admin.model.Session> getAllSessions(int limit, int offset) {
 
-        List<Session> sessions = new ArrayList<>();
+        List<com.cts.admin.model.Session> sessions = new ArrayList<>();
 
         String sql =
                 "SELECT session_id, "
@@ -151,7 +151,43 @@ public class SessionDAOImpl implements SessionDAO {
                 + "       started_by, "
                 + "       ended_by "
                 + "FROM sessions "
-                + "ORDER BY session_id DESC";
+                + "ORDER BY session_id DESC "
+                + "LIMIT ? OFFSET ?";
+
+        try (
+                Connection connection =
+                        ConnectionPool.getDataSource().getConnection();
+
+                PreparedStatement statement =
+                        connection.prepareStatement(sql)
+        ) {
+
+            statement.setInt(1, limit);
+            statement.setInt(2, offset);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+
+                while (resultSet.next()) {
+                    sessions.add(mapSession(resultSet));
+                }
+            }
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Unable to fetch session history.",
+                    e
+            );
+        }
+
+        return sessions;
+    }
+
+
+    @Override
+    public int getSessionCount() {
+
+        String sql = "SELECT COUNT(*) FROM sessions";
 
         try (
                 Connection connection =
@@ -164,20 +200,19 @@ public class SessionDAOImpl implements SessionDAO {
                         statement.executeQuery()
         ) {
 
-            while (resultSet.next()) {
-
-                sessions.add(mapSession(resultSet));
+            if (resultSet.next()) {
+                return resultSet.getInt(1);
             }
 
         } catch (SQLException e) {
 
             throw new RuntimeException(
-                    "Unable to fetch session history.",
+                    "Unable to count sessions.",
                     e
             );
         }
 
-        return sessions;
+        return 0;
     }
 
 

@@ -4,202 +4,270 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.cts.inward.config.ConnectionPool;
 import com.cts.inward.dto.ReturnReasonDto;
 import com.cts.inward.model.NpciChequeData;
 import com.cts.inward.model.OcrChequeData;
-import com.cts.inward.config.ConnectionPool;
 
 public class MicrRepairDaoImpl implements MicrRepairDao {
 
-    /*
-     * ---------------------------------------------------------------------
-     * NPCI CHEQUES
-     * ---------------------------------------------------------------------
-     */
+    private static final String STATUS_RETURN_BY_MAKER =
+            "RETURN_BY_MAKER";
+
+    private static final String STATUS_DATA_ENTRY =
+            "DATA_ENTRY";
+
     @Override
-    public List<NpciChequeData> getNpciCheques(long batchId) {
+    public List<NpciChequeData> getNpciCheques(
+            long batchId) {
 
-        List<NpciChequeData> cheques = new ArrayList<>();
+        String sql = """
+            SELECT
+                inward_cheque_id,
+                cheque_number,
+                batch_id,
+                account_number,
+                cheque_date,
+                drawer_name,
+                amount,
+                micr_code,
+                city_code,
+                bank_code,
+                branch_code
+            FROM public.inward_cheque
+            WHERE batch_id = ?
+            ORDER BY inward_cheque_id
+            """;
 
-        String sql =
-                "SELECT "
-                + "cheque_number, "
-                + "batch_id, "
-                + "account_number, "
-                + "cheque_date, "
-                + "drawer_name, "
-                + "amount, "
-                + "micr_code, "
-                + "city_code, "
-                + "bank_code, "
-                + "branch_code "
-                + "FROM public.inward_cheque "
-                + "WHERE batch_id = ? "
-                + "ORDER BY cheque_number";
+        List<NpciChequeData> cheques =
+                new ArrayList<>();
 
-        try (Connection connection = ConnectionPool.getDataSource().getConnection();
-             PreparedStatement statement =
-                     connection.prepareStatement(sql)) {
+        try (
+                Connection connection =
+                        ConnectionPool
+                                .getDataSource()
+                                .getConnection();
 
-            statement.setLong(1, batchId);
+                PreparedStatement statement =
+                        connection.prepareStatement(sql)) {
 
-            try (ResultSet rs = statement.executeQuery()) {
+            statement.setLong(
+                    1,
+                    batchId);
 
-                while (rs.next()) {
+            try (ResultSet resultSet =
+                         statement.executeQuery()) {
+
+                while (resultSet.next()) {
 
                     NpciChequeData cheque =
                             NpciChequeData.of(
-                                    rs.getString("cheque_number"),
-                                    rs.getLong("batch_id"),
-                                    rs.getString("account_number"),
-                                    rs.getDate("cheque_date") != null
-                                            ? rs.getDate("cheque_date").toLocalDate()
-                                            : null,
-                                    rs.getString("drawer_name"),
-                                    rs.getBigDecimal("amount"),
-                                    rs.getString("micr_code"),
-                                    rs.getString("city_code"),
-                                    rs.getString("bank_code"),
-                                    rs.getString("branch_code"));
+                                    resultSet.getString(
+                                            "cheque_number"),
 
-                    cheques.add(cheque);
+                                    resultSet.getLong(
+                                            "batch_id"),
+
+                                    resultSet.getString(
+                                            "account_number"),
+
+                                    resultSet.getDate(
+                                            "cheque_date") != null
+                                            ? resultSet.getDate(
+                                                    "cheque_date")
+                                                    .toLocalDate()
+                                            : null,
+
+                                    resultSet.getString(
+                                            "drawer_name"),
+
+                                    resultSet.getBigDecimal(
+                                            "amount"),
+
+                                    resultSet.getString(
+                                            "micr_code"),
+
+                                    resultSet.getString(
+                                            "city_code"),
+
+                                    resultSet.getString(
+                                            "bank_code"),
+
+                                    resultSet.getString(
+                                            "branch_code")
+                            );
+
+                    cheque.setInwardChequeId(
+                            resultSet.getLong(
+                                    "inward_cheque_id"));
+
+                    cheques.add(
+                            cheque);
                 }
             }
 
-        } catch (SQLException e) {
+        } catch (Exception e) {
+
             throw new RuntimeException(
-                    "Failed to fetch NPCI cheques for batch " + batchId,
+                    "Error retrieving NPCI cheques for batch "
+                            + batchId,
                     e);
         }
 
         return cheques;
     }
 
-
-    /*
-     * ---------------------------------------------------------------------
-     * OCR CHEQUES
-     * ---------------------------------------------------------------------
-     *
-     * IMPORTANT:
-     *
-     * Do NOT join:
-     *
-     *      ob.file_id = ib.file_id
-     *
-     * because the OCR file has its own inward_file record.
-     *
-     * Example:
-     *
-     * inward_batch:
-     *     batch_id = 8
-     *     file_id  = 11
-     *
-     * OCR:
-     *     batch_id = 8
-     *     file_id  = 13
-     *
-     * Therefore the correct relationship is:
-     *
-     *      ob.batch_id = ?
-     *
-     * ---------------------------------------------------------------------
-     */
     @Override
-    public List<OcrChequeData> getOcrCheques(long batchId) {
+    public List<OcrChequeData> getOcrCheques(
+            long batchId) {
 
-        List<OcrChequeData> cheques = new ArrayList<>();
+        String sql = """
+            SELECT
+                o.inward_cheque_id,
+                o.cheque_number,
+                o.ocr_batch_id,
+                o.account_number,
+                o.cheque_date,
+                o.drawer_name,
+                o.amount,
+                o.micr_code,
+                o.branch_code,
+                o.city_code,
+                o.bank_code
+            FROM public.ocr_cheque_data o
+            INNER JOIN public.ocr_batch ob
+                ON o.ocr_batch_id = ob.ocr_batch_id
+            WHERE ob.batch_id = ?
+            ORDER BY o.inward_cheque_id
+            """;
 
-        String sql =
-                "SELECT "
-                + "o.cheque_number, "
-                + "o.ocr_batch_id, "
-                + "o.account_number, "
-                + "o.cheque_date, "
-                + "o.drawer_name, "
-                + "o.amount, "
-                + "o.micr_code, "
-                + "o.branch_code, "
-                + "o.city_code, "
-                + "o.bank_code "
-                + "FROM public.ocr_cheque_data o "
-                + "INNER JOIN public.ocr_batch ob "
-                + "    ON o.ocr_batch_id = ob.ocr_batch_id "
-                + "WHERE ob.batch_id = ? "
-                + "ORDER BY o.cheque_number";
+        List<OcrChequeData> cheques =
+                new ArrayList<>();
 
-        try (Connection connection = ConnectionPool.getDataSource().getConnection();
-             PreparedStatement statement =
-                     connection.prepareStatement(sql)) {
+        try (
+                Connection connection =
+                        ConnectionPool
+                                .getDataSource()
+                                .getConnection();
 
-            statement.setLong(1, batchId);
+                PreparedStatement statement =
+                        connection.prepareStatement(sql)) {
 
-            try (ResultSet rs = statement.executeQuery()) {
+            statement.setLong(
+                    1,
+                    batchId);
 
-                while (rs.next()) {
+            try (ResultSet resultSet =
+                         statement.executeQuery()) {
+
+                while (resultSet.next()) {
 
                     OcrChequeData cheque =
-                            OcrChequeData.of(
-                                    rs.getString("cheque_number"),
-                                    rs.getLong("ocr_batch_id"),
-                                    rs.getString("account_number"),
-                                    rs.getDate("cheque_date") != null
-                                            ? rs.getDate("cheque_date").toLocalDate()
-                                            : null,
-                                    rs.getString("drawer_name"),
-                                    rs.getBigDecimal("amount"),
-                                    rs.getString("micr_code"),
-                                    rs.getString("city_code"),
-                                    rs.getString("bank_code"),
-                                    rs.getString("branch_code"));
+                            OcrChequeData.of();
 
-                    cheques.add(cheque);
+                    cheque.setInwardChequeId(
+                            resultSet.getLong(
+                                    "inward_cheque_id"));
+
+                    cheque.setChequeNumber(
+                            resultSet.getString(
+                                    "cheque_number"));
+
+                    cheque.setBatchId(
+                            batchId);
+
+                    cheque.setAccountNumber(
+                            resultSet.getString(
+                                    "account_number"));
+
+                    cheque.setChequeDate(
+                            resultSet.getDate(
+                                    "cheque_date") != null
+                                    ? resultSet.getDate(
+                                            "cheque_date")
+                                            .toLocalDate()
+                                    : null);
+
+                    cheque.setDrawerName(
+                            resultSet.getString(
+                                    "drawer_name"));
+
+                    cheque.setChequeAmount(
+                            resultSet.getBigDecimal(
+                                    "amount"));
+
+                    cheque.setMicrCode(
+                            resultSet.getString(
+                                    "micr_code"));
+
+                    cheque.setBranchSpecificCode(
+                            resultSet.getString(
+                                    "branch_code"));
+
+                    cheque.setCityCode(
+                            resultSet.getString(
+                                    "city_code"));
+
+                    cheque.setBankCode(
+                            resultSet.getString(
+                                    "bank_code"));
+
+                    cheques.add(
+                            cheque);
                 }
             }
 
-        } catch (SQLException e) {
+        } catch (Exception e) {
+
             throw new RuntimeException(
-                    "Failed to fetch OCR cheques for batch " + batchId,
+                    "Error retrieving OCR cheques for batch "
+                            + batchId,
                     e);
         }
 
         return cheques;
     }
 
-
-    /*
-     * ---------------------------------------------------------------------
-     * COMPLETED MICR REPAIR
-     * ---------------------------------------------------------------------
-     */
     @Override
-    public String getCompletedRepairedMicr(String chequeNumber) {
+    public String getCompletedRepairedMicr(
+            String chequeNumber) {
 
         String sql =
-                "SELECT repaired_micr "
-                + "FROM public.inward_micr_repair "
-                + "WHERE cheque_number = ? "
-                + "AND repair_status = 'COMPLETED' "
-                + "ORDER BY repaired_on DESC "
-                + "LIMIT 1";
+                "SELECT new_value "
+              + "FROM public.inward_micr_repair_history "
+              + "WHERE cheque_no = ? "
+              + "ORDER BY micr_repair_id DESC "
+              + "LIMIT 1";
 
-        try (Connection connection = ConnectionPool.getDataSource().getConnection();
-             PreparedStatement statement =
-                     connection.prepareStatement(sql)) {
+        try (
+                Connection connection =
+                        ConnectionPool
+                                .getDataSource()
+                                .getConnection();
 
-            statement.setString(1, chequeNumber);
+                PreparedStatement statement =
+                        connection.prepareStatement(sql)) {
 
-            try (ResultSet rs = statement.executeQuery()) {
+            statement.setString(
+                    1,
+                    chequeNumber);
 
-                if (rs.next()) {
-                    return rs.getString("repaired_micr");
+            try (ResultSet resultSet =
+                         statement.executeQuery()) {
+
+                if (resultSet.next()) {
+
+                    return resultSet.getString(
+                            "new_value");
                 }
             }
 
         } catch (SQLException e) {
+
             throw new RuntimeException(
                     "Failed to fetch completed MICR repair for cheque "
                             + chequeNumber,
@@ -209,73 +277,159 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
         return null;
     }
 
-
-    /*
-     * ---------------------------------------------------------------------
-     * FRONT IMAGE
-     * ---------------------------------------------------------------------
-     */
     @Override
-    public String getFrontImagePath(String chequeNumber) {
+    public String getLatestChequeStatus(
+            String chequeNumber) {
+
+        String sql =
+                "SELECT status "
+              + "FROM public.inward_cheque_status_history "
+              + "WHERE cheque_number = ? "
+              + "ORDER BY status_history_id DESC "
+              + "LIMIT 1";
+
+        try (
+                Connection connection =
+                        ConnectionPool
+                                .getDataSource()
+                                .getConnection();
+
+                PreparedStatement statement =
+                        connection.prepareStatement(sql)) {
+
+            statement.setString(
+                    1,
+                    chequeNumber);
+
+            try (ResultSet resultSet =
+                         statement.executeQuery()) {
+
+                if (resultSet.next()) {
+
+                    return resultSet.getString(
+                            "status");
+                }
+            }
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Failed to fetch latest cheque status for "
+                            + chequeNumber,
+                    e);
+        }
+
+        return null;
+    }
+
+    @Override
+    public long getBatchIdByChequeNumber(
+            String chequeNumber) {
+
+        String sql =
+                "SELECT batch_id "
+              + "FROM public.inward_cheque "
+              + "WHERE cheque_number = ? "
+              + "LIMIT 1";
+
+        try (
+                Connection connection =
+                        ConnectionPool
+                                .getDataSource()
+                                .getConnection();
+
+                PreparedStatement statement =
+                        connection.prepareStatement(sql)) {
+
+            statement.setString(
+                    1,
+                    chequeNumber);
+
+            try (ResultSet resultSet =
+                         statement.executeQuery()) {
+
+                if (resultSet.next()) {
+
+                    return resultSet.getLong(
+                            "batch_id");
+                }
+            }
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Failed to find batch for cheque "
+                            + chequeNumber,
+                    e);
+        }
+
+        return 0L;
+    }
+
+    @Override
+    public String getFrontImagePath(
+            String chequeNumber) {
 
         String sql =
                 "SELECT front_image "
-                + "FROM public.inward_cheque_image "
-                + "WHERE cheque_number = ?";
+              + "FROM public.inward_cheque_image "
+              + "WHERE cheque_number = ? "
+              + "LIMIT 1";
 
-        try (Connection connection = ConnectionPool.getDataSource().getConnection();
-             PreparedStatement statement =
-                     connection.prepareStatement(sql)) {
-
-            statement.setString(1, chequeNumber);
-
-            try (ResultSet rs = statement.executeQuery()) {
-
-                if (rs.next()) {
-                    return rs.getString("front_image");
-                }
-            }
-
-        } catch (SQLException e) {
-            throw new RuntimeException(
-                    "Failed to fetch front image for cheque "
-                            + chequeNumber,
-                    e);
-        }
-
-        return null;
+        return getImagePath(
+                sql,
+                chequeNumber,
+                "front_image");
     }
 
-
-    /*
-     * ---------------------------------------------------------------------
-     * BACK IMAGE
-     * ---------------------------------------------------------------------
-     */
     @Override
-    public String getBackImagePath(String chequeNumber) {
+    public String getBackImagePath(
+            String chequeNumber) {
 
         String sql =
                 "SELECT back_image "
-                + "FROM public.inward_cheque_image "
-                + "WHERE cheque_number = ?";
+              + "FROM public.inward_cheque_image "
+              + "WHERE cheque_number = ? "
+              + "LIMIT 1";
 
-        try (Connection connection = ConnectionPool.getDataSource().getConnection();
-             PreparedStatement statement =
-                     connection.prepareStatement(sql)) {
+        return getImagePath(
+                sql,
+                chequeNumber,
+                "back_image");
+    }
 
-            statement.setString(1, chequeNumber);
+    private String getImagePath(
+            String sql,
+            String chequeNumber,
+            String columnName) {
 
-            try (ResultSet rs = statement.executeQuery()) {
+        try (
+                Connection connection =
+                        ConnectionPool
+                                .getDataSource()
+                                .getConnection();
 
-                if (rs.next()) {
-                    return rs.getString("back_image");
+                PreparedStatement statement =
+                        connection.prepareStatement(sql)) {
+
+            statement.setString(
+                    1,
+                    chequeNumber);
+
+            try (ResultSet resultSet =
+                         statement.executeQuery()) {
+
+                if (resultSet.next()) {
+
+                    return resultSet.getString(
+                            columnName);
                 }
             }
 
-        } catch (SQLException e) {
+        } catch (Exception e) {
+
             throw new RuntimeException(
-                    "Failed to fetch back image for cheque "
+                    "Unable to load cheque image for "
                             + chequeNumber,
                     e);
         }
@@ -283,52 +437,51 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
         return null;
     }
 
-
-    /*
-     * ---------------------------------------------------------------------
-     * MAKER RETURN REASONS
-     * ---------------------------------------------------------------------
-     */
     @Override
     public List<ReturnReasonDto> getMakerReturnReasons() {
 
-        List<ReturnReasonDto> reasons = new ArrayList<>();
+        List<ReturnReasonDto> reasons =
+                new ArrayList<>();
 
         String sql =
                 "SELECT return_reason_code, description "
-                + "FROM public.inward_cheque_return_reason "
-                + "WHERE applicable_role IN ('MAKER', 'BOTH') "
-                + "AND status = 'ACTIVE' "
-                + "ORDER BY description";
+              + "FROM public.inward_cheque_return_reason "
+              + "WHERE applicable_role IN ('MAKER', 'BOTH') "
+              + "ORDER BY description";
 
-        try (Connection connection = ConnectionPool.getDataSource().getConnection();
-             PreparedStatement statement =
-                     connection.prepareStatement(sql);
-             ResultSet rs = statement.executeQuery()) {
+        try (
+                Connection connection =
+                        ConnectionPool
+                                .getDataSource()
+                                .getConnection();
 
-            while (rs.next()) {
+                PreparedStatement statement =
+                        connection.prepareStatement(sql);
+
+                ResultSet resultSet =
+                        statement.executeQuery()) {
+
+            while (resultSet.next()) {
 
                 reasons.add(
                         new ReturnReasonDto(
-                                rs.getString("return_reason_code"),
-                                rs.getString("description")));
+                                resultSet.getString(
+                                        "return_reason_code"),
+
+                                resultSet.getString(
+                                        "description")));
             }
 
-        } catch (SQLException e) {
+        } catch (Exception e) {
+
             throw new RuntimeException(
-                    "Failed to fetch maker return reasons",
+                    "Unable to load Maker return reasons",
                     e);
         }
 
         return reasons;
     }
 
-
-    /*
-     * ---------------------------------------------------------------------
-     * MAKER RETURN
-     * ---------------------------------------------------------------------
-     */
     @Override
     public boolean saveMakerReturn(
             String chequeNumber,
@@ -340,59 +493,317 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
 
         try {
 
-            connection = ConnectionPool.getDataSource().getConnection();
+            connection =
+                    ConnectionPool
+                            .getDataSource()
+                            .getConnection();
+
             connection.setAutoCommit(false);
 
             /*
-             * 1. Save return request.
+             * ---------------------------------------------------------
+             * 1. Save CHEQUE-level return record.
+             *
+             * RETURN_BY_MAKER belongs to the cheque only.
+             * ---------------------------------------------------------
              */
             String returnSql =
                     "INSERT INTO public.inward_cheque_return "
-                    + "(cheque_number, "
-                    + "return_reason_code, "
-                    + "maker_remarks, "
-                    + "requested_by, "
-                    + "return_status) "
-                    + "VALUES (?, ?, ?, ?, 'RETURN_REQUESTED')";
+                  + "(cheque_number, return_reason_code, "
+                  + "maker_remarks, requested_by, return_status) "
+                  + "VALUES (?, ?, ?, ?, ?)";
 
             try (PreparedStatement statement =
-                         connection.prepareStatement(returnSql)) {
+                         connection.prepareStatement(
+                                 returnSql)) {
 
-                statement.setString(1, chequeNumber);
-                statement.setString(2, returnReasonCode);
-                statement.setString(3, makerRemarks);
-                statement.setLong(4, userId);
+                statement.setString(
+                        1,
+                        chequeNumber);
 
-                statement.executeUpdate();
+                statement.setString(
+                        2,
+                        returnReasonCode);
+
+                if (makerRemarks == null
+                        || makerRemarks.trim().isEmpty()) {
+
+                    statement.setNull(
+                            3,
+                            Types.VARCHAR);
+
+                } else {
+
+                    statement.setString(
+                            3,
+                            makerRemarks.trim());
+                }
+
+                statement.setLong(
+                        4,
+                        userId);
+
+                statement.setString(
+                        5,
+                        STATUS_RETURN_BY_MAKER);
+
+                int inserted =
+                        statement.executeUpdate();
+
+                if (inserted != 1) {
+
+                    connection.rollback();
+
+                    return false;
+                }
             }
 
-
             /*
-             * 2. Save status history.
+             * ---------------------------------------------------------
+             * 2. Save CHEQUE-level status history.
+             *
+             * This cheque is now RETURN_BY_MAKER.
+             * ---------------------------------------------------------
              */
             String historySql =
                     "INSERT INTO public.inward_cheque_status_history "
-                    + "(cheque_number, "
-                    + "status, "
-                    + "return_reason_code, "
-                    + "maker_id, "
-                    + "maker_action, "
-                    + "maker_action_on, "
-                    + "remarks) "
-                    + "VALUES (?, 'RETURN_REQUESTED', ?, ?, "
-                    + "'RETURN_REQUESTED', CURRENT_TIMESTAMP, ?)";
+                  + "(cheque_number, status, rejection_reason_code, "
+                  + "return_reason_code, maker_id, maker_action, "
+                  + "maker_action_on, checker_id, checker_action, "
+                  + "checker_action_on, remarks) "
+                  + "VALUES (?, ?, NULL, ?, ?, ?, CURRENT_TIMESTAMP, "
+                  + "NULL, NULL, NULL, ?)";
 
             try (PreparedStatement statement =
-                         connection.prepareStatement(historySql)) {
+                         connection.prepareStatement(
+                                 historySql)) {
 
-                statement.setString(1, chequeNumber);
-                statement.setString(2, returnReasonCode);
-                statement.setLong(3, userId);
-                statement.setString(4, makerRemarks);
+                statement.setString(
+                        1,
+                        chequeNumber);
 
-                statement.executeUpdate();
+                statement.setString(
+                        2,
+                        STATUS_RETURN_BY_MAKER);
+
+                statement.setString(
+                        3,
+                        returnReasonCode);
+
+                statement.setLong(
+                        4,
+                        userId);
+
+                statement.setString(
+                        5,
+                        STATUS_RETURN_BY_MAKER);
+
+                if (makerRemarks == null
+                        || makerRemarks.trim().isEmpty()) {
+
+                    statement.setNull(
+                            6,
+                            Types.VARCHAR);
+
+                } else {
+
+                    statement.setString(
+                            6,
+                            makerRemarks.trim());
+                }
+
+                int inserted =
+                        statement.executeUpdate();
+
+                if (inserted != 1) {
+
+                    connection.rollback();
+
+                    return false;
+                }
             }
 
+            /*
+             * ---------------------------------------------------------
+             * 3. Find the batch containing this cheque.
+             * ---------------------------------------------------------
+             */
+            long batchId = 0L;
+
+            String batchIdSql =
+                    "SELECT batch_id "
+                  + "FROM public.inward_cheque "
+                  + "WHERE cheque_number = ? "
+                  + "LIMIT 1";
+
+            try (PreparedStatement statement =
+                         connection.prepareStatement(
+                                 batchIdSql)) {
+
+                statement.setString(
+                        1,
+                        chequeNumber);
+
+                try (ResultSet resultSet =
+                             statement.executeQuery()) {
+
+                    if (resultSet.next()) {
+
+                        batchId =
+                                resultSet.getLong(
+                                        "batch_id");
+                    }
+                }
+            }
+
+            if (batchId <= 0L) {
+
+                connection.rollback();
+
+                return false;
+            }
+
+            /*
+             * ---------------------------------------------------------
+             * 4. Count remaining CHEQUES that are still waiting for
+             *    MICR repair.
+             *
+             * Only the LATEST cheque status is considered.
+             *
+             * MICR_MISMATCH = still pending
+             *
+             * DATA_ENTRY = MICR stage completed
+             *
+             * RETURN_BY_MAKER = MICR stage completed
+             *
+             * ---------------------------------------------------------
+             */
+            int pendingMicrCount = 0;
+
+            String pendingMicrSql =
+                    "SELECT COUNT(*) "
+                  + "FROM public.inward_cheque c "
+                  + "INNER JOIN LATERAL ( "
+                  + "    SELECT h.status "
+                  + "    FROM public.inward_cheque_status_history h "
+                  + "    WHERE h.cheque_number = c.cheque_number "
+                  + "    ORDER BY h.status_history_id DESC "
+                  + "    LIMIT 1 "
+                  + ") latest ON TRUE "
+                  + "WHERE c.batch_id = ? "
+                  + "AND latest.status = 'MICR_MISMATCH'";
+
+            try (PreparedStatement statement =
+                         connection.prepareStatement(
+                                 pendingMicrSql)) {
+
+                statement.setLong(
+                        1,
+                        batchId);
+
+                try (ResultSet resultSet =
+                             statement.executeQuery()) {
+
+                    if (resultSet.next()) {
+
+                        pendingMicrCount =
+                                resultSet.getInt(1);
+                    }
+                }
+            }
+
+            /*
+             * ---------------------------------------------------------
+             * 5. DO NOT change the batch to RETURN_BY_MAKER.
+             *
+             * Only when ZERO MICR_MISMATCH cheques remain do we move
+             * the BATCH to DATA_ENTRY.
+             * ---------------------------------------------------------
+             */
+            if (pendingMicrCount == 0) {
+
+                String latestBatchStatusSql =
+                        "SELECT batch_status "
+                      + "FROM public.inward_batch_history "
+                      + "WHERE batch_id = ? "
+                      + "ORDER BY changed_on DESC "
+                      + "LIMIT 1";
+
+                String latestBatchStatus = null;
+
+                try (PreparedStatement statement =
+                             connection.prepareStatement(
+                                     latestBatchStatusSql)) {
+
+                    statement.setLong(
+                            1,
+                            batchId);
+
+                    try (ResultSet resultSet =
+                                 statement.executeQuery()) {
+
+                        if (resultSet.next()) {
+
+                            latestBatchStatus =
+                                    resultSet.getString(
+                                            "batch_status");
+                        }
+                    }
+                }
+
+                /*
+                 * Do not insert another DATA_ENTRY history row if the
+                 * batch is already there.
+                 */
+                if (!STATUS_DATA_ENTRY.equalsIgnoreCase(
+                        latestBatchStatus)) {
+
+                    String batchHistorySql =
+                            "INSERT INTO public.inward_batch_history "
+                          + "(batch_id, batch_status, changed_on, "
+                          + "changed_by, reason, remarks) "
+                          + "VALUES (?, ?, CURRENT_TIMESTAMP, ?, ?, ?)";
+
+                    try (PreparedStatement statement =
+                                 connection.prepareStatement(
+                                         batchHistorySql)) {
+
+                        statement.setLong(
+                                1,
+                                batchId);
+
+                        statement.setString(
+                                2,
+                                STATUS_DATA_ENTRY);
+
+                        statement.setLong(
+                                3,
+                                userId);
+
+                        statement.setString(
+                                4,
+                                "MICR_REPAIR_COMPLETED");
+
+                        statement.setString(
+                                5,
+                                "All cheques completed MICR stage; batch ready for Data Entry");
+
+                        int inserted =
+                                statement.executeUpdate();
+
+                        if (inserted != 1) {
+
+                            connection.rollback();
+
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            /*
+             * Everything completed successfully.
+             */
             connection.commit();
 
             return true;
@@ -400,9 +811,12 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
         } catch (SQLException e) {
 
             if (connection != null) {
+
                 try {
                     connection.rollback();
+
                 } catch (SQLException rollbackException) {
+
                     rollbackException.printStackTrace();
                 }
             }
@@ -415,22 +829,20 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
         } finally {
 
             if (connection != null) {
+
                 try {
+
                     connection.setAutoCommit(true);
                     connection.close();
+
                 } catch (SQLException closeException) {
+
                     closeException.printStackTrace();
                 }
             }
         }
     }
 
-
-    /*
-     * ---------------------------------------------------------------------
-     * MICR REPAIR
-     * ---------------------------------------------------------------------
-     */
     @Override
     public boolean saveMicrRepair(
             String chequeNumber,
@@ -443,115 +855,114 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
 
         try {
 
-            connection = ConnectionPool.getDataSource().getConnection();
+            connection =
+                    ConnectionPool
+                            .getDataSource()
+                            .getConnection();
+
             connection.setAutoCommit(false);
 
-            long repairId = findLatestRepairId(
-                    connection,
-                    chequeNumber);
-
             /*
-             * 1. Update existing repair or create a new repair.
+             * ---------------------------------------------------------
+             * 1. Save MICR repair history.
+             *
+             * Original OCR/NPCI data is NOT modified.
+             * ---------------------------------------------------------
              */
-            if (repairId > 0) {
-
-                String updateSql =
-                        "UPDATE public.inward_micr_repair "
-                        + "SET repaired_micr = ?, "
-                        + "repair_status = 'COMPLETED', "
-                        + "maker_id = ?, "
-                        + "repaired_on = CURRENT_TIMESTAMP "
-                        + "WHERE repair_id = ?";
-
-                try (PreparedStatement statement =
-                             connection.prepareStatement(updateSql)) {
-
-                    statement.setString(1, repairedMicr);
-                    statement.setLong(2, userId);
-                    statement.setLong(3, repairId);
-
-                    statement.executeUpdate();
-                }
-
-            } else {
-
-                String insertSql =
-                        "INSERT INTO public.inward_micr_repair "
-                        + "(cheque_number, "
-                        + "original_micr, "
-                        + "repaired_micr, "
-                        + "repair_status, "
-                        + "maker_id, "
-                        + "repaired_on) "
-                        + "VALUES (?, ?, ?, 'COMPLETED', ?, CURRENT_TIMESTAMP)";
-
-                try (PreparedStatement statement =
-                             connection.prepareStatement(
-                                     insertSql,
-                                     java.sql.Statement.RETURN_GENERATED_KEYS)) {
-
-                    statement.setString(1, chequeNumber);
-                    statement.setString(2, originalMicr);
-                    statement.setString(3, repairedMicr);
-                    statement.setLong(4, userId);
-
-                    statement.executeUpdate();
-
-                    try (ResultSet keys =
-                                 statement.getGeneratedKeys()) {
-
-                        if (keys.next()) {
-                            repairId = keys.getLong(1);
-                        }
-                    }
-                }
-            }
-
-
-            /*
-             * 2. Save MICR change history.
-             */
-            String changeHistorySql =
-                    "INSERT INTO public.inward_micr_change_history "
-                    + "(micr_repair_id, "
-                    + "old_micr, "
-                    + "is_checker_reviewed, "
-                    + "checker_user_id, "
-                    + "checker_reviewed_on) "
-                    + "VALUES (?, ?, 'N', NULL, NULL)";
+            String repairHistorySql =
+                    "INSERT INTO public.inward_micr_repair_history "
+                  + "(cheque_no, old_value, new_value, "
+                  + "changed_by, varified_by) "
+                  + "VALUES (?, ?, ?, ?, NULL)";
 
             try (PreparedStatement statement =
-                         connection.prepareStatement(changeHistorySql)) {
+                         connection.prepareStatement(
+                                 repairHistorySql)) {
 
-                statement.setLong(1, repairId);
-                statement.setString(2, originalMicr);
+                statement.setString(
+                        1,
+                        chequeNumber);
 
-                statement.executeUpdate();
+                statement.setString(
+                        2,
+                        originalMicr);
+
+                statement.setString(
+                        3,
+                        repairedMicr);
+
+                statement.setLong(
+                        4,
+                        userId);
+
+                int inserted =
+                        statement.executeUpdate();
+
+                if (inserted != 1) {
+
+                    connection.rollback();
+
+                    return false;
+                }
             }
 
-
             /*
-             * 3. Save cheque status history.
+             * ---------------------------------------------------------
+             * 2. Change CHEQUE status to DATA_ENTRY.
+             * ---------------------------------------------------------
              */
             String statusHistorySql =
                     "INSERT INTO public.inward_cheque_status_history "
-                    + "(cheque_number, "
-                    + "status, "
-                    + "maker_id, "
-                    + "maker_action, "
-                    + "maker_action_on, "
-                    + "remarks) "
-                    + "VALUES (?, 'MICR_REPAIRED', ?, "
-                    + "'MICR_REPAIRED', CURRENT_TIMESTAMP, ?)";
+                  + "(cheque_number, status, rejection_reason_code, "
+                  + "return_reason_code, maker_id, maker_action, "
+                  + "maker_action_on, checker_id, checker_action, "
+                  + "checker_action_on, remarks) "
+                  + "VALUES (?, ?, NULL, NULL, ?, ?, CURRENT_TIMESTAMP, "
+                  + "NULL, NULL, NULL, ?)";
 
             try (PreparedStatement statement =
-                         connection.prepareStatement(statusHistorySql)) {
+                         connection.prepareStatement(
+                                 statusHistorySql)) {
 
-                statement.setString(1, chequeNumber);
-                statement.setLong(2, userId);
-                statement.setString(3, remarks);
+                statement.setString(
+                        1,
+                        chequeNumber);
 
-                statement.executeUpdate();
+                statement.setString(
+                        2,
+                        STATUS_DATA_ENTRY);
+
+                statement.setLong(
+                        3,
+                        userId);
+
+                statement.setString(
+                        4,
+                        "MICR_REPAIR_COMPLETED");
+
+                if (remarks == null
+                        || remarks.trim().isEmpty()) {
+
+                    statement.setNull(
+                            5,
+                            Types.VARCHAR);
+
+                } else {
+
+                    statement.setString(
+                            5,
+                            remarks.trim());
+                }
+
+                int inserted =
+                        statement.executeUpdate();
+
+                if (inserted != 1) {
+
+                    connection.rollback();
+
+                    return false;
+                }
             }
 
             connection.commit();
@@ -561,9 +972,12 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
         } catch (SQLException e) {
 
             if (connection != null) {
+
                 try {
                     connection.rollback();
+
                 } catch (SQLException rollbackException) {
+
                     rollbackException.printStackTrace();
                 }
             }
@@ -576,47 +990,160 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
         } finally {
 
             if (connection != null) {
+
                 try {
+
                     connection.setAutoCommit(true);
                     connection.close();
+
                 } catch (SQLException closeException) {
+
                     closeException.printStackTrace();
                 }
             }
         }
     }
 
+    @Override
+    public boolean markBatchReadyForDataEntry(
+            long batchId,
+            long userId) {
 
-    /*
-     * ---------------------------------------------------------------------
-     * FIND LATEST REPAIR
-     * ---------------------------------------------------------------------
-     */
-    private long findLatestRepairId(
-            Connection connection,
-            String chequeNumber)
-            throws SQLException {
+        Connection connection = null;
 
-        String sql =
-                "SELECT repair_id "
-                + "FROM public.inward_micr_repair "
-                + "WHERE cheque_number = ? "
-                + "ORDER BY repaired_on DESC "
-                + "LIMIT 1";
+        try {
 
-        try (PreparedStatement statement =
-                     connection.prepareStatement(sql)) {
+            connection =
+                    ConnectionPool
+                            .getDataSource()
+                            .getConnection();
 
-            statement.setString(1, chequeNumber);
+            connection.setAutoCommit(false);
 
-            try (ResultSet rs = statement.executeQuery()) {
+            /*
+             * Find the current/latest batch status.
+             */
+            String latestStatusSql =
+                    "SELECT batch_status "
+                  + "FROM public.inward_batch_history "
+                  + "WHERE batch_id = ? "
+                  + "ORDER BY changed_on DESC "
+                  + "LIMIT 1";
 
-                if (rs.next()) {
-                    return rs.getLong("repair_id");
+            String latestStatus = null;
+
+            try (PreparedStatement statement =
+                         connection.prepareStatement(
+                                 latestStatusSql)) {
+
+                statement.setLong(
+                        1,
+                        batchId);
+
+                try (ResultSet resultSet =
+                             statement.executeQuery()) {
+
+                    if (resultSet.next()) {
+
+                        latestStatus =
+                                resultSet.getString(
+                                        "batch_status");
+                    }
+                }
+            }
+
+            /*
+             * Batch already ready for Data Entry.
+             */
+            if (STATUS_DATA_ENTRY.equalsIgnoreCase(
+                    latestStatus)) {
+
+                connection.commit();
+
+                return true;
+            }
+
+            /*
+             * Change BATCH status to DATA_ENTRY.
+             */
+            String historySql =
+                    "INSERT INTO public.inward_batch_history "
+                  + "(batch_id, batch_status, changed_on, "
+                  + "changed_by, reason, remarks) "
+                  + "VALUES (?, ?, CURRENT_TIMESTAMP, ?, ?, ?)";
+
+            try (PreparedStatement statement =
+                         connection.prepareStatement(
+                                 historySql)) {
+
+                statement.setLong(
+                        1,
+                        batchId);
+
+                statement.setString(
+                        2,
+                        STATUS_DATA_ENTRY);
+
+                statement.setLong(
+                        3,
+                        userId);
+
+                statement.setString(
+                        4,
+                        "MICR_REPAIR_COMPLETED");
+
+                statement.setString(
+                        5,
+                        "Batch ready for Data Entry");
+
+                int inserted =
+                        statement.executeUpdate();
+
+                if (inserted != 1) {
+
+                    connection.rollback();
+
+                    return false;
+                }
+            }
+
+            connection.commit();
+
+            return true;
+
+        } catch (SQLException e) {
+
+            if (connection != null) {
+
+                try {
+                    connection.rollback();
+
+                } catch (SQLException rollbackException) {
+
+                    rollbackException.printStackTrace();
+                }
+            }
+
+            throw new RuntimeException(
+                    "Failed to update batch "
+                            + batchId
+                            + " to DATA_ENTRY",
+                    e);
+
+        } finally {
+
+            if (connection != null) {
+
+                try {
+
+                    connection.setAutoCommit(true);
+                    connection.close();
+
+                } catch (SQLException closeException) {
+
+                    closeException.printStackTrace();
                 }
             }
         }
-
-        return 0;
     }
 }

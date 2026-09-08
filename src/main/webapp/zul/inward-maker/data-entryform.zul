@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?page title="Inward Data Entry"?>
+
+<zk>
+
+	<div apply="com.cts.inward.controller.DataEntryFormController"
+		width="100%" height="100%" style="padding:20px;">
+
+		<!-- ================================================= -->
+		<!-- HEADER -->
+		<!-- ================================================= -->
+
+		<hlayout width="100%"
+			style="justify-content:space-between; align-items:center; margin-bottom:20px;">
+
+			<!-- Back + Batch Information -->
+
+			<hlayout spacing="15px" style="align-items:center;">
+
+				<button id="btnBackQueue" label="← Back to Queue" />
+
+				<vlayout spacing="3px">
+
+					<label id="lblBatchInfo" value="Inward Data Entry"
+						style="font-size:18px; font-weight:bold;" />
+
+					<label id="lblChequeInfo" value="Cheque 1 of 1"
+						style="font-size:13px; color:#666;" />
+
+				</vlayout>
+
+			</hlayout>
+
+
+			<!-- Previous Button -->
+
+			<button id="btnPrev" label="← Prev" disabled="true" />
+
+		</hlayout>
+
+
+		<!-- ================================================= -->
+		<!-- MAIN CONTENT -->
+		<!-- ================================================= -->
+
+		<hlayout width="100%" spacing="20px">
+
+			<!-- ============================================= -->
+			<!-- LEFT : CHEQUE IMAGE -->
+			<!-- ============================================= -->
+
+			<vlayout hflex="2" spacing="12px"
+				style="background:#fff; padding:15px; border:1px solid #ddd; border-radius:6px;">
+
+				<!-- Image Controls -->
+
+				<hlayout spacing="8px" style="align-items:center;">
+
+					<label value="Side:" style="font-weight:bold;" />
+
+					<button id="btnSideFront" label="Front" />
+
+					<button id="btnSideBack" label="Back" />
+
+					<button id="btnZoomIn" label="Zoom In" />
+
+					<button id="btnZoomOut" label="Zoom Out" />
+
+					<button id="btnRotate" label="Rotate" />
+
+				</hlayout>
+
+
+				<!-- Cheque Image -->
+
+				<div width="100%" height="400px"
+					style="display:flex; justify-content:center; align-items:center; border:1px solid #eee; padding:10px; background:#fafafa; overflow:auto;">
+
+					<image id="imgCheque"
+						style="max-width:100%; max-height:380px;" />
+
+				</div>
+
+
+				<!-- Extracted MICR -->
+
+				<groupbox width="100%">
+
+					<caption label="EXTRACTED MICR BAND" />
+
+					<label id="lblMicrBand" value=""
+						style="font-family:monospace; font-size:15px; letter-spacing:2px;" />
+
+				</groupbox>
+
+			</vlayout>
+
+
+			<!-- ============================================= -->
+			<!-- RIGHT : DATA ENTRY -->
+			<!-- ============================================= -->
+
+			<vlayout hflex="1" spacing="15px"
+				style="background:#fff; padding:20px; border:1px solid #ddd; border-radius:6px;">
+
+				<label value="Cheque Data Fields"
+					style="font-size:18px; font-weight:bold;" />
+
+
+				<!-- Cheque Number -->
+
+				<vlayout spacing="5px">
+
+					<label value="Cheque Number" />
+
+					<textbox id="txtChequeNo" width="100%"
+						readonly="true" />
+
+				</vlayout>
+
+
+				<!-- Account Number -->
+
+				<vlayout spacing="5px">
+
+					<label value="Account Number *" />
+
+					<textbox id="txtAccountNo" width="100%" />
+
+				</vlayout>
+
+
+				<!-- Amount -->
+
+				<vlayout spacing="5px">
+
+					<label value="Cheque Amount (INR) *" />
+
+					<decimalbox id="decAmount" width="100%" />
+
+				</vlayout>
+
+
+				<!-- Cheque Date -->
+
+				<vlayout spacing="5px">
+
+					<label value="Cheque Date (DD-MM-YYYY) *" />
+
+					<datebox id="dtChequeDate" width="100%"
+						format="dd-MM-yyyy" />
+
+				</vlayout>
+
+
+				<!-- Save & Next -->
+
+				<vlayout width="100%" style="margin-top:10px;">
+
+					<button id="btnSaveNext" label="Save &amp; Next →"
+						width="100%" height="40px" />
+
+				</vlayout>
+
+			</vlayout>
+
+		</hlayout>
+
+	</div>
+
+</zk>

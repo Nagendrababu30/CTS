@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<?init class="com.cts.admin.controller.LayoutInit"
-        pageTitle="Checker Dashboard"
+ <?init class="com.cts.admin.controller.LayoutInit"
+        pageTitle="Inward Checker Dashboard"
         active="dashboard"?>
 
 <?init class="org.zkoss.zk.ui.util.Composition"
@@ -9,24 +7,250 @@
 
 <zk>
 
+    <style src="/css/inward/checker/checkerDashboard.css"/>
+
     <div
         self="@define(content)"
         width="100%"
         height="100%"
-        sclass="content">
+        sclass="content checker-dashboard"
+        apply="com.cts.inward.controller.CheckerDashboardController">
 
-        <label
-            value="Checker Dashboard"
-            sclass="page-title" />
+        <vlayout
+            width="100%"
+            spacing="20px"
+            sclass="content-layout">
 
-        <div>
 
-            <!--
-                Put your existing Checker Dashboard
-                cards, tables, buttons, etc. here.
-            -->
+            <!-- Dashboard Title -->
 
-        </div>
+            <label
+                value="Inward Checker Dashboard"
+                sclass="dashboard-title"/>
+
+
+            <!-- Summary Cards -->
+
+            <hlayout
+                width="100%"
+                spacing="20px"
+                sclass="summary-container">
+
+
+                <!-- Received Batches -->
+
+                <hlayout
+                    hflex="1"
+                    valign="middle"
+                    sclass="summary-card">
+
+                    <vlayout
+                        sclass="card-icon-container icon-blue">
+
+                        <label
+                            sclass="z-icon-folder-o"/>
+
+                    </vlayout>
+
+                    <vlayout
+                        spacing="2px">
+
+                        <label
+                            value="Received Batches"
+                            sclass="card-label"/>
+
+                        <label
+                            id="receivedCount"
+                            value="0"
+                            sclass="card-value text-blue"/>
+
+                    </vlayout>
+
+                </hlayout>
+
+
+                <!-- Available Batches -->
+
+                <hlayout
+                    hflex="1"
+                    valign="middle"
+                    sclass="summary-card">
+
+                    <vlayout
+                        sclass="card-icon-container icon-purple">
+
+                        <label
+                            sclass="z-icon-cog"/>
+
+                    </vlayout>
+
+                    <vlayout
+                        spacing="2px">
+
+                        <label
+                            value="Available Batches"
+                            sclass="card-label"/>
+
+                        <label
+                            id="availableCount"
+                            value="0"
+                            sclass="card-value text-purple"/>
+
+                    </vlayout>
+
+                </hlayout>
+
+
+                <!-- My Batches -->
+
+                <hlayout
+                    hflex="1"
+                    valign="middle"
+                    sclass="summary-card">
+
+                    <vlayout
+                        sclass="card-icon-container icon-green">
+
+                        <label
+                            sclass="z-icon-folder-open"/>
+
+                    </vlayout>
+
+                    <vlayout
+                        spacing="2px">
+
+                        <label
+                            value="My Batches"
+                            sclass="card-label"/>
+
+                        <label
+                            id="myBatchCount"
+                            value="0"
+                            sclass="card-value text-green"/>
+
+                    </vlayout>
+
+                </hlayout>
+
+            </hlayout>
+
+
+            <!-- Batches -->
+
+            <vlayout
+                width="100%"
+                sclass="table-panel"
+                spacing="0">
+
+
+                <!-- Table Header -->
+
+                <hlayout
+                    width="100%"
+                    valign="middle"
+                    sclass="table-header">
+
+                    <!-- Batches Title -->
+
+                    <label
+                        value="Batches"
+                        sclass="table-title"/>
+
+
+                    <!-- Filters -->
+
+                    <hbox
+                        hflex="1"
+                        align="center"
+                        pack="end"
+                        spacing="8px">
+
+                        <label
+                            value="Filter Status:"
+                            sclass="filter-label"/>
+
+                        <button
+                            id="allFilter"
+                            label="All 0"
+                            sclass="filter-btn active-filter"/>
+
+                        <button
+                            id="availableFilter"
+                            label="Available 0"
+                            sclass="filter-btn"/>
+
+                        <button
+                            id="myBatchesFilter"
+                            label="My Batches 0"
+                            sclass="filter-btn"/>
+
+                    </hbox>
+
+                </hlayout>
+
+
+                <!-- Horizontal Scroll Area -->
+
+                <div
+                    width="100%"
+                    sclass="table-scroll">
+
+                    <listbox
+                        id="batchList"
+                        width="1100px"
+                        sclass="batch-list"
+                        mold="paging"
+                        pageSize="5">
+
+                        <listhead>
+
+                            <listheader
+                                label="Batch ID"
+                                width="150px"/>
+
+                            <listheader
+                                label="Total Checks"
+                                width="150px"/>
+
+                            <listheader
+                                label="Maker"
+                                width="200px"/>
+
+                            <listheader
+                                label="Status"
+                                width="200px"/>
+
+                            <listheader
+                                label="User ID (Checker)"
+                                width="200px"/>
+
+                            <listheader
+                                label="Action"
+                                width="200px"/>
+
+                        </listhead>
+
+                    </listbox>
+
+                </div>
+
+
+                <!-- Footer -->
+
+                <hlayout
+                    width="100%"
+                    sclass="batch-footer">
+
+                    <label
+                        id="showingText"
+                        value="Showing 0 batches"
+                        sclass="showing-text"/>
+
+                </hlayout>
+
+            </vlayout>
+
+        </vlayout>
 
     </div>
 

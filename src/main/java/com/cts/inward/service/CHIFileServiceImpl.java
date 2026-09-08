@@ -25,9 +25,9 @@ public class CHIFileServiceImpl implements CHIFileService {
         return new CHIFileServiceImpl(
                 inwardFileDao);
     }
-
+ 
     @Override
-    public Map<FileType, List<InwardFile>> getCHIFilePaths() {
+    public Map<FileType, List<InwardFile>> getCHIFilePaths() { 
 
         List<InwardFile> chiFiles =
                 inwardFileDao.getChiFiles();

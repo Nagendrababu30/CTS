@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" 
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" 
+              name="BatchSummaryReport" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="b5a1c3e2-4f8a-4c2d-9e1b-3a2f8e1d6c7b">
+    
+    <parameter name="BATCH_ID" class="java.lang.String"/>
+    <parameter name="TOTAL_CHEQUES" class="java.lang.Integer"/>
+    <parameter name="MICR_REPAIR_COUNT" class="java.lang.Integer"/>
+    <parameter name="DATA_ENTRY_COUNT" class="java.lang.Integer"/>
+
+    <title>
+        <band height="80">
+            <!-- Top Banner Background -->
+            <rectangle>
+                <reportElement x="0" y="10" width="555" height="50" backcolor="#0D6EFD" uuid="10000000-0000-0000-0000-000000000001"/>
+                <graphicElement>
+                    <pen lineWidth="0.0"/>
+                </graphicElement>
+            </rectangle>
+            <!-- Title Text -->
+            <staticText>
+                <reportElement x="0" y="20" width="555" height="30" forecolor="#FFFFFF" uuid="20000000-0000-0000-0000-000000000002"/>
+                <textElement textAlignment="Center" verticalAlignment="Middle">
+                    <font size="16" isBold="true"/>
+                </textElement>
+                <text><![CDATA[Batch Processing Summary Report]]></text>
+            </staticText>
+        </band>
+    </title>
+    
+    <detail>
+        <band height="210">
+            <!-- Outer Table Box Frame (Expanded height to 185 to fit all rows) -->
+            <rectangle>
+                <reportElement x="0" y="20" width="555" height="185" backcolor="#F8F9FC" uuid="30000000-0000-0000-0000-000000000003"/>
+                <graphicElement>
+                    <pen lineWidth="1.0" lineColor="#CED4DA"/>
+                </graphicElement>
+            </rectangle>
+            
+            <!-- Table Header Row -->
+            <rectangle>
+                <reportElement x="0" y="20" width="555" height="30" backcolor="#E9ECEF" uuid="40000000-0000-0000-0000-000000000004"/>
+                <graphicElement>
+                    <pen lineWidth="1.0" lineColor="#CED4DA"/>
+                </graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="20" y="25" width="300" height="20" uuid="50000000-0000-0000-0000-000000000005"/>
+                <textElement verticalAlignment="Middle"><font size="11" isBold="true"/></textElement>
+                <text><![CDATA[Metric Description]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="340" y="25" width="195" height="20" uuid="60000000-0000-0000-0000-000000000006"/>
+                <textElement verticalAlignment="Middle"><font size="11" isBold="true"/></textElement>
+                <text><![CDATA[Value]]></text>
+            </staticText>
+
+            <!-- Row 1: Batch ID -->
+            <line>
+                <reportElement x="0" y="50" width="555" height="1" uuid="70000000-0000-0000-0000-000000000007"/>
+                <graphicElement><pen lineColor="#CED4DA"/></graphicElement>
+            </line>
+            <staticText>
+                <reportElement x="20" y="60" width="300" height="20" uuid="80000000-0000-0000-0000-000000000008"/>
+                <textElement verticalAlignment="Middle"><font size="10" isBold="true"/></textElement>
+                <text><![CDATA[Batch ID]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="340" y="60" width="195" height="20" uuid="90000000-0000-0000-0000-000000000009"/>
+                <textElement verticalAlignment="Middle"><font size="10"/></textElement>
+                <textFieldExpression><![CDATA[$P{BATCH_ID}]]></textFieldExpression>
+            </textField>
+
+            <!-- Row 2: Total Cheques -->
+            <line>
+                <reportElement x="0" y="85" width="555" height="1" uuid="11000000-0000-0000-0000-000000000011"/>
+                <graphicElement><pen lineColor="#CED4DA"/></graphicElement>
+            </line>
+            <staticText>
+                <reportElement x="20" y="95" width="300" height="20" uuid="12000000-0000-0000-0000-000000000012"/>
+                <textElement verticalAlignment="Middle"><font size="10" isBold="true"/></textElement>
+                <text><![CDATA[Total Cheques Processed]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="340" y="95" width="195" height="20" uuid="13000000-0000-0000-0000-000000000013"/>
+                <textElement verticalAlignment="Middle"><font size="10"/></textElement>
+                <textFieldExpression><![CDATA[$P{TOTAL_CHEQUES}]]></textFieldExpression>
+            </textField>
+
+            <!-- Row 3: MICR Repairs -->
+            <line>
+                <reportElement x="0" y="120" width="555" height="1" uuid="14000000-0000-0000-0000-000000000014"/>
+                <graphicElement><pen lineColor="#CED4DA"/></graphicElement>
+            </line>
+            <staticText>
+                <reportElement x="20" y="130" width="300" height="20" uuid="15000000-0000-0000-0000-000000000015"/>
+                <textElement verticalAlignment="Middle"><font size="10" isBold="true"/></textElement>
+                <text><![CDATA[MICR Repairs]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="340" y="130" width="195" height="20" uuid="16000000-0000-0000-0000-000000000016"/>
+                <textElement verticalAlignment="Middle"><font size="10"/></textElement>
+                <textFieldExpression><![CDATA[$P{MICR_REPAIR_COUNT}]]></textFieldExpression>
+            </textField>
+            
+             <!-- Row 4: Data Entry Repairs -->
+            <line>
+                <reportElement x="0" y="155" width="555" height="1" uuid="17000000-0000-0000-0000-000000000017"/>
+                <graphicElement><pen lineColor="#CED4DA"/></graphicElement>
+            </line>
+            <staticText>
+                <reportElement x="20" y="165" width="300" height="20" uuid="18000000-0000-0000-0000-000000000018"/>
+                <textElement verticalAlignment="Middle"><font size="10" isBold="true"/></textElement>
+                <text><![CDATA[Data Entry Repairs]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="340" y="165" width="195" height="20" uuid="19000000-0000-0000-0000-000000000019"/>
+                <textElement verticalAlignment="Middle"><font size="10"/></textElement>
+                <textFieldExpression><![CDATA[$P{DATA_ENTRY_COUNT}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+</jasperReport>

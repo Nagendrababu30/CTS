@@ -16,19 +16,16 @@ public class DashboardDaoImpl
     // Get dashboard batches
     // -------------------------------------------------------------------------
 
-    @Override
+	@Override
     public List<DashboardBatchDto> getDashboardBatches() {
 
-    	String sql = """
+        String sql = """
                 SELECT
                     b.batch_id,
                     b.total_cheques,
-
                     h.batch_status,
-
                     l.user_id AS lock_user_id,
                     l.lock_status
-
                 FROM public.inward_batch b
 
                 LEFT JOIN (
@@ -48,65 +45,50 @@ public class DashboardDaoImpl
                         bl.user_id,
                         bl.lock_status
                     FROM public.inward_batch_lock bl
-
                     INNER JOIN public."user" u
                         ON u.user_id = bl.user_id
-
                     INNER JOIN public."role" r
                         ON r.role_id = u.role_id
-
                     WHERE bl.lock_status = 'LOCKED'
                       AND u.status = 'ACTIVE'
                       AND r.role_name = 'INWARD_MAKER'
-
                     ORDER BY
                         bl.batch_id,
                         bl.locked_time DESC
                 ) l
                     ON b.batch_id = l.batch_id
 
-               
-                WHERE h.batch_status != 'SENT_TO_CHECKER'
+                WHERE h.batch_status IS NULL
+                   OR h.batch_status NOT IN (
+                        'SENT_TO_CHECKER',
+                        'COMPLETED'
+                   )
 
-                ORDER BY
-                    b.batch_id
+                ORDER BY b.batch_id
                 """;
 
         List<DashboardBatchDto> batches =
                 new ArrayList<>();
 
-
         try (
                 Connection connection =
-                        ConnectionPool
-                                .getDataSource()
+                        ConnectionPool.getDataSource()
                                 .getConnection();
 
                 PreparedStatement statement =
                         connection.prepareStatement(sql);
 
                 ResultSet resultSet =
-                        statement.executeQuery()) {
-
+                        statement.executeQuery()
+        ) {
 
             while (resultSet.next()) {
 
                 Long lockUserId = null;
 
-
-                /*
-                 * Do not use:
-                 *
-                 * resultSet.getObject(
-                 *     "lock_user_id",
-                 *     Long.class);
-                 *
-                 * because of the old c3p0 JDBC proxy.
-                 */
                 Object lockUserIdObject =
                         resultSet.getObject(
                                 "lock_user_id");
-
 
                 if (lockUserIdObject != null) {
 
@@ -115,10 +97,8 @@ public class DashboardDaoImpl
                                     "lock_user_id");
                 }
 
-
                 DashboardBatchDto batch =
                         new DashboardBatchDto(
-
                                 resultSet.getLong(
                                         "batch_id"),
 
@@ -134,10 +114,8 @@ public class DashboardDaoImpl
                                         "lock_status")
                         );
 
-
                 batches.add(batch);
             }
-
 
         } catch (Exception e) {
 
@@ -146,26 +124,13 @@ public class DashboardDaoImpl
                     e);
         }
 
-
         return batches;
     }
-
-
-    // -------------------------------------------------------------------------
-    // Lock batch
-    // -------------------------------------------------------------------------
 
     @Override
     public boolean lockBatch(
             Long batchId,
             Long userId) {
-
-        if (batchId == null
-                || userId == null) {
-
-            return false;
-        }
-
 
         String lockSql = """
                 INSERT INTO public.inward_batch_lock
@@ -175,28 +140,14 @@ public class DashboardDaoImpl
                     locked_time,
                     lock_status
                 )
-                SELECT
+                VALUES
+                (
                     ?,
                     ?,
                     CURRENT_TIMESTAMP,
                     'LOCKED'
-                WHERE EXISTS (
-                    SELECT 1
-                    FROM public."user" u
-                    INNER JOIN public."role" r
-                        ON r.role_id = u.role_id
-                    WHERE u.user_id = ?
-                      AND u.status = 'ACTIVE'
-                      AND r.role_name = 'INWARD_MAKER'
-                )
-                AND NOT EXISTS (
-                    SELECT 1
-                    FROM public.inward_batch_lock bl
-                    WHERE bl.batch_id = ?
-                      AND bl.lock_status = 'LOCKED'
                 )
                 """;
-
 
         String historySql = """
                 INSERT INTO public.inward_batch_history
@@ -219,46 +170,24 @@ public class DashboardDaoImpl
                 )
                 """;
 
-
         Connection connection = null;
-
 
         try {
 
             connection =
-                    ConnectionPool
-                            .getDataSource()
+                    ConnectionPool.getDataSource()
                             .getConnection();
 
-
-            /*
-             * Lock and history must be committed
-             * together.
-             */
             connection.setAutoCommit(false);
 
-
             /*
-             * -------------------------------------------------------------
-             * 1. Create the batch lock.
-             *
-             * This succeeds only when:
-             *
-             * - user exists
-             * - user is ACTIVE
-             * - user role is INWARD_MAKER
-             * - batch has no current LOCKED record
-             * -------------------------------------------------------------
+             * 1. Create batch lock.
              */
-
-            int lockInserted;
-
-
             try (
                     PreparedStatement statement =
                             connection.prepareStatement(
-                                    lockSql)) {
-
+                                    lockSql)
+            ) {
 
                 statement.setLong(
                         1,
@@ -267,105 +196,173 @@ public class DashboardDaoImpl
                 statement.setLong(
                         2,
                         userId);
-
-                /*
-                 * Verify user.
-                 */
-                statement.setLong(
-                        3,
-                        userId);
-
-                /*
-                 * Check existing lock.
-                 */
-                statement.setLong(
-                        4,
-                        batchId);
-
-
-                lockInserted =
-                        statement.executeUpdate();
-            }
-
-
-            /*
-             * No lock was created.
-             */
-            if (lockInserted == 0) {
-
-                connection.rollback();
-
-                return false;
-            }
-
-
-            /*
-             * -------------------------------------------------------------
-             * 2. Add LOCKED history record.
-             * -------------------------------------------------------------
-             */
-
-            try (
-                    PreparedStatement statement =
-                            connection.prepareStatement(
-                                    historySql)) {
-
-
-                statement.setLong(
-                        1,
-                        batchId);
-
-                statement.setLong(
-                        2,
-                        userId);
-
 
                 statement.executeUpdate();
             }
 
-
             /*
-             * Both operations succeeded.
+             * 2. Add LOCKED to batch history.
+             *
+             * RECEIVED is not updated.
+             * LOCKED is a new history record.
              */
+            try (
+                    PreparedStatement statement =
+                            connection.prepareStatement(
+                                    historySql)
+            ) {
+
+                statement.setLong(
+                        1,
+                        batchId);
+
+                statement.setLong(
+                        2,
+                        userId);
+
+                statement.executeUpdate();
+            }
+
             connection.commit();
 
             return true;
-
 
         } catch (Exception e) {
 
             if (connection != null) {
 
                 try {
-
                     connection.rollback();
-
                 } catch (Exception rollbackException) {
-
                     rollbackException.printStackTrace();
                 }
             }
-
 
             throw new RuntimeException(
                     "Error locking batch: "
                             + batchId,
                     e);
 
-
         } finally {
 
             if (connection != null) {
 
                 try {
-
+                    connection.setAutoCommit(true);
                     connection.close();
-
                 } catch (Exception closeException) {
-
                     closeException.printStackTrace();
                 }
             }
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Update batch workflow status
+    // -------------------------------------------------------------------------
+
+    @Override
+    public boolean updateBatchStatus(
+            Long batchId,
+            String batchStatus,
+            Long userId) {
+
+        if (batchId == null
+                || batchStatus == null
+                || batchStatus.trim().isEmpty()
+                || userId == null) {
+
+            return false;
+        }
+
+        String normalizedStatus =
+                batchStatus.trim().toUpperCase();
+
+        /*
+         * Only the statuses required in the current
+         * Maker flow are allowed here.
+         */
+        if (!"MICR_REPAIR".equals(normalizedStatus)
+                && !"DATA_ENTRY".equals(normalizedStatus)) {
+
+            return false;
+        }
+
+        String historySql = """
+                INSERT INTO public.inward_batch_history
+                (
+                    batch_id,
+                    batch_status,
+                    changed_on,
+                    changed_by,
+                    reason,
+                    remarks
+                )
+                VALUES
+                (
+                    ?,
+                    ?,
+                    CURRENT_TIMESTAMP,
+                    ?,
+                    ?,
+                    ?
+                )
+                """;
+
+        try (
+                Connection connection =
+                        ConnectionPool
+                                .getDataSource()
+                                .getConnection();
+
+                PreparedStatement statement =
+                        connection.prepareStatement(
+                                historySql)) {
+
+            statement.setLong(
+                    1,
+                    batchId);
+
+            statement.setString(
+                    2,
+                    normalizedStatus);
+
+            statement.setLong(
+                    3,
+                    userId);
+
+            if ("MICR_REPAIR".equals(normalizedStatus)) {
+
+                statement.setString(
+                        4,
+                        "MICR validation requires repair");
+
+                statement.setString(
+                        5,
+                        "Batch moved to MICR Repair");
+
+            } else {
+
+                statement.setString(
+                        4,
+                        "MICR validation completed");
+
+                statement.setString(
+                        5,
+                        "Batch moved to Data Entry");
+            }
+
+            int inserted =
+                    statement.executeUpdate();
+
+            return inserted == 1;
+
+        } catch (Exception e) {
+
+            throw new RuntimeException(
+                    "Error updating batch status for Batch ID: "
+                            + batchId,
+                    e);
         }
     }
 }

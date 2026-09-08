@@ -13,7 +13,6 @@ import com.cts.admin.service.UserService;
 public class LoginComposer
         extends GenericForwardComposer<Component> {
 
-    private static final long serialVersionUID = 1L;
 
     private Textbox username;
     private Textbox password;

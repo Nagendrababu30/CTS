@@ -97,7 +97,7 @@ public class LoginComposer
             case "ADMIN":
 
                 Executions.sendRedirect(
-                        "/zul/admin/adminDashboard.zul");
+                        "/zul/admin/admin-session-management.zul");
 
                 break;
 

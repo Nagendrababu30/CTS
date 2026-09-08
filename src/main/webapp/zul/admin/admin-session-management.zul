@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?init class="com.cts.admin.controller.LayoutInit"
+        pageTitle="Session Management"
+        active="session-management"?>
+
+<?init class="org.zkoss.zk.ui.util.Composition"
+        arg0="/zul/common/layout.zul"?>
+
+<zk>
+
+    <style src="/css/admin/sessionManagement.css"/>
+
+    <div
+        self="@define(content)"
+        width="100%"
+        height="100%"
+        sclass="content">
+
+        <!-- ============================================================
+             SESSION MANAGEMENT PAGE
+             ============================================================ -->
+
+        <vlayout
+            id="sessionManagementPage"
+            width="100%"
+            spacing="0"
+            sclass="session-page"
+            apply="com.cts.admin.controller.SessionManagementController">
+
+            <!-- ========================================================
+                 PAGE HEADER
+                 ======================================================== -->
+
+            <label
+                id="sessionPageTitle"
+                sclass="session-page-title"
+                value="Session Management"/>
+
+            <label
+                id="sessionPageSubtitle"
+                sclass="session-page-subtitle"
+                value="Open and close clearing operational windows, control batch intake sessions, and review clearing cycle history"/>
+
+
+            <!-- ========================================================
+                 CURRENT SESSION CARD
+                 ======================================================== -->
+
+            <vlayout
+                id="currentSessionCard"
+                sclass="current-session-card"
+                spacing="0">
+
+                <!-- TOP ROW -->
+                <hlayout
+                    sclass="current-session-top"
+                    spacing="0"
+                    valign="middle">
+
+                    <label
+                        sclass="current-session-label"
+                        value="CURRENT SESSION"/>
+
+                    <label
+                        id="sessionStatusBadge"
+                        sclass="status-badge status-inactive"
+                        value="NO ACTIVE SESSION"/>
+
+                </hlayout>
+
+
+                <!-- ====================================================
+                     CLOSED STATE
+                     ==================================================== -->
+
+                <vlayout
+                    id="closedSessionContent"
+                    sclass="closed-session-content"
+                    spacing="0">
+
+                    <label
+                        sclass="closed-session-title"
+                        value="Clearing Window Closed"/>
+
+                    <label
+                        sclass="closed-session-description"
+                        value="Start an internal processing session to allow outward work to begin."/>
+
+                    <button
+                        id="beginSessionButton"
+                        sclass="begin-session-button"
+                        label="&#x25B6;   Begin session"/>
+
+                </vlayout>
+
+
+                <!-- ====================================================
+                     ACTIVE STATE
+                     ==================================================== -->
+
+                <vlayout
+                    id="activeSessionContent"
+                    sclass="active-session-content"
+                    spacing="0"
+                    visible="false">
+
+                    <label
+                        id="activeSessionName"
+                        sclass="active-session-name"
+                        value=""/>
+
+                    <label
+                        id="activeSessionId"
+                        sclass="session-detail"
+                        value=""/>
+
+                    <label
+                        id="activeSessionStartedAt"
+                        sclass="session-detail"
+                        value=""/>
+
+                    <label
+                        id="activeSessionStartedBy"
+                        sclass="session-detail"
+                        value=""/>
+
+                    <button
+                        id="endSessionButton"
+                        sclass="end-session-button"
+                        label="&#x25A0;   End Current Session"/>
+
+                </vlayout>
+
+            </vlayout>
+
+
+            <!-- ========================================================
+                 SESSION HISTORY CARD
+                 ======================================================== -->
+
+            <vlayout
+                sclass="history-card"
+                spacing="0">
+
+                <hlayout
+                    sclass="history-header"
+                    spacing="0"
+                    valign="middle">
+
+                    <label
+                        sclass="history-title"
+                        value="Session History"/>
+
+                </hlayout>
+
+                <listbox
+                    id="sessionHistoryListbox"
+                    sclass="history-listbox"
+                    sizedByContent="false"
+                    span="true"
+                    emptyMessage="No session history available">
+
+                    <listhead sclass="history-listhead">
+
+                        <listheader label="Session ID"  width="12%"/>
+                        <listheader label="Start Date"  width="16%"/>
+                        <listheader label="Start Time"  width="14%"/>
+                        <listheader label="End Date"    width="16%"/>
+                        <listheader label="End Time"    width="14%"/>
+                        <listheader label="Status"      width="12%"/>
+
+                    </listhead>
+
+                </listbox>
+
+                <paging
+                    id="sessionHistoryPaging"
+                    pageSize="5"
+                    detailed="true"
+                    sclass="session-history-paging"/>
+
+            </vlayout>
+
+
+            <!-- ========================================================
+                 END SESSION CONFIRMATION MODAL
+                 ======================================================== -->
+
+            <window
+                id="endSessionModal"
+                sclass="end-session-modal"
+                border="none"
+                closable="false"
+                sizable="false"
+                position="center"
+                mode="modal"
+                visible="false">
+
+                <vlayout spacing="0">
+
+                    <!-- MODAL HEADER -->
+                    <hlayout
+                        sclass="modal-header"
+                        spacing="0"
+                        valign="middle">
+
+                        <label
+                            sclass="modal-title"
+                            hflex="1"
+                            value="Confirm End Session"/>
+
+                        <button
+                            id="modalCloseButton"
+                            sclass="modal-close"
+                            label="&#x00D7;"/>
+
+                    </hlayout>
+
+                    <!-- MODAL BODY -->
+                    <vlayout
+                        sclass="modal-body"
+                        spacing="0">
+
+                        <label
+                            id="modalQuestion"
+                            sclass="modal-question"
+                            value="Are you sure you want to end the active session?"/>
+
+                        <label
+                            sclass="modal-description"
+                            value="Ending the session will close the clearing window for current intake. Completed batches will remain tracked and logged."/>
+
+                    </vlayout>
+
+                    <!-- MODAL FOOTER -->
+                    <hlayout
+                        sclass="modal-footer"
+                        spacing="12px"
+                        valign="middle">
+
+                        <button
+                            id="modalCancelButton"
+                            sclass="modal-cancel"
+                            label="Cancel"/>
+
+                        <button
+                            id="modalConfirmButton"
+                            sclass="modal-confirm"
+                            label="Confirm &amp; End Session"/>
+
+                    </hlayout>
+
+                </vlayout>
+
+            </window>
+
+        </vlayout>
+
+    </div>
+
+</zk>

@@ -201,6 +201,19 @@
 
 
             <a
+                href="/zul/admin/admin-session-management.zul"
+                sclass="${arg.active eq 'session-management' ? 'menu-item active-menu' : 'menu-item'}">
+
+                <n:i class="fa-solid fa-clock menu-icon"></n:i>
+
+                <label
+                    value="Session Management"
+                    sclass="menu-label" />
+
+            </a>
+
+
+            <a
                 href="/zul/admin/auditLogs.zul"
                 sclass="${arg.active eq 'audit-logs' ? 'menu-item active-menu' : 'menu-item'}">
 

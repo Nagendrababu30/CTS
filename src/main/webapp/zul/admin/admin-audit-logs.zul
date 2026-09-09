@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?init class="com.cts.admin.controller.LayoutInit"
+        pageTitle="Audit Logs"
+        active="audit-logs"?>
+
+<?init class="org.zkoss.zk.ui.util.Composition"
+        arg0="/zul/common/layout.zul"?>
+
+<zk>
+
+    <style src="/css/admin/auditLog.css"/>
+
+    <div
+        self="@define(content)"
+        width="100%"
+        height="100%"
+        sclass="content">
+
+        <vlayout
+            id="auditLogPage"
+            width="100%"
+            spacing="0"
+            sclass="audit-page"
+            apply="com.cts.admin.controller.AuditLogController">
+
+            <!-- PAGE HEADER -->
+            <div sclass="audit-page-header">
+                <div sclass="audit-header-left">
+                    <label sclass="audit-page-title"    value="Audit Logs"/>
+                    <label sclass="audit-page-subtitle" value="User login and logout activity log"/>
+                </div>
+                <div sclass="audit-readonly-badge">
+                    <label sclass="audit-readonly-label" value="&#x25CE; Read-Only"/>
+                </div>
+            </div>
+
+            <!-- FILTER CARD -->
+            <div sclass="audit-filter-card">
+
+                <div sclass="audit-search-box">
+                    <label sclass="audit-search-icon" value="&#x2315;"/>
+                    <textbox
+                        id="auditSearchTextbox"
+                        hflex="1"
+                        height="38px"
+                        placeholder="Search by username or user ID..."
+                        sclass="audit-search-textbox"
+                        style="border:none !important; box-shadow:none !important; outline:none !important; background:transparent !important;"/>
+                </div>
+
+                <button
+                    id="auditSearchButton"
+                    sclass="audit-search-btn"
+                    label="Search"
+                    iconSclass="z-icon-search"/>
+
+                <combobox
+                    id="auditRoleCombobox"
+                    readonly="true"
+                    value="All Roles"
+                    sclass="audit-filter-combobox audit-roles-combobox">
+                    <comboitem label="All Roles"/>
+                    <comboitem label="INWARD_MAKER"/>
+                    <comboitem label="INWARD_CHECKER"/>
+                    <comboitem label="OUTWARD_MAKER"/>
+                    <comboitem label="OUTWARD_CHECKER"/>
+                    <comboitem label="CAPTURE_OPERATOR"/>
+                    <comboitem label="ADMIN"/>
+                </combobox>
+
+            </div>
+
+            <!-- AUDIT TRAIL CARD -->
+            <vlayout spacing="0" sclass="audit-trail-card">
+
+                <label sclass="audit-trail-title" value="User Session Records"/>
+
+                <listbox
+                    id="auditLogListbox"
+                    sclass="audit-listbox"
+                    sizedByContent="false"
+                    span="true"
+                    emptyMessage="No audit log records found">
+
+                    <listhead sizable="false" menupopup="none">
+
+                        <listheader label="User ID"  width="20%"/>
+                        <listheader label="Role"     width="28%"/>
+                        <listheader label="Login"    width="26%"/>
+                        <listheader label="Logout"   width="26%"/>
+
+                    </listhead>
+
+                </listbox>
+
+                <paging
+                    id="auditLogPaging"
+                    pageSize="10"
+                    detailed="true"
+                    sclass="audit-paging"/>
+
+            </vlayout>
+
+        </vlayout>
+
+    </div>
+
+</zk>

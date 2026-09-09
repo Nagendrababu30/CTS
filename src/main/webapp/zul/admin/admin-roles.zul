@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?init class="com.cts.admin.controller.LayoutInit"
+        pageTitle="Roles"
+        active="role-management"?>
+
+<?init class="org.zkoss.zk.ui.util.Composition"
+        arg0="/zul/common/layout.zul"?>
+
+<zk>
+
+    <style src="/css/admin/roles.css"/>
+
+    <div
+        self="@define(content)"
+        width="100%"
+        height="100%"
+        sclass="content">
+
+        <vlayout
+            id="roleManagementPage"
+            width="100%"
+            spacing="0"
+            sclass="role-management-page"
+            apply="com.cts.admin.controller.RoleController">
+
+            <!-- PAGE HEADER -->
+            <vlayout
+                id="rolePageHeader"
+                spacing="0"
+                sclass="role-page-header">
+
+                <label
+                    id="roleManagementTitle"
+                    value="Roles"
+                    sclass="role-page-title"/>
+
+                <label
+                    id="roleManagementSubtitle"
+                    value="Configured operational roles and their respective module permissions in the CTS application"
+                    sclass="role-page-subtitle"/>
+
+            </vlayout>
+
+            <!-- SYSTEM ROLES CARD -->
+            <vlayout
+                id="systemRolesCard"
+                width="100%"
+                spacing="0"
+                sclass="system-roles-card">
+
+                <vlayout
+                    id="systemRolesHeader"
+                    spacing="0"
+                    sclass="system-roles-header">
+
+                    <label
+                        id="systemRolesTitle"
+                        value="System Roles"
+                        sclass="system-roles-title"/>
+
+                </vlayout>
+
+                <listbox
+                    id="roleListbox"
+                    sclass="role-listbox"
+                    sizedByContent="false"
+                    span="true"
+                    emptyMessage="No roles available">
+
+                    <listhead
+                        id="roleListHead"
+                        sizable="false"
+                        menupopup="none">
+
+                        <listheader
+                            label="Role Name"
+                            width="25%"/>
+
+                        <listheader
+                            label="Description"
+                            width="55%"/>
+
+                        <listheader
+                            label="Status"
+                            width="20%"
+                            align="center"/>
+
+                    </listhead>
+
+                </listbox>
+
+            </vlayout>
+
+        </vlayout>
+
+    </div>
+
+</zk>

@@ -1,9 +1,13 @@
 package com.cts.inward.controller;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Datebox;
@@ -12,9 +16,11 @@ import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
 
-import com.cts.inward.dao.ChequeDao;
 import com.cts.inward.dao.ChequeDaoImpl;
 import com.cts.inward.model.InwardCheque;
+import com.cts.inward.service.BatchService;
+import com.cts.inward.service.ChequeService;
+import com.cts.inward.service.ChequeServiceImpl;
 
 public class DataEntryFormController extends GenericForwardComposer<Component> {
 
@@ -45,33 +51,25 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 
 	private Datebox dtChequeDate;
 
-	// =========================================================
 	// DATA
-	// =========================================================
-
 	private long batchId;
-
 	private List<InwardCheque> cheques;
-
 	private int currentIndex = 0;
 
-	// =========================================================
-	// DAO
-	// =========================================================
+	// SERVICE
+	private ChequeService chequeService;
+	private BatchService batchService;
 
-	private ChequeDao chequeDao;
-
-	// =========================================================
 	// PAGE INITIALIZATION
-	// =========================================================
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
 
 		super.doAfterCompose(comp);
 
-		chequeDao = ChequeDaoImpl.of();
+		/* Controller talks to Service. Service talks to DAO. */
 
+		chequeService = ChequeServiceImpl.of(ChequeDaoImpl.of());
 		String batchIdParameter = Executions.getCurrent().getParameter("batchId");
 
 		if (batchIdParameter == null || batchIdParameter.trim().isEmpty()) {
@@ -107,15 +105,15 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		}
 	}
 
-	// =========================================================
-	// LOAD CHEQUES FOR SELECTED BATCH
-	// =========================================================
+	// LOAD CHEQUES
 
 	private void loadCheques() {
-
 		try {
 
-			cheques = chequeDao.getChequesForBatch(String.valueOf(batchId));
+			/*
+			 * Controller -> Service
+			 */
+			cheques = chequeService.getChequesForBatch(String.valueOf(batchId));
 
 		} catch (RuntimeException e) {
 
@@ -133,10 +131,12 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	private void displayCurrentCheque() {
 
 		if (cheques == null || cheques.isEmpty()) {
+
 			return;
 		}
 
 		if (currentIndex < 0 || currentIndex >= cheques.size()) {
+
 			return;
 		}
 
@@ -168,11 +168,11 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 
 		if (cheque.getAmount() != null) {
 
-		    decAmount.setValue(cheque.getAmount());
+			decAmount.setValue(cheque.getAmount());
 
 		} else {
 
-		    decAmount.setRawValue("");
+			decAmount.setRawValue("");
 		}
 
 		// -----------------------------------------------------
@@ -208,6 +208,7 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	public void onClick$btnPrev() {
 
 		if (cheques == null || cheques.isEmpty()) {
+
 			return;
 		}
 
@@ -222,29 +223,122 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	// =========================================================
 	// SAVE & NEXT
 	// =========================================================
-	//
-	// For now this only moves to the next cheque.
-	// Database save will be implemented after the
-	// Data Entry update DAO/service is created.
-	//
-	// =========================================================
-
 	public void onClick$btnSaveNext() {
 
 		if (cheques == null || cheques.isEmpty()) {
+
 			return;
 		}
 
-		if (currentIndex < cheques.size() - 1) {
+		// ---------------------------------------------------------
+		// Validate current cheque
+		// ---------------------------------------------------------
 
-			currentIndex++;
+		String accountNumber = txtAccountNo.getValue();
 
-			displayCurrentCheque();
+		BigDecimal amount = decAmount.getValue();
 
-		} else {
+		Date chequeDateValue = dtChequeDate.getValue();
 
-			Messagebox.show("You have reached the last cheque in this batch.", "Data Entry", Messagebox.OK,
-					Messagebox.INFORMATION);
+		if (accountNumber == null || accountNumber.trim().isEmpty()) {
+
+			Messagebox.show("Account Number is required.", "Data Entry", Messagebox.OK, Messagebox.EXCLAMATION);
+
+			return;
+		}
+
+		if (amount == null) {
+
+			Messagebox.show("Cheque Amount is required.", "Data Entry", Messagebox.OK, Messagebox.EXCLAMATION);
+
+			return;
+		}
+
+		if (chequeDateValue == null) {
+
+			Messagebox.show("Cheque Date is required.", "Data Entry", Messagebox.OK, Messagebox.EXCLAMATION);
+
+			return;
+		}
+
+		// ---------------------------------------------------------
+		// Get logged-in user
+		// ---------------------------------------------------------
+
+		Session session = Executions.getCurrent().getSession();
+
+		Object userIdObject = session.getAttribute("userId");
+
+		if (userIdObject == null) {
+
+			Messagebox.show("User session has expired. Please login again.", "Data Entry", Messagebox.OK,
+					Messagebox.ERROR);
+
+			return;
+		}
+
+		long userId = ((Number) userIdObject).longValue();
+
+		// ---------------------------------------------------------
+		// Current cheque
+		// ---------------------------------------------------------
+
+		InwardCheque currentCheque = cheques.get(currentIndex);
+
+		LocalDate chequeDate = new java.sql.Date(chequeDateValue.getTime()).toLocalDate();
+
+		try {
+
+			// -----------------------------------------------------
+			// 1. Save cheque data
+			// 2. Mark cheque DATA_ENTRY_COMPLETED
+			// -----------------------------------------------------
+
+			chequeService.updateDataEntryCheque(currentCheque.getChequeNumber(), batchId, accountNumber.trim(), amount,
+					chequeDate, userId);
+
+			// -----------------------------------------------------
+			// If this is NOT the last cheque
+			// -----------------------------------------------------
+
+			if (currentIndex < cheques.size() - 1) {
+
+				currentIndex++;
+
+				displayCurrentCheque();
+
+				return;
+			}
+
+			// -----------------------------------------------------
+			// This was the LAST cheque
+			// -----------------------------------------------------
+
+			boolean completed = batchService.completeDataEntry(batchId, userId);
+
+			if (!completed) {
+
+				Messagebox.show(
+						"The batch cannot be submitted because " + "one or more cheques are still pending Data Entry.",
+						"Data Entry", Messagebox.OK, Messagebox.EXCLAMATION);
+
+				return;
+			}
+
+			// -----------------------------------------------------
+			// Batch is now DATA_ENTRY_COMPLETED
+			// -----------------------------------------------------
+
+			Messagebox.show("Batch " + batchId + " has been completed and is ready for Checker.",
+					"Data Entry Completed", Messagebox.OK, Messagebox.INFORMATION,
+					event -> Executions.sendRedirect("/zul/inward-maker/send-to-checker.zul"));
+
+		} catch (RuntimeException e) {
+
+			e.printStackTrace();
+
+			Messagebox.show("Unable to save Data Entry for cheque " + currentCheque.getChequeNumber() + ".",
+					"Data Entry", Messagebox.OK, Messagebox.ERROR);
 		}
 	}
 
@@ -278,7 +372,7 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		btnPrev.setDisabled(currentIndex == 0);
 
 		// -----------------------------------------------------
-		// SAVE & NEXT
+		// SAVE / SAVE & NEXT
 		// -----------------------------------------------------
 
 		if (currentIndex == cheques.size() - 1) {

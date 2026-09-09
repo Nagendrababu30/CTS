@@ -77,4 +77,11 @@ public class ChequeServiceImpl
 
 		chequeDao.updateCheque(chequeNumber, batchId, accountNumber, amount, chequeDate);
 	}
+	
+	@Override
+	public void updateDataEntryCheque(String chequeNumber, long batchId, String accountNumber, BigDecimal amount,
+			LocalDate chequeDate, long userId) {
+
+		chequeDao.updateDataEntryCheque(chequeNumber, batchId, accountNumber, amount, chequeDate, userId);
+	}
 }

@@ -19,5 +19,7 @@ public interface BatchService {
 	void sendToChecker(String batchId, String userId);
 	
 	void saveBatch(NpciBatchData batchData);
+
+	boolean completeDataEntry(long batchId, long userId);
 	
 }

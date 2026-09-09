@@ -6,8 +6,9 @@ import com.cts.inward.model.NpciBatchData;
 
 public interface CheckerReportDao {
    
-    List<NpciBatchData> getCompletedBatches();
-
-   
-    Map<String, Object> getCheckerReportDetails(Long batchId);
+    
+    List<Map<String, Object>> getRrfReportData();
+    
+    
+    List<Map<String, Object>> getApprovedReportData();
 }

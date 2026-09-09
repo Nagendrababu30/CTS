@@ -24,81 +24,119 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
         return new CheckerReportDaoImpl(ConnectionPool.getDataSource());
     }
 
+   
     @Override
-    public List<NpciBatchData> getCompletedBatches() {
-        // Query to filter for 'COMPLETED' status with case/whitespace safety
+    public List<Map<String, Object>> getRrfReportData() {
         String sql = """
                 SELECT 
-                    b.batch_id, 
-                    b.file_id, 
-                    b.presenting_bank_name, 
-                    b.total_cheques
-                FROM inward_batch b
-                WHERE UPPER(TRIM((
-                    SELECT h.batch_status
-                    FROM inward_batch_history h
-                    WHERE h.batch_id = b.batch_id
-                    ORDER BY h.changed_on DESC, h.batch_history_id DESC
+                    c.cheque_number as cheque_no,
+                    c.batch_id,
+                    c.amount,
+                    c.account_number,
+                    c.drawer_name,
+                    c.cheque_date,
+                    b.presenting_bank_name,
+                    (
+                        SELECT h.return_reason_code 
+                        FROM inward_cheque_status_history h 
+                        WHERE h.cheque_number = c.cheque_number 
+                        ORDER BY h.status_history_id DESC 
+                        LIMIT 1
+                    ) as return_reason,
+                    (
+                        SELECT h.remarks 
+                        FROM inward_cheque_status_history h 
+                        WHERE h.cheque_number = c.cheque_number 
+                        ORDER BY h.status_history_id DESC 
+                        LIMIT 1
+                    ) as remark
+                FROM inward_cheque c
+                JOIN inward_batch b ON c.batch_id = b.batch_id
+                WHERE (
+                    SELECT UPPER(TRIM(h.status))
+                    FROM inward_cheque_status_history h 
+                    WHERE h.cheque_number = c.cheque_number 
+                    ORDER BY h.status_history_id DESC 
                     LIMIT 1
-                ))) = 'COMPLETED'
-                ORDER BY b.batch_id
+                ) = 'REJECTED'
+                ORDER BY c.batch_id, c.cheque_number
                 """;
 
-        List<NpciBatchData> batches = new ArrayList<>();
-        
-        try (
-            Connection connection = dataSource.getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql);
-            ResultSet resultSet = statement.executeQuery()
-        ) {
-            while (resultSet.next()) {
-                NpciBatchData batch = new NpciBatchData(
-                        resultSet.getLong("batch_id"),
-                        resultSet.getLong("file_id"),
-                        resultSet.getString("presenting_bank_name"),
-                        resultSet.getInt("total_cheques")
-                );
-                batches.add(batch);
+        List<Map<String, Object>> rrfList = new ArrayList<>();
+
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet rs = statement.executeQuery()) {
+             
+            while (rs.next()) {
+                Map<String, Object> row = new HashMap<>();
+                row.put("batchId", String.format("BATCH%03d", rs.getLong("batch_id")));
+                row.put("chequeNo", rs.getString("cheque_no"));
+                row.put("amount", rs.getBigDecimal("amount"));
+                row.put("accountNumber", rs.getString("account_number")); // exact column name
+                row.put("payeeAccountNumber", ""); // static fallback since column doesn't exist
+                row.put("payeeName", "");          // static fallback since column doesn't exist
+                row.put("drawerName", rs.getString("drawer_name"));
+                row.put("bankName", rs.getString("presenting_bank_name"));
+                row.put("chequeDate", rs.getDate("cheque_date")); // fetched from database schema
+                row.put("returnReason", rs.getString("return_reason"));
+                row.put("remark", rs.getString("remark"));
+                
+                rrfList.add(row);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Error retrieving completed batches for report: " + e.getMessage(), e);
+            throw new RuntimeException("DB Error fetching RRF data: " + e.getMessage(), e);
         }
-
-        return batches;
+        return rrfList;
     }
     
     @Override
-    public Map<String, Object> getCheckerReportDetails(Long batchId) {
+    public List<Map<String, Object>> getApprovedReportData() {
         String sql = """
                 SELECT 
-                    b.batch_id,
-                    b.total_cheques,
-                    (SELECT COUNT(*) FROM inward_cheque c WHERE c.batch_id = b.batch_id AND c.status = 'APPROVED') as approved_count,
-                    (SELECT COUNT(*) FROM inward_cheque c WHERE c.batch_id = b.batch_id AND c.status = 'REJECTED') as rejected_count
-                FROM inward_batch b
-                WHERE b.batch_id = ?
+                    c.cheque_number as cheque_no,
+                    c.batch_id,
+                    c.amount,
+                    c.account_number,
+                    c.drawer_name,
+                    c.cheque_date,
+                    b.presenting_bank_name
+                FROM inward_cheque c
+                JOIN inward_batch b ON c.batch_id = b.batch_id
+                WHERE (
+                    SELECT UPPER(TRIM(h.status))
+                    FROM inward_cheque_status_history h 
+                    WHERE h.cheque_number = c.cheque_number 
+                    ORDER BY h.status_history_id DESC 
+                    LIMIT 1
+                ) = 'APPROVED'
+                ORDER BY c.batch_id, c.cheque_number
                 """;
 
-        Map<String, Object> params = new HashMap<>();
+        List<Map<String, Object>> approvedList = new ArrayList<>();
 
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet rs = statement.executeQuery()) {
              
-            statement.setLong(1, batchId);
-            
-            try (ResultSet rs = statement.executeQuery()) {
-                if (rs.next()) {
-                    params.put("BATCH_ID", String.format("BATCH%03d", rs.getLong("batch_id")));
-                    params.put("TOTAL_CHEQUES", rs.getInt("total_cheques"));
-                    params.put("APPROVED_CHEQUES", rs.getInt("approved_count"));
-                    params.put("REJECTED_CHEQUES", rs.getInt("rejected_count"));
-                }
+            while (rs.next()) {
+                Map<String, Object> row = new HashMap<>();
+                row.put("batchId", String.format("BATCH%03d", rs.getLong("batch_id")));
+                row.put("chequeNo", rs.getString("cheque_no"));
+                row.put("amount", rs.getBigDecimal("amount"));
+                row.put("accountNumber", rs.getString("account_number"));
+                row.put("payeeAccountNumber", ""); // static fallback since column doesn't exist
+                row.put("payeeName", "");          // static fallback since column doesn't exist
+                row.put("drawerName", rs.getString("drawer_name"));
+                row.put("bankName", rs.getString("presenting_bank_name"));
+                row.put("chequeDate", rs.getDate("cheque_date"));
+                approvedList.add(row);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("DB Error: " + e.getMessage(), e);
+            throw new RuntimeException("DB Error fetching Approved data: " + e.getMessage(), e);
         }
-        return params;
+        return approvedList;
     }
 }

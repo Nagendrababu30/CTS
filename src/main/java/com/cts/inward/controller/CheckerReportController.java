@@ -2,6 +2,7 @@ package com.cts.inward.controller;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -31,75 +32,119 @@ public class CheckerReportController extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
 
-    private Rows batchRows; 
+    
+    private Button generateRrfBtn;
+    private Button generateApprovedBtn;
     private CheckerReportDao reportDao = CheckerReportDaoImpl.of();
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
-        loadReportData();
+        initRrfEvent();
+        initApprovedEvent();
     }
 
-    private void loadReportData() {
-        try {
-            batchRows.getChildren().clear();
+    
+    private void initRrfEvent() {
+        if (generateRrfBtn != null) {
+            generateRrfBtn.addEventListener(Events.ON_CLICK, e -> {
+                try {
+                    // 1. Fetch expanded RRF data from database
+                    List<Map<String, Object>> rrfData = reportDao.getRrfReportData();
 
-            List<NpciBatchData> completedBatches = reportDao.getCompletedBatches();
-            
-            for (NpciBatchData batch : completedBatches) {
-                Row row = new Row();
-                
-                String formattedBatchId = String.format("BATCH%03d", batch.getBatchId());
-                Label idLbl = new Label(formattedBatchId);
-                idLbl.setSclass("report-batch-id"); 
-                row.appendChild(idLbl);
-               
-                row.appendChild(new Label(String.valueOf(batch.getTotalCheques())));
-
-                Button actionBtn = new Button("Generate Report");
-                actionBtn.setSclass("btn-generate-report");
-                
-                actionBtn.addEventListener(Events.ON_CLICK, e -> {
-                    try {
-                        // 1. Fetch exact metrics (Approved and Rejected counts) from DB
-                        Map<String, Object> reportParams = reportDao.getCheckerReportDetails(batch.getBatchId());
-                        
-                        
-
-                        // 2. Load Jasper template from WEB-INF/reports/checker_batch_summary.jrxml
-                        InputStream jrxmlStream = Sessions.getCurrent().getWebApp()
-                                                  .getResourceAsStream("/WEB-INF/reports/checker_batch_summary.jrxml");
-                        
-                        if (jrxmlStream == null) {
-                            Messagebox.show("Report template not found in WEB-INF/reports/", "Error", Messagebox.OK, Messagebox.ERROR);
-                            return;
-                        }
-
-                        // 3. Compile and Fill the Jasper Report
-                        JasperReport jasperReport = JasperCompileManager.compileReport(jrxmlStream);
-                        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, reportParams, new JREmptyDataSource());
-
-                        // 4. Export to PDF stream
-                        ByteArrayOutputStream pdfOutputStream = new ByteArrayOutputStream();
-                        JasperExportManager.exportReportToPdfStream(jasperPrint, pdfOutputStream);
-
-                        // 5. Trigger browser download
-                        String fileName = formattedBatchId + "_Checker_Summary.pdf";
-                        Filedownload.save(pdfOutputStream.toByteArray(), "application/pdf", fileName);
-
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                        Messagebox.show("Error generating report: " + ex.getMessage(), "Error", Messagebox.OK, Messagebox.ERROR);
+                    if (rrfData.isEmpty()) {
+                        Messagebox.show("No returned cheques found for RRF generation.", "Information", Messagebox.OK, Messagebox.EXCLAMATION);
+                        return;
                     }
-                });
 
-                row.appendChild(actionBtn);
-                batchRows.appendChild(row);
-            }
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            Messagebox.show("Error loading report data: " + e.getMessage(), "Error", Messagebox.OK, Messagebox.ERROR);
+                    // 2. Build the detailed XML structure dynamically
+                    StringBuilder xmlBuilder = new StringBuilder();
+                    xmlBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                    xmlBuilder.append("<RRFDocument>\n");
+                    xmlBuilder.append("    <Header>\n");
+                    xmlBuilder.append("        <FileDescription>Return Reason File (RRF) - CBS Failures</FileDescription>\n");
+                    xmlBuilder.append("        <TotalRecords>").append(rrfData.size()).append("</TotalRecords>\n");
+                    xmlBuilder.append("    </Header>\n");
+                    xmlBuilder.append("    <ReturnedCheques>\n");
+
+                    for (Map<String, Object> item : rrfData) {
+                        xmlBuilder.append("        <Cheque>\n");
+                        xmlBuilder.append("            <BatchID>").append(item.get("batchId")).append("</BatchID>\n");
+                        xmlBuilder.append("            <ChequeNumber>").append(item.get("chequeNo") != null ? item.get("chequeNo") : "").append("</ChequeNumber>\n");
+                        xmlBuilder.append("            <ChequeAmount>").append(item.get("amount") != null ? item.get("amount") : "").append("</ChequeAmount>\n");
+                        xmlBuilder.append("            <DrawerAccountNumber>").append(item.get("drawerAccountNo") != null ? item.get("drawerAccountNo") : "").append("</DrawerAccountNumber>\n");
+                        xmlBuilder.append("            <PayeeAccountNumber>").append(item.get("payeeAccountNo") != null ? item.get("payeeAccountNo") : "").append("</PayeeAccountNumber>\n");
+                        xmlBuilder.append("            <PayeeName>").append(item.get("payeeName") != null ? item.get("payeeName") : "").append("</PayeeName>\n");
+                        xmlBuilder.append("            <DrawerName>").append(item.get("drawerName") != null ? item.get("drawerName") : "").append("</DrawerName>\n");
+                        xmlBuilder.append("            <PresentingBank>").append(item.get("bankName") != null ? item.get("bankName") : "").append("</PresentingBank>\n");
+                        xmlBuilder.append("            <ChequeDate>").append(item.get("chequeDate") != null ? item.get("chequeDate") : "").append("</ChequeDate>\n");
+                        xmlBuilder.append("            <ReturnReason>").append(item.get("returnReason") != null ? item.get("returnReason") : "CBS_FAILURE").append("</ReturnReason>\n");
+                        xmlBuilder.append("            <Remark>").append(item.get("remark") != null ? item.get("remark") : "").append("</Remark>\n");
+                        xmlBuilder.append("        </Cheque>\n");
+                    }
+
+                    xmlBuilder.append("    </ReturnedCheques>\n");
+                    xmlBuilder.append("</RRFDocument>");
+
+                    // 3. Trigger browser download as .xml file
+                    byte[] xmlBytes = xmlBuilder.toString().getBytes(StandardCharsets.UTF_8);
+                    String fileName = "RRF_Return_Report_" + System.currentTimeMillis() + ".xml";
+                    Filedownload.save(xmlBytes, "application/xml", fileName);
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    Messagebox.show("Error generating RRF XML: " + ex.getMessage(), "Error", Messagebox.OK, Messagebox.ERROR);
+                }
+            });
+        }
+    }
+    
+    private void initApprovedEvent() {
+        if (generateApprovedBtn != null) {
+            generateApprovedBtn.addEventListener(Events.ON_CLICK, e -> {
+                try {
+                    List<Map<String, Object>> approvedData = reportDao.getApprovedReportData();
+
+                    if (approvedData.isEmpty()) {
+                        Messagebox.show("No approved cheques found for report generation.", "Information", Messagebox.OK, Messagebox.EXCLAMATION);
+                        return;
+                    }
+
+                    StringBuilder xmlBuilder = new StringBuilder();
+                    xmlBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+                    xmlBuilder.append("<ApprovedChequesDocument>\n");
+                    xmlBuilder.append("    <Header>\n");
+                    xmlBuilder.append("        <FileDescription>Approved Cheques Report</FileDescription>\n");
+                    xmlBuilder.append("        <TotalRecords>").append(approvedData.size()).append("</TotalRecords>\n");
+                    xmlBuilder.append("    </Header>\n");
+                    xmlBuilder.append("    <Cheques>\n");
+
+                    for (Map<String, Object> item : approvedData) {
+                        xmlBuilder.append("        <Cheque>\n");
+                        xmlBuilder.append("            <BatchID>").append(item.get("batchId")).append("</BatchID>\n");
+                        xmlBuilder.append("            <ChequeNumber>").append(item.get("chequeNo") != null ? item.get("chequeNo") : "").append("</ChequeNumber>\n");
+                        xmlBuilder.append("            <ChequeAmount>").append(item.get("amount") != null ? item.get("amount") : "").append("</ChequeAmount>\n");
+                        xmlBuilder.append("            <AccountNumber>").append(item.get("accountNumber") != null ? item.get("accountNumber") : "").append("</AccountNumber>\n");
+                        xmlBuilder.append("            <DrawerName>").append(item.get("drawerName") != null ? item.get("drawerName") : "").append("</DrawerName>\n");
+                        xmlBuilder.append("            <PayeeAccountNumber>").append(item.get("payeeAccountNo") != null ? item.get("payeeAccountNo") : "").append("</PayeeAccountNumber>\n");
+                        xmlBuilder.append("            <PayeeName>").append(item.get("payeeName") != null ? item.get("payeeName") : "").append("</PayeeName>\n");
+                        xmlBuilder.append("            <PresentingBank>").append(item.get("bankName") != null ? item.get("bankName") : "").append("</PresentingBank>\n");
+                        xmlBuilder.append("            <ChequeDate>").append(item.get("chequeDate") != null ? item.get("chequeDate") : "").append("</ChequeDate>\n");
+                        xmlBuilder.append("        </Cheque>\n");
+                    }
+
+                    xmlBuilder.append("    </Cheques>\n");
+                    xmlBuilder.append("</ApprovedChequesDocument>");
+
+                    byte[] xmlBytes = xmlBuilder.toString().getBytes(StandardCharsets.UTF_8);
+                    String fileName = "Approved_Cheques_Report_" + System.currentTimeMillis() + ".xml";
+                    Filedownload.save(xmlBytes, "application/xml", fileName);
+
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    Messagebox.show("Error generating Approved XML: " + ex.getMessage(), "Error", Messagebox.OK, Messagebox.ERROR);
+                }
+            });
         }
     }
 }

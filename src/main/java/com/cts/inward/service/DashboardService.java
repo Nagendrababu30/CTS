@@ -9,5 +9,10 @@ public interface DashboardService {
 	 List<DashboardBatchDto> getDashboardBatches();
 
 	 boolean lockBatch(Long batchId, Long userId);
+	 
+	 public boolean updateBatchStatus(
+	            Long batchId,
+	            String batchStatus,
+	            Long userId);
 	
 }

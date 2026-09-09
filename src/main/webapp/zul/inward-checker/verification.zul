@@ -6,18 +6,495 @@
 
 <?init class="org.zkoss.zk.ui.util.Composition"
         arg0="/zul/common/layout.zul"?>
+        
 
 <zk>
 
+    <style>
+
+        /* =====================================================
+           PAGE CONTENT
+           ===================================================== */
+
+        .verify-content {
+            width: 100%;
+            height: 100%;
+            padding: 22px 18px;
+            background: #f4f7fd;
+        }
+
+        /* =====================================================
+           PAGE HEADER
+           ===================================================== */
+
+        .page-header {
+            width: 100%;
+            margin-bottom: 18px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .page-description {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        /* =====================================================
+           CARD
+           ===================================================== */
+
+        .batch-card {
+            width: 100%;
+            padding: 16px;
+            background: #ffffff;
+            border: 1px solid #e1e5eb;
+            border-radius: 6px;
+        }
+
+        /* =====================================================
+           SEARCH
+           ===================================================== */
+
+        .search-row {
+            width: 100%;
+            height: 40px;
+            margin-bottom: 12px;
+        }
+
+        .search-box {
+            width: 178px;
+            height: 27px;
+            border: 1px solid #dfe3e8;
+            border-radius: 4px;
+            background: #ffffff;
+            padding: 0 8px;
+        }
+
+        .search-icon {
+            width: 18px;
+            color: #8b939f;
+            font-size: 14px;
+            text-align: center;
+            line-height: 25px;
+        }
+
+        .search-input {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            font-size: 11px;
+            color: #374151;
+        }
+
+        /* =====================================================
+           TABLE
+           ===================================================== */
+
+        .batch-table {
+            width: 100%;
+            border: 1px solid #e1e5eb;
+            border-radius: 6px;
+            overflow: hidden;
+            background: #ffffff;
+        }
+
+        /* =====================================================
+           TABLE HEADER
+           ===================================================== */
+
+        .table-header {
+            width: 100%;
+            height: 35px;
+            background: #f8f9fb;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .table-header-cell {
+            height: 35px;
+            padding-left: 11px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #111827;
+
+            /* IMPORTANT:
+               Vertically center the header text */
+            line-height: 35px;
+        }
+
+        /* =====================================================
+           TABLE ROW
+           ===================================================== */
+
+        .table-row {
+            width: 100%;
+            height: 41px;
+            border-bottom: 1px solid #e8ebef;
+            background: #ffffff;
+        }
+
+        .table-row:hover {
+            background: #f8faff;
+        }
+
+        .table-cell {
+            height: 41px;
+            padding-left: 11px;
+            font-size: 10px;
+            color: #202631;
+
+            /* Vertically center row text */
+            line-height: 41px;
+        }
+
+        .maker-cell {
+            color: #243b63;
+        }
+
+        /* =====================================================
+           OPEN BUTTON
+           ===================================================== */
+
+        .open-button {
+            width: 51px;
+            height: 21px;
+            background: #2861c2;
+            border: 1px solid #184a9d;
+            border-radius: 3px;
+            color: #ffffff;
+            font-size: 9px;
+            padding: 0;
+        }
+
+        .open-button:hover {
+            background: #174cae;
+        }
+
+        /* =====================================================
+           FOOTER
+           ===================================================== */
+
+        .bottom-row {
+            width: 100%;
+            height: 48px;
+        }
+
+        .showing-text {
+            font-size: 10px;
+            color: #777f89;
+            line-height: 48px;
+        }
+
+        /* =====================================================
+           PAGINATION
+           ===================================================== */
+
+        .pagination {
+            height: 30px;
+        }
+
+        .page-button {
+            width: 23px;
+            height: 23px;
+            margin-left: 4px;
+            border: 1px solid #dfe3e8;
+            border-radius: 4px;
+            background: #ffffff;
+            color: #a4abb5;
+            font-size: 11px;
+            padding: 0;
+        }
+
+        .page-button:hover {
+            background: #f2f5f9;
+        }
+
+        .page-button-active {
+            width: 23px;
+            height: 23px;
+            margin-left: 4px;
+            border: 1px solid #2861c2;
+            border-radius: 4px;
+            background: #2861c2;
+            color: #ffffff;
+            font-size: 11px;
+            padding: 0;
+        }
+
+    </style>
+
+
+    <!-- =========================================================
+         CONTENT
+         ========================================================= -->
+
     <div
         self="@define(content)"
-        width="100%"
-        height="100%"
-        sclass="content">
+    	apply="com.cts.inward.controller.VerifyBatchController"
+    	width="100%"
+    	height="100%"
+    	sclass="verify-content">
 
-        <label
-            value="Verify Batch"
-            sclass="page-title" />
+        <vlayout
+            width="100%"
+            height="100%"
+            spacing="0">
+
+
+            <!-- =================================================
+                 PAGE HEADER
+                 ================================================= -->
+
+            <vlayout
+                width="100%"
+                spacing="0"
+                sclass="page-header">
+
+                <label
+                    value="Verify Batch"
+                    sclass="page-title"/>
+
+                <label
+                    value="Select an inward batch sent by Maker to verify cheques and complete CBS account validation."
+                    sclass="page-description"/>
+
+            </vlayout>
+
+
+            <!-- =================================================
+                 MAIN CARD
+                 ================================================= -->
+
+            <vlayout
+                width="100%"
+                spacing="0"
+                sclass="batch-card">
+
+
+                <!-- =================================================
+                     SEARCH ROW
+                     ================================================= -->
+
+                <hlayout
+                    width="100%"
+                    height="40px"
+                    spacing="0"
+                    sclass="search-row">
+
+                    <!-- Spacer -->
+
+                    <hlayout
+                        hflex="1"
+                        spacing="0"/>
+
+
+                    <!-- Search Box -->
+
+                    <hlayout
+                        width="178px"
+                        height="27px"
+                        spacing="0"
+                        valign="middle"
+                        sclass="search-box">
+
+                        <label
+                            value="⌕"
+                            sclass="search-icon"/>
+
+                        <textbox
+                            id="searchBatch"
+                            hflex="1"
+                            height="25px"
+                            placeholder="Search by Batch ID"
+                            sclass="search-input"/>
+
+                    </hlayout>
+
+                </hlayout>
+
+
+                <!-- =================================================
+                     BATCH TABLE
+                     ================================================= -->
+
+                <vlayout
+                    id="batchTable"
+                    width="100%"
+                    spacing="0"
+                    sclass="batch-table">
+
+
+                    <!-- =================================================
+                         TABLE HEADER
+                         ================================================= -->
+
+                    <hlayout
+                        width="100%"
+                        height="35px"
+                        spacing="0"
+                        valign="middle"
+                        sclass="table-header">
+
+
+                        <!-- ===============================
+                             BATCH ID
+                             =============================== -->
+
+                        <hlayout
+                            hflex="26"
+                            height="35px"
+                            spacing="0"
+                            valign="middle"
+                            sclass="table-header-cell">
+
+                            <label
+                                value="Batch ID"
+                                style="line-height:35px;"/>
+
+                        </hlayout>
+
+
+                        <!-- ===============================
+                             CHEQUES
+                             =============================== -->
+
+                        <hlayout
+                            hflex="24"
+                            height="35px"
+                            spacing="0"
+                            valign="middle"
+                            sclass="table-header-cell">
+
+                            <label
+                                value="Cheques"
+                                style="line-height:35px;"/>
+
+                        </hlayout>
+
+
+                        <!-- ===============================
+                             MAKER
+                             =============================== -->
+
+                        <hlayout
+                            hflex="24"
+                            height="35px"
+                            spacing="0"
+                            valign="middle"
+                            sclass="table-header-cell">
+
+                            <label
+                                value="Maker"
+                                style="line-height:35px;"/>
+
+                        </hlayout>
+
+
+                        <!-- ===============================
+                             ACTION
+                             =============================== -->
+
+                        <hlayout
+                            hflex="26"
+                            height="35px"
+                            spacing="0"
+                            valign="middle"
+                            sclass="table-header-cell">
+
+                            <label
+                                value="Action"
+                                style="line-height:35px;"/>
+
+                        </hlayout>
+
+                    </hlayout>
+
+
+                    <!-- =================================================
+                         DYNAMIC DATABASE ROWS
+
+                         The Composer will add rows here.
+
+                         No batch is hard-coded in this ZUL.
+                         ================================================= -->
+
+                </vlayout>
+
+
+                <!-- =================================================
+                     FOOTER
+                     ================================================= -->
+
+                <hlayout
+                    width="100%"
+                    height="48px"
+                    spacing="0"
+                    valign="middle"
+                    sclass="bottom-row">
+
+
+                    <!-- Showing text -->
+
+                    <label
+                        id="showingText"
+                        value="Showing 0 to 0 of 0 batches"
+                        sclass="showing-text"/>
+
+
+                    <!-- Spacer -->
+
+                    <hlayout
+                        hflex="1"
+                        spacing="0"/>
+
+
+                    <!-- =================================================
+                         PAGINATION
+                         ================================================= -->
+
+                    <hlayout
+                        height="30px"
+                        spacing="0"
+                        valign="middle"
+                        sclass="pagination">
+
+
+                        <button
+                            id="firstPage"
+                            label="≪"
+                            sclass="page-button"/>
+
+                        <button
+                            id="previousPage"
+                            label="‹"
+                            sclass="page-button"/>
+
+                        <button
+                            id="currentPage"
+                            label="1"
+                            sclass="page-button-active"/>
+
+                        <button
+                            id="nextPage"
+                            label="›"
+                            sclass="page-button"/>
+
+                        <button
+                            id="lastPage"
+                            label="≫"
+                            sclass="page-button"/>
+
+                    </hlayout>
+
+                </hlayout>
+
+            </vlayout>
+
+        </vlayout>
 
     </div>
 

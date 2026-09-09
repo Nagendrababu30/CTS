@@ -14,329 +14,201 @@ import com.cts.admin.model.User;
 public class AuthorizationComposer
         extends GenericForwardComposer<Component> {
 
-    private static final long serialVersionUID = 1L;
-
-    private static final Map<String, String> PAGE_PERMISSIONS =
-            new HashMap<>();
-
-    static {
-
-        // =========================================================
-        // ADMIN
-        // =========================================================
-
-        PAGE_PERMISSIONS.put(
-                "/zul/admin/adminDashboard.zul",
-                "ADMIN");
-
-        PAGE_PERMISSIONS.put(
-                "/zul/admin/roleManagement.zul",
-                "ADMIN");
-
-        PAGE_PERMISSIONS.put(
-                "/zul/admin/userManagement.zul",
-                "ADMIN");
-
-        PAGE_PERMISSIONS.put(
-                "/zul/admin/batchMonitoring.zul",
-                "ADMIN");
-
-        PAGE_PERMISSIONS.put(
-                "/zul/admin/admin-dashboard.zul",
-                "ADMIN");
-
-        PAGE_PERMISSIONS.put(
-                "/zul/admin/admin-audit-logs.zul",
-                "ADMIN");
-
-        PAGE_PERMISSIONS.put(
-                "/zul/admin/admin-batch-monitoring.zul",
-                "ADMIN");
-
-        PAGE_PERMISSIONS.put(
-                "/zul/admin/admin-session-management.zul",
-                "ADMIN");
-
-        PAGE_PERMISSIONS.put(
-                "/zul/admin/admin-roles.zul",
-                "ADMIN");
-
-        PAGE_PERMISSIONS.put(
-                "/zul/admin/admin-user-management.zul",
-                "ADMIN");
-
-        PAGE_PERMISSIONS.put(
-                "/zul/admin/auditLogs.zul",
-                "ADMIN");
-
-
-        // =========================================================
-        // INWARD MAKER
-        // =========================================================
-
-        PAGE_PERMISSIONS.put(
-                "/zul/inward-maker/dashboard.zul",
-                "INWARD_MAKER");
-
-        /*
-         * MICR Repair queue page.
-         *
-         * This was missing previously and caused:
-         *
-         * /zul/inward-maker/micr-repair-list.zul
-         *              ↓
-         *          Access Denied
-         */
-        PAGE_PERMISSIONS.put(
-                "/zul/inward-maker/micr-repair-list.zul",
-                "INWARD_MAKER");
-
-        /*
-         * MICR Repair detail page.
-         */
-        
-        PAGE_PERMISSIONS.put(
-                "/zul/inward-maker/micr-repair-list.zul",
-                "INWARD_MAKER");
-        
-        PAGE_PERMISSIONS.put(
-                "/zul/inward-maker/micr-repair.zul",
-                "INWARD_MAKER");
+	private static final long serialVersionUID = 1L;
 
-        /*
-         * Data Entry page.
-         */
-        PAGE_PERMISSIONS.put(
-                "/zul/inward-maker/data-entry.zul",
-                "INWARD_MAKER");
+	private static final Map<String, String> PAGE_PERMISSIONS = new HashMap<>();
 
-        /*
-         * These pages can remain protected if they still exist,
-         * but they are no longer displayed in the Maker sidebar.
-         */
-        PAGE_PERMISSIONS.put(
-                "/zul/inward-maker/send-to-checker.zul",
-                "INWARD_MAKER");
+	static {
 
-        PAGE_PERMISSIONS.put(
-                "/zul/inward-maker/reports.zul",
-                "INWARD_MAKER");
+		// =========================================================
+		// ADMIN
+		// =========================================================
 
+		PAGE_PERMISSIONS.put("/zul/admin/admin-dashboard.zul", "ADMIN");
 
-        // =========================================================
-        // INWARD CHECKER
-        // =========================================================
+		PAGE_PERMISSIONS.put("/zul/admin/admin-roles.zul", "ADMIN");
 
-        PAGE_PERMISSIONS.put(
-                "/zul/inward-checker/dashboard.zul",
-                "INWARD_CHECKER");
+		PAGE_PERMISSIONS.put("/zul/admin/admin-user-management.zul", "ADMIN");
 
-        PAGE_PERMISSIONS.put(
-                "/zul/inward-checker/verification.zul",
-                "INWARD_CHECKER");
+		PAGE_PERMISSIONS.put("/zul/admin/admin-batch-monitoring.zul", "ADMIN");
 
-        PAGE_PERMISSIONS.put(
-                "/zul/inward-checker/reports.zul",
-                "INWARD_CHECKER");
+		PAGE_PERMISSIONS.put("/zul/admin/admin-session-management.zul", "ADMIN");
 
+		PAGE_PERMISSIONS.put("/zul/admin/admin-audit-logs.zul", "ADMIN");
 
-        // =========================================================
-        // OUTWARD MAKER
-        // =========================================================
+		// =========================================================
+		// INWARD MAKER
+		// =========================================================
 
-        PAGE_PERMISSIONS.put(
-                "/zul/outward/outward-maker/makerDashboard.zul",
-                "OUTWARD_MAKER");
+		PAGE_PERMISSIONS.put("/zul/inward-maker/dashboard.zul", "INWARD_MAKER");
 
-        PAGE_PERMISSIONS.put(
-                "/zul/outward/outward-maker/dataEntry.zul",
-                "OUTWARD_MAKER");
+		/*
+		 * MICR Repair queue page.
+		 *
+		 * This was missing previously and caused:
+		 *
+		 * /zul/inward-maker/micr-repair-list.zul ↓ Access Denied
+		 */
+		PAGE_PERMISSIONS.put("/zul/inward-maker/micr-repair-list.zul", "INWARD_MAKER");
 
-        PAGE_PERMISSIONS.put(
-                "/zul/outward/outward-maker/MicrRepair.zul",
-                "OUTWARD_MAKER");
+		/*
+		 * MICR Repair detail page.
+		 */
 
-        PAGE_PERMISSIONS.put(
-                "/zul/outward/outward-maker/amountAndAccount.zul",
-                "OUTWARD_MAKER");
+		PAGE_PERMISSIONS.put("/zul/inward-maker/micr-repair-list.zul", "INWARD_MAKER");
 
-        PAGE_PERMISSIONS.put(
-                "/zul/outward/outward-maker/sendToChecker.zul",
-                "OUTWARD_MAKER");
+		PAGE_PERMISSIONS.put("/zul/inward-maker/micr-repair.zul", "INWARD_MAKER");
 
+		/*
+		 * Data Entry page.
+		 */
+		PAGE_PERMISSIONS.put("/zul/inward-maker/data-entry.zul", "INWARD_MAKER");
 
-        // =========================================================
-        // OUTWARD CHECKER
-        // =========================================================
+		/*
+		 * These pages can remain protected if they still exist, but they are no longer
+		 * displayed in the Maker sidebar.
+		 */
+		PAGE_PERMISSIONS.put("/zul/inward-maker/send-to-checker.zul", "INWARD_MAKER");
 
-        PAGE_PERMISSIONS.put(
-                "/zul/outward/outward-checker/checkerDashboard.zul",
-                "OUTWARD_CHECKER");
+		PAGE_PERMISSIONS.put("/zul/inward-maker/reports.zul", "INWARD_MAKER");
 
-        PAGE_PERMISSIONS.put(
-                "/zul/outward/outward-checker/batchQueue.zul",
-                "OUTWARD_CHECKER");
+		// =========================================================
+		// INWARD CHECKER
+		// =========================================================
 
-        PAGE_PERMISSIONS.put(
-                "/zul/outward/outward-checker/checkerReports.zul",
-                "OUTWARD_CHECKER");
+		PAGE_PERMISSIONS.put("/zul/inward-checker/dashboard.zul", "INWARD_CHECKER");
 
-        PAGE_PERMISSIONS.put(
-                "/zul/outward/outward-checker/sendToNpci.zul",
-                "OUTWARD_CHECKER");
-    }
+		PAGE_PERMISSIONS.put("/zul/inward-checker/verification.zul", "INWARD_CHECKER");
 
+		PAGE_PERMISSIONS.put("/zul/inward-checker/batch-details.zul", "INWARD_CHECKER");
+		
+		PAGE_PERMISSIONS.put("/zul/inward-checker/reports.zul", "INWARD_CHECKER");
+		
+		
 
-    @Override
-    public void doBeforeComposeChildren(
-            Component comp)
-            throws Exception {
+		// =========================================================
+		// OUTWARD MAKER
+		// =========================================================
 
-        super.doBeforeComposeChildren(comp);
+		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/makerDashboard.zul", "OUTWARD_MAKER");
 
-        populateSessionRoleIfAbsent();
-    }
+		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/dataEntry.zul", "OUTWARD_MAKER");
 
+		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/MicrRepair.zul", "OUTWARD_MAKER");
 
-    private void populateSessionRoleIfAbsent() {
+		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/amountAndAccount.zul", "OUTWARD_MAKER");
 
-        Execution execution =
-                Executions.getCurrent();
+		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/sendToChecker.zul", "OUTWARD_MAKER");
 
-        if (execution == null
-                || execution.getAttribute("roleName") != null) {
+		// =========================================================
+		// OUTWARD CHECKER
+		// =========================================================
 
-            return;
-        }
+		PAGE_PERMISSIONS.put("/zul/outward/outward-checker/checkerDashboard.zul", "OUTWARD_CHECKER");
 
-        Session session =
-                execution.getSession();
+		PAGE_PERMISSIONS.put("/zul/outward/outward-checker/batchQueue.zul", "OUTWARD_CHECKER");
 
-        if (session == null) {
-            return;
-        }
+		PAGE_PERMISSIONS.put("/zul/outward/outward-checker/checkerReports.zul", "OUTWARD_CHECKER");
 
-        User loggedInUser =
-                (User) session.getAttribute(
-                        "loggedInUser");
+		PAGE_PERMISSIONS.put("/zul/outward/outward-checker/sendToNpci.zul", "OUTWARD_CHECKER");
+	}
 
-        if (loggedInUser != null
-                && loggedInUser.getRoleName() != null) {
+	@Override
+	public void doBeforeComposeChildren(Component comp) throws Exception {
 
-            execution.setAttribute(
-                    "roleName",
-                    loggedInUser.getRoleName());
-        }
-    }
+		super.doBeforeComposeChildren(comp);
 
+		populateSessionRoleIfAbsent();
+	}
 
-    @Override
-    public void doAfterCompose(
-            Component comp)
-            throws Exception {
+	private void populateSessionRoleIfAbsent() {
 
-        super.doAfterCompose(comp);
+		Execution execution = Executions.getCurrent();
 
-        checkAuthorization();
-    }
+		if (execution == null || execution.getAttribute("roleName") != null) {
 
+			return;
+		}
 
-    private void checkAuthorization() {
+		Session session = execution.getSession();
 
-        Execution execution =
-                Executions.getCurrent();
+		if (session == null) {
+			return;
+		}
 
-        if (execution == null) {
-            Executions.sendRedirect(
-                    "/login.zul");
-            return;
-        }
+		User loggedInUser = (User) session.getAttribute("loggedInUser");
 
-        Session session =
-                execution.getSession();
+		if (loggedInUser != null && loggedInUser.getRoleName() != null) {
 
-        if (session == null) {
-            Executions.sendRedirect(
-                    "/login.zul");
-            return;
-        }
+			execution.setAttribute("roleName", loggedInUser.getRoleName());
+		}
+	}
 
-        User loggedInUser =
-                (User) session.getAttribute(
-                        "loggedInUser");
+	@Override
+	public void doAfterCompose(Component comp) throws Exception {
 
-        if (loggedInUser == null) {
+		super.doAfterCompose(comp);
 
-            Executions.sendRedirect(
-                    "/login.zul");
+		checkAuthorization();
+	}
 
-            return;
-        }
+	private void checkAuthorization() {
 
+		Execution execution = Executions.getCurrent();
 
-        String currentPage =
-                execution
-                        .getDesktop()
-                        .getRequestPath();
+		if (execution == null) {
+			Executions.sendRedirect("/login.zul");
+			return;
+		}
 
+		Session session = execution.getSession();
 
-        String requiredRole =
-                PAGE_PERMISSIONS.get(
-                        currentPage);
+		if (session == null) {
+			Executions.sendRedirect("/login.zul");
+			return;
+		}
 
+		User loggedInUser = (User) session.getAttribute("loggedInUser");
 
-        if (requiredRole == null) {
+		if (loggedInUser == null) {
 
-            System.out.println(
-                    "Authorization warning: "
-                    + "Page is not registered: "
-                    + currentPage);
+			Executions.sendRedirect("/login.zul");
 
-            Executions.sendRedirect(
-                    "/accessDenied.zul");
+			return;
+		}
 
-            return;
-        }
+		String currentPage = execution.getDesktop().getRequestPath();
 
+		String requiredRole = PAGE_PERMISSIONS.get(currentPage);
 
-        String actualRole =
-                loggedInUser.getRoleName();
+		if (requiredRole == null) {
 
+			System.out.println("Authorization warning: " + "Page is not registered: " + currentPage);
 
-        if (actualRole == null
-                || !requiredRole.equalsIgnoreCase(
-                        actualRole)) {
+			Executions.sendRedirect("/accessDenied.zul");
 
-            System.out.println(
-                    "Unauthorized access attempt.");
+			return;
+		}
 
-            System.out.println(
-                    "User: "
-                    + loggedInUser.getUsername());
+		String actualRole = loggedInUser.getRoleName();
 
-            System.out.println(
-                    "Required role: "
-                    + requiredRole);
+		if (actualRole == null || !requiredRole.equalsIgnoreCase(actualRole)) {
 
-            System.out.println(
-                    "Actual role: "
-                    + actualRole);
+			System.out.println("Unauthorized access attempt.");
 
-            System.out.println(
-                    "Requested page: "
-                    + currentPage);
+			System.out.println("User: " + loggedInUser.getUsername());
 
-            Executions.sendRedirect(
-                    "/accessDenied.zul");
+			System.out.println("Required role: " + requiredRole);
 
-            return;
-        }
+			System.out.println("Actual role: " + actualRole);
 
+			System.out.println("Requested page: " + currentPage);
 
-        System.out.println(
-                "Authorization successful: "
-                + loggedInUser.getUsername()
-                + " -> "
-                + currentPage);
-    }
+			Executions.sendRedirect("/accessDenied.zul");
+
+			return;
+		}
+
+		System.out.println("Authorization successful: " + loggedInUser.getUsername() + " -> " + currentPage);
+	}
 }

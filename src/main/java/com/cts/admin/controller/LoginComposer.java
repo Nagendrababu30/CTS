@@ -11,136 +11,107 @@ import com.cts.admin.model.User;
 import com.cts.admin.service.UserService;
 import com.cts.admin.service.UserServiceImpl;
 
-public class LoginComposer
-        extends GenericForwardComposer<Component> {
+public class LoginComposer extends GenericForwardComposer<Component> {
 
+	private static final long serialVersionUID = 1L;
 
-    private Textbox username;
-    private Textbox password;
-    private Label loginMessage;
+	private Textbox username;
+	private Textbox password;
+	private Label loginMessage;
 
-    private UserService userService;
+	private UserService userService;
 
-    @Override
-    public void doAfterCompose(
-            Component comp)
-            throws Exception {
+	@Override
+	public void doAfterCompose(Component comp) throws Exception {
 
-        super.doAfterCompose(comp);
+		super.doAfterCompose(comp);
 
         userService = new UserServiceImpl();
     }
 
-    public void onClick$loginButton() {
+	public void onClick$loginButton() {
 
-        String usernameValue =
-                username.getValue();
+		String usernameValue = username.getValue();
 
-        String passwordValue =
-                password.getValue();
+		String passwordValue = password.getValue();
 
-        User user =
-                userService.authenticate(
-                        usernameValue,
-                        passwordValue);
+		User user = userService.authenticate(usernameValue, passwordValue);
 
-        if (user == null) {
+		if (user == null) {
 
-            loginMessage.setValue(
-                    "Invalid username or password.");
+			loginMessage.setValue("Invalid username or password.");
 
-            return;
-        }
+			return;
+		}
 
-        Session session =
-                Executions.getCurrent()
-                        .getSession();
+		Session session = Executions.getCurrent().getSession();
 
-        session.setAttribute(
-                "loggedInUser",
-                user);
+		session.setAttribute("loggedInUser", user);
 
-        session.setAttribute(
-                "userId",
-                user.getUserId());
+		session.setAttribute("userId", user.getUserId());
 
-        session.setAttribute(
-                "username",
-                user.getUsername());
+		session.setAttribute("username", user.getUsername());
 
-        session.setAttribute(
-                "roleId",
-                user.getRoleId());
+		session.setAttribute("roleId", user.getRoleId());
 
-        session.setAttribute(
-                "roleName",
-                user.getRoleName());
+		session.setAttribute("roleName", user.getRoleName());
 
-        redirectUser(user);
-    }
+		redirectUser(user);
+	}
 
-    private void redirectUser(User user) {
+	private void redirectUser(User user) {
 
-        String roleName =
-                user.getRoleName();
+		String roleName = user.getRoleName();
 
-        if (roleName == null
-                || roleName.isBlank()) {
+		if (roleName == null || roleName.isBlank()) {
 
-            loginMessage.setValue(
-                    "User role is not configured.");
+			loginMessage.setValue("User role is not configured.");
 
-            return;
-        }
+			return;
+		}
 
-        switch (roleName.toUpperCase()) {
+		switch (roleName.toUpperCase()) {
 
-            case "ADMIN":
+		case "ADMIN":
 
                 Executions.sendRedirect(
                         "/zul/admin/admin-dashboard.zul");
 
-                break;
+			break;
 
-            case "INWARD_MAKER":
+		case "INWARD_MAKER":
 
-                Executions.sendRedirect(
-                        "/zul/inward-maker/dashboard.zul");
+			Executions.sendRedirect("/zul/inward-maker/dashboard.zul");
 
-                break;
+			break;
 
-            case "INWARD_CHECKER":
+		case "INWARD_CHECKER":
 
-                Executions.sendRedirect(
-                        "/zul/inward-checker/dashboard.zul");
+			Executions.sendRedirect("/zul/inward-checker/dashboard.zul");
 
-                break;
+			break;
 
-            case "OUTWARD_MAKER":
+		case "OUTWARD_MAKER":
 
-                Executions.sendRedirect(
-                        "/zul/outward/outward-maker/makerDashboard.zul");
+			Executions.sendRedirect("/zul/outward/outward-maker/makerDashboard.zul");
 
-                break;
+			break;
 
-            case "OUTWARD_CHECKER":
+		case "OUTWARD_CHECKER":
 
-                Executions.sendRedirect(
-                        "/zul/outward/outward-checker/checkerDashboard.zul");
+			Executions.sendRedirect("/zul/outward/outward-checker/checkerDashboard.zul");
 
-                break;
+			break;
 
-            case "CAPTURE_OPERATOR":
+		case "CAPTURE_OPERATOR":
 
-                Executions.sendRedirect(
-                        "/zul/outward/outward-maker/makerDashboard.zul");
+			Executions.sendRedirect("/zul/outward/outward-maker/makerDashboard.zul");
 
-                break;
+			break;
 
-            default:
+		default:
 
-                loginMessage.setValue(
-                        "User role is not configured.");
-        }
-    }
+			loginMessage.setValue("User role is not configured.");
+		}
+	}
 }

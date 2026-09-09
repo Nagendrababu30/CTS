@@ -2,13 +2,13 @@ package com.cts.inward.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.cts.inward.dao.BatchDao;
 import com.cts.inward.model.InwardBatch;
 import com.cts.inward.model.NpciBatchData;
 
-public class BatchServiceImpl
-        implements BatchService {
+public class BatchServiceImpl implements BatchService {
 
     private final BatchDao batchDao;
 
@@ -18,11 +18,8 @@ public class BatchServiceImpl
         this.batchDao = batchDao;
     }
 
-    public static BatchServiceImpl of(
-            BatchDao batchDao) {
-
-        return new BatchServiceImpl(
-                batchDao);
+    public static BatchServiceImpl of(BatchDao batchDao) {
+        return new BatchServiceImpl(batchDao);
     }
 
     // ---------------------------------------------------------
@@ -30,9 +27,7 @@ public class BatchServiceImpl
     // ---------------------------------------------------------
 
     @Override
-    public void saveBatch(
-            NpciBatchData batchData) {
-
+    public void saveBatch(NpciBatchData batchData) {
         batchDao.saveBatch(batchData);
     }
 
@@ -130,13 +125,22 @@ public class BatchServiceImpl
     // ---------------------------------------------------------
 
     @Override
-    public void releaseLock(
-            String batchId,
+    public void releaseLock(String batchId, String userId) {
+    }
+
+    @Override
+    public void sendToChecker(String batchId, String userId) {
+    }
+
+    // =========================================================
+    // Verify Batch
+    // =========================================================
+
+    @Override
+    public List<Map<String, Object>> getBatchesForVerification(
             String userId) {
 
-        /*
-         * Will be implemented with batch_lock.
-         */
+        return batchDao.getBatchesForVerification(userId);
     }
 
     // ---------------------------------------------------------
@@ -144,27 +148,17 @@ public class BatchServiceImpl
     // ---------------------------------------------------------
 
     @Override
-    public void sendToChecker(
+    public List<Map<String, Object>> searchBatchesForVerification(
             String batchId,
             String userId) {
 
-        /*
-         * Will be implemented when the
-         * Maker -> Checker workflow is connected.
-         */
-    }
+        if (batchId == null || batchId.trim().isEmpty()) {
+            return getBatchesForVerification(userId);
+        }
 
-    // ---------------------------------------------------------
-    // Convert DAO model to domain model
-    // ---------------------------------------------------------
-
-    private InwardBatch convert(
-            NpciBatchData batch) {
-
-        return new InwardBatch(
-                batch.getBatchId(),
-                batch.getFileId(),
-                batch.getPresentingBankName(),
-                batch.getTotalCheques());
+        return batchDao.searchBatchesForVerification(
+                batchId.trim(),
+                userId
+        );
     }
 }

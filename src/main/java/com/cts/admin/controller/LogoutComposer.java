@@ -12,6 +12,8 @@ import org.zkoss.zul.Label;
 import org.zkoss.zul.Popup;
 
 import com.cts.admin.model.User;
+import com.cts.admin.service.AuditLogService;
+import com.cts.admin.service.AuditLogServiceImpl;
 
 public class LogoutComposer extends GenericForwardComposer<Component> {
 
@@ -25,10 +27,14 @@ public class LogoutComposer extends GenericForwardComposer<Component> {
     private Label headerDate;
     private Label headerLastLogin;
 
+    private AuditLogService auditLogService;
+
     @Override
     public void doAfterCompose(Component comp) throws Exception {
 
         super.doAfterCompose(comp);
+
+        auditLogService = new AuditLogServiceImpl();
 
         /* Today's date */
         SimpleDateFormat dateFmt = new SimpleDateFormat("dd MMM yyyy");
@@ -40,8 +46,7 @@ public class LogoutComposer extends GenericForwardComposer<Component> {
         User loggedInUser = (User) zkSession.getAttribute("loggedInUser");
 
         if (loggedInUser != null && loggedInUser.getLastLogin() != null) {
-            SimpleDateFormat loginFmt =
-                    new SimpleDateFormat("dd MMM yyyy hh:mm a");
+            SimpleDateFormat loginFmt = new SimpleDateFormat("dd MMM yyyy hh:mm a");
             loginFmt.setTimeZone(IST);
             headerLastLogin.setValue(loginFmt.format(loggedInUser.getLastLogin()));
         } else {
@@ -63,6 +68,15 @@ public class LogoutComposer extends GenericForwardComposer<Component> {
         Session session = Executions.getCurrent().getSession();
 
         if (session != null) {
+            /* End audit log entry via AuditLogService */
+            String auditSessionId = (String) session.getAttribute("auditSessionId");
+            if (auditSessionId != null) {
+                try {
+                    auditLogService.endAuditLog(auditSessionId);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
             session.invalidate();
         }
 

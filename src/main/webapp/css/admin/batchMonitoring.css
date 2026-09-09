@@ -1,0 +1,406 @@
+/* ============================================================
+   BATCH MONITORING PAGE
+   ============================================================ */
+
+.batch-page {
+    width: 100%;
+    padding: 34px 16px 40px 16px;
+    box-sizing: border-box;
+    background: #F5F7FC;
+}
+
+
+/* ============================================================
+   PAGE HEADER
+   ============================================================ */
+
+.batch-page-title {
+    color: #18243A;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 38px;
+    display: block;
+    white-space: nowrap;
+}
+
+.batch-page-subtitle {
+    color: #60738F;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 22px;
+    display: block;
+    margin-top: 3px;
+    margin-bottom: 24px;
+    white-space: nowrap;
+}
+
+
+/* ============================================================
+   TAB / SEARCH CARD
+   div is used here intentionally — div respects display:flex,
+   hbox renders as display:table which breaks justify-content
+   ============================================================ */
+
+.batch-tab-card {
+    width: 100%;
+    background: #FFFFFF;
+    border: 1px solid #DDE4ED !important;
+    border-radius: 10px;
+    padding: 14px 16px;
+    box-sizing: border-box;
+    margin-bottom: 20px;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+/* Strip ZK hbox chrome inside the card */
+.batch-tab-card .z-hbox,
+.batch-tab-card .z-hbox > table,
+.batch-tab-card .z-hbox td {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    vertical-align: middle !important;
+}
+
+
+/* ============================================================
+   TAB BUTTONS
+   ============================================================ */
+
+.batch-tab-btn {
+    height: 38px;
+    padding: 0 18px;
+    background: #FFFFFF;
+    border: 1px solid #D1D5DB;
+    border-radius: 7px;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: none;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+/* ZK overrides — force text color on all button states */
+.batch-tab-btn.z-button,
+.batch-tab-btn .z-button-cm {
+    color: #374151 !important;
+}
+
+.batch-tab-btn:hover,
+.batch-tab-btn.z-button:hover,
+.batch-tab-btn:hover .z-button-cm {
+    background: #F9FAFB;
+    border-color: #9CA3AF;
+    color: #374151 !important;
+}
+
+.batch-tab-active,
+.batch-tab-active.z-button,
+.batch-tab-active .z-button-cm {
+    background: #2454D6 !important;
+    border-color: #2454D6 !important;
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+}
+
+.batch-tab-active:hover,
+.batch-tab-active.z-button:hover,
+.batch-tab-active:hover .z-button-cm {
+    background: #1D4ED8 !important;
+    border-color: #1D4ED8 !important;
+    color: #FFFFFF !important;
+}
+
+
+/* ============================================================
+   SEARCH WRAPPER — right side group, flex-shrink:0 so it
+   never gets squeezed by the left side
+   ============================================================ */
+
+.batch-search-wrapper.z-hbox {
+    flex-shrink: 0 !important;
+}
+
+/* ============================================================
+   SEARCH BOX
+   ============================================================ */
+
+.batch-search-box.z-hbox {
+    height: 38px;
+    background: #FFFFFF;
+    border: 1px solid #D1D5DB !important;
+    border-radius: 7px;
+    box-sizing: border-box;
+    overflow: hidden;
+    padding: 0 8px;
+}
+
+.batch-search-box.z-hbox > table,
+.batch-search-box.z-hbox td {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    vertical-align: middle !important;
+    padding: 0 !important;
+}
+
+.batch-search-icon {
+    color: #9CA3AF;
+    font-size: 16px;
+    margin-right: 6px;
+    line-height: 1;
+}
+
+.batch-search-textbox {
+    height: 34px;
+    border: none !important;
+    background: transparent !important;
+    color: #344054;
+    font-size: 14px;
+    padding: 0;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.batch-search-textbox:focus {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+
+/* ============================================================
+   SEARCH BUTTON
+   ============================================================ */
+
+.batch-search-btn {
+    height: 38px;
+    padding: 0 18px;
+    background: #2454D6;
+    border: 1px solid #2454D6;
+    border-radius: 7px;
+    color: #FFFFFF;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: none;
+    margin-left: 8px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.batch-search-btn:hover {
+    background: #1D4ED8;
+    border-color: #1D4ED8;
+}
+
+
+/* ============================================================
+   RESULTS CARD
+   ============================================================ */
+
+.batch-results-card {
+    width: 100%;
+    background: #FFFFFF;
+    border: 1px solid #DDE4ED !important;
+    border-radius: 10px;
+    padding: 24px 16px 28px 16px;
+    box-sizing: border-box;
+    overflow-x: auto;
+}
+
+.batch-results-title {
+    color: #18243A;
+    font-size: 20px;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 18px;
+}
+
+
+/* ============================================================
+   LISTBOX
+   ============================================================ */
+
+.batch-listbox {
+    width: 100%;
+    min-width: 1100px;
+    background: #FFFFFF;
+    border: 1px solid #D9E1EB !important;
+    border-radius: 8px;
+    box-sizing: border-box;
+    box-shadow: none !important;
+    overflow: hidden;
+}
+
+
+/* ============================================================
+   LISTBOX HEADER ROW
+   ============================================================ */
+
+.batch-listbox .z-listhead {
+    background: #F8FAFC;
+    border: none !important;
+}
+
+.batch-listbox .z-listheader {
+    height: 52px;
+    background: #F8FAFC;
+    border-top: none !important;
+    border-left: none !important;
+    border-bottom: 1px solid #D9E1EB !important;
+    border-right: none !important;
+    padding: 0 12px;
+    box-sizing: border-box;
+    box-shadow: none !important;
+    overflow: visible !important;
+}
+
+.batch-listbox .z-listheader-content {
+    color: #18243A;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    line-height: 1.3;
+}
+
+
+/* ============================================================
+   LISTBOX DATA ROWS
+   ============================================================ */
+
+.batch-listbox .z-listitem {
+    min-height: 64px;
+    background: #FFFFFF;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: 1px solid #F3F4F6 !important;
+    box-shadow: none !important;
+}
+
+.batch-listbox .z-listitem:last-child {
+    border-bottom: none !important;
+}
+
+.batch-listbox .z-listitem:hover {
+    background: #FBFCFE;
+}
+
+
+/* ============================================================
+   LISTBOX CELLS
+   ============================================================ */
+
+.batch-listbox .z-listcell {
+    background: transparent;
+    border: none !important;
+    padding: 0 12px;
+    box-sizing: border-box;
+    box-shadow: none !important;
+    vertical-align: middle;
+}
+
+.batch-listbox .z-listcell-content {
+    color: #344054;
+    font-size: 13px;
+}
+
+.batch-listbox .z-listbox-emptybody td {
+    color: #98A2B3;
+    font-size: 14px;
+    text-align: center;
+    padding: 32px 0;
+}
+
+
+/* ============================================================
+   CELL LABEL STYLES
+   ============================================================ */
+
+.batch-id-label {
+    color: #2454D6;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.batch-cheques-label {
+    color: #18243A;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.batch-text-label {
+    color: #344054;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.batch-user-label {
+    color: #344054;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.batch-date-label {
+    color: #60738F;
+    font-size: 12px;
+    white-space: normal;
+    line-height: 1.4;
+}
+
+
+/* ============================================================
+   STATUS BADGE
+   ============================================================ */
+
+.batch-status-badge {
+    border-radius: 999px;
+    padding: 4px 12px;
+    box-sizing: border-box;
+    white-space: nowrap;
+}
+
+.batch-status-badge.z-hbox > table,
+.batch-status-badge.z-hbox td {
+    border: none !important;
+    box-shadow: none !important;
+    vertical-align: middle !important;
+}
+
+.batch-status-label {
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.batch-status-green {
+    background: #DCFCE7 !important;
+    border: 1px solid #B7EFCA !important;
+}
+.batch-status-green .batch-status-label { color: #166534; }
+
+.batch-status-amber {
+    background: #FEF9C3 !important;
+    border: 1px solid #FDE68A !important;
+}
+.batch-status-amber .batch-status-label { color: #854D0E; }
+
+.batch-status-red {
+    background: #FEE2E2 !important;
+    border: 1px solid #FECACA !important;
+}
+.batch-status-red .batch-status-label { color: #991B1B; }
+
+.batch-status-grey {
+    background: #F3F4F6 !important;
+    border: 1px solid #D1D5DB !important;
+}
+.batch-status-grey .batch-status-label { color: #374151; }

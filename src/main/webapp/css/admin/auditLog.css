@@ -1,0 +1,434 @@
+/* ============================================================
+   AUDIT LOG PAGE
+   ============================================================ */
+
+.audit-page {
+    width: 100%;
+    padding: 34px 40px 40px 40px;
+    box-sizing: border-box;
+    background: #F5F7FC;
+}
+
+
+/* ============================================================
+   PAGE HEADER
+   div used — needs display:flex + space-between
+   ============================================================ */
+
+.audit-page-header {
+    width: 100%;
+    margin-bottom: 24px;
+    box-sizing: border-box;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+}
+
+.audit-header-left {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+}
+
+.audit-page-title {
+    color: #18243A;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 38px;
+    display: block;
+    white-space: nowrap;
+}
+
+
+/* ============================================================
+   FILTER CARD
+   White card — search box + 3 dropdowns in one row
+   div used — display:flex + align-items:center + gap
+   ============================================================ */
+
+.audit-filter-card {
+    width: 100%;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 10px;
+    padding: 16px 20px;
+    box-sizing: border-box;
+    margin-bottom: 14px;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 12px;
+}
+
+
+/* ============================================================
+   SEARCH BOX inside filter card
+   div — border + display:flex both work reliably
+   ============================================================ */
+
+.audit-search-box {
+    flex: 1 1 0 !important;
+    min-width: 180px;
+    height: 42px;
+    background: #FFFFFF;
+    border: 1px solid #D1D5DB !important;
+    border-radius: 7px;
+    box-sizing: border-box;
+    overflow: hidden;
+    padding: 0 12px;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.audit-search-icon {
+    color: #9CA3AF;
+    font-size: 15px;
+    margin-right: 8px;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.audit-search-textbox {
+    height: 38px;
+    flex: 1 !important;
+    border: none !important;
+    background: transparent !important;
+    color: #344054;
+    font-size: 14px;
+    padding: 0;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.audit-search-textbox:focus {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+
+/* ============================================================
+   FILTER COMBOBOXES
+   ============================================================ */
+
+.audit-filter-combobox.z-combobox {
+    height: 42px;
+    background: #FFFFFF;
+    border: 1px solid #D1D5DB !important;
+    border-radius: 7px !important;
+    box-shadow: none !important;
+    box-sizing: border-box;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.audit-filter-combobox .z-combobox-input {
+    height: 40px;
+    background: #FFFFFF !important;
+    border: none !important;
+    color: #344054;
+    font-size: 14px;
+    padding: 0 12px;
+    box-shadow: none !important;
+    outline: none !important;
+    box-sizing: border-box;
+}
+
+.audit-filter-combobox .z-combobox-input:focus {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.audit-filter-combobox .z-combobox-button {
+    width: 36px;
+    height: 40px;
+    background: #FFFFFF !important;
+    border: none !important;
+    border-left: 1px solid #D1D5DB !important;
+    box-shadow: none !important;
+    box-sizing: border-box;
+}
+
+.audit-filter-combobox .z-combobox-button:hover {
+    background: #F8FAFC !important;
+}
+
+.audit-filter-combobox .z-combobox-button .z-icon {
+    color: #374151;
+    font-size: 13px;
+}
+
+.audit-modules-combobox { width: 170px; min-width: 170px; }
+.audit-roles-combobox   { width: 155px; min-width: 155px; }
+
+/* ============================================================
+   SEARCH BUTTON
+   ============================================================ */
+
+.audit-search-btn {
+    flex-shrink: 0;
+    height: 42px;
+    padding: 0 18px;
+    background: #2454D6;
+    border: none;
+    border-radius: 7px;
+    color: #FFFFFF;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(36, 84, 214, 0.25);
+    transition: background 0.15s ease;
+}
+
+.audit-search-btn:hover {
+    background: #1B44C8;
+}
+
+
+/* ============================================================
+   AUDIT TRAIL CARD
+   ============================================================ */
+
+.audit-trail-card {
+    width: 100%;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 10px;
+    padding: 24px 28px 28px 28px;
+    box-sizing: border-box;
+}
+
+.audit-trail-title {
+    color: #18243A;
+    font-size: 20px;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 18px;
+}
+
+
+/* ============================================================
+   LISTBOX
+   ============================================================ */
+
+.audit-listbox {
+    width: 100%;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 8px;
+    box-sizing: border-box;
+    box-shadow: none !important;
+    overflow: hidden;
+}
+
+.audit-listbox .z-listhead {
+    background: #F9FAFB;
+    border: none !important;
+}
+
+.audit-listbox .z-listheader {
+    height: 54px;
+    background: #F9FAFB;
+    border-top: none !important;
+    border-left: none !important;
+    border-bottom: 1px solid #E5E7EB !important;
+    border-right: none !important;
+    padding: 0 18px;
+    box-sizing: border-box;
+    box-shadow: none !important;
+    overflow: visible !important;
+}
+
+.audit-listbox .z-listheader-content {
+    color: #374151;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+}
+
+.audit-listbox .z-listitem {
+    min-height: 72px;
+    background: #FFFFFF;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: 1px solid #F3F4F6 !important;
+    box-shadow: none !important;
+}
+
+.audit-listbox .z-listitem:last-child {
+    border-bottom: none !important;
+}
+
+.audit-listbox .z-listitem:hover {
+    background: #FAFAFA;
+}
+
+.audit-listbox .z-listcell {
+    background: transparent;
+    border: none !important;
+    padding: 14px 18px;
+    box-sizing: border-box;
+    box-shadow: none !important;
+    vertical-align: top;
+}
+
+.audit-listbox .z-listcell-content {
+    color: #374151;
+    font-size: 13px;
+}
+
+.audit-listbox .z-listbox-emptybody td {
+    color: #9CA3AF;
+    font-size: 14px;
+    text-align: center;
+    padding: 40px 0;
+}
+
+
+/* ============================================================
+   CELL LABEL STYLES
+   ============================================================ */
+
+.audit-datetime-label {
+    color: #6B7280;
+    font-size: 13px;
+    line-height: 1.6;
+    white-space: normal;
+}
+
+.audit-user-label {
+    color: #111827;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.audit-module-label {
+    color: #374151;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.audit-batch-label {
+    color: #2454D6;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.audit-session-label {
+    color: #374151;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+
+/* ============================================================
+   ACTION BADGE  (Hbox built in controller)
+   ============================================================ */
+
+.audit-action-badge {
+    border-radius: 5px;
+    padding: 4px 10px;
+    box-sizing: border-box;
+    white-space: nowrap;
+}
+
+.audit-action-badge.z-hbox > table,
+.audit-action-badge.z-hbox td {
+    border: none !important;
+    box-shadow: none !important;
+    vertical-align: middle !important;
+}
+
+.audit-action-label {
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    letter-spacing: 0.04em;
+}
+
+/* Green — LOGIN, STARTED */
+.audit-action-green {
+    background: #DCFCE7 !important;
+    border: 1px solid #86EFAC !important;
+}
+.audit-action-green .audit-action-label { color: #166534; }
+
+/* Blue — general */
+.audit-action-blue {
+    background: #DBEAFE !important;
+    border: 1px solid #93C5FD !important;
+}
+.audit-action-blue .audit-action-label { color: #1D4ED8; }
+
+/* Amber — LOCKED, PENDING */
+.audit-action-amber {
+    background: #FEF9C3 !important;
+    border: 1px solid #FDE68A !important;
+}
+.audit-action-amber .audit-action-label { color: #92400E; }
+
+/* Red — FAILED, LOGOUT */
+.audit-action-red {
+    background: #FEE2E2 !important;
+    border: 1px solid #FCA5A5 !important;
+}
+.audit-action-red .audit-action-label { color: #991B1B; }
+
+/* Grey — anything else */
+.audit-action-grey {
+    background: #F3F4F6 !important;
+    border: 1px solid #D1D5DB !important;
+}
+.audit-action-grey .audit-action-label { color: #374151; }
+
+
+/* ============================================================
+   PAGE SUBTITLE + READONLY BADGE
+   ============================================================ */
+
+.audit-page-subtitle {
+    color: #6B7A99;
+    font-size: 14px;
+    display: block !important;
+    margin-top: 4px;
+}
+
+.audit-readonly-badge {
+    flex-shrink: 0;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.audit-readonly-label {
+    color: #6B7280;
+    font-size: 13px;
+    font-weight: 600;
+    background: #F3F4F6;
+    border: 1px solid #D1D5DB;
+    border-radius: 6px;
+    padding: 4px 12px;
+    white-space: nowrap;
+}
+
+/* ============================================================
+   PAGING
+   ============================================================ */
+
+.audit-paging {
+    margin: 14px 24px 20px 24px;
+}
+
+.audit-paging.z-paging {
+    border-top: 1px solid #EEF2FA !important;
+    padding-top: 12px !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    font-size: 13px !important;
+}

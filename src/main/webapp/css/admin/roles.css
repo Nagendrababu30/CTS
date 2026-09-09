@@ -1,0 +1,309 @@
+/* ============================================================
+   ROLES PAGE
+   ============================================================ */
+
+.role-management-page {
+    width: 100%;
+    padding: 34px 40px 40px 40px;
+    box-sizing: border-box;
+    background: #F5F7FC;
+}
+
+.role-management-page.z-vlayout > table,
+.role-management-page.z-vlayout > table > tbody > tr > td {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    width: 100% !important;
+}
+
+
+/* ============================================================
+   PAGE HEADER
+   ============================================================ */
+
+.role-page-header {
+    margin-bottom: 28px;
+}
+
+.role-page-header.z-vlayout > table,
+.role-page-header.z-vlayout > table > tbody > tr > td {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+.role-page-title {
+    font-size: 30px;
+    font-weight: 700;
+    color: #111827;
+    display: block !important;
+    line-height: 36px;
+    letter-spacing: -0.3px;
+}
+
+.role-page-subtitle {
+    font-size: 14px;
+    color: #6B7A99;
+    display: block !important;
+    margin-top: 5px;
+    line-height: 1.6;
+    font-weight: 400;
+}
+
+
+/* ============================================================
+   SYSTEM ROLES CARD
+   ============================================================ */
+
+.system-roles-card {
+    width: 100%;
+    background: #FFFFFF;
+    border: 1px solid #E1E8F4 !important;
+    border-radius: 10px;
+    box-sizing: border-box;
+    box-shadow: 0 1px 3px rgba(15, 25, 50, 0.05);
+    overflow: hidden;
+}
+
+.system-roles-card.z-vlayout > table,
+.system-roles-card.z-vlayout > table > tbody > tr > td {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    width: 100% !important;
+}
+
+
+/* ============================================================
+   CARD HEADER
+   ============================================================ */
+
+.system-roles-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid #E8EEF8 !important;
+    box-sizing: border-box;
+    background: #FFFFFF;
+}
+
+.system-roles-header.z-vlayout > table,
+.system-roles-header.z-vlayout > table > tbody > tr > td {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+.system-roles-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+    display: block !important;
+}
+
+
+/* ============================================================
+   ROLE LISTBOX
+   ============================================================ */
+
+.role-listbox {
+    width: calc(100% - 48px) !important;
+    margin: 18px 24px 24px 24px;
+    border: 1px solid #E1E8F4 !important;
+    border-radius: 8px;
+    box-sizing: border-box;
+    box-shadow: none !important;
+    overflow: hidden;
+    background: #FFFFFF;
+}
+
+
+/* ============================================================
+   LISTBOX HEADER
+   ============================================================ */
+
+.role-listbox .z-listhead {
+    background: #F3F6FB;
+    border-bottom: 1px solid #E1E8F4 !important;
+}
+
+.role-listbox .z-listheader {
+    height: 44px;
+    background: #F3F6FB;
+    border-top: none !important;
+    border-left: none !important;
+    border-bottom: none !important;
+    border-right: 1px solid #E8EEF8 !important;
+    padding: 0 16px;
+    box-sizing: border-box;
+    box-shadow: none !important;
+}
+
+.role-listbox .z-listheader:last-child {
+    border-right: none !important;
+}
+
+.role-listbox .z-listheader-content {
+    color: #5A6E8C;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    white-space: nowrap !important;
+    overflow: visible !important;
+}
+
+
+/* ============================================================
+   LISTBOX ROWS
+   ============================================================ */
+
+.role-listbox .z-listitem {
+    height: 64px;
+    background: #FFFFFF;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: 1px solid #EEF2FA !important;
+    box-shadow: none !important;
+}
+
+.role-listbox .z-listitem:last-child {
+    border-bottom: none !important;
+}
+
+.role-listbox .z-listitem:hover {
+    background: #F8FAFF;
+}
+
+
+/* ============================================================
+   LIST CELLS
+   ============================================================ */
+
+.role-listbox .z-listcell {
+    background: transparent;
+    border: none !important;
+    padding: 0 16px;
+    box-sizing: border-box;
+    box-shadow: none !important;
+    vertical-align: middle;
+}
+
+.role-listbox .z-listcell-content {
+    color: #1F2D45;
+    font-size: 14px;
+}
+
+.role-listbox .z-listbox-emptybody td {
+    color: #9AABC8;
+    font-size: 14px;
+    text-align: center;
+    padding: 40px 0;
+    font-style: italic;
+}
+
+
+/* ============================================================
+   ROLE NAME — icon pill + name label
+   ============================================================ */
+
+.role-name-box {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 10px;
+}
+
+.role-name-box.z-hbox,
+.role-name-box.z-hbox > table,
+.role-name-box.z-hbox td {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    vertical-align: middle !important;
+}
+
+.role-icon-label {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    background: #EEF3FF !important;
+    border: 1px solid #CCDCFA !important;
+    border-radius: 8px;
+    color: #2454D6;
+    font-size: 14px;
+    font-weight: 700;
+    box-sizing: border-box;
+}
+
+.role-name-label {
+    color: #111827;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+
+/* ============================================================
+   DESCRIPTION
+   ============================================================ */
+
+.role-description-label {
+    color: #4B5E7A;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+
+/* ============================================================
+   STATUS BADGE
+   ============================================================ */
+
+.role-status-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px;
+    border-radius: 999px;
+    padding: 4px 12px;
+    box-sizing: border-box;
+    white-space: nowrap;
+}
+
+.role-status-badge.z-hbox,
+.role-status-badge.z-hbox > table,
+.role-status-badge.z-hbox td {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    vertical-align: middle !important;
+}
+
+.role-status-active {
+    background: #DCFCE7 !important;
+    border: 1px solid #A3E6C0 !important;
+}
+
+.role-status-inactive {
+    background: #F3F4F6 !important;
+    border: 1px solid #D1D5DB !important;
+}
+
+.role-status-dot {
+    font-size: 8px;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.role-status-active .role-status-dot  { color: #16A34A; }
+.role-status-inactive .role-status-dot { color: #6B7280; }
+
+.role-status-label {
+    font-size: 12.5px;
+    font-weight: 600;
+}
+
+.role-status-active .role-status-label  { color: #166534; }
+.role-status-inactive .role-status-label { color: #374151; }

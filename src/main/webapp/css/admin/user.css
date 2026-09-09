@@ -1,0 +1,641 @@
+/* ============================================================
+   USER MANAGEMENT PAGE
+   ============================================================ */
+
+.user-management-page {
+    width: 100%;
+    padding: 34px 40px 40px 40px;
+    box-sizing: border-box;
+    background: #F4F6FB;
+}
+
+.user-management-page.z-vlayout > table,
+.user-management-page.z-vlayout > table > tbody > tr > td {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    width: 100% !important;
+}
+
+
+/* ============================================================
+   PAGE HEADER
+   div — display:flex, title left, button right
+   ============================================================ */
+
+.user-page-header {
+    width: 100%;
+    margin-bottom: 24px;
+    box-sizing: border-box;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+/* Left block — div so flex:1 works */
+.user-page-header-left {
+    flex: 1 1 0 !important;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.user-page-title {
+    display: block !important;
+    color: #111827;
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 36px;
+    letter-spacing: -0.3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-page-subtitle {
+    display: block !important;
+    color: #6B7A99;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    margin-top: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* ============================================================
+   CREATE USER BUTTON
+   ============================================================ */
+
+.create-user-button {
+    flex-shrink: 0 !important;
+    height: 40px;
+    padding: 0 20px;
+    margin-left: 20px;
+    background: #2454D6;
+    border: none !important;
+    border-radius: 8px;
+    color: #FFFFFF;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(36, 84, 214, 0.30);
+}
+
+.create-user-button:hover {
+    background: #1B44C8;
+    box-shadow: 0 3px 8px rgba(36, 84, 214, 0.35);
+}
+
+
+/* ============================================================
+   SEARCH / FILTER CARD
+   div — display:flex + gap
+   ============================================================ */
+
+.user-filter-card {
+    width: 100%;
+    box-sizing: border-box;
+    background: #FFFFFF;
+    border: 1px solid #E1E8F4 !important;
+    border-radius: 10px;
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(15, 25, 50, 0.05);
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 10px;
+}
+
+
+/* ============================================================
+   SEARCH INPUT BOX
+   div — border + display:flex both work reliably
+   ============================================================ */
+
+.user-search-container {
+    flex: 1 1 0 !important;
+    min-width: 0;
+    height: 40px;
+    background: #F7F9FD;
+    border: 1.5px solid #D1DBF0 !important;
+    border-radius: 8px;
+    box-sizing: border-box;
+    overflow: hidden;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 10px 0 2px;
+}
+
+.user-search-icon {
+    color: #9AABC8;
+    font-size: 20px;
+    line-height: 1;
+    margin-left: 10px;
+    margin-right: 6px;
+    flex-shrink: 0;
+}
+
+.user-search-textbox {
+    flex: 1 !important;
+    border: none !important;
+    background: transparent !important;
+    color: #1F2D45;
+    font-size: 14px;
+    box-shadow: none !important;
+    outline: none !important;
+    height: 36px !important;
+    padding: 0 !important;
+}
+
+.user-search-textbox:focus {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+
+/* ============================================================
+   SEARCH & CLEAR BUTTONS
+   ============================================================ */
+
+.btn-search {
+    flex-shrink: 0;
+    height: 40px;
+    padding: 0 18px;
+    background: #2454D6;
+    border: none !important;
+    border-radius: 8px;
+    color: #FFFFFF;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(36, 84, 214, 0.25);
+}
+
+.btn-search:hover {
+    background: #1B44C8;
+}
+
+.btn-clear {
+    flex-shrink: 0;
+    height: 40px;
+    padding: 0 16px;
+    background: #FFFFFF;
+    border: 1.5px solid #D1DBF0 !important;
+    border-radius: 8px;
+    color: #4B5E7A;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.btn-clear:hover {
+    background: #F0F4FD;
+    border-color: #A8B8D8 !important;
+    color: #1F2D45;
+}
+
+
+/* ============================================================
+   FILTER DIVIDER
+   ============================================================ */
+
+.filter-divider {
+    width: 1px !important;
+    height: 28px;
+    background: #E1E8F4 !important;
+    flex-shrink: 0;
+    display: block !important;
+    margin: 0 4px;
+}
+
+
+/* ============================================================
+   FILTER LABELS
+   ============================================================ */
+
+.user-filter-label {
+    flex-shrink: 0;
+    color: #4B5E7A;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+
+/* ============================================================
+   COMBOBOX
+   ============================================================ */
+
+.user-filter-combobox.z-combobox {
+    height: 40px;
+    background: #F7F9FD;
+    border: 1.5px solid #D1DBF0 !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    box-sizing: border-box;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.user-filter-combobox .z-combobox-input {
+    height: 38px;
+    background: transparent !important;
+    border: none !important;
+    color: #1F2D45;
+    font-size: 14px;
+    padding: 0 10px;
+    box-shadow: none !important;
+    outline: none !important;
+    box-sizing: border-box;
+}
+
+.user-filter-combobox .z-combobox-input:focus {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.user-filter-combobox .z-combobox-button {
+    width: 34px;
+    height: 38px;
+    background: transparent !important;
+    border: none !important;
+    border-left: 1px solid #D1DBF0 !important;
+    box-shadow: none !important;
+}
+
+.user-filter-combobox .z-combobox-button:hover {
+    background: rgba(36, 84, 214, 0.06) !important;
+}
+
+.user-filter-combobox .z-combobox-button .z-icon {
+    color: #4B5E7A;
+    font-size: 13px;
+}
+
+.role-filter-combobox   { width: 195px; min-width: 195px; }
+.status-filter-combobox { width: 148px; min-width: 148px; }
+
+
+/* ============================================================
+   SYSTEM USERS CARD
+   ============================================================ */
+
+.system-users-card {
+    width: 100%;
+    background: #FFFFFF;
+    border: 1px solid #E1E8F4 !important;
+    border-radius: 10px;
+    box-sizing: border-box;
+    box-shadow: 0 1px 3px rgba(15, 25, 50, 0.05);
+    overflow: hidden;
+}
+
+
+/* ============================================================
+   CARD HEADER
+   ============================================================ */
+
+.system-users-header {
+    width: 100%;
+    height: 60px;
+    padding: 0 24px;
+    box-sizing: border-box;
+    background: #FFFFFF;
+    border-bottom: 1px solid #E8EEF8 !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.system-users-title {
+    color: #111827;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.1px;
+}
+
+
+/* ============================================================
+   LISTBOX
+   span="true" makes it fill the card width automatically
+   ============================================================ */
+
+.user-listbox {
+    margin: 18px 24px 0 24px;
+    background: #FFFFFF;
+    border: 1px solid #E1E8F4 !important;
+    border-radius: 8px;
+    box-sizing: border-box;
+    box-shadow: none !important;
+    overflow: hidden;
+}
+
+
+/* ============================================================
+   LISTBOX HEADER
+   ============================================================ */
+
+.user-listbox .z-listhead {
+    background: #F3F6FB;
+    border-bottom: 1px solid #E1E8F4 !important;
+}
+
+.user-listbox .z-listheader {
+    height: 44px;
+    background: #F3F6FB;
+    border-top: none !important;
+    border-left: none !important;
+    border-bottom: none !important;
+    border-right: 1px solid #E8EEF8 !important;
+    padding: 0 16px;
+    box-sizing: border-box;
+    box-shadow: none !important;
+    overflow: visible !important;
+}
+
+.user-listbox .z-listheader:last-child {
+    border-right: none !important;
+}
+
+.user-listbox .z-listheader-content {
+    color: #5A6E8C;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    white-space: nowrap !important;
+    overflow: visible !important;
+}
+
+
+/* ============================================================
+   LISTBOX DATA ROWS
+   ============================================================ */
+
+.user-listbox .z-listitem {
+    height: 68px;
+    background: #FFFFFF;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: 1px solid #EEF2FA !important;
+    box-shadow: none !important;
+}
+
+.user-listbox .z-listitem:last-child {
+    border-bottom: none !important;
+}
+
+.user-listbox .z-listitem:hover {
+    background: #F8FAFF;
+}
+
+
+/* ============================================================
+   LIST CELLS
+   ============================================================ */
+
+.user-listbox .z-listcell {
+    background: transparent;
+    border: none !important;
+    padding: 0 16px;
+    box-sizing: border-box;
+    box-shadow: none !important;
+    vertical-align: middle;
+}
+
+.user-listbox .z-listcell-content {
+    color: #1F2D45;
+    font-size: 14px;
+}
+
+.user-listbox .z-listbox-emptybody td {
+    color: #9AABC8;
+    font-size: 14px;
+    text-align: center;
+    padding: 40px 0;
+    font-style: italic;
+}
+
+
+/* ============================================================
+   CELL LABEL STYLES
+   ============================================================ */
+
+.user-id-label {
+    color: #9AABC8;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.username-label {
+    color: #2454D6;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.full-name-label {
+    color: #1F2D45;
+    font-size: 14px;
+    font-weight: 400;
+    white-space: nowrap;
+}
+
+
+/* ============================================================
+   ASSIGNED ROLE BADGE
+   ============================================================ */
+
+.assigned-role-container {
+    display: inline-flex !important;
+    align-items: center !important;
+    background: #EEF3FF !important;
+    border: 1px solid #CCDCFA !important;
+    border-radius: 6px;
+    padding: 4px 12px;
+    box-sizing: border-box;
+}
+
+/* Strip hbox chrome */
+.assigned-role-container.z-hbox,
+.assigned-role-container.z-hbox > table,
+.assigned-role-container.z-hbox td {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    vertical-align: middle !important;
+}
+
+.assigned-role-label {
+    color: #2454D6;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+}
+
+
+/* ============================================================
+   STATUS BADGE
+   ============================================================ */
+
+.status-container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100%;
+}
+
+.status-container.z-hbox,
+.status-container.z-hbox > table,
+.status-container.z-hbox td {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    vertical-align: middle !important;
+}
+
+.status-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    background: #E8FAF0 !important;
+    border: 1px solid #A3E6C0 !important;
+    border-radius: 20px;
+    padding: 4px 12px;
+    box-sizing: border-box;
+    gap: 5px;
+}
+
+.status-badge.z-hbox,
+.status-badge.z-hbox > table,
+.status-badge.z-hbox td {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    vertical-align: middle !important;
+}
+
+.status-icon {
+    font-size: 8px;
+    color: #16A34A;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.status-label {
+    color: #166534;
+    font-size: 12.5px;
+    font-weight: 700;
+    white-space: nowrap;
+    letter-spacing: 0.2px;
+}
+
+
+/* ============================================================
+   ACTION BUTTONS
+   ============================================================ */
+
+.actions-container {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100%;
+    gap: 6px;
+}
+
+.actions-container.z-hbox,
+.actions-container.z-hbox > table,
+.actions-container.z-hbox td {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    vertical-align: middle !important;
+}
+
+.action-button {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    background: #FFFFFF;
+    border: 1.5px solid #DDE5F2 !important;
+    border-radius: 7px;
+    padding: 0;
+    box-sizing: border-box;
+    box-shadow: none !important;
+    cursor: pointer;
+}
+
+.edit-button {
+    color: #4B5E7A;
+}
+
+.edit-button:hover {
+    background: #F0F4FD;
+    border-color: #B8CAE8 !important;
+    color: #1F2D45;
+    box-shadow: 0 1px 4px rgba(15, 25, 50, 0.08) !important;
+}
+
+.power-button {
+    color: #DC2626;
+    background: #FFF8F8;
+    border-color: #FECACA !important;
+}
+
+.power-button:hover {
+    background: #FEF0F0;
+    border-color: #FCA5A5 !important;
+    box-shadow: 0 1px 4px rgba(220, 38, 38, 0.15) !important;
+}
+
+.delete-button {
+    color: #DC2626;
+    background: #FFF8F8;
+    border-color: #FECACA !important;
+}
+
+.delete-button:hover {
+    background: #FEF0F0;
+    border-color: #FCA5A5 !important;
+    box-shadow: 0 1px 4px rgba(220, 38, 38, 0.15) !important;
+}
+
+
+/* ============================================================
+   PAGING
+   ============================================================ */
+
+.user-paging {
+    margin: 14px 24px 20px 24px;
+}
+
+.user-paging.z-paging {
+    border-top: 1px solid #EEF2FA !important;
+    padding-top: 12px !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    font-size: 13px !important;
+}
+
+
+/* ============================================================
+   DISABLED ACTION BUTTONS
+   ============================================================ */
+
+.action-button.z-disabled,
+.action-button:disabled {
+    opacity: 0.35 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+    box-shadow: none !important;
+}

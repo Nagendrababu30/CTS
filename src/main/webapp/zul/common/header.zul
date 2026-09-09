@@ -56,7 +56,8 @@
                     sclass="header-meta-text" />
 
                 <label
-                    value="21-06-2025"
+                    id="headerDate"
+                    value=""
                     sclass="header-meta-val" />
 
             </hlayout>
@@ -77,7 +78,8 @@
                     sclass="header-meta-text" />
 
                 <label
-                    value="21-06-2025 09:15 AM"
+                    id="headerLastLogin"
+                    value=""
                     sclass="header-meta-val" />
 
             </hlayout>

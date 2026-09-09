@@ -1,45 +1,138 @@
-/* Container for the entire report page */
-.report-window {
-    padding: 30px;
-    background-color: #f8f9fc; /* Slight grey background */
+
+
+/* --- RRF Report Card Styles --- */
+.rrf-card-container {
+    margin-top: 20px;
+    padding: 24px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border: 1px solid #e5e7eb;
 }
 
-/* Grid/Table styling */
-.report-grid {
-    border: 1px solid #e0e4e8;
-    border-radius: 8px;
-    background: white;
-    box-shadow: 0px 2px 5px rgba(0,0,0,0.05);
-}
-.report-batch-id {
-    font-weight: bold;
-    color: #333;
-}
-/* Header row styling */
-.report-columns {
-    background-color: #fcfcfd;
+.rrf-content-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.report-column-header {
-    color: #4a5568;
+.rrf-left-group {
+    flex-grow: 1;
+}
+
+.rrf-title {
+    font-size: 16px;
     font-weight: 700;
-    padding: 15px !important;
-    border-bottom: 2px solid #edf2f7;
+    color: #1f2937;
 }
 
-/* The Blue Generate Report Button (No Arrow) */
-.btn-generate-report {
-    background-color: #0d6efd; 
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 6px 14px;
-    font-weight: 500;
+.rrf-description {
     font-size: 13px;
+    color: #4b5563;
+}
+
+.rrf-note-box {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background-color: #eff6ff;
+    border-left: 4px solid #3b82f6;
+    border-radius: 4px;
+}
+
+.rrf-note-text {
+    font-size: 12px;
+    color: #1e40af;
+}
+
+.rrf-icon-box {
+    background-color: #f3e8ff;
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-generate-rrf {
+    background-color: #9333ea !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    padding: 10px 20px !important;
+    border-radius: 6px !important;
+    border: none !important;
     cursor: pointer;
 }
+.btn-generate-rrf:hover {
+    background-color: #7e22ce !important;
+}
 
-.btn-generate-report:hover {
-    background-color: #0b5ed7;
-    color: white;
+
+/* --- Approved Report Card Styles --- */
+.approved-card-container {
+    margin-top: 20px;
+    padding: 24px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border: 1px solid #e5e7eb;
+}
+
+.approved-content-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.approved-left-group {
+    flex-grow: 1;
+}
+
+.approved-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.approved-description {
+    font-size: 13px;
+    color: #4b5563;
+}
+
+.approved-note-box {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background-color: #ecfdf5;
+    border-left: 4px solid #10b981;
+    border-radius: 4px;
+}
+
+.approved-note-text {
+    font-size: 12px;
+    color: #065f46;
+}
+
+.approved-icon-box {
+    background-color: #d1fae5;
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-generate-approved {
+    background-color: #059669 !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    padding: 10px 20px !important;
+    border-radius: 6px !important;
+    border: none !important;
+    cursor: pointer;
+}
+.btn-generate-approved:hover {
+    background-color: #047857 !important;
 }

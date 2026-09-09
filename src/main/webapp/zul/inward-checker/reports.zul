@@ -17,20 +17,53 @@
 
        <window id="reportWindow" apply="com.cts.inward.controller.CheckerReportController" width="100%" height="100%" sclass="report-window">
         
+      <!-- RRF Report Section Card -->
+      <vlayout sclass="rrf-card-container">
+          <hlayout spacing="20px" valign="middle" sclass="rrf-content-wrapper">
+              
+              <!-- Left Side: Icon, Text, and Note -->
+              <hlayout spacing="16px" valign="top" sclass="rrf-left-group">
+                  <div sclass="rrf-icon-box">
+                      <label value="📄" sclass="rrf-icon-text" />
+                  </div>
+                  
+                  <vlayout spacing="4px" sclass="rrf-text-group">
+                      <label value="RRF Report (XML)" sclass="rrf-title" />
+                      <label value="Generate RRF file containing returned cheque details (from all batches)" sclass="rrf-description" />
+                      
+                      <vlayout sclass="rrf-note-box">
+                          <label value="Note: RRF contains cheques returned due to CBS failure. It includes details from all batches." sclass="rrf-note-text" />
+                      </vlayout>
+                  </vlayout>
+              </hlayout>
+
+              <vlayout>
+                  <button id="generateRrfBtn" label="Generate RRF (XML)" sclass="btn-generate-rrf" />
+              </vlayout>
+              
+          </hlayout>
+      </vlayout>
       
-        <grid sclass="report-grid" mold="paging" pageSize="10">
-        
-            <columns sclass="report-columns">
-                <column label="Batch ID" sclass="report-column-header"/>
-                <column label="Total Cheques" sclass="report-column-header"/>
-                <column label="Action" sclass="report-column-header" align="center"/>
-            </columns>
-            
-            <rows id="batchRows">
-               
-            </rows>
-            
-        </grid>
+      <!-- Approved Report Section Card -->
+      <vlayout sclass="approved-card-container">
+          <hlayout spacing="20px" valign="middle" sclass="approved-content-wrapper">
+              <hlayout spacing="16px" valign="top" hflex="1" sclass="approved-left-group">
+                  <div sclass="approved-icon-box">
+                      <label value="✅" sclass="approved-icon-text" />
+                  </div>
+                  <vlayout spacing="4px" sclass="approved-text-group">
+                      <label value="Approved Report (XML)" sclass="approved-title" />
+                      <label value="Generate XML file containing successfully approved cheque details" sclass="approved-description" />
+                      <vlayout sclass="approved-note-box">
+                          <label value="Note: Contains cheques that successfully passed checks and were approved across all batches." sclass="approved-note-text" />
+                      </vlayout>
+                  </vlayout>
+              </hlayout>
+              <vlayout sclass="approved-right-group">
+                  <button id="generateApprovedBtn" label="Generate Approved (XML)" sclass="btn-generate-approved" />
+              </vlayout>
+          </hlayout>
+      </vlayout>
 
     </window>
 

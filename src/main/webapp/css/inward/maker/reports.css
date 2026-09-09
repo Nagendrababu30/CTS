@@ -1,0 +1,45 @@
+/* Container for the entire report page */
+.report-window {
+    padding: 30px;
+    background-color: #f8f9fc; /* Slight grey background */
+}
+
+/* Grid/Table styling */
+.report-grid {
+    border: 1px solid #e0e4e8;
+    border-radius: 8px;
+    background: white;
+    box-shadow: 0px 2px 5px rgba(0,0,0,0.05);
+}
+.report-batch-id {
+    font-weight: bold;
+    color: #333;
+}
+/* Header row styling */
+.report-columns {
+    background-color: #fcfcfd;
+}
+
+.report-column-header {
+    color: #4a5568;
+    font-weight: 700;
+    padding: 15px !important;
+    border-bottom: 2px solid #edf2f7;
+}
+
+/* The Blue Generate Report Button (No Arrow) */
+.btn-generate-report {
+    background-color: #0d6efd; 
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-weight: 500;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.btn-generate-report:hover {
+    background-color: #0b5ed7;
+    color: white;
+}

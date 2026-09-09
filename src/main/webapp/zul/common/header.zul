@@ -7,9 +7,9 @@
         apply="com.cts.admin.controller.LogoutComposer">
 
 
-        <!-- ================================================= -->
-        <!-- LEFT SECTION                                     -->
-        <!-- ================================================= -->
+       
+        <!-- LEFT SECTION -->
+       
 
         <hlayout
             spacing="12px"
@@ -32,9 +32,9 @@
         </hlayout>
 
 
-        <!-- ================================================= -->
-        <!-- RIGHT SECTION                                    -->
-        <!-- ================================================= -->
+        
+        <!-- RIGHT SECTION -->
+        
 
         <hlayout
             spacing="25px"
@@ -56,7 +56,8 @@
                     sclass="header-meta-text" />
 
                 <label
-                    value="21-06-2025"
+                    id="headerDate"
+                    value=""
                     sclass="header-meta-val" />
 
             </hlayout>
@@ -77,15 +78,16 @@
                     sclass="header-meta-text" />
 
                 <label
-                    value="21-06-2025 09:15 AM"
+                    id="headerLastLogin"
+                    value=""
                     sclass="header-meta-val" />
 
             </hlayout>
 
 
-            <!-- ================================================= -->
-            <!-- NOTIFICATION                                      -->
-            <!-- ================================================= -->
+            
+            <!-- NOTIFICATION -->
+            
 
             <div
                 id="notificationArea"
@@ -197,9 +199,9 @@
             </div>
 
 
-            <!-- ================================================= -->
-            <!-- USER ICON                                         -->
-            <!-- ================================================= -->
+           
+            <!-- USER ICON -->
+            
 
             <div
                 id="userWrapper"
@@ -212,9 +214,9 @@
             </div>
 
 
-            <!-- ================================================= -->
-            <!-- LOGOUT POPUP                                      -->
-            <!-- ================================================= -->
+            
+            <!-- LOGOUT POPUP -->
+            
 
             <popup
                 id="logoutPopup"

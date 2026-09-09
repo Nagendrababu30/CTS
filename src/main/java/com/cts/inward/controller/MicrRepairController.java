@@ -26,16 +26,11 @@ public class MicrRepairController
 
     private static final long serialVersionUID = 1L;
 
-    // -------------------------------------------------------------------------
-    // ZUL Components
-    // -------------------------------------------------------------------------
-
     private Label batchLabel;
     private Label chequeCounter;
 
     private Button frontButton;
     private Button backButton;
-    private Button grayButton;
 
     private Label bankName;
     private Label chequeNumberImage;
@@ -53,12 +48,6 @@ public class MicrRepairController
     private Textbox ocrBranchCode;
     private Textbox ocrMicrCode;
 
-    /*
-     * Internally generated corrected MICR.
-     * Maker does not manually type this.
-     */
-    private Textbox micrCode;
-
     private Button backToList;
     private Button previousButton;
     private Button nextButton;
@@ -71,15 +60,7 @@ public class MicrRepairController
     private Button cancelReturnButton;
     private Button confirmReturnButton;
 
-    // -------------------------------------------------------------------------
-    // Service
-    // -------------------------------------------------------------------------
-
     private MicrRepairService micrRepairService;
-
-    // -------------------------------------------------------------------------
-    // Page state
-    // -------------------------------------------------------------------------
 
     private long batchId;
     private int chequeIndex;
@@ -87,27 +68,19 @@ public class MicrRepairController
 
     private List<MicrComparisonDto> comparisons;
 
-    // -------------------------------------------------------------------------
-    // Image state
-    // -------------------------------------------------------------------------
-
     private String frontImagePath;
     private String backImagePath;
 
-    // -------------------------------------------------------------------------
-    // Composer lifecycle
-    // -------------------------------------------------------------------------
+    private String correctedMicr;
 
     @Override
-    public void doAfterCompose(
-            Component comp)
+    public void doAfterCompose(Component comp)
             throws Exception {
 
         super.doAfterCompose(comp);
 
         micrRepairService =
                 new MicrRepairServiceImpl();
-
 
         String batchIdParameter =
                 Executions.getCurrent()
@@ -121,7 +94,6 @@ public class MicrRepairController
                 Executions.getCurrent()
                         .getParameter("source");
 
-
         if (batchIdParameter == null
                 || batchIdParameter.trim().isEmpty()) {
 
@@ -133,7 +105,6 @@ public class MicrRepairController
 
             return;
         }
-
 
         try {
 
@@ -152,7 +123,6 @@ public class MicrRepairController
             return;
         }
 
-
         if (chequeIndexParameter != null
                 && !chequeIndexParameter.trim().isEmpty()) {
 
@@ -166,44 +136,28 @@ public class MicrRepairController
 
                 chequeIndex =
                         micrRepairService
-                                .getNextRepairIndex(
-                                        batchId);
+                                .getNextRepairIndex(batchId);
             }
 
         } else {
 
             chequeIndex =
                     micrRepairService
-                            .getNextRepairIndex(
-                                    batchId);
+                            .getNextRepairIndex(batchId);
         }
-
 
         initializeReturnWindowComponents();
 
-
         if (chequeIndex < 0) {
 
-            Messagebox.show(
-                    "No MICR repair is pending for Batch ID: "
-                            + batchId,
-                    "MICR Repair",
-                    Messagebox.OK,
-                    Messagebox.INFORMATION,
-                    event -> goBack());
-
+            showBatchReadyAndOpenDataEntry();
             return;
         }
-
 
         loadBatch();
 
         registerEvents();
     }
-
-    // -------------------------------------------------------------------------
-    // Return window components
-    // -------------------------------------------------------------------------
 
     private void initializeReturnWindowComponents() {
 
@@ -211,299 +165,330 @@ public class MicrRepairController
             return;
         }
 
-
         returnReason =
                 (Combobox) returnWindow
-                        .getFellow(
-                                "returnReason");
-
+                        .getFellow("returnReason");
 
         returnRemarks =
                 (Textbox) returnWindow
-                        .getFellow(
-                                "returnRemarks");
-
+                        .getFellow("returnRemarks");
 
         cancelReturnButton =
                 (Button) returnWindow
-                        .getFellow(
-                                "cancelReturnButton");
-
+                        .getFellow("cancelReturnButton");
 
         confirmReturnButton =
                 (Button) returnWindow
-                        .getFellow(
-                                "confirmReturnButton");
+                        .getFellow("confirmReturnButton");
     }
-
-    // -------------------------------------------------------------------------
-    // Load batch
-    // -------------------------------------------------------------------------
 
     private void loadBatch() {
 
         comparisons =
-                micrRepairService.compareBatch(
-                        batchId);
-
+                micrRepairService
+                        .compareBatch(batchId);
 
         if (comparisons == null
                 || comparisons.isEmpty()) {
 
-            Messagebox.show(
-                    "No cheque data found for Batch ID: "
-                            + batchId,
-                    "MICR Repair",
-                    Messagebox.OK,
-                    Messagebox.INFORMATION,
-                    event -> goBack());
-
+            showBatchReadyAndOpenDataEntry();
             return;
         }
 
-
-        if (chequeIndex < 0) {
-
-            chequeIndex = 0;
-        }
-
-
-        if (chequeIndex >= comparisons.size()) {
+        if (chequeIndex < 0
+                || chequeIndex >= comparisons.size()
+                || comparisons.get(chequeIndex) == null
+                || !comparisons.get(chequeIndex)
+                        .isNeedsMicrRepair()) {
 
             chequeIndex =
-                    comparisons.size() - 1;
-        }
+                    findNextRepairIndex(
+                            chequeIndex);
 
+            if (chequeIndex < 0) {
+
+                showBatchReadyAndOpenDataEntry();
+                return;
+            }
+        }
 
         batchLabel.setValue(
                 "Batch ID : " + batchId);
 
-
         loadCheque();
     }
 
-    // -------------------------------------------------------------------------
-    // Load current cheque
-    // -------------------------------------------------------------------------
-
-    private void loadCheque() {
+    private int findNextRepairIndex(
+            int startIndex) {
 
         if (comparisons == null
                 || comparisons.isEmpty()) {
 
-            return;
+            return -1;
         }
 
+        int start =
+                Math.max(0, startIndex);
 
-        if (chequeIndex < 0
+        for (int i = start;
+                i < comparisons.size();
+                i++) {
+
+            MicrComparisonDto comparison =
+                    comparisons.get(i);
+
+            if (comparison != null
+                    && comparison.isNeedsMicrRepair()) {
+
+                return i;
+            }
+        }
+
+        for (int i = 0;
+                i < start
+                && i < comparisons.size();
+                i++) {
+
+            MicrComparisonDto comparison =
+                    comparisons.get(i);
+
+            if (comparison != null
+                    && comparison.isNeedsMicrRepair()) {
+
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    private void loadCheque() {
+
+        if (comparisons == null
+                || comparisons.isEmpty()
+                || chequeIndex < 0
                 || chequeIndex >= comparisons.size()) {
 
             return;
         }
 
-
         MicrComparisonDto comparison =
-                comparisons.get(
-                        chequeIndex);
+                comparisons.get(chequeIndex);
 
+        if (comparison == null) {
+            return;
+        }
+
+        if (!comparison.isNeedsMicrRepair()) {
+
+            int nextIndex =
+                    findNextRepairIndex(
+                            chequeIndex + 1);
+
+            if (nextIndex < 0) {
+
+                showBatchReadyAndOpenDataEntry();
+                return;
+            }
+
+            chequeIndex = nextIndex;
+            comparison = comparisons.get(chequeIndex);
+        }
+
+        batchLabel.setValue(
+                "Batch ID : " + batchId);
 
         updateChequeCounter();
 
         populateNpciData(comparison);
-
         populateOcrData(comparison);
 
-        loadImages(
-                comparison.getChequeNumber());
+        loadImages(comparison.getChequeNumber());
 
         clearOcrErrorStyles();
+        applyOcrErrorStyles(comparison);
+        configureEditableFields(comparison);
 
-        applyOcrErrorStyles(
-                comparison);
+        correctedMicr =
+                generateCorrectedMicr();
 
-        configureEditableFields(
-                comparison);
-
-        updateCorrectedMicr();
-
-
-        /*
-         * Static repair page.
-         */
         previousButton.setDisabled(true);
-
         nextButton.setDisabled(true);
     }
-
-    // -------------------------------------------------------------------------
-    // NPCI data
-    // -------------------------------------------------------------------------
 
     private void populateNpciData(
             MicrComparisonDto comparison) {
 
         chequeNumber.setValue(
-                safe(
-                        comparison.getChequeNumber()));
-
+                safe(comparison.getChequeNumber()));
 
         npciCityCode.setValue(
-                safe(
-                        comparison.getNpciCityCode()));
-
+                safe(comparison.getNpciCityCode()));
 
         npciBankCode.setValue(
-                safe(
-                        comparison.getNpciBankCode()));
-
+                safe(comparison.getNpciBankCode()));
 
         npciBranchCode.setValue(
-                safe(
-                        comparison.getNpciBranchCode()));
-
+                safe(comparison.getNpciBranchCode()));
 
         npciMicrCode.setValue(
-                safe(
-                        comparison.getNpciMicrCode()));
-
+                safe(comparison.getNpciMicrCode()));
 
         bankName.setValue("");
 
         chequeNumberImage.setValue(
-                safe(
-                        comparison.getChequeNumber()));
+                safe(comparison.getChequeNumber()));
     }
-
-    // -------------------------------------------------------------------------
-    // OCR data
-    // -------------------------------------------------------------------------
 
     private void populateOcrData(
             MicrComparisonDto comparison) {
 
         ocrCityCode.setValue(
-                safe(
-                        comparison.getOcrCityCode()));
-
+                safe(comparison.getOcrCityCode()));
 
         ocrBankCode.setValue(
-                safe(
-                        comparison.getOcrBankCode()));
-
+                safe(comparison.getOcrBankCode()));
 
         ocrBranchCode.setValue(
-                safe(
-                        comparison.getOcrBranchCode()));
-
+                safe(comparison.getOcrBranchCode()));
 
         ocrMicrCode.setValue(
-                safe(
-                        comparison.getOcrMicrCode()));
+                safe(comparison.getOcrMicrCode()));
     }
-
-    // -------------------------------------------------------------------------
-    // Configure editable fields
-    // -------------------------------------------------------------------------
 
     private void configureEditableFields(
             MicrComparisonDto comparison) {
 
-        /*
-         * Only the mismatching component becomes editable.
-         *
-         * Matching fields remain read-only.
-         */
+        boolean wholeMicrInvalid =
+                !comparison.isNpciMicrFoundInMaster();
 
-        ocrCityCode.setReadonly(
-                !comparison.isCityCodeMismatch());
+        if (wholeMicrInvalid) {
 
+            ocrCityCode.setReadonly(false);
+            ocrBankCode.setReadonly(false);
+            ocrBranchCode.setReadonly(false);
 
-        ocrBankCode.setReadonly(
-                !comparison.isBankCodeMismatch());
+        } else {
 
+            ocrCityCode.setReadonly(
+                    !comparison.isCityCodeMismatch());
 
-        ocrBranchCode.setReadonly(
-                !comparison.isBranchCodeMismatch());
+            ocrBankCode.setReadonly(
+                    !comparison.isBankCodeMismatch());
 
+            ocrBranchCode.setReadonly(
+                    !comparison.isBranchCodeMismatch());
+        }
 
-        /*
-         * Complete OCR MICR is never manually edited.
-         */
         ocrMicrCode.setReadonly(true);
-
-
-        /*
-         * Corrected MICR is generated internally.
-         */
-        micrCode.setReadonly(true);
     }
 
-    // -------------------------------------------------------------------------
-    // Generate corrected MICR
-    // -------------------------------------------------------------------------
+    private void applyOcrErrorStyles(
+            MicrComparisonDto comparison) {
 
-    private void updateCorrectedMicr() {
+        boolean wholeMicrInvalid =
+                !comparison.isNpciMicrFoundInMaster();
 
-        String city =
-                safe(
-                        ocrCityCode.getValue()).trim();
+        if (wholeMicrInvalid) {
 
-        String bank =
-                safe(
-                        ocrBankCode.getValue()).trim();
+            ocrCityCode.setValue("");
+            ocrBankCode.setValue("");
+            ocrBranchCode.setValue("");
 
-        String branch =
-                safe(
-                        ocrBranchCode.getValue()).trim();
+            ocrCityCode.setReadonly(false);
+            ocrBankCode.setReadonly(false);
+            ocrBranchCode.setReadonly(false);
 
+            ocrCityCode.setSclass(
+                    "ocr-field ocr-error");
 
-        /*
-         * If any component is incomplete,
-         * there is no complete MICR yet.
-         */
-        if (!city.matches("\\d{3}")
-                || !bank.matches("\\d{3}")
-                || !branch.matches("\\d{3}")) {
+            ocrBankCode.setSclass(
+                    "ocr-field ocr-error");
 
-            micrCode.setValue("");
+            ocrBranchCode.setSclass(
+                    "ocr-field ocr-error");
+
+            ocrMicrCode.setSclass(
+                    "ocr-field ocr-error");
 
             return;
         }
 
+        if (comparison.isCityCodeMismatch()) {
 
-        /*
-         * Corrected MICR is:
-         *
-         * City + Bank + Branch
-         */
-        String correctedMicr =
-                city
-                + bank
-                + branch;
+            ocrCityCode.setValue("");
+            ocrCityCode.setReadonly(false);
+            ocrCityCode.setSclass(
+                    "ocr-field ocr-error");
+        }
 
+        if (comparison.isBankCodeMismatch()) {
 
-        micrCode.setValue(
-                correctedMicr);
+            ocrBankCode.setValue("");
+            ocrBankCode.setReadonly(false);
+            ocrBankCode.setSclass(
+                    "ocr-field ocr-error");
+        }
+
+        if (comparison.isBranchCodeMismatch()) {
+
+            ocrBranchCode.setValue("");
+            ocrBranchCode.setReadonly(false);
+            ocrBranchCode.setSclass(
+                    "ocr-field ocr-error");
+        }
+
+        if (comparison.isMicrMismatch()) {
+
+            ocrMicrCode.setSclass(
+                    "ocr-field ocr-error");
+        }
     }
 
-    // -------------------------------------------------------------------------
-    // Validate components
-    // -------------------------------------------------------------------------
+    private void clearOcrErrorStyles() {
+
+        ocrCityCode.setSclass("ocr-field");
+        ocrBankCode.setSclass("ocr-field");
+        ocrBranchCode.setSclass("ocr-field");
+        ocrMicrCode.setSclass("ocr-field");
+
+        ocrCityCode.setReadonly(true);
+        ocrBankCode.setReadonly(true);
+        ocrBranchCode.setReadonly(true);
+        ocrMicrCode.setReadonly(true);
+    }
+
+    private String generateCorrectedMicr() {
+
+        String city =
+                safe(ocrCityCode.getValue()).trim();
+
+        String bank =
+                safe(ocrBankCode.getValue()).trim();
+
+        String branch =
+                safe(ocrBranchCode.getValue()).trim();
+
+        if (!city.matches("\\d{3}")
+                || !bank.matches("\\d{3}")
+                || !branch.matches("\\d{3}")) {
+
+            return "";
+        }
+
+        return city + bank + branch;
+    }
 
     private boolean validateMicrComponents() {
 
         String city =
-                safe(
-                        ocrCityCode.getValue()).trim();
+                safe(ocrCityCode.getValue()).trim();
 
         String bank =
-                safe(
-                        ocrBankCode.getValue()).trim();
+                safe(ocrBankCode.getValue()).trim();
 
         String branch =
-                safe(
-                        ocrBranchCode.getValue()).trim();
-
+                safe(ocrBranchCode.getValue()).trim();
 
         if (!city.matches("\\d{3}")) {
 
@@ -516,7 +501,6 @@ public class MicrRepairController
             return false;
         }
 
-
         if (!bank.matches("\\d{3}")) {
 
             Messagebox.show(
@@ -527,7 +511,6 @@ public class MicrRepairController
 
             return false;
         }
-
 
         if (!branch.matches("\\d{3}")) {
 
@@ -540,13 +523,8 @@ public class MicrRepairController
             return false;
         }
 
-
         return true;
     }
-
-    // -------------------------------------------------------------------------
-    // Image loading
-    // -------------------------------------------------------------------------
 
     private void loadImages(
             String chequeNumberValue) {
@@ -561,15 +539,9 @@ public class MicrRepairController
                         .getBackImagePath(
                                 chequeNumberValue);
 
-
         resetImageStyle();
-
         showFrontImage();
     }
-
-    // -------------------------------------------------------------------------
-    // Front image
-    // -------------------------------------------------------------------------
 
     private void showFrontImage() {
 
@@ -580,10 +552,6 @@ public class MicrRepairController
 
         backButton.setSclass(
                 "image-button");
-
-        grayButton.setSclass(
-                "image-button");
-
 
         if (frontImagePath != null
                 && !frontImagePath.trim().isEmpty()) {
@@ -597,10 +565,6 @@ public class MicrRepairController
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Back image
-    // -------------------------------------------------------------------------
-
     private void showBackImage() {
 
         resetImageStyle();
@@ -610,10 +574,6 @@ public class MicrRepairController
 
         backButton.setSclass(
                 "image-button image-button-active");
-
-        grayButton.setSclass(
-                "image-button");
-
 
         if (backImagePath != null
                 && !backImagePath.trim().isEmpty()) {
@@ -627,75 +587,32 @@ public class MicrRepairController
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Grayscale image
-    // -------------------------------------------------------------------------
-
-    private void showGrayImage() {
-
-        frontButton.setSclass(
-                "image-button");
-
-        backButton.setSclass(
-                "image-button");
-
-        grayButton.setSclass(
-                "image-button image-button-active");
-
-
-        chequeImage.setStyle(
-                "width:100%;"
-                + "height:430px;"
-                + "object-fit:contain;"
-                + "border:1px solid #dce3ee;"
-                + "background:#effdf3;"
-                + "filter:grayscale(100%);");
-    }
-
-    // -------------------------------------------------------------------------
-    // Static counter
-    // -------------------------------------------------------------------------
-
     private void updateChequeCounter() {
 
         chequeCounter.setValue(
                 "☷  Cheque "
-                + (chequeIndex + 1)
-                + " of "
-                + comparisons.size());
+                        + (chequeIndex + 1)
+                        + " of "
+                        + comparisons.size());
     }
-
-    // -------------------------------------------------------------------------
-    // Previous
-    // -------------------------------------------------------------------------
 
     private void goToPrevious() {
 
         Messagebox.show(
-                "This repair page is fixed to the current cheque. "
-                        + "Use Save & Next after completing the repair.",
+                "Use Save & Next after completing the current MICR repair.",
                 "MICR Repair",
                 Messagebox.OK,
                 Messagebox.INFORMATION);
     }
-
-    // -------------------------------------------------------------------------
-    // Next
-    // -------------------------------------------------------------------------
 
     private void goToNext() {
 
         Messagebox.show(
-                "This repair page is fixed to the current cheque. "
-                        + "Use Save & Next after completing the repair.",
+                "Use Save & Next after completing the current MICR repair.",
                 "MICR Repair",
                 Messagebox.OK,
                 Messagebox.INFORMATION);
     }
-
-    // -------------------------------------------------------------------------
-    // Save & Next
-    // -------------------------------------------------------------------------
 
     private void saveAndNext() {
 
@@ -713,22 +630,34 @@ public class MicrRepairController
             return;
         }
 
+        MicrComparisonDto comparison =
+                comparisons.get(chequeIndex);
+
+        if (comparison == null) {
+
+            Messagebox.show(
+                    "Current cheque data is unavailable.",
+                    "MICR Repair",
+                    Messagebox.OK,
+                    Messagebox.ERROR);
+
+            return;
+        }
+
+        if (!comparison.isNeedsMicrRepair()) {
+
+            moveAfterSave();
+            return;
+        }
 
         if (!validateMicrComponents()) {
             return;
         }
 
+        correctedMicr =
+                generateCorrectedMicr();
 
-        updateCorrectedMicr();
-
-
-        String correctedMicr =
-                safe(
-                        micrCode.getValue()).trim();
-
-
-        if (!correctedMicr.matches(
-                "\\d{9}")) {
+        if (!correctedMicr.matches("\\d{9}")) {
 
             Messagebox.show(
                     "Corrected MICR could not be generated.",
@@ -739,16 +668,8 @@ public class MicrRepairController
             return;
         }
 
-
-        MicrComparisonDto comparison =
-                comparisons.get(
-                        chequeIndex);
-
-
         String chequeNumberValue =
-                safe(
-                        comparison.getChequeNumber()).trim();
-
+                safe(comparison.getChequeNumber()).trim();
 
         if (chequeNumberValue.isEmpty()) {
 
@@ -761,11 +682,8 @@ public class MicrRepairController
             return;
         }
 
-
         String originalMicr =
-                safe(
-                        comparison.getOcrMicrCode()).trim();
-
+                safe(comparison.getOcrMicrCode()).trim();
 
         if (originalMicr.isEmpty()) {
 
@@ -778,13 +696,10 @@ public class MicrRepairController
             return;
         }
 
-
         User loggedInUser =
                 (User) Executions.getCurrent()
                         .getSession()
-                        .getAttribute(
-                                "loggedInUser");
-
+                        .getAttribute("loggedInUser");
 
         if (loggedInUser == null) {
 
@@ -797,21 +712,19 @@ public class MicrRepairController
             return;
         }
 
-
         long userId =
                 loggedInUser.getUserId();
-
 
         try {
 
             boolean saved =
-                    micrRepairService.saveMicrRepair(
-                            chequeNumberValue,
-                            originalMicr,
-                            correctedMicr,
-                            null,
-                            userId);
-
+                    micrRepairService
+                            .saveMicrRepair(
+                                    chequeNumberValue,
+                                    originalMicr,
+                                    correctedMicr,
+                                    null,
+                                    userId);
 
             if (!saved) {
 
@@ -824,14 +737,12 @@ public class MicrRepairController
                 return;
             }
 
-
             Messagebox.show(
                     "MICR repair saved successfully.",
                     "MICR Repair",
                     Messagebox.OK,
                     Messagebox.INFORMATION,
                     event -> moveAfterSave());
-
 
         } catch (IllegalArgumentException e) {
 
@@ -840,7 +751,6 @@ public class MicrRepairController
                     "MICR Repair",
                     Messagebox.OK,
                     Messagebox.EXCLAMATION);
-
 
         } catch (Exception e) {
 
@@ -853,45 +763,27 @@ public class MicrRepairController
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Move after save
-    // -------------------------------------------------------------------------
-
     private void moveAfterSave() {
 
         comparisons =
-                micrRepairService.compareBatch(
-                        batchId);
-
+                micrRepairService
+                        .compareBatch(batchId);
 
         int nextRepairIndex =
-                micrRepairService.getNextRepairIndex(
-                        batchId);
-
+                micrRepairService
+                        .getNextRepairIndex(batchId);
 
         if (nextRepairIndex < 0) {
 
-            Messagebox.show(
-                    "MICR repair completed for this batch.",
-                    "MICR Repair",
-                    Messagebox.OK,
-                    Messagebox.INFORMATION,
-                    event -> goBack());
-
+            showBatchReadyAndOpenDataEntry();
             return;
         }
-
 
         chequeIndex =
                 nextRepairIndex;
 
-
         loadCheque();
     }
-
-    // -------------------------------------------------------------------------
-    // Return
-    // -------------------------------------------------------------------------
 
     private void openReturnWindow() {
 
@@ -908,24 +800,17 @@ public class MicrRepairController
             return;
         }
 
-
         returnReason.getItems().clear();
-
-        returnReason.setSelectedItem(
-                null);
-
+        returnReason.setSelectedItem(null);
         returnRemarks.setValue("");
-
 
         List<ReturnReasonDto> reasons =
                 micrRepairService
                         .getMakerReturnReasons();
 
-
         if (reasons != null) {
 
-            for (ReturnReasonDto reason :
-                    reasons) {
+            for (ReturnReasonDto reason : reasons) {
 
                 Comboitem item =
                         new Comboitem();
@@ -940,38 +825,23 @@ public class MicrRepairController
             }
         }
 
-
         returnWindow.setVisible(true);
     }
-
-    // -------------------------------------------------------------------------
-    // Cancel return
-    // -------------------------------------------------------------------------
 
     private void cancelReturn() {
 
         if (returnReason != null) {
-
-            returnReason.setSelectedItem(
-                    null);
+            returnReason.setSelectedItem(null);
         }
 
-
         if (returnRemarks != null) {
-
             returnRemarks.setValue("");
         }
 
-
         if (returnWindow != null) {
-
             returnWindow.setVisible(false);
         }
     }
-
-    // -------------------------------------------------------------------------
-    // Confirm return
-    // -------------------------------------------------------------------------
 
     private void confirmReturn() {
 
@@ -986,10 +856,8 @@ public class MicrRepairController
             return;
         }
 
-
         Comboitem selectedItem =
                 returnReason.getSelectedItem();
-
 
         if (selectedItem == null) {
 
@@ -1002,10 +870,8 @@ public class MicrRepairController
             return;
         }
 
-
         String returnReasonCode =
                 (String) selectedItem.getValue();
-
 
         if (returnReasonCode == null
                 || returnReasonCode.trim().isEmpty()) {
@@ -1018,7 +884,6 @@ public class MicrRepairController
 
             return;
         }
-
 
         if (comparisons == null
                 || comparisons.isEmpty()
@@ -1034,22 +899,22 @@ public class MicrRepairController
             return;
         }
 
-
-        String remarks =
-                returnRemarks == null
-                        ? null
-                        : returnRemarks.getValue();
-
-
         MicrComparisonDto comparison =
-                comparisons.get(
-                        chequeIndex);
+                comparisons.get(chequeIndex);
 
+        if (comparison == null) {
+
+            Messagebox.show(
+                    "Current cheque data is unavailable.",
+                    "Return Cheque",
+                    Messagebox.OK,
+                    Messagebox.ERROR);
+
+            return;
+        }
 
         String chequeNumberValue =
-                safe(
-                        comparison.getChequeNumber()).trim();
-
+                safe(comparison.getChequeNumber()).trim();
 
         if (chequeNumberValue.isEmpty()) {
 
@@ -1062,13 +927,15 @@ public class MicrRepairController
             return;
         }
 
+        String remarks =
+                returnRemarks == null
+                        ? ""
+                        : returnRemarks.getValue();
 
         User loggedInUser =
                 (User) Executions.getCurrent()
                         .getSession()
-                        .getAttribute(
-                                "loggedInUser");
-
+                        .getAttribute("loggedInUser");
 
         if (loggedInUser == null) {
 
@@ -1081,25 +948,23 @@ public class MicrRepairController
             return;
         }
 
-
         long userId =
                 loggedInUser.getUserId();
-
 
         try {
 
             boolean saved =
-                    micrRepairService.saveMakerReturn(
-                            chequeNumberValue,
-                            returnReasonCode,
-                            remarks,
-                            userId);
-
+                    micrRepairService
+                            .saveMakerReturn(
+                                    chequeNumberValue,
+                                    returnReasonCode.trim(),
+                                    remarks,
+                                    userId);
 
             if (!saved) {
 
                 Messagebox.show(
-                        "Unable to save the return request.",
+                        "Unable to save the cheque return.",
                         "Return Cheque",
                         Messagebox.OK,
                         Messagebox.ERROR);
@@ -1107,24 +972,21 @@ public class MicrRepairController
                 return;
             }
 
-
             returnWindow.setVisible(false);
-
 
             Messagebox.show(
                     "Cheque "
                             + chequeNumberValue
-                            + " has been submitted for return.",
+                            + " has been marked RETURN_BY_MAKER.",
                     "Return Cheque",
                     Messagebox.OK,
                     Messagebox.INFORMATION,
-                    event -> goBack());
-
+                    event -> moveAfterReturn());
 
         } catch (Exception e) {
 
             Messagebox.show(
-                    "Unable to submit return request: "
+                    "Unable to return cheque: "
                             + e.getMessage(),
                     "Return Cheque",
                     Messagebox.OK,
@@ -1132,9 +994,40 @@ public class MicrRepairController
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Back
-    // -------------------------------------------------------------------------
+    private void moveAfterReturn() {
+
+        comparisons =
+                micrRepairService
+                        .compareBatch(batchId);
+
+        int nextRepairIndex =
+                micrRepairService
+                        .getNextRepairIndex(batchId);
+
+        if (nextRepairIndex < 0) {
+
+            showBatchReadyAndOpenDataEntry();
+            return;
+        }
+
+        chequeIndex =
+                nextRepairIndex;
+
+        loadCheque();
+    }
+
+    private void showBatchReadyAndOpenDataEntry() {
+
+        goToDataEntry();
+    }
+
+    private void goToDataEntry() {
+
+        Executions.sendRedirect(
+                "/zul/inward-maker/data-entry.zul"
+                        + "?batchId="
+                        + batchId);
+    }
 
     private void goBack() {
 
@@ -1150,172 +1043,74 @@ public class MicrRepairController
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Event registration
-    // -------------------------------------------------------------------------
-
     private void registerEvents() {
 
         frontButton.addEventListener(
                 Events.ON_CLICK,
                 event -> showFrontImage());
 
-
         backButton.addEventListener(
                 Events.ON_CLICK,
                 event -> showBackImage());
-
-
-        grayButton.addEventListener(
-                Events.ON_CLICK,
-                event -> showGrayImage());
-
 
         previousButton.addEventListener(
                 Events.ON_CLICK,
                 event -> goToPrevious());
 
-
         nextButton.addEventListener(
                 Events.ON_CLICK,
                 event -> goToNext());
-
 
         saveNextButton.addEventListener(
                 Events.ON_CLICK,
                 event -> saveAndNext());
 
-
         returnButton.addEventListener(
                 Events.ON_CLICK,
                 event -> openReturnWindow());
-
 
         backToList.addEventListener(
                 Events.ON_CLICK,
                 event -> goBack());
 
+        cancelReturnButton.addEventListener(
+                Events.ON_CLICK,
+                event -> cancelReturn());
 
-        if (cancelReturnButton != null) {
+        confirmReturnButton.addEventListener(
+                Events.ON_CLICK,
+                event -> confirmReturn());
 
-            cancelReturnButton.addEventListener(
-                    Events.ON_CLICK,
-                    event -> cancelReturn());
-        }
-
-
-        if (confirmReturnButton != null) {
-
-            confirmReturnButton.addEventListener(
-                    Events.ON_CLICK,
-                    event -> confirmReturn());
-        }
-
-
-        /*
-         * When a Maker edits one of the mismatching components,
-         * regenerate the complete corrected MICR.
-         */
         ocrCityCode.addEventListener(
                 Events.ON_CHANGE,
-                event -> updateCorrectedMicr());
-
+                event -> correctedMicr =
+                        generateCorrectedMicr());
 
         ocrBankCode.addEventListener(
                 Events.ON_CHANGE,
-                event -> updateCorrectedMicr());
-
+                event -> correctedMicr =
+                        generateCorrectedMicr());
 
         ocrBranchCode.addEventListener(
                 Events.ON_CHANGE,
-                event -> updateCorrectedMicr());
+                event -> correctedMicr =
+                        generateCorrectedMicr());
     }
 
-    // -------------------------------------------------------------------------
-    // Clear OCR error styles
-    // -------------------------------------------------------------------------
-
-    private void clearOcrErrorStyles() {
-
-        ocrCityCode.setSclass(
-                "ocr-field");
-
-        ocrBankCode.setSclass(
-                "ocr-field");
-
-        ocrBranchCode.setSclass(
-                "ocr-field");
-
-        ocrMicrCode.setSclass(
-                "ocr-field");
-    }
-
-    // -------------------------------------------------------------------------
-    // Apply OCR error styles
-    // -------------------------------------------------------------------------
-
-    private void applyOcrErrorStyles(
-            MicrComparisonDto comparison) {
-
-        /*
-         * Only the individual mismatching component
-         * gets the error style.
-         */
-
-        if (comparison.isCityCodeMismatch()) {
-
-            ocrCityCode.setSclass(
-                    "ocr-field ocr-error");
-        }
-
-
-        if (comparison.isBankCodeMismatch()) {
-
-            ocrBankCode.setSclass(
-                    "ocr-field ocr-error");
-        }
-
-
-        if (comparison.isBranchCodeMismatch()) {
-
-            ocrBranchCode.setSclass(
-                    "ocr-field ocr-error");
-        }
-
-
-        /*
-         * Do NOT highlight the complete OCR MICR here.
-         *
-         * The mismatch is represented by the individual
-         * component(s).
-         */
-        ocrMicrCode.setSclass(
-                "ocr-field");
-    }
-
-    // -------------------------------------------------------------------------
-    // Utility
-    // -------------------------------------------------------------------------
-
-    private String safe(
-            String value) {
+    private String safe(String value) {
 
         return value == null
                 ? ""
                 : value;
     }
 
-    // -------------------------------------------------------------------------
-    // Reset image style
-    // -------------------------------------------------------------------------
-
     private void resetImageStyle() {
 
         chequeImage.setStyle(
                 "width:100%;"
-                + "height:430px;"
-                + "object-fit:contain;"
-                + "border:1px solid #dce3ee;"
-                + "background:#effdf3;");
+                        + "height:430px;"
+                        + "object-fit:contain;"
+                        + "border:1px solid #dce3ee;"
+                        + "background:#effdf3;");
     }
 }

@@ -5,9 +5,9 @@
     <div
         sclass="sidebar">
 
-        <!-- ================================================= -->
-        <!-- INWARD MAKER                                      -->
-        <!-- ================================================= -->
+        
+        <!-- INWARD MAKER -->
+        
 
         <vlayout
             visible="${arg.roleName eq 'INWARD_MAKER'}"
@@ -86,9 +86,8 @@
         </vlayout>
 
 
-        <!-- ================================================= -->
-        <!-- INWARD CHECKER                                     -->
-        <!-- ================================================= -->
+        
+        <!-- INWARD CHECKER -->
 
         <vlayout
             visible="${arg.roleName eq 'INWARD_CHECKER'}"
@@ -139,9 +138,8 @@
         </vlayout>
 
 
-        <!-- ================================================= -->
-        <!-- ADMIN                                              -->
-        <!-- ================================================= -->
+        
+        <!-- ADMIN -->
 
         <vlayout
             visible="${arg.roleName eq 'ADMIN'}"
@@ -149,7 +147,7 @@
             spacing="0px">
 
             <a
-                href="/zul/admin/adminDashboard.zul"
+                href="/zul/admin/admin-dashboard.zul"
                 sclass="${arg.active eq 'dashboard' ? 'menu-item active-menu' : 'menu-item'}">
 
                 <n:i class="fa-solid fa-house menu-icon"></n:i>
@@ -162,20 +160,20 @@
 
 
             <a
-                href="/zul/admin/roleManagement.zul"
+                href="/zul/admin/admin-roles.zul"
                 sclass="${arg.active eq 'role-management' ? 'menu-item active-menu' : 'menu-item'}">
 
                 <n:i class="fa-solid fa-user-shield menu-icon"></n:i>
 
                 <label
-                    value="Role Management"
+                    value="Roles"
                     sclass="menu-label" />
 
             </a>
 
 
             <a
-                href="/zul/admin/userManagement.zul"
+                href="/zul/admin/admin-user-management.zul"
                 sclass="${arg.active eq 'user-management' ? 'menu-item active-menu' : 'menu-item'}">
 
                 <n:i class="fa-solid fa-users menu-icon"></n:i>
@@ -188,7 +186,7 @@
 
 
             <a
-                href="/zul/admin/batchMonitoring.zul"
+                href="/zul/admin/admin-batch-monitoring.zul"
                 sclass="${arg.active eq 'batch-monitoring' ? 'menu-item active-menu' : 'menu-item'}">
 
                 <n:i class="fa-solid fa-list-check menu-icon"></n:i>
@@ -201,7 +199,20 @@
 
 
             <a
-                href="/zul/admin/auditLogs.zul"
+                href="/zul/admin/admin-session-management.zul"
+                sclass="${arg.active eq 'session-management' ? 'menu-item active-menu' : 'menu-item'}">
+
+                <n:i class="fa-solid fa-clock menu-icon"></n:i>
+
+                <label
+                    value="Session Management"
+                    sclass="menu-label" />
+
+            </a>
+
+
+            <a
+                href="/zul/admin/admin-audit-logs.zul"
                 sclass="${arg.active eq 'audit-logs' ? 'menu-item active-menu' : 'menu-item'}">
 
                 <n:i class="fa-solid fa-clock-rotate-left menu-icon"></n:i>

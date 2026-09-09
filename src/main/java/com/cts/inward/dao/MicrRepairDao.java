@@ -14,6 +14,10 @@ public interface MicrRepairDao {
 
     String getCompletedRepairedMicr(String chequeNumber);
 
+    String getLatestChequeStatus(String chequeNumber);
+
+    long getBatchIdByChequeNumber(String chequeNumber);
+
     String getFrontImagePath(String chequeNumber);
 
     String getBackImagePath(String chequeNumber);
@@ -31,5 +35,9 @@ public interface MicrRepairDao {
             String originalMicr,
             String repairedMicr,
             String remarks,
+            long userId);
+
+    boolean markBatchReadyForDataEntry(
+            long batchId,
             long userId);
 }

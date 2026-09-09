@@ -9,6 +9,7 @@ import org.zkoss.zul.Textbox;
 
 import com.cts.admin.model.User;
 import com.cts.admin.service.UserService;
+import com.cts.admin.service.UserServiceImpl;
 
 public class LoginComposer extends GenericForwardComposer<Component> {
 
@@ -25,8 +26,8 @@ public class LoginComposer extends GenericForwardComposer<Component> {
 
 		super.doAfterCompose(comp);
 
-		userService = new UserService();
-	}
+        userService = new UserServiceImpl();
+    }
 
 	public void onClick$loginButton() {
 
@@ -73,7 +74,8 @@ public class LoginComposer extends GenericForwardComposer<Component> {
 
 		case "ADMIN":
 
-			Executions.sendRedirect("/zul/admin/adminDashboard.zul");
+                Executions.sendRedirect(
+                        "/zul/admin/admin-dashboard.zul");
 
 			break;
 

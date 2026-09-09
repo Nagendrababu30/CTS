@@ -8,22 +8,17 @@ import com.cts.inward.dto.ReturnReasonDto;
 
 public interface MicrRepairService {
 
-    List<MicrComparisonDto> compareBatch(
-            long batchId);
+    List<MicrComparisonDto> compareBatch(long batchId);
 
-    boolean needsMicrRepair(
-            long batchId);
+    boolean needsMicrRepair(long batchId);
 
     List<MicrRepairBatchDto> getRepairBatches();
 
-    int getNextRepairIndex(
-            long batchId);
+    int getNextRepairIndex(long batchId);
 
-    String getFrontImagePath(
-            String chequeNumber);
+    String getFrontImagePath(String chequeNumber);
 
-    String getBackImagePath(
-            String chequeNumber);
+    String getBackImagePath(String chequeNumber);
 
     List<ReturnReasonDto> getMakerReturnReasons();
 
@@ -38,5 +33,9 @@ public interface MicrRepairService {
             String originalMicr,
             String repairedMicr,
             String remarks,
+            long userId);
+
+    boolean markBatchDataEntry(
+            long batchId,
             long userId);
 }

@@ -38,7 +38,7 @@ public class LoginComposer extends GenericForwardComposer<Component> {
         auditLogService = new AuditLogServiceImpl();
     }
 
-    public void onClick$loginButton() {
+	public void onClick$loginButton() {
 
         String usernameValue = username.getValue();
         String passwordValue = password.getValue();

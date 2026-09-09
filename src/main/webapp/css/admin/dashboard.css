@@ -255,7 +255,7 @@
 .session-status-box {
     width: 100%;
     border-radius: 9px;
-    padding: 14px 16px;
+    padding: 10px 14px;
     box-sizing: border-box;
     overflow: visible !important;
 }
@@ -312,10 +312,12 @@
 
 .session-name-label {
     color: #18243A;
-    font-size: 18px;
+    font-size: 14px;
     font-weight: 700;
     flex: 1 !important;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     display: block !important;
 }
 
@@ -696,3 +698,54 @@
 
 .audit-action-grey   { background: #F3F4F6 !important; border: 1px solid #D1D5DB !important; }
 .audit-action-grey   .audit-action-label { color: #374151; }
+
+
+/* ============================================================
+   SESSION BADGE ON DASHBOARD
+   ============================================================ */
+
+.status-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+.status-inactive {
+    background: #E5E7EB !important;
+    color: #4B5563 !important;
+}
+
+.status-active {
+    background: #16A34A !important;
+    color: #FFFFFF !important;
+}
+
+.current-session-top.z-hlayout > table,
+.current-session-top.z-hlayout td {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    vertical-align: middle !important;
+    padding: 0 !important;
+}
+
+.current-session-top {
+    margin-bottom: 8px;
+}
+
+.session-badge-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+}
+
+.status-inactive .session-badge-label { color: #4B5563; }
+.status-active   .session-badge-label { color: #FFFFFF; }

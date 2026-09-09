@@ -27,8 +27,7 @@
             <!-- PAGE HEADER -->
             <div sclass="dashboard-header">
                 <div sclass="dashboard-header-left">
-                    <label sclass="dashboard-title"    value="Admin Dashboard"/>
-                    <label sclass="dashboard-subtitle" value="System-wide monitoring, user management, and session control"/>
+                    <label sclass="dashboard-title" value="Admin Dashboard"/>
                 </div>
             </div>
 
@@ -74,14 +73,13 @@
                         <label id="sessionManageLink" sclass="card-link" value="Sessions &#x2192;"/>
                     </div>
                     <vlayout id="sessionStatusBox" spacing="0" sclass="session-status-box session-box-inactive">
-                        <label id="sessionCurrentLbl" sclass="session-current-label" value="CURRENT SESSION"/>
-                        <div sclass="session-name-row">
-                            <label id="sessionNameLbl"  sclass="session-name-label"   value="No Active Session"/>
-                            <div   id="sessionBadge"    sclass="session-badge session-badge-inactive">
+                        <hlayout sclass="current-session-top" spacing="8px" valign="middle">
+                            <label id="sessionCurrentLbl" sclass="session-current-label" value="CURRENT SESSION"/>
+                            <div id="sessionStatusBadge" sclass="status-badge status-inactive">
                                 <label id="sessionBadgeLbl" sclass="session-badge-label" value="NOT STARTED"/>
                             </div>
-                        </div>
-                        <label id="sessionMetaLbl" sclass="session-meta-label" value="Started: - by -"/>
+                        </hlayout>
+                        <label id="sessionNameLbl" sclass="session-name-label" value="No Active Session"/>
                     </vlayout>
                 </vlayout>
 

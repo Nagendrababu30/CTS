@@ -27,8 +27,7 @@
             <!-- PAGE HEADER -->
             <div sclass="audit-page-header">
                 <div sclass="audit-header-left">
-                    <label sclass="audit-page-title"    value="Audit Logs"/>
-                    <label sclass="audit-page-subtitle" value="User login and logout activity log"/>
+                    <label sclass="audit-page-title" value="Audit Logs"/>
                 </div>
                 <div sclass="audit-readonly-badge">
                     <label sclass="audit-readonly-label" value="&#x25CE; Read-Only"/>
@@ -59,15 +58,7 @@
                     id="auditRoleCombobox"
                     readonly="true"
                     value="All Roles"
-                    sclass="audit-filter-combobox audit-roles-combobox">
-                    <comboitem label="All Roles"/>
-                    <comboitem label="INWARD_MAKER"/>
-                    <comboitem label="INWARD_CHECKER"/>
-                    <comboitem label="OUTWARD_MAKER"/>
-                    <comboitem label="OUTWARD_CHECKER"/>
-                    <comboitem label="CAPTURE_OPERATOR"/>
-                    <comboitem label="ADMIN"/>
-                </combobox>
+                    sclass="audit-filter-combobox audit-roles-combobox"/>
 
             </div>
 

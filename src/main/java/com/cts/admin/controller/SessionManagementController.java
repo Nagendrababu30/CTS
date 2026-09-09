@@ -37,9 +37,6 @@ public class SessionManagementController
     private Vlayout closedSessionContent;
     private Vlayout activeSessionContent;
     private Label   activeSessionName;
-    private Label   activeSessionId;
-    private Label   activeSessionStartedAt;
-    private Label   activeSessionStartedBy;
     private Button  beginSessionButton;
     private Button  endSessionButton;
     private Listbox sessionHistoryListbox;
@@ -78,9 +75,6 @@ public class SessionManagementController
         closedSessionContent  = (Vlayout) comp.getFellow("closedSessionContent");
         activeSessionContent  = (Vlayout) comp.getFellow("activeSessionContent");
         activeSessionName     = (Label)   comp.getFellow("activeSessionName");
-        activeSessionId       = (Label)   comp.getFellow("activeSessionId");
-        activeSessionStartedAt = (Label)  comp.getFellow("activeSessionStartedAt");
-        activeSessionStartedBy = (Label)  comp.getFellow("activeSessionStartedBy");
         beginSessionButton    = (Button)  comp.getFellow("beginSessionButton");
         endSessionButton      = (Button)  comp.getFellow("endSessionButton");
         sessionHistoryListbox = (Listbox) comp.getFellow("sessionHistoryListbox");
@@ -333,26 +327,13 @@ public class SessionManagementController
 
         closedSessionContent.setVisible(false);
         activeSessionContent.setVisible(true);
-        sessionStatusBadge.setValue("ACTIVE SESSION");
+        sessionStatusBadge.setValue("ACTIVE");
         sessionStatusBadge.setSclass("status-badge status-active");
 
         activeSessionName.setValue(
                 activeSession.getSessionName() != null
                         ? activeSession.getSessionName()
                         : "Clearing Session");
-
-        activeSessionId.setValue(
-                "Session ID : " + activeSession.getSessionId());
-
-        activeSessionStartedAt.setValue(
-                activeSession.getStartedAt() != null
-                        ? "Started At : " + formatDateTime(activeSession.getStartedAt())
-                        : "Started At : -");
-
-        activeSessionStartedBy.setValue(
-                activeSession.getStartedBy() != null
-                        ? "Started By : Admin " + activeSession.getStartedBy()
-                        : "Started By : -");
     }
 
     // =========================================================

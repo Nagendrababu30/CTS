@@ -37,11 +37,6 @@
                         value="User Management"
                         sclass="user-page-title"/>
 
-                    <label
-                        id="userManagementSubtitle"
-                        value="Manage system operators, assign operational roles, and regulate system access"
-                        sclass="user-page-subtitle"/>
-
                 </div>
 
                 <button

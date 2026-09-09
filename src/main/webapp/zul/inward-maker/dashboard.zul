@@ -1,7 +1,7 @@
- 
+<?xml version="1.0" encoding="UTF-8"?>
 
 <?init class="com.cts.admin.controller.LayoutInit"
-        pageTitle="Inward Checker Dashboard"
+        pageTitle="Inward Maker Dashboard"
         active="dashboard"?>
 
 <?init class="org.zkoss.zk.ui.util.Composition"
@@ -9,41 +9,37 @@
 
 <zk>
 
-    <style src="/css/inward/checker/checkerDashboard.css"/>
+    <style src="/css/inward/maker/dashboard.css"/>
 
     <div
         self="@define(content)"
         width="100%"
         height="100%"
-        sclass="content checker-dashboard"
-        apply="com.cts.inward.controller.CheckerDashboardController">
+        sclass="content">
 
         <vlayout
-            width="100%"
+            apply="com.cts.inward.controller.DashboardController"
             spacing="20px"
-            sclass="content-layout">
-
-            <!-- Dashboard Title -->
+            sclass="content-layout"
+            hflex="1">
 
             <label
-                value="Inward Checker Dashboard"
-                sclass="dashboard-title"/>
+                value="Dashboard"
+                sclass="page-title"/>
 
 
             <!-- Summary Cards -->
 
             <hlayout
-                width="100%"
                 spacing="20px"
-                sclass="summary-container">
-
+                width="100%">
 
                 <!-- Received Batches -->
 
                 <hlayout
                     hflex="1"
-                    valign="middle"
-                    sclass="summary-card">
+                    sclass="summary-card"
+                    valign="middle">
 
                     <vlayout
                         sclass="card-icon-container icon-blue">
@@ -53,15 +49,14 @@
 
                     </vlayout>
 
-                    <vlayout
-                        spacing="2px">
+                    <vlayout spacing="2px">
 
                         <label
-                            value="Received Batches"
+                            value="Received batches"
                             sclass="card-label"/>
 
                         <label
-                            id="receivedCount"
+                            id="receivedCountLabel"
                             value="0"
                             sclass="card-value text-blue"/>
 
@@ -70,12 +65,12 @@
                 </hlayout>
 
 
-                <!-- Available Batches -->
+                <!-- Available Processing -->
 
                 <hlayout
                     hflex="1"
-                    valign="middle"
-                    sclass="summary-card">
+                    sclass="summary-card"
+                    valign="middle">
 
                     <vlayout
                         sclass="card-icon-container icon-purple">
@@ -85,15 +80,14 @@
 
                     </vlayout>
 
-                    <vlayout
-                        spacing="2px">
+                    <vlayout spacing="2px">
 
                         <label
-                            value="Available Batches"
+                            value="Available Processing"
                             sclass="card-label"/>
 
                         <label
-                            id="availableCount"
+                            id="pendingCountLabel"
                             value="0"
                             sclass="card-value text-purple"/>
 
@@ -106,8 +100,8 @@
 
                 <hlayout
                     hflex="1"
-                    valign="middle"
-                    sclass="summary-card">
+                    sclass="summary-card"
+                    valign="middle">
 
                     <vlayout
                         sclass="card-icon-container icon-green">
@@ -117,15 +111,14 @@
 
                     </vlayout>
 
-                    <vlayout
-                        spacing="2px">
+                    <vlayout spacing="2px">
 
                         <label
                             value="My Batches"
                             sclass="card-label"/>
 
                         <label
-                            id="myBatchCount"
+                            id="myBatchesCountLabel"
                             value="0"
                             sclass="card-value text-green"/>
 
@@ -136,85 +129,79 @@
             </hlayout>
 
 
-            <!-- Batches Pending For Verification -->
+            <!-- Data Table Panel -->
 
             <vlayout
-                width="100%"
                 sclass="table-panel"
                 spacing="0">
 
-
-                <!-- Table Header -->
-
                 <hlayout
-                    width="100%"
+                    sclass="table-header"
                     valign="middle"
-                    sclass="table-header">
+                    width="100%">
 
                     <label
-                        value="Batches Pending For Verification"
+                        value="Batches"
                         sclass="table-title"/>
 
-                </hlayout>
-
-
-                <!-- Horizontal Scroll Area -->
-
-                <div
-                    width="100%"
-                    sclass="table-scroll">
-
-                    <listbox
-                        id="batchList"
-                        width="1100px"
-                        sclass="batch-list"
-                        mold="paging"
-                        pageSize="5">
-
-                        <listhead>
-
-                            <listheader
-                                label="Batch ID"
-                                width="150px"/>
-
-                            <listheader
-                                label="Total Checks"
-                                width="150px"/>
-
-                            <listheader
-                                label="Maker"
-                                width="200px"/>
-
-                            <listheader
-                                label="Status"
-                                width="200px"/>
-
-                            <listheader
-                                label="User ID (Checker)"
-                                width="200px"/>
-
-                            <listheader
-                                label="Action"
-                                width="200px"/>
-
-                        </listhead>
-
-                    </listbox>
-
-                </div>
-
-
-                <!-- Footer -->
-
-                <hlayout
-                    width="100%"
-                    sclass="batch-footer">
+                    <hlayout
+                        hflex="1"/>
 
                     <label
-                        id="showingText"
-                        value="Showing 0 batches"/>
+                        value="Filter Status:"
+                        sclass="filter-label"/>
+
+                    <button
+                        id="allBtn"
+                        label="All"
+                        sclass="filter-btn active-filter"/>
+
+                    <button
+                        id="availableBtn"
+                        label="Available"
+                        sclass="filter-btn"/>
+
+                    <button
+                        id="myBatchesBtn"
+                        label="My Batches"
+                        sclass="filter-btn"/>
 
                 </hlayout>
+
+
+                <grid
+                    id="batchesGrid"
+                    sclass="custom-grid"
+                    emptyMessage="No batches found."
+                    mold="paging"
+                    pageSize="10">
+
+                    <columns>
+
+                        <column
+                            label="Batch ID"/>
+
+                        <column
+                            label="Total Cheque Count"
+                            align="center"/>
+
+                        <column
+                            label="Status"
+                            align="center"/>
+
+                        <column
+                            label="User ID"
+                            align="center"/>
+
+                        <column
+                            label="Action"
+                            align="center"/>
+
+                    </columns>
+
+                    <rows/>
+
+                </grid>
 
             </vlayout>
 

@@ -10,7 +10,9 @@ public interface BatchDao {
     void saveBatch(NpciBatchData batchData);
 
 	 List<NpciBatchData> getAllBatches();
-	
+	 
+	 int getDataEntryPendingCount(long batchId);
+	 
 	 boolean completeDataEntry(long batchId, long userId);
 
 	List<NpciBatchData> getBatchesByStatus(String batchStatus);

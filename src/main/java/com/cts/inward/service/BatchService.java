@@ -14,6 +14,8 @@ public interface BatchService {
 	
 	InwardBatch getBatch(String batchId);
 	
+	int getDataEntryPendingCount(long batchId);
+	
 	boolean acquireLock(String batchId, String userId);
 	
 	void releaseLock(String batchId, String userId);

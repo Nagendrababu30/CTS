@@ -89,7 +89,44 @@ public class BatchDaoImpl implements BatchDao {
 
 		return batches;
 	}
+	
+	@Override
+	public int getDataEntryPendingCount(long batchId) {
 
+		String sql =
+		        "SELECT COUNT(*) " +
+		        "FROM public.inward_cheque c " +
+		        "LEFT JOIN LATERAL ( " +
+		        "    SELECT h.status " +
+		        "    FROM public.inward_cheque_status_history h " +
+		        "    WHERE h.cheque_number = c.cheque_number " +
+		        "    ORDER BY h.status_history_id DESC " +
+		        "    LIMIT 1 " +
+		        ") latest ON TRUE " +
+		        "WHERE c.batch_id = ? " +
+		        "AND COALESCE(latest.status, '') NOT IN " +
+		        "('DATA_ENTRY_COMPLETED', 'RETURN_BY_MAKER')";
+
+	    try (Connection connection = ConnectionPool.getDataSource().getConnection();
+	         PreparedStatement statement = connection.prepareStatement(sql)) {
+
+	        statement.setLong(1, batchId);
+
+	        try (ResultSet resultSet = statement.executeQuery()) {
+
+	            if (resultSet.next()) {
+	                return resultSet.getInt(1);
+	            }
+	        }
+
+	    } catch (Exception e) {
+	        throw new RuntimeException(
+	                "Error retrieving Data Entry pending count for batch " + batchId, e);
+	    }
+
+	    return 0;
+	}
+	
 	@Override
 	public boolean completeDataEntry(long batchId, long userId) {
 
@@ -112,7 +149,7 @@ public class BatchDaoImpl implements BatchDao {
 					+ "    ORDER BY h.status_history_id DESC " + "    LIMIT 1 " + ") latest ON TRUE "
 					+ "WHERE c.batch_id = ?";
 
-			int totalCount = 0;
+			int totalCount =0;
 			int completedCount = 0;
 
 			try (PreparedStatement statement = connection.prepareStatement(checkSql)) {

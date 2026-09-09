@@ -105,8 +105,12 @@ public class DataEntryController extends GenericForwardComposer<Component> {
 
 		pendingCell.setStyle("text-align:center;");
 
-		pendingCell.appendChild(new Label(String.valueOf(batch.getTotalCheques()) + " Cheques"));
+		int pendingCount =
+		        batchService.getDataEntryPendingCount(batch.getBatchId());
 
+		pendingCell.appendChild(
+		        new Label(String.valueOf(pendingCount) + " Cheques")
+		);
 		item.appendChild(pendingCell);
 
 		// -----------------------------------------------------

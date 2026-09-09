@@ -4,9 +4,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
-import javax.sql.DataSource;
+import java.util.Map;
 
 import com.cts.inward.config.ConnectionPool;
 import com.cts.inward.model.NpciBatchData;
@@ -52,6 +52,10 @@ public class BatchDaoImpl implements BatchDao {
 		}
 	}
 
+	// =========================================================
+	// GET ALL BATCHES
+	// =========================================================
+
 	@Override
 	public List<NpciBatchData> getAllBatches() {
 
@@ -67,7 +71,7 @@ public class BatchDaoImpl implements BatchDao {
 
 		List<NpciBatchData> batches = new ArrayList<>();
 
-		try (Connection connection = ConnectionPool.getDataSource().getConnection();
+		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql);
 				ResultSet resultSet = statement.executeQuery()) {
 

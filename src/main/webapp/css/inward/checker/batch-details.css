@@ -1,0 +1,697 @@
+/* =========================================================
+   PAGE
+   ========================================================= */
+
+.batch-details-content {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 14px 20px 24px 20px;
+    background: #f4f7fd;
+    overflow: auto;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.details-header {
+    width: 100%;
+    margin-bottom: 18px;
+}
+
+.breadcrumb {
+    font-size: 12px;
+    color: #0757b8;
+}
+
+.breadcrumb-current {
+    font-size: 12px;
+    color: #111827;
+}
+
+.details-title {
+    margin-top: 2px;
+    font-size: 21px;
+    font-weight: 700;
+    color: #10233d;
+}
+
+.back-button {
+    width: 108px;
+    height: 30px;
+    border: 1px solid #d6dee8;
+    border-radius: 5px;
+    background: #ffffff;
+    color: #24364d;
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   MAIN LAYOUT
+   ========================================================= */
+
+.main-layout {
+    width: 100%;
+    box-sizing: border-box;
+    align-items: flex-start;
+}
+
+
+/*
+ * IMPORTANT
+ *
+ * Do not give left-card/right-card a fixed width.
+ *
+ * The ZUL uses:
+ *
+ * left-card  -> hflex="53"
+ * right-card -> hflex="47"
+ *
+ * Therefore ZK distributes the available width between them.
+ */
+
+.left-card,
+.right-card {
+    min-width: 0;
+    box-sizing: border-box;
+    background: #ffffff;
+    border: 1px solid #dce3ed;
+    border-radius: 6px;
+}
+
+.left-card {
+    padding: 20px;
+}
+
+.right-card {
+    padding: 20px;
+}
+
+
+/* =========================================================
+   PANEL TITLE
+   ========================================================= */
+
+.panel-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #10233d;
+}
+
+
+/* =========================================================
+   IMAGE PREVIEW
+   ========================================================= */
+
+.image-wrapper {
+    width: 100%;
+    height: 250px;
+    margin-top: 14px;
+    padding: 10px;
+    box-sizing: border-box;
+    border: 1px solid #d9e1eb;
+    border-radius: 5px;
+    background: #f7faff;
+}
+
+.zoom-row {
+    width: 100%;
+    height: 28px;
+}
+
+.zoom-button {
+    width: 28px;
+    height: 24px;
+    min-width: 28px;
+    padding: 0;
+    border: 1px solid #d3dce7;
+    border-radius: 4px;
+    background: #ffffff;
+    color: #172a43;
+    font-size: 11px;
+}
+
+.zoom-button:hover {
+    background: #f2f5f9;
+}
+
+.zoom-value {
+    width: 48px;
+    height: 24px;
+    box-sizing: border-box;
+    border-top: 1px solid #d3dce7;
+    border-bottom: 1px solid #d3dce7;
+    background: #ffffff;
+    text-align: center;
+}
+
+.zoom-label {
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   CHEQUE PREVIEW
+   ========================================================= */
+
+.cheque-preview {
+    width: 100%;
+    height: 200px;
+    box-sizing: border-box;
+    padding: 14px;
+    border: 1px solid #bcd2e4;
+    border-radius: 3px;
+    background: #dff1fc;
+    overflow: hidden;
+}
+
+.cheque-bank {
+    font-size: 14px;
+    font-weight: 700;
+    color: #075be7;
+}
+
+.cheque-branch {
+    margin-top: 7px;
+    font-size: 9px;
+    color: #536b83;
+}
+
+.cheque-top-right {
+    align-items: flex-end;
+}
+
+.cheque-number {
+    font-size: 13px;
+    font-weight: 700;
+    color: #17304f;
+}
+
+.cheque-date {
+    padding: 4px 8px;
+    border: 1px solid #9db2c8;
+    border-radius: 3px;
+    background: #ffffff;
+    color: #263b55;
+    font-size: 9px;
+}
+
+.cheque-line {
+    margin-top: 17px;
+    align-items: center;
+}
+
+.cheque-label {
+    margin-right: 8px;
+    font-size: 9px;
+    font-weight: 700;
+    color: #58718b;
+}
+
+.cheque-value {
+    padding-bottom: 2px;
+    border-bottom: 1px dashed #8fa5ba;
+    font-size: 12px;
+    font-weight: 600;
+    color: #172b45;
+}
+
+.amount-box {
+    padding: 6px 10px;
+    border: 1px solid #9db2c8;
+    border-radius: 3px;
+    background: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    color: #14263e;
+}
+
+.micr-image {
+    width: 100%;
+    margin-top: 25px;
+    text-align: center;
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: #17324f;
+}
+
+
+/* =========================================================
+   CHEQUE INFORMATION
+   ========================================================= */
+
+.cheque-info-row {
+    width: 100%;
+    margin-top: 15px;
+}
+
+.cheque-info {
+    font-size: 11px;
+    font-weight: 700;
+    color: #10233d;
+}
+
+.cbs-pass-badge {
+    padding: 4px 8px;
+    border: 1px solid #22c55e;
+    border-radius: 5px;
+    background: #ecfdf3;
+    color: #07883c;
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.cbs-fail-badge {
+    padding: 4px 8px;
+    border: 1px solid #ef4444;
+    border-radius: 5px;
+    background: #fff1f2;
+    color: #dc2626;
+    font-size: 9px;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   CHEQUE NAVIGATION
+   ========================================================= */
+
+.cheque-nav {
+    width: 100%;
+    margin-top: 12px;
+    overflow: hidden;
+}
+
+.cheque-nav-label {
+    margin-right: 7px;
+    font-size: 9px;
+    font-weight: 700;
+    color: #63758a;
+}
+
+.cheque-button {
+    width: 28px;
+    height: 27px;
+    min-width: 28px;
+    margin-right: 3px;
+    padding: 0;
+    border: 1px solid #7ee0a7;
+    border-radius: 3px;
+    background: #f3fff7;
+    color: #087b3d;
+    font-size: 10px;
+}
+
+.cheque-button-selected {
+    border-color: #1769e0;
+    background: #1769e0;
+    color: #ffffff;
+}
+
+.cheque-arrow {
+    width: 28px;
+    height: 27px;
+    min-width: 28px;
+    padding: 0;
+    border: 1px solid #cbd5e1;
+    border-radius: 3px;
+    background: #ffffff;
+    color: #334155;
+}
+
+
+/* =========================================================
+   DECISION BUTTONS
+   ========================================================= */
+
+.decision-area {
+    width: 100%;
+    margin-top: 16px;
+    padding-top: 15px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.decision-button {
+    height: 35px;
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.accept-button {
+    border: 1px solid #16a34a;
+    background: #16a34a;
+    color: #ffffff;
+}
+
+.return-button {
+    border: 1px solid #f59e0b;
+    background: #ffffff;
+    color: #d97706;
+}
+
+.reject-button {
+    border: 1px solid #fee2e2;
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.selected-decision {
+    width: 100%;
+    height: 33px;
+    margin-top: 8px;
+    box-sizing: border-box;
+    border: 1px dashed #16a34a;
+    border-radius: 5px;
+    background: #f0fdf4;
+    justify-content: center;
+    color: #079447;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   RIGHT HEADER
+   ========================================================= */
+
+.verification-header {
+    width: 100%;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.verification-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #10233d;
+}
+
+.verification-subtitle {
+    margin-top: 4px;
+    font-size: 9px;
+    color: #5c7088;
+}
+
+.verification-value {
+    font-size: 9px;
+    font-weight: 700;
+    color: #174a99;
+}
+
+.maker-badge {
+    padding: 5px 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background: #f8fafc;
+    color: #26415f;
+    font-size: 9px;
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   COMMON SECTION
+   ========================================================= */
+
+.section {
+    width: 100%;
+    margin-top: 12px;
+    padding: 11px;
+    box-sizing: border-box;
+    border: 1px solid #dce3ed;
+    border-radius: 5px;
+    background: #ffffff;
+}
+
+.section-header {
+    width: 100%;
+}
+
+.section-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: #142a44;
+}
+
+.section-description {
+    font-size: 9px;
+    color: #42658d;
+}
+
+.green-status {
+    font-size: 9px;
+    font-weight: 600;
+    color: #079447;
+    white-space: nowrap;
+}
+
+.unchanged-status {
+    font-size: 9px;
+    color: #42658d;
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   MAKER REJECTION
+   ========================================================= */
+
+.maker-rejection {
+    border-color: #ef4444;
+    background: #fffafa;
+}
+
+.rejection-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: #dc2626;
+}
+
+.rejection-text {
+    margin-top: 4px;
+    font-size: 9px;
+    color: #374151;
+}
+
+.rejection-reason {
+    color: #dc2626;
+}
+
+.rejected-badge {
+    padding: 3px 6px;
+    border-radius: 3px;
+    background: #dc2626;
+    color: #ffffff;
+    font-size: 8px;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   FIELDS
+   ========================================================= */
+
+.field-label {
+    font-size: 9px;
+    color: #263c57;
+}
+
+.old-label {
+    margin-bottom: 3px;
+    font-size: 8px;
+    color: #dc2626;
+}
+
+.new-label {
+    margin-bottom: 3px;
+    font-size: 8px;
+    color: #079447;
+}
+
+.value-box {
+    width: 100%;
+    height: 29px;
+    box-sizing: border-box;
+    padding: 0 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background: #ffffff;
+    align-items: center;
+    font-size: 9px;
+    color: #1e293b;
+    overflow: hidden;
+}
+
+.value-box label {
+    white-space: nowrap;
+}
+
+.old-value {
+    border-color: #ff4d4d;
+    background: #fff1f2;
+    color: #dc2626;
+}
+
+.new-value {
+    border-color: #22c55e;
+    background: #f0fdf4;
+    color: #079447;
+}
+
+.data-field {
+    width: 100%;
+    margin-top: 9px;
+}
+
+.field-header {
+    width: 100%;
+}
+
+
+/* =========================================================
+   CBS
+   ========================================================= */
+
+.cbs-section {
+    border-color: #22c55e;
+    background: #f0fdf4;
+}
+
+.cbs-section-failed {
+    border-color: #ef4444;
+    background: #fffafa;
+}
+
+.cbs-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: #079447;
+}
+
+.cbs-title-failed {
+    color: #dc2626;
+}
+
+.cbs-failure {
+    width: 100%;
+    margin-top: 7px;
+    padding: 6px 7px;
+    box-sizing: border-box;
+    border: 1px solid #fecaca;
+    border-radius: 4px;
+    background: #ffffff;
+    color: #dc2626;
+    font-size: 8px;
+}
+
+.cbs-checks {
+    width: 100%;
+    margin-top: 8px;
+}
+
+.cbs-check {
+    min-width: 0;
+    height: 40px;
+    box-sizing: border-box;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background: #ffffff;
+    justify-content: center;
+    align-items: center;
+    padding: 3px;
+}
+
+.cbs-check-name {
+    width: 100%;
+    font-size: 8px;
+    color: #50647c;
+    text-align: center;
+    white-space: normal;
+}
+
+.cbs-check-value {
+    font-size: 8px;
+    font-weight: 700;
+    color: #079447;
+    text-align: center;
+}
+
+.cbs-check-failed {
+    border-color: #ef4444;
+}
+
+.cbs-check-failed .cbs-check-value {
+    color: #dc2626;
+}
+
+
+/* =========================================================
+   REMARKS
+   ========================================================= */
+
+.remarks-label {
+    font-size: 9px;
+    color: #263c57;
+}
+
+.remarks-box {
+    width: 100%;
+    height: 45px;
+    margin-top: 5px;
+    box-sizing: border-box;
+    border: 1px solid #d1d9e4;
+    border-radius: 4px;
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   BOTTOM ACTIONS
+   ========================================================= */
+
+.bottom-actions {
+    width: 100%;
+    margin-top: 13px;
+    padding-top: 12px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.prev-next {
+    width: 80px;
+    height: 30px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    background: #ffffff;
+    color: #334155;
+    font-size: 9px;
+}
+
+.complete-button {
+    width: 158px;
+    height: 30px;
+    border: 1px solid #16a34a;
+    border-radius: 4px;
+    background: #16a34a;
+    color: #ffffff;
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.cbs-fail-value {
+    color: #d93025;
+    font-weight: 600;
+}
+
+.red-status {
+    color: #d93025;
+    font-weight: 600;
+}
+
+.cbs-fail-badge {
+    color: #d93025;
+    font-weight: 600;
+}

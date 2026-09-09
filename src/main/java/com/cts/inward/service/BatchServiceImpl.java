@@ -139,7 +139,12 @@ public class BatchServiceImpl implements BatchService {
 		return new InwardBatch(batch.getBatchId(), batch.getFileId(), batch.getPresentingBankName(),
 				batch.getTotalCheques());
 	}
-
+	
+	@Override
+	public int getDataEntryPendingCount(long batchId) {
+	    return batchDao.getDataEntryPendingCount(batchId);
+	}
+	
 	@Override
 	public boolean completeDataEntry(long batchId, long userId) {
 

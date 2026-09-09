@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?init class="com.cts.admin.controller.LayoutInit"
+        pageTitle="User Management"
+        active="user-management"?>
+
+<?init class="org.zkoss.zk.ui.util.Composition"
+        arg0="/zul/common/layout.zul"?>
+
+<zk>
+
+    <style src="/css/admin/user.css"/>
+
+    <div
+        self="@define(content)"
+        width="100%"
+        height="100%"
+        sclass="content">
+
+        <vlayout
+            id="userManagementPage"
+            width="100%"
+            apply="com.cts.admin.controller.UserController"
+            spacing="0"
+            sclass="user-management-page">
+
+            <!-- ====================================================
+                 PAGE HEADER
+                 ==================================================== -->
+
+            <div sclass="user-page-header">
+
+                <div sclass="user-page-header-left">
+
+                    <label
+                        id="userManagementTitle"
+                        value="User Management"
+                        sclass="user-page-title"/>
+
+                </div>
+
+                <button
+                    id="createUserButton"
+                    label="+ Create User"
+                    sclass="create-user-button"/>
+
+            </div>
+
+
+            <!-- ====================================================
+                 SEARCH / FILTER CARD
+                 ==================================================== -->
+
+            <div sclass="user-filter-card">
+
+                <div sclass="user-search-container">
+
+                    <label
+                        id="userSearchIcon"
+                        value="⌕"
+                        sclass="user-search-icon"/>
+
+                    <textbox
+                        id="userSearchTextbox"
+                        hflex="1"
+                        placeholder="Search by username or user ID..."
+                        sclass="user-search-textbox"/>
+
+                </div>
+
+                <button
+                    id="searchUserButton"
+                    label="Search"
+                    iconSclass="z-icon-search"
+                    sclass="btn-search"/>
+
+                <button
+                    id="clearUserFilterButton"
+                    label="Clear"
+                    sclass="btn-clear"/>
+
+                <div sclass="filter-divider"/>
+
+                <label
+                    id="roleFilterLabel"
+                    value="Role"
+                    sclass="user-filter-label"/>
+
+                <combobox
+                    id="roleFilterCombobox"
+                    readonly="true"
+                    sclass="user-filter-combobox role-filter-combobox"/>
+
+                <label
+                    id="statusFilterLabel"
+                    value="Status"
+                    sclass="user-filter-label"/>
+
+                <combobox
+                    id="statusFilterCombobox"
+                    readonly="true"
+                    sclass="user-filter-combobox status-filter-combobox"/>
+
+            </div>
+
+
+            <!-- ====================================================
+                 SYSTEM USERS CARD
+                 ==================================================== -->
+
+            <div
+                id="systemUsersCard"
+                sclass="system-users-card">
+
+                <div sclass="system-users-header">
+                    <label
+                        id="systemUsersTitle"
+                        value="System Users"
+                        sclass="system-users-title"/>
+                </div>
+
+                <listbox
+                    id="userListbox"
+                    sclass="user-listbox"
+                    sizedByContent="false"
+                    span="true"
+                    emptyMessage="No users found">
+
+                    <listhead
+                        id="userListHead"
+                        sizable="false"
+                        menupopup="none">
+
+                        <listheader id="userIdHeader"       label="S.No"         width="10%"/>
+                        <listheader id="usernameHeader"     label="Username"      width="26%"/>
+                        <listheader id="assignedRoleHeader" label="Assigned Role" width="26%"/>
+                        <listheader id="userStatusHeader"   label="Status"        width="19%" align="center"/>
+                        <listheader id="userActionsHeader"  label="Actions"       width="19%" align="center"/>
+
+                    </listhead>
+
+                </listbox>
+
+                <paging
+                    id="userPaging"
+                    pageSize="10"
+                    detailed="true"
+                    sclass="user-paging"/>
+
+            </div>
+
+        </vlayout>
+
+    </div>
+
+</zk>

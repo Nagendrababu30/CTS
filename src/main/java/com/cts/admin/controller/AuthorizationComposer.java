@@ -42,7 +42,27 @@ public class AuthorizationComposer
                 "ADMIN");
 
         PAGE_PERMISSIONS.put(
+                "/zul/admin/admin-dashboard.zul",
+                "ADMIN");
+
+        PAGE_PERMISSIONS.put(
+                "/zul/admin/admin-audit-logs.zul",
+                "ADMIN");
+
+        PAGE_PERMISSIONS.put(
+                "/zul/admin/admin-batch-monitoring.zul",
+                "ADMIN");
+
+        PAGE_PERMISSIONS.put(
                 "/zul/admin/admin-session-management.zul",
+                "ADMIN");
+
+        PAGE_PERMISSIONS.put(
+                "/zul/admin/admin-roles.zul",
+                "ADMIN");
+
+        PAGE_PERMISSIONS.put(
+                "/zul/admin/admin-user-management.zul",
                 "ADMIN");
 
         PAGE_PERMISSIONS.put(

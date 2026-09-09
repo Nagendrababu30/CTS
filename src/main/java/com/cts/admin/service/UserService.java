@@ -1,28 +1,26 @@
 package com.cts.admin.service;
 
-import com.cts.admin.dao.UserDao;
+import java.util.List;
+
 import com.cts.admin.model.User;
 
-public class UserService {
+public interface UserService {
 
-    private final UserDao userDao;
+    User authenticate(String username, String password);
 
-    public UserService() {
-    	userDao = new UserDao();
-    }
+    List<User> getUsers(int limit, int offset, String searchText, Long roleId, String status);
 
-    public User authenticate(String username, String password) {
+    User getUserById(Long userId);
 
-        if (username == null || username.trim().isEmpty()) {
-            return null;
-        }
+    boolean usernameExists(String username);
 
-        if (password == null || password.isEmpty()) {
-            return null;
-        }
+    boolean createUser(User user);
 
-        return userDao.authenticate(
-                username.trim(),
-                password);
-    }
+    boolean updateUser(User user);
+
+    boolean updateUserStatus(Long userId, String status);
+
+    void deleteUser(Long userId);
+
+    int getUserCount();
 }

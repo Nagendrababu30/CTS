@@ -40,23 +40,23 @@ public class BatchServiceImpl implements BatchService {
             getAvailableBatchesForMaker(
                     String userId) {
 
-        List<NpciBatchData> batches =
-                batchDao.getAllBatches();
+//        List<NpciBatchData> batches =
+//                batchDao.getAllBatches();
+//
+//        List<InwardBatch> result =
+//                new ArrayList<>();
+//
+//        if (batches == null) {
+//            return result;
+//        }
+//
+//        for (NpciBatchData batch : batches) {
+//
+//            result.add(
+//                    convert(batch));
+//        }
 
-        List<InwardBatch> result =
-                new ArrayList<>();
-
-        if (batches == null) {
-            return result;
-        }
-
-        for (NpciBatchData batch : batches) {
-
-            result.add(
-                    convert(batch));
-        }
-
-        return result;
+        return null;
     }
 
     // ---------------------------------------------------------
@@ -83,23 +83,23 @@ public class BatchServiceImpl implements BatchService {
     public InwardBatch getBatch(
             String batchId) {
 
-        long id =
-                Long.parseLong(batchId);
-
-        List<NpciBatchData> batches =
-                batchDao.getAllBatches();
-
-        if (batches == null) {
-            return null;
-        }
-
-        for (NpciBatchData batch : batches) {
-
-            if (batch.getBatchId() == id) {
-
-                return convert(batch);
-            }
-        }
+//        long id =
+//                Long.parseLong(batchId);
+//
+//        List<NpciBatchData> batches =
+//                batchDao.getAllBatches();
+//
+//        if (batches == null) {
+//            return null;
+//        }
+//
+//        for (NpciBatchData batch : batches) {
+//
+//            if (batch.getBatchId() == id) {
+//
+//                return convert(batch);
+//            }
+//        }
 
         return null;
     }

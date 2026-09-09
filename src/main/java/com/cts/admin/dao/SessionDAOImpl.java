@@ -16,7 +16,7 @@ public class SessionDAOImpl implements SessionDAO {
     public boolean startSession(Long userId) {
 
         String sessionName = "Clearing Session - "
-                + new java.text.SimpleDateFormat("dd MMM yyyy HH:mm")
+                + new java.text.SimpleDateFormat("dd MMM yyyy")
                         .format(new java.util.Date());
 
         java.sql.Timestamp nowIST = new java.sql.Timestamp(

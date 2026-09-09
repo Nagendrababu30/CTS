@@ -37,11 +37,6 @@
                 sclass="session-page-title"
                 value="Session Management"/>
 
-            <label
-                id="sessionPageSubtitle"
-                sclass="session-page-subtitle"
-                value="Open and close clearing operational windows, control batch intake sessions, and review clearing cycle history"/>
-
 
             <!-- ========================================================
                  CURRENT SESSION CARD
@@ -108,21 +103,6 @@
                     <label
                         id="activeSessionName"
                         sclass="active-session-name"
-                        value=""/>
-
-                    <label
-                        id="activeSessionId"
-                        sclass="session-detail"
-                        value=""/>
-
-                    <label
-                        id="activeSessionStartedAt"
-                        sclass="session-detail"
-                        value=""/>
-
-                    <label
-                        id="activeSessionStartedBy"
-                        sclass="session-detail"
                         value=""/>
 
                     <button

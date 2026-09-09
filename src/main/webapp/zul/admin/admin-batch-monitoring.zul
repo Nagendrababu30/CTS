@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?init class="com.cts.admin.controller.LayoutInit"
+        pageTitle="Batch Monitoring"
+        active="batch-monitoring"?>
+
+<?init class="org.zkoss.zk.ui.util.Composition"
+        arg0="/zul/common/layout.zul"?>
+
+<zk>
+
+    <style src="/css/admin/batchMonitoring.css"/>
+
+    <div
+        self="@define(content)"
+        width="100%"
+        height="100%"
+        sclass="content">
+
+        <vlayout
+            id="batchMonitoringPage"
+            apply="com.cts.admin.controller.BatchMonitoringController"
+            width="100%"
+            spacing="0"
+            sclass="batch-page">
+
+            <!-- PAGE HEADER -->
+            <label sclass="batch-page-title" value="Batch Monitoring"/>
+
+            <div style="height:4px;"/>
+
+            <!-- TAB / SEARCH CARD -->
+            <div sclass="batch-tab-card">
+
+                <hbox align="center" spacing="8px" sclass="batch-tab-left">
+
+                    <button id="tabBatchCapture" sclass="batch-tab-btn batch-tab-active" label="Batch Capture"/>
+                    <button id="tabInward"       sclass="batch-tab-btn"                 label="Inward Batches"/>
+                    <button id="tabOutward"      sclass="batch-tab-btn"                 label="Outward"/>
+
+                </hbox>
+
+                <hbox align="center" spacing="0" sclass="batch-search-wrapper">
+
+                    <hbox align="center" spacing="0" sclass="batch-search-box">
+
+                        <label sclass="batch-search-icon" value="&#x2315;"/>
+
+                        <textbox
+                            id="batchSearchTextbox"
+                            width="200px"
+                            height="34px"
+                            placeholder="Search by Batch ID, User..."
+                            sclass="batch-search-textbox"/>
+
+                    </hbox>
+
+                    <button id="batchSearchButton" sclass="batch-search-btn" label="Search"/>
+
+                </hbox>
+
+            </div>
+
+            <!-- RESULTS CARD -->
+            <vlayout spacing="0" sclass="batch-results-card">
+
+                <label
+                    id="batchSectionTitle"
+                    sclass="batch-results-title"
+                    value="Batch Capture Batches"/>
+
+                <listbox
+                    id="batchListbox"
+                    sclass="batch-listbox"
+                    sizedByContent="true"
+                    span="true"
+                    emptyMessage="No records available">
+
+                    <!--
+                        Listhead rebuilt dynamically by BatchMonitoringController
+                        Batch Capture:  Batch ID | Branch | Cheque Count | Created By | Created At
+                        Inward/Outward: Batch ID | Cheque Count | Status | Maker | Checker |
+                                        Maker Receive Time | Checker Receive Time | Batch Completion Time
+                    -->
+
+                </listbox>
+
+            </vlayout>
+
+        </vlayout>
+
+    </div>
+
+</zk>

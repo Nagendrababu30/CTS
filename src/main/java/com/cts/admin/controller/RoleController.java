@@ -45,18 +45,9 @@ public class RoleController extends GenericForwardComposer<Component> {
 
                 /* ── Role Name ── */
                 Listcell nameCell = new Listcell();
-                Hbox nameBox = new Hbox();
-                nameBox.setSclass("role-name-box");
-
-                Label icon = new Label(getInitial(role.getRoleName()));
-                icon.setSclass("role-icon-label");
-
                 Label nameLabel = new Label(role.getRoleName());
                 nameLabel.setSclass("role-name-label");
-
-                nameBox.appendChild(icon);
-                nameBox.appendChild(nameLabel);
-                nameCell.appendChild(nameBox);
+                nameCell.appendChild(nameLabel);
                 item.appendChild(nameCell);
 
                 /* ── Description ── */
@@ -94,8 +85,4 @@ public class RoleController extends GenericForwardComposer<Component> {
         }
     }
 
-    private String getInitial(String roleName) {
-        if (roleName == null || roleName.isEmpty()) return "R";
-        return String.valueOf(roleName.charAt(0)).toUpperCase();
-    }
 }

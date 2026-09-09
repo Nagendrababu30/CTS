@@ -55,9 +55,8 @@ public class DashboardController extends GenericForwardComposer<Component> {
     private Vlayout sessionStatusBox;
     private Label   sessionCurrentLbl;
     private Label   sessionNameLbl;
-    private Div     sessionBadge;
+    private Div     sessionStatusBadge;
     private Label   sessionBadgeLbl;
-    private Label   sessionMetaLbl;
     private Label   sessionManageLink;
 
     /* Batch card */
@@ -164,25 +163,19 @@ public class DashboardController extends GenericForwardComposer<Component> {
                 sessionCurrentLbl.setSclass("session-current-label");
                 sessionCurrentLbl.setValue("CURRENT SESSION");
                 sessionNameLbl.setValue("No Active Session");
-                sessionBadge.setSclass("session-badge session-badge-inactive");
+                sessionStatusBadge.setSclass("status-badge status-inactive");
                 sessionBadgeLbl.setValue("NOT STARTED");
-                sessionMetaLbl.setValue("Started: - by -");
 
             } else {
 
                 sessionStatusBox.setSclass("session-status-box session-box-active");
                 sessionCurrentLbl.setSclass("session-current-label-active");
                 sessionCurrentLbl.setValue("CURRENT SESSION");
-                sessionNameLbl.setValue("Clearing Session");
-                sessionBadge.setSclass("session-badge session-badge-active");
+                sessionNameLbl.setValue(
+                        active.getSessionName() != null ? active.getSessionName() : "-");
+                sessionStatusBadge.setSclass("status-badge status-active");
                 sessionBadgeLbl.setValue("ACTIVE");
 
-                String startedAt = active.getStartedAt() != null
-                        ? DATE_FMT.format(active.getStartedAt()) : "-";
-                String startedBy = active.getStartedBy() != null
-                        ? "Admin " + active.getStartedBy() : "-";
-
-                sessionMetaLbl.setValue("Started: " + startedAt + " by " + startedBy);
             }
 
         } catch (Exception e) {

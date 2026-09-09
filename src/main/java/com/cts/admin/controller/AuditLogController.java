@@ -9,6 +9,7 @@ import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
+import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listcell;
@@ -21,6 +22,8 @@ import org.zkoss.zul.event.PagingEvent;
 import com.cts.admin.model.AuditLog;
 import com.cts.admin.service.AuditLogService;
 import com.cts.admin.service.AuditLogServiceImpl;
+import com.cts.admin.service.RoleService;
+import com.cts.admin.service.RoleServiceImpl;
 
 public class AuditLogController extends GenericForwardComposer<Component> {
 
@@ -46,6 +49,7 @@ public class AuditLogController extends GenericForwardComposer<Component> {
     // ================================================================
 
     private AuditLogService auditLogService;
+    private RoleService     roleService;
 
     // ================================================================
     // INIT
@@ -57,6 +61,10 @@ public class AuditLogController extends GenericForwardComposer<Component> {
         super.doAfterCompose(comp);
 
         auditLogService = new AuditLogServiceImpl();
+        roleService     = new RoleServiceImpl();
+
+        /* Load role filter from DB */
+        loadRoleFilter();
 
         auditLogPaging.setPageSize(PAGE_SIZE);
         auditLogPaging.setTotalSize(auditLogService.getTotalAuditLogCount());
@@ -104,6 +112,27 @@ public class AuditLogController extends GenericForwardComposer<Component> {
                 loadAuditLogs(0);
             }
         });
+    }
+
+    // ================================================================
+    // LOAD ROLE FILTER FROM DB
+    // ================================================================
+
+    private void loadRoleFilter() {
+        auditRoleCombobox.getItems().clear();
+        Comboitem all = new Comboitem("All Roles");
+        all.setValue(null);
+        auditRoleCombobox.appendChild(all);
+        try {
+            roleService.getAllRoles().forEach(role -> {
+                Comboitem item = new Comboitem(role.getRoleName());
+                item.setValue(role.getRoleName());
+                auditRoleCombobox.appendChild(item);
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        auditRoleCombobox.setSelectedIndex(0);
     }
 
     // ================================================================

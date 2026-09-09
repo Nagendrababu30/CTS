@@ -25,8 +25,9 @@
             sclass="batch-page">
 
             <!-- PAGE HEADER -->
-            <label sclass="batch-page-title"    value="Batch Monitoring"/>
-            <label sclass="batch-page-subtitle" value="Real-time tracking of clearing batches across Batch Capture, Inward, and Outward cycles"/>
+            <label sclass="batch-page-title" value="Batch Monitoring"/>
+
+            <div style="height:4px;"/>
 
             <!-- TAB / SEARCH CARD -->
             <div sclass="batch-tab-card">

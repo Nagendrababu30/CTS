@@ -112,7 +112,7 @@
             <!-- Verify Batch -->
             <a
                 href="/zul/inward-checker/verification.zul"
-                sclass="${arg.active eq 'verification' ? 'menu-item active-menu' : 'menu-item'}">
+                sclass="${arg.active eq 'verify-batch' ? 'menu-item active-menu' : 'menu-item'}">
 
                 <n:i class="fa-regular fa-clipboard menu-icon"></n:i>
 

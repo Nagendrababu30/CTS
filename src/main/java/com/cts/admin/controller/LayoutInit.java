@@ -12,49 +12,33 @@ import com.cts.admin.model.User;
 
 public class LayoutInit implements Initiator {
 
-    @Override
-    public void doInit(
-            Page page,
-            Map<String, Object> args)
-            throws Exception {
+	@Override
+	public void doInit(Page page, Map<String, Object> args) throws Exception {
 
-        Execution execution =
-                Executions.getCurrent();
+		Execution execution = Executions.getCurrent();
 
-        Session session =
-                execution.getSession();
+		Session session = execution.getSession();
 
-        User user =
-                (User) session.getAttribute(
-                        "loggedInUser");
+		User user = (User) session.getAttribute("loggedInUser");
 
-        if (user == null) {
+		if (user == null) {
 
-            Executions.sendRedirect(
-                    "/login.zul");
+			Executions.sendRedirect("/login.zul");
 
-            return;
-        }
+			return;
+		}
 
-        execution.setAttribute(
-                "roleId",
-                user.getRoleId());
+		execution.setAttribute("userId", user.getUserId());
 
-        execution.setAttribute(
-                "roleName",
-                user.getRoleName());
+		execution.setAttribute("roleId", user.getRoleId());
 
-        execution.setAttribute(
-                "username",
-                user.getUsername());
+		execution.setAttribute("roleName", user.getRoleName());
 
+		execution.setAttribute("username", user.getUsername());
 
-        for (Map.Entry<String, Object> entry
-                : args.entrySet()) {
+		for (Map.Entry<String, Object> entry : args.entrySet()) {
 
-            execution.setAttribute(
-                    entry.getKey(),
-                    entry.getValue());
-        }
-    }
+			execution.setAttribute(entry.getKey(), entry.getValue());
+		}
+	}
 }

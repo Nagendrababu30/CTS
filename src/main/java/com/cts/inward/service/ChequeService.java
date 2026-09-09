@@ -23,4 +23,6 @@ public interface ChequeService {
 
 	void updateCheque(String chequeNumber,long batchId,String accountNumber,BigDecimal amount,LocalDate chequeDate);
 	
+	void updateDataEntryCheque(String chequeNumber, long batchId, String accountNumber, BigDecimal amount,
+			LocalDate chequeDate, long userId);
 }

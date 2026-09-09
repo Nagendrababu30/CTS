@@ -7,164 +7,141 @@ import com.cts.inward.dao.BatchDao;
 import com.cts.inward.model.InwardBatch;
 import com.cts.inward.model.NpciBatchData;
 
-public class BatchServiceImpl
-        implements BatchService {
+public class BatchServiceImpl implements BatchService {
 
-    private final BatchDao batchDao;
+	private final BatchDao batchDao;
 
-    private BatchServiceImpl(
-            BatchDao batchDao) {
+	private BatchServiceImpl(BatchDao batchDao) {
 
-        this.batchDao = batchDao;
-    }
+		this.batchDao = batchDao;
+	}
 
-    public static BatchServiceImpl of(
-            BatchDao batchDao) {
+	public static BatchServiceImpl of(BatchDao batchDao) {
 
-        return new BatchServiceImpl(
-                batchDao);
-    }
+		return new BatchServiceImpl(batchDao);
+	}
 
-    // ---------------------------------------------------------
-    // Save batch
-    // ---------------------------------------------------------
+	// ---------------------------------------------------------
+	// Save batch
+	// ---------------------------------------------------------
 
-    @Override
-    public void saveBatch(
-            NpciBatchData batchData) {
+	@Override
+	public void saveBatch(NpciBatchData batchData) {
 
-        batchDao.saveBatch(batchData);
-    }
+		batchDao.saveBatch(batchData);
+	}
 
-    // ---------------------------------------------------------
-    // Maker Data Entry queue
-    // ---------------------------------------------------------
+	// ---------------------------------------------------------
+	// Maker Data Entry queue
+	// ---------------------------------------------------------
 
-    @Override
-    public List<InwardBatch>
-            getAvailableBatchesForMaker(
-                    String userId) {
+	@Override
+	public List<InwardBatch> getAvailableBatchesForMaker(String userId) {
 
-        List<NpciBatchData> batches =
-                batchDao.getAllBatches();
+		List<NpciBatchData> batches = batchDao.getBatchesByStatus("DATA_ENTRY");
 
-        List<InwardBatch> result =
-                new ArrayList<>();
+		List<InwardBatch> result = new ArrayList<>();
 
-        if (batches == null) {
-            return result;
-        }
+		if (batches == null) {
+			return result;
+		}
 
-        for (NpciBatchData batch : batches) {
+		for (NpciBatchData batch : batches) {
 
-            result.add(
-                    convert(batch));
-        }
+			result.add(convert(batch));
+		}
 
-        return result;
-    }
+		return result;
+	}
+	// ---------------------------------------------------------
+	// Checker queue
+	// ---------------------------------------------------------
 
-    // ---------------------------------------------------------
-    // Checker queue
-    // ---------------------------------------------------------
+	@Override
+	public List<InwardBatch> getBatchesForChecker(String userId) {
 
-    @Override
-    public List<InwardBatch>
-            getBatchesForChecker(
-                    String userId) {
+		/*
+		 * Checker filtering will be implemented when the checker workflow is connected.
+		 */
+		return getAvailableBatchesForMaker(userId);
+	}
 
-        /*
-         * Checker filtering will be implemented
-         * when the checker workflow is connected.
-         */
-        return getAvailableBatchesForMaker(userId);
-    }
+	// ---------------------------------------------------------
+	// Get one batch
+	// ---------------------------------------------------------
 
-    // ---------------------------------------------------------
-    // Get one batch
-    // ---------------------------------------------------------
+	@Override
+	public InwardBatch getBatch(String batchId) {
 
-    @Override
-    public InwardBatch getBatch(
-            String batchId) {
+		long id = Long.parseLong(batchId);
 
-        long id =
-                Long.parseLong(batchId);
+		List<NpciBatchData> batches = batchDao.getAllBatches();
 
-        List<NpciBatchData> batches =
-                batchDao.getAllBatches();
+		if (batches == null) {
+			return null;
+		}
 
-        if (batches == null) {
-            return null;
-        }
+		for (NpciBatchData batch : batches) {
 
-        for (NpciBatchData batch : batches) {
+			if (batch.getBatchId() == id) {
 
-            if (batch.getBatchId() == id) {
+				return convert(batch);
+			}
+		}
 
-                return convert(batch);
-            }
-        }
+		return null;
+	}
 
-        return null;
-    }
+	// ---------------------------------------------------------
+	// Lock
+	// ---------------------------------------------------------
 
-    // ---------------------------------------------------------
-    // Lock
-    // ---------------------------------------------------------
+	@Override
+	public boolean acquireLock(String batchId, String userId) {
 
-    @Override
-    public boolean acquireLock(
-            String batchId,
-            String userId) {
+		/*
+		 * Locking will be connected after the batch_lock table/DAO flow is wired.
+		 */
+		return true;
+	}
 
-        /*
-         * Locking will be connected after
-         * the batch_lock table/DAO flow is wired.
-         */
-        return true;
-    }
+	// ---------------------------------------------------------
+	// Release lock
+	// ---------------------------------------------------------
 
-    // ---------------------------------------------------------
-    // Release lock
-    // ---------------------------------------------------------
+	@Override
+	public void releaseLock(String batchId, String userId) {
 
-    @Override
-    public void releaseLock(
-            String batchId,
-            String userId) {
+		/*
+		 * Will be implemented with batch_lock.
+		 */
+	}
 
-        /*
-         * Will be implemented with batch_lock.
-         */
-    }
+	// ---------------------------------------------------------
+	// Send to checker
+	// ---------------------------------------------------------
 
-    // ---------------------------------------------------------
-    // Send to checker
-    // ---------------------------------------------------------
+	@Override
+	public void sendToChecker(String batchId, String userId) {
 
-    @Override
-    public void sendToChecker(
-            String batchId,
-            String userId) {
+		/*
+		 * Will be implemented when the Maker -> Checker workflow is connected.
+		 */
+	}
 
-        /*
-         * Will be implemented when the
-         * Maker -> Checker workflow is connected.
-         */
-    }
+	// ---------------------------------------------------------
+	// Convert DAO model to domain model
+	// ---------------------------------------------------------
 
-    // ---------------------------------------------------------
-    // Convert DAO model to domain model
-    // ---------------------------------------------------------
+	private InwardBatch convert(NpciBatchData batch) {
 
-    private InwardBatch convert(
-            NpciBatchData batch) {
+		return new InwardBatch(batch.getBatchId(), batch.getFileId(), batch.getPresentingBankName(),
+				batch.getTotalCheques());
+	}
 
-        return new InwardBatch(
-                batch.getBatchId(),
-                batch.getFileId(),
-                batch.getPresentingBankName(),
-                batch.getTotalCheques());
-    }
+	@Override
+	public boolean completeDataEntry(long batchId, long userId) {
+
+		return batchDao.completeDataEntry(batchId, userId);
+	}
 }

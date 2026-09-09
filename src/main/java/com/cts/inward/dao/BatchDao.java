@@ -14,4 +14,8 @@ public interface BatchDao {
 
 	 List<NpciBatchData> getAllBatches();
 	
+	 boolean completeDataEntry(long batchId, long userId);
+
+	List<NpciBatchData> getBatchesByStatus(String batchStatus);
+
 }

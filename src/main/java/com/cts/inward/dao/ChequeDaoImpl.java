@@ -140,4 +140,85 @@ public class ChequeDaoImpl implements ChequeDao {
 			throw new IllegalStateException("Failed to update cheque: " + chequeNumber, e);
 		}
 	}
+
+	@Override
+	public void updateDataEntryCheque(String chequeNumber, long batchId, String accountNumber, BigDecimal amount,
+			LocalDate chequeDate, long userId) {
+
+		Connection connection = null;
+
+		try {
+
+			connection = dataSource.getConnection();
+
+			connection.setAutoCommit(false);
+			// 1. Update cheque data
+						String updateChequeSql = "UPDATE inward_cheque SET " + "account_number = ?, " + "amount = ?, "
+					+ "cheque_date = ? " + "WHERE cheque_number = ? " + "AND batch_id = ?";
+
+			try (PreparedStatement statement = connection.prepareStatement(updateChequeSql)) {
+
+				statement.setString(1, accountNumber);
+				statement.setBigDecimal(2, amount);
+				statement.setObject(3, chequeDate);
+				statement.setString(4, chequeNumber);
+				statement.setLong(5, batchId);
+
+				int updatedRows = statement.executeUpdate();
+
+				if (updatedRows != 1) {
+
+					throw new IllegalStateException("Cheque not found: " + chequeNumber + " for batch " + batchId);
+				}
+			}
+			// 2. Add cheque status history
+				String statusHistorySql = "INSERT INTO public.inward_cheque_status_history " + "(cheque_number, status, "
+					+ "rejection_reason_code, return_reason_code, " + "maker_id, maker_action, maker_action_on, "
+					+ "checker_id, checker_action, checker_action_on, " + "remarks) "
+					+ "VALUES (?, ?, NULL, NULL, ?, ?, " + "CURRENT_TIMESTAMP, NULL, NULL, NULL, ?)";
+
+			try (PreparedStatement statement = connection.prepareStatement(statusHistorySql)) {
+
+				statement.setString(1, chequeNumber);
+
+				statement.setString(2, "DATA_ENTRY_COMPLETED");
+
+				statement.setLong(3, userId);
+
+				statement.setString(4, "DATA_ENTRY_COMPLETED");
+
+				statement.setString(5, "Cheque data entry completed");
+
+				statement.executeUpdate();
+			}
+
+			connection.commit();
+
+		} catch (Exception e) {
+
+			if (connection != null) {
+
+				try {
+					connection.rollback();
+				} catch (Exception rollbackException) {
+					rollbackException.printStackTrace();
+				}
+			}
+
+			throw new RuntimeException("Failed to save Data Entry for cheque " + chequeNumber, e);
+
+		} finally {
+
+			if (connection != null) {
+
+				try {
+					connection.setAutoCommit(true);
+					connection.close();
+				} catch (Exception closeException) {
+					closeException.printStackTrace();
+				}
+			}
+		}
+	}
+
 }

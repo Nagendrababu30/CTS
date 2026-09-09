@@ -22,16 +22,9 @@ public class DataEntryController extends GenericForwardComposer<Component> {
 
 	private static final long serialVersionUID = 1L;
 
-	// ---------------------------------------------------------
 	// ZUL components
-	// ---------------------------------------------------------
-
 	private Listbox batchListbox;
-
-	// ---------------------------------------------------------
 	// Service
-	// ---------------------------------------------------------
-
 	private BatchService batchService;
 
 	// ---------------------------------------------------------

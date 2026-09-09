@@ -1,4 +1,4 @@
- package com.cts.inward.controller;
+package com.cts.inward.controller;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,9 +6,7 @@ import java.util.List;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Session;
-import org.zkoss.zk.ui.select.SelectorComposer;
-import org.zkoss.zk.ui.select.Selectors;
-import org.zkoss.zk.ui.select.annotation.Wire;
+import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Listbox;
@@ -19,7 +17,8 @@ import com.cts.inward.model.CheckerBatch;
 import com.cts.inward.service.CheckerDashboardService;
 import com.cts.inward.service.CheckerDashboardServiceImpl;
 
-public class CheckerDashboardController extends SelectorComposer<Component> {
+public class CheckerDashboardController
+        extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
 
@@ -29,31 +28,20 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
      * =========================================================
      */
 
-    @Wire("#receivedCount")
     private Label receivedCount;
 
-    @Wire("#availableCount")
     private Label availableCount;
 
-    @Wire("#myBatchCount")
     private Label myBatchCount;
 
-    @Wire("#showingText")
     private Label showingText;
 
-    @Wire("#batchList")
     private Listbox batchList;
 
-    /*
-     * Filter buttons
-     */
-    @Wire("#allFilter")
     private Button allFilter;
 
-    @Wire("#availableFilter")
     private Button availableFilter;
 
-    @Wire("#myBatchesFilter")
     private Button myBatchesFilter;
 
 
@@ -78,11 +66,11 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
     /*
      * =========================================================
      * CURRENT FILTER
-     * =========================================================
      *
      * ALL
      * AVAILABLE
      * MY_BATCHES
+     * =========================================================
      */
 
     private String selectedFilter = "ALL";
@@ -95,36 +83,65 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
      */
 
     @Override
-    public void doAfterCompose(Component component) throws Exception {
+    public void doAfterCompose(
+            Component component)
+            throws Exception {
 
         super.doAfterCompose(component);
 
         /*
-         * Wire ZUL components.
+         * GenericForwardComposer automatically wires
+         * ZUL components to fields having the same IDs.
+         *
+         * Therefore:
+         *
+         * id="allFilter"
+         *        -> private Button allFilter;
+         *
+         * id="availableFilter"
+         *        -> private Button availableFilter;
+         *
+         * id="myBatchesFilter"
+         *        -> private Button myBatchesFilter;
          */
-        Selectors.wireComponents(component, this, false);
+
+        /*
+         * =====================================================
+         * GET CURRENT SESSION
+         * =====================================================
+         */
+
+        Session session =
+                Executions.getCurrent()
+                        .getSession();
+
+        if (session == null) {
+
+            Executions.sendRedirect(
+                    "/zul/login.zul");
+
+            return;
+        }
 
 
         /*
-         * Get current session.
+         * =====================================================
+         * GET LOGGED-IN USER ID
+         * =====================================================
+         *
+         * This keeps your existing session design:
+         *
+         * session attribute = "userId"
          */
-        Session session = Executions.getCurrent().getSession();
 
-
-        /*
-         * Get logged-in user ID.
-         */
         Object sessionUserId =
-                session.getAttribute("userId");
+                session.getAttribute(
+                        "userId");
 
-
-        /*
-         * If user is not logged in,
-         * redirect to login page.
-         */
         if (sessionUserId == null) {
 
-            Executions.sendRedirect("/zul/login.zul");
+            Executions.sendRedirect(
+                    "/zul/login.zul");
 
             return;
         }
@@ -133,13 +150,37 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
         /*
          * Convert session user ID to long.
          */
-        userId =
-                ((Number) sessionUserId).longValue();
+
+        if (sessionUserId instanceof Number) {
+
+            userId =
+                    ((Number) sessionUserId)
+                            .longValue();
+
+        } else {
+
+            try {
+
+                userId =
+                        Long.parseLong(
+                                sessionUserId.toString());
+
+            } catch (NumberFormatException e) {
+
+                Executions.sendRedirect(
+                        "/zul/login.zul");
+
+                return;
+            }
+        }
 
 
         /*
-         * Initialize service.
+         * =====================================================
+         * INITIALIZE SERVICE
+         * =====================================================
          */
+
         service =
                 new CheckerDashboardServiceImpl();
 
@@ -150,14 +191,17 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
          * =====================================================
          */
 
-        allFilter.addEventListener("onClick", event -> {
+        allFilter.addEventListener(
+                "onClick",
+                event -> {
 
-            selectedFilter = "ALL";
+                    selectedFilter =
+                            "ALL";
 
-            updateFilterButtons();
+                    updateFilterButtons();
 
-            loadBatches();
-        });
+                    loadBatches();
+                });
 
 
         /*
@@ -166,14 +210,17 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
          * =====================================================
          */
 
-        availableFilter.addEventListener("onClick", event -> {
+        availableFilter.addEventListener(
+                "onClick",
+                event -> {
 
-            selectedFilter = "AVAILABLE";
+                    selectedFilter =
+                            "AVAILABLE";
 
-            updateFilterButtons();
+                    updateFilterButtons();
 
-            loadBatches();
-        });
+                    loadBatches();
+                });
 
 
         /*
@@ -182,25 +229,34 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
          * =====================================================
          */
 
-        myBatchesFilter.addEventListener("onClick", event -> {
+        myBatchesFilter.addEventListener(
+                "onClick",
+                event -> {
 
-            selectedFilter = "MY_BATCHES";
+                    selectedFilter =
+                            "MY_BATCHES";
 
-            updateFilterButtons();
+                    updateFilterButtons();
 
-            loadBatches();
-        });
+                    loadBatches();
+                });
 
 
         /*
-         * Set ALL as the default filter.
+         * =====================================================
+         * DEFAULT FILTER
+         * =====================================================
          */
+
         updateFilterButtons();
 
 
         /*
-         * Load dashboard.
+         * =====================================================
+         * LOAD DASHBOARD
+         * =====================================================
          */
+
         loadDashboard();
     }
 
@@ -232,25 +288,32 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
         /*
          * Received Batches
          */
+
         receivedCount.setValue(
                 String.valueOf(
-                        service.getReceivedBatchCount()));
+                        service
+                                .getReceivedBatchCount()));
 
 
         /*
          * Available Batches
          */
+
         availableCount.setValue(
                 String.valueOf(
-                        service.getAvailableBatchCount()));
+                        service
+                                .getAvailableBatchCount()));
 
 
         /*
          * My Batches
          */
+
         myBatchCount.setValue(
                 String.valueOf(
-                        service.getMyBatchCount(userId)));
+                        service
+                                .getMyBatchCount(
+                                        userId)));
     }
 
 
@@ -258,12 +321,6 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
      * =========================================================
      * UPDATE FILTER COUNTS
      * =========================================================
-     *
-     * Example:
-     *
-     * All 3
-     * Available 1
-     * My Batches 1
      */
 
     private void updateFilterCounts() {
@@ -271,24 +328,42 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
         List<CheckerBatch> batches =
                 service.getBatches();
 
+        if (batches == null) {
+
+            batches =
+                    new ArrayList<>();
+        }
+
         int allCount =
                 batches.size();
 
-        int availableCountValue = 0;
+        int availableCountValue =
+                0;
 
-        int myBatchesCount = 0;
+        int myBatchesCount =
+                0;
 
 
-        for (CheckerBatch batch : batches) {
+        for (CheckerBatch batch :
+                batches) {
+
+            if (batch == null) {
+
+                continue;
+            }
+
 
             /*
+             * =====================================================
              * AVAILABLE
              *
              * lock_status = AVAILABLE
              * user_id = NULL
+             * =====================================================
              */
+
             if ("AVAILABLE".equals(
-                        batch.getLockStatus())
+                    batch.getLockStatus())
                     && batch.getUserId() == null) {
 
                 availableCountValue++;
@@ -296,16 +371,20 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 
 
             /*
+             * =====================================================
              * MY BATCHES
              *
              * lock_status = LOCKED
              * user_id = current checker
+             * =====================================================
              */
+
             if ("LOCKED".equals(
-                        batch.getLockStatus())
+                    batch.getLockStatus())
                     && batch.getUserId() != null
                     && batch.getUserId()
-                            .longValue() == userId) {
+                            .longValue()
+                            == userId) {
 
                 myBatchesCount++;
             }
@@ -313,10 +392,14 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 
 
         /*
-         * Update button labels.
+         * =====================================================
+         * UPDATE BUTTON LABELS
+         * =====================================================
          */
+
         allFilter.setLabel(
-                "All " + allCount);
+                "All "
+                + allCount);
 
         availableFilter.setLabel(
                 "Available "
@@ -339,19 +422,30 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
         /*
          * Remove existing rows.
          */
-        batchList.getItems().clear();
+
+        batchList
+                .getItems()
+                .clear();
 
 
         /*
          * Get all batches.
          */
+
         List<CheckerBatch> batches =
                 service.getBatches();
+
+        if (batches == null) {
+
+            batches =
+                    new ArrayList<>();
+        }
 
 
         /*
          * List after applying selected filter.
          */
+
         List<CheckerBatch> filteredBatches =
                 new ArrayList<>();
 
@@ -362,55 +456,66 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
          * =====================================================
          */
 
-        for (CheckerBatch batch : batches) {
+        for (CheckerBatch batch :
+                batches) {
 
-            /*
-             * ALL
-             *
-             * Show every batch.
-             */
-            if ("ALL".equals(selectedFilter)) {
+            if (batch == null) {
 
-                filteredBatches.add(batch);
+                continue;
             }
 
 
             /*
-             * AVAILABLE
-             *
-             * Show only:
-             *
-             * lock_status = AVAILABLE
-             * user_id = NULL
+             * =================================================
+             * ALL
+             * =================================================
              */
+
+            if ("ALL".equals(
+                    selectedFilter)) {
+
+                filteredBatches.add(
+                        batch);
+            }
+
+
+            /*
+             * =================================================
+             * AVAILABLE
+             * =================================================
+             */
+
             else if ("AVAILABLE".equals(
                     selectedFilter)) {
 
                 if ("AVAILABLE".equals(
-                            batch.getLockStatus())
+                        batch.getLockStatus())
                         && batch.getUserId() == null) {
 
-                    filteredBatches.add(batch);
+                    filteredBatches.add(
+                            batch);
                 }
             }
 
 
             /*
+             * =================================================
              * MY BATCHES
-             *
-             * Show only batches locked
-             * by current checker.
+             * =================================================
              */
+
             else if ("MY_BATCHES".equals(
                     selectedFilter)) {
 
                 if ("LOCKED".equals(
-                            batch.getLockStatus())
+                        batch.getLockStatus())
                         && batch.getUserId() != null
                         && batch.getUserId()
-                                .longValue() == userId) {
+                                .longValue()
+                                == userId) {
 
-                    filteredBatches.add(batch);
+                    filteredBatches.add(
+                            batch);
                 }
             }
         }
@@ -471,14 +576,18 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
             String makerId =
                     "Not Assigned";
 
-            if (batch.getMaker() != null) {
+            if (batch.getMaker() != null
+                    && !batch.getMaker()
+                            .trim()
+                            .isEmpty()) {
 
                 makerId =
                         batch.getMaker();
             }
 
             Listcell makerCell =
-                    new Listcell(makerId);
+                    new Listcell(
+                            makerId);
 
             makerCell.setSclass(
                     "maker-name");
@@ -493,9 +602,20 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
              * =================================================
              */
 
+            String lockStatus =
+                    batch.getLockStatus();
+
+            if (lockStatus == null
+                    || lockStatus.trim()
+                            .isEmpty()) {
+
+                lockStatus =
+                        "AVAILABLE";
+            }
+
             Listcell statusCell =
                     new Listcell(
-                            batch.getLockStatus());
+                            lockStatus);
 
             item.appendChild(
                     statusCell);
@@ -505,22 +625,13 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
              * =================================================
              * CHECKER USER ID
              * =================================================
-             *
-             * AVAILABLE:
-             *
-             * Not Assigned
-             *
-             *
-             * LOCKED:
-             *
-             * Display owner checker ID.
              */
 
             String checkerId =
                     "Not Assigned";
 
             if ("LOCKED".equals(
-                        batch.getLockStatus())
+                    batch.getLockStatus())
                     && batch.getUserId() != null) {
 
                 checkerId =
@@ -529,7 +640,8 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
             }
 
             Listcell checkerCell =
-                    new Listcell(checkerId);
+                    new Listcell(
+                            checkerId);
 
             item.appendChild(
                     checkerCell);
@@ -551,17 +663,10 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
              *
              * AVAILABLE BATCH
              * =================================================
-             *
-             * user_id = NULL
-             *
-             * Display:
-             *
-             * Not Assigned
-             * Open Verification
              */
 
             if ("AVAILABLE".equals(
-                        batch.getLockStatus())
+                    batch.getLockStatus())
                     && batch.getUserId() == null) {
 
                 Button openButton =
@@ -583,6 +688,7 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
                             /*
                              * Try to lock batch.
                              */
+
                             boolean locked =
                                     service.lockBatch(
                                             batchId,
@@ -592,6 +698,7 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
                             /*
                              * Lock successful.
                              */
+
                             if (locked) {
 
                                 Executions.sendRedirect(
@@ -604,10 +711,8 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 
                             /*
                              * Lock failed.
-                             *
-                             * Another checker may
-                             * have taken the batch.
                              */
+
                             else {
 
                                 loadDashboard();
@@ -629,10 +734,11 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
              */
 
             else if ("LOCKED".equals(
-                            batch.getLockStatus())
+                    batch.getLockStatus())
                     && batch.getUserId() != null
                     && batch.getUserId()
-                            .longValue() == userId) {
+                            .longValue()
+                            == userId) {
 
                 Button openButton =
                         new Button(
@@ -651,11 +757,11 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 
 
                             /*
-                             * Already owned by
-                             * current checker.
+                             * Already owned by current checker.
                              *
-                             * No lock operation.
+                             * Do not lock again.
                              */
+
                             Executions.sendRedirect(
                                     "/zul/inward-checker/"
                                     + "batch-details.zul"
@@ -680,7 +786,8 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
             else {
 
                 Label lockedLabel =
-                        new Label("Locked");
+                        new Label(
+                                "Locked");
 
                 lockedLabel.setSclass(
                         "status-locked");
@@ -691,23 +798,32 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 
 
             /*
-             * Add action cell.
+             * =================================================
+             * ADD ACTION CELL
+             * =================================================
              */
+
             item.appendChild(
                     actionCell);
 
 
             /*
-             * Add row to table.
+             * =================================================
+             * ADD ROW
+             * =================================================
              */
+
             batchList.appendChild(
                     item);
         }
 
 
         /*
-         * Update footer.
+         * =====================================================
+         * UPDATE FOOTER
+         * =====================================================
          */
+
         updateShowingText(
                 filteredBatches.size());
     }
@@ -724,6 +840,7 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
         /*
          * Reset all buttons.
          */
+
         allFilter.setSclass(
                 "filter-btn");
 
@@ -737,7 +854,9 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
         /*
          * Set active button.
          */
-        if ("ALL".equals(selectedFilter)) {
+
+        if ("ALL".equals(
+                selectedFilter)) {
 
             allFilter.setSclass(
                     "filter-btn active-filter");

@@ -24,17 +24,17 @@ public class AuthorizationComposer
 		// ADMIN
 		// =========================================================
 
-		PAGE_PERMISSIONS.put("/zul/admin/adminDashboard.zul", "ADMIN");
+		PAGE_PERMISSIONS.put("/zul/admin/admin-dashboard.zul", "ADMIN");
 
-		PAGE_PERMISSIONS.put("/zul/admin/roleManagement.zul", "ADMIN");
+		PAGE_PERMISSIONS.put("/zul/admin/admin-roles.zul", "ADMIN");
 
-		PAGE_PERMISSIONS.put("/zul/admin/userManagement.zul", "ADMIN");
+		PAGE_PERMISSIONS.put("/zul/admin/admin-user-management.zul", "ADMIN");
 
-		PAGE_PERMISSIONS.put("/zul/admin/batchMonitoring.zul", "ADMIN");
+		PAGE_PERMISSIONS.put("/zul/admin/admin-batch-monitoring.zul", "ADMIN");
 
-		PAGE_PERMISSIONS.put("/zul/admin/sessionManagement.zul", "ADMIN");
+		PAGE_PERMISSIONS.put("/zul/admin/admin-session-management.zul", "ADMIN");
 
-		PAGE_PERMISSIONS.put("/zul/admin/auditLogs.zul", "ADMIN");
+		PAGE_PERMISSIONS.put("/zul/admin/admin-audit-logs.zul", "ADMIN");
 
 		// =========================================================
 		// INWARD MAKER

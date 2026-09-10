@@ -24,47 +24,32 @@ public class PxfParserImpl implements PxfParser {
         this.xmlInputFactory = xmlInputFactory;
     }
 
-    public static PxfParserImpl of(
-            XMLInputFactory xmlInputFactory) {
-
+    public static PxfParserImpl of(XMLInputFactory xmlInputFactory) {
         return new PxfParserImpl(xmlInputFactory);
     }
 
     @Override
     public PxfParserResult parse(String filePath) {
 
-        try (InputStream inputStream =
-                     Files.newInputStream(Path.of(filePath))) {
+        try (InputStream inputStream = Files.newInputStream(Path.of(filePath))) {
 
-            XMLStreamReader reader =
-                    xmlInputFactory.createXMLStreamReader(inputStream);
-
-            PxfParserResult result =
-                    readPxf(reader);
-
+            XMLStreamReader reader = xmlInputFactory.createXMLStreamReader(inputStream);
+            PxfParserResult result = readPxf(reader);
             reader.close();
-
             return result;
 
         } catch (Exception e) {
-
-            throw new IllegalStateException(
-                    "Failed to parse PXF file: "
-                            + filePath,
-                    e);
+            throw new IllegalStateException("Failed to parse PXF file: " + filePath, e);
         }
     }
 
-    private PxfParserResult readPxf(
-            XMLStreamReader reader) throws Exception {
+    private PxfParserResult readPxf(XMLStreamReader reader) throws Exception {
 
         long batchCode = 0;
         long fileId = 0;
         String presentingBankName = null;
         int totalCheques = 0;
-
-        List<NpciChequeData> chequeDataList =
-                new ArrayList<>();
+        List<NpciChequeData> chequeDataList = new ArrayList<>();
 
         while (reader.hasNext()) {
 
@@ -74,47 +59,28 @@ public class PxfParserImpl implements PxfParser {
                 continue;
             }
 
-            String elementName =
-                    reader.getLocalName();
+            String elementName = reader.getLocalName();
 
             switch (elementName) {
 
             case "batch_code":
-
-                batchCode =
-                        Long.parseLong(reader.getElementText());
-
+                batchCode = Long.parseLong(reader.getElementText());
                 break;
 
             case "presenting_bank_name":
-
-                presentingBankName =
-                        reader.getElementText();
-
+                presentingBankName = reader.getElementText();
                 break;
 
             case "total_cheques":
-
-                totalCheques =
-                        Integer.parseInt(
-                                reader.getElementText());
-
+                totalCheques = Integer.parseInt(reader.getElementText());
                 break;
 
             case "file_id":
-
-                fileId =
-                		Long.parseLong(reader.getElementText());
-
+                fileId = Long.parseLong(reader.getElementText());
                 break;
 
             case "cheque":
-
-                NpciChequeData chequeData =
-                        readCheque(reader, batchCode);
-
-                chequeDataList.add(chequeData);
-
+                chequeDataList.add(readCheque(reader, batchCode));
                 break;
 
             default:
@@ -122,29 +88,23 @@ public class PxfParserImpl implements PxfParser {
             }
         }
 
-        NpciBatchData batchData =
-                new NpciBatchData(
-                        batchCode,
-                        fileId,
-                        presentingBankName,
-                        totalCheques);
-
-        return PxfParserResult.of(
-                batchData,
-                chequeDataList);
+        NpciBatchData batchData = new NpciBatchData(batchCode, fileId, presentingBankName, totalCheques);
+        return PxfParserResult.of(batchData, chequeDataList);
     }
 
-    private NpciChequeData readCheque(
-            XMLStreamReader reader, long batchCode) throws Exception {
+    private NpciChequeData readCheque(XMLStreamReader reader, long batchCode) throws Exception {
 
         String chequeNumber = null;
         String accountNumber = null;
         LocalDate chequeDate = null;
+        LocalDate presentingDate = null;
         BigDecimal chequeAmount = null;
+        String amountInWords = null;
         String micrCode = null;
         String cityCode = null;
         String bankCode = null;
         String branchCode = null;
+        String drawerName = null;
         String payeeName = null;
         String payeeAccountNumber = null;
 
@@ -153,9 +113,7 @@ public class PxfParserImpl implements PxfParser {
             int event = reader.next();
 
             if (event == XMLStreamConstants.END_ELEMENT
-                    && "cheque".equals(
-                            reader.getLocalName())) {
-
+                    && "cheque".equals(reader.getLocalName())) {
                 break;
             }
 
@@ -163,81 +121,60 @@ public class PxfParserImpl implements PxfParser {
                 continue;
             }
 
-            String elementName =
-                    reader.getLocalName();
+            String elementName = reader.getLocalName();
 
             switch (elementName) {
 
             case "cheque_number":
-
-                chequeNumber =
-                        reader.getElementText();
-
+                chequeNumber = reader.getElementText();
                 break;
 
             case "account_number":
-
-                accountNumber =
-                        reader.getElementText();
-
+                accountNumber = reader.getElementText();
                 break;
 
             case "cheque_amount":
-
-                chequeAmount =
-                        new BigDecimal(
-                                reader.getElementText());
-
+                chequeAmount = new BigDecimal(reader.getElementText());
                 break;
 
             case "cheque_date":
+                chequeDate = LocalDate.parse(reader.getElementText());
+                break;
 
-                chequeDate =
-                        LocalDate.parse(
-                                reader.getElementText());
+            case "presenting_date":
+                presentingDate = LocalDate.parse(reader.getElementText());
+                break;
 
+            case "amount_in_words":
+                amountInWords = reader.getElementText();
                 break;
 
             case "micr_code":
-
-                micrCode =
-                        reader.getElementText();
-
+                micrCode = reader.getElementText();
                 break;
 
             case "city_code":
-
-                cityCode =
-                        reader.getElementText();
-
+                cityCode = reader.getElementText();
                 break;
 
             case "bank_code":
-
-                bankCode =
-                        reader.getElementText();
-
+                bankCode = reader.getElementText();
                 break;
 
             case "branch_code":
+                branchCode = reader.getElementText();
+                break;
 
-                branchCode =
-                        reader.getElementText();
-
+            case "drawer_name":
+                drawerName = reader.getElementText();
                 break;
 
             case "payee_name":
-
-                payeeName =
-                        reader.getElementText();
-
+                payeeName = reader.getElementText();
                 break;
 
             case "payee_account_number":
-
-                payeeAccountNumber =
-                        reader.getElementText();
-
+                payeeAccountNumber = reader.getElementText();
                 break;
 
             default:
@@ -250,11 +187,14 @@ public class PxfParserImpl implements PxfParser {
                 batchCode,
                 accountNumber,
                 chequeDate,
+                presentingDate,
                 chequeAmount,
+                amountInWords,
                 micrCode,
                 cityCode,
                 bankCode,
                 branchCode,
+                drawerName,
                 payeeName,
                 payeeAccountNumber);
     }

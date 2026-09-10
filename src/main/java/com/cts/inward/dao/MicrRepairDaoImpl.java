@@ -66,39 +66,22 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
 
                     NpciChequeData cheque =
                             NpciChequeData.of(
-                                    resultSet.getString(
-                                            "cheque_number"),
-
-                                    resultSet.getLong(
-                                            "batch_id"),
-
-                                    resultSet.getString(
-                                            "account_number"),
-
-                                    resultSet.getDate(
-                                            "cheque_date") != null
-                                            ? resultSet.getDate(
-                                                    "cheque_date")
-                                                    .toLocalDate()
-                                            : null,
-
-                                    resultSet.getString(
-                                            "drawer_name"),
-
-                                    resultSet.getBigDecimal(
-                                            "amount"),
-
-                                    resultSet.getString(
-                                            "micr_code"),
-
-                                    resultSet.getString(
-                                            "city_code"),
-
-                                    resultSet.getString(
-                                            "bank_code"),
-
-                                    resultSet.getString(
-                                            "branch_code")
+                                    resultSet.getString("cheque_number"),
+                                    resultSet.getLong("batch_id"),
+                                    resultSet.getString("account_number"),
+                                    resultSet.getDate("cheque_date") != null
+                                            ? resultSet.getDate("cheque_date").toLocalDate() : null,
+                                    resultSet.getDate("presenting_date") != null
+                                            ? resultSet.getDate("presenting_date").toLocalDate() : null,
+                                    resultSet.getBigDecimal("amount"),
+                                    null,
+                                    resultSet.getString("micr_code"),
+                                    resultSet.getString("city_code"),
+                                    resultSet.getString("bank_code"),
+                                    resultSet.getString("branch_code"),
+                                    resultSet.getString("drawer_name"),
+                                    null,
+                                    null
                             );
 
                     cheque.setInwardChequeId(

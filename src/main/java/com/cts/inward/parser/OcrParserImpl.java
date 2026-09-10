@@ -23,47 +23,32 @@ public class OcrParserImpl implements OcrParser {
         this.xmlInputFactory = xmlInputFactory;
     }
 
-    public static OcrParserImpl of(
-            XMLInputFactory xmlInputFactory) {
-
+    public static OcrParserImpl of(XMLInputFactory xmlInputFactory) {
         return new OcrParserImpl(xmlInputFactory);
     }
 
     @Override
     public OcrBatchData parse(String filePath) {
 
-        try (InputStream inputStream =
-                     Files.newInputStream(Path.of(filePath))) {
+        try (InputStream inputStream = Files.newInputStream(Path.of(filePath))) {
 
-            XMLStreamReader reader =
-                    xmlInputFactory.createXMLStreamReader(inputStream);
-
-            OcrBatchData batchData =
-                    readBatch(reader);
-
+            XMLStreamReader reader = xmlInputFactory.createXMLStreamReader(inputStream);
+            OcrBatchData batchData = readBatch(reader);
             reader.close();
-
             return batchData;
 
         } catch (Exception e) {
-
-            throw new IllegalStateException(
-                    "Failed to parse OCR file: "
-                            + filePath,
-                    e);
+            throw new IllegalStateException("Failed to parse OCR file: " + filePath, e);
         }
     }
 
-    private OcrBatchData readBatch(
-            XMLStreamReader reader) throws Exception {
+    private OcrBatchData readBatch(XMLStreamReader reader) throws Exception {
 
         long batchCode = 0;
         String presentingBankName = null;
         int totalCheques = 0;
         long fileId = 0;
-
-        List<OcrChequeData> cheques =
-                new ArrayList<>();
+        List<OcrChequeData> cheques = new ArrayList<>();
 
         while (reader.hasNext()) {
 
@@ -73,47 +58,28 @@ public class OcrParserImpl implements OcrParser {
                 continue;
             }
 
-            String elementName =
-                    reader.getLocalName();
+            String elementName = reader.getLocalName();
 
             switch (elementName) {
 
             case "batch_code":
-
-                batchCode =
-                        Long.parseLong(reader.getElementText());
-
+                batchCode = Long.parseLong(reader.getElementText());
                 break;
 
             case "presenting_bank_name":
-
-                presentingBankName =
-                        reader.getElementText();
-
+                presentingBankName = reader.getElementText();
                 break;
 
             case "total_cheques":
-
-                totalCheques =
-                        Integer.parseInt(
-                                reader.getElementText());
-
+                totalCheques = Integer.parseInt(reader.getElementText());
                 break;
 
             case "file_id":
-
-                fileId =
-                		Long.parseLong(reader.getElementText());
-
+                fileId = Long.parseLong(reader.getElementText());
                 break;
 
             case "cheque":
-
-                OcrChequeData chequeData =
-                        readCheque(reader, batchCode);
-
-                cheques.add(chequeData);
-
+                cheques.add(readCheque(reader, batchCode));
                 break;
 
             default:
@@ -121,25 +87,23 @@ public class OcrParserImpl implements OcrParser {
             }
         }
 
-        return OcrBatchData.of(
-                batchCode,
-                presentingBankName,
-                totalCheques,
-                fileId);
+        OcrBatchData batch = OcrBatchData.of(batchCode, presentingBankName, totalCheques, fileId);
+        batch.setCheques(cheques);
+        return batch;
     }
 
-    private OcrChequeData readCheque(
-            XMLStreamReader reader,
-            long batchCode) throws Exception {
+    private OcrChequeData readCheque(XMLStreamReader reader, long batchCode) throws Exception {
 
         String chequeNumber = null;
         String accountNumber = null;
         LocalDate chequeDate = null;
+        LocalDate presentingDate = null;
         BigDecimal chequeAmount = null;
         String micrCode = null;
         String cityCode = null;
         String bankCode = null;
         String branchCode = null;
+        String drawerName = null;
         String payeeName = null;
         String payeeAccountNumber = null;
 
@@ -148,9 +112,7 @@ public class OcrParserImpl implements OcrParser {
             int event = reader.next();
 
             if (event == XMLStreamConstants.END_ELEMENT
-                    && "cheque".equals(
-                            reader.getLocalName())) {
-
+                    && "cheque".equals(reader.getLocalName())) {
                 break;
             }
 
@@ -158,81 +120,56 @@ public class OcrParserImpl implements OcrParser {
                 continue;
             }
 
-            String elementName =
-                    reader.getLocalName();
+            String elementName = reader.getLocalName();
 
             switch (elementName) {
 
             case "cheque_number":
-
-                chequeNumber =
-                        reader.getElementText();
-
+                chequeNumber = reader.getElementText();
                 break;
 
             case "account_number":
-
-                accountNumber =
-                        reader.getElementText();
-
+                accountNumber = reader.getElementText();
                 break;
 
             case "cheque_amount":
-
-                chequeAmount =
-                        new BigDecimal(
-                                reader.getElementText());
-
+                chequeAmount = new BigDecimal(reader.getElementText());
                 break;
 
             case "cheque_date":
+                chequeDate = LocalDate.parse(reader.getElementText());
+                break;
 
-                chequeDate =
-                        LocalDate.parse(
-                                reader.getElementText());
-
+            case "presenting_date":
+                presentingDate = LocalDate.parse(reader.getElementText());
                 break;
 
             case "micr_code":
-
-                micrCode =
-                        reader.getElementText();
-
+                micrCode = reader.getElementText();
                 break;
 
             case "city_code":
-
-                cityCode =
-                        reader.getElementText();
-
+                cityCode = reader.getElementText();
                 break;
 
             case "bank_code":
-
-                bankCode =
-                        reader.getElementText();
-
+                bankCode = reader.getElementText();
                 break;
 
             case "branch_code":
+                branchCode = reader.getElementText();
+                break;
 
-                branchCode =
-                        reader.getElementText();
-
+            case "drawer_name":
+                drawerName = reader.getElementText();
                 break;
 
             case "payee_name":
-
-                payeeName =
-                        reader.getElementText();
-
+                payeeName = reader.getElementText();
                 break;
 
             case "payee_account_number":
-
-                payeeAccountNumber =
-                        reader.getElementText();
-
+                payeeAccountNumber = reader.getElementText();
                 break;
 
             default:
@@ -245,11 +182,13 @@ public class OcrParserImpl implements OcrParser {
                 batchCode,
                 accountNumber,
                 chequeDate,
+                presentingDate,
                 chequeAmount,
                 micrCode,
                 cityCode,
                 bankCode,
                 branchCode,
+                drawerName,
                 payeeName,
                 payeeAccountNumber);
     }

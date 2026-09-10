@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?page title="Batch Verification"
+    contentType="text/html;charset=UTF-8"?>
+
+<?style src="/css/checker.css"?>
+
+<?init class="com.cts.admin.controller.LayoutInit"
+        pageTitle="Batch Verification"
+        active="batchVerification"?>
+
+<?init class="org.zkoss.zk.ui.util.Composition"
+        arg0="/zul/common/layout.zul"?>
+
+<zk>
+
+    <!-- ========================================================= -->
+    <!-- COMMON LAYOUT CONTENT                                     -->
+    <!-- Header + Checker Sidebar come from layout.zul             -->
+    <!-- ========================================================= -->
+
+    <div
+        self="@define(content)"
+        width="100%"
+        height="100%"
+        style="
+            width:100%;
+            height:100%;
+            background:#F4F7FB;
+        ">
+
+        <!-- ===================================================== -->
+        <!-- BATCH VERIFICATION CONTROLLER                         -->
+        <!-- ===================================================== -->
+
+        <vlayout
+            apply="com.iispl.cts.controller.outward.checker.CheckerBatchVerificationController"
+            width="100%"
+            height="100%"
+            spacing="20px"
+            style="
+                padding:30px 45px;
+                box-sizing:border-box;
+                overflow:auto;
+            ">
+
+
+            <!-- ================================================= -->
+            <!-- PAGE HEADER                                        -->
+            <!-- ================================================= -->
+
+            <hlayout
+                width="100%"
+                valign="middle"
+                pack="justify">
+
+                <vlayout
+                    spacing="5px">
+
+                    <label
+                        value="Batch Verification"
+                        sclass="page-title"/>
+
+                    <label
+                        id="batchIdLabel"
+                        value="Batch: -"
+                        sclass="batch-id-label"/>
+
+                </vlayout>
+
+
+                <!-- BACK TO QUEUE -->
+
+                <button
+                    label="← Back to Queue"
+                    sclass="secondary-button"
+                    onClick="Executions.sendRedirect('/outward/checker/batchesQueue.zul')"/>
+
+            </hlayout>
+
+
+            <!-- ================================================= -->
+            <!-- BATCH SUMMARY                                      -->
+            <!-- ================================================= -->
+
+            <div
+                sclass="batch-summary">
+
+                <!-- TOTAL CHEQUES -->
+
+                <div
+                    sclass="summary-item">
+
+                    <label
+                        value="Total Cheques"
+                        sclass="summary-label"/>
+
+                    <label
+                        id="totalChequeLabel"
+                        value="0"
+                        sclass="summary-value"/>
+
+                </div>
+
+
+                <!-- ACCEPTED -->
+
+                <div
+                    sclass="summary-item">
+
+                    <label
+                        value="Accepted"
+                        sclass="summary-label"/>
+
+                    <label
+                        id="acceptedChequeLabel"
+                        value="0"
+                        sclass="summary-value"/>
+
+                </div>
+
+
+                <!-- REJECTED -->
+
+                <div
+                    sclass="summary-item">
+
+                    <label
+                        value="Rejected"
+                        sclass="summary-label"/>
+
+                    <label
+                        id="rejectedChequeLabel"
+                        value="0"
+                        sclass="summary-value"/>
+
+                </div>
+
+
+                <!-- PENDING -->
+
+                <div
+                    sclass="summary-item">
+
+                    <label
+                        value="Pending"
+                        sclass="summary-label"/>
+
+                    <label
+                        id="pendingChequeLabel"
+                        value="0"
+                        sclass="summary-value"/>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- CHEQUES IN BATCH                                   -->
+            <!-- ================================================= -->
+
+            <div
+                sclass="section-card">
+
+                <label
+                    value="Cheques in Batch"
+                    sclass="section-title"/>
+
+                <separator
+                    height="15px"/>
+
+
+                <listbox
+                    id="chequeListbox"
+                    width="100%"
+                    mold="paging"
+                    pageSize="10"
+                    emptyMessage="No cheques found in this batch">
+
+                    <listhead>
+
+                        <listheader
+                            label="#"
+                            width="8%"/>
+
+                        <listheader
+                            label="Cheque Number"
+                            width="18%"/>
+
+                        <listheader
+                            label="Account Number"
+                            width="20%"/>
+
+                        <listheader
+                            label="Amount"
+                            width="15%"/>
+
+                        <listheader
+                            label="Cheque Date"
+                            width="15%"/>
+
+                        <listheader
+                            label="Status"
+                            width="12%"/>
+
+                        <listheader
+                            label="Action"
+                            width="12%"/>
+
+                    </listhead>
+
+                </listbox>
+
+            </div>
+
+        </vlayout>
+
+    </div>
+
+</zk>

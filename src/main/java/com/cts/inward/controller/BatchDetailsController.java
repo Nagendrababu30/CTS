@@ -9,8 +9,13 @@ import java.util.Map;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
+import org.zkoss.zul.Window;
+import org.zkoss.zul.Textbox;
+import org.zkoss.zul.Messagebox;
+import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Vlayout;
@@ -236,11 +241,156 @@ public class BatchDetailsController
     // INIT
     // =========================================================
 
+    // =========================================================
+    // CHECKER DECISION
+    // =========================================================
+
+    private Long userId;
+
+    private Button acceptButton;
+    private Button returnButton;
+    private Button rejectButton;
+
+    private Hlayout selectedDecision;
+    private Label selectedDecisionText;
+
+    private Window acceptConfirmWindow;
+    private Button acceptCancelButton;
+    private Button acceptConfirmButton;
+
+    private Window rejectWindow;
+    private Combobox rejectReason;
+    private Textbox rejectRemark;
+    private Button rejectCancelButton;
+    private Button rejectConfirmButton;
+
+    private Window returnWindow;
+    private Combobox returnReason;
+    private Textbox returnRemark;
+    private Button returnCancelButton;
+    private Button returnConfirmButton;
+
+    private boolean cbsPassed = false;
+
+
     @Override
     public void doAfterCompose(Component component)
             throws Exception {
 
         super.doAfterCompose(component);
+
+        // =========================================================
+        // POPUP CONTROLS
+        //
+        // IMPORTANT:
+        // Each Window is its own ZK ID space. Therefore controls
+        // inside the popup windows cannot reliably be wired by the
+        // outer GenericForwardComposer. Get them from their own
+        // Window ID space and register the events explicitly.
+        // =========================================================
+
+        if (acceptConfirmWindow != null) {
+            acceptCancelButton =
+                    (Button) acceptConfirmWindow.getFellow(
+                            "acceptCancelButton");
+
+            acceptConfirmButton =
+                    (Button) acceptConfirmWindow.getFellow(
+                            "acceptConfirmButton");
+
+            acceptCancelButton.addEventListener(
+                    Events.ON_CLICK,
+                    event -> handleAcceptCancelButton()
+            );
+
+            acceptConfirmButton.addEventListener(
+                    Events.ON_CLICK,
+                    event -> handleAcceptConfirmButton()
+            );
+        }
+
+        if (rejectWindow != null) {
+            rejectReason =
+                    (Combobox) rejectWindow.getFellow(
+                            "rejectReason");
+
+            rejectRemark =
+                    (Textbox) rejectWindow.getFellow(
+                            "rejectRemark");
+
+            rejectCancelButton =
+                    (Button) rejectWindow.getFellow(
+                            "rejectCancelButton");
+
+            rejectConfirmButton =
+                    (Button) rejectWindow.getFellow(
+                            "rejectConfirmButton");
+
+            rejectCancelButton.addEventListener(
+                    Events.ON_CLICK,
+                    event -> handleRejectCancelButton()
+            );
+
+            rejectConfirmButton.addEventListener(
+                    Events.ON_CLICK,
+                    event -> handleRejectConfirmButton()
+            );
+        }
+
+        if (returnWindow != null) {
+            returnReason =
+                    (Combobox) returnWindow.getFellow(
+                            "returnReason");
+
+            returnRemark =
+                    (Textbox) returnWindow.getFellow(
+                            "returnRemark");
+
+            returnCancelButton =
+                    (Button) returnWindow.getFellow(
+                            "returnCancelButton");
+
+            returnConfirmButton =
+                    (Button) returnWindow.getFellow(
+                            "returnConfirmButton");
+
+            returnCancelButton.addEventListener(
+                    Events.ON_CLICK,
+                    event -> handleReturnCancelButton()
+            );
+
+            returnConfirmButton.addEventListener(
+                    Events.ON_CLICK,
+                    event -> handleReturnConfirmButton()
+            );
+        }
+
+        // Keep all decision popups hidden when the page is first created.
+        // They are opened explicitly only from their corresponding buttons.
+        if (acceptConfirmWindow != null) {
+            acceptConfirmWindow.setVisible(false);
+        }
+        if (rejectWindow != null) {
+            rejectWindow.setVisible(false);
+        }
+        if (returnWindow != null) {
+            returnWindow.setVisible(false);
+        }
+
+        Object sessionUserId =
+                Executions.getCurrent().getAttribute("userId");
+
+        if (sessionUserId instanceof Number) {
+            userId = ((Number) sessionUserId).longValue();
+        } else if (sessionUserId != null) {
+            try {
+                userId = Long.valueOf(String.valueOf(sessionUserId));
+            } catch (NumberFormatException e) {
+                userId = null;
+            }
+        }
+
+        System.out.println("CHECKER USER ID = " + userId);
 
         // -----------------------------------------------------
         // Existing DAO + Service
@@ -1362,6 +1512,12 @@ public class BatchDetailsController
     private void loadCbsValidation(
             String chequeNumber) {
 
+        cbsPassed = false;
+
+        if (acceptButton != null) {
+            acceptButton.setDisabled(true);
+        }
+
         System.out.println();
 
         System.out.println(
@@ -1574,6 +1730,8 @@ public class BatchDetailsController
                 && datePassed
                 && accountPassed;
 
+        cbsPassed = allPassed;
+
 
         if (allPassed) {
 
@@ -1716,6 +1874,10 @@ public class BatchDetailsController
                     "cbs-pass-badge"
             );
         }
+
+        if (acceptButton != null) {
+            acceptButton.setDisabled(false);
+        }
     }
 
 
@@ -1773,6 +1935,12 @@ public class BatchDetailsController
             leftCbsStatus.setSclass(
                     "cbs-fail-badge"
             );
+        }
+
+        cbsPassed = false;
+
+        if (acceptButton != null) {
+            acceptButton.setDisabled(true);
         }
     }
 
@@ -1979,6 +2147,197 @@ public class BatchDetailsController
     // =========================================================
     // CHEQUE NAVIGATION
     // =========================================================
+
+    // =========================================================
+    // CHECKER DECISION - ACCEPT
+    // =========================================================
+
+    public void onClick$acceptButton() {
+        if (!cbsPassed) {
+            Messagebox.show("CBS validation has failed. This cheque cannot be accepted.",
+                    "CBS Validation", Messagebox.OK, Messagebox.ERROR);
+            return;
+        }
+        if (acceptConfirmWindow != null) {
+            acceptConfirmWindow.doModal();
+        }
+    }
+
+    private void handleAcceptCancelButton() {
+        if (acceptConfirmWindow != null) {
+            acceptConfirmWindow.setVisible(false);
+        }
+    }
+
+    private void handleAcceptConfirmButton() {
+        if (!cbsPassed) {
+            if (acceptConfirmWindow != null) {
+                acceptConfirmWindow.setVisible(false);
+            }
+            Messagebox.show("CBS validation has failed. This cheque cannot be accepted.",
+                    "CBS Validation", Messagebox.OK, Messagebox.ERROR);
+            return;
+        }
+        saveDecision("ACCEPT", null, null, "Accepted", null, acceptConfirmWindow);
+    }
+
+    // =========================================================
+    // CHECKER DECISION - REJECT
+    // =========================================================
+
+    public void onClick$rejectButton() {
+        if (rejectReason != null) {
+            rejectReason.setSelectedItem(null);
+            rejectReason.setValue("");
+        }
+        if (rejectRemark != null) {
+            rejectRemark.setValue("");
+        }
+        if (rejectWindow != null) {
+            rejectWindow.doModal();
+        }
+    }
+
+    private void handleRejectCancelButton() {
+        if (rejectWindow != null) {
+            rejectWindow.setVisible(false);
+        }
+    }
+
+    private void handleRejectConfirmButton() {
+        String reasonCode = rejectReason == null ? null : rejectReason.getValue();
+        if (reasonCode == null || reasonCode.trim().isEmpty()) {
+            Messagebox.show("Please select a rejection reason.",
+                    "Validation", Messagebox.OK, Messagebox.EXCLAMATION);
+            return;
+        }
+        String remarks = rejectRemark == null ? null : rejectRemark.getValue();
+        saveDecision("REJECT", reasonCode.trim(), null, "Rejected", remarks, rejectWindow);
+    }
+
+    // =========================================================
+    // CHECKER DECISION - RETURN TO MAKER
+    // =========================================================
+
+    public void onClick$returnButton() {
+        if (returnReason != null) {
+            returnReason.setSelectedItem(null);
+            returnReason.setValue("");
+        }
+        if (returnRemark != null) {
+            returnRemark.setValue("");
+        }
+        if (returnWindow != null) {
+            returnWindow.doModal();
+        }
+    }
+
+    private void handleReturnCancelButton() {
+        if (returnWindow != null) {
+            returnWindow.setVisible(false);
+        }
+    }
+
+    private void handleReturnConfirmButton() {
+        String reasonCode = returnReason == null ? null : returnReason.getValue();
+        if (reasonCode == null || reasonCode.trim().isEmpty()) {
+            Messagebox.show("Please select a return reason.",
+                    "Validation", Messagebox.OK, Messagebox.EXCLAMATION);
+            return;
+        }
+        String remarks = returnRemark == null ? null : returnRemark.getValue();
+        saveDecision("RETURN_TO_MAKER", null, reasonCode.trim(), "Returned", remarks, returnWindow);
+    }
+
+    // =========================================================
+    // SAVE CHECKER DECISION
+    // =========================================================
+
+    private void saveDecision(String status,
+            String rejectionReasonCode,
+            String returnReasonCode,
+            String checkerAction,
+            String remarks,
+            Window popupWindow) {
+
+        String chequeNumber = getCurrentChequeNumber();
+
+        if (chequeNumber == null || chequeNumber.trim().isEmpty()) {
+            Messagebox.show("No cheque is currently selected.",
+                    "Error", Messagebox.OK, Messagebox.ERROR);
+            return;
+        }
+
+        if (userId == null) {
+            Messagebox.show("Logged-in checker ID was not found in the session.",
+                    "Authentication Error", Messagebox.OK, Messagebox.ERROR);
+            return;
+        }
+
+        try {
+            batchDetailsService.saveCheckerDecision(
+                    chequeNumber,
+                    status,
+                    rejectionReasonCode,
+                    returnReasonCode,
+                    userId,
+                    checkerAction,
+                    remarks);
+
+            if (popupWindow != null) {
+                popupWindow.setVisible(false);
+            }
+
+            if (selectedDecisionText != null) {
+                if ("Accepted".equals(checkerAction)) {
+                    selectedDecisionText.setValue("✓ Selected Decision: Accepted");
+                } else if ("Rejected".equals(checkerAction)) {
+                    selectedDecisionText.setValue("⚠ Selected Decision: Rejected");
+                } else {
+                    selectedDecisionText.setValue("↶ Selected Decision: Returned");
+                }
+            }
+
+            if (selectedDecision != null) {
+                String decisionClass = "Accepted".equals(checkerAction)
+                        ? "accepted"
+                        : "Rejected".equals(checkerAction)
+                                ? "rejected"
+                                : "returned";
+                selectedDecision.setSclass("selected-decision " + decisionClass);
+            }
+
+            moveToNextAfterDecision();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Messagebox.show("Failed to save checker decision. Please check the server log.",
+                    "Database Error", Messagebox.OK, Messagebox.ERROR);
+        }
+    }
+
+    private String getCurrentChequeNumber() {
+        if (cheques == null || cheques.isEmpty()
+                || currentChequeIndex < 0
+                || currentChequeIndex >= cheques.size()) {
+            return null;
+        }
+        return getString(cheques.get(currentChequeIndex), "chequeNumber");
+    }
+
+    private void moveToNextAfterDecision() {
+        if (currentChequeIndex < cheques.size() - 1) {
+            currentChequeIndex++;
+            loadCurrentCheque();
+        } else {
+            updateChequeNavigation();
+            Messagebox.show(
+                    "This is the last cheque in the batch. The decision has been saved.",
+                    "Batch Completed",
+                    Messagebox.OK,
+                    Messagebox.INFORMATION);
+        }
+    }
 
     private void updateChequeNavigation() {
 

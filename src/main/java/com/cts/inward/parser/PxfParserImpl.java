@@ -58,7 +58,7 @@ public class PxfParserImpl implements PxfParser {
     private PxfParserResult readPxf(
             XMLStreamReader reader) throws Exception {
 
-        long batchId = 0;
+        long batchCode = 0;
         long fileId = 0;
         String presentingBankName = null;
         int totalCheques = 0;
@@ -79,33 +79,39 @@ public class PxfParserImpl implements PxfParser {
 
             switch (elementName) {
 
-            case "BatchId":
-                batchId =
-                        Long.parseLong(
-                                reader.getElementText());
+            case "batch_code":
+
+                batchCode =
+                        Long.parseLong(reader.getElementText());
+
                 break;
 
-            case "PresentingBankName":
+            case "presenting_bank_name":
+
                 presentingBankName =
                         reader.getElementText();
+
                 break;
 
-            case "TotalCheque":
+            case "total_cheques":
+
                 totalCheques =
                         Integer.parseInt(
                                 reader.getElementText());
+
                 break;
 
-            case "FileId":
+            case "file_id":
+
                 fileId =
-                        Long.parseLong(
-                                reader.getElementText());
+                		Long.parseLong(reader.getElementText());
+
                 break;
 
-            case "Cheque":
+            case "cheque":
 
                 NpciChequeData chequeData =
-                        readCheque(reader);
+                        readCheque(reader, batchCode);
 
                 chequeDataList.add(chequeData);
 
@@ -118,7 +124,7 @@ public class PxfParserImpl implements PxfParser {
 
         NpciBatchData batchData =
                 new NpciBatchData(
-                        batchId,
+                        batchCode,
                         fileId,
                         presentingBankName,
                         totalCheques);
@@ -129,10 +135,9 @@ public class PxfParserImpl implements PxfParser {
     }
 
     private NpciChequeData readCheque(
-            XMLStreamReader reader) throws Exception {
+            XMLStreamReader reader, long batchCode) throws Exception {
 
         String chequeNumber = null;
-        long batchId = 0;
         String accountNumber = null;
         LocalDate chequeDate = null;
         String drawerName = null;
@@ -141,13 +146,15 @@ public class PxfParserImpl implements PxfParser {
         String cityCode = null;
         String bankCode = null;
         String branchCode = null;
+        String payeeName = null;
+        String payeeAccountNumber = null;
 
         while (reader.hasNext()) {
 
             int event = reader.next();
 
             if (event == XMLStreamConstants.END_ELEMENT
-                    && "Cheque".equals(
+                    && "cheque".equals(
                             reader.getLocalName())) {
 
                 break;
@@ -162,57 +169,76 @@ public class PxfParserImpl implements PxfParser {
 
             switch (elementName) {
 
-            case "ChequeNumber":
+            case "cheque_number":
+
                 chequeNumber =
                         reader.getElementText();
+
                 break;
 
-            case "BatchId":
-                batchId =
-                        Long.parseLong(
-                                reader.getElementText());
-                break;
+            case "account_number":
 
-            case "AccountNumber":
                 accountNumber =
                         reader.getElementText();
+
                 break;
 
-            case "ChequeDate":
-                chequeDate =
-                        LocalDate.parse(
-                                reader.getElementText());
-                break;
+            case "cheque_amount":
 
-            case "DrawerName":
-                drawerName =
-                        reader.getElementText();
-                break;
-
-            case "ChequeAmount":
                 chequeAmount =
                         new BigDecimal(
                                 reader.getElementText());
+
                 break;
 
-            case "MicrCode":
+            case "cheque_date":
+
+                chequeDate =
+                        LocalDate.parse(
+                                reader.getElementText());
+
+                break;
+
+            case "micr_code":
+
                 micrCode =
                         reader.getElementText();
+
                 break;
 
-            case "CityCode":
+            case "city_code":
+
                 cityCode =
                         reader.getElementText();
+
                 break;
 
-            case "BankCode":
+            case "bank_code":
+
                 bankCode =
                         reader.getElementText();
+
                 break;
 
-            case "BranchCode":
+            case "branch_code":
+
                 branchCode =
                         reader.getElementText();
+
+                break;
+
+            case "payee_name":
+
+                payeeName =
+                        reader.getElementText();
+
+                break;
+
+            case "payee_account_number":
+
+                payeeAccountNumber =
+                        reader.getElementText();
+
                 break;
 
             default:
@@ -222,14 +248,15 @@ public class PxfParserImpl implements PxfParser {
 
         return NpciChequeData.of(
                 chequeNumber,
-                batchId,
+                batchCode,
                 accountNumber,
                 chequeDate,
-                drawerName,
                 chequeAmount,
                 micrCode,
                 cityCode,
                 bankCode,
-                branchCode);
+                branchCode,
+                payeeName,
+                payeeAccountNumber);
     }
 }

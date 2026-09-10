@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?page title="Amount And Account - Batch Details"?>
+
+<zk>
+
+    <window
+            width="100%"
+            height="100%"
+            border="none"
+            apply="com.iispl.cts.controller.outward.OutwardMakerAmountAccountDetailController">
+
+        <borderlayout
+                width="100%"
+                height="100%"
+                style="background:#F4F7FB;">
+
+            <!-- HEADER -->
+            <north size="62px">
+                <include src="/header.zul"/>
+            </north>
+
+            <!-- SIDEBAR -->
+            <west size="280px">
+                <include src="/makersidebar.zul"/>
+            </west>
+
+            <!-- MAIN CONTENT -->
+            <center>
+
+                <vlayout
+                        width="100%"
+                        spacing="20px"
+                        style="padding:30px;">
+
+                    <!-- PAGE TITLE -->
+                    <hlayout
+                            width="100%"
+                            valign="middle">
+
+                        <label
+                                value="Amount And Account"
+                                style="font-size:30px;
+                                       font-weight:bold;
+                                       color:#122B49;"/>
+
+                        <space/>
+
+                        <button
+                                id="backButton"
+                                label="Back"
+                                width="100px"
+                                style="background:#FFFFFF;
+                                       border:1px solid #C9D6E4;
+                                       color:#122B49;
+                                       font-weight:bold;"/>
+
+                    </hlayout>
+
+                    <!-- BATCH INFORMATION -->
+                    <groupbox
+                            width="100%"
+                            style="background:white;
+                                   border:1px solid #DCE5F0;">
+
+                        <caption
+                                label="Batch Information"
+                                style="font-size:18px;
+                                       font-weight:bold;
+                                       color:#122B49;"/>
+
+                        <grid
+                                width="100%"
+                                style="padding:10px;">
+
+                            <columns>
+                                <column width="20%"/>
+                                <column width="30%"/>
+                                <column width="20%"/>
+                                <column width="30%"/>
+                            </columns>
+
+                            <rows>
+
+                                <row>
+                                    <label
+                                            value="Batch Number"
+                                            style="font-weight:bold;
+                                                   color:#526579;"/>
+
+                                    <label
+                                            id="batchNumberLabel"
+                                            value="-"
+                                            style="font-weight:bold;
+                                                   color:#122B49;"/>
+
+                                    <label
+                                            value="Total Cheques"
+                                            style="font-weight:bold;
+                                                   color:#526579;"/>
+
+                                    <label
+                                            id="totalChequesLabel"
+                                            value="-"
+                                            style="font-weight:bold;
+                                                   color:#122B49;"/>
+                                </row>
+
+                                <row>
+                                    <label
+                                            value="Batch Status"
+                                            style="font-weight:bold;
+                                                   color:#526579;"/>
+
+                                    <label
+                                            id="batchStatusLabel"
+                                            value="-"
+                                            style="font-weight:bold;
+                                                   color:#122B49;"/>
+
+                                    <label
+                                            value="Verification Status"
+                                            style="font-weight:bold;
+                                                   color:#526579;"/>
+
+                                    <label
+                                            id="verificationStatusLabel"
+                                            value="-"
+                                            style="font-weight:bold;
+                                                   color:#122B49;"/>
+                                </row>
+
+                            </rows>
+
+                        </grid>
+
+                    </groupbox>
+
+
+                    <!-- CHEQUE LIST -->
+                    <groupbox
+                            width="100%"
+                            height="100%"
+                            style="background:white;
+                                   border:1px solid #DCE5F0;">
+
+                        <caption
+                                label="Cheque Verification"
+                                style="font-size:18px;
+                                       font-weight:bold;
+                                       color:#122B49;"/>
+
+                        <listbox
+                                id="chequeListbox"
+                                width="100%"
+                                height="100%"
+                                emptyMessage="No cheques available for this batch.">
+
+                            <listhead>
+
+                                <listheader
+                                        label="Cheque Number"
+                                        width="15%"/>
+
+                                <listheader
+                                        label="Account Number"
+                                        width="20%"/>
+
+                                <listheader
+                                        label="Amount"
+                                        width="15%"/>
+
+                                <listheader
+                                        label="Cheque Date"
+                                        width="15%"/>
+
+                                <listheader
+                                        label="Cheque Status"
+                                        width="20%"/>
+
+                                <listheader
+                                        label="Validation"
+                                        width="15%"/>
+
+                            </listhead>
+
+                        </listbox>
+
+                    </groupbox>
+
+
+                    <!-- FOOTER ACTIONS -->
+                    <hlayout
+                            width="100%"
+                            valign="middle">
+
+                        <label
+                                id="messageLabel"
+                                value=""
+                                style="font-size:14px;
+                                       color:#C0392B;"/>
+
+                        <space/>
+
+                        <button
+                                id="verifyButton"
+                                label="Verify Batch"
+                                width="140px"
+                                style="background:#122B49;
+                                       color:white;
+                                       border:none;
+                                       font-weight:bold;"/>
+
+                    </hlayout>
+
+                </vlayout>
+
+            </center>
+
+        </borderlayout>
+
+    </window>
+
+</zk>

@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?init class="com.cts.admin.controller.LayoutInit"
+        pageTitle="Outward Maker Dashboard"
+        active="dashboard"?>
+
+<?init class="org.zkoss.zk.ui.util.Composition"
+        arg0="/zul/common/layout.zul"?>
+
+<zk>
+
+    <style><![CDATA[
+
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            overflow: hidden !important;
+            background: #F4F7FB;
+        }
+
+        .outward-dashboard-content {
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            background: #F4F7FB;
+        }
+
+        .outward-dashboard-layout {
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            padding: 24px 30px;
+            overflow: auto;
+            background: #F4F7FB;
+        }
+
+        .summary-card {
+            background: white;
+            border: 1px solid #DCE5F0;
+            border-radius: 8px;
+            padding: 18px;
+            box-sizing: border-box;
+        }
+
+        .card-label {
+            font-size: 14px;
+            color: #667085;
+        }
+
+        .card-value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .text-blue {
+            color: #175CD3;
+        }
+
+        .text-purple {
+            color: #7A5AF8;
+        }
+
+        .text-green {
+            color: #12B76A;
+        }
+
+        .table-panel {
+            background: white;
+            border: 1px solid #DCE5F0;
+            border-radius: 8px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .table-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #122B49;
+        }
+
+        .filter-label {
+            font-size: 14px;
+            color: #667085;
+            margin-right: 8px;
+        }
+
+        .filter-btn {
+            margin-left: 6px;
+            border: 1px solid #D0D5DD;
+            border-radius: 5px;
+            background: white;
+            color: #344054;
+            font-weight: 600;
+        }
+
+        .active-filter {
+            background: #175CD3;
+            color: white;
+            border-color: #175CD3;
+        }
+
+        .batch-grid {
+            width: 100%;
+        }
+
+        .batch-grid .z-listbox-body {
+            overflow-y: auto !important;
+        }
+
+        .batch-grid .z-listcell-content {
+            padding: 12px 10px;
+        }
+
+    ]]></style>
+
+
+    <!-- =========================================================
+         CONTENT FOR COMMON LAYOUT
+         ========================================================= -->
+
+    <div
+        self="@define(content)"
+        width="100%"
+        height="100%"
+        sclass="outward-dashboard-content">
+
+
+        <!-- =====================================================
+             OUTWARD MAKER DASHBOARD CONTROLLER
+             ===================================================== -->
+
+        <vlayout
+            apply="com.iispl.cts.controller.outward.OutwardMakerDashboardController"
+            spacing="20px"
+            sclass="outward-dashboard-layout"
+            hflex="1">
+
+
+            <!-- =================================================
+                 PAGE TITLE
+                 ================================================= -->
+
+            <label
+                value="Outward Maker Dashboard"
+                style="
+                    font-size:26px;
+                    font-weight:bold;
+                    color:#122B49;
+                "/>
+
+
+            <!-- =================================================
+                 SUMMARY CARDS
+                 ================================================= -->
+
+            <hlayout
+                spacing="20px"
+                width="100%">
+
+
+                <!-- =============================================
+                     PENDING DATA ENTRY
+                     ============================================= -->
+
+                <hlayout
+                    hflex="1"
+                    sclass="summary-card"
+                    valign="middle">
+
+                    <vlayout
+                        width="55px"
+                        height="55px"
+                        style="
+                            background:#EAF2FF;
+                            border-radius:8px;
+                            align-items:center;
+                            justify-content:center;
+                        ">
+
+                        <label
+                            sclass="z-icon-folder-o"
+                            style="
+                                font-size:22px;
+                                color:#175CD3;
+                            "/>
+
+                    </vlayout>
+
+
+                    <vlayout
+                        spacing="2px"
+                        style="padding-left:14px;">
+
+                        <label
+                            value="Pending Data Entry"
+                            sclass="card-label"/>
+
+                        <label
+                            id="pendingDataEntryCount"
+                            value="0"
+                            sclass="card-value text-blue"/>
+
+                    </vlayout>
+
+                </hlayout>
+
+
+                <!-- =============================================
+                     MICR REPAIR
+                     ============================================= -->
+
+                <hlayout
+                    hflex="1"
+                    sclass="summary-card"
+                    valign="middle">
+
+                    <vlayout
+                        width="55px"
+                        height="55px"
+                        style="
+                            background:#F4F0FF;
+                            border-radius:8px;
+                            align-items:center;
+                            justify-content:center;
+                        ">
+
+                        <label
+                            sclass="z-icon-cog"
+                            style="
+                                font-size:22px;
+                                color:#7A5AF8;
+                            "/>
+
+                    </vlayout>
+
+
+                    <vlayout
+                        spacing="2px"
+                        style="padding-left:14px;">
+
+                        <label
+                            value="MICR Repair"
+                            sclass="card-label"/>
+
+                        <label
+                            id="micrRepairCount"
+                            value="0"
+                            sclass="card-value text-purple"/>
+
+                    </vlayout>
+
+                </hlayout>
+
+
+                <!-- =============================================
+                     READY TO SUBMIT
+                     ============================================= -->
+
+                <hlayout
+                    hflex="1"
+                    sclass="summary-card"
+                    valign="middle">
+
+                    <vlayout
+                        width="55px"
+                        height="55px"
+                        style="
+                            background:#ECFDF3;
+                            border-radius:8px;
+                            align-items:center;
+                            justify-content:center;
+                        ">
+
+                        <label
+                            sclass="z-icon-check"
+                            style="
+                                font-size:22px;
+                                color:#12B76A;
+                            "/>
+
+                    </vlayout>
+
+
+                    <vlayout
+                        spacing="2px"
+                        style="padding-left:14px;">
+
+                        <label
+                            value="Ready to Submit"
+                            sclass="card-label"/>
+
+                        <label
+                            id="readyToSubmitCount"
+                            value="0"
+                            sclass="card-value text-green"/>
+
+                    </vlayout>
+
+                </hlayout>
+
+            </hlayout>
+
+
+            <!-- =================================================
+                 BATCHES TABLE PANEL
+                 ================================================= -->
+
+            <vlayout
+                sclass="table-panel"
+                spacing="0"
+                width="100%">
+
+
+                <!-- =============================================
+                     TABLE HEADER
+                     ============================================= -->
+
+                <hlayout
+                    valign="middle"
+                    width="100%"
+                    style="padding-bottom:16px;">
+
+                    <label
+                        value="Batches"
+                        sclass="table-title"/>
+
+                    <space hflex="1"/>
+
+                    <label
+                        value="Filter Status:"
+                        sclass="filter-label"/>
+
+                    <button
+                        id="allBtn"
+                        label="All"
+                        sclass="filter-btn active-filter"/>
+
+                    <button
+                        id="availableBtn"
+                        label="Available"
+                        sclass="filter-btn"/>
+
+                    <button
+                        id="myBatchesBtn"
+                        label="My Batches"
+                        sclass="filter-btn"/>
+
+                </hlayout>
+
+
+                <!-- =============================================
+                     BATCH LIST
+                     ============================================= -->
+
+                <listbox
+                    id="batchListbox"
+                    width="100%"
+                    height="450px"
+                    sclass="batch-grid"
+                    emptyMessage="No batches available."
+                    nonselectableTags="button"
+                    style="
+                        border:1px solid #E4E7EC;
+                        border-radius:6px;
+                    ">
+
+
+                    <!-- =========================================
+                         COLUMNS
+
+                         MUST MATCH CONTROLLER RENDERER:
+
+                         1. Batch No
+                         2. Total Cheques
+                         3. Status
+                         4. Action
+                         5. Assignment
+                         ========================================= -->
+
+                    <listhead>
+
+                        <listheader
+                            label="Batch ID"
+                            width="30%"/>
+
+                        <listheader
+                            label="Total Cheques"
+                            width="15%"
+                            align="center"/>
+
+                        <listheader
+                            label="Status"
+                            width="20%"
+                            align="center"/>
+
+                        <listheader
+                            label="Action"
+                            width="17%"
+                            align="center"/>
+
+                        <listheader
+                            label="Assignment"
+                            width="18%"
+                            align="center"/>
+
+                    </listhead>
+
+
+                    <!--
+                        IMPORTANT:
+
+                        No hard-coded listitem rows here.
+
+                        OutwardMakerDashboardController will call:
+
+                            batchListbox.setModel(model);
+
+                        and its renderer will create the rows.
+                    -->
+
+                </listbox>
+
+            </vlayout>
+
+        </vlayout>
+
+    </div>
+
+</zk>

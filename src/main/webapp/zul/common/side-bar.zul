@@ -5,10 +5,88 @@
     <div
         sclass="sidebar">
 
-        
-        <!-- INWARD MAKER -->
-        
+        <!-- OUTWARD MAKER -->
 
+<vlayout
+    visible="${arg.roleName eq 'OUTWARD_MAKER'}"
+    width="100%"
+    spacing="0px">
+
+
+    <!-- DASHBOARD -->
+
+    <a
+        href="/zul/outward/outward-maker/outward-maker-dashboard.zul"
+        sclass="${arg.active eq 'dashboard'
+            ? 'menu-item active-menu'
+            : 'menu-item'}">
+
+        <n:i class="fa-solid fa-house menu-icon"/>
+
+        <label
+            value="Dashboard"
+            sclass="menu-label"/>
+
+    </a>
+
+
+    <!-- MICR REPAIR -->
+
+    <a
+        href="/zul/outward/outward-maker/outward-maker-micr-repair.zul"
+        sclass="${arg.active eq 'micrRepair'
+            ? 'menu-item active-menu'
+            : 'menu-item'}">
+
+        <n:i class="fa-solid fa-wrench menu-icon"/>
+
+        <label
+            value="MICR Repair"
+            sclass="menu-label"/>
+
+    </a>
+
+
+    <!-- DATA ENTRY -->
+
+    <!-- DATA ENTRY -->
+<a
+    href="/zul/outward/outward-maker/outward-maker-data-entry.zul"
+    sclass="${arg.active eq 'dataEntry'
+        ? 'menu-item active-menu'
+        : 'menu-item'}">
+
+    <n:i
+        class="fa-solid fa-pen-to-square menu-icon"/>
+
+    <label
+        value="Data Entry"
+        sclass="menu-label"/>
+</a>
+
+
+    <!-- SEND TO CHECKER -->
+
+    <a
+        href="/zul/outward/outward-maker/outward-maker-send-to-checker.zul"
+        sclass="${arg.active eq 'sendToChecker'
+            ? 'menu-item active-menu'
+            : 'menu-item'}">
+
+        <n:i class="fa-solid fa-paper-plane menu-icon"/>
+
+        <label
+            value="Send to Checker"
+            sclass="menu-label"/>
+
+    </a>
+
+</vlayout>
+         
+         
+         
+         
+   <!-- INWARD MAKER -->
         <vlayout
             visible="${arg.roleName eq 'INWARD_MAKER'}"
             width="100%"

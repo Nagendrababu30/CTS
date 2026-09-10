@@ -1,8 +1,12 @@
 package com.cts.inward.service;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
+import com.cts.inward.config.FileConfiguration;
 import com.cts.inward.dto.PxfParserResult;
 import com.cts.inward.enums.FileType;
 import com.cts.inward.model.ChequeImage;
@@ -31,6 +35,8 @@ public class FileProcessingServiceImpl
     private final PibfProcessor pibfProcessor;
     private final OcrParser ocrParser;
 
+    private final FileConfiguration fileConfiguration;
+
     private final BatchService batchService;
     private final ChequeService chequeService;
 
@@ -41,6 +47,7 @@ public class FileProcessingServiceImpl
     private final ChequeImageService chequeImageService;
 
     private FileProcessingServiceImpl(
+            FileConfiguration fileConfiguration,
             PxfParser pxfParser,
             PibfProcessor pibfProcessor,
             OcrParser ocrParser,
@@ -51,6 +58,7 @@ public class FileProcessingServiceImpl
             ImageService imageService,
             ChequeImageService chequeImageService) {
 
+        this.fileConfiguration = fileConfiguration;
         this.pxfParser = pxfParser;
         this.pibfProcessor = pibfProcessor;
         this.ocrParser = ocrParser;
@@ -63,6 +71,7 @@ public class FileProcessingServiceImpl
     }
 
     public static FileProcessingServiceImpl of(
+            FileConfiguration fileConfiguration,
             PxfParser pxfParser,
             PibfProcessor pibfProcessor,
             OcrParser ocrParser,
@@ -74,6 +83,7 @@ public class FileProcessingServiceImpl
             ChequeImageService chequeImageService) {
 
         return new FileProcessingServiceImpl(
+                fileConfiguration,
                 pxfParser,
                 pibfProcessor,
                 ocrParser,
@@ -88,27 +98,101 @@ public class FileProcessingServiceImpl
     @Override
     public void processFile(String filePath) {
 
-        FileType fileType =
-                resolveFileType(filePath);
+        FileType fileType = resolveFileType(filePath);
+
+        /* CATCH 1 — move to processing/{type}/ before parsing */
+        String processingFilePath = moveToProcessing(filePath, fileType);
 
         switch (fileType) {
 
         case PXF:
-            processPxfFile(filePath);
+            processPxfFile(processingFilePath);
+            moveToArchive(processingFilePath, fileType);
             break;
 
         case PIBF:
-            processPibfFile(filePath);
+            processPibfFile(processingFilePath);
+            moveToArchive(processingFilePath, fileType);
             break;
 
         case OCR:
-            processOcrFile(filePath);
+            processOcrFile(processingFilePath);
+            moveToArchive(processingFilePath, fileType);
             break;
 
         default:
             throw new IllegalStateException(
                     "Unsupported file type: "
                             + fileType);
+        }
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Move file from incoming/{type}/ to processing/{type}/               */
+    /* Returns the new file path in the processing directory.              */
+    /* ------------------------------------------------------------------ */
+
+    private String moveToProcessing(String filePath, FileType fileType) {
+
+        try {
+
+            Path source = Path.of(filePath);
+
+            Path targetDir = fileConfiguration
+                    .getProcessingPath()
+                    .resolve(fileType.name().toLowerCase());
+
+            Files.createDirectories(targetDir);
+
+            Path target = targetDir.resolve(source.getFileName());
+
+            Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+
+            System.out.println(
+                    "[FileProcessing] Moved to processing: "
+                    + target);
+
+            return target.toString();
+
+        } catch (IOException e) {
+
+            throw new IllegalStateException(
+                    "Failed to move file to processing directory: "
+                    + filePath, e);
+        }
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Move file from processing/{type}/ to archive/{type}/ after parsing  */
+    /* Called only after parse succeeds — failed files stay in processing  */
+    /* Image files are NOT archived — they stay in images/                 */
+    /* ------------------------------------------------------------------ */
+
+    private void moveToArchive(String filePath, FileType fileType) {
+
+        try {
+
+            Path source = Path.of(filePath);
+
+            Path targetDir = fileConfiguration
+                    .getArchivePath()
+                    .resolve(fileType.name().toLowerCase());
+
+            Files.createDirectories(targetDir);
+
+            Path target = targetDir.resolve(source.getFileName());
+
+            Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+
+            System.out.println(
+                    "[FileProcessing] Archived: "
+                    + target);
+
+        } catch (IOException e) {
+
+            throw new IllegalStateException(
+                    "Failed to move file to archive directory: "
+                    + filePath, e);
         }
     }
 

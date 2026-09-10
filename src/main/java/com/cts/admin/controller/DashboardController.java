@@ -39,7 +39,7 @@ public class DashboardController extends GenericForwardComposer<Component> {
             java.util.TimeZone.getTimeZone("Asia/Kolkata");
 
     private static final SimpleDateFormat DATE_FMT =
-            new SimpleDateFormat("dd MMM yyyy, hh:mm a");
+            new SimpleDateFormat("dd/MM/yyyy hh:mm a");
 
     /* ------------------------------------------------------------------ */
     /* ZUL COMPONENTS                                                       */

@@ -15,5 +15,12 @@ public interface BatchDetailsDao {
 
 	void saveCheckerDecision(String chequeNumber, String status, String rejectionReasonCode, String returnReasonCode,
 			Long checkerId, String checkerAction, String remarks);
+	
+	 List<Map<String, Object>> getBatchesForVerification(
+	            String userId);
+
+	    List<Map<String, Object>> searchBatchesForVerification(
+	            String batchId,
+	            String userId);
 
 }

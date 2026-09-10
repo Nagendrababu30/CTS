@@ -13,10 +13,755 @@
 <zk>
 
     <!-- ========================================================= -->
-    <!-- PAGE CSS                                                  -->
+    <!-- PAGE CSS – MODERN REALTIME PREMIUM DESIGN                 -->
     <!-- ========================================================= -->
 
-    <style src="/css/outward-maker/captured-batches.css"/>
+    <style><![CDATA[
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+        /* ---------- Design tokens ---------- */
+        :root {
+            --bg-app:            #EAF0FA;
+            --bg-app-2:          #E4ECF8;
+            --bg-surface:        #FFFFFF;
+            --bg-surface-2:      #FCFDFF;
+            --bg-subtle:         #F9FAFB;
+            --bg-hover:          #F6F9FF;
+            --border-light:      #E4EAF3;
+            --border-mid:        #D0D5DD;
+            --border-dark:       #98A2B3;
+            --text-primary:      #0B1F3F;
+            --text-secondary:    #2B3A55;
+            --text-muted:        #667085;
+            --text-faint:        #98A2B3;
+
+            --brand-blue:        #175CD3;
+            --brand-blue-dark:   #1D4ED8;
+            --brand-indigo:      #4F46E5;
+            --brand-purple:      #7A5AF8;
+            --brand-pink:        #C026D3;
+            --brand-orange:      #F97316;
+            --brand-amber:       #F59E0B;
+            --brand-green:       #12B76A;
+            --brand-teal:        #14B8A6;
+            --brand-cyan:        #06B6D4;
+
+            --radius-sm:         6px;
+            --radius-md:         10px;
+            --radius-lg:         16px;
+            --radius-xl:         22px;
+            --radius-pill:       999px;
+
+            --shadow-xs:         0 1px 2px rgba(16, 24, 40, 0.04);
+            --shadow-sm:         0 1px 3px rgba(16, 24, 40, 0.06), 0 1px 2px rgba(16, 24, 40, 0.04);
+            --shadow-md:         0 6px 18px rgba(16, 24, 40, 0.07), 0 2px 6px rgba(16, 24, 40, 0.03);
+            --shadow-lg:         0 18px 40px rgba(16, 24, 40, 0.10), 0 6px 14px rgba(16, 24, 40, 0.05);
+            --shadow-xl:         0 28px 60px rgba(16, 24, 40, 0.14), 0 10px 22px rgba(16, 24, 40, 0.06);
+
+            --shadow-glow-blue:  0 6px 22px rgba(23, 92, 211, 0.35);
+            --shadow-glow-purple:0 6px 22px rgba(122, 90, 248, 0.35);
+            --shadow-glow-green: 0 6px 22px rgba(18, 183, 106, 0.35);
+
+            --ease:              cubic-bezier(0.4, 0, 0.2, 1);
+            --ease-spring:       cubic-bezier(0.34, 1.56, 0.64, 1);
+            --ease-out-expo:     cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* =============================================================
+           GLOBAL RESET / BASE
+           ============================================================= */
+
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            overflow: hidden !important;
+            background: var(--bg-app);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+            color: var(--text-secondary);
+        }
+
+        html { scrollbar-gutter: stable; }
+
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-mid) transparent;
+        }
+
+        *::-webkit-scrollbar        { width: 8px; height: 8px; }
+        *::-webkit-scrollbar-track  { background: transparent; border-radius: 4px; }
+        *::-webkit-scrollbar-thumb  {
+            background: linear-gradient(180deg, #C8D2E0, #B0BCCE);
+            border-radius: 4px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+        *::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #98A2B3, #7A879C);
+            background-clip: padding-box;
+        }
+
+        /* =============================================================
+           ANIMATIONS
+           ============================================================= */
+
+        @keyframes auroraFloat1 {
+            0%   { transform: translate(0, 0) scale(1); }
+            50%  { transform: translate(30px, -25px) scale(1.05); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        @keyframes auroraFloat2 {
+            0%   { transform: translate(0, 0) scale(1); }
+            50%  { transform: translate(-35px, 30px) scale(1.06); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        @keyframes auroraFloat3 {
+            0%   { transform: translate(0, 0) scale(1); }
+            50%  { transform: translate(20px, 35px) scale(1.04); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        @keyframes gradientShift {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes liveDot {
+            0%   { box-shadow: 0 0 0 0 rgba(18, 183, 106, 0.6), 0 0 12px rgba(18, 183, 106, 0.8); }
+            70%  { box-shadow: 0 0 0 12px rgba(18, 183, 106, 0), 0 0 12px rgba(18, 183, 106, 0.3); }
+            100% { box-shadow: 0 0 0 0 rgba(18, 183, 106, 0), 0 0 12px rgba(18, 183, 106, 0.8); }
+        }
+
+        @keyframes subtlePulse {
+            0%   { opacity: 1; }
+            50%  { opacity: 0.82; }
+            100% { opacity: 1; }
+        }
+
+        /* =============================================================
+           MAIN CONTENT AREA
+           ============================================================= */
+
+        .captured-batches-content {
+            position: relative;
+            background:
+                radial-gradient(1200px 600px at 0% 0%, rgba(23, 92, 211, 0.08), transparent 60%),
+                radial-gradient(1000px 600px at 100% 0%, rgba(122, 90, 248, 0.08), transparent 60%),
+                radial-gradient(900px 700px at 100% 100%, rgba(18, 183, 106, 0.05), transparent 60%),
+                linear-gradient(180deg, var(--bg-app) 0%, var(--bg-app-2) 100%);
+        }
+
+        .captured-batches-content::before {
+            content: '';
+            position: absolute;
+            top: -180px;
+            left: -120px;
+            width: 560px;
+            height: 560px;
+            background: radial-gradient(circle, rgba(23, 92, 211, 0.14) 0%, rgba(23, 92, 211, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(10px);
+            animation: auroraFloat1 16s ease-in-out infinite;
+        }
+
+        .captured-batches-content::after {
+            content: '';
+            position: absolute;
+            bottom: -200px;
+            right: -140px;
+            width: 620px;
+            height: 620px;
+            background: radial-gradient(circle, rgba(122, 90, 248, 0.14) 0%, rgba(122, 90, 248, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(10px);
+            animation: auroraFloat2 18s ease-in-out infinite;
+        }
+
+        /* Make sure children are above ambient glows */
+        .captured-batches-content > .z-vlayout {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* =============================================================
+           PAGE TITLE
+           ============================================================= */
+
+        .captured-batches-page-title {
+            font-family: 'Space Grotesk', 'Plus Jakarta Sans', 'Inter', sans-serif !important;
+            font-size: 30px !important;
+            font-weight: 700 !important;
+            letter-spacing: -0.035em !important;
+            background: linear-gradient(135deg, #0B1F3F 0%, #175CD3 50%, #7A5AF8 100%);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 14px;
+            animation: gradientShift 6s ease infinite, fadeInUp 0.5s var(--ease-out-expo) both;
+        }
+
+        .captured-batches-page-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 72px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--brand-blue), var(--brand-purple), var(--brand-pink), var(--brand-orange), var(--brand-green));
+            background-size: 300% 100%;
+            border-radius: 2px;
+            box-shadow: 0 0 20px rgba(23, 92, 211, 0.5);
+            animation: gradientShift 5s ease infinite;
+        }
+
+        /* =============================================================
+           GROUPBOX – MAIN CARD
+           ============================================================= */
+
+        .captured-batches-groupbox {
+            background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-surface-2) 100%) !important;
+            border: 1px solid var(--border-light) !important;
+            border-radius: var(--radius-lg) !important;
+            padding: 28px 28px 24px 28px !important;
+            box-sizing: border-box !important;
+            box-shadow: var(--shadow-md) !important;
+            position: relative !important;
+            overflow: hidden !important;
+            animation: fadeInUp 0.55s var(--ease-out-expo) 0.1s both;
+        }
+
+        .captured-batches-groupbox:hover {
+            box-shadow: var(--shadow-lg) !important;
+            border-color: #DCE3EE !important;
+        }
+
+        /* Animated top accent bar */
+        .captured-batches-groupbox::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg,
+                var(--brand-blue), var(--brand-indigo), var(--brand-purple),
+                var(--brand-pink), var(--brand-orange), var(--brand-green),
+                var(--brand-cyan), var(--brand-blue));
+            background-size: 400% 100%;
+            animation: gradientShift 8s ease infinite;
+            z-index: 3;
+        }
+
+        /* Reset ZK groupbox 3d mold inner wrappers */
+        .captured-batches-groupbox .z-groupbox-hl,
+        .captured-batches-groupbox .z-groupbox-hr,
+        .captured-batches-groupbox .z-groupbox-hm,
+        .captured-batches-groupbox .z-groupbox-tl,
+        .captured-batches-groupbox .z-groupbox-tr,
+        .captured-batches-groupbox .z-groupbox-tm,
+        .captured-batches-groupbox .z-groupbox-bl,
+        .captured-batches-groupbox .z-groupbox-br,
+        .captured-batches-groupbox .z-groupbox-bm,
+        .captured-batches-groupbox .z-groupbox-cl,
+        .captured-batches-groupbox .z-groupbox-cr,
+        .captured-batches-groupbox .z-groupbox-cm,
+        .captured-batches-groupbox .z-groupbox-header,
+        .captured-batches-groupbox .z-groupbox-title,
+        .captured-batches-groupbox .z-groupbox-content {
+            background: transparent !important;
+            background-image: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .captured-batches-groupbox .z-groupbox-content {
+            padding: 0 !important;
+            overflow: visible !important;
+        }
+
+        /* =============================================================
+           CAPTION – "Batches"
+           ============================================================= */
+
+        .captured-batches-caption {
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif !important;
+            font-size: 18px !important;
+            font-weight: 800 !important;
+            color: var(--text-primary) !important;
+            letter-spacing: -0.015em !important;
+            position: relative !important;
+            padding: 0 0 16px 18px !important;
+            margin: 0 !important;
+            display: block !important;
+            background: transparent !important;
+            border: none !important;
+            text-shadow: none !important;
+        }
+
+        .captured-batches-caption::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 4px;
+            width: 5px;
+            height: 22px;
+            background: linear-gradient(180deg, var(--brand-blue), var(--brand-purple), var(--brand-pink));
+            border-radius: 3px;
+            box-shadow: 0 0 14px rgba(23, 92, 211, 0.55);
+        }
+
+        .captured-batches-caption::after {
+            content: '';
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            margin-left: 12px;
+            background: var(--brand-green);
+            border-radius: 50%;
+            animation: liveDot 2s infinite;
+            vertical-align: middle;
+        }
+
+        /* =============================================================
+           TABLE CONTAINER
+           ============================================================= */
+
+        .captured-batches-table-container {
+            width: 100%;
+            position: relative;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        /* =============================================================
+           LISTBOX – MAIN TABLE
+           ============================================================= */
+
+        .captured-batches-listbox {
+            width: 100% !important;
+            border: 1px solid var(--border-light) !important;
+            border-radius: var(--radius-md) !important;
+            overflow: hidden !important;
+            background: var(--bg-surface) !important;
+            box-shadow: inset 0 1px 3px rgba(16, 24, 40, 0.03) !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+
+        /* Listbox body – scroll area */
+        .captured-batches-listbox .z-listbox-body {
+            overflow-y: auto !important;
+            background: var(--bg-surface) !important;
+        }
+
+        .captured-batches-listbox .z-listbox-body::-webkit-scrollbar { width: 6px; }
+        .captured-batches-listbox .z-listbox-body::-webkit-scrollbar-track { background: transparent; }
+        .captured-batches-listbox .z-listbox-body::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #C8D2E0, #B0BCCE);
+            border-radius: 3px;
+        }
+        .captured-batches-listbox .z-listbox-body::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #98A2B3, #7A879C);
+        }
+
+        /* =============================================================
+           LIST HEADER – UNIFIED GRADIENT, SLIM UNDERLINE
+           ============================================================= */
+
+        .captured-batches-listhead,
+        .captured-batches-listbox .z-listhead {
+            background: linear-gradient(90deg, #175CD3 0%, #4F46E5 30%, #7A5AF8 60%, #6D28D9 100%) !important;
+            background-size: 200% 100% !important;
+            border-bottom: none !important;
+            position: relative !important;
+            z-index: 5 !important;
+            animation: gradientShift 14s ease infinite !important;
+            box-shadow: 0 1px 6px rgba(23, 92, 211, 0.18) !important;
+            height: 52px !important;
+        }
+
+        .captured-batches-listheader,
+        .captured-batches-listbox .z-listheader,
+        .captured-batches-listbox .z-listhead th,
+        .captured-batches-listbox .z-listhead .z-listheader-content {
+            background: transparent !important;
+            font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
+            font-weight: 700 !important;
+            font-size: 13px !important;
+            letter-spacing: 0.06em !important;
+            text-transform: uppercase !important;
+            color: #FFFFFF !important;
+            padding: 18px 16px !important;
+            border-bottom: none !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+            position: relative !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.22) !important;
+            line-height: 1.4 !important;
+            vertical-align: middle !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: background-color 0.25s var(--ease);
+        }
+
+        .captured-batches-listheader:last-child,
+        .captured-batches-listbox .z-listheader:last-child {
+            border-right: none !important;
+        }
+
+        /* Force nested text visible */
+        .captured-batches-listbox .z-listheader .z-listheader-content,
+        .captured-batches-listbox .z-listheader-content,
+        .captured-batches-listbox .z-listheader label,
+        .captured-batches-listbox .z-listheader .z-label,
+        .captured-batches-listbox .z-listheader * {
+            color: #FFFFFF !important;
+            font-weight: 700 !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            background: transparent !important;
+            font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
+            letter-spacing: 0.06em !important;
+            line-height: 1.4 !important;
+            vertical-align: middle !important;
+            white-space: nowrap !important;
+            text-overflow: ellipsis !important;
+            overflow: hidden !important;
+        }
+
+        /* Ultra-slim glowing underline across the header */
+        .captured-batches-listheader::after,
+        .captured-batches-listbox .z-listheader::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, #7DD3FC, #C7D2FE, #F5D0FE, #FDE68A, #A7F3D0, #7DD3FC);
+            background-size: 300% 100%;
+            opacity: 0.85;
+            animation: gradientShift 6s ease infinite;
+            z-index: 6;
+            box-shadow: 0 0 4px rgba(199, 210, 254, 0.45);
+        }
+
+        /* Header hover – subtle lighten */
+        .captured-batches-listheader:hover,
+        .captured-batches-listbox .z-listheader:hover {
+            background: rgba(255, 255, 255, 0.05) !important;
+        }
+
+        /* Sizable handle color */
+        .captured-batches-listbox .z-columns-div,
+        .captured-batches-listbox .z-listheader-button {
+            background: transparent !important;
+            border-color: rgba(255, 255, 255, 0.15) !important;
+        }
+
+        /* =============================================================
+           DATA ROWS
+           ============================================================= */
+
+        .captured-batches-listbox .z-listbox-body tr,
+        .captured-batches-listbox .z-listitem {
+            border-bottom: 1px solid #EEF2F8 !important;
+            position: relative !important;
+            background: #FFFFFF !important;
+            transition: background 0.25s var(--ease), box-shadow 0.25s var(--ease) !important;
+        }
+
+        .captured-batches-listbox .z-listbox-body tr:nth-child(even),
+        .captured-batches-listbox .z-listitem:nth-child(even) {
+            background: linear-gradient(90deg, #FCFDFF 0%, #F9FBFF 100%) !important;
+        }
+
+        .captured-batches-listbox .z-listbox-body tr:hover,
+        .captured-batches-listbox .z-listitem:hover {
+            background: linear-gradient(90deg, #F0F6FF 0%, #F8FBFF 100%) !important;
+            box-shadow: inset 4px 0 0 var(--brand-blue),
+                        0 2px 10px rgba(23, 92, 211, 0.08) !important;
+        }
+
+        .captured-batches-listbox .z-listbox-body tr:last-child,
+        .captured-batches-listbox .z-listitem:last-child {
+            border-bottom: none !important;
+        }
+
+        /* =============================================================
+           DATA CELLS
+           ============================================================= */
+
+        .captured-batches-listbox .z-listcell {
+            border-right: 1px solid rgba(228, 234, 243, 0.7) !important;
+            transition: background-color 0.2s var(--ease) !important;
+        }
+
+        .captured-batches-listbox .z-listcell:last-child {
+            border-right: none !important;
+        }
+
+        .captured-batches-listbox .z-listcell-content {
+            font-family: 'Inter', sans-serif !important;
+            font-size: 14px !important;
+            color: #1D2939 !important;
+            font-weight: 500 !important;
+            letter-spacing: 0.005em !important;
+            padding: 18px 18px !important;
+            line-height: 1.5 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: inherit !important;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Batch No (col 1) – emphasized */
+        .captured-batches-listbox .z-listbox-body tr .z-listcell:nth-child(1) .z-listcell-content,
+        .captured-batches-listbox .z-listitem .z-listcell:nth-child(1) .z-listcell-content {
+            font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif !important;
+            font-weight: 700 !important;
+            font-size: 14.5px !important;
+            color: #0B1F3F !important;
+            letter-spacing: -0.01em !important;
+        }
+
+        /* Batch No – colored dot prefix */
+        .captured-batches-listbox .z-listbox-body tr .z-listcell:nth-child(1) .z-listcell-content::before,
+        .captured-batches-listbox .z-listitem .z-listcell:nth-child(1) .z-listcell-content::before {
+            content: '';
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: linear-gradient(135deg, #175CD3, #4F46E5);
+            border-radius: 50%;
+            margin-right: 12px;
+            box-shadow: 0 0 8px rgba(23, 92, 211, 0.5);
+            flex-shrink: 0;
+        }
+
+        /* Total Cheques (col 2) – numeric emphasis */
+        .captured-batches-listbox .z-listbox-body tr .z-listcell:nth-child(2) .z-listcell-content,
+        .captured-batches-listbox .z-listitem .z-listcell:nth-child(2) .z-listcell-content {
+            font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif !important;
+            font-weight: 700 !important;
+            color: #6D28D9 !important;
+            font-variant-numeric: tabular-nums !important;
+        }
+
+        /* Status (col 3) – weight emphasis */
+        .captured-batches-listbox .z-listbox-body tr .z-listcell:nth-child(3) .z-listcell-content,
+        .captured-batches-listbox .z-listitem .z-listcell:nth-child(3) .z-listcell-content {
+            font-weight: 600 !important;
+        }
+
+        /* =============================================================
+           EMPTY MESSAGE
+           ============================================================= */
+
+        .captured-batches-listbox .z-listbox-emptybody,
+        .captured-batches-listbox .z-listbox-emptybody td {
+            padding: 80px 20px !important;
+            color: var(--text-faint) !important;
+            font-size: 15px !important;
+            font-weight: 500 !important;
+            font-style: italic !important;
+            background: linear-gradient(180deg, #FCFDFF 0%, #F7FAFF 100%) !important;
+            text-align: center !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+
+        /* =============================================================
+           PAGINATION (mold="paging")
+           ============================================================= */
+
+        .captured-batches-listbox .z-paging {
+            background: linear-gradient(180deg, #FCFDFF 0%, #F7FAFF 100%) !important;
+            border-top: 1px solid var(--border-light) !important;
+            padding: 12px 18px !important;
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif !important;
+            box-shadow: 0 -2px 8px rgba(16, 24, 40, 0.02) !important;
+        }
+
+        .captured-batches-listbox .z-paging-text,
+        .captured-batches-listbox .z-paging-info {
+            font-family: 'Space Grotesk', 'Inter', sans-serif !important;
+            font-size: 13px !important;
+            color: var(--text-muted) !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.02em !important;
+            font-variant-numeric: tabular-nums !important;
+        }
+
+        /* Pagination buttons */
+        .captured-batches-listbox .z-paging-button {
+            min-width: 36px !important;
+            height: 34px !important;
+            border: 1.5px solid var(--border-mid) !important;
+            border-radius: var(--radius-md) !important;
+            background: var(--bg-surface) !important;
+            color: var(--text-secondary) !important;
+            font-weight: 700 !important;
+            font-size: 13px !important;
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif !important;
+            cursor: pointer !important;
+            box-shadow: var(--shadow-xs) !important;
+            letter-spacing: 0.02em !important;
+            transition: box-shadow 0.25s var(--ease-out-expo),
+                        border-color 0.25s var(--ease),
+                        background-color 0.25s var(--ease),
+                        color 0.25s var(--ease) !important;
+            padding: 0 12px !important;
+            font-variant-numeric: tabular-nums !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin: 0 2px !important;
+        }
+
+        .captured-batches-listbox .z-paging-button:hover {
+            background: var(--bg-subtle) !important;
+            border-color: var(--brand-blue) !important;
+            color: var(--brand-blue) !important;
+            box-shadow: 0 4px 14px rgba(23, 92, 211, 0.20) !important;
+        }
+
+        .captured-batches-listbox .z-paging-button:active {
+            box-shadow: var(--shadow-xs) !important;
+        }
+
+        /* Active page */
+        .captured-batches-listbox .z-paging-button.z-paging-button-selected,
+        .captured-batches-listbox .z-paging-button.z-paging-selected {
+            background: linear-gradient(135deg, #175CD3 0%, #4F46E5 50%, #7A5AF8 100%) !important;
+            background-size: 200% 200% !important;
+            color: #FFFFFF !important;
+            border-color: transparent !important;
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45),
+                        0 0 0 1px rgba(255, 255, 255, 0.2) inset !important;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+            animation: gradientShift 4s ease infinite !important;
+        }
+
+        .captured-batches-listbox .z-paging-button.z-paging-button-selected:hover,
+        .captured-batches-listbox .z-paging-button.z-paging-selected:hover {
+            background: linear-gradient(135deg, #1D4ED8 0%, #4338CA 50%, #6D28D9 100%) !important;
+            background-size: 200% 200% !important;
+            box-shadow: 0 8px 26px rgba(79, 70, 229, 0.55),
+                        0 0 0 1px rgba(255, 255, 255, 0.25) inset !important;
+        }
+
+        /* Disabled pagination buttons */
+        .captured-batches-listbox .z-paging-button[disabled],
+        .captured-batches-listbox .z-paging-button-disabled {
+            opacity: 0.4 !important;
+            cursor: default !important;
+            pointer-events: none !important;
+        }
+
+        /* =============================================================
+           FOCUS / SELECTION
+           ============================================================= */
+
+        .captured-batches-listbox .z-paging-button:focus-visible {
+            outline: 2px solid var(--brand-blue) !important;
+            outline-offset: 3px !important;
+            box-shadow: 0 0 0 5px rgba(23, 92, 211, 0.18) !important;
+        }
+
+        ::selection {
+            background: rgba(23, 92, 211, 0.22);
+            color: var(--text-primary);
+        }
+
+        /* =============================================================
+           RESPONSIVE
+           ============================================================= */
+
+        @media (max-width: 1024px) {
+            .captured-batches-content {
+                padding: 20px 18px !important;
+            }
+            .captured-batches-groupbox {
+                padding: 22px 20px !important;
+            }
+            .captured-batches-page-title {
+                font-size: 24px !important;
+            }
+            .captured-batches-caption {
+                font-size: 16px !important;
+            }
+            .captured-batches-listbox .z-listheader,
+            .captured-batches-listheader {
+                font-size: 12px !important;
+                padding: 16px 12px !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .captured-batches-content {
+                padding: 16px 12px !important;
+            }
+            .captured-batches-groupbox {
+                padding: 18px 14px !important;
+            }
+            .captured-batches-page-title {
+                font-size: 21px !important;
+            }
+            .captured-batches-listbox .z-listheader,
+            .captured-batches-listheader {
+                font-size: 10.5px !important;
+                padding: 13px 8px !important;
+                letter-spacing: 0.04em !important;
+            }
+            .captured-batches-listbox .z-listcell-content {
+                padding: 14px 10px !important;
+                font-size: 12.5px !important;
+            }
+            .captured-batches-listbox .z-paging-button {
+                min-width: 32px !important;
+                height: 30px !important;
+                font-size: 12px !important;
+                padding: 0 8px !important;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+    ]]></style>
 
 
     <!-- ========================================================= -->

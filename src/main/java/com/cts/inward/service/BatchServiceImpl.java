@@ -53,6 +53,8 @@ public class BatchServiceImpl implements BatchService {
 
 		return result;
 	}
+
+		
 	// ---------------------------------------------------------
 	// Checker queue
 	// ---------------------------------------------------------
@@ -148,4 +150,19 @@ public class BatchServiceImpl implements BatchService {
 
 		return batchDao.completeDataEntry(batchId, userId);
 	}
+
+	@Override
+	public List<Map<String, Object>> getBatchesForVerification(Integer userId) {
+		
+		return batchDao.getBatchesForVerification(userId);
+	}
+
+	@Override
+	public List<Map<String, Object>> searchBatchesForVerification(Long batchId, Integer userId) {
+		
+		return batchDao.searchBatchesForVerification(batchId, userId);
+	}
+	
+	
+	
 }

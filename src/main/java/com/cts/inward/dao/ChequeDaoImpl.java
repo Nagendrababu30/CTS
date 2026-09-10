@@ -42,15 +42,13 @@ public class ChequeDaoImpl implements ChequeDao {
 
 			statement.setString(3, cheque.getAccountNumber());
 
-			statement.setString(4, cheque.getDrawerName());
+			statement.setBigDecimal(4, cheque.getChequeAmount());
 
-			statement.setBigDecimal(5, cheque.getChequeAmount());
+			statement.setString(5, cheque.getMicrCode());
 
-			statement.setString(6, cheque.getMicrCode());
+			statement.setObject(6, cheque.getChequeDate());
 
-			statement.setObject(7, cheque.getChequeDate());
-
-			statement.setObject(8, null);
+			statement.setObject(7x, null);
 
 			statement.executeUpdate();
 

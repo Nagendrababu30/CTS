@@ -140,7 +140,6 @@ public class PxfParserImpl implements PxfParser {
         String chequeNumber = null;
         String accountNumber = null;
         LocalDate chequeDate = null;
-        String drawerName = null;
         BigDecimal chequeAmount = null;
         String micrCode = null;
         String cityCode = null;

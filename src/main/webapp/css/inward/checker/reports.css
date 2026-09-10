@@ -1,5 +1,26 @@
+.report-window .z-window-content {
+    background: transparent !important;
+}
+/* Remove the large outer background only on Reports page */
+.content {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+.report-window {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
 
-
+.report-window .z-window-content {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
 /* --- RRF Report Card Styles --- */
 .rrf-card-container {
     margin-top: 20px;

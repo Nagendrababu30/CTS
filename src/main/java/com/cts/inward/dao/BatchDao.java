@@ -16,4 +16,13 @@ public interface BatchDao {
 	 boolean completeDataEntry(long batchId, long userId);
 
 	List<NpciBatchData> getBatchesByStatus(String batchStatus);
+	
+	List<Map<String, Object>> getBatchesForVerification(
+	        Integer userId);
+
+	List<Map<String, Object>> searchBatchesForVerification(
+	        Long batchId,
+	        Integer userId);
+
+   
 }

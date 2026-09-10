@@ -75,7 +75,7 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
 				    cheque_number,
 				    batch_id,
 				    account_number,
-				    drawer_name,
+				    payee_name,
 				    amount,
 				    micr_code,
 				    cheque_date
@@ -103,7 +103,7 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
 
 					cheque.put("accountNumber", resultSet.getString("account_number"));
 
-					cheque.put("drawerName", resultSet.getString("drawer_name"));
+					cheque.put("drawerName", resultSet.getString("payee_name"));
 
 					cheque.put("amount", resultSet.getBigDecimal("amount"));
 
@@ -134,7 +134,7 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
 				    account_number,
 				    amount,
 				    cheque_date,
-				    drawer_name
+				    payee_name
 				FROM inward_cheque
 				WHERE cheque_number = ?
 				""";
@@ -170,7 +170,7 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
 
 						details.put("oldChequeDate", rs.getString("cheque_date"));
 
-						details.put("oldDrawerName", rs.getString("drawer_name"));
+						details.put("oldDrawerName", rs.getString("payee_name"));
 					}
 				}
 			}
@@ -359,6 +359,18 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
 
 			throw new RuntimeException("Failed to save checker decision for cheque " + chequeNumber, e);
 		}
+	}
+
+	@Override
+	public List<Map<String, Object>> getBatchesForVerification(String userId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Map<String, Object>> searchBatchesForVerification(String batchId, String userId) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

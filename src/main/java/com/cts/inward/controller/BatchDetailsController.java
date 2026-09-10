@@ -34,7 +34,7 @@ public class BatchDetailsController
     // BATCH
     // =========================================================
 
-    private String batchId;
+    private Long batchId;
 
     private List<Map<String, Object>> cheques =
             new ArrayList<>();
@@ -161,7 +161,7 @@ public class BatchDetailsController
 
     // =========================================================
     // DATA ENTRY - PAYEE NAME
-    // DB FIELD = DRAWER_NAME
+    // DB FIELD = payee_name
     // =========================================================
 
     private Label payeeStatus;
@@ -245,7 +245,7 @@ public class BatchDetailsController
     // CHECKER DECISION
     // =========================================================
 
-    private Long userId;
+    private Integer userId;
 
     private Button acceptButton;
     private Button returnButton;
@@ -381,10 +381,11 @@ public class BatchDetailsController
                 Executions.getCurrent().getAttribute("userId");
 
         if (sessionUserId instanceof Number) {
-            userId = ((Number) sessionUserId).longValue();
+            userId = ((Number) sessionUserId).intValue();
         } else if (sessionUserId != null) {
             try {
-                userId = Long.valueOf(String.valueOf(sessionUserId));
+                userId = Integer.valueOf(
+                        String.valueOf(sessionUserId));
             } catch (NumberFormatException e) {
                 userId = null;
             }
@@ -406,9 +407,21 @@ public class BatchDetailsController
         // Get batch ID from URL
         // -----------------------------------------------------
 
-        batchId =
+        String batchIdParameter =
                 Executions.getCurrent()
                         .getParameter("batchId");
+
+        if (batchIdParameter != null
+                && !batchIdParameter.trim().isEmpty()) {
+            try {
+                batchId = Long.valueOf(
+                        batchIdParameter.trim());
+            } catch (NumberFormatException e) {
+                batchId = null;
+            }
+        } else {
+            batchId = null;
+        }
 
 
         System.out.println();
@@ -426,8 +439,7 @@ public class BatchDetailsController
         );
 
 
-        if (batchId == null
-                || batchId.trim().isEmpty()) {
+        if (batchId == null) {
 
             System.out.println(
                     "BATCH DETAILS - Batch ID NOT FOUND"
@@ -437,7 +449,7 @@ public class BatchDetailsController
         }
 
 
-        batchId = batchId.trim();
+
 
 
         // -----------------------------------------------------
@@ -1374,7 +1386,7 @@ public class BatchDetailsController
 
         // =====================================================
         // PAYEE NAME
-        // DB FIELD = DRAWER_NAME
+        // DB FIELD = payee_name
         // =====================================================
 
         String oldPayee =
@@ -2205,14 +2217,53 @@ public class BatchDetailsController
     }
 
     private void handleRejectConfirmButton() {
-        String reasonCode = rejectReason == null ? null : rejectReason.getValue();
+
+        String reasonCode = null;
+
+        if (rejectReason != null
+                && rejectReason.getSelectedItem() != null) {
+
+            Object selectedValue =
+                    rejectReason.getSelectedItem().getValue();
+
+            if (selectedValue != null) {
+                reasonCode = String.valueOf(selectedValue);
+            }
+        }
+
         if (reasonCode == null || reasonCode.trim().isEmpty()) {
-            Messagebox.show("Please select a rejection reason.",
-                    "Validation", Messagebox.OK, Messagebox.EXCLAMATION);
+
+            Messagebox.show(
+                    "Please select a rejection reason.",
+                    "Validation",
+                    Messagebox.OK,
+                    Messagebox.EXCLAMATION
+            );
+
             return;
         }
-        String remarks = rejectRemark == null ? null : rejectRemark.getValue();
-        saveDecision("REJECT", reasonCode.trim(), null, "Rejected", remarks, rejectWindow);
+
+        String remarks =
+                rejectRemark == null
+                        ? null
+                        : rejectRemark.getValue();
+
+        System.out.println(
+                "REJECT REASON CODE = " + reasonCode
+        );
+
+        System.out.println(
+                "REJECT REMARKS = " + remarks
+        );
+
+        saveDecision(
+                "REJECT",
+                reasonCode.trim(),
+                null,
+                "Rejected",
+                remarks,
+                rejectWindow
+        );
     }
 
     // =========================================================
@@ -2239,14 +2290,53 @@ public class BatchDetailsController
     }
 
     private void handleReturnConfirmButton() {
-        String reasonCode = returnReason == null ? null : returnReason.getValue();
+
+        String reasonCode = null;
+
+        if (returnReason != null
+                && returnReason.getSelectedItem() != null) {
+
+            Object selectedValue =
+                    returnReason.getSelectedItem().getValue();
+
+            if (selectedValue != null) {
+                reasonCode = String.valueOf(selectedValue);
+            }
+        }
+
         if (reasonCode == null || reasonCode.trim().isEmpty()) {
-            Messagebox.show("Please select a return reason.",
-                    "Validation", Messagebox.OK, Messagebox.EXCLAMATION);
+
+            Messagebox.show(
+                    "Please select a return reason.",
+                    "Validation",
+                    Messagebox.OK,
+                    Messagebox.EXCLAMATION
+            );
+
             return;
         }
-        String remarks = returnRemark == null ? null : returnRemark.getValue();
-        saveDecision("RETURN_TO_MAKER", null, reasonCode.trim(), "Returned", remarks, returnWindow);
+
+        String remarks =
+                returnRemark == null
+                        ? null
+                        : returnRemark.getValue();
+
+        System.out.println(
+                "RETURN REASON CODE = " + reasonCode
+        );
+
+        System.out.println(
+                "RETURN REMARKS = " + remarks
+        );
+
+        saveDecision(
+                "RETURN_TO_MAKER",
+                null,
+                reasonCode.trim(),
+                "Returned",
+                remarks,
+                returnWindow
+        );
     }
 
     // =========================================================

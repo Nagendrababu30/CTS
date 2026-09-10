@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.cts.inward.config.ConnectionPool;
 import com.iispl.cts.data.CTSStaticData;
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.model.outward.OutwardCheque;
@@ -19,6 +20,7 @@ public class CheckerBatchDAO {
     // ============================================================
     // GET BATCHES LOCKED BY CURRENT CHECKER
     // ============================================================
+	private final javax.sql.DataSource dataSource =ConnectionPool.getDataSource();
 
     public List<OutwardBatch> getCheckerBatches(
             String checkerUserId) {
@@ -42,7 +44,7 @@ public class CheckerBatchDAO {
 
         try (
                 Connection con =
-                        CTSStaticData.getConnection();
+                		dataSource.getConnection();
 
                 PreparedStatement ps =
                         con.prepareStatement(sql)
@@ -145,7 +147,7 @@ public class CheckerBatchDAO {
 
         try (
                 Connection con =
-                        CTSStaticData.getConnection();
+                		dataSource.getConnection();
 
                 PreparedStatement ps =
                         con.prepareStatement(sql)
@@ -373,7 +375,7 @@ public class CheckerBatchDAO {
 
      try (
              Connection con =
-                     CTSStaticData.getConnection();
+            		 dataSource.getConnection();
 
              PreparedStatement ps =
                      con.prepareStatement(sql)

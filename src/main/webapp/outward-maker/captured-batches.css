@@ -1,0 +1,139 @@
+/* =========================================================
+   Capture Operator - Captured Batches
+   ========================================================= */
+
+
+/* =========================================================
+   Main Window
+   ========================================================= */
+
+.captured-batches-window {
+    width: 100%;
+    height: 100%;
+    border: none;
+    background: #ffffff;
+}
+
+
+/* =========================================================
+   Header
+   ========================================================= */
+
+.captured-batches-header {
+    width: 100%;
+}
+
+
+/* =========================================================
+   Main Layout
+   ========================================================= */
+
+.captured-batches-layout {
+    width: 100%;
+    height: calc(100% - 70px);
+    background: #ffffff;
+}
+
+
+/* =========================================================
+   Sidebar
+   ========================================================= */
+
+.captured-batches-sidebar {
+    width: 305px;
+    height: 100%;
+    background: #071b33;
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   Main Content
+   ========================================================= */
+
+.captured-batches-content {
+    width: calc(100% - 305px);
+    height: 100%;
+    background: #ffffff;
+    padding: 35px 55px;
+    overflow: auto;
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   Page Title
+   ========================================================= */
+
+.captured-batches-page-title {
+    display: block;
+    color: #12375b;
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+
+/* =========================================================
+   Groupbox
+   ========================================================= */
+
+.captured-batches-groupbox {
+    width: 100%;
+    border: 1px solid #d4dce5;
+    background: #ffffff;
+}
+
+
+/* =========================================================
+   Groupbox Caption
+   ========================================================= */
+
+.captured-batches-caption {
+    color: #12375b;
+    font-size: 21px;
+    font-weight: bold;
+}
+
+
+/* =========================================================
+   Table Container
+   ========================================================= */
+
+.captured-batches-table-container {
+    padding: 18px;
+}
+
+
+/* =========================================================
+   Listbox
+   ========================================================= */
+
+.captured-batches-listbox {
+    width: 100%;
+    border: 1px solid #d7dfe8;
+    font-size: 16px;
+}
+
+
+/* =========================================================
+   Table Header
+   ========================================================= */
+
+.captured-batches-listhead {
+    height: 52px;
+    background: #078fe5;
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   Table Header Columns
+   ========================================================= */
+
+.captured-batches-listheader {
+    background: #078fe5;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: bold;
+}

@@ -5,10 +5,10 @@ import java.util.List;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.Wire;
-
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.ListModelList;
@@ -16,6 +16,7 @@ import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.ListitemRenderer;
+import org.zkoss.zk.ui.util.Clients;
 
 import com.iispl.cts.model.outward.OutwardCheque;
 import com.iispl.cts.service.outward.checker.CheckerBatchService;
@@ -24,7 +25,6 @@ public class CheckerBatchVerificationController
         extends SelectorComposer<Component> {
 
     private static final long serialVersionUID = 1L;
-
 
     // =========================================================
     // ZUL COMPONENTS
@@ -48,13 +48,11 @@ public class CheckerBatchVerificationController
     @Wire
     private Listbox chequeListbox;
 
-
     // =========================================================
     // SERVICE
     // =========================================================
 
     private CheckerBatchService batchService;
-
 
     // =========================================================
     // VARIABLES
@@ -64,6 +62,7 @@ public class CheckerBatchVerificationController
 
     private List<OutwardCheque> chequeList;
 
+    private long currentUserId;
 
     // =========================================================
     // INITIALIZE
@@ -75,26 +74,118 @@ public class CheckerBatchVerificationController
 
         super.doAfterCompose(comp);
 
-        // Create service object
-        batchService = new CheckerBatchService();
+        // =====================================================
+        // GET ZK SESSION
+        // =====================================================
 
-        // Get batchId from URL
-        batchId = Executions
-                .getCurrent()
-                .getParameter("batchId");
+        Session session =
+                Executions.getCurrent().getSession();
 
-        // If batchId is missing
+        // =====================================================
+        // NO SESSION
+        // =====================================================
+
+        if (session == null) {
+
+            Executions.sendRedirect(
+                    "/zul/login.zul"
+            );
+
+            return;
+        }
+
+        // =====================================================
+        // GET USER ID FROM SESSION
+        // =====================================================
+
+        Object sessionUserId =
+                session.getAttribute("userId");
+
+        // =====================================================
+        // USER ID NOT FOUND
+        // =====================================================
+
+        if (sessionUserId == null) {
+
+            Executions.sendRedirect(
+                    "/zul/login.zul"
+            );
+
+            return;
+        }
+
+        // =====================================================
+        // CONVERT USER ID
+        // =====================================================
+
+        if (sessionUserId instanceof Number) {
+
+            currentUserId =
+                    ((Number) sessionUserId)
+                            .longValue();
+
+        } else {
+
+            try {
+
+                currentUserId =
+                        Long.parseLong(
+                                sessionUserId.toString()
+                        );
+
+            } catch (NumberFormatException e) {
+
+                Executions.sendRedirect(
+                        "/zul/login.zul"
+                );
+
+                return;
+            }
+        }
+
+        // =====================================================
+        // LOG CURRENT USER
+        // =====================================================
+
+        System.out.println(
+                "Checker Batch Verification - User ID = "
+                        + currentUserId
+        );
+
+        // =====================================================
+        // CREATE SERVICE
+        // =====================================================
+
+        batchService =
+                new CheckerBatchService();
+
+        // =====================================================
+        // GET BATCH ID FROM URL
+        // =====================================================
+
+        batchId =
+                Executions
+                        .getCurrent()
+                        .getParameter("batchId");
+
+        // =====================================================
+        // IF BATCH ID IS MISSING
+        // =====================================================
+
         if (batchId == null
                 || batchId.trim().isEmpty()) {
 
             goBackToQueue();
+
             return;
         }
 
-        // Load batch
+        // =====================================================
+        // LOAD BATCH
+        // =====================================================
+
         loadBatch();
     }
-
 
     // =========================================================
     // LOAD BATCH
@@ -109,22 +200,37 @@ public class CheckerBatchVerificationController
             );
 
             System.out.println(
-                    "LOADING BATCH = " + batchId
+                    "LOADING BATCH = "
+                            + batchId
+            );
+
+            System.out.println(
+                    "CURRENT USER ID = "
+                            + currentUserId
             );
 
             System.out.println(
                     "=========================================="
             );
 
-            // Get cheques using batch number
-            chequeList = batchService
-                    .getChequesByBatchNumber(batchId);
+            // =================================================
+            // GET CHEQUES USING BATCH NUMBER
+            // =================================================
 
-            // Safety check
+            chequeList =
+                    batchService
+                            .getChequesByBatchNumber(
+                                    batchId
+                            );
+
+            // =================================================
+            // SAFETY CHECK
+            // =================================================
+
             if (chequeList == null) {
 
-                chequeList = new ArrayList<>();
-
+                chequeList =
+                        new ArrayList<>();
             }
 
             System.out.println(
@@ -132,26 +238,39 @@ public class CheckerBatchVerificationController
                             + chequeList.size()
             );
 
+            // =================================================
+            // DISPLAY BATCH ID
+            // =================================================
 
-            // Display batch ID
-            batchIdLabel.setValue(batchId);
+            batchIdLabel.setValue(
+                    batchId
+            );
 
+            // =================================================
+            // UPDATE SUMMARY
+            // =================================================
 
-            // Update summary
             updateSummary();
 
+            // =================================================
+            // DISPLAY CHEQUE LIST
+            // =================================================
 
-            // Display cheque list
             displayCheques();
-
 
         } catch (Exception e) {
 
             e.printStackTrace();
 
+            Clients.showNotification(
+                    "Unable to load batch verification.",
+                    Clients.NOTIFICATION_TYPE_ERROR,
+                    null,
+                    "top_center",
+                    4000
+            );
         }
     }
-
 
     // =========================================================
     // UPDATE SUMMARY
@@ -159,28 +278,34 @@ public class CheckerBatchVerificationController
 
     private void updateSummary() {
 
-        int total = chequeList.size();
+        int total =
+                chequeList.size();
 
         int accepted = 0;
-        int rejected = 0;
-        int pending = 0;
 
+        int rejected = 0;
+
+        int pending = 0;
 
         for (OutwardCheque cheque : chequeList) {
 
             String status =
                     cheque.getChequeStatus();
 
+            // =================================================
+            // EMPTY STATUS
+            // =================================================
 
-            // If status is empty
             if (status == null
                     || status.trim().isEmpty()) {
 
                 pending++;
-
             }
 
+            // =================================================
             // ACCEPTED
+            // =================================================
+
             else if (
                     status.equalsIgnoreCase("ACCEPTED")
                     || status.equalsIgnoreCase("ACCEPT")
@@ -188,30 +313,33 @@ public class CheckerBatchVerificationController
             ) {
 
                 accepted++;
-
             }
 
+            // =================================================
             // REJECTED
+            // =================================================
+
             else if (
                     status.equalsIgnoreCase("REJECTED")
                     || status.equalsIgnoreCase("REJECT")
             ) {
 
                 rejected++;
-
             }
 
-            // Everything else = Pending
+            // =================================================
+            // EVERYTHING ELSE = PENDING
+            // =================================================
+
             else {
 
                 pending++;
-
             }
-
         }
 
-
-        // Display values
+        // =================================================
+        // DISPLAY VALUES
+        // =================================================
 
         totalChequeLabel.setValue(
                 String.valueOf(total)
@@ -228,9 +356,7 @@ public class CheckerBatchVerificationController
         pendingChequeLabel.setValue(
                 String.valueOf(pending)
         );
-
     }
-
 
     // =========================================================
     // DISPLAY CHEQUES
@@ -238,81 +364,63 @@ public class CheckerBatchVerificationController
 
     private void displayCheques() {
 
-
         ListModelList<OutwardCheque> model =
                 new ListModelList<>();
 
+        model.addAll(
+                chequeList
+        );
 
-        model.addAll(chequeList);
-
-
-        chequeListbox.setModel(model);
-
+        chequeListbox.setModel(
+                model
+        );
 
         chequeListbox.setItemRenderer(
-
                 new ListitemRenderer<OutwardCheque>() {
 
                     @Override
                     public void render(
-
                             Listitem item,
                             OutwardCheque cheque,
-                            int index
-
-                    ) {
-
+                            int index) {
 
                         // =====================================
                         // SERIAL NUMBER
                         // =====================================
 
                         item.appendChild(
-
                                 new Listcell(
-
                                         String.valueOf(
                                                 index + 1
                                         )
-
                                 )
-
                         );
-
 
                         // =====================================
                         // CHEQUE NUMBER
                         // =====================================
 
                         item.appendChild(
-
                                 new Listcell(
-
                                         safe(
-                                                cheque.getChequeNumber()
+                                                cheque
+                                                        .getChequeNumber()
                                         )
-
                                 )
-
                         );
-
 
                         // =====================================
                         // ACCOUNT NUMBER
                         // =====================================
 
                         item.appendChild(
-
                                 new Listcell(
-
                                         safe(
-                                                cheque.getDrawerAccountNumber()
+                                                cheque
+                                                        .getDrawerAccountNumber()
                                         )
-
                                 )
-
                         );
-
 
                         // =====================================
                         // AMOUNT
@@ -320,21 +428,19 @@ public class CheckerBatchVerificationController
 
                         String amountValue = "-";
 
-
                         if (cheque.getAmount() != null) {
 
                             amountValue =
-                                    cheque.getAmount().toString();
-
+                                    cheque
+                                            .getAmount()
+                                            .toString();
                         }
 
-
                         item.appendChild(
-
-                                new Listcell(amountValue)
-
+                                new Listcell(
+                                        amountValue
+                                )
                         );
-
 
                         // =====================================
                         // CHEQUE DATE
@@ -342,62 +448,57 @@ public class CheckerBatchVerificationController
 
                         String dateValue = "-";
 
-
                         if (cheque.getChequeDate() != null) {
 
                             dateValue =
                                     cheque
                                             .getChequeDate()
                                             .toString();
-
                         }
 
-
                         item.appendChild(
-
-                                new Listcell(dateValue)
-
+                                new Listcell(
+                                        dateValue
+                                )
                         );
-
 
                         // =====================================
                         // MICR
                         // =====================================
 
                         String micr =
-
-                                safe(cheque.getCityCode())
-
+                                safe(
+                                        cheque.getCityCode()
+                                )
                                 + "-"
-
-                                + safe(cheque.getBankCode())
-
+                                + safe(
+                                        cheque.getBankCode()
+                                )
                                 + "-"
-
-                                + safe(cheque.getBranchCode());
-
+                                + safe(
+                                        cheque.getBranchCode()
+                                );
 
                         item.appendChild(
-
-                                new Listcell(micr)
-
+                                new Listcell(
+                                        micr
+                                )
                         );
-
 
                         // =====================================
                         // STATUS
                         // =====================================
 
                         String status =
-                                getDisplayStatus(cheque);
-
+                                getDisplayStatus(
+                                        cheque
+                                );
 
                         item.appendChild(
-
-                                new Listcell(status)
-
+                                new Listcell(
+                                        status
+                                )
                         );
-
 
                         // =====================================
                         // ACTION
@@ -406,147 +507,104 @@ public class CheckerBatchVerificationController
                         Listcell actionCell =
                                 new Listcell();
 
-
                         Button openButton =
                                 new Button();
 
-
-                        openButton.setLabel("OPEN");
-
+                        openButton.setLabel(
+                                "OPEN"
+                        );
 
                         openButton.setSclass(
                                 "primary-button"
                         );
 
+                        // =====================================
+                        // STORE CURRENT BATCH ID
+                        // =====================================
 
-                        // Store current batch ID
                         final String currentBatchId =
                                 batchId;
 
+                        // =====================================
+                        // STORE CHEQUE NUMBER
+                        // =====================================
 
-                        // Store cheque number
                         final String currentChequeNumber =
                                 cheque.getChequeNumber();
-
 
                         // =====================================
                         // OPEN BUTTON CLICK
                         // =====================================
 
                         openButton.addEventListener(
-
                                 "onClick",
-
                                 event -> {
 
-
-                                    /*
-                                     * IMPORTANT:
-                                     *
-                                     * Your actual folder is:
-                                     *
-                                     * src/main/webapp/outward/checker/
-                                     *
-                                     * Therefore use:
-                                     *
-                                     * /outward/checker/
-                                     *
-                                     * NOT:
-                                     *
-                                     * /Outward/checker/
-                                     */
-
                                     String url =
-
                                             "/outward/checker/"
-
-                                            + "chequeVerification.zul"
-
-                                            + "?batchId="
-
-                                            + currentBatchId
-
-                                            + "&chequeNumber="
-
-                                            + currentChequeNumber;
-
+                                                    + "chequeVerification.zul"
+                                                    + "?batchId="
+                                                    + currentBatchId
+                                                    + "&chequeNumber="
+                                                    + currentChequeNumber;
 
                                     System.out.println(
                                             "OPENING CHEQUE URL = "
                                                     + url
                                     );
 
-
-                                    Executions.sendRedirect(url);
-
+                                    Executions.sendRedirect(
+                                            url
+                                    );
                                 }
-
                         );
-
 
                         actionCell.appendChild(
                                 openButton
                         );
 
-
                         item.appendChild(
                                 actionCell
                         );
-
                     }
-
                 }
-
         );
-
     }
-
 
     // =========================================================
     // GET DISPLAY STATUS
     // =========================================================
 
     private String getDisplayStatus(
-            OutwardCheque cheque
-    ) {
+            OutwardCheque cheque) {
 
         String status =
                 cheque.getChequeStatus();
-
 
         if (status == null
                 || status.trim().isEmpty()) {
 
             return "PENDING";
-
         }
 
-
         return status.toUpperCase();
-
     }
-
 
     // =========================================================
     // SAFE STRING
     // =========================================================
 
     private String safe(
-            String value
-    ) {
+            String value) {
 
         if (value == null
                 || value.trim().isEmpty()) {
 
             return "-";
-
         }
 
-
         return value;
-
     }
-
 
     // =========================================================
     // BACK BUTTON
@@ -556,9 +614,7 @@ public class CheckerBatchVerificationController
     public void backButton() {
 
         goBackToQueue();
-
     }
-
 
     // =========================================================
     // BACK BUTTON BOTTOM
@@ -568,9 +624,7 @@ public class CheckerBatchVerificationController
     public void backButtonBottom() {
 
         goBackToQueue();
-
     }
-
 
     // =========================================================
     // GO BACK TO QUEUE
@@ -578,17 +632,12 @@ public class CheckerBatchVerificationController
 
     private void goBackToQueue() {
 
-
-        // CORRECT: lowercase outward
+        // Correct: lowercase outward
 
         Executions.sendRedirect(
-
                 "/outward/checker/batchesQueue.zul"
-
         );
-
     }
-
 
     // =========================================================
     // SIDEBAR - DASHBOARD
@@ -598,13 +647,9 @@ public class CheckerBatchVerificationController
     public void openDashboard() {
 
         navigate(
-
                 "/outward/checker/dashboard.zul"
-
         );
-
     }
-
 
     // =========================================================
     // SIDEBAR - BATCH QUEUE
@@ -614,13 +659,9 @@ public class CheckerBatchVerificationController
     public void openQueue() {
 
         navigate(
-
                 "/outward/checker/batchesQueue.zul"
-
         );
-
     }
-
 
     // =========================================================
     // SIDEBAR - REPORTS
@@ -630,13 +671,9 @@ public class CheckerBatchVerificationController
     public void openReports() {
 
         navigate(
-
                 "/outward/checker/reports.zul"
-
         );
-
     }
-
 
     // =========================================================
     // SIDEBAR - SEND TO NPCI
@@ -646,25 +683,19 @@ public class CheckerBatchVerificationController
     public void openNPCI() {
 
         navigate(
-
                 "/outward/checker/sendToNPCI.zul"
-
         );
-
     }
-
 
     // =========================================================
     // COMMON NAVIGATION
     // =========================================================
 
     private void navigate(
-            String page
-    ) {
+            String page) {
 
-        Executions.sendRedirect(page);
-
+        Executions.sendRedirect(
+                page
+        );
     }
-
 }
-

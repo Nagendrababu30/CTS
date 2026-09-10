@@ -7,10 +7,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.cts.inward.config.ConnectionPool;
 import com.iispl.cts.data.CTSStaticData;
 import com.iispl.cts.model.outward.OutwardBatch;
 
 public class OutwardMakerSendCheckerDAO {
+	private final javax.sql.DataSource dataSource =ConnectionPool.getDataSource();
+
 
     // =========================================================
     // GET BATCHES READY FOR CHECKER
@@ -27,7 +30,7 @@ public class OutwardMakerSendCheckerDAO {
                    + "  AND b.batch_status = 'READY_TO_SUBMIT' "
                    + "ORDER BY b.batch_number ASC";
 
-        try (Connection con = CTSStaticData.getConnection();
+        try (Connection con = dataSource.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, userId);
@@ -56,7 +59,7 @@ public class OutwardMakerSendCheckerDAO {
     public boolean updateBatchStatus(String batchNumber, String newStatus) {
         String sql = "UPDATE public.outward_batch SET batch_status = ? WHERE batch_number = ?";
 
-        try (Connection con = CTSStaticData.getConnection();
+        try (Connection con = dataSource.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, newStatus);

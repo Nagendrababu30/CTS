@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Wire;
@@ -18,7 +19,8 @@ import org.zkoss.zul.Messagebox;
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.service.outward.OutwardMakerSendCheckerService;
 
-public class OutwardMakerSendCheckerController extends SelectorComposer<Component> {
+public class OutwardMakerSendCheckerController
+        extends SelectorComposer<Component> {
 
     private static final long serialVersionUID = 1L;
 
@@ -27,30 +29,108 @@ public class OutwardMakerSendCheckerController extends SelectorComposer<Componen
 
     private OutwardMakerSendCheckerService service;
 
-    private int currentUserId;
+    private long currentUserId;
 
     // =========================================================
     // PAGE LOAD
     // =========================================================
 
     @Override
-    public void doAfterCompose(Component comp) throws Exception {
+    public void doAfterCompose(Component comp)
+            throws Exception {
+
         super.doAfterCompose(comp);
 
-        // 1. Validate active session
-        if (!LoginController.isLoggedIn()) {
-            Executions.sendRedirect("/login.zul");
+        // =====================================================
+        // GET ZK SESSION
+        // =====================================================
+
+        Session session =
+                Executions.getCurrent().getSession();
+
+        // =====================================================
+        // NO SESSION
+        // =====================================================
+
+        if (session == null) {
+
+            Executions.sendRedirect(
+                    "/zul/login.zul"
+            );
+
             return;
         }
 
-        // 2. Fetch logged-in user integer ID
-        this.currentUserId = LoginController.getCurrentUserId();
-        System.out.println("user"+currentUserId);
+        // =====================================================
+        // GET USER ID FROM SESSION
+        // =====================================================
 
-        // 3. Initialize service
-        this.service = new OutwardMakerSendCheckerService();
+        Object sessionUserId =
+                session.getAttribute("userId");
 
-        // 4. Load batches
+        // =====================================================
+        // USER ID NOT FOUND
+        // =====================================================
+
+        if (sessionUserId == null) {
+
+            Executions.sendRedirect(
+                    "/zul/login.zul"
+            );
+
+            return;
+        }
+
+        // =====================================================
+        // CONVERT USER ID
+        // =====================================================
+
+        if (sessionUserId instanceof Number) {
+
+            currentUserId =
+                    ((Number) sessionUserId)
+                            .longValue();
+
+        } else {
+
+            try {
+
+                currentUserId =
+                        Long.parseLong(
+                                sessionUserId.toString()
+                        );
+
+            } catch (NumberFormatException e) {
+
+                Executions.sendRedirect(
+                        "/zul/login.zul"
+                );
+
+                return;
+            }
+        }
+
+        // =====================================================
+        // LOG CURRENT USER
+        // =====================================================
+
+        System.out.println(
+                "OUTWARD MAKER SEND TO CHECKER: "
+                        + "userId="
+                        + currentUserId
+        );
+
+        // =====================================================
+        // CREATE SERVICE
+        // =====================================================
+
+        this.service =
+                new OutwardMakerSendCheckerService();
+
+        // =====================================================
+        // LOAD BATCHES
+        // =====================================================
+
         loadReadyBatches();
     }
 
@@ -59,29 +139,69 @@ public class OutwardMakerSendCheckerController extends SelectorComposer<Componen
     // =========================================================
 
     private void loadReadyBatches() {
+
         try {
+
             if (batchListbox == null) {
                 return;
             }
 
-            // Retrieve batches in status 'READY_TO_SUBMIT' assigned to this maker
-            List<OutwardBatch> batches = service.getReadyBatches(currentUserId);
+            // =================================================
+            // RETRIEVE BATCHES ASSIGNED TO CURRENT MAKER
+            // =================================================
 
-            ListModelList<OutwardBatch> model = new ListModelList<>(batches);
+            List<OutwardBatch> batches =
+                    service.getReadyBatches(
+                            Math.toIntExact(
+                                    currentUserId
+                            )
+                    );
 
-            batchListbox.setItemRenderer((Listitem item, OutwardBatch batch, int index) -> {
-                renderBatchRow(item, batch);
-            });
+            // =================================================
+            // SAFETY
+            // =================================================
 
-            batchListbox.setModel(model);
+            if (batches == null) {
+
+                batches =
+                        new java.util.ArrayList<>();
+            }
+
+            ListModelList<OutwardBatch> model =
+                    new ListModelList<>(
+                            batches
+                    );
+
+            // =================================================
+            // RENDERER
+            // =================================================
+
+            batchListbox.setItemRenderer(
+                    (Listitem item,
+                     OutwardBatch batch,
+                     int index) -> {
+
+                        renderBatchRow(
+                                item,
+                                batch
+                        );
+                    }
+            );
+
+            batchListbox.setModel(
+                    model
+            );
 
         } catch (Exception e) {
+
             e.printStackTrace();
+
             Messagebox.show(
-                "Unable to load batches ready for Checker.\n" + e.getMessage(),
-                "Error",
-                Messagebox.OK,
-                Messagebox.ERROR
+                    "Unable to load batches ready for Checker.\n"
+                            + e.getMessage(),
+                    "Error",
+                    Messagebox.OK,
+                    Messagebox.ERROR
             );
         }
     }
@@ -90,76 +210,173 @@ public class OutwardMakerSendCheckerController extends SelectorComposer<Componen
     // RENDER ONE BATCH ROW
     // =========================================================
 
-    private void renderBatchRow(Listitem item, OutwardBatch batch) {
-        // 1. Batch Number
-        Listcell batchIdCell = new Listcell();
-        Label batchIdLabel = new Label(safeValue(batch.getBatchNumber()));
-        batchIdLabel.setStyle("font-weight:bold; color:#122B49;");
-        batchIdCell.appendChild(batchIdLabel);
-        item.appendChild(batchIdCell);
+    private void renderBatchRow(
+            Listitem item,
+            OutwardBatch batch) {
 
-        // 2. Total Cheques
-        Listcell chequeCell = new Listcell();
-        int cheques = batch.getNumberOfCheques() != null ? batch.getNumberOfCheques() : 0;
-        Label chequeLabel = new Label(String.valueOf(cheques));
-        chequeCell.appendChild(chequeLabel);
-        item.appendChild(chequeCell);
+        // =====================================================
+        // BATCH NUMBER
+        // =====================================================
 
-        // 3. Status Badge
-        Listcell statusCell = new Listcell();
-        Label statusLabel = new Label("✓ Ready to Submit");
+        Listcell batchIdCell =
+                new Listcell();
+
+        Label batchIdLabel =
+                new Label(
+                        safeValue(
+                                batch.getBatchNumber()
+                        )
+                );
+
+        batchIdLabel.setStyle(
+                "font-weight:bold;"
+                        + "color:#122B49;"
+        );
+
+        batchIdCell.appendChild(
+                batchIdLabel
+        );
+
+        item.appendChild(
+                batchIdCell
+        );
+
+        // =====================================================
+        // TOTAL CHEQUES
+        // =====================================================
+
+        Listcell chequeCell =
+                new Listcell();
+
+        int cheques =
+                batch.getNumberOfCheques() != null
+                        ? batch.getNumberOfCheques()
+                        : 0;
+
+        Label chequeLabel =
+                new Label(
+                        String.valueOf(
+                                cheques
+                        )
+                );
+
+        chequeCell.appendChild(
+                chequeLabel
+        );
+
+        item.appendChild(
+                chequeCell
+        );
+
+        // =====================================================
+        // STATUS BADGE
+        // =====================================================
+
+        Listcell statusCell =
+                new Listcell();
+
+        Label statusLabel =
+                new Label(
+                        "✓ Ready to Submit"
+                );
+
         statusLabel.setStyle(
-            "background:#D1FADF;"
-            + "color:#039855;"
-            + "padding:6px 12px;"
-            + "border-radius:4px;"
-            + "font-weight:bold;"
-            + "display:inline-block;"
+                "background:#D1FADF;"
+                        + "color:#039855;"
+                        + "padding:6px 12px;"
+                        + "border-radius:4px;"
+                        + "font-weight:bold;"
+                        + "display:inline-block;"
         );
-        statusCell.appendChild(statusLabel);
-        item.appendChild(statusCell);
 
-        // 4. Action Button
-        Listcell actionCell = new Listcell();
-        Button sendButton = new Button("Send to Checker");
-        sendButton.setWidth("150px");
+        statusCell.appendChild(
+                statusLabel
+        );
+
+        item.appendChild(
+                statusCell
+        );
+
+        // =====================================================
+        // ACTION BUTTON
+        // =====================================================
+
+        Listcell actionCell =
+                new Listcell();
+
+        Button sendButton =
+                new Button(
+                        "Send to Checker"
+                );
+
+        sendButton.setWidth(
+                "150px"
+        );
+
         sendButton.setStyle(
-            "background:#2457D6;"
-            + "color:white;"
-            + "border:none;"
-            + "padding:6px 12px;"
-            + "cursor:pointer;"
-            + "font-weight:bold;"
+                "background:#2457D6;"
+                        + "color:white;"
+                        + "border:none;"
+                        + "padding:6px 12px;"
+                        + "cursor:pointer;"
+                        + "font-weight:bold;"
         );
 
-        sendButton.addEventListener(Events.ON_CLICK, event -> {
-            sendToChecker(batch.getBatchNumber());
-        });
+        sendButton.addEventListener(
+                Events.ON_CLICK,
+                event ->
+                        sendToChecker(
+                                batch.getBatchNumber()
+                        )
+        );
 
-        actionCell.appendChild(sendButton);
-        item.appendChild(actionCell);
+        actionCell.appendChild(
+                sendButton
+        );
+
+        item.appendChild(
+                actionCell
+        );
     }
 
     // =========================================================
     // SEND TO CHECKER - CONFIRMATION
     // =========================================================
 
-    private void sendToChecker(String batchNumber) {
-        if (batchNumber == null || batchNumber.trim().isEmpty()) {
-            Messagebox.show("Invalid batch number.", "Error", Messagebox.OK, Messagebox.ERROR);
+    private void sendToChecker(
+            String batchNumber) {
+
+        if (batchNumber == null
+                || batchNumber.trim().isEmpty()) {
+
+            Messagebox.show(
+                    "Invalid batch number.",
+                    "Error",
+                    Messagebox.OK,
+                    Messagebox.ERROR
+            );
+
             return;
         }
 
         Messagebox.show(
-            "Are you sure you want to send batch " + batchNumber + " to Checker?",
-            "Confirm Submission",
-            Messagebox.YES | Messagebox.NO,
-            Messagebox.QUESTION,
-            event -> {
-                if (Messagebox.ON_YES.equals(event.getName())) {
-                    processSend(batchNumber);
+                "Are you sure you want to send batch "
+                        + batchNumber
+                        + " to Checker?",
+                "Confirm Submission",
+                Messagebox.YES | Messagebox.NO,
+                Messagebox.QUESTION,
+                event -> {
+
+                    if (Messagebox.ON_YES.equals(
+                            event.getName()
+                    )) {
+
+                        processSend(
+                                batchNumber
+                        );
+                    }
                 }
-            }
         );
     }
 
@@ -167,41 +384,78 @@ public class OutwardMakerSendCheckerController extends SelectorComposer<Componen
     // ACTUAL SEND OPERATION
     // =========================================================
 
-    private void processSend(String batchNumber) {
+    private void processSend(
+            String batchNumber) {
+
         try {
-            boolean success = service.sendToChecker(batchNumber, currentUserId);
+
+            // =================================================
+            // SEND USING CURRENT LOGGED-IN USER
+            // =================================================
+
+            boolean success =
+                    service.sendToChecker(
+                            batchNumber,
+                            Math.toIntExact(
+                                    currentUserId
+                            )
+                    );
 
             if (success) {
+
                 Messagebox.show(
-                    "Batch " + batchNumber + " has been successfully sent to Checker.",
-                    "Success",
-                    Messagebox.OK,
-                    Messagebox.INFORMATION
+                        "Batch "
+                                + batchNumber
+                                + " has been successfully sent to Checker.",
+                        "Success",
+                        Messagebox.OK,
+                        Messagebox.INFORMATION
                 );
+
             } else {
+
                 Messagebox.show(
-                    "Batch " + batchNumber + " could not be sent.\nIt may already be dispatched or not assigned to you.",
-                    "Send Failed",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION
+                        "Batch "
+                                + batchNumber
+                                + " could not be sent.\n"
+                                + "It may already be dispatched "
+                                + "or not assigned to you.",
+                        "Send Failed",
+                        Messagebox.OK,
+                        Messagebox.EXCLAMATION
                 );
             }
 
-            // Refresh table
+            // =================================================
+            // REFRESH TABLE
+            // =================================================
+
             loadReadyBatches();
 
         } catch (Exception e) {
+
             e.printStackTrace();
+
             Messagebox.show(
-                "Error while sending batch to Checker.\n" + e.getMessage(),
-                "Error",
-                Messagebox.OK,
-                Messagebox.ERROR
+                    "Error while sending batch to Checker.\n"
+                            + e.getMessage(),
+                    "Error",
+                    Messagebox.OK,
+                    Messagebox.ERROR
             );
         }
     }
 
-    private String safeValue(String value) {
-        return (value == null || value.trim().isEmpty()) ? "-" : value;
+    // =========================================================
+    // SAFE VALUE
+    // =========================================================
+
+    private String safeValue(
+            String value) {
+
+        return (value == null
+                || value.trim().isEmpty())
+                ? "-"
+                : value;
     }
 }

@@ -1,71 +1,105 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?init class="com.cts.admin.controller.LayoutInit"
-        pageTitle="Checker Reports"
-        active="reports"?>
+    pageTitle="Checker Reports"
+    active="reports"?>
 
 <?init class="org.zkoss.zk.ui.util.Composition"
-         arg0="/zul/common/layout.zul"?>
+    arg0="/zul/common/layout.zul"?>
 
 <zk>
+
     <style src="/css/inward/checker/reports.css"/>
+
     <div
         self="@define(content)"
         width="100%"
         height="100%"
         sclass="content">
 
-       <window id="reportWindow" apply="com.cts.inward.controller.CheckerReportController" width="100%" height="100%" sclass="report-window">
+        <window id="reportWindow" apply="com.cts.inward.controller.CheckerReportController" width="100%" height="100%" sclass="report-window">
+
+            <!-- RRF Report Section Card -->
+
+         <vlayout sclass="rrf-card-container">
+
+         <hlayout spacing="20px" valign="middle" sclass="rrf-content-wrapper">
+
+         <hlayout spacing="16px" valign="top" sclass="rrf-left-group">
+
+         <div sclass="rrf-icon-box">
         
-      <!-- RRF Report Section Card -->
-      <vlayout sclass="rrf-card-container">
-          <hlayout spacing="20px" valign="middle" sclass="rrf-content-wrapper">
-              
-              <!-- Left Side: Icon, Text, and Note -->
-              <hlayout spacing="16px" valign="top" sclass="rrf-left-group">
-                  <div sclass="rrf-icon-box">
-                      <label value="📄" sclass="rrf-icon-text" />
-                  </div>
-                  
-                  <vlayout spacing="4px" sclass="rrf-text-group">
-                      <label value="RRF Report (XML)" sclass="rrf-title" />
-                      <label value="Generate RRF file containing returned cheque details (from all batches)" sclass="rrf-description" />
-                      
-                      <vlayout sclass="rrf-note-box">
-                          <label value="Note: RRF contains cheques returned due to CBS failure. It includes details from all batches." sclass="rrf-note-text" />
-                      </vlayout>
-                  </vlayout>
-              </hlayout>
+         <label value="📄"  sclass="rrf-icon-text"/>
 
-              <vlayout>
-                  <button id="generateRrfBtn" label="Generate RRF (XML)" sclass="btn-generate-rrf" />
-              </vlayout>
-              
-          </hlayout>
-      </vlayout>
-      
-      <!-- Approved Report Section Card -->
-      <vlayout sclass="approved-card-container">
-          <hlayout spacing="20px" valign="middle" sclass="approved-content-wrapper">
-              <hlayout spacing="16px" valign="top" hflex="1" sclass="approved-left-group">
-                  <div sclass="approved-icon-box">
-                      <label value="✅" sclass="approved-icon-text" />
-                  </div>
-                  <vlayout spacing="4px" sclass="approved-text-group">
-                      <label value="Approved Report (XML)" sclass="approved-title" />
-                      <label value="Generate XML file containing successfully approved cheque details" sclass="approved-description" />
-                      <vlayout sclass="approved-note-box">
-                          <label value="Note: Contains cheques that successfully passed checks and were approved across all batches." sclass="approved-note-text" />
-                      </vlayout>
-                  </vlayout>
-              </hlayout>
-              <vlayout sclass="approved-right-group">
-                  <button id="generateApprovedBtn" label="Generate Approved (XML)" sclass="btn-generate-approved" />
-              </vlayout>
-          </hlayout>
-      </vlayout>
+         </div>
 
-    </window>
+         <vlayout spacing="4px" sclass="rrf-text-group">
+
+         <label value="RRF Report (XML)" sclass="rrf-title"/>
+
+         <label value="Generate RRF file containing returned cheque details (from all batches)" sclass="rrf-description"/>
+
+         <vlayout sclass="rrf-note-box">
+
+         <label value="Note: RRF contains cheques returned due to CBS failure. It includes details from all batches." sclass="rrf-note-text"/>
+
+         </vlayout>
+
+         </vlayout>
+
+         </hlayout>
+
+         <vlayout>
+
+         <button id="generateRrfBtn"  label="Generate RRF (XML)"  sclass="btn-generate-rrf"/>
+
+         </vlayout>
+
+         </hlayout>
+
+         </vlayout>
+
+         <!-- Approved Report Section Card -->
+
+         <vlayout sclass="approved-card-container">
+
+         <hlayout spacing="20px" valign="middle" sclass="approved-content-wrapper">
+
+         <hlayout spacing="16px" valign="top" hflex="1" sclass="approved-left-group">
+
+         <div sclass="approved-icon-box">
+
+         <label value="✅" sclass="approved-icon-text"/>
+
+         </div>
+
+         <vlayout spacing="4px" sclass="approved-text-group">
+          
+         <label value="Approved Report (XML)" sclass="approved-title"/>
+
+         <label value="Generate XML file containing successfully approved cheque details" sclass="approved-description"/>
+
+         <vlayout sclass="approved-note-box">
+
+         <label value="Note: Contains cheques that successfully passed checks and were approved across all batches." sclass="approved-note-text"/>
+
+         </vlayout>
+
+         </vlayout>
+
+         </hlayout>
+
+         <vlayout sclass="approved-right-group">
+
+         <button id="generateApprovedBtn" label="Generate Approved (XML)" sclass="btn-generate-approved"/>
+
+         </vlayout>
+
+         </hlayout>
+
+         </vlayout>
+
+         </window>
 
     </div>
 

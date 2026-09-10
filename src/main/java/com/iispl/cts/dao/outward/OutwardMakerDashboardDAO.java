@@ -48,11 +48,12 @@ public class OutwardMakerDashboardDAO {
 
                 "FROM public.outward_batch ob " +
 
-                "LEFT JOIN public.outward_batch_assignment mba " +
+                "INNER JOIN public.outward_batch_assignment mba " +
                 "    ON ob.batch_number = mba.batch_number " +
-                "    AND UPPER(mba.assignment_role) = 'MAKER' " +
-                "    AND UPPER(mba.assignment_status) IN " +
-                "        ('ASSIGNED', 'IN_PROGRESS') " +
+
+                "WHERE UPPER(mba.assignment_role) = 'MAKER' " +
+                "  AND UPPER(mba.assignment_status) IN ('ASSIGNED', 'IN_PROGRESS') " +
+                "  AND UPPER(ob.batch_status) NOT IN ('SUBMITTED_TO_CHECKER', 'COMPLETED', 'REJECTED') " +
 
                 "ORDER BY ob.batch_number";
 

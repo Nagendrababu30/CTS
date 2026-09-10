@@ -8,7 +8,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.cts.inward.config.ConnectionPool;
 import com.iispl.cts.data.CTSStaticData;
@@ -184,4 +186,94 @@ public class OutwardMakerDataEntryDetailDAO {
                 }
             }
         }
-}}
+}
+    /**
+     * Records Maker Verification on Save & Next.
+     * maker_reason_id is explicitly set to NULL.
+     */
+    public boolean saveMakerVerify(String batchNumber, String chequeNumber, int makerId) throws SQLException {
+        String sql = "INSERT INTO public.cheque_processing "
+                   + "(batch_number, cheque_number, maker_id, maker_action, maker_reason_id) "
+                   + "VALUES (?, ?, ?, 'VERIFY', NULL) "
+                   + "ON CONFLICT (batch_number, cheque_number) DO UPDATE SET "
+                   + "  maker_id = EXCLUDED.maker_id, "
+                   + "  maker_action = 'VERIFY', "
+                   + "  maker_reason_id = NULL";
+
+        try (Connection con = CTSStaticData.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, batchNumber);
+            ps.setString(2, chequeNumber);
+            ps.setInt(3, makerId);
+
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    /**
+     * Records Maker Rejection Request with the selected reason ID.
+     */
+    public boolean saveMakerReject(String batchNumber, String chequeNumber, int makerId, int reasonId) throws SQLException {
+        String sql = "INSERT INTO public.cheque_processing "
+                   + "(batch_number, cheque_number, maker_id, maker_action, maker_reason_id) "
+                   + "VALUES (?, ?, ?, 'REJECT_REQUEST', ?) "
+                   + "ON CONFLICT (batch_number, cheque_number) DO UPDATE SET "
+                   + "  maker_id = EXCLUDED.maker_id, "
+                   + "  maker_action = 'REJECT_REQUEST', "
+                   + "  maker_reason_id = EXCLUDED.maker_reason_id";
+
+        try (Connection con = CTSStaticData.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, batchNumber);
+            ps.setString(2, chequeNumber);
+            ps.setInt(3, makerId);
+            ps.setInt(4, reasonId);
+
+            return ps.executeUpdate() > 0;
+        }
+    }
+/**
+* Fetches all reasons from public.return_reason_master
+*/
+    public Map<Integer, String> getReturnReasons() {
+        Map<Integer, String> reasons = new java.util.LinkedHashMap<>();
+        
+        // Correct column names matching your Supabase table
+        String sql = "SELECT id, reason_name FROM public.return_reason_master WHERE active = true ORDER BY id ASC";
+
+        try (Connection con = CTSStaticData.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                // Read by column index to prevent any naming issues:
+                // Column 1 is 'id', Column 2 is 'reason_name'
+                int id = rs.getInt(1);
+                String reasonName = rs.getString(2);
+                reasons.put(id, reasonName);
+            }
+            System.out.println("[DEBUG-CTS] Successfully loaded " + reasons.size() + " reasons from database.");
+
+        } catch (Exception e) {
+            System.err.println("[DEBUG-CTS] Failed to load return reasons: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return reasons;
+    }
+
+/**
+* Updates cheque status in public.outward_cheque
+*/
+public boolean updateChequeStatus(String batchNumber, String chequeNumber, String status) throws SQLException {
+String sql = "UPDATE public.outward_cheque SET cheque_status = ? WHERE batch_number = ? AND cheque_number = ?";
+try (Connection con = CTSStaticData.getConnection();
+PreparedStatement ps = con.prepareStatement(sql)) {
+ps.setString(1, status);
+ps.setString(2, batchNumber);
+ps.setString(3, chequeNumber);
+return ps.executeUpdate() > 0;
+}
+}
+    }

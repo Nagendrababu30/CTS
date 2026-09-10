@@ -1,7 +1,6 @@
 package com.cts.inward.controller;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
+
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -19,14 +18,7 @@ import org.zkoss.zul.Rows;
 
 import com.cts.inward.dao.CheckerReportDao;
 import com.cts.inward.dao.CheckerReportDaoImpl;
-import com.cts.inward.model.NpciBatchData;
 
-import net.sf.jasperreports.engine.JREmptyDataSource;
-import net.sf.jasperreports.engine.JasperCompileManager;
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReport;
 
 public class CheckerReportController extends GenericForwardComposer<Component> {
 

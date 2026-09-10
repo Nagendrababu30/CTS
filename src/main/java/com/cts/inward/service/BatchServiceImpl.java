@@ -38,40 +38,12 @@ public class BatchServiceImpl implements BatchService {
 
 	@Override
 	public List<InwardBatch> getAvailableBatchesForMaker(String userId) {
-
-		List<NpciBatchData> batches = batchDao.getBatchesByStatus("DATA_ENTRY");
-
-		List<InwardBatch> result = new ArrayList<>();
-
-		if (batches == null) {
-			return result;
-		}
-
-		for (NpciBatchData batch : batches) {
-//        List<NpciBatchData> batches =
-//                batchDao.getAllBatches();
-//
-//        List<InwardBatch> result =
-//                new ArrayList<>();
-//
-//        if (batches == null) {
-//            return result;
-//        }
-//
-//        for (NpciBatchData batch : batches) {
-//
-//            result.add(
-//                    convert(batch));
-//        }
-
-        return null;
-    }
-
-			result.add(convert(batch));
-		}
-
-		return result;
+		
+		return  null;
+		
 	}
+
+		
 	// ---------------------------------------------------------
 	// Checker queue
 	// ---------------------------------------------------------
@@ -185,4 +157,19 @@ public class BatchServiceImpl implements BatchService {
 
 		return batchDao.completeDataEntry(batchId, userId);
 	}
+
+	@Override
+	public List<Map<String, Object>> getBatchesForVerification(Integer userId) {
+		
+		return batchDao.getBatchesForVerification(userId);
+	}
+
+	@Override
+	public List<Map<String, Object>> searchBatchesForVerification(Long batchId, Integer userId) {
+		
+		return batchDao.searchBatchesForVerification(batchId, userId);
+	}
+	
+	
+	
 }

@@ -11,11 +11,13 @@ public class OcrChequeData {
 	private long batchId;
 	private String accountNumber;
 	private LocalDate chequeDate;
+	private LocalDate presentingDate;
 	private BigDecimal chequeAmount;
 	private String micrCode;
 	private String cityCode;
 	private String bankCode;
 	private String branchSpecificCode;
+	private String drawerName;
 	private String payeeName;
 	private String payeeAccountNumber;
 
@@ -24,18 +26,20 @@ public class OcrChequeData {
 	}
 
 	private OcrChequeData(String chequeNumber, long batchId, String accountNumber, LocalDate chequeDate,
-			BigDecimal chequeAmount, String micrCode, String cityCode, String bankCode, String branchSpecificCode,
-			String payeeName, String payeeAccountNumber) {
+			LocalDate presentingDate, BigDecimal chequeAmount, String micrCode, String cityCode, String bankCode,
+			String branchSpecificCode, String drawerName, String payeeName, String payeeAccountNumber) {
 
 		this.chequeNumber = chequeNumber;
 		this.batchId = batchId;
 		this.accountNumber = accountNumber;
 		this.chequeDate = chequeDate;
+		this.presentingDate = presentingDate;
 		this.chequeAmount = chequeAmount;
 		this.micrCode = micrCode;
 		this.cityCode = cityCode;
 		this.bankCode = bankCode;
 		this.branchSpecificCode = branchSpecificCode;
+		this.drawerName = drawerName;
 		this.payeeName = payeeName;
 		this.payeeAccountNumber = payeeAccountNumber;
 
@@ -46,11 +50,11 @@ public class OcrChequeData {
 	}
 
 	public static OcrChequeData of(String chequeNumber, long batchId, String accountNumber, LocalDate chequeDate,
-			BigDecimal chequeAmount, String micrCode, String cityCode, String bankCode, String branchSpecificCode,
-			String payeeName, String payeeAccountNumber) {
+			LocalDate presentingDate, BigDecimal chequeAmount, String micrCode, String cityCode, String bankCode,
+			String branchSpecificCode, String drawerName, String payeeName, String payeeAccountNumber) {
 
-		return new OcrChequeData(chequeNumber, batchId, accountNumber, chequeDate, chequeAmount, micrCode, cityCode,
-				bankCode, branchSpecificCode, payeeName, payeeAccountNumber);
+		return new OcrChequeData(chequeNumber, batchId, accountNumber, chequeDate, presentingDate, chequeAmount,
+				micrCode, cityCode, bankCode, branchSpecificCode, drawerName, payeeName, payeeAccountNumber);
 	}
 
 	public long getInwardChequeId() {
@@ -147,6 +151,22 @@ public class OcrChequeData {
 
 	public void setPayeeAccountNumber(String payeeAccountNumber) {
 		this.payeeAccountNumber = payeeAccountNumber;
+	}
+
+	public LocalDate getPresentingDate() {
+		return presentingDate;
+	}
+
+	public void setPresentingDate(LocalDate presentingDate) {
+		this.presentingDate = presentingDate;
+	}
+
+	public String getDrawerName() {
+		return drawerName;
+	}
+
+	public void setDrawerName(String drawerName) {
+		this.drawerName = drawerName;
 	}
 
 }

@@ -5,72 +5,50 @@ import java.time.LocalDate;
 
 public class NpciChequeData {
 
-    private long inwardChequeId;
+	private long inwardChequeId;
 
-    private String chequeNumber;
-    private long batchId;
-    private String accountNumber;
-    private LocalDate chequeDate;
-    private BigDecimal chequeAmount;
-    private String micrCode;
-    private String cityCode;
-    private String bankCode;
-    private String branchCode;
-    private String payeeName;
-    private String payeeAccountNumber;
+	private String chequeNumber;
+	private long batchId;
+	private String accountNumber;
+	private LocalDate chequeDate;
+	private LocalDate presentingDate;
+	private BigDecimal chequeAmount;
+	private String amountInWords;
+	private String micrCode;
+	private String cityCode;
+	private String bankCode;
+	private String branchCode;
+	private String drawerName;
+	private String payeeName;
+	private String payeeAccountNumber;
 
-    private NpciChequeData(
-            String chequeNumber,
-            long batchId,
-            String accountNumber,
-            LocalDate chequeDate,
-            BigDecimal chequeAmount,
-            String micrCode,
-            String cityCode,
-            String bankCode,
-            String branchCode,
-            String payeeName,
-            String payeeAccountNumber) {
+	private NpciChequeData(String chequeNumber, long batchId, String accountNumber, LocalDate chequeDate,
+			LocalDate presentingDate, BigDecimal chequeAmount, String amountInWords, String micrCode, String cityCode,
+			String bankCode, String branchCode, String drawerName, String payeeName, String payeeAccountNumber) {
 
-        this.chequeNumber = chequeNumber;
-        this.batchId = batchId;
-        this.accountNumber = accountNumber;
-        this.chequeDate = chequeDate;
-        this.chequeAmount = chequeAmount;
-        this.micrCode = micrCode;
-        this.cityCode = cityCode;
-        this.bankCode = bankCode;
-        this.branchCode = branchCode;
-        this.payeeName = payeeName;
-        this.payeeAccountNumber = payeeAccountNumber;
-    }
+		this.chequeNumber = chequeNumber;
+		this.batchId = batchId;
+		this.accountNumber = accountNumber;
+		this.chequeDate = chequeDate;
+		this.presentingDate = presentingDate;
+		this.chequeAmount = chequeAmount;
+		this.amountInWords = amountInWords;
+		this.micrCode = micrCode;
+		this.cityCode = cityCode;
+		this.bankCode = bankCode;
+		this.branchCode = branchCode;
+		this.drawerName = drawerName;
+		this.payeeName = payeeName;
+		this.payeeAccountNumber = payeeAccountNumber;
+	}
 
-    public static NpciChequeData of(
-            String chequeNumber,
-            long batchId,
-            String accountNumber,
-            LocalDate chequeDate,
-            BigDecimal chequeAmount,
-            String micrCode,
-            String cityCode,
-            String bankCode,
-            String branchCode,
-            String payeeName,
-            String payeeAccountNumber) {
+	public static NpciChequeData of(String chequeNumber, long batchId, String accountNumber, LocalDate chequeDate,
+			LocalDate presentingDate, BigDecimal chequeAmount, String amountInWords, String micrCode, String cityCode,
+			String bankCode, String branchCode, String drawerName, String payeeName, String payeeAccountNumber) {
 
-        return new NpciChequeData(
-                chequeNumber,
-                batchId,
-                accountNumber,
-                chequeDate,
-                chequeAmount,
-                micrCode,
-                cityCode,
-                bankCode,
-                branchCode,
-                payeeName,
-                payeeAccountNumber);
-    }
+		return new NpciChequeData(chequeNumber, batchId, accountNumber, chequeDate, presentingDate, chequeAmount,
+				amountInWords, micrCode, cityCode, bankCode, branchCode, drawerName, payeeName, payeeAccountNumber);
+	}
 
 	public long getInwardChequeId() {
 		return inwardChequeId;
@@ -167,8 +145,29 @@ public class NpciChequeData {
 	public void setPayeeAccountNumber(String payeeAccountNumber) {
 		this.payeeAccountNumber = payeeAccountNumber;
 	}
-	
-	
 
-    
+	public LocalDate getPresentingDate() {
+		return presentingDate;
+	}
+
+	public void setPresentingDate(LocalDate presentingDate) {
+		this.presentingDate = presentingDate;
+	}
+
+	public String getDrawerName() {
+		return drawerName;
+	}
+
+	public void setDrawerName(String drawerName) {
+		this.drawerName = drawerName;
+	}
+
+	public String getAmountInWords() {
+		return amountInWords;
+	}
+
+	public void setAmountInWords(String amountInWords) {
+		this.amountInWords = amountInWords;
+	}
+
 }

@@ -142,6 +142,11 @@ public class BatchServiceImpl implements BatchService {
 				batch.getTotalCheques());
 	}
 	@Override
+	public long getBatchIdByFileName(String batchName) {
+		return batchDao.getBatchIdByFileName(batchName);
+	}
+
+	@Override
 	public int getDataEntryPendingCount(long batchId) {
 	    return batchDao.getDataEntryPendingCount(batchId);
 	}

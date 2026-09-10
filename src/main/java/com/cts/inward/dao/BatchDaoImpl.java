@@ -287,6 +287,42 @@ public class BatchDaoImpl implements BatchDao {
 	}
 	
 	@Override
+	public long getBatchIdByFileName(String batchName) {
+
+		/*
+		 * Find the batch_id by joining inward_batch with inward_file
+		 * where the PXF file name starts with the given batch name.
+		 *
+		 * e.g. batchName = "BATCH001" matches file_name = "BATCH001.xml"
+		 */
+		String sql =
+				"SELECT b.batch_id "
+				+ "FROM inward_batch b "
+				+ "JOIN inward_file f ON b.file_id = f.file_id "
+				+ "WHERE f.file_name LIKE ? "
+				+ "AND UPPER(f.file_type) = 'PXF' "
+				+ "LIMIT 1";
+
+		try (Connection connection = dataSource.getConnection();
+		     PreparedStatement statement = connection.prepareStatement(sql)) {
+
+			statement.setString(1, batchName + "%");
+
+			try (ResultSet resultSet = statement.executeQuery()) {
+				if (resultSet.next()) {
+					return resultSet.getLong("batch_id");
+				}
+			}
+
+		} catch (Exception e) {
+			throw new RuntimeException(
+					"Failed to look up batch_id for batch name: " + batchName, e);
+		}
+
+		return -1L;
+	}
+
+	@Override
 	public List<Map<String, Object>> getBatchesForVerification(
 	        Integer userId) {
 
@@ -294,7 +330,6 @@ public class BatchDaoImpl implements BatchDao {
 	        SELECT
 	            b.batch_id,
 	            b.total_cheques,
-	            h.maker_id,
 	            l.locked_time
 	        FROM inward_batch b
 
@@ -312,7 +347,7 @@ public class BatchDaoImpl implements BatchDao {
 
 	        LEFT JOIN inward_batch_history h
 	            ON h.batch_id = b.batch_id
-	            AND h.status = 'DATA_ENTRY_COMPLETED'
+	            AND h.batch_status = 'DATA_ENTRY_COMPLETED'
 
 	        WHERE l.user_id = ?
 	          AND l.lock_status = 'LOCKED'
@@ -336,7 +371,6 @@ public class BatchDaoImpl implements BatchDao {
 
 	                row.put("batch_id", rs.getLong("batch_id"));
 	                row.put("total_cheques", rs.getInt("total_cheques"));
-	                row.put("maker_id", rs.getObject("maker_id"));
 	                row.put("locked_time", rs.getTimestamp("locked_time"));
 
 	                batches.add(row);
@@ -345,9 +379,7 @@ public class BatchDaoImpl implements BatchDao {
 
 	    } catch (SQLException e) {
 	        throw new RuntimeException(
-	                "Failed to fetch batches for verification",
-	                e
-	        );
+	                "Failed to fetch batches for verification", e);
 	    }
 
 	    return batches;
@@ -362,7 +394,6 @@ public class BatchDaoImpl implements BatchDao {
 	        SELECT
 	            b.batch_id,
 	            b.total_cheques,
-	            h.maker_id,
 	            l.locked_time
 	        FROM inward_batch b
 
@@ -380,7 +411,7 @@ public class BatchDaoImpl implements BatchDao {
 
 	        LEFT JOIN inward_batch_history h
 	            ON h.batch_id = b.batch_id
-	            AND h.status = 'DATA_ENTRY_COMPLETED'
+	            AND h.batch_status = 'DATA_ENTRY_COMPLETED'
 
 	        WHERE l.user_id = ?
 	          AND l.lock_status = 'LOCKED'
@@ -406,7 +437,6 @@ public class BatchDaoImpl implements BatchDao {
 
 	                row.put("batch_id", rs.getLong("batch_id"));
 	                row.put("total_cheques", rs.getInt("total_cheques"));
-	                row.put("maker_id", rs.getObject("maker_id"));
 	                row.put("locked_time", rs.getTimestamp("locked_time"));
 
 	                batches.add(row);
@@ -415,9 +445,7 @@ public class BatchDaoImpl implements BatchDao {
 
 	    } catch (SQLException e) {
 	        throw new RuntimeException(
-	                "Failed to search batches for verification",
-	                e
-	        );
+	                "Failed to search batches for verification", e);
 	    }
 
 	    return batches;

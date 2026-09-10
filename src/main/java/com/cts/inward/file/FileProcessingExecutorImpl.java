@@ -38,9 +38,42 @@ public class FileProcessingExecutorImpl
     @Override
     public void submit(String filePath) {
 
-        executorService.submit(
-                () -> inwardIngestionService
-                        .processFile(filePath));
+        executorService.submit(() -> {
+            try {
+                inwardIngestionService.processFile(filePath);
+            } catch (Exception e) {
+                System.err.println(
+                        "[FileProcessingExecutor] ERROR processing file: "
+                        + filePath);
+                e.printStackTrace();
+            }
+        });
+    }
+
+    @Override
+    public void submitBatch(java.util.List<String> orderedFilePaths) {
+
+        /*
+         * All files of a batch run sequentially on ONE thread.
+         * Order must be: PXF → OCR → PIBF
+         *
+         * This guarantees:
+         *  - PXF creates inward_batch + inward_cheque rows
+         *  - OCR can safely FK-reference inward_batch
+         *  - PIBF can safely look up inward_cheque rows
+         */
+        executorService.submit(() -> {
+            for (String filePath : orderedFilePaths) {
+                try {
+                    inwardIngestionService.processFile(filePath);
+                } catch (Exception e) {
+                    System.err.println(
+                            "[FileProcessingExecutor] ERROR processing file: "
+                            + filePath);
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     @Override

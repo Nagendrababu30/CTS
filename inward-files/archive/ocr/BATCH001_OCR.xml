@@ -1,0 +1,176 @@
+<?xml version='1.0' encoding='utf-8'?>
+<batchFile>
+    <batch>
+        <batch_id>1</batch_id>
+        <total_cheques>10</total_cheques>
+        <presenting_bank_name>HDFC Bank Limited</presenting_bank_name>
+        <file_id>1</file_id>
+
+        <cheques>
+            <cheque>
+                <cheque_number>1000001</cheque_number>
+                <account_number>501234567890</account_number>
+                <cheque_amount>12500.00</cheque_amount>
+                <cheque_date>2026-09-01</cheque_date>
+                <presentingdate>2026-09-01</presentingdate>
+                <drawer_name>Aarav Mehta</drawer_name>
+                <amount_in_words>Twelve Thousand Five Hundred Only</amount_in_words>
+                <micr_code>400002129</micr_code>
+                <city_code>400</city_code>
+                <bank_code>002</bank_code>
+                <branch_code>00123</branch_code>
+                <payee_name>Ravi Kumar</payee_name>
+                <payee_account_number>601234567890</payee_account_number>
+            </cheque>
+
+            <cheque>
+                <cheque_number>1000002</cheque_number>
+                <account_number>501234567891</account_number>
+                <cheque_amount>8750.00</cheque_amount>
+                <cheque_date>2026-09-02</cheque_date>
+                <presentingdate>2026-09-01</presentingdate>
+                <drawer_name>Aarav Shah</drawer_name>
+                <amount_in_words>Eight Thousand Seven Hundred Fifty Only</amount_in_words>
+                <micr_code>400002465</micr_code>
+                <city_code>400</city_code>
+                <bank_code>002</bank_code>
+                <branch_code>00456</branch_code>
+                <payee_name>Sree Lakshmi Traders</payee_name>
+                <payee_account_number>601234567891</payee_account_number>
+            </cheque>
+
+            <cheque>
+                <cheque_number>1000003</cheque_number>
+                <account_number>501234567892</account_number>
+                <cheque_amount>23000.00</cheque_amount>
+                <cheque_date>2026-09-03</cheque_date>
+                <presentingdate>2026-09-01</presentingdate>
+                <drawer_name>Aarav Kapoor</drawer_name>
+                <amount_in_words>Twenty Three Thousand Only</amount_in_words>
+                <micr_code>500003798</micr_code>
+                <city_code>500</city_code>
+                <bank_code>003</bank_code>
+                <branch_code>00789</branch_code>
+                <payee_name>Anil Enterprises</payee_name>
+                <payee_account_number>601234567892</payee_account_number>
+            </cheque>
+
+            <cheque>
+                <cheque_number>1000004</cheque_number>
+                <account_number>501234567893</account_number>
+                <cheque_amount>5600.00</cheque_amount>
+                <cheque_date>2026-09-04</cheque_date>
+                <presentingdate>2026-09-01</presentingdate>
+                <drawer_name>Aarav Malhotra</drawer_name>
+                <amount_in_words>Five Thousand Six Hundred Only</amount_in_words>
+                <micr_code>110004329</micr_code>
+                <city_code>110</city_code>
+                <bank_code>004</bank_code>
+                <branch_code>00321</branch_code>
+                <payee_name>Priya Stores</payee_name>
+                <payee_account_number>601234567893</payee_account_number>
+            </cheque>
+
+            <cheque>
+                <cheque_number>1000005</cheque_number>
+                <account_number>501234567894</account_number>
+                <cheque_amount>9100.00</cheque_amount>
+                <cheque_date>2026-09-05</cheque_date>
+                <presentingdate>2026-09-01</presentingdate>
+                <drawer_name>Aarav Iyer</drawer_name>
+                <amount_in_words>Nine Thousand One Hundred Only</amount_in_words>
+                <micr_code>600005649</micr_code>
+                <city_code>600</city_code>
+                <bank_code>005</bank_code>
+                <branch_code>00654</branch_code>
+                <payee_name>Vijay Constructions</payee_name>
+                <payee_account_number>601234567894</payee_account_number>
+            </cheque>
+
+            <cheque>
+                <cheque_number>1000006</cheque_number>
+                <account_number>501234567985</account_number>
+                <cheque_amount>15500.00</cheque_amount>
+                <cheque_date>2026-09-06</cheque_date>
+                <presentingdate>2026-09-01</presentingdate>
+                <drawer_name>Aarav Bhat</drawer_name>
+                <amount_in_words>Fifteen Thousand Five Hundred Only</amount_in_words>
+                <micr_code>400006987</micr_code>
+                <city_code>400</city_code>
+                <bank_code>006</bank_code>
+                <branch_code>00987</branch_code>
+                <payee_name>Meena Fashions</payee_name>
+                <payee_account_number>601234567895</payee_account_number>
+            </cheque>
+
+            <cheque>
+                <cheque_number>1000700</cheque_number>
+                <account_number>501234567896</account_number>
+                <cheque_amount>4200.00</cheque_amount>
+                <cheque_date>2026-09-17</cheque_date>
+                <presentingdate>2026-09-01</presentingdate>
+                <drawer_name>Aarav Joshi</drawer_name>
+                <amount_in_words>Four Thousand Two Hundred Only</amount_in_words>
+                <micr_code>700007111</micr_code>
+                <city_code>700</city_code>
+                <bank_code>007</bank_code>
+                <branch_code>00111</branch_code>
+                <payee_name>Sai Medicals</payee_name>
+                <payee_account_number>601234567896</payee_account_number>
+            </cheque>
+
+            <cheque>
+                <cheque_number>1000800</cheque_number>
+                <account_number>501234567897</account_number>
+                <cheque_amount>17850.00</cheque_amount>
+                <cheque_date>2026-09-08</cheque_date>
+                <presentingdate>2026-09-01</presentingdate>
+                <drawer_name>Aarav Khanna</drawer_name>
+                <amount_in_words>Seventeen Thousand Eight Hundred Fifty Only</amount_in_words>
+                <micr_code>400008229</micr_code>
+                <city_code>400</city_code>
+                <bank_code>008</bank_code>
+                <branch_code>00222</branch_code>
+                <payee_name>Naveen Agencies</payee_name>
+                <payee_account_number>601234567897</payee_account_number>
+            </cheque>
+
+            <cheque>
+                <cheque_number>1000009</cheque_number>
+                <account_number>501234567988</account_number>
+                <cheque_amount>6300.00</cheque_amount>
+                <cheque_date>2026-09-19</cheque_date>
+                <presentingdate>2026-09-01</presentingdate>
+                <drawer_name>Aarav Rao</drawer_name>
+                <amount_in_words>Six Thousand Three Hundred Only</amount_in_words>
+                <micr_code>500009339</micr_code>
+                <city_code>500</city_code>
+                <bank_code>009</bank_code>
+                <branch_code>00333</branch_code>
+                <payee_name>Kiran Textiles</payee_name>
+                <payee_account_number>601234567898</payee_account_number>
+            </cheque>
+
+            <cheque>
+                <cheque_number>1000010</cheque_number>
+                <account_number>501234567899</account_number>
+                <cheque_amount>11100.00</cheque_amount>
+                <cheque_date>2026-09-10</cheque_date>
+                <presentingdate>2026-09-01</presentingdate>
+                <drawer_name>Aarav Menon</drawer_name>
+                <amount_in_words>Eleven Thousand One Hundred Only</amount_in_words>
+                <micr_code>600010444</micr_code>
+                <city_code>600</city_code>
+                <bank_code>010</bank_code>
+                <branch_code>00444</branch_code>
+                <payee_name>Omkar Suppliers</payee_name>
+                <payee_account_number>601234567899</payee_account_number>
+            </cheque>
+        </cheques>
+    </batch>
+
+    <test_metadata>
+        <source>OCR_REFERENCE</source>
+        <reference_rule>OCR data is the correct/reference data</reference_rule>
+    </test_metadata>
+</batchFile>

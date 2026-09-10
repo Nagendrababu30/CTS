@@ -34,8 +34,9 @@ public class ChequeDaoImpl implements ChequeDao {
                 "INSERT INTO inward_cheque "
                 + "(cheque_number, batch_id, account_number, drawer_name, "
                 + "amount, micr_code, cheque_date, presenting_date, "
-                + "payee_name, payee_account_number, amount_in_words) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "payee_name, payee_account_number, amount_in_words, "
+                + "city_code, bank_code, branch_code) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -51,6 +52,9 @@ public class ChequeDaoImpl implements ChequeDao {
             statement.setString(9, cheque.getPayeeName());
             statement.setString(10, cheque.getPayeeAccountNumber());
             statement.setString(11, cheque.getAmountInWords());
+            statement.setString(12, cheque.getCityCode());
+            statement.setString(13, cheque.getBankCode());
+            statement.setString(14, cheque.getBranchCode());
 
             statement.executeUpdate();
 

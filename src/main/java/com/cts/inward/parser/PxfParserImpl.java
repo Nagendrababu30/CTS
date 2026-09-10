@@ -63,6 +63,7 @@ public class PxfParserImpl implements PxfParser {
 
             switch (elementName) {
 
+            case "batch_id":
             case "batch_code":
                 batchCode = Long.parseLong(reader.getElementText());
                 break;
@@ -142,6 +143,7 @@ public class PxfParserImpl implements PxfParser {
                 break;
 
             case "presenting_date":
+            case "presentingdate":
                 presentingDate = LocalDate.parse(reader.getElementText());
                 break;
 

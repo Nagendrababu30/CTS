@@ -23,10 +23,7 @@ public class OcrBatchServiceImpl
     }
 
     @Override
-    public void saveBatch(
-            OcrBatchData batchData) {
-
-        ocrBatchDao.saveBatch(
-                batchData);
+    public long saveBatch(OcrBatchData batchData) {
+        return ocrBatchDao.saveBatch(batchData);
     }
 }

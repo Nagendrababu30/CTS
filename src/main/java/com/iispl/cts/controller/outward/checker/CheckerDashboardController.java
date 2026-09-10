@@ -1,10 +1,12 @@
 package com.iispl.cts.controller.outward.checker;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Session;
+import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Wire;
 import org.zkoss.zk.ui.util.Clients;
@@ -41,6 +43,47 @@ public class CheckerDashboardController
     private Label readyToSendCount;
 
     // ============================================================
+    // FILTER COMPONENTS
+    // ============================================================
+
+    @Wire
+    private Button allBtn;
+
+    @Wire
+    private Button availableBtn;
+
+    @Wire
+    private Button myBatchesBtn;
+
+    // ============================================================
+    // PAGINATION COMPONENTS
+    // ============================================================
+
+    @Wire
+    private Button previousPageButton;
+
+    @Wire
+    private Button nextPageButton;
+
+    @Wire
+    private Button page1Button;
+
+    @Wire
+    private Button page2Button;
+
+    @Wire
+    private Button page3Button;
+
+    @Wire
+    private Button page4Button;
+
+    @Wire
+    private Button page5Button;
+
+    @Wire
+    private Label paginationInfo;
+
+    // ============================================================
     // SERVICE
     // ============================================================
 
@@ -51,6 +94,20 @@ public class CheckerDashboardController
     // ============================================================
 
     private long currentCheckerUser;
+
+    // ============================================================
+    // FILTER
+    // ============================================================
+
+    private String currentFilter = "ALL";
+
+    // ============================================================
+    // PAGINATION
+    // ============================================================
+
+    private int currentPage = 1;
+
+    private static final int PAGE_SIZE = 5;
 
     // ============================================================
     // PAGE INITIALIZATION
@@ -149,10 +206,299 @@ public class CheckerDashboardController
                 new CheckerDashboardService();
 
         // ========================================================
+        // INITIAL FILTER
+        // ========================================================
+
+        currentFilter = "ALL";
+
+        // ========================================================
+        // INITIAL PAGE
+        // ========================================================
+
+        currentPage = 1;
+
+        // ========================================================
+        // FILTER BUTTON STYLE
+        // ========================================================
+
+        updateFilterButtonStyles();
+
+        // ========================================================
+        // REGISTER FILTER EVENTS
+        // ========================================================
+
+        registerFilterEvents();
+
+        // ========================================================
+        // REGISTER PAGINATION EVENTS
+        // ========================================================
+
+        registerPaginationEvents();
+
+        // ========================================================
         // LOAD DASHBOARD
         // ========================================================
 
         loadDashboard();
+    }
+
+    // ============================================================
+    // REGISTER FILTER EVENTS
+    // ============================================================
+
+    private void registerFilterEvents() {
+
+        System.out.println(
+                "Registering Checker dashboard filters..."
+        );
+
+        System.out.println(
+                "allBtn = " + allBtn
+        );
+
+        System.out.println(
+                "availableBtn = " + availableBtn
+        );
+
+        System.out.println(
+                "myBatchesBtn = " + myBatchesBtn
+        );
+
+        // ========================================================
+        // ALL
+        // ========================================================
+
+        if (allBtn != null) {
+
+            allBtn.addEventListener(
+                    Events.ON_CLICK,
+                    event -> {
+
+                        System.out.println(
+                                "CHECKER ALL BUTTON CLICKED"
+                        );
+
+                        currentFilter = "ALL";
+
+                        currentPage = 1;
+
+                        updateFilterButtonStyles();
+
+                        loadDashboard();
+                    }
+            );
+        }
+
+        // ========================================================
+        // AVAILABLE
+        // ========================================================
+
+        if (availableBtn != null) {
+
+            availableBtn.addEventListener(
+                    Events.ON_CLICK,
+                    event -> {
+
+                        System.out.println(
+                                "CHECKER AVAILABLE BUTTON CLICKED"
+                        );
+
+                        currentFilter = "AVAILABLE";
+
+                        currentPage = 1;
+
+                        updateFilterButtonStyles();
+
+                        loadDashboard();
+                    }
+            );
+        }
+
+        // ========================================================
+        // MY BATCHES
+        // ========================================================
+
+        if (myBatchesBtn != null) {
+
+            myBatchesBtn.addEventListener(
+                    Events.ON_CLICK,
+                    event -> {
+
+                        System.out.println(
+                                "CHECKER MY BATCHES BUTTON CLICKED"
+                        );
+
+                        currentFilter = "MY_BATCHES";
+
+                        currentPage = 1;
+
+                        updateFilterButtonStyles();
+
+                        loadDashboard();
+                    }
+            );
+        }
+    }
+
+    // ============================================================
+    // REGISTER PAGINATION EVENTS
+    // ============================================================
+
+    private void registerPaginationEvents() {
+
+        // ========================================================
+        // PREVIOUS
+        // ========================================================
+
+        if (previousPageButton != null) {
+
+            previousPageButton.addEventListener(
+                    Events.ON_CLICK,
+                    event -> {
+
+                        if (currentPage > 1) {
+
+                            currentPage--;
+
+                            loadDashboard();
+                        }
+                    }
+            );
+        }
+
+        // ========================================================
+        // NEXT
+        // ========================================================
+
+        if (nextPageButton != null) {
+
+            nextPageButton.addEventListener(
+                    Events.ON_CLICK,
+                    event -> {
+
+                        int totalPages =
+                                getTotalPages();
+
+                        if (currentPage < totalPages) {
+
+                            currentPage++;
+
+                            loadDashboard();
+                        }
+                    }
+            );
+        }
+
+        // ========================================================
+        // PAGE BUTTONS
+        // ========================================================
+
+        registerPageButton(
+                page1Button,
+                1
+        );
+
+        registerPageButton(
+                page2Button,
+                2
+        );
+
+        registerPageButton(
+                page3Button,
+                3
+        );
+
+        registerPageButton(
+                page4Button,
+                4
+        );
+
+        registerPageButton(
+                page5Button,
+                5
+        );
+    }
+
+    // ============================================================
+    // REGISTER PAGE BUTTON
+    // ============================================================
+
+    private void registerPageButton(
+            Button button,
+            int pageNumber) {
+
+        if (button == null) {
+            return;
+        }
+
+        button.addEventListener(
+                Events.ON_CLICK,
+                event -> {
+
+                    int totalPages =
+                            getTotalPages();
+
+                    if (pageNumber <= totalPages) {
+
+                        currentPage =
+                                pageNumber;
+
+                        loadDashboard();
+                    }
+                }
+        );
+    }
+
+    // ============================================================
+    // UPDATE FILTER BUTTON STYLES
+    // ============================================================
+
+    private void updateFilterButtonStyles() {
+
+        if (allBtn != null) {
+
+            allBtn.setSclass(
+                    "filter-btn"
+                            +
+                            (
+                                    "ALL".equals(
+                                            currentFilter
+                                    )
+                                            ? " active-filter"
+                                            : ""
+                            )
+            );
+        }
+
+        if (availableBtn != null) {
+
+            availableBtn.setSclass(
+                    "filter-btn"
+                            +
+                            (
+                                    "AVAILABLE".equals(
+                                            currentFilter
+                                    )
+                                            ? " active-filter"
+                                            : ""
+                            )
+            );
+        }
+
+        if (myBatchesBtn != null) {
+
+            myBatchesBtn.setSclass(
+                    "filter-btn"
+                            +
+                            (
+                                    "MY_BATCHES".equals(
+                                            currentFilter
+                                    )
+                                            ? " active-filter"
+                                            : ""
+                            )
+            );
+        }
     }
 
     // ============================================================
@@ -166,7 +512,15 @@ public class CheckerDashboardController
             List<OutwardBatch> batches =
                     service.getBatches();
 
+            // ----------------------------------------------------
+            // KPI COUNTS
+            // ----------------------------------------------------
+
             loadCounts(batches);
+
+            // ----------------------------------------------------
+            // BATCH TABLE
+            // ----------------------------------------------------
 
             loadBatchList(batches);
 
@@ -273,19 +627,484 @@ public class CheckerDashboardController
     private void loadBatchList(
             List<OutwardBatch> batches) {
 
-        ListModelList<OutwardBatch> model =
-                new ListModelList<>();
+        // ========================================================
+        // FILTER DATA
+        // ========================================================
+
+        List<OutwardBatch> filteredBatches =
+                new ArrayList<>();
 
         if (batches != null) {
 
-            model.addAll(batches);
+            for (OutwardBatch batch : batches) {
+
+                if (batch == null) {
+                    continue;
+                }
+
+                if (matchesCurrentFilter(batch)) {
+
+                    filteredBatches.add(batch);
+                }
+            }
         }
 
-        batchListbox.setModel(model);
+        System.out.println(
+                "======================================"
+        );
+
+        System.out.println(
+                "CHECKER BATCH LIST"
+        );
+
+        System.out.println(
+                "Filter        : "
+                        + currentFilter
+        );
+
+        System.out.println(
+                "Total Batches : "
+                        + (batches == null
+                                ? 0
+                                : batches.size())
+        );
+
+        System.out.println(
+                "Filtered      : "
+                        + filteredBatches.size()
+        );
+
+        // ========================================================
+        // TOTAL PAGES
+        // ========================================================
+
+        int totalPages =
+                calculateTotalPages(
+                        filteredBatches.size()
+                );
+
+        // ========================================================
+        // SAFETY CHECK
+        // ========================================================
+
+        if (totalPages == 0) {
+
+            currentPage = 1;
+
+        } else if (currentPage > totalPages) {
+
+            currentPage = totalPages;
+        }
+
+        // ========================================================
+        // GET CURRENT PAGE DATA
+        // ========================================================
+
+        List<OutwardBatch> pageData =
+                getPageData(
+                        filteredBatches
+                );
+
+        System.out.println(
+                "Current Page  : "
+                        + currentPage
+        );
+
+        System.out.println(
+                "Total Pages   : "
+                        + totalPages
+        );
+
+        System.out.println(
+                "Page Records  : "
+                        + pageData.size()
+        );
+
+        // ========================================================
+        // CREATE MODEL
+        // ========================================================
+
+        ListModelList<OutwardBatch> model =
+                new ListModelList<>();
+
+        model.addAll(pageData);
+
+        // ========================================================
+        // SET RENDERER
+        // ========================================================
 
         batchListbox.setItemRenderer(
                 new CheckerBatchRenderer()
         );
+
+        // ========================================================
+        // SET MODEL
+        // ========================================================
+
+        batchListbox.setModel(model);
+
+        // ========================================================
+        // UPDATE PAGINATION
+        // ========================================================
+
+        updatePagination(
+                filteredBatches.size(),
+                totalPages
+        );
+    }
+
+    // ============================================================
+    // CHECK CURRENT FILTER
+    // ============================================================
+
+    private boolean matchesCurrentFilter(
+            OutwardBatch batch) {
+
+        if (batch == null) {
+            return false;
+        }
+
+        // ========================================================
+        // ALL
+        // ========================================================
+
+        if ("ALL".equals(currentFilter)) {
+
+            return true;
+        }
+
+        // ========================================================
+        // AVAILABLE
+        //
+        // Checker available logic is based on lock status.
+        // ========================================================
+
+        if ("AVAILABLE".equals(currentFilter)) {
+
+            return isBatchAvailable(batch);
+        }
+
+        // ========================================================
+        // MY BATCHES
+        // ========================================================
+
+        if ("MY_BATCHES".equals(currentFilter)) {
+
+            return isMyBatch(batch);
+        }
+
+        return true;
+    }
+
+    // ============================================================
+    // CHECK AVAILABLE BATCH
+    // ============================================================
+
+    private boolean isBatchAvailable(
+            OutwardBatch batch) {
+
+        if (batch == null) {
+            return false;
+        }
+
+        String lockStatus =
+                batch.getLockStatus();
+
+        return "AVAILABLE".equalsIgnoreCase(
+                safe(lockStatus)
+        );
+    }
+
+    // ============================================================
+    // CHECK MY BATCH
+    // ============================================================
+
+    private boolean isMyBatch(
+            OutwardBatch batch) {
+
+        if (batch == null) {
+            return false;
+        }
+
+        String checkerUser =
+                batch.getCheckerUserNumber();
+
+        if (checkerUser == null
+                || checkerUser.trim().isEmpty()) {
+
+            return false;
+        }
+
+        return String.valueOf(
+                currentCheckerUser
+        ).equalsIgnoreCase(
+                checkerUser.trim()
+        );
+    }
+
+    // ============================================================
+    // GET CURRENT PAGE DATA
+    // ============================================================
+
+    private List<OutwardBatch> getPageData(
+            List<OutwardBatch> filteredBatches) {
+
+        List<OutwardBatch> pageData =
+                new ArrayList<>();
+
+        if (filteredBatches == null
+                || filteredBatches.isEmpty()) {
+
+            return pageData;
+        }
+
+        int startIndex =
+                (currentPage - 1)
+                        * PAGE_SIZE;
+
+        if (startIndex >= filteredBatches.size()) {
+
+            return pageData;
+        }
+
+        int endIndex =
+                Math.min(
+                        startIndex + PAGE_SIZE,
+                        filteredBatches.size()
+                );
+
+        pageData.addAll(
+                filteredBatches.subList(
+                        startIndex,
+                        endIndex
+                )
+        );
+
+        return pageData;
+    }
+
+    // ============================================================
+    // CALCULATE TOTAL PAGES
+    // ============================================================
+
+    private int calculateTotalPages(
+            int totalRecords) {
+
+        if (totalRecords <= 0) {
+
+            return 0;
+        }
+
+        return (
+                totalRecords
+                        + PAGE_SIZE
+                        - 1
+        ) / PAGE_SIZE;
+    }
+
+    // ============================================================
+    // GET TOTAL PAGES
+    // ============================================================
+
+    private int getTotalPages() {
+
+        if (service == null) {
+            return 0;
+        }
+
+        try {
+
+            List<OutwardBatch> batches =
+                    service.getBatches();
+
+            if (batches == null) {
+                return 0;
+            }
+
+            int filteredCount = 0;
+
+            for (OutwardBatch batch : batches) {
+
+                if (batch != null
+                        &&
+                        matchesCurrentFilter(batch)) {
+
+                    filteredCount++;
+                }
+            }
+
+            return calculateTotalPages(
+                    filteredCount
+            );
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            return 0;
+        }
+    }
+
+    // ============================================================
+    // UPDATE PAGINATION
+    // ============================================================
+
+    private void updatePagination(
+            int totalRecords,
+            int totalPages) {
+
+        // ========================================================
+        // PREVIOUS
+        // ========================================================
+
+        if (previousPageButton != null) {
+
+            boolean disabled =
+                    currentPage <= 1
+                            || totalPages <= 1;
+
+            previousPageButton.setDisabled(
+                    disabled
+            );
+
+            previousPageButton.setSclass(
+                    disabled
+                            ? "pagination-btn pagination-disabled"
+                            : "pagination-btn"
+            );
+        }
+
+        // ========================================================
+        // NEXT
+        // ========================================================
+
+        if (nextPageButton != null) {
+
+            boolean disabled =
+                    totalPages == 0
+                            || currentPage >= totalPages;
+
+            nextPageButton.setDisabled(
+                    disabled
+            );
+
+            nextPageButton.setSclass(
+                    disabled
+                            ? "pagination-btn pagination-disabled"
+                            : "pagination-btn"
+            );
+        }
+
+        // ========================================================
+        // PAGE BUTTONS
+        // ========================================================
+
+        updatePageButton(
+                page1Button,
+                1,
+                totalPages
+        );
+
+        updatePageButton(
+                page2Button,
+                2,
+                totalPages
+        );
+
+        updatePageButton(
+                page3Button,
+                3,
+                totalPages
+        );
+
+        updatePageButton(
+                page4Button,
+                4,
+                totalPages
+        );
+
+        updatePageButton(
+                page5Button,
+                5,
+                totalPages
+        );
+
+        // ========================================================
+        // PAGINATION INFORMATION
+        // ========================================================
+
+        if (paginationInfo != null) {
+
+            if (totalRecords == 0) {
+
+                paginationInfo.setValue(
+                        "Showing 0 of 0"
+                );
+
+            } else {
+
+                int start =
+                        (
+                                (currentPage - 1)
+                                        * PAGE_SIZE
+                        ) + 1;
+
+                int end =
+                        Math.min(
+                                currentPage * PAGE_SIZE,
+                                totalRecords
+                        );
+
+                paginationInfo.setValue(
+                        "Showing "
+                                + start
+                                + "-"
+                                + end
+                                + " of "
+                                + totalRecords
+                );
+            }
+        }
+    }
+
+    // ============================================================
+    // UPDATE PAGE BUTTON
+    // ============================================================
+
+    private void updatePageButton(
+            Button button,
+            int pageNumber,
+            int totalPages) {
+
+        if (button == null) {
+            return;
+        }
+
+        boolean visible =
+                pageNumber <= totalPages;
+
+        button.setVisible(
+                visible
+        );
+
+        if (!visible) {
+            return;
+        }
+
+        button.setDisabled(false);
+
+        if (currentPage == pageNumber) {
+
+            button.setSclass(
+                    "pagination-btn pagination-active"
+            );
+
+        } else {
+
+            button.setSclass(
+                    "pagination-btn"
+            );
+        }
     }
 
     // ============================================================
@@ -425,8 +1244,9 @@ public class CheckerDashboardController
                 );
 
                 openButton.addEventListener(
-                        "onClick",
-                        event -> openBatch(batch)
+                        Events.ON_CLICK,
+                        event ->
+                                openBatch(batch)
                 );
 
                 actionCell.appendChild(

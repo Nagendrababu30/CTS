@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?page title="Send to Checker"?>
+
+<?init class="com.cts.admin.controller.LayoutInit"
+        pageTitle="Send to Checker"
+        active="sendToChecker"?>
+
+<?init class="org.zkoss.zk.ui.util.Composition"
+        arg0="/zul/common/layout.zul"?>
+
+<zk>
+
+    <!-- =========================================================
+         GLOBAL STYLING
+         ========================================================= -->
+
+    <style><![CDATA[
+
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            height: 100% !important;
+            overflow: hidden !important;
+            background: #F4F7FB;
+        }
+
+        .z-window-embedded-cnt,
+        .z-window-content {
+            padding: 0 !important;
+        }
+
+        /* Listbox styling matching maker UI */
+
+        .send-checker-listbox .z-listheader {
+            background: #0091FF !important;
+            color: #FFFFFF !important;
+            font-weight: 700 !important;
+            font-size: 13px !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.2) !important;
+            height: 38px !important;
+        }
+
+        .send-checker-listbox .z-listheader-content {
+            color: #FFFFFF !important;
+            font-weight: 700 !important;
+            padding: 8px 12px !important;
+        }
+
+        .send-checker-listbox .z-listcell {
+            font-size: 13px !important;
+            color: #1E293B !important;
+            padding: 10px 12px !important;
+            border-bottom: 1px solid #E2E8F0 !important;
+        }
+
+        .send-checker-listbox .z-listitem:hover > .z-listcell {
+            background: #F8FAFC !important;
+        }
+
+    ]]></style>
+
+
+    <!-- =========================================================
+         CONTENT
+         
+         Header + Sidebar are provided by:
+         
+             /zul/common/layout.zul
+         
+         ========================================================= -->
+
+    <div
+        self="@define(content)"
+        width="100%"
+        height="100%"
+        style="
+            width:100%;
+            height:100%;
+            background:#F4F7FB;
+        ">
+
+
+        <!-- =====================================================
+             SEND TO CHECKER CONTROLLER
+             ===================================================== -->
+
+        <vlayout
+            apply="com.iispl.cts.controller.outward.OutwardMakerSendCheckerController"
+            spacing="18px"
+            width="100%"
+            height="100%"
+            style="
+                padding:24px 30px;
+                box-sizing:border-box;
+                overflow:auto;
+            ">
+
+
+            <!-- =================================================
+                 PAGE TITLE
+                 ================================================= -->
+
+            <label
+                value="Send to Checker"
+                style="
+                    font-size:26px;
+                    font-weight:700;
+                    color:#0F172A;
+                    letter-spacing:-0.3px;
+                "/>
+
+
+            <!-- =================================================
+                 INFORMATION CARD
+                 ================================================= -->
+
+            <div
+                width="100%"
+                style="
+                    background:#EEF6FF;
+                    border:1px solid #B8D5FF;
+                    border-radius:6px;
+                    padding:12px 18px;
+                    box-sizing:border-box;
+                ">
+
+                <label
+                    value="ⓘ The following outward batches have completed maker processing and are ready to be submitted to Outward Checker."
+                    style="
+                        font-size:13px;
+                        font-weight:500;
+                        color:#174EA6;
+                    "/>
+
+            </div>
+
+
+            <!-- =================================================
+                 BATCH LIST CARD
+                 ================================================= -->
+
+            <div
+                width="100%"
+                style="
+                    background:white;
+                    border:1px solid #DCE5F0;
+                    border-radius:6px;
+                    padding:16px;
+                    box-sizing:border-box;
+                    box-shadow:0 1px 3px rgba(16,24,40,0.04);
+                ">
+
+
+                <listbox
+                    id="batchListbox"
+                    width="100%"
+                    sclass="send-checker-listbox"
+                    style="
+                        border:1px solid #E2E8F0;
+                        border-radius:6px;
+                        overflow:hidden;
+                    "
+                    emptyMessage="No batches are ready to submit."
+                    mold="paging"
+                    pageSize="10">
+
+                    <listhead>
+
+                        <listheader
+                            label="Batch ID"
+                            width="20%"/>
+
+                        <listheader
+                            label="Total Cheques"
+                            width="20%"/>
+
+                        <listheader
+                            label="Status"
+                            width="30%"/>
+
+                        <listheader
+                            label="Action"
+                            width="30%"/>
+
+                    </listhead>
+
+                </listbox>
+
+            </div>
+
+        </vlayout>
+
+    </div>
+
+</zk>

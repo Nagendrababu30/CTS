@@ -89,17 +89,21 @@ public class AuthorizationComposer
 		// =========================================================
 		// OUTWARD MAKER
 		// =========================================================
+		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-dashboard.zul", "OUTWARD_MAKER");
 
-		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/makerDashboard.zul", "OUTWARD_MAKER");
+		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-micr-repair.zul", "OUTWARD_MAKER");
+		PAGE_PERMISSIONS.put(
+			    "/zul/outward/outward-maker/outward-maker-data-entry-detail.zul",
+			    "OUTWARD_MAKER"
+			);
 
-		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/dataEntry.zul", "OUTWARD_MAKER");
+		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-micr-repair-detail.zul", "OUTWARD_MAKER");
 
-		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/MicrRepair.zul", "OUTWARD_MAKER");
+		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-data-entry.zul", "OUTWARD_MAKER");
 
-		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/amountAndAccount.zul", "OUTWARD_MAKER");
+		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-data-entry-repair.zul", "OUTWARD_MAKER");
 
-		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/sendToChecker.zul", "OUTWARD_MAKER");
-
+		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-send-to-checker.zul", "OUTWARD_MAKER");
 		// =========================================================
 		// OUTWARD CHECKER
 		// =========================================================

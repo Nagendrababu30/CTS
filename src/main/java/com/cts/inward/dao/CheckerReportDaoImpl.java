@@ -33,6 +33,8 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
                     c.batch_id,
                     c.amount,
                     c.account_number,
+                    c.payee_account_number,
+                    c.payee_name,
                     c.drawer_name,
                     c.cheque_date,
                     b.presenting_bank_name,
@@ -73,12 +75,12 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
                 row.put("batchId", String.format("BATCH%03d", rs.getLong("batch_id")));
                 row.put("chequeNo", rs.getString("cheque_no"));
                 row.put("amount", rs.getBigDecimal("amount"));
-                row.put("accountNumber", rs.getString("account_number")); // exact column name
-                row.put("payeeAccountNumber", ""); // static fallback since column doesn't exist
-                row.put("payeeName", "");          // static fallback since column doesn't exist
+                row.put("drawerAccountNo", rs.getString("account_number"));
+                row.put("payeeAccountNo", rs.getString("payee_account_number"));
+                row.put("payeeName", rs.getString("payee_name"));         
                 row.put("drawerName", rs.getString("drawer_name"));
                 row.put("bankName", rs.getString("presenting_bank_name"));
-                row.put("chequeDate", rs.getDate("cheque_date")); // fetched from database schema
+                row.put("chequeDate", rs.getDate("cheque_date")); 
                 row.put("returnReason", rs.getString("return_reason"));
                 row.put("remark", rs.getString("remark"));
                 
@@ -99,6 +101,8 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
                     c.batch_id,
                     c.amount,
                     c.account_number,
+                    c.payee_account_number,
+                    c.payee_name,
                     c.drawer_name,
                     c.cheque_date,
                     b.presenting_bank_name
@@ -126,8 +130,8 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
                 row.put("chequeNo", rs.getString("cheque_no"));
                 row.put("amount", rs.getBigDecimal("amount"));
                 row.put("accountNumber", rs.getString("account_number"));
-                row.put("payeeAccountNumber", ""); // static fallback since column doesn't exist
-                row.put("payeeName", "");          // static fallback since column doesn't exist
+                row.put("payeeAccountNo", rs.getString("payee_account_number"));
+                row.put("payeeName", rs.getString("payee_name"));        
                 row.put("drawerName", rs.getString("drawer_name"));
                 row.put("bankName", rs.getString("presenting_bank_name"));
                 row.put("chequeDate", rs.getDate("cheque_date"));

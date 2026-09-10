@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Wire;
 import org.zkoss.zk.ui.util.Clients;
@@ -14,17 +15,18 @@ import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.ListitemRenderer;
 import org.zkoss.zul.ListModelList;
-import org.zkoss.zul.Messagebox;
 
-import com.iispl.cts.controller.outward.LoginController;
 import com.iispl.cts.model.outward.OutwardBatch;
-import com.iispl.cts.model.outward.UserSession;
 import com.iispl.cts.service.outward.checker.CheckerDashboardService;
 
 public class CheckerDashboardController
         extends SelectorComposer<Component> {
 
     private static final long serialVersionUID = 1L;
+
+    // ============================================================
+    // ZUL COMPONENTS
+    // ============================================================
 
     @Wire
     private Listbox batchListbox;
@@ -38,77 +40,125 @@ public class CheckerDashboardController
     @Wire
     private Label readyToSendCount;
 
+    // ============================================================
+    // SERVICE
+    // ============================================================
+
     private CheckerDashboardService service;
 
-    /*
-     * ============================================================
-     * CURRENT LOGGED-IN CHECKER
-     * ============================================================
-     */
+    // ============================================================
+    // CURRENT LOGGED-IN CHECKER USER ID
+    // ============================================================
 
-    private String currentCheckerUser;
+    private long currentCheckerUser;
 
+    // ============================================================
+    // PAGE INITIALIZATION
+    // ============================================================
 
     @Override
-    public void doAfterCompose(Component comp) throws Exception {
+    public void doAfterCompose(Component comp)
+            throws Exception {
 
         super.doAfterCompose(comp);
 
-        /*
-         * ---------------------------------------------------------
-         * CURRENT LOGIN SESSION
-         * ---------------------------------------------------------
-         */
+        // ========================================================
+        // GET ZK SESSION
+        // ========================================================
 
-        UserSession sessionUser =
-                LoginController.getCurrentUserSession();
+        Session session =
+                Executions.getCurrent().getSession();
 
-        if (sessionUser == null) {
+        // ========================================================
+        // NO SESSION
+        // ========================================================
 
-            Executions.sendRedirect("/login.zul");
+        if (session == null) {
+
+            Executions.sendRedirect(
+                    "/zul/login.zul"
+            );
+
             return;
         }
 
-        /*
-         * Outward Checker role = 4
-         */
+        // ========================================================
+        // GET USER ID FROM SESSION
+        // ========================================================
 
-        if (sessionUser.getRoleId() != 4) {
+        Object sessionUserId =
+                session.getAttribute("userId");
 
-            Messagebox.show(
-                    "Access denied. Outward Checker access is required.",
-                    "Access Denied",
-                    Messagebox.OK,
-                    Messagebox.ERROR);
+        // ========================================================
+        // USER ID NOT FOUND
+        // ========================================================
 
-            Executions.sendRedirect("/login.zul");
+        if (sessionUserId == null) {
+
+            Executions.sendRedirect(
+                    "/zul/login.zul"
+            );
+
             return;
         }
 
-        /*
-         * Use logged-in user's actual database user ID.
-         */
+        // ========================================================
+        // CONVERT USER ID
+        // ========================================================
 
-        currentCheckerUser =
-                String.valueOf(sessionUser.getUserId());
+        if (sessionUserId instanceof Number) {
+
+            currentCheckerUser =
+                    ((Number) sessionUserId)
+                            .longValue();
+
+        } else {
+
+            try {
+
+                currentCheckerUser =
+                        Long.parseLong(
+                                sessionUserId.toString()
+                        );
+
+            } catch (NumberFormatException e) {
+
+                Executions.sendRedirect(
+                        "/zul/login.zul"
+                );
+
+                return;
+            }
+        }
+
+        // ========================================================
+        // LOG CURRENT CHECKER
+        // ========================================================
 
         System.out.println(
                 "CHECKER SESSION: "
-                + "userId=" + sessionUser.getUserId()
-                + ", username=" + sessionUser.getUsername()
-                + ", roleId=" + sessionUser.getRoleId());
+                        + "userId="
+                        + currentCheckerUser
+        );
 
-        service = new CheckerDashboardService();
+        // ========================================================
+        // CREATE SERVICE
+        // ========================================================
+
+        service =
+                new CheckerDashboardService();
+
+        // ========================================================
+        // LOAD DASHBOARD
+        // ========================================================
 
         loadDashboard();
     }
 
+    // ============================================================
+    // LOAD DASHBOARD
+    // ============================================================
 
-    /*
-     * ============================================================
-     * LOAD DASHBOARD
-     * ============================================================
-     */
     private void loadDashboard() {
 
         try {
@@ -134,17 +184,17 @@ public class CheckerDashboardController
         }
     }
 
+    // ============================================================
+    // SUMMARY COUNTS
+    // ============================================================
 
-    /*
-     * ============================================================
-     * SUMMARY COUNTS
-     * ============================================================
-     */
     private void loadCounts(
             List<OutwardBatch> batches) {
 
         int pending = 0;
+
         int cbsValidation = 0;
+
         int readyToSend = 0;
 
         if (batches != null) {
@@ -162,12 +212,13 @@ public class CheckerDashboardController
                     continue;
                 }
 
-                status = status.toUpperCase();
+                status =
+                        status.toUpperCase();
 
+                // =================================================
+                // PENDING VERIFICATION
+                // =================================================
 
-                /*
-                 * Pending verification
-                 */
                 if ("READY_FOR_CHECKER".equals(status)
                         || "SUBMITTED".equals(status)
                         || "CHECKER_PENDING".equals(status)
@@ -176,20 +227,20 @@ public class CheckerDashboardController
                     pending++;
                 }
 
+                // =================================================
+                // CBS VALIDATION
+                // =================================================
 
-                /*
-                 * CBS validation
-                 */
                 if ("CBS_VALIDATION".equals(status)
                         || "PENDING_CBS_VALIDATION".equals(status)) {
 
                     cbsValidation++;
                 }
 
+                // =================================================
+                // READY TO SEND
+                // =================================================
 
-                /*
-                 * Ready to send
-                 */
                 if ("READY_TO_SEND".equals(status)
                         || "READY_FOR_NPCI".equals(status)) {
 
@@ -198,6 +249,9 @@ public class CheckerDashboardController
             }
         }
 
+        // ========================================================
+        // DISPLAY COUNTS
+        // ========================================================
 
         pendingVerificationCount.setValue(
                 String.valueOf(pending)
@@ -212,12 +266,10 @@ public class CheckerDashboardController
         );
     }
 
+    // ============================================================
+    // LOAD BATCH TABLE
+    // ============================================================
 
-    /*
-     * ============================================================
-     * LOAD BATCH TABLE
-     * ============================================================
-     */
     private void loadBatchList(
             List<OutwardBatch> batches) {
 
@@ -225,6 +277,7 @@ public class CheckerDashboardController
                 new ListModelList<>();
 
         if (batches != null) {
+
             model.addAll(batches);
         }
 
@@ -235,12 +288,10 @@ public class CheckerDashboardController
         );
     }
 
+    // ============================================================
+    // BATCH RENDERER
+    // ============================================================
 
-    /*
-     * ============================================================
-     * BATCH RENDERER
-     * ============================================================
-     */
     private class CheckerBatchRenderer
             implements ListitemRenderer<OutwardBatch> {
 
@@ -251,27 +302,27 @@ public class CheckerDashboardController
                 int index)
                 throws Exception {
 
+            // ====================================================
+            // BATCH NUMBER
+            // ====================================================
 
-            /*
-             * ----------------------------------------------------
-             * BATCH NUMBER
-             * ----------------------------------------------------
-             */
             Listcell batchCell =
                     new Listcell();
 
             batchCell.setLabel(
-                    safe(batch.getBatchNumber())
+                    safe(
+                            batch.getBatchNumber()
+                    )
             );
 
-            item.appendChild(batchCell);
+            item.appendChild(
+                    batchCell
+            );
 
+            // ====================================================
+            // CHEQUE COUNT
+            // ====================================================
 
-            /*
-             * ----------------------------------------------------
-             * CHEQUE COUNT
-             * ----------------------------------------------------
-             */
             Listcell chequeCell =
                     new Listcell();
 
@@ -281,35 +332,36 @@ public class CheckerDashboardController
                     )
             );
 
-            item.appendChild(chequeCell);
+            item.appendChild(
+                    chequeCell
+            );
 
+            // ====================================================
+            // STATUS
+            // ====================================================
 
-            /*
-             * ----------------------------------------------------
-             * STATUS
-             * ----------------------------------------------------
-             */
             Listcell statusCell =
                     new Listcell();
 
             statusCell.setLabel(
-                    safe(batch.getBatchStatus())
+                    safe(
+                            batch.getBatchStatus()
+                    )
             );
 
-            item.appendChild(statusCell);
+            item.appendChild(
+                    statusCell
+            );
 
+            // ====================================================
+            // ASSIGNMENT
+            // ====================================================
 
-            /*
-             * ----------------------------------------------------
-             * ASSIGNMENT
-             * ----------------------------------------------------
-             */
             Listcell assignmentCell =
                     new Listcell();
 
             String lockStatus =
                     batch.getLockStatus();
-
 
             if (lockStatus == null) {
 
@@ -317,8 +369,10 @@ public class CheckerDashboardController
                         "AVAILABLE"
                 );
 
-            } else if ("AVAILABLE".equalsIgnoreCase(
-                    lockStatus)) {
+            } else if (
+                    "AVAILABLE".equalsIgnoreCase(
+                            lockStatus
+                    )) {
 
                 assignmentCell.setLabel(
                         "Available"
@@ -329,12 +383,12 @@ public class CheckerDashboardController
                 String checker =
                         batch.getCheckerUserNumber();
 
-                if (checker != null &&
-                    !checker.trim().isEmpty()) {
+                if (checker != null
+                        && !checker.trim().isEmpty()) {
 
                     assignmentCell.setLabel(
                             "Locked by Checker "
-                            + checker
+                                    + checker
                     );
 
                 } else {
@@ -345,23 +399,21 @@ public class CheckerDashboardController
                 }
             }
 
-            item.appendChild(assignmentCell);
+            item.appendChild(
+                    assignmentCell
+            );
 
+            // ====================================================
+            // ACTION
+            // ====================================================
 
-            /*
-             * ----------------------------------------------------
-             * ACTION
-             * ----------------------------------------------------
-             */
             Listcell actionCell =
                     new Listcell();
-
 
             boolean available =
                     "AVAILABLE".equalsIgnoreCase(
                             batch.getLockStatus()
                     );
-
 
             if (available) {
 
@@ -372,12 +424,10 @@ public class CheckerDashboardController
                         "btn btn-primary"
                 );
 
-
                 openButton.addEventListener(
                         "onClick",
                         event -> openBatch(batch)
                 );
-
 
                 actionCell.appendChild(
                         openButton
@@ -397,27 +447,21 @@ public class CheckerDashboardController
                 );
             }
 
-
-            item.appendChild(actionCell);
+            item.appendChild(
+                    actionCell
+            );
         }
     }
 
+    // ============================================================
+    // OPEN BATCH
+    // ============================================================
 
-    /*
-     * ============================================================
-     * OPEN BATCH
-     * ============================================================
-     *
-     * 1. User clicks Open
-     * 2. Backend tries to acquire lock
-     * 3. If successful -> Batches Queue
-     * 4. If another Checker already acquired it -> error
-     */
     private void openBatch(
             OutwardBatch batch) {
 
-        if (batch == null ||
-            batch.getBatchNumber() == null) {
+        if (batch == null
+                || batch.getBatchNumber() == null) {
 
             Clients.showNotification(
                     "Invalid batch.",
@@ -430,19 +474,19 @@ public class CheckerDashboardController
             return;
         }
 
-
         String batchNumber =
                 batch.getBatchNumber();
 
-
         try {
 
-            /*
-             * Re-check database before locking.
-             */
-            OutwardBatch latest =
-                    service.findBatch(batchNumber);
+            // ====================================================
+            // RE-CHECK DATABASE BEFORE LOCKING
+            // ====================================================
 
+            OutwardBatch latest =
+                    service.findBatch(
+                            batchNumber
+                    );
 
             if (latest == null) {
 
@@ -459,12 +503,13 @@ public class CheckerDashboardController
                 return;
             }
 
+            // ====================================================
+            // ALREADY LOCKED
+            // ====================================================
 
-            /*
-             * Already locked?
-             */
             if (!"AVAILABLE".equalsIgnoreCase(
-                    latest.getLockStatus())) {
+                    latest.getLockStatus()
+            )) {
 
                 Clients.showNotification(
                         "Batch is already locked.",
@@ -479,16 +524,17 @@ public class CheckerDashboardController
                 return;
             }
 
+            // ====================================================
+            // ATTEMPT ATOMIC ASSIGNMENT
+            // ====================================================
 
-            /*
-             * Attempt atomic assignment.
-             */
             boolean assigned =
                     service.assignBatch(
                             batchNumber,
-                            currentCheckerUser
+                            String.valueOf(
+                                    currentCheckerUser
+                            )
                     );
-
 
             if (!assigned) {
 
@@ -505,10 +551,10 @@ public class CheckerDashboardController
                 return;
             }
 
+            // ====================================================
+            // SUCCESSFUL LOCK
+            // ====================================================
 
-            /*
-             * Successful lock.
-             */
             Clients.showNotification(
                     "Batch assigned successfully.",
                     Clients.NOTIFICATION_TYPE_INFO,
@@ -517,16 +563,17 @@ public class CheckerDashboardController
                     2000
             );
 
+            // ====================================================
+            // MOVE TO BATCHES QUEUE
+            // ====================================================
 
-            /*
-             * Move to Batches Queue.
-             */
             Executions.sendRedirect(
                     "/outward/checker/batchesQueue.zul"
-                    + "?batchNumber="
-                    + Executions.encodeURL(batchNumber)
+                            + "?batchNumber="
+                            + Executions.encodeURL(
+                                    batchNumber
+                            )
             );
-
 
         } catch (Exception e) {
 
@@ -542,13 +589,12 @@ public class CheckerDashboardController
         }
     }
 
+    // ============================================================
+    // SAFE STRING
+    // ============================================================
 
-    /*
-     * ============================================================
-     * SAFE STRING
-     * ============================================================
-     */
-    private String safe(String value) {
+    private String safe(
+            String value) {
 
         return value == null
                 ? ""

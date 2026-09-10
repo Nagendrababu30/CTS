@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?page title="Capture Operator - Batch Capture"
+    contentType="text/html;charset=UTF-8"?>
+
+<?init class="com.cts.admin.controller.LayoutInit"
+        pageTitle="Batch Capture"
+        active="batchCapture"?>
+
+<?init class="org.zkoss.zk.ui.util.Composition"
+        arg0="/zul/common/layout.zul"?>
+
+<zk>
+
+    <!-- PAGE CSS -->
+    <style src="/css/outward-maker/batch-capture.css"/>
+
+
+    <!-- ========================================================= -->
+    <!-- COMMON LAYOUT CONTENT                                     -->
+    <!-- Header + Sidebar are provided by /zul/common/layout.zul   -->
+    <!-- ========================================================= -->
+
+    <div
+        self="@define(content)"
+        width="100%"
+        height="100%"
+        style="
+            width:100%;
+            height:100%;
+            background:#F4F7FB;
+        ">
+
+        <!-- ===================================================== -->
+        <!-- BATCH CAPTURE CONTROLLER                              -->
+        <!-- ===================================================== -->
+
+        <vlayout
+            apply="com.iispl.cts.controller.outward.CaptureOperatorBatchCaptureController"
+            width="100%"
+            height="100%"
+            spacing="20px"
+            sclass="batch-capture-content"
+            style="
+                padding:24px 30px;
+                box-sizing:border-box;
+                overflow:auto;
+            ">
+
+
+            <!-- ================================================= -->
+            <!-- PAGE TITLE                                         -->
+            <!-- ================================================= -->
+
+            <label
+                value="Batch Capture"
+                sclass="batch-capture-page-title"/>
+
+
+            <!-- ================================================= -->
+            <!-- BATCH DETAILS FORM                                 -->
+            <!-- ================================================= -->
+
+            <groupbox
+                width="100%"
+                mold="3d"
+                sclass="batch-capture-groupbox">
+
+                <caption
+                    label="Batch Details"
+                    sclass="batch-capture-caption"/>
+
+
+                <grid
+                    width="100%"
+                    sclass="batch-capture-grid">
+
+                    <columns>
+
+                        <column width="180px"/>
+
+                        <column/>
+
+                    </columns>
+
+
+                    <rows>
+
+                        <!-- ===================================== -->
+                        <!-- BRANCH CODE                            -->
+                        <!-- ===================================== -->
+
+                        <row
+                            sclass="batch-capture-row">
+
+                            <label
+                                value="Branch Code"
+                                sclass="batch-capture-field-label"/>
+
+                            <combobox
+                                id="branchCodeCombo"
+                                width="300px"
+                                placeholder="Select Branch Code"
+                                autodrop="true"
+                                sclass="batch-capture-input"/>
+
+                        </row>
+
+
+                        <!-- ===================================== -->
+                        <!-- BRANCH NAME                            -->
+                        <!-- ===================================== -->
+
+                        <row
+                            sclass="batch-capture-row">
+
+                            <label
+                                value="Branch Name"
+                                sclass="batch-capture-field-label"/>
+
+                            <textbox
+                                id="branchNameTextbox"
+                                width="300px"
+                                readonly="true"
+                                sclass="batch-capture-input"/>
+
+                        </row>
+
+
+                        <!-- ===================================== -->
+                        <!-- NUMBER OF CHEQUES                      -->
+                        <!-- ===================================== -->
+
+                        <row
+                            sclass="batch-capture-row">
+
+                            <label
+                                value="Number of Cheques"
+                                sclass="batch-capture-field-label"/>
+
+                            <intbox
+                                id="numberOfCheques"
+                                width="300px"
+                                placeholder="Enter number of cheques"
+                                constraint="no negative"
+                                sclass="batch-capture-input"/>
+
+                        </row>
+
+
+                        <!-- ===================================== -->
+                        <!-- BATCH FOLDER                           -->
+                        <!-- ===================================== -->
+
+                        <row
+                            sclass="batch-capture-row">
+
+                            <label
+                                value="Batch Folder Path"
+                                sclass="batch-capture-field-label"/>
+
+                            <textbox
+                                id="batchFolderPath"
+                                width="600px"
+                                value="C:\Users"
+                                placeholder="Enter batch folder path"
+                                sclass="batch-capture-folder-input"/>
+
+                        </row>
+
+
+                        <!-- ===================================== -->
+                        <!-- XML INFORMATION                        -->
+                        <!-- ===================================== -->
+
+                        <row
+                            sclass="batch-capture-row">
+
+                            <label value=""/>
+
+                            <label
+                                value="XML will be detected automatically from the selected folder."
+                                sclass="batch-capture-xml-info"/>
+
+                        </row>
+
+
+                        <!-- ===================================== -->
+                        <!-- CAPTURE BUTTON                         -->
+                        <!-- ===================================== -->
+
+                        <row
+                            sclass="batch-capture-row">
+
+                            <label value=""/>
+
+                            <button
+                                id="capturedBatchButton"
+                                label="Capture Batch"
+                                width="180px"
+                                height="40px"
+                                sclass="batch-capture-button"/>
+
+                        </row>
+
+                    </rows>
+
+                </grid>
+
+            </groupbox>
+
+        </vlayout>
+
+    </div>
+
+</zk>

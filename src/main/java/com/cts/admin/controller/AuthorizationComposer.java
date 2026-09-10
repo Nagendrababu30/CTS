@@ -96,6 +96,17 @@ public class AuthorizationComposer
 			    "/zul/outward/outward-maker/outward-maker-data-entry-detail.zul",
 			    "OUTWARD_MAKER"
 			);
+		//CAPTURE OPERATOR 
+		
+		PAGE_PERMISSIONS.put(
+			    "/zul/outward/outward-maker/capture-operator-batch-capture.zul",
+			    "CAPTURE_OPERATOR"
+			);
+
+			PAGE_PERMISSIONS.put(
+			    "/zul/outward/outward-maker/capture-operator-captured-batches.zul",
+			    "CAPTURE_OPERATOR"
+			);
 
 		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-micr-repair-detail.zul", "OUTWARD_MAKER");
 
@@ -108,13 +119,34 @@ public class AuthorizationComposer
 		// OUTWARD CHECKER
 		// =========================================================
 
-		PAGE_PERMISSIONS.put("/zul/outward/outward-checker/checkerDashboard.zul", "OUTWARD_CHECKER");
+		// ============================================================
+		// OUTWARD CHECKER PAGES
+		// ============================================================
 
-		PAGE_PERMISSIONS.put("/zul/outward/outward-checker/batchQueue.zul", "OUTWARD_CHECKER");
+		PAGE_PERMISSIONS.put(
+		        "/zul/outward/outward-checker/dashboard.zul",
+		        "OUTWARD_CHECKER"
+		);
 
-		PAGE_PERMISSIONS.put("/zul/outward/outward-checker/checkerReports.zul", "OUTWARD_CHECKER");
+		PAGE_PERMISSIONS.put(
+		        "/zul/outward/outward-checker/batchesQueue.zul",
+		        "OUTWARD_CHECKER"
+		);
 
-		PAGE_PERMISSIONS.put("/zul/outward/outward-checker/sendToNpci.zul", "OUTWARD_CHECKER");
+		PAGE_PERMISSIONS.put(
+		        "/zul/outward/outward-checker/chequeVerification.zul",
+		        "OUTWARD_CHECKER"
+		);
+
+		PAGE_PERMISSIONS.put(
+		        "/zul/outward/outward-checker/reports.zul",
+		        "OUTWARD_CHECKER"
+		);
+
+		PAGE_PERMISSIONS.put(
+		        "/zul/outward/outward-checker/sendToNPCI.zul",
+		        "OUTWARD_CHECKER"
+		);
 	}
 
 	@Override

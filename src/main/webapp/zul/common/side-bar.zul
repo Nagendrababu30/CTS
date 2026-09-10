@@ -4,6 +4,126 @@
 
     <div
         sclass="sidebar">
+        <vlayout
+    visible="${arg.roleName eq 'OUTWARD_CHECKER'}"
+    width="100%"
+    spacing="0px">
+
+    <!-- DASHBOARD -->
+    <a
+        href="/zul/outward/outward-checker/dashboard.zul"
+        sclass="${arg.active eq 'dashboard'
+            ? 'menu-item active-menu'
+            : 'menu-item'}">
+
+        <n:i
+            class="fa-solid fa-house menu-icon"/>
+
+        <label
+            value="Dashboard"
+            sclass="menu-label"/>
+
+    </a>
+
+
+    <!-- BATCHES QUEUE -->
+    <a
+        href="/zul/outward/outward-checker/batchesQueue.zul"
+        sclass="${arg.active eq 'batchesQueue'
+            ? 'menu-item active-menu'
+            : 'menu-item'}">
+
+        <n:i
+            class="fa-solid fa-layer-group menu-icon"/>
+
+        <label
+            value="Batches Queue"
+            sclass="menu-label"/>
+
+    </a>
+
+
+    <!-- REPORTS -->
+    <a
+        href="/zul/outward/outward-checker/reports.zul"
+        sclass="${arg.active eq 'reports'
+            ? 'menu-item active-menu'
+            : 'menu-item'}">
+
+        <n:i
+            class="fa-solid fa-chart-column menu-icon"/>
+
+        <label
+            value="Reports"
+            sclass="menu-label"/>
+
+    </a>
+
+
+    <!-- SEND TO NPCI -->
+    <a
+        href="/zul/outward/outward-checker/sendToNPCI.zul"
+        sclass="${arg.active eq 'sendToNPCI'
+            ? 'menu-item active-menu'
+            : 'menu-item'}">
+
+        <n:i
+            class="fa-solid fa-paper-plane menu-icon"/>
+
+        <label
+            value="Send to NPCI"
+            sclass="menu-label"/>
+
+    </a>
+
+</vlayout>
+        
+        
+    <!-- BATCH CAPTURE -->     
+        
+        <vlayout
+    visible="${arg.roleName eq 'CAPTURE_OPERATOR'}"
+    width="100%"
+    spacing="0px">
+
+
+    <!-- BATCH CAPTURE -->
+
+    <a
+        href="/zul/outward/outward-maker/capture-operator-batch-capture.zul"
+        sclass="${arg.active eq 'batchCapture'
+            ? 'menu-item active-menu'
+            : 'menu-item'}">
+
+        <n:i
+            class="fa-solid fa-camera menu-icon"/>
+
+        <label
+            value="Batch Capture"
+            sclass="menu-label"/>
+
+    </a>
+
+
+    <!-- CAPTURED BATCHES -->
+
+    <a
+        href="/zul/outward/outward-maker/capture-operator-captured-batches.zul"
+        sclass="${arg.active eq 'capturedBatches'
+            ? 'menu-item active-menu'
+            : 'menu-item'}">
+
+        <n:i
+            class="fa-solid fa-layer-group menu-icon"/>
+
+        <label
+            value="Captured Batches"
+            sclass="menu-label"/>
+
+    </a>
+
+
+</vlayout>
 
         <!-- OUTWARD MAKER -->
 

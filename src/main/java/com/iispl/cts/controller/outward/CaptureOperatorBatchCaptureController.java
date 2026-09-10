@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.Wire;
@@ -14,7 +15,6 @@ import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
 
 import com.iispl.cts.model.outward.OutwardBatch;
-import com.iispl.cts.model.outward.UserSession;
 import com.iispl.cts.service.outward.CaptureOperatorBatchService;
 
 public class CaptureOperatorBatchCaptureController
@@ -36,6 +36,7 @@ public class CaptureOperatorBatchCaptureController
 
     private CaptureOperatorBatchService service;
 
+
     // =========================================================
     // INIT
     // =========================================================
@@ -50,44 +51,75 @@ public class CaptureOperatorBatchCaptureController
         // CURRENT LOGGED-IN USER
         // -------------------------------------------------
 
-        UserSession sessionUser =
-                LoginController.getCurrentUserSession();
+        Session session =
+                Executions.getCurrent().getSession();
 
-        if (sessionUser == null) {
+        if (session == null) {
 
-            Executions.sendRedirect("/login.zul");
+            Executions.sendRedirect("/zul/login.zul");
             return;
         }
 
-        // Capture Operator role = 5
-        if (sessionUser.getRoleId() != 5) {
+        Object sessionUserId =
+                session.getAttribute("userId");
 
-            Messagebox.show(
-                    "Access denied. Capture Operator access is required.",
-                    "Access Denied",
-                    Messagebox.OK,
-                    Messagebox.ERROR);
+        if (sessionUserId == null) {
 
-            Executions.sendRedirect("/login.zul");
+            Executions.sendRedirect("/zul/login.zul");
             return;
+        }
+
+        long userId;
+
+        if (sessionUserId instanceof Number) {
+
+            userId =
+                    ((Number) sessionUserId)
+                            .longValue();
+
+        } else {
+
+            try {
+
+                userId =
+                        Long.parseLong(
+                                sessionUserId.toString());
+
+            } catch (NumberFormatException e) {
+
+                Executions.sendRedirect("/zul/login.zul");
+                return;
+            }
         }
 
         System.out.println(
                 "CAPTURE OPERATOR SESSION: "
-                + "userId=" + sessionUser.getUserId()
-                + ", username=" + sessionUser.getUsername()
-                + ", roleId=" + sessionUser.getRoleId());
+                + "userId=" + userId);
+
+
+        // -------------------------------------------------
+        // SERVICE
+        // -------------------------------------------------
 
         service =
                 new CaptureOperatorBatchService();
 
+
+        // -------------------------------------------------
+        // LOAD BRANCHES
+        // -------------------------------------------------
+
         loadBranches();
 
-        // Temporary default folder path
+
+        // -------------------------------------------------
+        // TEMPORARY DEFAULT FOLDER PATH
+        // -------------------------------------------------
+
         batchFolderPath.setValue(
-        	    "/home/iispl/Desktop"
-        	);
+                "/home/iispl/Desktop");
     }
+
 
     // =========================================================
     // LOAD BRANCHES
@@ -107,6 +139,7 @@ public class CaptureOperatorBatchCaptureController
 
                 System.out.println(
                         "No active branches found.");
+
                 return;
             }
 
@@ -114,6 +147,7 @@ public class CaptureOperatorBatchCaptureController
 
                 if (branch == null ||
                         branch.length < 2) {
+
                     continue;
                 }
 
@@ -146,6 +180,7 @@ public class CaptureOperatorBatchCaptureController
                     Messagebox.ERROR);
         }
     }
+
 
     // =========================================================
     // BRANCH SELECT
@@ -185,6 +220,7 @@ public class CaptureOperatorBatchCaptureController
                         : branchName);
     }
 
+
     // =========================================================
     // CAPTURE BATCH
     // =========================================================
@@ -202,6 +238,7 @@ public class CaptureOperatorBatchCaptureController
 
             System.out.println(
                     "=================================");
+
 
             // -------------------------------------------------
             // BRANCH
@@ -224,6 +261,7 @@ public class CaptureOperatorBatchCaptureController
             String branchCode =
                     selectedItem.getValue();
 
+
             // -------------------------------------------------
             // CHEQUE COUNT
             // -------------------------------------------------
@@ -242,6 +280,7 @@ public class CaptureOperatorBatchCaptureController
 
                 return;
             }
+
 
             // -------------------------------------------------
             // FOLDER PATH
@@ -269,14 +308,15 @@ public class CaptureOperatorBatchCaptureController
                     "Folder Path: "
                     + folderPath);
 
+
             // -------------------------------------------------
             // CURRENT LOGGED-IN USER
             // -------------------------------------------------
 
-            UserSession sessionUser =
-                    LoginController.getCurrentUserSession();
+            Session session =
+                    Executions.getCurrent().getSession();
 
-            if (sessionUser == null) {
+            if (session == null) {
 
                 Messagebox.show(
                         "Your session has expired. Please login again.",
@@ -288,16 +328,71 @@ public class CaptureOperatorBatchCaptureController
                 return;
             }
 
-            int createdBy =
-                    sessionUser.getUserId();
+            Object sessionUserId =
+                    session.getAttribute("userId");
+
+            if (sessionUserId == null) {
+
+                Messagebox.show(
+                        "Your session has expired. Please login again.",
+                        "Session Expired",
+                        Messagebox.OK,
+                        Messagebox.EXCLAMATION);
+
+                Executions.sendRedirect("/login.zul");
+                return;
+            }
+
+            long userId;
+
+            if (sessionUserId instanceof Number) {
+
+                userId =
+                        ((Number) sessionUserId)
+                                .longValue();
+
+            } else {
+
+                try {
+
+                    userId =
+                            Long.parseLong(
+                                    sessionUserId.toString());
+
+                } catch (NumberFormatException e) {
+
+                    Messagebox.show(
+                            "Invalid user session. Please login again.",
+                            "Session Error",
+                            Messagebox.OK,
+                            Messagebox.EXCLAMATION);
+
+                    Executions.sendRedirect("/login.zul");
+                    return;
+                }
+            }
 
             System.out.println(
                     "Created By (Logged-in User ID): "
-                    + createdBy);
+                    + userId);
+
 
             // -------------------------------------------------
             // SERVICE
             // -------------------------------------------------
+
+            /*
+             * Existing service flow is preserved.
+             *
+             * If captureBatch() currently accepts int,
+             * use Math.toIntExact(userId).
+             *
+             * This safely converts the session long to int
+             * without silently overflowing.
+             */
+
+            int createdBy =
+                    Math.toIntExact(userId);
 
             OutwardBatch batch =
                     service.captureBatch(
@@ -305,6 +400,7 @@ public class CaptureOperatorBatchCaptureController
                             chequeCount,
                             folderPath,
                             createdBy);
+
 
             // -------------------------------------------------
             // SUCCESS
@@ -326,6 +422,11 @@ public class CaptureOperatorBatchCaptureController
                     "Batch Captured",
                     Messagebox.OK,
                     Messagebox.INFORMATION);
+
+
+            // -------------------------------------------------
+            // CLEAR FORM
+            // -------------------------------------------------
 
             clearForm();
 
@@ -351,6 +452,7 @@ public class CaptureOperatorBatchCaptureController
         }
     }
 
+
     // =========================================================
     // CLEAR FORM
     // =========================================================
@@ -366,7 +468,6 @@ public class CaptureOperatorBatchCaptureController
                 null);
 
         // Keep temporary default path
-     // Temporary default folder path
         batchFolderPath.setValue(
                 "/home/iispl/Desktop");
     }

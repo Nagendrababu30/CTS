@@ -4,29 +4,27 @@ import java.util.List;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Wire;
-import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Messagebox;
 
-import com.iispl.cts.controller.outward.LoginController;
-import com.iispl.cts.model.outward.OutwardBatch;
-import com.iispl.cts.model.outward.UserSession;
-import com.iispl.cts.service.outward.checker.CheckerBatchService;
+import org.zkoss.zk.ui.util.Clients;
 
+import com.iispl.cts.model.outward.OutwardBatch;
+import com.iispl.cts.service.outward.checker.CheckerBatchService;
 
 public class CheckerBatchesQueueController
         extends SelectorComposer<Component> {
 
     private static final long serialVersionUID = 1L;
-
 
     // ============================================
     // ZUL COMPONENT
@@ -35,20 +33,17 @@ public class CheckerBatchesQueueController
     @Wire
     private Listbox queueListbox;
 
-
     // ============================================
     // SERVICE
     // ============================================
 
     private CheckerBatchService service;
 
-
     // ============================================
-    // CURRENT CHECKER
+    // CURRENT CHECKER USER ID
     // ============================================
 
-    private String currentCheckerUser;
-
+    private long currentCheckerUser;
 
     // ============================================
     // PAGE LOAD
@@ -60,67 +55,82 @@ public class CheckerBatchesQueueController
 
         super.doAfterCompose(comp);
 
-
         // ========================================
-        // GET CURRENT USER
+        // GET ZK SESSION
         // ========================================
 
-        UserSession sessionUser =
-                LoginController.getCurrentUserSession();
-
+        Session session =
+                Executions.getCurrent().getSession();
 
         // ========================================
         // NO SESSION
         // ========================================
 
-        if (sessionUser == null) {
+        if (session == null) {
 
             Executions.sendRedirect(
-                    "/login.zul"
+                    "/zul/login.zul"
             );
 
             return;
         }
 
-
         // ========================================
-        // CHECK ROLE
-        // ROLE ID 4 = OUTWARD CHECKER
+        // GET USER ID FROM SESSION
         // ========================================
 
-        if (sessionUser.getRoleId() != 4) {
+        Object sessionUserId =
+                session.getAttribute("userId");
 
-            Messagebox.show(
+        // ========================================
+        // USER ID NOT FOUND
+        // ========================================
 
-                    "Access denied. "
-                    + "Outward Checker access is required.",
-
-                    "Access Denied",
-
-                    Messagebox.OK,
-
-                    Messagebox.ERROR
-
-            );
+        if (sessionUserId == null) {
 
             Executions.sendRedirect(
-                    "/login.zul"
+                    "/zul/login.zul"
             );
 
             return;
         }
 
-
         // ========================================
-        // GET CHECKER USER ID
+        // CONVERT USER ID
         // ========================================
 
-        currentCheckerUser =
+        if (sessionUserId instanceof Number) {
 
-                String.valueOf(
-                        sessionUser.getUserId()
+            currentCheckerUser =
+                    ((Number) sessionUserId).longValue();
+
+        } else {
+
+            try {
+
+                currentCheckerUser =
+                        Long.parseLong(
+                                sessionUserId.toString()
+                        );
+
+            } catch (NumberFormatException e) {
+
+                Executions.sendRedirect(
+                        "/zul/login.zul"
                 );
 
+                return;
+            }
+        }
+
+        // ========================================
+        // LOG CURRENT CHECKER
+        // ========================================
+
+        System.out.println(
+                "Checker Batches Queue - User ID = "
+                        + currentCheckerUser
+        );
 
         // ========================================
         // CREATE SERVICE
@@ -129,15 +139,12 @@ public class CheckerBatchesQueueController
         service =
                 new CheckerBatchService();
 
-
         // ========================================
         // LOAD BATCHES
         // ========================================
 
         loadBatches();
-
     }
-
 
     // ============================================
     // LOAD BATCHES
@@ -148,18 +155,17 @@ public class CheckerBatchesQueueController
         try {
 
             List<OutwardBatch> batches =
-
                     service.getCheckerQueueBatches(
-                            currentCheckerUser
+                            String.valueOf(
+                                    currentCheckerUser
+                            )
                     );
-
 
             // ========================================
             // CLEAR OLD ROWS
             // ========================================
 
             queueListbox.getItems().clear();
-
 
             // ========================================
             // NO BATCHES
@@ -171,7 +177,6 @@ public class CheckerBatchesQueueController
                 return;
             }
 
-
             // ========================================
             // CREATE ROWS
             // ========================================
@@ -179,33 +184,21 @@ public class CheckerBatchesQueueController
             for (OutwardBatch batch : batches) {
 
                 createBatchRow(batch);
-
             }
-
 
         } catch (Exception e) {
 
             e.printStackTrace();
 
-
             Clients.showNotification(
-
                     "Unable to load Batches Queue.",
-
                     Clients.NOTIFICATION_TYPE_ERROR,
-
                     null,
-
                     "top_center",
-
                     4000
-
             );
-
         }
-
     }
-
 
     // ============================================
     // CREATE BATCH ROW
@@ -214,14 +207,12 @@ public class CheckerBatchesQueueController
     private void createBatchRow(
             final OutwardBatch batch) {
 
-
         // ========================================
         // ROW
         // ========================================
 
         Listitem item =
                 new Listitem();
-
 
         // ========================================
         // BATCH NUMBER
@@ -231,15 +222,12 @@ public class CheckerBatchesQueueController
                 new Listcell();
 
         batchNumberCell.setLabel(
-
                 batch.getBatchNumber()
-
         );
 
         item.appendChild(
                 batchNumberCell
         );
-
 
         // ========================================
         // TOTAL CHEQUES
@@ -249,17 +237,14 @@ public class CheckerBatchesQueueController
                 new Listcell();
 
         chequeCell.setLabel(
-
                 String.valueOf(
                         batch.getNumberOfCheques()
                 )
-
         );
 
         item.appendChild(
                 chequeCell
         );
-
 
         // ========================================
         // STATUS
@@ -269,15 +254,12 @@ public class CheckerBatchesQueueController
                 new Listcell();
 
         statusCell.setLabel(
-
                 "Locked by Checker"
-
         );
 
         item.appendChild(
                 statusCell
         );
-
 
         // ========================================
         // ACTION
@@ -286,24 +268,19 @@ public class CheckerBatchesQueueController
         Listcell actionCell =
                 new Listcell();
 
-
         Button openButton =
                 new Button("Open");
-
 
         openButton.setSclass(
                 "btn btn-primary"
         );
-
 
         // ========================================
         // OPEN BUTTON CLICK
         // ========================================
 
         openButton.addEventListener(
-
                 Events.ON_CLICK,
-
                 new EventListener<Event>() {
 
                     @Override
@@ -311,27 +288,19 @@ public class CheckerBatchesQueueController
                             throws Exception {
 
                         openBatch(
-
                                 batch.getBatchNumber()
-
                         );
-
                     }
-
                 }
-
         );
-
 
         actionCell.appendChild(
                 openButton
         );
 
-
         item.appendChild(
                 actionCell
         );
-
 
         // ========================================
         // ADD TO LISTBOX
@@ -340,9 +309,7 @@ public class CheckerBatchesQueueController
         queueListbox.appendChild(
                 item
         );
-
     }
-
 
     // ============================================
     // OPEN BATCH
@@ -351,44 +318,34 @@ public class CheckerBatchesQueueController
     private void openBatch(
             String batchNumber) {
 
-
         if (batchNumber == null
                 || batchNumber.trim().isEmpty()) {
 
             return;
-
         }
 
-
         System.out.println(
-
                 "OPENING BATCH = "
                         + batchNumber
-
+                        + " | CHECKER USER ID = "
+                        + currentCheckerUser
         );
 
-
         // ========================================
-        // IMPORTANT
+        // OPEN CHEQUE VERIFICATION
+        // ========================================
         //
-        // PARAMETER NAME = batchNumber
-        //
-        // SAME NAME USED IN
+        // batchNumber is passed to
         // CheckerChequeVerificationController
+        //
         // ========================================
 
         Executions.sendRedirect(
-
                 "/outward/checker/chequeVerification.zul"
-
-                + "?batchNumber="
-
-                + Executions.encodeURL(batchNumber)
-
+                        + "?batchNumber="
+                        + Executions.encodeURL(
+                                batchNumber
+                        )
         );
-
     }
-
 }
-
-

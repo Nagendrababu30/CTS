@@ -32,9 +32,9 @@ public class FileSummaryDaoImpl
             FileStage fileStage) {
 
         String sql =
-                "UPDATE file_summary " +
-                "SET filestage = ? " +
-                "WHERE fileid = ?";
+                "UPDATE inward_file_summary " +
+                "SET file_stage = ? " +
+                "WHERE file_id = ?";
 
         try (
                 Connection connection =

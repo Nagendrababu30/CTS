@@ -20,6 +20,7 @@ public class OcrChequeData {
 	private String drawerName;
 	private String payeeName;
 	private String payeeAccountNumber;
+	private String amountInWords;
 
 	private OcrChequeData() {
 
@@ -27,7 +28,8 @@ public class OcrChequeData {
 
 	private OcrChequeData(String chequeNumber, long batchId, String accountNumber, LocalDate chequeDate,
 			LocalDate presentingDate, BigDecimal chequeAmount, String micrCode, String cityCode, String bankCode,
-			String branchSpecificCode, String drawerName, String payeeName, String payeeAccountNumber) {
+			String branchSpecificCode, String drawerName, String payeeName, String payeeAccountNumber,
+			String amountInWords) {
 
 		this.chequeNumber = chequeNumber;
 		this.batchId = batchId;
@@ -42,7 +44,7 @@ public class OcrChequeData {
 		this.drawerName = drawerName;
 		this.payeeName = payeeName;
 		this.payeeAccountNumber = payeeAccountNumber;
-
+		this.amountInWords = amountInWords;
 	}
 
 	public static OcrChequeData of() {
@@ -51,10 +53,12 @@ public class OcrChequeData {
 
 	public static OcrChequeData of(String chequeNumber, long batchId, String accountNumber, LocalDate chequeDate,
 			LocalDate presentingDate, BigDecimal chequeAmount, String micrCode, String cityCode, String bankCode,
-			String branchSpecificCode, String drawerName, String payeeName, String payeeAccountNumber) {
+			String branchSpecificCode, String drawerName, String payeeName, String payeeAccountNumber,
+			String amountInWords) {
 
 		return new OcrChequeData(chequeNumber, batchId, accountNumber, chequeDate, presentingDate, chequeAmount,
-				micrCode, cityCode, bankCode, branchSpecificCode, drawerName, payeeName, payeeAccountNumber);
+				micrCode, cityCode, bankCode, branchSpecificCode, drawerName, payeeName, payeeAccountNumber,
+				amountInWords);
 	}
 
 	public long getInwardChequeId() {
@@ -167,6 +171,14 @@ public class OcrChequeData {
 
 	public void setDrawerName(String drawerName) {
 		this.drawerName = drawerName;
+	}
+
+	public String getAmountInWords() {
+		return amountInWords;
+	}
+
+	public void setAmountInWords(String amountInWords) {
+		this.amountInWords = amountInWords;
 	}
 
 }

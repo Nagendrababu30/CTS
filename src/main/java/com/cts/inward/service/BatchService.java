@@ -26,6 +26,8 @@ public interface BatchService {
 
 	boolean completeDataEntry(long batchId, long userId);
 
+	long getBatchIdByFileName(String batchName);
+
 	// Verify Batch
 	List<Map<String, Object>> getBatchesForVerification(Integer userId);
 

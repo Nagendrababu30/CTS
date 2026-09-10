@@ -18,64 +18,76 @@ public class InwardFileDaoImpl
 
     private final DataSource dataSource;
 
-    private InwardFileDaoImpl(
-            DataSource dataSource) {
-
-        this.dataSource =
-                dataSource;
+    private InwardFileDaoImpl(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     public static InwardFileDaoImpl of() {
-
-        return new InwardFileDaoImpl(
-                ConnectionPool.getDataSource());
+        return new InwardFileDaoImpl(ConnectionPool.getDataSource());
     }
 
+    /*
+     * Only fetch files that have not been moved to incoming yet.
+     * Once a file is moved, it is marked PROCESSED and never
+     * picked up again in future sessions.
+     */
     @Override
     public List<InwardFile> getChiFiles() {
 
         String sql =
-                "SELECT fileid, filename, filepath, filetype "
-                + "FROM inward_file";
+                "SELECT file_id, file_name, file_path, file_type "
+                + "FROM inward_file "
+                + "WHERE status = 'PENDING'";
 
-        List<InwardFile> files =
-                new ArrayList<>();
+        List<InwardFile> files = new ArrayList<>();
 
-        try (Connection connection =
-                     dataSource.getConnection();
-             PreparedStatement statement =
-                     connection.prepareStatement(sql);
-             ResultSet resultSet =
-                     statement.executeQuery()) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
 
             while (resultSet.next()) {
 
                 FileType fileType =
                         FileType.valueOf(
-                                resultSet
-                                        .getString(
-                                                "filetype")
-                                        .toUpperCase());
+                                resultSet.getString("file_type").toUpperCase());
 
                 files.add(
                         InwardFile.of(
-                                resultSet.getLong(
-                                        "fileid"),
-                                resultSet.getString(
-                                        "filename"),
-                                resultSet.getString(
-                                        "filepath"),
+                                resultSet.getLong("file_id"),
+                                resultSet.getString("file_name"),
+                                resultSet.getString("file_path"),
                                 fileType));
             }
 
             return files;
 
         } catch (SQLException e) {
-
             throw new IllegalStateException(
-                    "Failed to retrieve CHI files "
-                    + "from INWARD_FILE",
-                    e);
+                    "Failed to retrieve CHI files from inward_file", e);
+        }
+    }
+
+    /*
+     * Called immediately after the file is moved to incoming/.
+     * Prevents re-processing in future sessions.
+     */
+    @Override
+    public void markAsProcessed(long fileId) {
+
+        String sql =
+                "UPDATE inward_file "
+                + "SET status = 'PROCESSED' "
+                + "WHERE file_id = ?";
+
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setLong(1, fileId);
+            statement.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new IllegalStateException(
+                    "Failed to mark file as processed, fileId: " + fileId, e);
         }
     }
 }

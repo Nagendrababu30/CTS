@@ -143,7 +143,7 @@ public class SessionManagementController
         FileSummaryServiceImpl fileSummaryService = FileSummaryServiceImpl.of(fileSummaryDao);
         CHIFileServiceImpl    chiFileService    = CHIFileServiceImpl.of(inwardFileDao);
         InwardSessionFileServiceImpl sessionFileService =
-                InwardSessionFileServiceImpl.of(fileConfig, fileSummaryService);
+                InwardSessionFileServiceImpl.of(fileConfig, fileSummaryService, inwardFileDao);
 
         // 5. FileProcessingService
         FileProcessingServiceImpl fileProcessingService =

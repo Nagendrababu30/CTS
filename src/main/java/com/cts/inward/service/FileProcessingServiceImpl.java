@@ -221,42 +221,44 @@ public class FileProcessingServiceImpl
     @Override
     public void processPibfFile(String filePath) {
 
-        String batchId =
-                extractBatchId(filePath);
+        /*
+         * Extract batch name from filename e.g. "wPIBF_BATCH001_01.img" → "BATCH001"
+         * Then look up the numeric batch_id from DB by matching
+         * against the PXF file name in inward_file.
+         */
+        String batchName = extractBatchId(filePath);
+
+        long batchId = batchService.getBatchIdByFileName(batchName);
+
+        if (batchId <= 0) {
+            throw new IllegalStateException(
+                    "Could not resolve batch_id for PIBF file: "
+                    + filePath + " (batchName=" + batchName + ")");
+        }
 
         List<PibfImageData> imageDataList =
-                pibfProcessor.extractImages(
-                        filePath);
+                pibfProcessor.extractImages(filePath);
 
         List<InwardCheque> cheques =
                 chequeService.getChequesForBatch(
-                        batchId);
+                        String.valueOf(batchId));
 
-        if (imageDataList.size()
-                != cheques.size()) {
-
+        if (imageDataList.size() != cheques.size()) {
             throw new IllegalStateException(
                     "PIBF image count does not match "
                     + "cheque count for batch: "
                     + batchId);
         }
 
-        for (int index = 0;
-                index < cheques.size();
-                index++) {
+        for (int index = 0; index < cheques.size(); index++) {
 
-            InwardCheque cheque =
-                    cheques.get(index);
-
-            PibfImageData imageData =
-                    imageDataList.get(index);
-
-            String chequeNumber =
-                    cheque.getChequeNumber();
+            InwardCheque cheque = cheques.get(index);
+            PibfImageData imageData = imageDataList.get(index);
+            String chequeNumber = cheque.getChequeNumber();
 
             ChequeImagePaths imagePaths =
                     imageService.saveChequeImages(
-                            batchId,
+                            String.valueOf(batchId),
                             chequeNumber,
                             imageData);
 
@@ -266,8 +268,7 @@ public class FileProcessingServiceImpl
                             imagePaths.getFrontImagePath(),
                             imagePaths.getBackImagePath());
 
-            chequeImageService.saveImage(
-                    chequeImage);
+            chequeImageService.saveImage(chequeImage);
         }
     }
 
@@ -277,44 +278,61 @@ public class FileProcessingServiceImpl
         OcrBatchData batchData =
                 ocrParser.parse(filePath);
 
-        ocrBatchService.saveBatch(
-                batchData);
+        /*
+         * saveBatch() returns the generated ocr_batch_id via RETURNING.
+         * Each cheque must use this ID — NOT the inward batch_id —
+         * because ocr_cheque_data.ocr_batch_id is a FK to ocr_batch.ocr_batch_id.
+         */
+        long generatedOcrBatchId =
+                ocrBatchService.saveBatch(batchData);
 
         for (OcrChequeData chequeData :
                 batchData.getCheques()) {
 
-            ocrChequeService.saveCheque(
-                    chequeData);
+            chequeData.setInwardChequeId(0);
+            chequeData.setBatchId(generatedOcrBatchId);
+
+            ocrChequeService.saveCheque(chequeData);
         }
-    }
-
-    private String extractBatchId(
-            String filePath) {
-
-        Path file =
-                Path.of(filePath);
-
-        String fileName =
-                file.getFileName()
-                        .toString();
 
         /*
-         * Expected test PIBF filename:
-         *
-         * wPIBF_BATCH001_01.img
+         * Link each ocr_cheque_data row to its corresponding
+         * inward_cheque row via inward_cheque_id.
+         * Uses cheque_number as the bridge — single UPDATE for the batch.
          */
+        ocrChequeService.linkInwardChequeIds(generatedOcrBatchId);
+    }
 
-        String[] parts =
-                fileName.split("_");
+    private String extractBatchId(String filePath) {
 
-        if (parts.length < 3) {
+        Path file = Path.of(filePath);
+        String fileName = file.getFileName().toString();
 
-            throw new IllegalArgumentException(
-                    "Invalid PIBF filename: "
-                            + fileName);
+        /*
+         * Supported filename formats:
+         *
+         * wPIBF_BATCH001_01.img  → parts[1] = BATCH001
+         * BATCH001.img           → strip extension = BATCH001
+         * BATCH001_01.img        → parts[0] = BATCH001
+         */
+        String nameWithoutExtension = fileName.contains(".")
+                ? fileName.substring(0, fileName.lastIndexOf('.'))
+                : fileName;
+
+        String[] parts = nameWithoutExtension.split("_");
+
+        if (parts.length >= 3) {
+            // wPIBF_BATCH001_01 → parts[1]
+            return parts[1];
         }
 
-        return parts[1];
+        if (parts.length == 2) {
+            // BATCH001_01 → parts[0]
+            return parts[0];
+        }
+
+        // BATCH001 → nameWithoutExtension directly
+        return nameWithoutExtension;
     }
 
     private FileType resolveFileType(

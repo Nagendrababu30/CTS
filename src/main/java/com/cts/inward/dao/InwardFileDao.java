@@ -7,5 +7,6 @@ import com.cts.inward.model.InwardFile;
 public interface InwardFileDao {
 
     List<InwardFile> getChiFiles();
-    
+
+    void markAsProcessed(long fileId);
 }

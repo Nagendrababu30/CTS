@@ -305,45 +305,81 @@ public class UserController extends GenericForwardComposer<Component> {
 
         Window window = new Window();
         window.setTitle(editMode ? "Edit User" : "Create User");
-        window.setWidth("500px");
+        window.setWidth("460px");
         window.setBorder("normal");
         window.setClosable(true);
         window.setSizable(false);
-        window.setStyle("padding:20px;");
+        window.setStyle(
+                "border-radius:12px !important; "
+                + "box-shadow: 0 8px 32px rgba(0,0,0,0.12) !important; "
+                + "overflow:hidden !important;");
 
         Vbox mainBox = new Vbox();
-        mainBox.setSpacing("15px");
+        mainBox.setSpacing("0");
         mainBox.setWidth("100%");
+        mainBox.setStyle("padding:28px 28px 24px 28px; box-sizing:border-box;");
 
         /* Username */
         Label usernameLabel = new Label("Username");
+        usernameLabel.setStyle(
+                "display:block; font-size:13px; font-weight:600; "
+                + "color:#374151; margin-bottom:6px; margin-top:0;");
         Textbox usernameBox = new Textbox();
         usernameBox.setWidth("100%");
         usernameBox.setPlaceholder("Enter username");
+        usernameBox.setStyle(
+                "height:40px; border:1.5px solid #D1DBF0 !important; "
+                + "border-radius:8px; font-size:14px; padding:0 12px; "
+                + "box-sizing:border-box; color:#1F2D45;");
         if (editMode) {
             usernameBox.setValue(existingUser.getUsername());
             usernameBox.setReadonly(true);
+            usernameBox.setStyle(
+                    "height:40px; border:1.5px solid #E5E7EB !important; "
+                    + "border-radius:8px; font-size:14px; padding:0 12px; "
+                    + "box-sizing:border-box; color:#6B7280; background:#F9FAFB;");
         }
-        mainBox.appendChild(usernameLabel);
-        mainBox.appendChild(usernameBox);
+        Vbox usernameGroup = new Vbox();
+        usernameGroup.setSpacing("0");
+        usernameGroup.setStyle("margin-bottom:18px;");
+        usernameGroup.appendChild(usernameLabel);
+        usernameGroup.appendChild(usernameBox);
+        mainBox.appendChild(usernameGroup);
 
         /* Password */
         Label passwordLabel = new Label("Password");
+        passwordLabel.setStyle(
+                "display:block; font-size:13px; font-weight:600; "
+                + "color:#374151; margin-bottom:6px;");
         Textbox passwordBox = new Textbox();
         passwordBox.setType("password");
         passwordBox.setWidth("100%");
         passwordBox.setPlaceholder(editMode
                 ? "Leave blank to keep current password"
                 : "Enter password");
-        mainBox.appendChild(passwordLabel);
-        mainBox.appendChild(passwordBox);
+        passwordBox.setStyle(
+                "height:40px; border:1.5px solid #D1DBF0 !important; "
+                + "border-radius:8px; font-size:14px; padding:0 12px; "
+                + "box-sizing:border-box; color:#1F2D45;");
+        Vbox passwordGroup = new Vbox();
+        passwordGroup.setSpacing("0");
+        passwordGroup.setStyle("margin-bottom:18px;");
+        passwordGroup.appendChild(passwordLabel);
+        passwordGroup.appendChild(passwordBox);
+        mainBox.appendChild(passwordGroup);
 
         /* Role */
         Label roleLabel = new Label("Role");
+        roleLabel.setStyle(
+                "display:block; font-size:13px; font-weight:600; "
+                + "color:#374151; margin-bottom:6px;");
         Combobox roleCombo = new Combobox();
         roleCombo.setWidth("100%");
         roleCombo.setReadonly(true);
         roleCombo.setPlaceholder("Select role");
+        roleCombo.setStyle(
+                "height:40px; border:1.5px solid #D1DBF0 !important; "
+                + "border-radius:8px; font-size:14px; box-sizing:border-box;");
 
         try {
             for (Role role : roleService.getAllRoles()) {
@@ -360,16 +396,27 @@ public class UserController extends GenericForwardComposer<Component> {
             e.printStackTrace();
         }
 
-        mainBox.appendChild(roleLabel);
-        mainBox.appendChild(roleCombo);
+        Vbox roleGroup = new Vbox();
+        roleGroup.setSpacing("0");
+        roleGroup.setStyle("margin-bottom:24px;");
+        roleGroup.appendChild(roleLabel);
+        roleGroup.appendChild(roleCombo);
+        mainBox.appendChild(roleGroup);
 
         /* Buttons */
         Hbox btnBox = new Hbox();
         btnBox.setSpacing("10px");
         btnBox.setAlign("end");
         btnBox.setWidth("100%");
+        btnBox.setStyle(
+                "border-top:1px solid #E5E7EB; padding-top:20px; "
+                + "display:flex; justify-content:flex-end;");
 
         Button cancelBtn = new Button("Cancel");
+        cancelBtn.setStyle(
+                "height:38px; padding:0 20px; background:#FFFFFF; "
+                + "border:1.5px solid #D1D5DB !important; border-radius:8px; "
+                + "color:#374151; font-size:14px; font-weight:600; cursor:pointer;");
         cancelBtn.addEventListener("onClick", new EventListener<Event>() {
             @Override
             public void onEvent(Event event) throws Exception {
@@ -378,7 +425,10 @@ public class UserController extends GenericForwardComposer<Component> {
         });
 
         Button saveBtn = new Button(editMode ? "Update User" : "Create User");
-        saveBtn.setSclass("primary-button");
+        saveBtn.setStyle(
+                "height:38px; padding:0 20px; background:#2454D6; "
+                + "border:none !important; border-radius:8px; "
+                + "color:#FFFFFF; font-size:14px; font-weight:600; cursor:pointer;");
         saveBtn.addEventListener("onClick", new EventListener<Event>() {
             @Override
             public void onEvent(Event event) throws Exception {

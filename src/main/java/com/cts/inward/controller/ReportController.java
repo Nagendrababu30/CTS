@@ -84,7 +84,7 @@ public class ReportController extends GenericForwardComposer<Component> {
                         // 4. Export to PDF stream
                         ByteArrayOutputStream pdfOutputStream = new ByteArrayOutputStream();
                         JasperExportManager.exportReportToPdfStream(jasperPrint, pdfOutputStream);
-
+ 
                         // 5. Trigger browser download
                         String fileName = formattedBatchId + "_Report.pdf";
                         Filedownload.save(pdfOutputStream.toByteArray(), "application/pdf", fileName);

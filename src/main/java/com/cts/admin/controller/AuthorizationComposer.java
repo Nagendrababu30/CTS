@@ -14,95 +14,6 @@ import com.cts.admin.model.User;
 public class AuthorizationComposer
         extends GenericForwardComposer<Component> {
 
-    private static final long serialVersionUID = 1L;
-
-    private static final Map<String, String> PAGE_PERMISSIONS =
-            new HashMap<>();
-
-    static {
-
-        // =========================================================
-        // ADMIN
-        // =========================================================
-
-        PAGE_PERMISSIONS.put(
-                "/zul/admin/adminDashboard.zul",
-                "ADMIN");
-
-        PAGE_PERMISSIONS.put(
-                "/zul/admin/roleManagement.zul",
-                "ADMIN");
-
-        PAGE_PERMISSIONS.put(
-                "/zul/admin/userManagement.zul",
-                "ADMIN");
-
-        PAGE_PERMISSIONS.put(
-                "/zul/admin/batchMonitoring.zul",
-                "ADMIN");
-
-        PAGE_PERMISSIONS.put(
-                "/zul/admin/admin-dashboard.zul",
-                "ADMIN");
-
-        PAGE_PERMISSIONS.put(
-                "/zul/admin/admin-audit-logs.zul",
-                "ADMIN");
-
-        PAGE_PERMISSIONS.put(
-                "/zul/admin/admin-batch-monitoring.zul",
-                "ADMIN");
-
-        PAGE_PERMISSIONS.put(
-                "/zul/admin/admin-session-management.zul",
-                "ADMIN");
-
-        PAGE_PERMISSIONS.put(
-                "/zul/admin/admin-roles.zul",
-                "ADMIN");
-
-        PAGE_PERMISSIONS.put(
-                "/zul/admin/admin-user-management.zul",
-                "ADMIN");
-
-        PAGE_PERMISSIONS.put(
-                "/zul/admin/auditLogs.zul",
-                "ADMIN");
-
-
-        // =========================================================
-        // INWARD MAKER
-        // =========================================================
-
-        PAGE_PERMISSIONS.put(
-                "/zul/inward-maker/dashboard.zul",
-                "INWARD_MAKER");
-
-        /*
-         * MICR Repair queue page.
-         *
-         * This was missing previously and caused:
-         *
-         * /zul/inward-maker/micr-repair-list.zul
-         *              ↓
-         *          Access Denied
-         */
-        PAGE_PERMISSIONS.put(
-                "/zul/inward-maker/micr-repair-list.zul",
-                "INWARD_MAKER");
-
-        /*
-         * MICR Repair detail page.
-         */
-        
-        PAGE_PERMISSIONS.put(
-                "/zul/inward-maker/micr-repair-list.zul",
-                "INWARD_MAKER");
-        
-        PAGE_PERMISSIONS.put(
-                "/zul/inward-maker/micr-repair.zul",
-                "INWARD_MAKER");
-
 	private static final long serialVersionUID = 1L;
 
 	private static final Map<String, String> PAGE_PERMISSIONS = new HashMap<>();
@@ -113,17 +24,17 @@ public class AuthorizationComposer
 		// ADMIN
 		// =========================================================
 
-		PAGE_PERMISSIONS.put("/zul/admin/adminDashboard.zul", "ADMIN");
+		PAGE_PERMISSIONS.put("/zul/admin/admin-dashboard.zul", "ADMIN");
 
-		PAGE_PERMISSIONS.put("/zul/admin/roleManagement.zul", "ADMIN");
+		PAGE_PERMISSIONS.put("/zul/admin/admin-roles.zul", "ADMIN");
 
-		PAGE_PERMISSIONS.put("/zul/admin/userManagement.zul", "ADMIN");
+		PAGE_PERMISSIONS.put("/zul/admin/admin-user-management.zul", "ADMIN");
 
-		PAGE_PERMISSIONS.put("/zul/admin/batchMonitoring.zul", "ADMIN");
+		PAGE_PERMISSIONS.put("/zul/admin/admin-batch-monitoring.zul", "ADMIN");
 
-		PAGE_PERMISSIONS.put("/zul/admin/sessionManagement.zul", "ADMIN");
+		PAGE_PERMISSIONS.put("/zul/admin/admin-session-management.zul", "ADMIN");
 
-		PAGE_PERMISSIONS.put("/zul/admin/auditLogs.zul", "ADMIN");
+		PAGE_PERMISSIONS.put("/zul/admin/admin-audit-logs.zul", "ADMIN");
 
 		// =========================================================
 		// INWARD MAKER

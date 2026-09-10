@@ -7,11 +7,14 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.cts.inward.config.ConnectionPool;
 import com.iispl.cts.data.CTSStaticData;
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.model.outward.OutwardCheque;
 
 public class CaptureOperatorBatchDAO {
+	private final javax.sql.DataSource dataSource =ConnectionPool.getDataSource();
+
 
     // =========================================================
     // GET ACTIVE BRANCHES
@@ -27,7 +30,7 @@ public class CaptureOperatorBatchDAO {
                 "WHERE status = 'ACTIVE' " +
                 "ORDER BY branch_code";
 
-        try (Connection connection = CTSStaticData.getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
@@ -62,7 +65,7 @@ public class CaptureOperatorBatchDAO {
                 "FROM branch " +
                 "WHERE branch_code = ?";
 
-        try (Connection connection = CTSStaticData.getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
 
             ps.setString(1, branchCode);
@@ -103,7 +106,7 @@ public class CaptureOperatorBatchDAO {
             // GET CONNECTION
             // =====================================================
 
-            connection = CTSStaticData.getConnection();
+            connection = dataSource.getConnection();
 
             // One transaction for batch + all cheques
             connection.setAutoCommit(false);
@@ -513,7 +516,7 @@ public class CaptureOperatorBatchDAO {
                 "ORDER BY created_at DESC";
 
 
-        try (Connection connection = CTSStaticData.getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement ps =
                      connection.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {

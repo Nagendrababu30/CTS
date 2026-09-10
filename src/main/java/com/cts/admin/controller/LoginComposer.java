@@ -111,9 +111,9 @@ public class LoginComposer extends GenericForwardComposer<Component> {
             case "OUTWARD_MAKER":
                 Executions.sendRedirect("/zul/outward/outward-maker/outward-maker-dashboard.zul"); break;
             case "OUTWARD_CHECKER":
-                Executions.sendRedirect("/zul/outward/outward-checker/checkerDashboard.zul"); break;
+                Executions.sendRedirect("/zul/outward/outward-checker/dashboard.zul"); break;
             case "CAPTURE_OPERATOR":
-                Executions.sendRedirect("/zul/outward/outward-maker/makerDashboard.zul"); break;
+                Executions.sendRedirect("/zul/outward/outward-maker/capture-operator-batch-capture.zul"); break;
             default:
                 loginMessage.setValue("User role is not configured.");
         }

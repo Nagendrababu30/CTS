@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?page title="Checker Dashboard"
+    contentType="text/html;charset=UTF-8"?>
+
+<?init class="com.cts.admin.controller.LayoutInit"
+        pageTitle="Checker Dashboard"
+        active="dashboard"?>
+
+<?init class="org.zkoss.zk.ui.util.Composition"
+        arg0="/zul/common/layout.zul"?>
+
+<zk>
+
+    <!-- ========================================================= -->
+    <!-- PAGE CSS                                                  -->
+    <!-- ========================================================= -->
+
+    <style>
+        <![CDATA[
+        .checker-dashboard-content {
+            background: #F4F7FB;
+        }
+
+        .checker-dashboard-card {
+            background: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .checker-dashboard-card-label {
+            font-size: 14px;
+            color: #6B7280;
+        }
+
+        .checker-dashboard-card-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #172B4D;
+        }
+
+        .checker-dashboard-section {
+            background: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .checker-dashboard-section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #172B4D;
+        }
+        ]]>
+    </style>
+
+
+    <!-- ========================================================= -->
+    <!-- COMMON LAYOUT CONTENT                                     -->
+    <!-- Header + Checker Sidebar come from layout.zul             -->
+    <!-- ========================================================= -->
+
+    <div
+        self="@define(content)"
+        width="100%"
+        height="100%"
+        style="
+            width:100%;
+            height:100%;
+            background:#F4F7FB;
+        ">
+
+        <!-- ===================================================== -->
+        <!-- CHECKER DASHBOARD CONTROLLER                          -->
+        <!-- ===================================================== -->
+
+        <vlayout
+            apply="com.iispl.cts.controller.outward.checker.CheckerDashboardController"
+            width="100%"
+            height="100%"
+            spacing="20px"
+            sclass="checker-dashboard-content"
+            style="
+                padding:25px;
+                box-sizing:border-box;
+                overflow:auto;
+            ">
+
+
+            <!-- ================================================= -->
+            <!-- PAGE TITLE                                         -->
+            <!-- ================================================= -->
+
+            <vlayout
+                spacing="5px"
+                style="margin-bottom:5px;">
+
+                <label
+                    value="Checker Dashboard"
+                    style="
+                        font-size:26px;
+                        font-weight:bold;
+                        color:#172B4D;
+                    "/>
+
+                <label
+                    value="Monitor and verify outward batches"
+                    style="
+                        font-size:14px;
+                        color:#6B7280;
+                    "/>
+
+            </vlayout>
+
+
+            <!-- ================================================= -->
+            <!-- SUMMARY CARDS                                      -->
+            <!-- ================================================= -->
+
+            <hlayout
+                width="100%"
+                spacing="15px"
+                style="margin-bottom:5px;">
+
+
+                <!-- ============================================= -->
+                <!-- PENDING VERIFICATION                           -->
+                <!-- ============================================= -->
+
+                <div
+                    width="30%"
+                    sclass="checker-dashboard-card">
+
+                    <label
+                        value="Pending Verification"
+                        sclass="checker-dashboard-card-label"/>
+
+                    <separator
+                        height="8px"/>
+
+                    <label
+                        id="pendingVerificationCount"
+                        value="0"
+                        sclass="checker-dashboard-card-value"/>
+
+                </div>
+
+
+                <!-- ============================================= -->
+                <!-- CBS VALIDATION                                 -->
+                <!-- ============================================= -->
+
+                <div
+                    width="30%"
+                    sclass="checker-dashboard-card">
+
+                    <label
+                        value="CBS Validation"
+                        sclass="checker-dashboard-card-label"/>
+
+                    <separator
+                        height="8px"/>
+
+                    <label
+                        id="cbsValidationCount"
+                        value="0"
+                        sclass="checker-dashboard-card-value"/>
+
+                </div>
+
+
+                <!-- ============================================= -->
+                <!-- READY TO SEND                                  -->
+                <!-- ============================================= -->
+
+                <div
+                    width="30%"
+                    sclass="checker-dashboard-card">
+
+                    <label
+                        value="Ready To Send"
+                        sclass="checker-dashboard-card-label"/>
+
+                    <separator
+                        height="8px"/>
+
+                    <label
+                        id="readyToSendCount"
+                        value="0"
+                        sclass="checker-dashboard-card-value"/>
+
+                </div>
+
+            </hlayout>
+
+
+            <!-- ================================================= -->
+            <!-- BATCH TABLE                                       -->
+            <!-- ================================================= -->
+
+            <div
+                width="100%"
+                sclass="checker-dashboard-section">
+
+                <label
+                    value="Checker Batch Queue"
+                    sclass="checker-dashboard-section-title"/>
+
+                <separator
+                    height="15px"/>
+
+
+                <listbox
+                    id="batchListbox"
+                    width="100%"
+                    mold="paging"
+                    pageSize="10"
+                    emptyMessage="No batches available for verification.">
+
+                    <listhead>
+
+                        <listheader
+                            label="Batch Number"
+                            width="20%"/>
+
+                        <listheader
+                            label="Total Cheques"
+                            width="15%"/>
+
+                        <listheader
+                            label="Status"
+                            width="20%"/>
+
+                        <listheader
+                            label="Assignment"
+                            width="20%"/>
+
+                        <listheader
+                            label="Action"
+                            width="15%"/>
+
+                    </listhead>
+
+                </listbox>
+
+            </div>
+
+        </vlayout>
+
+    </div>
+
+</zk>

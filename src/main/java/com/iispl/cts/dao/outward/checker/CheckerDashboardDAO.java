@@ -6,10 +6,12 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.cts.inward.config.ConnectionPool;
 import com.iispl.cts.data.CTSStaticData;
 import com.iispl.cts.model.outward.OutwardBatch;
 
 public class CheckerDashboardDAO {
+	private final javax.sql.DataSource dataSource =ConnectionPool.getDataSource();
 
     /*
      * ============================================================
@@ -61,7 +63,7 @@ public class CheckerDashboardDAO {
                 "     'PENDING_CHECKER') " +
                 "ORDER BY ob.created_at DESC";
 
-        try (Connection con = CTSStaticData.getConnection();
+        try (Connection con = dataSource.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
@@ -303,7 +305,7 @@ public class CheckerDashboardDAO {
                 "        ('ASSIGNED', 'IN_PROGRESS') " +
                 "WHERE ob.batch_number = ?";
 
-        try (Connection con = CTSStaticData.getConnection();
+        try (Connection con = dataSource.getConnection();
              PreparedStatement ps =
                      con.prepareStatement(sql)) {
 
@@ -516,7 +518,7 @@ public class CheckerDashboardDAO {
                 "          IN ('ASSIGNED', 'IN_PROGRESS') " +
                 ")";
 
-        try (Connection con = CTSStaticData.getConnection();
+        try (Connection con = dataSource.getConnection();
              PreparedStatement ps =
                      con.prepareStatement(sql)) {
 

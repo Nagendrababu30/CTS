@@ -1,6 +1,7 @@
 package com.iispl.cts.dao.outward.checker;
 
 import com.iispl.cts.model.outward.OutwardBatch;
+import com.cts.inward.config.ConnectionPool;
 import com.iispl.cts.data.CTSStaticData;
 
 import java.sql.Connection;
@@ -10,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CheckerReportsDAO {
+	
+	private final javax.sql.DataSource dataSource =ConnectionPool.getDataSource();
 
     /**
      * Get only ASSIGNED batches.
@@ -30,7 +33,7 @@ public class CheckerReportsDAO {
                 "ORDER BY batch_number DESC";
 
         try (Connection connection =
-                     CTSStaticData.getConnection();
+        		dataSource.getConnection();
              PreparedStatement ps =
                      connection.prepareStatement(sql)) {
 

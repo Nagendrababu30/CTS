@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?page title="Captured Batches"
+    contentType="text/html;charset=UTF-8"?>
+
+<?init class="com.cts.admin.controller.LayoutInit"
+        pageTitle="Captured Batches"
+        active="capturedBatches"?>
+
+<?init class="org.zkoss.zk.ui.util.Composition"
+        arg0="/zul/common/layout.zul"?>
+
+<zk>
+
+    <!-- ========================================================= -->
+    <!-- PAGE CSS                                                  -->
+    <!-- ========================================================= -->
+
+    <style src="/css/outward-maker/captured-batches.css"/>
+
+
+    <!-- ========================================================= -->
+    <!-- COMMON LAYOUT CONTENT                                     -->
+    <!-- Header + Sidebar come from /zul/common/layout.zul         -->
+    <!-- ========================================================= -->
+
+    <div
+        self="@define(content)"
+        width="100%"
+        height="100%"
+        style="
+            width:100%;
+            height:100%;
+            background:#F4F7FB;
+        ">
+
+        <!-- ===================================================== -->
+        <!-- CAPTURED BATCHES CONTROLLER                            -->
+        <!-- ===================================================== -->
+
+        <vlayout
+            apply="com.iispl.cts.controller.outward.CaptureOperatorCapturedBatchesController"
+            width="100%"
+            height="100%"
+            spacing="20px"
+            sclass="captured-batches-content"
+            style="
+                padding:24px 30px;
+                box-sizing:border-box;
+                overflow:auto;
+            ">
+
+
+            <!-- ================================================= -->
+            <!-- PAGE TITLE                                         -->
+            <!-- ================================================= -->
+
+            <label
+                value="Captured Batches"
+                sclass="captured-batches-page-title"/>
+
+
+            <!-- ================================================= -->
+            <!-- CAPTURED BATCH TABLE                               -->
+            <!-- ================================================= -->
+
+            <groupbox
+                width="100%"
+                sclass="captured-batches-groupbox">
+
+                <caption
+                    label="Batches"
+                    sclass="captured-batches-caption"/>
+
+
+                <div
+                    sclass="captured-batches-table-container">
+
+
+                    <listbox
+                        id="capturedBatchesList"
+                        width="100%"
+                        mold="paging"
+                        pageSize="10"
+                        emptyMessage="No captured batches available."
+                        sclass="captured-batches-listbox">
+
+
+                        <!-- ===================================== -->
+                        <!-- TABLE HEADER                            -->
+                        <!-- ===================================== -->
+
+                        <listhead
+                            sizable="true"
+                            height="52px"
+                            sclass="captured-batches-listhead">
+
+
+                            <listheader
+                                label="Batch No"
+                                width="35%"
+                                sclass="captured-batches-listheader"/>
+
+
+                            <listheader
+                                label="Total Cheques"
+                                width="25%"
+                                sclass="captured-batches-listheader"/>
+
+
+                            <listheader
+                                label="Status"
+                                width="25%"
+                                sclass="captured-batches-listheader"/>
+
+
+                        </listhead>
+
+
+                        <!-- ===================================== -->
+                        <!-- ROWS LOADED BY CONTROLLER               -->
+                        <!-- ===================================== -->
+
+                    </listbox>
+
+                </div>
+
+            </groupbox>
+
+        </vlayout>
+
+    </div>
+
+</zk>

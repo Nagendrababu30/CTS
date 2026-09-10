@@ -13,14 +13,744 @@
 <zk>
 
     <!-- ===================================================== -->
-    <!-- CSS -->
+    <!-- CSS – MODERN REALTIME PREMIUM DESIGN                  -->
     <!-- ===================================================== -->
 
-    <style src="/css/outward-maker/batch-capture.css"/>
+    <style><![CDATA[
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+        /* ---------- Design tokens ---------- */
+        :root {
+            --bg-app:            #EAF0FA;
+            --bg-app-2:          #E4ECF8;
+            --bg-surface:        #FFFFFF;
+            --bg-surface-2:      #FCFDFF;
+            --bg-subtle:         #F9FAFB;
+            --bg-hover:          #F6F9FF;
+            --border-light:      #E4EAF3;
+            --border-mid:        #D0D5DD;
+            --border-dark:       #98A2B3;
+            --text-primary:      #0B1F3F;
+            --text-secondary:    #2B3A55;
+            --text-muted:        #667085;
+            --text-faint:        #98A2B3;
+
+            --brand-blue:        #175CD3;
+            --brand-blue-dark:   #1D4ED8;
+            --brand-indigo:      #4F46E5;
+            --brand-purple:      #7A5AF8;
+            --brand-pink:        #C026D3;
+            --brand-orange:      #F97316;
+            --brand-amber:       #F59E0B;
+            --brand-green:       #12B76A;
+            --brand-teal:        #14B8A6;
+            --brand-cyan:        #06B6D4;
+
+            --radius-sm:         6px;
+            --radius-md:         10px;
+            --radius-lg:         16px;
+            --radius-xl:         22px;
+            --radius-pill:       999px;
+
+            --shadow-xs:         0 1px 2px rgba(16, 24, 40, 0.04);
+            --shadow-sm:         0 1px 3px rgba(16, 24, 40, 0.06), 0 1px 2px rgba(16, 24, 40, 0.04);
+            --shadow-md:         0 6px 18px rgba(16, 24, 40, 0.07), 0 2px 6px rgba(16, 24, 40, 0.03);
+            --shadow-lg:         0 18px 40px rgba(16, 24, 40, 0.10), 0 6px 14px rgba(16, 24, 40, 0.05);
+            --shadow-xl:         0 28px 60px rgba(16, 24, 40, 0.14), 0 10px 22px rgba(16, 24, 40, 0.06);
+
+            --shadow-glow-blue:  0 6px 22px rgba(23, 92, 211, 0.35);
+            --shadow-glow-green: 0 6px 22px rgba(18, 183, 106, 0.35);
+
+            --ease:              cubic-bezier(0.4, 0, 0.2, 1);
+            --ease-spring:       cubic-bezier(0.34, 1.56, 0.64, 1);
+            --ease-out-expo:     cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* =============================================================
+           GLOBAL RESET / BASE
+           ============================================================= */
+
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            overflow: hidden !important;
+            background: var(--bg-app);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+            color: var(--text-secondary);
+        }
+
+        html { scrollbar-gutter: stable; }
+
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-mid) transparent;
+        }
+
+        *::-webkit-scrollbar        { width: 8px; height: 8px; }
+        *::-webkit-scrollbar-track  { background: transparent; border-radius: 4px; }
+        *::-webkit-scrollbar-thumb  {
+            background: linear-gradient(180deg, #C8D2E0, #B0BCCE);
+            border-radius: 4px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+        *::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #98A2B3, #7A879C);
+            background-clip: padding-box;
+        }
+
+        /* =============================================================
+           ANIMATIONS
+           ============================================================= */
+
+        @keyframes auroraFloat1 {
+            0%   { transform: translate(0, 0) scale(1); }
+            50%  { transform: translate(30px, -25px) scale(1.05); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        @keyframes auroraFloat2 {
+            0%   { transform: translate(0, 0) scale(1); }
+            50%  { transform: translate(-35px, 30px) scale(1.06); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        @keyframes gradientShift {
+            0%   { background-position: 0% 50%; }
+            50%  { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes shimmerSweep {
+            0%   { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes liveDot {
+            0%   { box-shadow: 0 0 0 0 rgba(18, 183, 106, 0.6), 0 0 12px rgba(18, 183, 106, 0.8); }
+            70%  { box-shadow: 0 0 0 12px rgba(18, 183, 106, 0), 0 0 12px rgba(18, 183, 106, 0.3); }
+            100% { box-shadow: 0 0 0 0 rgba(18, 183, 106, 0), 0 0 12px rgba(18, 183, 106, 0.8); }
+        }
+
+        /* =============================================================
+           MAIN CONTENT AREA
+           ============================================================= */
+
+        .batch-capture-content {
+            position: relative;
+            background:
+                radial-gradient(1200px 600px at 0% 0%, rgba(23, 92, 211, 0.08), transparent 60%),
+                radial-gradient(1000px 600px at 100% 0%, rgba(122, 90, 248, 0.08), transparent 60%),
+                radial-gradient(900px 700px at 100% 100%, rgba(18, 183, 106, 0.05), transparent 60%),
+                linear-gradient(180deg, var(--bg-app) 0%, var(--bg-app-2) 100%);
+        }
+
+        .batch-capture-content::before {
+            content: '';
+            position: absolute;
+            top: -180px;
+            left: -120px;
+            width: 560px;
+            height: 560px;
+            background: radial-gradient(circle, rgba(23, 92, 211, 0.14) 0%, rgba(23, 92, 211, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(10px);
+            animation: auroraFloat1 16s ease-in-out infinite;
+        }
+
+        .batch-capture-content::after {
+            content: '';
+            position: absolute;
+            bottom: -200px;
+            right: -140px;
+            width: 620px;
+            height: 620px;
+            background: radial-gradient(circle, rgba(122, 90, 248, 0.14) 0%, rgba(122, 90, 248, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+            filter: blur(10px);
+            animation: auroraFloat2 18s ease-in-out infinite;
+        }
+
+        /* Make sure children of content are above ambient glows */
+        .batch-capture-content > .z-vlayout {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* =============================================================
+           PAGE TITLE
+           ============================================================= */
+
+        .batch-capture-page-title {
+            font-family: 'Space Grotesk', 'Plus Jakarta Sans', 'Inter', sans-serif !important;
+            font-size: 30px !important;
+            font-weight: 700 !important;
+            letter-spacing: -0.035em !important;
+            background: linear-gradient(135deg, #0B1F3F 0%, #175CD3 50%, #7A5AF8 100%);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 14px;
+            animation: gradientShift 6s ease infinite, fadeInUp 0.5s var(--ease-out-expo) both;
+            -webkit-text-stroke: 0.3px transparent;
+        }
+
+        .batch-capture-page-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 72px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--brand-blue), var(--brand-purple), var(--brand-pink), var(--brand-orange), var(--brand-green));
+            background-size: 300% 100%;
+            border-radius: 2px;
+            box-shadow: 0 0 20px rgba(23, 92, 211, 0.5);
+            animation: gradientShift 5s ease infinite;
+        }
+
+        /* =============================================================
+           GROUPBOX – MAIN CARD
+           ============================================================= */
+
+        .batch-capture-groupbox {
+            background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-surface-2) 100%) !important;
+            border: 1px solid var(--border-light) !important;
+            border-radius: var(--radius-lg) !important;
+            padding: 28px 28px 24px 28px !important;
+            box-sizing: border-box !important;
+            box-shadow: var(--shadow-md) !important;
+            position: relative !important;
+            overflow: hidden !important;
+            animation: fadeInUp 0.55s var(--ease-out-expo) 0.1s both;
+        }
+
+        .batch-capture-groupbox:hover {
+            box-shadow: var(--shadow-lg) !important;
+            border-color: #DCE3EE !important;
+        }
+
+        /* Animated top accent bar */
+        .batch-capture-groupbox::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg,
+                var(--brand-blue), var(--brand-indigo), var(--brand-purple),
+                var(--brand-pink), var(--brand-orange), var(--brand-green),
+                var(--brand-cyan), var(--brand-blue));
+            background-size: 400% 100%;
+            animation: gradientShift 8s ease infinite;
+            z-index: 3;
+        }
+
+        /* Reset ZK groupbox 3d mold inner wrappers */
+        .batch-capture-groupbox .z-groupbox-hl,
+        .batch-capture-groupbox .z-groupbox-hr,
+        .batch-capture-groupbox .z-groupbox-hm,
+        .batch-capture-groupbox .z-groupbox-tl,
+        .batch-capture-groupbox .z-groupbox-tr,
+        .batch-capture-groupbox .z-groupbox-tm,
+        .batch-capture-groupbox .z-groupbox-bl,
+        .batch-capture-groupbox .z-groupbox-br,
+        .batch-capture-groupbox .z-groupbox-bm,
+        .batch-capture-groupbox .z-groupbox-cl,
+        .batch-capture-groupbox .z-groupbox-cr,
+        .batch-capture-groupbox .z-groupbox-cm,
+        .batch-capture-groupbox .z-groupbox-header,
+        .batch-capture-groupbox .z-groupbox-title,
+        .batch-capture-groupbox .z-groupbox-content {
+            background: transparent !important;
+            background-image: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .batch-capture-groupbox .z-groupbox-content {
+            padding: 0 !important;
+            overflow: visible !important;
+        }
+
+        /* =============================================================
+           CAPTION – "Batch Details"
+           ============================================================= */
+
+        .batch-capture-caption {
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif !important;
+            font-size: 18px !important;
+            font-weight: 800 !important;
+            color: var(--text-primary) !important;
+            letter-spacing: -0.015em !important;
+            position: relative !important;
+            padding: 0 0 16px 18px !important;
+            margin: 0 !important;
+            display: block !important;
+            background: transparent !important;
+            border: none !important;
+            text-shadow: none !important;
+        }
+
+        /* Accent bar before caption */
+        .batch-capture-caption::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 4px;
+            width: 5px;
+            height: 22px;
+            background: linear-gradient(180deg, var(--brand-blue), var(--brand-purple), var(--brand-pink));
+            border-radius: 3px;
+            box-shadow: 0 0 14px rgba(23, 92, 211, 0.55);
+        }
+
+        /* Live indicator dot after caption */
+        .batch-capture-caption::after {
+            content: '';
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            margin-left: 12px;
+            background: var(--brand-green);
+            border-radius: 50%;
+            animation: liveDot 2s infinite;
+            vertical-align: middle;
+        }
+
+        /* =============================================================
+           GRID
+           ============================================================= */
+
+        .batch-capture-grid {
+            width: 100% !important;
+            border: none !important;
+            background: transparent !important;
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
+        }
+
+        .batch-capture-grid .z-grid-header,
+        .batch-capture-grid .z-grid-body,
+        .batch-capture-grid .z-grid-content,
+        .batch-capture-grid .z-columns,
+        .batch-capture-grid .z-rows,
+        .batch-capture-grid .z-row,
+        .batch-capture-grid .z-cell,
+        .batch-capture-grid .z-column {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .batch-capture-grid .z-columns {
+            display: none !important;
+        }
+
+        /* =============================================================
+           ROWS – MODERN CARD-LIKE ROWS
+           ============================================================= */
+
+        .batch-capture-row {
+            background: transparent !important;
+            border: none !important;
+            position: relative;
+        }
+
+        .batch-capture-row .z-cell {
+            padding: 14px 10px !important;
+            vertical-align: middle !important;
+            border: none !important;
+            background: transparent !important;
+            position: relative;
+        }
+
+        /* Column 1 – labels */
+        .batch-capture-row .z-cell:first-child {
+            width: 180px !important;
+            text-align: left;
+        }
+
+        /* Column 2 – inputs */
+        .batch-capture-row .z-cell:last-child {
+            text-align: left;
+        }
+
+        /* Row hover – subtle highlight */
+        .batch-capture-row:hover {
+            background: linear-gradient(90deg, rgba(23, 92, 211, 0.03) 0%, transparent 100%) !important;
+        }
+
+        /* Row divider – slim, elegant */
+        .batch-capture-row + .batch-capture-row .z-cell {
+            border-top: 1px solid #EEF2F8 !important;
+        }
+
+        /* =============================================================
+           FIELD LABELS
+           ============================================================= */
+
+        .batch-capture-field-label {
+            font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
+            font-size: 13.5px !important;
+            font-weight: 600 !important;
+            color: var(--text-secondary) !important;
+            letter-spacing: 0.01em !important;
+            line-height: 1.5 !important;
+            vertical-align: middle !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            text-transform: none !important;
+        }
+
+        /* =============================================================
+           INPUTS – COMBOBOX / TEXTBOX / INTBOX
+           ============================================================= */
+
+        .batch-capture-input,
+        .batch-capture-input .z-input,
+        .batch-capture-input input,
+        .batch-capture-input textarea {
+            font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            color: var(--text-primary) !important;
+            background: linear-gradient(180deg, #FFFFFF 0%, #FCFDFF 100%) !important;
+            border: 1.5px solid var(--border-mid) !important;
+            border-radius: var(--radius-md) !important;
+            padding: 10px 14px !important;
+            box-sizing: border-box !important;
+            transition: border-color 0.22s var(--ease),
+                        box-shadow 0.22s var(--ease),
+                        background-color 0.22s var(--ease) !important;
+            box-shadow: var(--shadow-xs) !important;
+            outline: none !important;
+            line-height: 1.5 !important;
+            height: auto !important;
+            min-height: 42px !important;
+        }
+
+        .batch-capture-input:hover .z-input,
+        .batch-capture-input:hover input,
+        .batch-capture-input:hover textarea {
+            border-color: var(--border-dark) !important;
+            box-shadow: 0 4px 12px rgba(16, 24, 40, 0.06) !important;
+        }
+
+        .batch-capture-input:focus-within .z-input,
+        .batch-capture-input:focus-within input:focus,
+        .batch-capture-input:focus-within textarea:focus {
+            border-color: var(--brand-blue) !important;
+            box-shadow: 0 0 0 4px rgba(23, 92, 211, 0.14),
+                        0 4px 14px rgba(23, 92, 211, 0.12) !important;
+            background: #FFFFFF !important;
+        }
+
+        /* Read-only / disabled inputs */
+        .batch-capture-input[readonly] .z-input,
+        .batch-capture-input[readonly] input,
+        .batch-capture-input .z-input[readonly],
+        .batch-capture-input input[readonly] {
+            background: linear-gradient(180deg, #F4F7FC 0%, #EEF3FA 100%) !important;
+            color: var(--text-muted) !important;
+            cursor: default !important;
+            border-color: var(--border-light) !important;
+            box-shadow: inset 0 1px 2px rgba(16, 24, 40, 0.03) !important;
+        }
+
+        /* Combobox specific */
+        .batch-capture-input.z-combobox .z-combobox-input {
+            border: 1.5px solid var(--border-mid) !important;
+            border-radius: var(--radius-md) 0 0 var(--radius-md) !important;
+            background: linear-gradient(180deg, #FFFFFF 0%, #FCFDFF 100%) !important;
+            padding: 10px 14px !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            color: var(--text-primary) !important;
+            min-height: 42px !important;
+            box-sizing: border-box !important;
+            transition: all 0.22s var(--ease) !important;
+            box-shadow: var(--shadow-xs) !important;
+        }
+
+        .batch-capture-input.z-combobox .z-combobox-btn {
+            background: linear-gradient(180deg, #F9FAFB 0%, #F2F4F7 100%) !important;
+            border: 1.5px solid var(--border-mid) !important;
+            border-left: none !important;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0 !important;
+            min-height: 42px !important;
+            min-width: 40px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            cursor: pointer !important;
+            transition: all 0.22s var(--ease) !important;
+            color: var(--brand-blue) !important;
+        }
+
+        .batch-capture-input.z-combobox:hover .z-combobox-input {
+            border-color: var(--border-dark) !important;
+            box-shadow: 0 4px 12px rgba(16, 24, 40, 0.06) !important;
+        }
+
+        .batch-capture-input.z-combobox:hover .z-combobox-btn {
+            background: linear-gradient(180deg, #EEF3FA 0%, #E4ECF8 100%) !important;
+            border-color: var(--border-dark) !important;
+        }
+
+        .batch-capture-input.z-combobox:focus-within .z-combobox-input {
+            border-color: var(--brand-blue) !important;
+            box-shadow: 0 0 0 4px rgba(23, 92, 211, 0.14) !important;
+            background: #FFFFFF !important;
+        }
+
+        .batch-capture-input.z-combobox:focus-within .z-combobox-btn {
+            border-color: var(--brand-blue) !important;
+            background: linear-gradient(180deg, #E0EEFF 0%, #D4E4FF 100%) !important;
+            color: var(--brand-blue-dark) !important;
+        }
+
+        /* Placeholder styling */
+        .batch-capture-input input::placeholder,
+        .batch-capture-input .z-input::placeholder,
+        .batch-capture-input.z-combobox .z-combobox-input::placeholder {
+            color: var(--text-faint) !important;
+            font-weight: 400 !important;
+            opacity: 1 !important;
+            font-style: normal !important;
+        }
+
+        /* Combobox popup dropdown */
+        .batch-capture-input.z-combobox .z-combobox-popup,
+        .z-combobox-popup {
+            background: var(--bg-surface) !important;
+            border: 1px solid var(--border-light) !important;
+            border-radius: var(--radius-md) !important;
+            box-shadow: var(--shadow-lg) !important;
+            overflow: hidden !important;
+            padding: 4px !important;
+            font-family: 'Inter', sans-serif !important;
+            animation: fadeInUp 0.2s var(--ease-out-expo) both;
+        }
+
+        .z-combobox-popup .z-comboitem {
+            padding: 10px 14px !important;
+            font-size: 13.5px !important;
+            font-weight: 500 !important;
+            color: var(--text-secondary) !important;
+            border-radius: var(--radius-sm) !important;
+            transition: all 0.18s var(--ease) !important;
+            cursor: pointer !important;
+        }
+
+        .z-combobox-popup .z-comboitem:hover,
+        .z-combobox-popup .z-comboitem-over {
+            background: linear-gradient(135deg, rgba(23, 92, 211, 0.10), rgba(122, 90, 248, 0.10)) !important;
+            color: var(--brand-blue) !important;
+            font-weight: 600 !important;
+        }
+
+        .z-combobox-popup .z-comboitem-seld,
+        .z-combobox-popup .z-comboitem-selected {
+            background: linear-gradient(135deg, #175CD3 0%, #4F46E5 100%) !important;
+            color: #FFFFFF !important;
+            font-weight: 600 !important;
+        }
+
+        /* =============================================================
+           FILE UPLOAD BUTTON
+           ============================================================= */
+
+        .batch-capture-button,
+        .batch-capture-button .z-button,
+        .batch-capture-button .z-button-cm {
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif !important;
+            font-size: 13.5px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.02em !important;
+            color: #FFFFFF !important;
+            background: linear-gradient(135deg, #175CD3 0%, #4F46E5 50%, #7A5AF8 100%) !important;
+            background-size: 200% 200% !important;
+            border: none !important;
+            border-radius: var(--radius-md) !important;
+            padding: 11px 22px !important;
+            cursor: pointer !important;
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.42),
+                        0 0 0 1px rgba(255, 255, 255, 0.18) inset !important;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.22) !important;
+            transition: box-shadow 0.25s var(--ease-out-expo),
+                        background-position 0.4s var(--ease) !important;
+            min-height: 40px !important;
+            position: relative !important;
+            overflow: hidden !important;
+            animation: gradientShift 5s ease infinite !important;
+        }
+
+        .batch-capture-button:hover,
+        .batch-capture-button:hover .z-button,
+        .batch-capture-button:hover .z-button-cm {
+            background: linear-gradient(135deg, #1D4ED8 0%, #4338CA 50%, #6D28D9 100%) !important;
+            background-size: 200% 200% !important;
+            box-shadow: 0 10px 28px rgba(79, 70, 229, 0.55),
+                        0 0 0 1px rgba(255, 255, 255, 0.24) inset !important;
+        }
+
+        .batch-capture-button:active,
+        .batch-capture-button:active .z-button,
+        .batch-capture-button:active .z-button-cm {
+            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4) !important;
+        }
+
+        /* Focus visible */
+        .batch-capture-button:focus-visible,
+        .batch-capture-button .z-button:focus-visible {
+            outline: 2px solid var(--brand-blue) !important;
+            outline-offset: 3px !important;
+        }
+
+        /* =============================================================
+           XML / INFO LABELS
+           ============================================================= */
+
+        .batch-capture-xml-info {
+            font-family: 'Inter', 'Space Grotesk', sans-serif !important;
+            font-size: 12.5px !important;
+            font-weight: 500 !important;
+            color: var(--text-muted) !important;
+            letter-spacing: 0.01em !important;
+            line-height: 1.6 !important;
+            padding: 6px 0 !important;
+            display: inline-block !important;
+        }
+
+        /* Highlight the selected files label subtly */
+        #selectedFilesLabel {
+            color: var(--brand-blue) !important;
+            font-weight: 600 !important;
+            padding: 6px 12px !important;
+            background: linear-gradient(135deg, rgba(23, 92, 211, 0.06), rgba(122, 90, 248, 0.06)) !important;
+            border-radius: var(--radius-pill) !important;
+            border: 1px solid rgba(23, 92, 211, 0.14) !important;
+            transition: all 0.25s var(--ease) !important;
+        }
+
+        /* =============================================================
+           HINT ROW (helper text) – slimmer, softer
+           ============================================================= */
+
+        .batch-capture-row .batch-capture-xml-info {
+            color: var(--text-faint) !important;
+            font-style: italic !important;
+            font-size: 12.5px !important;
+            font-weight: 400 !important;
+        }
+
+        /* =============================================================
+           SCROLLBAR POLISH
+           ============================================================= */
+
+        .batch-capture-content::-webkit-scrollbar { width: 8px; }
+        .batch-capture-content::-webkit-scrollbar-track { background: transparent; }
+        .batch-capture-content::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #C8D2E0, #B0BCCE);
+            border-radius: 4px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+        .batch-capture-content::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #98A2B3, #7A879C);
+            background-clip: padding-box;
+        }
+
+        /* =============================================================
+           RESPONSIVE
+           ============================================================= */
+
+        @media (max-width: 1024px) {
+            .batch-capture-content {
+                padding: 20px 18px !important;
+            }
+            .batch-capture-groupbox {
+                padding: 22px 20px !important;
+            }
+            .batch-capture-page-title {
+                font-size: 24px !important;
+            }
+            .batch-capture-caption {
+                font-size: 16px !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .batch-capture-content {
+                padding: 16px 12px !important;
+            }
+            .batch-capture-groupbox {
+                padding: 18px 14px !important;
+            }
+            .batch-capture-page-title {
+                font-size: 21px !important;
+            }
+            .batch-capture-row .z-cell:first-child {
+                width: 130px !important;
+            }
+            .batch-capture-field-label {
+                font-size: 12.5px !important;
+            }
+            .batch-capture-input,
+            .batch-capture-input .z-input,
+            .batch-capture-input input {
+                font-size: 13px !important;
+                min-height: 40px !important;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        /* =============================================================
+           SELECTION
+           ============================================================= */
+
+        ::selection {
+            background: rgba(23, 92, 211, 0.22);
+            color: var(--text-primary);
+        }
+
+    ]]></style>
 
 
     <!-- ===================================================== -->
-    <!-- PAGE -->
+    <!-- PAGE                                                  -->
     <!-- ===================================================== -->
 
     <div
@@ -35,7 +765,7 @@
 
 
         <!-- ================================================= -->
-        <!-- MAIN CONTENT -->
+        <!-- MAIN CONTENT                                      -->
         <!-- ================================================= -->
 
         <vlayout
@@ -52,7 +782,7 @@
 
 
             <!-- ============================================= -->
-            <!-- PAGE TITLE -->
+            <!-- PAGE TITLE                                    -->
             <!-- ============================================= -->
 
             <label
@@ -61,7 +791,7 @@
 
 
             <!-- ============================================= -->
-            <!-- BATCH DETAILS -->
+            <!-- BATCH DETAILS                                 -->
             <!-- ============================================= -->
 
             <groupbox
@@ -81,7 +811,7 @@
 
 
                     <!-- ===================================== -->
-                    <!-- COLUMNS -->
+                    <!-- COLUMNS                               -->
                     <!-- ===================================== -->
 
                     <columns>
@@ -94,14 +824,14 @@
 
 
                     <!-- ===================================== -->
-                    <!-- ROWS -->
+                    <!-- ROWS                                  -->
                     <!-- ===================================== -->
 
                     <rows>
 
 
                         <!-- ================================= -->
-                        <!-- BRANCH CODE -->
+                        <!-- BRANCH CODE                       -->
                         <!-- ================================= -->
 
                         <row
@@ -122,7 +852,7 @@
 
 
                         <!-- ================================= -->
-                        <!-- BRANCH NAME -->
+                        <!-- BRANCH NAME                       -->
                         <!-- ================================= -->
 
                         <row
@@ -142,7 +872,7 @@
 
 
                         <!-- ================================= -->
-                        <!-- NUMBER OF CHEQUES -->
+                        <!-- NUMBER OF CHEQUES                 -->
                         <!-- ================================= -->
 
                         <row
@@ -163,7 +893,7 @@
 
 
                         <!-- ================================= -->
-                        <!-- FILE UPLOAD -->
+                        <!-- FILE UPLOAD                       -->
                         <!-- ================================= -->
 
                         <row
@@ -215,7 +945,7 @@
 
 
                         <!-- ================================= -->
-                        <!-- CAPTURE BUTTON -->
+                        <!-- CAPTURE BUTTON                    -->
                         <!-- ================================= -->
 
                         <row

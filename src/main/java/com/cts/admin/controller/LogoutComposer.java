@@ -37,7 +37,7 @@ public class LogoutComposer extends GenericForwardComposer<Component> {
         auditLogService = new AuditLogServiceImpl();
 
         /* Today's date */
-        SimpleDateFormat dateFmt = new SimpleDateFormat("dd MMM yyyy");
+        SimpleDateFormat dateFmt = new SimpleDateFormat("dd/MM/yyyy");
         dateFmt.setTimeZone(IST);
         headerDate.setValue(dateFmt.format(new Date()));
 
@@ -46,7 +46,7 @@ public class LogoutComposer extends GenericForwardComposer<Component> {
         User loggedInUser = (User) zkSession.getAttribute("loggedInUser");
 
         if (loggedInUser != null && loggedInUser.getLastLogin() != null) {
-            SimpleDateFormat loginFmt = new SimpleDateFormat("dd MMM yyyy hh:mm a");
+            SimpleDateFormat loginFmt = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
             loginFmt.setTimeZone(IST);
             headerLastLogin.setValue(loginFmt.format(loggedInUser.getLastLogin()));
         } else {

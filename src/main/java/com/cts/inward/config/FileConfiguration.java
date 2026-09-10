@@ -50,4 +50,13 @@ public class FileConfiguration {
         return getImagesPath()
                 .resolve(batchId);
     }
+
+    public Path getChequeImagePath(
+            String batchId,
+            String chequeNumber) {
+
+        return getImagesPath()
+                .resolve(batchId)
+                .resolve(chequeNumber);
+    }
 }

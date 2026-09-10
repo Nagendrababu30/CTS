@@ -232,7 +232,7 @@ public class AuditLogController extends GenericForwardComposer<Component> {
     }
 
     private String formatDateTime(java.util.Date date) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy hh:mm a");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
         sdf.setTimeZone(IST);
         return sdf.format(date);
     }

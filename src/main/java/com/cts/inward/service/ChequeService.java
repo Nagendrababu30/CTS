@@ -18,9 +18,11 @@ public interface ChequeService {
 	InwardCheque getNextCheque(String batchId, String chequeId);
 
 	InwardCheque getPreviousCheque(String batchId, String chequeId);
-	
-	void saveCheque(NpciChequeData cheque);
 
-	void updateCheque(String chequeNumber,long batchId,String accountNumber,BigDecimal amount,LocalDate chequeDate);
+	void saveCheque(NpciChequeData cheque);
 	
+	void saveDataEntryCorrections(String chequeNumber, long batchId, String accountNumber, BigDecimal amount,
+			LocalDate chequeDate, long userId);
+
+	void updateChequeStatus(String chequeNumber, String status, long userId);
 }

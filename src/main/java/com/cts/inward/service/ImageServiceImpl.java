@@ -46,29 +46,15 @@ public class ImageServiceImpl implements ImageService {
 		try {
 
             Path chequeImageDirectory =
-                    fileConfiguration
-                            .getImagesPath()
-                            .resolve(batchId)
-                            .resolve(chequeNumber);
+                    fileConfiguration.getChequeImagePath(batchId, chequeNumber);
 
-            Files.createDirectories(
-                    chequeImageDirectory);
+            Files.createDirectories(chequeImageDirectory);
 
-            Path frontImagePath =
-                    chequeImageDirectory.resolve(
-                            "front.jpg");
+            Path frontImagePath = chequeImageDirectory.resolve("front.jpg");
+            Path backImagePath  = chequeImageDirectory.resolve("back.jpg");
 
-            Path backImagePath =
-                    chequeImageDirectory.resolve(
-                            "back.jpg");
-
-            Files.write(
-                    frontImagePath,
-                    imageData.getFrontImage());
-
-            Files.write(
-                    backImagePath,
-                    imageData.getBackImage());
+            Files.write(frontImagePath, imageData.getFrontImage());
+            Files.write(backImagePath,  imageData.getBackImage());
 
             return ChequeImagePaths.of(
                     frontImagePath.toString(),
@@ -78,8 +64,7 @@ public class ImageServiceImpl implements ImageService {
 
             throw new IllegalStateException(
                     "Failed to save images for cheque: "
-                            + chequeNumber,
-                    e);
+                            + chequeNumber, e);
         }
     }
 }

@@ -33,8 +33,8 @@ public class ChequeImageDaoImpl
             ChequeImage chequeImage) {
 
         String sql =
-                "INSERT INTO cheque_image "
-                + "(chequenumber, frontpath, backpath) "
+                "INSERT INTO inward_cheque_image "
+                + "(cheque_number, front_image, back_image) "
                 + "VALUES (?, ?, ?)";
 
         try (Connection connection =
@@ -69,10 +69,10 @@ public class ChequeImageDaoImpl
             String chequeNumber) {
 
         String sql =
-                "SELECT imageid, chequenumber, "
-                + "frontpath, backpath "
-                + "FROM cheque_image "
-                + "WHERE chequenumber = ?";
+                "SELECT image_id, cheque_number, "
+                + "front_image, back_image "
+                + "FROM inward_cheque_image "
+                + "WHERE cheque_number = ?";
 
         try (Connection connection =
                      dataSource.getConnection();
@@ -91,14 +91,10 @@ public class ChequeImageDaoImpl
                 }
 
                 return ChequeImage.of(
-                        resultSet.getLong(
-                                "imageid"),
-                        resultSet.getString(
-                                "chequenumber"),
-                        resultSet.getString(
-                                "frontpath"),
-                        resultSet.getString(
-                                "backpath"));
+                        resultSet.getLong("image_id"),
+                        resultSet.getString("cheque_number"),
+                        resultSet.getString("front_image"),
+                        resultSet.getString("back_image"));
             }
 
         } catch (SQLException e) {

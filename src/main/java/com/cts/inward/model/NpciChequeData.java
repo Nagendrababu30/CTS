@@ -11,35 +11,38 @@ public class NpciChequeData {
     private long batchId;
     private String accountNumber;
     private LocalDate chequeDate;
-    private String drawerName;
     private BigDecimal chequeAmount;
     private String micrCode;
     private String cityCode;
     private String bankCode;
     private String branchCode;
+    private String payeeName;
+    private String payeeAccountNumber;
 
     private NpciChequeData(
             String chequeNumber,
             long batchId,
             String accountNumber,
             LocalDate chequeDate,
-            String drawerName,
             BigDecimal chequeAmount,
             String micrCode,
             String cityCode,
             String bankCode,
-            String branchCode) {
+            String branchCode,
+            String payeeName,
+            String payeeAccountNumber) {
 
         this.chequeNumber = chequeNumber;
         this.batchId = batchId;
         this.accountNumber = accountNumber;
         this.chequeDate = chequeDate;
-        this.drawerName = drawerName;
         this.chequeAmount = chequeAmount;
         this.micrCode = micrCode;
         this.cityCode = cityCode;
         this.bankCode = bankCode;
         this.branchCode = branchCode;
+        this.payeeName = payeeName;
+        this.payeeAccountNumber = payeeAccountNumber;
     }
 
     public static NpciChequeData of(
@@ -47,24 +50,26 @@ public class NpciChequeData {
             long batchId,
             String accountNumber,
             LocalDate chequeDate,
-            String drawerName,
             BigDecimal chequeAmount,
             String micrCode,
             String cityCode,
             String bankCode,
-            String branchCode) {
+            String branchCode,
+            String payeeName,
+            String payeeAccountNumber) {
 
         return new NpciChequeData(
                 chequeNumber,
                 batchId,
                 accountNumber,
                 chequeDate,
-                drawerName,
                 chequeAmount,
                 micrCode,
                 cityCode,
                 bankCode,
-                branchCode);
+                branchCode,
+                payeeName,
+                payeeAccountNumber);
     }
 
 	public long getInwardChequeId() {
@@ -107,14 +112,6 @@ public class NpciChequeData {
 		this.chequeDate = chequeDate;
 	}
 
-	public String getDrawerName() {
-		return drawerName;
-	}
-
-	public void setDrawerName(String drawerName) {
-		this.drawerName = drawerName;
-	}
-
 	public BigDecimal getChequeAmount() {
 		return chequeAmount;
 	}
@@ -154,6 +151,24 @@ public class NpciChequeData {
 	public void setBranchCode(String branchCode) {
 		this.branchCode = branchCode;
 	}
+
+	public String getPayeeName() {
+		return payeeName;
+	}
+
+	public void setPayeeName(String payeeName) {
+		this.payeeName = payeeName;
+	}
+
+	public String getPayeeAccountNumber() {
+		return payeeAccountNumber;
+	}
+
+	public void setPayeeAccountNumber(String payeeAccountNumber) {
+		this.payeeAccountNumber = payeeAccountNumber;
+	}
+	
+	
 
     
 }

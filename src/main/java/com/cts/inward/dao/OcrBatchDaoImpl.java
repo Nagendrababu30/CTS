@@ -41,7 +41,7 @@ public class OcrBatchDaoImpl implements OcrBatchDao {
                     1,
                     batchData.getBatchId());
 
-            statement.setString(
+            statement.setLong(
                     2,
                     batchData.getFileId());
 

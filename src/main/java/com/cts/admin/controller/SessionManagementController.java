@@ -1,8 +1,12 @@
 package com.cts.admin.controller;
 
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
+import javax.xml.stream.XMLInputFactory;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
@@ -22,6 +26,32 @@ import org.zkoss.zul.Window;
 import com.cts.admin.model.User;
 import com.cts.admin.service.SessionService;
 import com.cts.admin.service.SessionServiceImpl;
+import com.cts.inward.config.ApplicationConfiguration;
+import com.cts.inward.config.FileConfiguration;
+import com.cts.inward.dao.BatchDaoImpl;
+import com.cts.inward.dao.ChequeImageDaoImpl;
+import com.cts.inward.dao.ChequeDaoImpl;
+import com.cts.inward.dao.FileSummaryDaoImpl;
+import com.cts.inward.dao.InwardFileDaoImpl;
+import com.cts.inward.dao.OcrBatchDaoImpl;
+import com.cts.inward.dao.OcrChequeDaoImpl;
+import com.cts.inward.file.FileProcessingExecutorImpl;
+import com.cts.inward.file.IncomingFileWatcherImpl;
+import com.cts.inward.parser.OcrParserImpl;
+import com.cts.inward.parser.PibfProcessorImpl;
+import com.cts.inward.parser.PxfParserImpl;
+import com.cts.inward.service.BatchServiceImpl;
+import com.cts.inward.service.CHIFileServiceImpl;
+import com.cts.inward.service.ChequeImageServiceImpl;
+import com.cts.inward.service.ChequeServiceImpl;
+import com.cts.inward.service.FileProcessingServiceImpl;
+import com.cts.inward.service.FileSummaryServiceImpl;
+import com.cts.inward.service.ImageServiceImpl;
+import com.cts.inward.service.InwardIngestionService;
+import com.cts.inward.service.InwardIngestionServiceImpl;
+import com.cts.inward.service.InwardSessionFileServiceImpl;
+import com.cts.inward.service.OcrBatchServiceImpl;
+import com.cts.inward.service.OcrChequeServiceImpl;
 
 public class SessionManagementController
         extends GenericForwardComposer<Component> {
@@ -54,10 +84,11 @@ public class SessionManagementController
     private Button modalConfirmButton;
 
     // =========================================================
-    // SERVICE
+    // SERVICES
     // =========================================================
 
-    private SessionService sessionService;
+    private SessionService         sessionService;
+    private InwardIngestionService inwardIngestionService;
 
     // =========================================================
     // COMPOSE
@@ -70,6 +101,92 @@ public class SessionManagementController
 
         sessionService = new SessionServiceImpl();
 
+        /* --------------------------------------------------------
+         * Build the full inward processing object graph.
+         * This is manual DI since there is no IoC container.
+         * -------------------------------------------------------- */
+
+        // 1. Config
+        ApplicationConfiguration appConfig =
+                ApplicationConfiguration.of();
+
+        FileConfiguration fileConfig =
+                FileConfiguration.of(
+                        Path.of(appConfig.getInwardRootPath()));
+
+        int threadPoolSize =
+                appConfig.getFileProcessingThreadPoolSize();
+
+        // 2. Parsers
+        XMLInputFactory xmlFactory = XMLInputFactory.newInstance();
+
+        PxfParserImpl    pxfParser    = PxfParserImpl.of(xmlFactory);
+        OcrParserImpl    ocrParser    = OcrParserImpl.of(xmlFactory);
+        PibfProcessorImpl pibfProcessor = PibfProcessorImpl.of();
+
+        // 3. DAOs
+        com.cts.inward.dao.BatchDao        batchDao       = BatchDaoImpl.of();
+        com.cts.inward.dao.ChequeDao       chequeDao      = ChequeDaoImpl.of();
+        com.cts.inward.dao.OcrBatchDao     ocrBatchDao    = OcrBatchDaoImpl.of();
+        com.cts.inward.dao.OcrChequeDao    ocrChequeDao   = OcrChequeDaoImpl.of();
+        ChequeImageDaoImpl                 chequeImageDao = ChequeImageDaoImpl.of();
+        FileSummaryDaoImpl                 fileSummaryDao = FileSummaryDaoImpl.of();
+        InwardFileDaoImpl                  inwardFileDao  = InwardFileDaoImpl.of();
+
+        // 4. Services
+        BatchServiceImpl      batchService      = BatchServiceImpl.of(batchDao);
+        ChequeServiceImpl     chequeService     = ChequeServiceImpl.of(chequeDao);
+        OcrBatchServiceImpl   ocrBatchService   = OcrBatchServiceImpl.of(ocrBatchDao);
+        OcrChequeServiceImpl  ocrChequeService  = OcrChequeServiceImpl.of(ocrChequeDao);
+        ChequeImageServiceImpl chequeImageService = ChequeImageServiceImpl.of(chequeImageDao);
+        ImageServiceImpl      imageService      = ImageServiceImpl.of(fileConfig);
+        FileSummaryServiceImpl fileSummaryService = FileSummaryServiceImpl.of(fileSummaryDao);
+        CHIFileServiceImpl    chiFileService    = CHIFileServiceImpl.of(inwardFileDao);
+        InwardSessionFileServiceImpl sessionFileService =
+                InwardSessionFileServiceImpl.of(fileConfig, fileSummaryService);
+
+        // 5. FileProcessingService
+        FileProcessingServiceImpl fileProcessingService =
+                FileProcessingServiceImpl.of(
+                        fileConfig,
+                        pxfParser,
+                        pibfProcessor,
+                        ocrParser,
+                        batchService,
+                        chequeService,
+                        ocrBatchService,
+                        ocrChequeService,
+                        imageService,
+                        chequeImageService);
+
+        // 6. Lightweight ingestion service — used only by executor
+        InwardIngestionServiceImpl ingestionForExecutor =
+                InwardIngestionServiceImpl.of(fileProcessingService);
+
+        // 7. Executor + Watcher
+        FileProcessingExecutorImpl executor =
+                FileProcessingExecutorImpl.of(
+                        threadPoolSize,
+                        ingestionForExecutor);
+
+        IncomingFileWatcherImpl fileWatcher =
+                IncomingFileWatcherImpl.of(
+                        fileConfig,
+                        FileSystems.getDefault().newWatchService(),
+                        executor);
+
+        // 8. Full ingestion service — used by processSessionFiles()
+        inwardIngestionService =
+                InwardIngestionServiceImpl.of(
+                        fileProcessingService,
+                        chiFileService,
+                        sessionFileService,
+                        fileWatcher);
+
+        /* --------------------------------------------------------
+         * Wire ZUL components
+         * -------------------------------------------------------- */
+
         currentSessionCard    = (Vlayout) comp.getFellow("currentSessionCard");
         sessionStatusBadge    = (Label)   comp.getFellow("sessionStatusBadge");
         closedSessionContent  = (Vlayout) comp.getFellow("closedSessionContent");
@@ -81,9 +198,9 @@ public class SessionManagementController
         sessionHistoryPaging  = (Paging)  comp.getFellow("sessionHistoryPaging");
         sessionHistoryPaging.setPageSize(PAGE_SIZE);
 
-        endSessionModal   = (Window) comp.getFellow("endSessionModal");
-        modalCloseButton  = (Button) endSessionModal.getFellow("modalCloseButton");
-        modalCancelButton = (Button) endSessionModal.getFellow("modalCancelButton");
+        endSessionModal    = (Window) comp.getFellow("endSessionModal");
+        modalCloseButton   = (Button) endSessionModal.getFellow("modalCloseButton");
+        modalCancelButton  = (Button) endSessionModal.getFellow("modalCancelButton");
         modalConfirmButton = (Button) endSessionModal.getFellow("modalConfirmButton");
 
         registerEvents();
@@ -277,10 +394,20 @@ public class SessionManagementController
             if (ended) {
 
                 Messagebox.show(
-                        "Internal processing session ended successfully.",
+                        "Session ended. File processing has started.",
                         "Session Ended",
                         Messagebox.OK,
                         Messagebox.INFORMATION);
+
+                /* ------------------------------------------------
+                 * Trigger inward file processing:
+                 *  1. getCHIFilePaths() — get files from inward_file table
+                 *  2. moveFilesToIncoming() — move to incoming/{type}/ dirs
+                 *  3. startWatching() — NIO watcher detects files
+                 *  4. FileProcessingExecutor submits each file
+                 *  5. processFile() parses and saves to DB
+                 * ------------------------------------------------ */
+                inwardIngestionService.processSessionFiles();
 
             } else {
 
@@ -402,19 +529,13 @@ public class SessionManagementController
             java.util.TimeZone.getTimeZone("Asia/Kolkata");
 
     private String formatDate(Date date) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         sdf.setTimeZone(IST);
         return sdf.format(date);
     }
 
     private String formatTime(Date date) {
         SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
-        sdf.setTimeZone(IST);
-        return sdf.format(date);
-    }
-
-    private String formatDateTime(Date date) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy hh:mm a");
         sdf.setTimeZone(IST);
         return sdf.format(date);
     }

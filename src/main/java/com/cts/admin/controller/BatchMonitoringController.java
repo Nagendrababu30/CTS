@@ -43,7 +43,7 @@ public class BatchMonitoringController
     private Tab activeTab = Tab.BATCH_CAPTURE;
 
     private static final SimpleDateFormat DATE_FMT =
-            new SimpleDateFormat("dd MMM yyyy, hh:mm a");
+            new SimpleDateFormat("dd/MM/yyyy hh:mm a");
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {

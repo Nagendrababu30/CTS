@@ -556,12 +556,20 @@ public class MicrRepairController
         if (frontImagePath != null
                 && !frontImagePath.trim().isEmpty()) {
 
-            chequeImage.setSrc(
-                    frontImagePath);
+            try {
+                byte[] bytes = java.nio.file.Files.readAllBytes(
+                        java.nio.file.Path.of(frontImagePath));
+                org.zkoss.image.AImage aImage =
+                        new org.zkoss.image.AImage("front.jpg", bytes);
+                chequeImage.setContent(aImage);
+            } catch (Exception e) {
+                e.printStackTrace();
+                chequeImage.setContent((org.zkoss.image.AImage) null);
+            }
 
         } else {
 
-            chequeImage.setSrc(null);
+            chequeImage.setContent((org.zkoss.image.AImage) null);
         }
     }
 
@@ -578,12 +586,20 @@ public class MicrRepairController
         if (backImagePath != null
                 && !backImagePath.trim().isEmpty()) {
 
-            chequeImage.setSrc(
-                    backImagePath);
+            try {
+                byte[] bytes = java.nio.file.Files.readAllBytes(
+                        java.nio.file.Path.of(backImagePath));
+                org.zkoss.image.AImage aImage =
+                        new org.zkoss.image.AImage("back.jpg", bytes);
+                chequeImage.setContent(aImage);
+            } catch (Exception e) {
+                e.printStackTrace();
+                chequeImage.setContent((org.zkoss.image.AImage) null);
+            }
 
         } else {
 
-            chequeImage.setSrc(null);
+            chequeImage.setContent((org.zkoss.image.AImage) null);
         }
     }
 

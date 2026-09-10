@@ -16,7 +16,7 @@ public class DashboardDaoImpl
     // Get dashboard batches
     // -------------------------------------------------------------------------
 
-	@Override
+    @Override
     public List<DashboardBatchDto> getDashboardBatches() {
 
         String sql = """
@@ -28,6 +28,9 @@ public class DashboardDaoImpl
                     l.lock_status
                 FROM public.inward_batch b
 
+                /*
+                 * Get latest workflow status for each batch.
+                 */
                 LEFT JOIN (
                     SELECT DISTINCT ON (batch_id)
                         batch_id,
@@ -35,29 +38,49 @@ public class DashboardDaoImpl
                     FROM public.inward_batch_history
                     ORDER BY
                         batch_id,
-                        changed_on DESC
+                        changed_on DESC,
+                        batch_history_id DESC
                 ) h
                     ON b.batch_id = h.batch_id
 
+                /*
+                 * Get latest lock record for each batch.
+                 *
+                 * IMPORTANT:
+                 * We do NOT filter lock_status here.
+                 *
+                 * We first find the latest lock record and then
+                 * consider it active only when its latest status
+                 * is LOCKED.
+                 */
                 LEFT JOIN (
                     SELECT DISTINCT ON (bl.batch_id)
                         bl.batch_id,
                         bl.user_id,
                         bl.lock_status
                     FROM public.inward_batch_lock bl
+
                     INNER JOIN public."user" u
                         ON u.user_id = bl.user_id
+
                     INNER JOIN public."role" r
                         ON r.role_id = u.role_id
-                    WHERE bl.lock_status = 'LOCKED'
-                      AND u.status = 'ACTIVE'
+
+                    WHERE u.status = 'ACTIVE'
                       AND r.role_name = 'INWARD_MAKER'
+
                     ORDER BY
                         bl.batch_id,
-                        bl.locked_time DESC
+                        bl.locked_time DESC,
+                        bl.lock_id DESC
                 ) l
                     ON b.batch_id = l.batch_id
+                   AND l.lock_status = 'LOCKED'
 
+                /*
+                 * Maker dashboard must not show batches that
+                 * have already gone to Checker or completed.
+                 */
                 WHERE h.batch_status IS NULL
                    OR h.batch_status NOT IN (
                         'SENT_TO_CHECKER',
@@ -72,7 +95,8 @@ public class DashboardDaoImpl
 
         try (
                 Connection connection =
-                        ConnectionPool.getDataSource()
+                        ConnectionPool
+                                .getDataSource()
                                 .getConnection();
 
                 PreparedStatement statement =
@@ -127,12 +151,33 @@ public class DashboardDaoImpl
         return batches;
     }
 
+
+    // -------------------------------------------------------------------------
+    // Lock batch
+    // -------------------------------------------------------------------------
+
     @Override
     public boolean lockBatch(
             Long batchId,
             Long userId) {
 
-        String lockSql = """
+        if (batchId == null
+                || userId == null) {
+
+            return false;
+        }
+
+        String existingLockSql =
+                """
+                SELECT 1
+                FROM public.inward_batch_lock bl
+                WHERE bl.batch_id = ?
+                  AND bl.lock_status = 'LOCKED'
+                LIMIT 1
+                """;
+
+        String lockSql =
+                """
                 INSERT INTO public.inward_batch_lock
                 (
                     batch_id,
@@ -149,7 +194,8 @@ public class DashboardDaoImpl
                 )
                 """;
 
-        String historySql = """
+        String historySql =
+                """
                 INSERT INTO public.inward_batch_history
                 (
                     batch_id,
@@ -175,13 +221,45 @@ public class DashboardDaoImpl
         try {
 
             connection =
-                    ConnectionPool.getDataSource()
+                    ConnectionPool
+                            .getDataSource()
                             .getConnection();
 
             connection.setAutoCommit(false);
 
             /*
-             * 1. Create batch lock.
+             * ---------------------------------------------------------
+             * 1. Check whether batch already has an active lock.
+             * ---------------------------------------------------------
+             */
+            try (
+                    PreparedStatement statement =
+                            connection.prepareStatement(
+                                    existingLockSql)
+            ) {
+
+                statement.setLong(
+                        1,
+                        batchId);
+
+                try (
+                        ResultSet resultSet =
+                                statement.executeQuery()
+                ) {
+
+                    if (resultSet.next()) {
+
+                        connection.rollback();
+
+                        return false;
+                    }
+                }
+            }
+
+            /*
+             * ---------------------------------------------------------
+             * 2. Create Maker lock.
+             * ---------------------------------------------------------
              */
             try (
                     PreparedStatement statement =
@@ -197,14 +275,21 @@ public class DashboardDaoImpl
                         2,
                         userId);
 
-                statement.executeUpdate();
+                int inserted =
+                        statement.executeUpdate();
+
+                if (inserted != 1) {
+
+                    connection.rollback();
+
+                    return false;
+                }
             }
 
             /*
-             * 2. Add LOCKED to batch history.
-             *
-             * RECEIVED is not updated.
-             * LOCKED is a new history record.
+             * ---------------------------------------------------------
+             * 3. Add LOCKED batch history.
+             * ---------------------------------------------------------
              */
             try (
                     PreparedStatement statement =
@@ -220,7 +305,15 @@ public class DashboardDaoImpl
                         2,
                         userId);
 
-                statement.executeUpdate();
+                int inserted =
+                        statement.executeUpdate();
+
+                if (inserted != 1) {
+
+                    connection.rollback();
+
+                    return false;
+                }
             }
 
             connection.commit();
@@ -248,14 +341,18 @@ public class DashboardDaoImpl
             if (connection != null) {
 
                 try {
+
                     connection.setAutoCommit(true);
                     connection.close();
+
                 } catch (Exception closeException) {
+
                     closeException.printStackTrace();
                 }
             }
         }
     }
+
 
     // -------------------------------------------------------------------------
     // Update batch workflow status
@@ -278,91 +375,232 @@ public class DashboardDaoImpl
         String normalizedStatus =
                 batchStatus.trim().toUpperCase();
 
+
         /*
-         * Only the statuses required in the current
-         * Maker flow are allowed here.
+         * Current Maker workflow statuses.
+         *
+         * LOCKED:
+         *     created by lockBatch(), not normally through this method.
+         *
+         * MICR_REPAIR:
+         *     batch requires MICR repair.
+         *
+         * DATA_ENTRY:
+         *     MICR stage completed; Maker continues with Data Entry.
+         *
+         * SENT_TO_CHECKER:
+         *     Maker has completed processing.
+         *     At this point the Maker lock is released.
          */
         if (!"MICR_REPAIR".equals(normalizedStatus)
-                && !"DATA_ENTRY".equals(normalizedStatus)) {
+                && !"DATA_ENTRY".equals(normalizedStatus)
+                && !"SENT_TO_CHECKER".equals(normalizedStatus)) {
 
             return false;
         }
 
-        String historySql = """
-                INSERT INTO public.inward_batch_history
-                (
-                    batch_id,
-                    batch_status,
-                    changed_on,
-                    changed_by,
-                    reason,
-                    remarks
-                )
-                VALUES
-                (
-                    ?,
-                    ?,
-                    CURRENT_TIMESTAMP,
-                    ?,
-                    ?,
-                    ?
-                )
-                """;
 
-        try (
-                Connection connection =
-                        ConnectionPool
-                                .getDataSource()
-                                .getConnection();
+        Connection connection = null;
 
-                PreparedStatement statement =
-                        connection.prepareStatement(
-                                historySql)) {
+        try {
 
-            statement.setLong(
-                    1,
-                    batchId);
+            connection =
+                    ConnectionPool
+                            .getDataSource()
+                            .getConnection();
 
-            statement.setString(
-                    2,
-                    normalizedStatus);
+            connection.setAutoCommit(false);
 
-            statement.setLong(
-                    3,
-                    userId);
 
-            if ("MICR_REPAIR".equals(normalizedStatus)) {
+            /*
+             * ---------------------------------------------------------
+             * 1. Add the new batch workflow status.
+             * ---------------------------------------------------------
+             */
+            String historySql = """
+                    INSERT INTO public.inward_batch_history
+                    (
+                        batch_id,
+                        batch_status,
+                        changed_on,
+                        changed_by,
+                        reason,
+                        remarks
+                    )
+                    VALUES
+                    (
+                        ?,
+                        ?,
+                        CURRENT_TIMESTAMP,
+                        ?,
+                        ?,
+                        ?
+                    )
+                    """;
 
-                statement.setString(
-                        4,
-                        "MICR validation requires repair");
+            try (
+                    PreparedStatement statement =
+                            connection.prepareStatement(
+                                    historySql)
+            ) {
 
-                statement.setString(
-                        5,
-                        "Batch moved to MICR Repair");
-
-            } else {
+                statement.setLong(
+                        1,
+                        batchId);
 
                 statement.setString(
-                        4,
-                        "MICR validation completed");
+                        2,
+                        normalizedStatus);
 
-                statement.setString(
-                        5,
-                        "Batch moved to Data Entry");
+                statement.setLong(
+                        3,
+                        userId);
+
+
+                if ("MICR_REPAIR".equals(
+                        normalizedStatus)) {
+
+                    statement.setString(
+                            4,
+                            "MICR validation requires repair");
+
+                    statement.setString(
+                            5,
+                            "Batch moved to MICR Repair");
+
+
+                } else if ("DATA_ENTRY".equals(
+                        normalizedStatus)) {
+
+                    statement.setString(
+                            4,
+                            "MICR validation completed");
+
+                    statement.setString(
+                            5,
+                            "Batch moved to Data Entry");
+
+
+                } else {
+
+                    /*
+                     * SENT_TO_CHECKER
+                     */
+                    statement.setString(
+                            4,
+                            "Maker processing completed");
+
+                    statement.setString(
+                            5,
+                            "Batch sent to Checker");
+                }
+
+
+                int inserted =
+                        statement.executeUpdate();
+
+                if (inserted != 1) {
+
+                    connection.rollback();
+                    return false;
+                }
             }
 
-            int inserted =
-                    statement.executeUpdate();
 
-            return inserted == 1;
+            /*
+             * ---------------------------------------------------------
+             * 2. Release Maker lock ONLY when batch is sent to Checker.
+             * ---------------------------------------------------------
+             *
+             * DATA_ENTRY does NOT release the lock.
+             *
+             * The lock table keeps lock history, so we insert a new
+             * UNLOCKED record instead of deleting the old LOCKED row.
+             */
+            if ("SENT_TO_CHECKER".equals(
+                    normalizedStatus)) {
+
+                String unlockSql = """
+                        INSERT INTO public.inward_batch_lock
+                        (
+                            batch_id,
+                            user_id,
+                            locked_time,
+                            lock_status
+                        )
+                        VALUES
+                        (
+                            ?,
+                            ?,
+                            CURRENT_TIMESTAMP,
+                            'UNLOCKED'
+                        )
+                        """;
+
+                try (
+                        PreparedStatement statement =
+                                connection.prepareStatement(
+                                        unlockSql)
+                ) {
+
+                    statement.setLong(
+                            1,
+                            batchId);
+
+                    statement.setLong(
+                            2,
+                            userId);
+
+                    int inserted =
+                            statement.executeUpdate();
+
+                    if (inserted != 1) {
+
+                        connection.rollback();
+                        return false;
+                    }
+                }
+            }
+
+
+            /*
+             * ---------------------------------------------------------
+             * 3. Everything succeeded.
+             * ---------------------------------------------------------
+             */
+            connection.commit();
+
+            return true;
 
         } catch (Exception e) {
 
+            if (connection != null) {
+
+                try {
+                    connection.rollback();
+                } catch (Exception rollbackException) {
+                    rollbackException.printStackTrace();
+                }
+            }
+
             throw new RuntimeException(
                     "Error updating batch status for Batch ID: "
-                            + batchId,
+                            + batchId
+                            + ", status: "
+                            + normalizedStatus,
                     e);
+
+        } finally {
+
+            if (connection != null) {
+
+                try {
+                    connection.setAutoCommit(true);
+                    connection.close();
+                } catch (Exception closeException) {
+                    closeException.printStackTrace();
+                }
+            }
         }
     }
 }

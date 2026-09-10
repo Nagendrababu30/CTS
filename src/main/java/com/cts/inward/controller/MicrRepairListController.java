@@ -9,6 +9,7 @@ import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Grid;
 import org.zkoss.zul.Label;
+import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Row;
 import org.zkoss.zul.Rows;
 
@@ -27,8 +28,11 @@ public class MicrRepairListController
 
     private MicrRepairService micrRepairService;
 
+
     @Override
-    public void doAfterCompose(Component comp) throws Exception {
+    public void doAfterCompose(
+            Component comp)
+            throws Exception {
 
         super.doAfterCompose(comp);
 
@@ -38,87 +42,134 @@ public class MicrRepairListController
         loadRepairBatches();
     }
 
+
     private void loadRepairBatches() {
 
-        micrRepairRows.getChildren().clear();
+        micrRepairRows
+                .getChildren()
+                .clear();
+
 
         List<MicrRepairBatchDto> batches =
-                micrRepairService.getRepairBatches();
+                micrRepairService
+                        .getRepairBatches();
 
-        /*
-         * No batches require MICR repair.
-         */
-        if (batches == null || batches.isEmpty()) {
 
-            micrRepairGrid.setVisible(false);
-            emptyMessage.setVisible(true);
+        if (batches == null
+                || batches.isEmpty()) {
+
+            micrRepairGrid.setVisible(
+                    false);
+
+            emptyMessage.setVisible(
+                    true);
 
             return;
         }
 
-        /*
-         * At least one batch requires
-         * MICR repair.
-         */
-        micrRepairGrid.setVisible(true);
-        emptyMessage.setVisible(false);
 
-        for (MicrRepairBatchDto batch : batches) {
+        micrRepairGrid.setVisible(
+                true);
 
-            Row row = new Row();
+        emptyMessage.setVisible(
+                false);
 
-            /*
-             * Batch ID
-             */
+
+        for (MicrRepairBatchDto batch :
+                batches) {
+
+            if (batch == null) {
+
+                continue;
+            }
+
+
+            Row row =
+                    new Row();
+
+
             row.appendChild(
                     new Label(
                             String.valueOf(
                                     batch.getBatchId())));
 
-            /*
-             * Total Cheques
-             */
+
             row.appendChild(
                     new Label(
                             String.valueOf(
                                     batch.getTotalCheques())));
 
-            /*
-             * MICR Error Count
-             */
+
             Label errorCount =
                     new Label(
                             String.valueOf(
                                     batch.getMicrErrorCount()));
 
+
             errorCount.setSclass(
                     "micr-error-count");
 
-            row.appendChild(errorCount);
 
-            /*
-             * MICR Repair button
-             */
+            row.appendChild(
+                    errorCount);
+
+
             Button repairButton =
-                    new Button("MICR Repair");
+                    new Button(
+                            "MICR Repair");
+
 
             repairButton.setSclass(
                     "repair-button");
 
+
             long batchId =
                     batch.getBatchId();
 
+
             repairButton.addEventListener(
                     Events.ON_CLICK,
-                    event -> openRepairPage(batchId));
+                    event ->
+                            openRepairPage(
+                                    batchId));
 
-            row.appendChild(repairButton);
 
-            micrRepairRows.appendChild(row);
+            row.appendChild(
+                    repairButton);
+
+
+            micrRepairRows
+                    .appendChild(row);
+        }
+
+
+        if (micrRepairRows
+                .getChildren()
+                .isEmpty()) {
+
+            micrRepairGrid.setVisible(
+                    false);
+
+            emptyMessage.setVisible(
+                    true);
         }
     }
 
-    private void openRepairPage(long batchId) {
+
+    private void openRepairPage(
+            long batchId) {
+
+        if (batchId <= 0L) {
+
+            Messagebox.show(
+                    "Invalid Batch ID.",
+                    "MICR Repair",
+                    Messagebox.OK,
+                    Messagebox.ERROR);
+
+            return;
+        }
+
 
         String url =
                 "/zul/inward-maker/"
@@ -127,6 +178,8 @@ public class MicrRepairListController
                 + batchId
                 + "&source=list";
 
-        Executions.sendRedirect(url);
+
+        Executions.sendRedirect(
+                url);
     }
 }

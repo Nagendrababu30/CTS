@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.sql.DataSource;
+
 import com.cts.inward.config.ConnectionPool;
 import com.cts.inward.model.NpciBatchData;
 
@@ -126,7 +128,7 @@ public class BatchDaoImpl implements BatchDao {
 
 	    return 0;
 	}
-	
+
 	@Override
 	public boolean completeDataEntry(long batchId, long userId) {
 
@@ -134,22 +136,35 @@ public class BatchDaoImpl implements BatchDao {
 
 		try {
 
-			connection = ConnectionPool.getDataSource().getConnection();
-
+			connection = dataSource.getConnection();
 			connection.setAutoCommit(false);
 
 			// ---------------------------------------------------------
-			// 1. Check whether ALL cheques are completed
+			// 1. Check all ELIGIBLE cheques
+			//
+			// RETURN_BY_MAKER cheques are excluded because they do not
+			// participate in Data Entry.
 			// ---------------------------------------------------------
 
-			String checkSql = "SELECT " + "COUNT(*) AS total_count, " + "COUNT(*) FILTER "
-					+ "(WHERE latest.status = 'DATA_ENTRY_COMPLETED') " + "AS completed_count "
-					+ "FROM public.inward_cheque c " + "LEFT JOIN LATERAL ( " + "    SELECT h.status "
-					+ "    FROM public.inward_cheque_status_history h " + "    WHERE h.cheque_number = c.cheque_number "
-					+ "    ORDER BY h.status_history_id DESC " + "    LIMIT 1 " + ") latest ON TRUE "
-					+ "WHERE c.batch_id = ?";
+			String checkSql = """
+					SELECT
+					    COUNT(*) AS eligible_count,
+					    COUNT(*) FILTER (
+					        WHERE latest.status = 'DATA_ENTRY_COMPLETED'
+					    ) AS completed_count
+					FROM public.inward_cheque c
+					LEFT JOIN LATERAL (
+					    SELECT h.status
+					    FROM public.inward_cheque_status_history h
+					    WHERE h.cheque_number = c.cheque_number
+					    ORDER BY h.status_history_id DESC
+					    LIMIT 1
+					) latest ON TRUE
+					WHERE c.batch_id = ?
+					  AND COALESCE(latest.status, '') <> 'RETURN_BY_MAKER'
+					""";
 
-			int totalCount =0;
+			int eligibleCount = 0;
 			int completedCount = 0;
 
 			try (PreparedStatement statement = connection.prepareStatement(checkSql)) {
@@ -160,7 +175,7 @@ public class BatchDaoImpl implements BatchDao {
 
 					if (resultSet.next()) {
 
-						totalCount = resultSet.getInt("total_count");
+						eligibleCount = resultSet.getInt("eligible_count");
 
 						completedCount = resultSet.getInt("completed_count");
 					}
@@ -168,31 +183,48 @@ public class BatchDaoImpl implements BatchDao {
 			}
 
 			// ---------------------------------------------------------
-			// 2. Do not complete batch if even one cheque is pending
+			// 2. Do not complete batch if any eligible cheque is pending
 			// ---------------------------------------------------------
 
-			if (totalCount == 0 || totalCount != completedCount) {
+			if (eligibleCount == 0 || eligibleCount != completedCount) {
 
 				connection.rollback();
 
 				return false;
 			}
 
+			// ---------------------------------------------------------
 			// 3. Add DATA_ENTRY_COMPLETED to batch history
-			String historySql = "INSERT INTO public.inward_batch_history " + "(batch_id, batch_status, changed_on, "
-					+ "changed_by, reason, remarks) " + "VALUES (?, ?, CURRENT_TIMESTAMP, ?, ?, ?)";
+			// ---------------------------------------------------------
+
+			String historySql = """
+					INSERT INTO public.inward_batch_history
+					(
+					    batch_id,
+					    batch_status,
+					    changed_on,
+					    changed_by,
+					    reason,
+					    remarks
+					)
+					VALUES
+					(
+					    ?,
+					    ?,
+					    CURRENT_TIMESTAMP,
+					    ?,
+					    ?,
+					    ?
+					)
+					""";
 
 			try (PreparedStatement statement = connection.prepareStatement(historySql)) {
 
 				statement.setLong(1, batchId);
-
 				statement.setString(2, "DATA_ENTRY_COMPLETED");
-
 				statement.setLong(3, userId);
-
 				statement.setString(4, "DATA_ENTRY_COMPLETED");
-
-				statement.setString(5, "All cheques completed Data Entry");
+				statement.setString(5, "All eligible cheques completed Data Entry");
 
 				statement.executeUpdate();
 			}
@@ -221,13 +253,13 @@ public class BatchDaoImpl implements BatchDao {
 				try {
 					connection.setAutoCommit(true);
 					connection.close();
+
 				} catch (Exception closeException) {
 					closeException.printStackTrace();
 				}
 			}
 		}
 	}
-
 	@Override
 	public List<NpciBatchData> getBatchesByStatus(String batchStatus) {
 

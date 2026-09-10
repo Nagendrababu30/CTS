@@ -2,7 +2,6 @@ package com.cts.inward.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.cts.inward.dao.BatchDao;
 import com.cts.inward.model.InwardBatch;
@@ -38,9 +37,21 @@ public class BatchServiceImpl implements BatchService {
 
 	@Override
 	public List<InwardBatch> getAvailableBatchesForMaker(String userId) {
-		
-		return  null;
-		
+
+		List<NpciBatchData> batches = batchDao.getBatchesByStatus("DATA_ENTRY");
+
+		List<InwardBatch> result = new ArrayList<>();
+
+		if (batches == null) {
+			return result;
+		}
+
+		for (NpciBatchData batch : batches) {
+
+			result.add(convert(batch));
+		}
+
+		return result;
 	}
 
 		
@@ -75,23 +86,6 @@ public class BatchServiceImpl implements BatchService {
 		for (NpciBatchData batch : batches) {
 
 			if (batch.getBatchId() == id) {
-//        long id =
-//                Long.parseLong(batchId);
-//
-//        List<NpciBatchData> batches =
-//                batchDao.getAllBatches();
-//
-//        if (batches == null) {
-//            return null;
-//        }
-//
-//        for (NpciBatchData batch : batches) {
-//
-//            if (batch.getBatchId() == id) {
-//
-//                return convert(batch);
-//            }
-//        }
 
 				return convert(batch);
 			}
@@ -146,12 +140,11 @@ public class BatchServiceImpl implements BatchService {
 		return new InwardBatch(batch.getBatchId(), batch.getFileId(), batch.getPresentingBankName(),
 				batch.getTotalCheques());
 	}
-	
 	@Override
 	public int getDataEntryPendingCount(long batchId) {
 	    return batchDao.getDataEntryPendingCount(batchId);
 	}
-	
+
 	@Override
 	public boolean completeDataEntry(long batchId, long userId) {
 

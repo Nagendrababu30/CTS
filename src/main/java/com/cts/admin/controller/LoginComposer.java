@@ -109,7 +109,7 @@ public class LoginComposer extends GenericForwardComposer<Component> {
             case "INWARD_CHECKER":
                 Executions.sendRedirect("/zul/inward-checker/dashboard.zul"); break;
             case "OUTWARD_MAKER":
-                Executions.sendRedirect("/zul/outward/outward-maker/makerDashboard.zul"); break;
+                Executions.sendRedirect("/zul/outward/outward-maker/outward-maker-dashboard.zul"); break;
             case "OUTWARD_CHECKER":
                 Executions.sendRedirect("/zul/outward/outward-checker/checkerDashboard.zul"); break;
             case "CAPTURE_OPERATOR":

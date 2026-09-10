@@ -111,9 +111,7 @@ public class CheckerDashboardController
          * =====================================================
          */
 
-        Session session =
-                Executions.getCurrent()
-                        .getSession();
+        
 
         if (session == null) {
 

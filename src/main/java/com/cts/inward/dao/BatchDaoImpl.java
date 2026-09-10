@@ -3,6 +3,7 @@ package com.cts.inward.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -91,44 +92,35 @@ public class BatchDaoImpl implements BatchDao {
 
 		return batches;
 	}
-	
+
 	@Override
 	public int getDataEntryPendingCount(long batchId) {
 
-		String sql =
-		        "SELECT COUNT(*) " +
-		        "FROM public.inward_cheque c " +
-		        "LEFT JOIN LATERAL ( " +
-		        "    SELECT h.status " +
-		        "    FROM public.inward_cheque_status_history h " +
-		        "    WHERE h.cheque_number = c.cheque_number " +
-		        "    ORDER BY h.status_history_id DESC " +
-		        "    LIMIT 1 " +
-		        ") latest ON TRUE " +
-		        "WHERE c.batch_id = ? " +
-		        "AND COALESCE(latest.status, '') NOT IN " +
-		        "('DATA_ENTRY_COMPLETED', 'RETURN_BY_MAKER')";
+		String sql = "SELECT COUNT(*) " + "FROM public.inward_cheque c " + "LEFT JOIN LATERAL ( "
+				+ "    SELECT h.status " + "    FROM public.inward_cheque_status_history h "
+				+ "    WHERE h.cheque_number = c.cheque_number " + "    ORDER BY h.status_history_id DESC "
+				+ "    LIMIT 1 " + ") latest ON TRUE " + "WHERE c.batch_id = ? "
+				+ "AND COALESCE(latest.status, '') NOT IN " + "('DATA_ENTRY_COMPLETED', 'RETURN_BY_MAKER')";
 
-	    try (Connection connection = ConnectionPool.getDataSource().getConnection();
-	         PreparedStatement statement = connection.prepareStatement(sql)) {
+		try (Connection connection = ConnectionPool.getDataSource().getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql)) {
 
-	        statement.setLong(1, batchId);
+			statement.setLong(1, batchId);
 
-	        try (ResultSet resultSet = statement.executeQuery()) {
+			try (ResultSet resultSet = statement.executeQuery()) {
 
-	            if (resultSet.next()) {
-	                return resultSet.getInt(1);
-	            }
-	        }
+				if (resultSet.next()) {
+					return resultSet.getInt(1);
+				}
+			}
 
-	    } catch (Exception e) {
-	        throw new RuntimeException(
-	                "Error retrieving Data Entry pending count for batch " + batchId, e);
-	    }
+		} catch (Exception e) {
+			throw new RuntimeException("Error retrieving Data Entry pending count for batch " + batchId, e);
+		}
 
-	    return 0;
+		return 0;
 	}
-	
+
 	@Override
 	public boolean completeDataEntry(long batchId, long userId) {
 
@@ -151,7 +143,7 @@ public class BatchDaoImpl implements BatchDao {
 					+ "    ORDER BY h.status_history_id DESC " + "    LIMIT 1 " + ") latest ON TRUE "
 					+ "WHERE c.batch_id = ?";
 
-			int totalCount =0;
+			int totalCount = 0;
 			int completedCount = 0;
 
 			try (PreparedStatement statement = connection.prepareStatement(checkSql)) {
@@ -262,5 +254,142 @@ public class BatchDaoImpl implements BatchDao {
 		}
 
 		return batches;
+	}
+	
+	@Override
+	public List<Map<String, Object>> getBatchesForVerification(
+	        Integer userId) {
+
+	    String sql = """
+	        SELECT
+	            b.batch_id,
+	            b.total_cheques,
+	            h.maker_id,
+	            l.locked_time
+	        FROM inward_batch b
+
+	        INNER JOIN (
+	            SELECT DISTINCT ON (batch_id, user_id)
+	                   batch_id,
+	                   user_id,
+	                   locked_time,
+	                   lock_status
+	            FROM inward_batch_lock
+	            WHERE user_id = ?
+	            ORDER BY batch_id, user_id, locked_time DESC
+	        ) l
+	            ON l.batch_id = b.batch_id
+
+	        LEFT JOIN inward_batch_history h
+	            ON h.batch_id = b.batch_id
+	            AND h.status = 'DATA_ENTRY_COMPLETED'
+
+	        WHERE l.user_id = ?
+	          AND l.lock_status = 'LOCKED'
+
+	        ORDER BY b.batch_id
+	        """;
+
+	    List<Map<String, Object>> batches = new ArrayList<>();
+
+	    try (Connection connection = dataSource.getConnection();
+	         PreparedStatement ps = connection.prepareStatement(sql)) {
+
+	        ps.setInt(1, userId);
+	        ps.setInt(2, userId);
+
+	        try (ResultSet rs = ps.executeQuery()) {
+
+	            while (rs.next()) {
+
+	                Map<String, Object> row = new HashMap<>();
+
+	                row.put("batch_id", rs.getLong("batch_id"));
+	                row.put("total_cheques", rs.getInt("total_cheques"));
+	                row.put("maker_id", rs.getObject("maker_id"));
+	                row.put("locked_time", rs.getTimestamp("locked_time"));
+
+	                batches.add(row);
+	            }
+	        }
+
+	    } catch (SQLException e) {
+	        throw new RuntimeException(
+	                "Failed to fetch batches for verification",
+	                e
+	        );
+	    }
+
+	    return batches;
+	}
+	
+	@Override
+	public List<Map<String, Object>> searchBatchesForVerification(
+	        Long batchId,
+	        Integer userId) {
+
+	    String sql = """
+	        SELECT
+	            b.batch_id,
+	            b.total_cheques,
+	            h.maker_id,
+	            l.locked_time
+	        FROM inward_batch b
+
+	        INNER JOIN (
+	            SELECT DISTINCT ON (batch_id, user_id)
+	                   batch_id,
+	                   user_id,
+	                   locked_time,
+	                   lock_status
+	            FROM inward_batch_lock
+	            WHERE user_id = ?
+	            ORDER BY batch_id, user_id, locked_time DESC
+	        ) l
+	            ON l.batch_id = b.batch_id
+
+	        LEFT JOIN inward_batch_history h
+	            ON h.batch_id = b.batch_id
+	            AND h.status = 'DATA_ENTRY_COMPLETED'
+
+	        WHERE l.user_id = ?
+	          AND l.lock_status = 'LOCKED'
+	          AND b.batch_id = ?
+
+	        ORDER BY b.batch_id
+	        """;
+
+	    List<Map<String, Object>> batches = new ArrayList<>();
+
+	    try (Connection connection = dataSource.getConnection();
+	         PreparedStatement ps = connection.prepareStatement(sql)) {
+
+	        ps.setInt(1, userId);
+	        ps.setInt(2, userId);
+	        ps.setLong(3, batchId);
+
+	        try (ResultSet rs = ps.executeQuery()) {
+
+	            while (rs.next()) {
+
+	                Map<String, Object> row = new HashMap<>();
+
+	                row.put("batch_id", rs.getLong("batch_id"));
+	                row.put("total_cheques", rs.getInt("total_cheques"));
+	                row.put("maker_id", rs.getObject("maker_id"));
+	                row.put("locked_time", rs.getTimestamp("locked_time"));
+
+	                batches.add(row);
+	            }
+	        }
+
+	    } catch (SQLException e) {
+	        throw new RuntimeException(
+	                "Failed to search batches for verification",
+	                e
+	        );
+	    }
+
+	    return batches;
 	}
 }

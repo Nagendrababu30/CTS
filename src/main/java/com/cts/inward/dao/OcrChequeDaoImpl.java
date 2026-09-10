@@ -27,9 +27,9 @@ public class OcrChequeDaoImpl implements OcrChequeDao {
 
         String sql =
                 "INSERT INTO inward_ocr " +
-                "(batchid, chequenumber, accountnumber, drawername, " +
-                "amount, micrcode, chequedate, branchcode, citycode, bankcode) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "(batchid, chequenumber, accountnumber, " +
+                "amount, micrcode, chequedate, branchcode, citycode, bankcode, payee_name, payee_account_number) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (
                 Connection connection =
@@ -50,32 +50,36 @@ public class OcrChequeDaoImpl implements OcrChequeDao {
                     3,
                     chequeData.getAccountNumber());
 
-            statement.setString(
-                    4,
-                    chequeData.getDrawerName());
-
             statement.setBigDecimal(
-                    5,
+                    4,
                     chequeData.getChequeAmount());
 
             statement.setString(
-                    6,
+                    5,
                     chequeData.getMicrCode());
 
             statement.setObject(
-                    7,
+                    6,
                     chequeData.getChequeDate());
 
             statement.setString(
-                    8,
+                    7,
                     chequeData.getBranchSpecificCode());
 
             statement.setString(
-                    9,
+                    8,
                     chequeData.getCityCode());
 
             statement.setString(
+                    9,
+                    chequeData.getBankCode());
+            
+            statement.setString(
                     10,
+                    chequeData.getBankCode());
+            
+            statement.setString(
+                    11,
                     chequeData.getBankCode());
 
             statement.executeUpdate();

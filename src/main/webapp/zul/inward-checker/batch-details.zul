@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?init class="com.cts.admin.controller.LayoutInit"
+
         pageTitle="Batch Details"
+
         active="verify-batch"?>
 
 <?init class="org.zkoss.zk.ui.util.Composition"
+
         arg0="/zul/common/layout.zul"?>
 
 <zk>
@@ -12,204 +15,313 @@
     <style src="/css/inward/checker/batch-details.css"/>
 
 
+
     <!-- =========================================================
+
          PAGE CONTENT
-         ========================================================= -->
+
+         \========================================================= -->
 
     <div
+
         self="@define(content)"
+
         apply="com.cts.inward.controller.BatchDetailsController"
+
         width="100%"
+
         height="100%"
+
         sclass="batch-details-content">
 
 
+
         <!-- =====================================================
+
              PAGE HEADER
-             ===================================================== -->
+
+             \===================================================== -->
 
         <hlayout
+
             width="100%"
+
             spacing="0"
+
             valign="middle"
+
             sclass="details-header">
 
             <vlayout
+
                 hflex="1"
+
                 spacing="0">
 
                 <!-- BREADCRUMB -->
 
                 <hlayout
+
                     spacing="3px"
+
                     valign="middle">
 
                     <label
+
                         value="Dashboard"
+
                         sclass="breadcrumb"/>
 
                     <label
+
                         value=">"
+
                         sclass="breadcrumb"/>
 
                     <label
+
                         value="Verify Batch"
+
                         sclass="breadcrumb"/>
 
                     <label
+
                         value=">"
+
                         sclass="breadcrumb"/>
 
                     <label
+
                         value="Batch Details"
+
                         sclass="breadcrumb-current"/>
 
                 </hlayout>
 
 
+
                 <!-- TITLE -->
 
                 <label
+
                     id="pageTitle"
+
                     value="Verify Inward Batch - BATCH001"
+
                     sclass="details-title"/>
 
             </vlayout>
 
 
+
             <!-- BACK BUTTON -->
 
             <button
+
                 id="backToList"
+
                 label="← Back to List"
+
                 sclass="back-button"/>
 
         </hlayout>
 
 
 
+
+
         <!-- =====================================================
+
              MAIN TWO COLUMN AREA
-             ===================================================== -->
+
+             \===================================================== -->
 
         <hlayout
+
             width="100%"
+
             spacing="18px"
+
             valign="top"
+
             sclass="main-layout">
 
 
+
             <!-- =================================================
+
                  LEFT PANEL
-                 ================================================= -->
+
+                 \================================================= -->
 
             <vlayout
+
                 hflex="53"
+
                 spacing="0"
+
                 sclass="left-card">
 
 
+
                 <label
+
                     value="Cheque Image Preview"
+
                     sclass="panel-title"/>
 
 
+
                 <!-- =================================================
+
                      IMAGE PREVIEW
-                     ================================================= -->
+
+                     \================================================= -->
 
                 <vlayout
+
                     width="100%"
+
                     spacing="5px"
+
                     sclass="image-wrapper">
+
 
 
                     <!-- ZOOM -->
 
                     <hlayout
+
                         width="100%"
+
                         spacing="0"
+
                         valign="middle"
+
                         sclass="zoom-row">
 
                         <hlayout
+
                             hflex="1"
+
                             spacing="0"/>
 
                         <button
+
                             id="zoomOut"
+
                             label="-"
+
                             sclass="zoom-button"/>
 
                         <hlayout
+
                             width="48px"
+
                             height="24px"
+
                             spacing="0"
+
                             valign="middle"
+
                             sclass="zoom-value">
 
                             <label
+
                                 id="zoomValue"
+
                                 value="100%"
+
                                 sclass="zoom-label"/>
 
                         </hlayout>
 
                         <button
+
                             id="zoomIn"
+
                             label="+"
+
                             sclass="zoom-button"/>
 
                     </hlayout>
 
 
 
+
+
                     <!-- =================================================
+
                          CHEQUE PREVIEW
-                         ================================================= -->
+
+                         \================================================= -->
 
                     <div
+
                         id="chequePreview"
+
                         width="100%"
+
                         height="200px"
+
                         sclass="cheque-preview">
+
 
 
                         <!-- TOP -->
 
                         <hlayout
+
                             width="100%"
+
                             spacing="0">
 
                             <vlayout
+
                                 hflex="1"
+
                                 spacing="0">
 
                                 <label
+
                                     id="bankName"
+
                                     value="STATE BANK OF INDIA"
+
                                     sclass="cheque-bank"/>
 
                                 <label
+
                                     id="branchName"
+
                                     value="HYDERABAD MAIN BRANCH"
+
                                     sclass="cheque-branch"/>
 
                             </vlayout>
 
 
+
                             <vlayout
+
                                 spacing="5px"
+
                                 sclass="cheque-top-right">
 
                                 <label
+
                                     id="imageChequeNumber"
+
                                     value="000125"
+
                                     sclass="cheque-number"/>
 
                                 <label
+
                                     id="imageChequeDate"
+
                                     value="DATE: 21-06-2025"
+
                                     sclass="cheque-date"/>
 
                             </vlayout>
@@ -218,52 +330,80 @@
 
 
 
+
+
                         <!-- PAYEE -->
 
                         <hlayout
+
                             width="100%"
+
                             spacing="0"
+
                             valign="middle"
+
                             sclass="cheque-line">
 
                             <label
+
                                 value="PAY"
+
                                 sclass="cheque-label"/>
 
                             <label
+
                                 id="payeeImage"
+
                                 value="Ravi Kumar"
+
                                 sclass="cheque-value"/>
 
                         </hlayout>
 
 
 
+
+
                         <!-- AMOUNT -->
 
                         <hlayout
+
                             width="100%"
+
                             spacing="0"
+
                             valign="middle"
+
                             sclass="cheque-line">
 
                             <label
+
                                 value="RUPEES"
+
                                 sclass="cheque-label"/>
 
                             <label
+
                                 id="amountWordsImage"
+
                                 value="Five Thousand Only"
+
                                 sclass="cheque-value"
+
                                 hflex="1"/>
 
                             <hlayout
+
                                 spacing="0"
+
                                 valign="middle">
 
                                 <label
+
                                     id="amountImage"
+
                                     value="₹ 2500.00"
+
                                     sclass="amount-box"/>
 
                             </hlayout>
@@ -272,11 +412,16 @@
 
 
 
+
+
                         <!-- MICR -->
 
                         <label
+
                             id="micrImage"
+
                             value="|| 000125 || 500002001 |: 9876543210 || 29"
+
                             sclass="micr-image"/>
 
                     </div>
@@ -285,143 +430,215 @@
 
 
 
+
+
                 <!-- =================================================
+
                      CHEQUE INFORMATION
-                     ================================================= -->
+
+                     \================================================= -->
 
                 <hlayout
+
                     width="100%"
+
                     spacing="0"
+
                     valign="middle"
+
                     sclass="cheque-info-row">
 
                     <label
+
                         id="chequeNumberLabel"
+
                         value="Cheque Number : 000125"
+
                         hflex="1"
+
                         sclass="cheque-info"/>
 
                     <label
+
                         id="leftCbsStatus"
+
                         value="● CBS: PASSED"
+
                         sclass="cbs-pass-badge"/>
 
                 </hlayout>
 
 
 
+
+
                 <!-- =================================================
+
                      CHEQUE NAVIGATION
-                     ================================================= -->
+
+                     \================================================= -->
 
                 <hlayout
+
                     width="100%"
+
                     spacing="3px"
+
                     valign="middle"
+
                     sclass="cheque-nav">
 
                     <label
+
                         value="CHEQUE"
+
                         sclass="cheque-nav-label"/>
 
                     <button id="cheque1" label="1"
+
                             sclass="cheque-button cheque-button-selected"/>
 
                     <button id="cheque2" label="2"
+
                             sclass="cheque-button"/>
 
                     <button id="cheque3" label="3"
+
                             sclass="cheque-button"/>
 
                     <button id="cheque4" label="4"
+
                             sclass="cheque-button"/>
 
                     <button id="cheque5" label="5"
+
                             sclass="cheque-button"/>
 
                     <button id="cheque6" label="6"
+
                             sclass="cheque-button"/>
 
                     <button id="cheque7" label="7"
+
                             sclass="cheque-button"/>
 
                     <button id="cheque8" label="8"
+
                             sclass="cheque-button"/>
 
                     <button id="cheque9" label="9"
+
                             sclass="cheque-button"/>
 
                     <button id="cheque10" label="10"
+
                             sclass="cheque-button"/>
 
                     <button id="cheque11" label="11"
+
                             sclass="cheque-button"/>
 
                     <button id="cheque12" label="12"
+
                             sclass="cheque-button"/>
 
                     <button id="cheque13" label="13"
+
                             sclass="cheque-button"/>
 
                     <button id="cheque14" label="14"
+
                             sclass="cheque-button"/>
 
                     <button id="cheque15" label="15"
+
                             sclass="cheque-button"/>
 
                     <button
+
                         id="nextChequeArrow"
+
                         label="›"
+
                         sclass="cheque-arrow"/>
 
                 </hlayout>
 
 
 
+
+
                 <!-- =================================================
+
                      DECISION BUTTONS
-                     ================================================= -->
+
+                     \================================================= -->
 
                 <vlayout
+
                     width="100%"
+
                     spacing="0"
+
                     sclass="decision-area">
 
                     <hlayout
+
                         width="100%"
+
                         spacing="10px">
 
                         <button
+
                             id="acceptButton"
+
                             label="✓ Accept"
+
                             hflex="1"
+
                             sclass="decision-button accept-button"/>
 
                         <button
+
                             id="returnButton"
+
                             label="↶ Return"
+
                             hflex="1"
+
                             sclass="decision-button return-button"/>
 
                         <button
+
                             id="rejectButton"
+
                             label="⚠ Reject"
+
                             hflex="1"
+
                             sclass="decision-button reject-button"/>
 
                     </hlayout>
 
 
+
                     <hlayout
+
                         id="selectedDecision"
+
                         width="100%"
+
                         spacing="0"
+
                         valign="middle"
+
                         sclass="selected-decision">
 
                         <label
+
                             id="selectedDecisionText"
-                            value="✓ Selected Decision: Accepted"/>
+
+                            value=""/>
 
                     </hlayout>
 
@@ -431,55 +648,86 @@
 
 
 
+
+
             <!-- =================================================
+
                  RIGHT PANEL
-                 ================================================= -->
+
+                 \================================================= -->
 
             <vlayout
+
                 hflex="47"
+
                 spacing="0"
+
                 sclass="right-card">
 
 
+
                 <!-- =================================================
+
                      VERIFICATION HEADER
-                     ================================================= -->
+
+                     \================================================= -->
 
                 <hlayout
+
                     width="100%"
+
                     spacing="10px"
+
                     valign="top"
+
                     sclass="verification-header">
 
                     <vlayout
+
                         hflex="1"
+
                         spacing="2px">
 
                         <label
+
                             value="Verification &amp; Corrections"
+
                             sclass="verification-title"/>
 
                         <hlayout
+
                             spacing="3px"
+
                             valign="middle">
 
                             <label
+
                                 value="Cheque:"
+
                                 sclass="verification-subtitle"/>
 
                             <label
+
                                 id="rightChequeNumber"
+
                                 value="000125"
+
                                 sclass="verification-value"/>
 
                             <label
+
                                 id="chequePosition"
+
                                 value=" (1 of 15) | Bank:"
+
                                 sclass="verification-subtitle"/>
 
                             <label
+
                                 id="rightBankName"
+
                                 value="STATE BANK OF INDIA"
+
                                 sclass="verification-value"/>
 
                         </hlayout>
@@ -487,116 +735,179 @@
                     </vlayout>
 
 
+
                     <label
+
                         id="makerId"
+
                         value="Maker: maker101"
+
                         sclass="maker-badge"/>
 
                 </hlayout>
 
 
 
+
+
                 <!-- =================================================
+
                      MAKER REJECTION
-                     ================================================= -->
+
+                     \================================================= -->
 
                 <vlayout
+
                     id="makerRejectionSection"
+
                     width="100%"
+
                     spacing="3px"
+
                     sclass="section maker-rejection"
+
                     visible="false">
 
                     <hlayout
+
                         width="100%"
+
                         spacing="0"
+
                         valign="middle">
 
                         <label
+
                             value="⚠ Cheque Rejected by Maker"
+
                             hflex="1"
+
                             sclass="rejection-title"/>
 
                         <label
+
                             value="REJECTED"
+
                             sclass="rejected-badge"/>
 
                     </hlayout>
 
                     <label
+
                         id="makerRejectReason"
+
                         value="Reason: 03 - Signature differs from bank records."
+
                         sclass="rejection-text rejection-reason"/>
 
                     <label
+
                         id="makerRejectRemarks"
+
                         value="Remarks: Drawer signature differs from mandate on CBS repository."
+
                         sclass="rejection-text"/>
 
                 </vlayout>
 
 
 
+
+
                 <!-- =================================================
+
                      MICR
-                     ================================================= -->
+
+                     \================================================= -->
 
                 <vlayout
+
                     id="micrSection"
+
                     width="100%"
+
                     spacing="5px"
+
                     sclass="section">
 
 
+
                     <hlayout
+
                         width="100%"
+
                         spacing="0"
+
                         valign="middle"
+
                         sclass="section-header">
 
                         <hlayout
+
                             hflex="1"
+
                             spacing="3px">
 
                             <label
+
                                 value="MICR Code"
+
                                 sclass="section-title"/>
 
                             <label
+
                                 value="(City • Bank • Branch)"
+
                                 sclass="section-description"/>
 
                         </hlayout>
 
                         <label
+
                             id="micrStatus"
+
                             value="• No MICR Correction"
+
                             sclass="unchanged-status"/>
 
                     </hlayout>
 
 
 
+
+
                     <!-- NO CORRECTION -->
 
                     <vlayout
+
                         id="micrUnchanged"
+
                         width="100%"
+
                         spacing="3px">
 
                         <label
+
                             value="MICR"
+
                             sclass="field-label"/>
 
                         <hlayout
+
                             width="100%"
+
                             height="30px"
+
                             spacing="0"
+
                             valign="middle"
+
                             sclass="value-box">
 
                             <label
+
                                 id="micrValue"
+
                                 value="500002001"/>
 
                         </hlayout>
@@ -605,31 +916,48 @@
 
 
 
+
+
                     <!-- CORRECTION -->
 
                     <hlayout
+
                         id="micrCorrection"
+
                         width="100%"
+
                         spacing="8px"
+
                         visible="false">
 
                         <vlayout
+
                             hflex="1"
+
                             spacing="2px">
 
                             <label
+
                                 value="Old (Scanned)"
+
                                 sclass="old-label"/>
 
                             <hlayout
+
                                 width="100%"
+
                                 height="29px"
+
                                 spacing="0"
+
                                 valign="middle"
+
                                 sclass="value-box old-value">
 
                                 <label
+
                                     id="oldMicrValue"
+
                                     value="5002200012"/>
 
                             </hlayout>
@@ -637,23 +965,35 @@
                         </vlayout>
 
 
+
                         <vlayout
+
                             hflex="1"
+
                             spacing="2px">
 
                             <label
+
                                 value="Corrected (Maker)"
+
                                 sclass="new-label"/>
 
                             <hlayout
+
                                 width="100%"
+
                                 height="29px"
+
                                 spacing="0"
+
                                 valign="middle"
+
                                 sclass="value-box new-value">
 
                                 <label
+
                                     id="correctedMicrValue"
+
                                     value="500002001"/>
 
                             </hlayout>
@@ -666,85 +1006,134 @@
 
 
 
+
+
                 <!-- =================================================
+
                      DATA ENTRY
-                     ================================================= -->
+
+                     \================================================= -->
 
                 <vlayout
+
                     id="dataEntrySection"
+
                     width="100%"
+
                     spacing="2px"
+
                     sclass="section">
 
 
+
                     <hlayout
+
                         width="100%"
+
                         spacing="0"
+
                         valign="middle">
 
                         <label
+
                             value="Data Entry Fields"
+
                             hflex="1"
+
                             sclass="section-title"/>
 
                         <label
+
                             id="dataEntrySummary"
+
                             value="• 2 Fields Corrected"
+
                             sclass="green-status"/>
 
                     </hlayout>
 
 
 
+
+
                     <!-- ACCOUNT NUMBER -->
 
                     <vlayout
+
                         id="accountField"
+
                         width="100%"
+
                         spacing="3px"
+
                         sclass="data-field">
 
                         <hlayout
+
                             width="100%"
+
                             spacing="0"
+
                             valign="middle"
+
                             sclass="field-header">
 
                             <label
+
                                 value="Account Number"
+
                                 hflex="1"
+
                                 sclass="field-label"/>
 
                             <label
+
                                 id="accountStatus"
+
                                 value="Corrected"
+
                                 sclass="green-status"/>
 
                         </hlayout>
 
 
+
                         <hlayout
+
                             id="accountCorrection"
+
                             width="100%"
+
                             spacing="8px">
 
                             <vlayout
+
                                 hflex="1"
+
                                 spacing="2px">
 
                                 <label
+
                                     value="Old (Scanned)"
+
                                     sclass="old-label"/>
 
                                 <hlayout
+
                                     width="100%"
+
                                     height="29px"
+
                                     spacing="0"
+
                                     valign="middle"
+
                                     sclass="value-box old-value">
 
                                     <label
+
                                         id="oldAccountNumber"
+
                                         value="9876543200"/>
 
                                 </hlayout>
@@ -752,23 +1141,35 @@
                             </vlayout>
 
 
+
                             <vlayout
+
                                 hflex="1"
+
                                 spacing="2px">
 
                                 <label
+
                                     value="Corrected (Maker)"
+
                                     sclass="new-label"/>
 
                                 <hlayout
+
                                     width="100%"
+
                                     height="29px"
+
                                     spacing="0"
+
                                     valign="middle"
+
                                     sclass="value-box new-value">
 
                                     <label
+
                                         id="correctedAccountNumber"
+
                                         value="9876543210"/>
 
                                 </hlayout>
@@ -778,17 +1179,27 @@
                         </hlayout>
 
 
+
                         <hlayout
+
                             id="accountUnchanged"
+
                             width="100%"
+
                             height="29px"
+
                             spacing="0"
+
                             visible="false"
+
                             valign="middle"
+
                             sclass="value-box">
 
                             <label
+
                                 id="accountNumber"
+
                                 value="9876543210"/>
 
                         </hlayout>
@@ -797,54 +1208,84 @@
 
 
 
+
+
                     <!-- AMOUNT -->
 
                     <vlayout
+
                         id="amountField"
+
                         width="100%"
+
                         spacing="3px"
+
                         sclass="data-field">
 
                         <hlayout
+
                             width="100%"
+
                             spacing="0"
+
                             valign="middle">
 
                             <label
+
                                 value="Cheque Amount"
+
                                 hflex="1"
+
                                 sclass="field-label"/>
 
                             <label
+
                                 id="amountStatus"
+
                                 value="Corrected"
+
                                 sclass="green-status"/>
 
                         </hlayout>
 
 
+
                         <hlayout
+
                             id="amountCorrection"
+
                             width="100%"
+
                             spacing="8px">
 
                             <vlayout
+
                                 hflex="1"
+
                                 spacing="2px">
 
                                 <label
+
                                     value="Old (Scanned)"
+
                                     sclass="old-label"/>
 
                                 <hlayout
+
                                     width="100%"
+
                                     height="29px"
+
                                     spacing="0"
+
                                     valign="middle"
+
                                     sclass="value-box old-value">
 
                                     <label
+
                                         id="oldAmount"
+
                                         value="₹ 2000.00"/>
 
                                 </hlayout>
@@ -852,23 +1293,35 @@
                             </vlayout>
 
 
+
                             <vlayout
+
                                 hflex="1"
+
                                 spacing="2px">
 
                                 <label
+
                                     value="Corrected (Maker)"
+
                                     sclass="new-label"/>
 
                                 <hlayout
+
                                     width="100%"
+
                                     height="29px"
+
                                     spacing="0"
+
                                     valign="middle"
+
                                     sclass="value-box new-value">
 
                                     <label
+
                                         id="correctedAmount"
+
                                         value="₹ 2500.00"/>
 
                                 </hlayout>
@@ -878,17 +1331,27 @@
                         </hlayout>
 
 
+
                         <hlayout
+
                             id="amountUnchanged"
+
                             width="100%"
+
                             height="29px"
+
                             spacing="0"
+
                             visible="false"
+
                             valign="middle"
+
                             sclass="value-box">
 
                             <label
+
                                 id="amount"
+
                                 value="₹ 2500.00"/>
 
                         </hlayout>
@@ -897,70 +1360,110 @@
 
 
 
+
+
                     <!-- CHEQUE DATE -->
 
                     <vlayout
+
                         id="dateField"
+
                         width="100%"
+
                         spacing="3px"
+
                         sclass="data-field">
 
                         <hlayout
+
                             width="100%"
+
                             spacing="0"
+
                             valign="middle">
 
                             <label
+
                                 value="Cheque Date"
+
                                 hflex="1"
+
                                 sclass="field-label"/>
 
                             <label
+
                                 id="dateStatus"
+
                                 value="Unchanged"
+
                                 sclass="unchanged-status"/>
 
                         </hlayout>
 
 
+
                         <hlayout
+
                             id="dateUnchanged"
+
                             width="100%"
+
                             height="29px"
+
                             spacing="0"
+
                             valign="middle"
+
                             sclass="value-box">
 
                             <label
+
                                 id="chequeDate"
+
                                 value="21-06-2025"/>
 
                         </hlayout>
 
 
+
                         <hlayout
+
                             id="dateCorrection"
+
                             width="100%"
+
                             spacing="8px"
+
                             visible="false">
 
                             <vlayout
+
                                 hflex="1"
+
                                 spacing="2px">
 
                                 <label
+
                                     value="Old (Scanned)"
+
                                     sclass="old-label"/>
 
                                 <hlayout
+
                                     width="100%"
+
                                     height="29px"
+
                                     spacing="0"
+
                                     valign="middle"
+
                                     sclass="value-box old-value">
 
                                     <label
+
                                         id="oldChequeDate"
+
                                         value="15-06-2025"/>
 
                                 </hlayout>
@@ -968,23 +1471,35 @@
                             </vlayout>
 
 
+
                             <vlayout
+
                                 hflex="1"
+
                                 spacing="2px">
 
                                 <label
+
                                     value="Corrected (Maker)"
+
                                     sclass="new-label"/>
 
                                 <hlayout
+
                                     width="100%"
+
                                     height="29px"
+
                                     spacing="0"
+
                                     valign="middle"
+
                                     sclass="value-box new-value">
 
                                     <label
+
                                         id="correctedChequeDate"
+
                                         value="21-06-2025"/>
 
                                 </hlayout>
@@ -997,70 +1512,110 @@
 
 
 
+
+
                     <!-- PAYEE NAME -->
 
                     <vlayout
+
                         id="payeeField"
+
                         width="100%"
+
                         spacing="3px"
+
                         sclass="data-field">
 
                         <hlayout
+
                             width="100%"
+
                             spacing="0"
+
                             valign="middle">
 
                             <label
+
                                 value="Payee Name"
+
                                 hflex="1"
+
                                 sclass="field-label"/>
 
                             <label
+
                                 id="payeeStatus"
+
                                 value="Unchanged"
+
                                 sclass="unchanged-status"/>
 
                         </hlayout>
 
 
+
                         <hlayout
+
                             id="payeeUnchanged"
+
                             width="100%"
+
                             height="29px"
+
                             spacing="0"
+
                             valign="middle"
+
                             sclass="value-box">
 
                             <label
+
                                 id="payeeName"
+
                                 value="Ravi Kumar"/>
 
                         </hlayout>
 
 
+
                         <hlayout
+
                             id="payeeCorrection"
+
                             width="100%"
+
                             spacing="8px"
+
                             visible="false">
 
                             <vlayout
+
                                 hflex="1"
+
                                 spacing="2px">
 
                                 <label
+
                                     value="Old (Scanned)"
+
                                     sclass="old-label"/>
 
                                 <hlayout
+
                                     width="100%"
+
                                     height="29px"
+
                                     spacing="0"
+
                                     valign="middle"
+
                                     sclass="value-box old-value">
 
                                     <label
+
                                         id="oldPayeeName"
+
                                         value="Ravi Kumar"/>
 
                                 </hlayout>
@@ -1068,23 +1623,35 @@
                             </vlayout>
 
 
+
                             <vlayout
+
                                 hflex="1"
+
                                 spacing="2px">
 
                                 <label
+
                                     value="Corrected (Maker)"
+
                                     sclass="new-label"/>
 
                                 <hlayout
+
                                     width="100%"
+
                                     height="29px"
+
                                     spacing="0"
+
                                     valign="middle"
+
                                     sclass="value-box new-value">
 
                                     <label
+
                                         id="correctedPayeeName"
+
                                         value="Ravi Kumar"/>
 
                                 </hlayout>
@@ -1099,110 +1666,172 @@
 
 
 
+
+
                 <!-- =================================================
+
                      CBS VALIDATION
-                     ================================================= -->
+
+                     \================================================= -->
 
                 <vlayout
+
                     id="cbsSection"
+
                     width="100%"
+
                     spacing="5px"
+
                     sclass="section cbs-section">
 
 
+
                     <hlayout
+
                         width="100%"
+
                         spacing="0"
+
                         valign="middle">
 
                         <label
+
                             id="cbsTitle"
+
                             value="CBS Validation: PASSED"
+
                             hflex="1"
+
                             sclass="cbs-title"/>
 
                         <label
+
                             id="cbsActionStatus"
+
                             value="✓ All core banking checks passed"
+
                             sclass="green-status"/>
 
                     </hlayout>
 
 
+
                     <!-- CBS FAILURE -->
 
                     <hlayout
+
                         id="cbsFailure"
+
                         width="100%"
+
                         spacing="0"
+
                         visible="false"
+
                         sclass="cbs-failure">
 
                         <label
+
                             id="cbsFailureText"
+
                             value=""
+
                             width="100%"/>
 
                     </hlayout>
 
 
 
+
+
                     <!-- CBS CHECKS -->
 
                     <hlayout
+
                         width="100%"
+
                         spacing="6px"
+
                         sclass="cbs-checks">
 
                         <vlayout
+
                             id="cbsAmountFunds"
+
                             hflex="1"
+
                             spacing="2px"
+
                             sclass="cbs-check">
 
                             <label
+
                                 value="Amount / Funds"
+
                                 sclass="cbs-check-name"/>
 
                             <label
+
                                 id="cbsAmountResult"
+
                                 value="Passed"
+
                                 sclass="cbs-check-value"/>
 
                         </vlayout>
 
 
+
                         <vlayout
+
                             id="cbsChequeDate"
+
                             hflex="1"
+
                             spacing="2px"
+
                             sclass="cbs-check">
 
                             <label
+
                                 value="Cheque Date"
+
                                 sclass="cbs-check-name"/>
 
                             <label
+
                                 id="cbsDateResult"
+
                                 value="Passed"
+
                                 sclass="cbs-check-value"/>
 
                         </vlayout>
 
 
+
                         <vlayout
+
                             id="cbsAccountStatus"
+
                             hflex="1"
+
                             spacing="2px"
+
                             sclass="cbs-check">
 
                             <label
+
                                 value="Account Status"
+
                                 sclass="cbs-check-name"/>
 
                             <label
+
                                 id="cbsAccountResult"
+
                                 value="Passed"
+
                                 sclass="cbs-check-value"/>
 
                         </vlayout>
@@ -1213,62 +1842,98 @@
 
 
 
+
+
                 <!-- =================================================
+
                      CHECKER REMARKS
-                     ================================================= -->
+
+                     \================================================= -->
 
                 <vlayout
+
                     width="100%"
+
                     spacing="3px"
+
                     sclass="section">
 
                     <label
+
                         value="Checker Remarks"
+
                         sclass="remarks-label"/>
 
                     <textbox
+
                         id="checkerRemarks"
+
                         width="100%"
+
                         height="45px"
+
                         multiline="true"
+
                         placeholder="Enter remarks (optional)..."
+
                         sclass="remarks-box"/>
 
                 </vlayout>
 
 
 
+
+
                 <!-- =================================================
+
                      BOTTOM ACTIONS
-                     ================================================= -->
+
+                     \================================================= -->
 
                 <hlayout
+
                     width="100%"
+
                     spacing="0"
+
                     valign="middle"
+
                     sclass="bottom-actions">
 
 
+
                     <hlayout
+
                         hflex="1"
+
                         spacing="7px">
 
                         <button
+
                             id="previousCheque"
+
                             label="← Prev"
+
                             sclass="prev-next"/>
 
                         <button
+
                             id="nextCheque"
+
                             label="Next →"
+
                             sclass="prev-next"/>
 
                     </hlayout>
 
 
+
                     <button
+
                         id="completeVerification"
+
                         label="Complete Verification"
+
                         sclass="complete-button"/>
 
                 </hlayout>
@@ -1277,6 +1942,180 @@
 
         </hlayout>
 
+        <!-- =====================================================
+             ACCEPT CONFIRMATION
+             ===================================================== -->
+        <window id="acceptConfirmWindow"
+                title="Confirm Accept"
+                width="420px"
+                border="normal"
+                closable="false"
+                visible="false">
+
+            <vlayout width="100%"
+                     spacing="15px"
+                     style="padding:25px;">
+
+                <label value="Confirm Cheque Acceptance"
+                       style="font-size:17px; font-weight:bold;"/>
+
+                <label value="Are you sure you want to accept this cheque?"
+                       style="font-size:14px;"/>
+
+                <hlayout width="100%"
+                         spacing="10px">
+                    <hlayout hflex="1" spacing="0"/>
+
+                    <button id="acceptCancelButton"
+                            label="Cancel"/>
+
+                    <button id="acceptConfirmButton"
+                            label="Confirm"/>
+
+                </hlayout>
+            </vlayout>
+        </window>
+
+
+        <!-- =====================================================
+             REJECT CHEQUE
+             ===================================================== -->
+        <window id="rejectWindow"
+                title="Reject Cheque"
+                width="500px"
+                border="normal"
+                closable="false"
+                visible="false">
+
+            <vlayout width="100%"
+                     spacing="12px"
+                     style="padding:25px;">
+
+                <label value="Rejection Reason"
+                       style="font-weight:bold;"/>
+
+                <combobox id="rejectReason"
+                          width="100%"
+                          placeholder="Select rejection reason">
+
+                    <comboitem label="Signature mismatch" value="SIGNATURE_MISMATCH"/>
+                    <comboitem label="Signature not available" value="SIGNATURE_NOT_AVAILABLE"/>
+                    <comboitem label="Amount mismatch" value="AMOUNT_MISMATCH"/>
+                    <comboitem label="Account number mismatch" value="ACCOUNT_NUMBER_MISMATCH"/>
+                    <comboitem label="Cheque date invalid" value="CHEQUE_DATE_INVALID"/>
+                    <comboitem label="Stale cheque" value="STALE_CHEQUE"/>
+                    <comboitem label="Post-dated cheque" value="POST_DATED_CHEQUE"/>
+                    <comboitem label="Payee name mismatch" value="PAYEE_NAME_MISMATCH"/>
+                    <comboitem label="Alteration not authenticated" value="ALTERATION_NOT_AUTHENTICATED"/>
+                    <comboitem label="Material alteration" value="MATERIAL_ALTERATION"/>
+                    <comboitem label="Cheque damaged" value="CHEQUE_DAMAGED"/>
+                    <comboitem label="Duplicate cheque" value="DUPLICATE_CHEQUE"/>
+                    <comboitem label="Stop payment" value="STOP_PAYMENT"/>
+                    <comboitem label="Account closed" value="ACCOUNT_CLOSED"/>
+                    <comboitem label="Account blocked" value="ACCOUNT_BLOCKED"/>
+                    <comboitem label="Account frozen" value="ACCOUNT_FROZEN"/>
+                    <comboitem label="Insufficient funds" value="INSUFFICIENT_FUNDS"/>
+                    <comboitem label="Exceeds available balance" value="EXCEEDS_AVAILABLE_BALANCE"/>
+                    <comboitem label="CBS validation failed" value="CBS_VALIDATION_FAILED"/>
+                    <comboitem label="MICR mismatch" value="MICR_MISMATCH"/>
+                    <comboitem label="Cheque details mismatch" value="CHEQUE_DETAILS_MISMATCH"/>
+                    <comboitem label="Suspected fraud" value="SUSPECTED_FRAUD"/>
+                    <comboitem label="Other" value="OTHER"/>
+
+                </combobox>
+
+                <label value="Remark"
+                       style="font-weight:bold;"/>
+
+                <textbox id="rejectRemark"
+                         width="100%"
+                         rows="4"
+                         maxlength="500"
+                         placeholder="Enter remark"/>
+
+                <hlayout width="100%"
+                         spacing="10px">
+                    <hlayout hflex="1" spacing="0"/>
+
+                    <button id="rejectCancelButton"
+                            label="Cancel"/>
+
+                    <button id="rejectConfirmButton"
+                            label="Confirm"/>
+
+                </hlayout>
+            </vlayout>
+        </window>
+
+
+        <!-- =====================================================
+             RETURN TO MAKER
+             ===================================================== -->
+        <window id="returnWindow"
+                title="Return to Maker"
+                width="500px"
+                border="normal"
+                closable="false"
+                visible="false">
+
+            <vlayout width="100%"
+                     spacing="12px"
+                     style="padding:25px;">
+
+                <label value="Return Reason"
+                       style="font-weight:bold;"/>
+
+                <combobox id="returnReason"
+                          width="100%"
+                          placeholder="Select return reason">
+
+                    <comboitem label="MICR correction required" value="MICR_CORRECTION_REQUIRED"/>
+                    <comboitem label="MICR code incorrect" value="MICR_CODE_INCORRECT"/>
+                    <comboitem label="MICR code not readable" value="MICR_CODE_NOT_READABLE"/>
+                    <comboitem label="Account number correction required" value="ACCOUNT_NUMBER_CORRECTION_REQUIRED"/>
+                    <comboitem label="Amount correction required" value="AMOUNT_CORRECTION_REQUIRED"/>
+                    <comboitem label="Cheque date correction required" value="CHEQUE_DATE_CORRECTION_REQUIRED"/>
+                    <comboitem label="Payee name correction required" value="PAYEE_NAME_CORRECTION_REQUIRED"/>
+                    <comboitem label="Multiple data entry errors" value="MULTIPLE_DATA_ENTRY_ERRORS"/>
+                    <comboitem label="Data entry correction required" value="DATA_ENTRY_CORRECTION_REQUIRED"/>
+                    <comboitem label="Cheque image not clear" value="CHEQUE_IMAGE_NOT_CLEAR"/>
+                    <comboitem label="Cheque image partially visible" value="CHEQUE_IMAGE_PARTIALLY_VISIBLE"/>
+                    <comboitem label="Cheque details not readable" value="CHEQUE_DETAILS_NOT_READABLE"/>
+                    <comboitem label="Missing cheque details" value="MISSING_CHEQUE_DETAILS"/>
+                    <comboitem label="Incorrect cheque details" value="INCORRECT_CHEQUE_DETAILS"/>
+                    <comboitem label="CBS validation recheck required" value="CBS_VALIDATION_RECHECK_REQUIRED"/>
+                    <comboitem label="Maker correction incomplete" value="MAKER_CORRECTION_INCOMPLETE"/>
+                    <comboitem label="Maker correction incorrect" value="MAKER_CORRECTION_INCORRECT"/>
+                    <comboitem label="Other" value="OTHER"/>
+
+                </combobox>
+
+                <label value="Remark"
+                       style="font-weight:bold;"/>
+
+                <textbox id="returnRemark"
+                         width="100%"
+                         rows="4"
+                         maxlength="500"
+                         placeholder="Enter remark"/>
+
+                <hlayout width="100%"
+                         spacing="10px">
+                    <hlayout hflex="1" spacing="0"/>
+
+                    <button id="returnCancelButton"
+                            label="Cancel"/>
+
+                    <button id="returnConfirmButton"
+                            label="Confirm"/>
+
+                </hlayout>
+            </vlayout>
+        </window>
+
+
     </div>
+
+
 
 </zk>

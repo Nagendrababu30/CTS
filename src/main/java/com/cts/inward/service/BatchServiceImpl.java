@@ -48,6 +48,24 @@ public class BatchServiceImpl implements BatchService {
 		}
 
 		for (NpciBatchData batch : batches) {
+//        List<NpciBatchData> batches =
+//                batchDao.getAllBatches();
+//
+//        List<InwardBatch> result =
+//                new ArrayList<>();
+//
+//        if (batches == null) {
+//            return result;
+//        }
+//
+//        for (NpciBatchData batch : batches) {
+//
+//            result.add(
+//                    convert(batch));
+//        }
+
+        return null;
+    }
 
 			result.add(convert(batch));
 		}
@@ -85,6 +103,23 @@ public class BatchServiceImpl implements BatchService {
 		for (NpciBatchData batch : batches) {
 
 			if (batch.getBatchId() == id) {
+//        long id =
+//                Long.parseLong(batchId);
+//
+//        List<NpciBatchData> batches =
+//                batchDao.getAllBatches();
+//
+//        if (batches == null) {
+//            return null;
+//        }
+//
+//        for (NpciBatchData batch : batches) {
+//
+//            if (batch.getBatchId() == id) {
+//
+//                return convert(batch);
+//            }
+//        }
 
 				return convert(batch);
 			}

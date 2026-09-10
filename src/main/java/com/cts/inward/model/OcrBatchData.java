@@ -1,61 +1,55 @@
 package com.cts.inward.model;
 
-import java.util.List;
-
 public class OcrBatchData {
 
-    private final long batchId;
-    private final String presentingBankName;
-    private final int totalCheque;
-    private final String fileId;
-    private final List<OcrChequeData> cheques;
+	private long batchId;
+	private String presentingBankName;
+	private int totalCheque;
+	private long fileId;
 
-    private OcrBatchData(
-            long batchId,
-            String presentingBankName,
-            int totalCheque,
-            String fileId,
-            List<OcrChequeData> cheques) {
+	private OcrBatchData(long batchId, String presentingBankName, int totalCheque, long fileId) {
 
-        this.batchId = batchId;
-        this.presentingBankName = presentingBankName;
-        this.totalCheque = totalCheque;
-        this.fileId = fileId;
-        this.cheques = cheques;
-    }
+		this.batchId = batchId;
+		this.presentingBankName = presentingBankName;
+		this.totalCheque = totalCheque;
+		this.fileId = fileId;
+	}
 
-    public static OcrBatchData of(
-            long batchId,
-            String presentingBankName,
-            int totalCheque,
-            String fileId,
-            List<OcrChequeData> cheques) {
+	public static OcrBatchData of(long batchId, String presentingBankName, int totalCheque, long fileId) {
 
-        return new OcrBatchData(
-                batchId,
-                presentingBankName,
-                totalCheque,
-                fileId,
-                cheques);
-    }
+		return new OcrBatchData(batchId, presentingBankName, totalCheque, fileId);
+	}
 
-    public long getBatchId() {
-        return batchId;
-    }
+	public long getBatchId() {
+		return batchId;
+	}
 
-    public String getPresentingBankName() {
-        return presentingBankName;
-    }
+	public void setBatchId(long batchId) {
+		this.batchId = batchId;
+	}
 
-    public int getTotalCheque() {
-        return totalCheque;
-    }
+	public String getPresentingBankName() {
+		return presentingBankName;
+	}
 
-    public String getFileId() {
-        return fileId;
-    }
+	public void setPresentingBankName(String presentingBankName) {
+		this.presentingBankName = presentingBankName;
+	}
 
-    public List<OcrChequeData> getCheques() {
-        return cheques;
-    }
+	public int getTotalCheque() {
+		return totalCheque;
+	}
+
+	public void setTotalCheque(int totalCheque) {
+		this.totalCheque = totalCheque;
+	}
+
+	public long getFileId() {
+		return fileId;
+	}
+
+	public void setFileId(long fileId) {
+		this.fileId = fileId;
+	}
+
 }

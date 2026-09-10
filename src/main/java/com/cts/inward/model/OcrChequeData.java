@@ -5,161 +5,148 @@ import java.time.LocalDate;
 
 public class OcrChequeData {
 
-    private long inwardChequeId;
+	private long inwardChequeId;
 
-    private String chequeNumber;
-    private long batchId;
-    private String accountNumber;
-    private LocalDate chequeDate;
-    private String drawerName;
-    private BigDecimal chequeAmount;
-    private String micrCode;
-    private String cityCode;
-    private String bankCode;
-    private String branchSpecificCode;
+	private String chequeNumber;
+	private long batchId;
+	private String accountNumber;
+	private LocalDate chequeDate;
+	private BigDecimal chequeAmount;
+	private String micrCode;
+	private String cityCode;
+	private String bankCode;
+	private String branchSpecificCode;
+	private String payeeName;
+	private String payeeAccountNumber;
 
-    private OcrChequeData() {
+	private OcrChequeData() {
 
-    }
+	}
 
-    private OcrChequeData(
-            String chequeNumber,
-            long batchId,
-            String accountNumber,
-            LocalDate chequeDate,
-            String drawerName,
-            BigDecimal chequeAmount,
-            String micrCode,
-            String cityCode,
-            String bankCode,
-            String branchSpecificCode) {
+	private OcrChequeData(String chequeNumber, long batchId, String accountNumber, LocalDate chequeDate,
+			BigDecimal chequeAmount, String micrCode, String cityCode, String bankCode, String branchSpecificCode,
+			String payeeName, String payeeAccountNumber) {
 
-        this.chequeNumber = chequeNumber;
-        this.batchId = batchId;
-        this.accountNumber = accountNumber;
-        this.chequeDate = chequeDate;
-        this.drawerName = drawerName;
-        this.chequeAmount = chequeAmount;
-        this.micrCode = micrCode;
-        this.cityCode = cityCode;
-        this.bankCode = bankCode;
-        this.branchSpecificCode = branchSpecificCode;
-    }
+		this.chequeNumber = chequeNumber;
+		this.batchId = batchId;
+		this.accountNumber = accountNumber;
+		this.chequeDate = chequeDate;
+		this.chequeAmount = chequeAmount;
+		this.micrCode = micrCode;
+		this.cityCode = cityCode;
+		this.bankCode = bankCode;
+		this.branchSpecificCode = branchSpecificCode;
+		this.payeeName = payeeName;
+		this.payeeAccountNumber = payeeAccountNumber;
 
-    public static OcrChequeData of() {
-        return new OcrChequeData();
-    }
+	}
 
-    public static OcrChequeData of(
-            String chequeNumber,
-            long batchId,
-            String accountNumber,
-            LocalDate chequeDate,
-            String drawerName,
-            BigDecimal chequeAmount,
-            String micrCode,
-            String cityCode,
-            String bankCode,
-            String branchSpecificCode) {
+	public static OcrChequeData of() {
+		return new OcrChequeData();
+	}
 
-        return new OcrChequeData(
-                chequeNumber,
-                batchId,
-                accountNumber,
-                chequeDate,
-                drawerName,
-                chequeAmount,
-                micrCode,
-                cityCode,
-                bankCode,
-                branchSpecificCode);
-    }
+	public static OcrChequeData of(String chequeNumber, long batchId, String accountNumber, LocalDate chequeDate,
+			BigDecimal chequeAmount, String micrCode, String cityCode, String bankCode, String branchSpecificCode,
+			String payeeName, String payeeAccountNumber) {
 
-    public long getInwardChequeId() {
-        return inwardChequeId;
-    }
+		return new OcrChequeData(chequeNumber, batchId, accountNumber, chequeDate, chequeAmount, micrCode, cityCode,
+				bankCode, branchSpecificCode, payeeName, payeeAccountNumber);
+	}
 
-    public void setInwardChequeId(long inwardChequeId) {
-        this.inwardChequeId = inwardChequeId;
-    }
+	public long getInwardChequeId() {
+		return inwardChequeId;
+	}
 
-    public String getChequeNumber() {
-        return chequeNumber;
-    }
+	public void setInwardChequeId(long inwardChequeId) {
+		this.inwardChequeId = inwardChequeId;
+	}
 
-    public void setChequeNumber(String chequeNumber) {
-        this.chequeNumber = chequeNumber;
-    }
+	public String getChequeNumber() {
+		return chequeNumber;
+	}
 
-    public long getBatchId() {
-        return batchId;
-    }
+	public void setChequeNumber(String chequeNumber) {
+		this.chequeNumber = chequeNumber;
+	}
 
-    public void setBatchId(long batchId) {
-        this.batchId = batchId;
-    }
+	public long getBatchId() {
+		return batchId;
+	}
 
-    public String getAccountNumber() {
-        return accountNumber;
-    }
+	public void setBatchId(long batchId) {
+		this.batchId = batchId;
+	}
 
-    public void setAccountNumber(String accountNumber) {
-        this.accountNumber = accountNumber;
-    }
+	public String getAccountNumber() {
+		return accountNumber;
+	}
 
-    public LocalDate getChequeDate() {
-        return chequeDate;
-    }
+	public void setAccountNumber(String accountNumber) {
+		this.accountNumber = accountNumber;
+	}
 
-    public void setChequeDate(LocalDate chequeDate) {
-        this.chequeDate = chequeDate;
-    }
+	public LocalDate getChequeDate() {
+		return chequeDate;
+	}
 
-    public String getDrawerName() {
-        return drawerName;
-    }
+	public void setChequeDate(LocalDate chequeDate) {
+		this.chequeDate = chequeDate;
+	}
 
-    public void setDrawerName(String drawerName) {
-        this.drawerName = drawerName;
-    }
+	public BigDecimal getChequeAmount() {
+		return chequeAmount;
+	}
 
-    public BigDecimal getChequeAmount() {
-        return chequeAmount;
-    }
+	public void setChequeAmount(BigDecimal chequeAmount) {
+		this.chequeAmount = chequeAmount;
+	}
 
-    public void setChequeAmount(BigDecimal chequeAmount) {
-        this.chequeAmount = chequeAmount;
-    }
+	public String getMicrCode() {
+		return micrCode;
+	}
 
-    public String getMicrCode() {
-        return micrCode;
-    }
+	public void setMicrCode(String micrCode) {
+		this.micrCode = micrCode;
+	}
 
-    public void setMicrCode(String micrCode) {
-        this.micrCode = micrCode;
-    }
+	public String getCityCode() {
+		return cityCode;
+	}
 
-    public String getCityCode() {
-        return cityCode;
-    }
+	public void setCityCode(String cityCode) {
+		this.cityCode = cityCode;
+	}
 
-    public void setCityCode(String cityCode) {
-        this.cityCode = cityCode;
-    }
+	public String getBankCode() {
+		return bankCode;
+	}
 
-    public String getBankCode() {
-        return bankCode;
-    }
+	public void setBankCode(String bankCode) {
+		this.bankCode = bankCode;
+	}
 
-    public void setBankCode(String bankCode) {
-        this.bankCode = bankCode;
-    }
+	public String getBranchSpecificCode() {
+		return branchSpecificCode;
+	}
 
-    public String getBranchSpecificCode() {
-        return branchSpecificCode;
-    }
+	public void setBranchSpecificCode(String branchSpecificCode) {
+		this.branchSpecificCode = branchSpecificCode;
+	}
 
-    public void setBranchSpecificCode(String branchSpecificCode) {
-        this.branchSpecificCode = branchSpecificCode;
-    }
+	public String getPayeeName() {
+		return payeeName;
+	}
+
+	public void setPayeeName(String payeeName) {
+		this.payeeName = payeeName;
+	}
+
+	public String getPayeeAccountNumber() {
+		return payeeAccountNumber;
+	}
+
+	public void setPayeeAccountNumber(String payeeAccountNumber) {
+		this.payeeAccountNumber = payeeAccountNumber;
+	}
+
 }

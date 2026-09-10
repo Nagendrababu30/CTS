@@ -34,7 +34,6 @@ public class ChequeDaoImpl implements ChequeDao {
 				+ "amount, micrcode, chequedate, presentingdate) " + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
 		try (Connection connection = dataSource.getConnection();
-
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setString(1, cheque.getChequeNumber());
@@ -51,9 +50,6 @@ public class ChequeDaoImpl implements ChequeDao {
 
 			statement.setObject(7, cheque.getChequeDate());
 
-			/*
-			 * PXF data does not currently contain presenting date, so store NULL.
-			 */
 			statement.setObject(8, null);
 
 			statement.executeUpdate();
@@ -62,7 +58,6 @@ public class ChequeDaoImpl implements ChequeDao {
 
 			throw new IllegalStateException("Failed to save cheque: " + cheque.getChequeNumber(), e);
 		}
-
 	}
 
 	@Override
@@ -115,29 +110,133 @@ public class ChequeDaoImpl implements ChequeDao {
 	}
 
 	@Override
-	public void updateCheque(String chequeNumber, long batchId, String accountNumber, BigDecimal amount,
-			LocalDate chequeDate) {
+	public void saveDataEntryCorrections(String chequeNumber, long batchId, String accountNumber, BigDecimal amount,
+			LocalDate chequeDate, long userId) {
 
-		String sql = "UPDATE inward_cheque SET " + "account_number = ?, " + "amount = ?, " + "cheque_date = ? "
-				+ "WHERE cheque_number = ? " + "AND batch_id = ?";
+		String sql = "INSERT INTO inward_cheque_dataentry_history " + "(cheque_no, field_name, new_value, changed_by) "
+				+ "VALUES (?, ?, ?, ?)";
 
 		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
-			statement.setString(1, accountNumber);
-			statement.setBigDecimal(2, amount);
-			statement.setObject(3, chequeDate);
-			statement.setString(4, chequeNumber);
-			statement.setLong(5, batchId);
+			// Account Number
+			if (accountNumber != null && !accountNumber.trim().isEmpty()) {
 
-			int updatedRows = statement.executeUpdate();
+				statement.setString(1, chequeNumber);
 
-			if (updatedRows == 0) {
-				throw new IllegalStateException("Cheque not found: " + chequeNumber + " for batch " + batchId);
+				statement.setString(2, "ACCOUNT_NUMBER");
+
+				statement.setString(3, accountNumber);
+
+				statement.setLong(4, userId);
+
+				statement.executeUpdate();
+			}
+
+			// Amount
+			if (amount != null) {
+
+				statement.setString(1, chequeNumber);
+
+				statement.setString(2, "AMOUNT");
+
+				statement.setString(3, amount.toPlainString());
+
+				statement.setLong(4, userId);
+
+				statement.executeUpdate();
+			}
+
+			// Cheque Date
+
+			if (chequeDate != null) {
+
+				statement.setString(1, chequeNumber);
+
+				statement.setString(2, "CHEQUE_DATE");
+
+				statement.setString(3, chequeDate.toString());
+
+				statement.setLong(4, userId);
+
+				statement.executeUpdate();
 			}
 
 		} catch (SQLException e) {
-			throw new IllegalStateException("Failed to update cheque: " + chequeNumber, e);
+
+			throw new IllegalStateException("Failed to save Data Entry corrections " + "for cheque: " + chequeNumber,
+					e);
 		}
+	}
+
+	@Override
+	public void updateChequeStatus(String chequeNumber, String status, long userId) {
+
+	    String checkSql =
+	            "SELECT status " +
+	            "FROM public.inward_cheque_status_history " +
+	            "WHERE cheque_number = ? " +
+	            "ORDER BY status_history_id DESC " +
+	            "LIMIT 1";
+
+	    String insertSql =
+	            "INSERT INTO public.inward_cheque_status_history " +
+	            "(cheque_number, status, " +
+	            "rejection_reason_code, return_reason_code, " +
+	            "maker_id, maker_action, maker_action_on, " +
+	            "checker_id, checker_action, checker_action_on, remarks) " +
+	            "VALUES (?, ?, NULL, NULL, ?, ?, NULL, NULL, NULL, NULL, NULL)";
+
+	    try (Connection connection = dataSource.getConnection()) {
+
+	        // ---------------------------------------------------------
+	        // 1. Get the latest status of this cheque
+	        // ---------------------------------------------------------
+
+	        String latestStatus = null;
+
+	        try (PreparedStatement statement =
+	                     connection.prepareStatement(checkSql)) {
+
+	            statement.setString(1, chequeNumber);
+
+	            try (ResultSet resultSet = statement.executeQuery()) {
+
+	                if (resultSet.next()) {
+	                    latestStatus = resultSet.getString("status");
+	                }
+	            }
+	        }
+
+	        // ---------------------------------------------------------
+	        // 2. Prevent duplicate consecutive status
+	        // ---------------------------------------------------------
+
+	        if (status.equals(latestStatus)) {
+	            return;
+	        }
+
+	        // ---------------------------------------------------------
+	        // 3. Insert the new status
+	        // ---------------------------------------------------------
+
+	        try (PreparedStatement statement =
+	                     connection.prepareStatement(insertSql)) {
+
+	            statement.setString(1, chequeNumber);
+	            statement.setString(2, status);
+	            statement.setLong(3, userId);
+	            statement.setString(4, "DATA_ENTRY");
+
+	            statement.executeUpdate();
+	        }
+
+	    } catch (SQLException e) {
+
+	        throw new IllegalStateException(
+	                "Failed to update cheque status for cheque: "
+	                        + chequeNumber,
+	                e);
+	    }
 	}
 }

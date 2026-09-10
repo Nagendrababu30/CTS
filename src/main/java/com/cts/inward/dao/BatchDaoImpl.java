@@ -13,19 +13,15 @@ import com.cts.inward.model.NpciBatchData;
 
 public class BatchDaoImpl implements BatchDao {
 
-	private final javax.sql.DataSource dataSource;
+	private final DataSource dataSource;
 
-	private BatchDaoImpl(javax.sql.DataSource dataSource) {
+	private BatchDaoImpl(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
 
 	public static BatchDao of() {
 		return new BatchDaoImpl(ConnectionPool.getDataSource());
 	}
-
-	// =========================================================
-	// SAVE BATCH
-	// =========================================================
 
 	@Override
 	public void saveBatch(NpciBatchData batchData) {
@@ -41,21 +37,17 @@ public class BatchDaoImpl implements BatchDao {
 				VALUES (?, ?, ?, ?)
 				""";
 
-		try (Connection connection = dataSource.getConnection();
+		try (Connection connection = ConnectionPool.getDataSource().getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setLong(1, batchData.getBatchId());
-
 			statement.setLong(2, batchData.getFileId());
-
 			statement.setString(3, batchData.getPresentingBankName());
-
 			statement.setInt(4, batchData.getTotalCheques());
 
 			statement.executeUpdate();
 
 		} catch (Exception e) {
-
 			throw new RuntimeException("Error saving batch", e);
 		}
 	}
@@ -92,188 +84,179 @@ public class BatchDaoImpl implements BatchDao {
 			}
 
 		} catch (Exception e) {
-
 			throw new RuntimeException("Error retrieving batches", e);
 		}
 
 		return batches;
 	}
-
-	// =========================================================
-	// VERIFY BATCH
-	//
-	// inward_batch_lock -> identifies current user's batch
-	// inward_batch -> total cheque count
-	// inward_batch_history -> maker ID
-	// =========================================================
-
+	
 	@Override
-	public List<Map<String, Object>> getBatchesForVerification(String userId) {
+	public int getDataEntryPendingCount(long batchId) {
 
-		String sql = """
-				SELECT
-				    b.batch_id,
-				    b.total_cheques,
-				    h.changed_by AS maker_id
+		String sql =
+		        "SELECT COUNT(*) " +
+		        "FROM public.inward_cheque c " +
+		        "LEFT JOIN LATERAL ( " +
+		        "    SELECT h.status " +
+		        "    FROM public.inward_cheque_status_history h " +
+		        "    WHERE h.cheque_number = c.cheque_number " +
+		        "    ORDER BY h.status_history_id DESC " +
+		        "    LIMIT 1 " +
+		        ") latest ON TRUE " +
+		        "WHERE c.batch_id = ? " +
+		        "AND COALESCE(latest.status, '') NOT IN " +
+		        "('DATA_ENTRY_COMPLETED', 'RETURN_BY_MAKER')";
 
-				FROM inward_batch b
+	    try (Connection connection = ConnectionPool.getDataSource().getConnection();
+	         PreparedStatement statement = connection.prepareStatement(sql)) {
 
-				JOIN (
-				    SELECT DISTINCT ON (batch_id, user_id)
-				        batch_id,
-				        user_id,
-				        lock_status,
-				        locked_time
-				    FROM inward_batch_lock
-				    WHERE user_id = ?
-				    ORDER BY
-				        batch_id,
-				        user_id,
-				        locked_time DESC
-				) l
-				    ON b.batch_id = l.batch_id
+	        statement.setLong(1, batchId);
 
-				LEFT JOIN (
-				    SELECT DISTINCT ON (batch_id)
-				        batch_id,
-				        changed_by,
-				        changed_on
-				    FROM inward_batch_history
-				    WHERE batch_status = 'SENT_TO_CHECKER'
-				    ORDER BY
-				        batch_id,
-				        changed_on DESC
-				) h
-				    ON b.batch_id = h.batch_id
+	        try (ResultSet resultSet = statement.executeQuery()) {
 
-				WHERE l.lock_status = 'LOCKED'
+	            if (resultSet.next()) {
+	                return resultSet.getInt(1);
+	            }
+	        }
 
-				ORDER BY b.batch_id
-				""";
+	    } catch (Exception e) {
+	        throw new RuntimeException(
+	                "Error retrieving Data Entry pending count for batch " + batchId, e);
+	    }
 
-		List<Map<String, Object>> batches = new ArrayList<>();
+	    return 0;
+	}
+	
+	@Override
+	public boolean completeDataEntry(long batchId, long userId) {
 
-		try (Connection connection = dataSource.getConnection();
-				PreparedStatement statement = connection.prepareStatement(sql)) {
+		Connection connection = null;
 
-			statement.setLong(1, Long.parseLong(userId));
+		try {
 
-			try (ResultSet resultSet = statement.executeQuery()) {
+			connection = ConnectionPool.getDataSource().getConnection();
 
-				while (resultSet.next()) {
+			connection.setAutoCommit(false);
 
-					Map<String, Object> batch = new HashMap<>();
+			// ---------------------------------------------------------
+			// 1. Check whether ALL cheques are completed
+			// ---------------------------------------------------------
 
-					batch.put("batchId", resultSet.getLong("batch_id"));
+			String checkSql = "SELECT " + "COUNT(*) AS total_count, " + "COUNT(*) FILTER "
+					+ "(WHERE latest.status = 'DATA_ENTRY_COMPLETED') " + "AS completed_count "
+					+ "FROM public.inward_cheque c " + "LEFT JOIN LATERAL ( " + "    SELECT h.status "
+					+ "    FROM public.inward_cheque_status_history h " + "    WHERE h.cheque_number = c.cheque_number "
+					+ "    ORDER BY h.status_history_id DESC " + "    LIMIT 1 " + ") latest ON TRUE "
+					+ "WHERE c.batch_id = ?";
 
-					batch.put("chequeCount", resultSet.getInt("total_cheques"));
+			int totalCount =0;
+			int completedCount = 0;
 
-					/*
-					 * Maker ID comes from inward_batch_history.
-					 *
-					 * Use getObject() so SQL NULL does not automatically become 0. 
-					 */
-					Object makerId = resultSet.getObject("maker_id");
+			try (PreparedStatement statement = connection.prepareStatement(checkSql)) {
 
-					batch.put("makerId", makerId);
+				statement.setLong(1, batchId);
 
-					batches.add(batch);
+				try (ResultSet resultSet = statement.executeQuery()) {
+
+					if (resultSet.next()) {
+
+						totalCount = resultSet.getInt("total_count");
+
+						completedCount = resultSet.getInt("completed_count");
+					}
 				}
 			}
 
+			// ---------------------------------------------------------
+			// 2. Do not complete batch if even one cheque is pending
+			// ---------------------------------------------------------
+
+			if (totalCount == 0 || totalCount != completedCount) {
+
+				connection.rollback();
+
+				return false;
+			}
+
+			// 3. Add DATA_ENTRY_COMPLETED to batch history
+			String historySql = "INSERT INTO public.inward_batch_history " + "(batch_id, batch_status, changed_on, "
+					+ "changed_by, reason, remarks) " + "VALUES (?, ?, CURRENT_TIMESTAMP, ?, ?, ?)";
+
+			try (PreparedStatement statement = connection.prepareStatement(historySql)) {
+
+				statement.setLong(1, batchId);
+
+				statement.setString(2, "DATA_ENTRY_COMPLETED");
+
+				statement.setLong(3, userId);
+
+				statement.setString(4, "DATA_ENTRY_COMPLETED");
+
+				statement.setString(5, "All cheques completed Data Entry");
+
+				statement.executeUpdate();
+			}
+
+			connection.commit();
+
+			return true;
+
 		} catch (Exception e) {
 
-			throw new RuntimeException("Error retrieving batches for verification", e);
-		}
+			if (connection != null) {
 
-		return batches;
+				try {
+					connection.rollback();
+				} catch (Exception rollbackException) {
+					rollbackException.printStackTrace();
+				}
+			}
+
+			throw new RuntimeException("Failed to complete Data Entry for batch " + batchId, e);
+
+		} finally {
+
+			if (connection != null) {
+
+				try {
+					connection.setAutoCommit(true);
+					connection.close();
+				} catch (Exception closeException) {
+					closeException.printStackTrace();
+				}
+			}
+		}
 	}
 
-	// =========================================================
-	// SEARCH VERIFY BATCH
-	//
-	// Search is still restricted to batches currently
-	// locked by the logged-in Checker.
-	// =========================================================
-
 	@Override
-	public List<Map<String, Object>> searchBatchesForVerification(String batchId, String userId) {
+	public List<NpciBatchData> getBatchesByStatus(String batchStatus) {
 
-		String sql = """
-				SELECT
-				    b.batch_id,
-				    b.total_cheques,
-				    h.changed_by AS maker_id
+		String sql = "SELECT " + "b.batch_id, " + "b.file_id, " + "b.presenting_bank_name, " + "b.total_cheques "
+				+ "FROM public.inward_batch b " + "INNER JOIN LATERAL ( " + "    SELECT h.batch_status "
+				+ "    FROM public.inward_batch_history h " + "    WHERE h.batch_id = b.batch_id "
+				+ "    ORDER BY h.changed_on DESC " + "    LIMIT 1 " + ") latest ON TRUE "
+				+ "WHERE latest.batch_status = ? " + "ORDER BY b.batch_id";
 
-				FROM inward_batch b
+		List<NpciBatchData> batches = new ArrayList<>();
 
-				JOIN (
-				    SELECT DISTINCT ON (batch_id, user_id)
-				        batch_id,
-				        user_id,
-				        lock_status,
-				        locked_time
-				    FROM inward_batch_lock
-				    WHERE user_id = ?
-				    ORDER BY
-				        batch_id,
-				        user_id,
-				        locked_time DESC
-				) l
-				    ON b.batch_id = l.batch_id
+		try (Connection connection = ConnectionPool.getDataSource().getConnection();
 
-				LEFT JOIN (
-				    SELECT DISTINCT ON (batch_id)
-				        batch_id,
-				        changed_by,
-				        changed_on
-				    FROM inward_batch_history
-				    WHERE batch_status = 'SENT_TO_CHECKER'
-				    ORDER BY
-				        batch_id,
-				        changed_on DESC
-				) h
-				    ON b.batch_id = h.batch_id
-
-				WHERE l.lock_status = 'LOCKED'
-				  AND CAST(b.batch_id AS VARCHAR) LIKE ?
-
-				ORDER BY b.batch_id
-				""";
-
-		List<Map<String, Object>> batches = new ArrayList<>();
-
-		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
-			statement.setLong(1, Long.parseLong(userId));
-
-			statement.setString(2, "%" + batchId.trim() + "%");
+			statement.setString(1, batchStatus);
 
 			try (ResultSet resultSet = statement.executeQuery()) {
 
 				while (resultSet.next()) {
 
-					Map<String, Object> batch = new HashMap<>();
-
-					batch.put("batchId", resultSet.getLong("batch_id"));
-
-					batch.put("chequeCount", resultSet.getInt("total_cheques"));
-
-					/*
-					 * Maker ID comes from inward_batch_history.
-					 */
-					Object makerId = resultSet.getObject("maker_id");
-
-					batch.put("makerId", makerId);
-
-					batches.add(batch);
+					batches.add(new NpciBatchData(resultSet.getLong("batch_id"), resultSet.getLong("file_id"),
+							resultSet.getString("presenting_bank_name"), resultSet.getInt("total_cheques")));
 				}
 			}
 
 		} catch (Exception e) {
 
-			throw new RuntimeException("Error searching batches for verification", e);
+			throw new RuntimeException("Error retrieving batches by status", e);
 		}
 
 		return batches;

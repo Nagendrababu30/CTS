@@ -1,9 +1,13 @@
 package com.cts.inward.controller;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Session;
+import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Datebox;
@@ -12,9 +16,14 @@ import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
 
-import com.cts.inward.dao.ChequeDao;
+import com.cts.admin.model.User;
+import com.cts.inward.dao.BatchDaoImpl;
 import com.cts.inward.dao.ChequeDaoImpl;
 import com.cts.inward.model.InwardCheque;
+import com.cts.inward.service.BatchService;
+import com.cts.inward.service.BatchServiceImpl;
+import com.cts.inward.service.ChequeService;
+import com.cts.inward.service.ChequeServiceImpl;
 
 public class DataEntryFormController extends GenericForwardComposer<Component> {
 
@@ -50,16 +59,16 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	// =========================================================
 
 	private long batchId;
-
+	private Long loggedInUserId;
 	private List<InwardCheque> cheques;
 
 	private int currentIndex = 0;
 
 	// =========================================================
-	// DAO
+	// SERVICE
 	// =========================================================
-
-	private ChequeDao chequeDao;
+	private BatchService batchService;
+	private ChequeService chequeService;
 
 	// =========================================================
 	// PAGE INITIALIZATION
@@ -69,9 +78,13 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	public void doAfterCompose(Component comp) throws Exception {
 
 		super.doAfterCompose(comp);
-
-		chequeDao = ChequeDaoImpl.of();
-
+		loadLoggedInUser();
+		/*
+		 * Controller talks to Service. Service talks to DAO.
+		 */
+		chequeService = ChequeServiceImpl.of(ChequeDaoImpl.of());
+		batchService = BatchServiceImpl.of(BatchDaoImpl.of());
+		
 		String batchIdParameter = Executions.getCurrent().getParameter("batchId");
 
 		if (batchIdParameter == null || batchIdParameter.trim().isEmpty()) {
@@ -107,15 +120,28 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		}
 	}
 
+	private void loadLoggedInUser() {
+
+		Session session = Executions.getCurrent().getSession();
+
+		User user = (User) session.getAttribute("loggedInUser");
+
+		if (user != null) {
+			loggedInUserId = user.getUserId();
+		}
+	}
 	// =========================================================
-	// LOAD CHEQUES FOR SELECTED BATCH
+	// LOAD CHEQUES
 	// =========================================================
 
 	private void loadCheques() {
 
 		try {
 
-			cheques = chequeDao.getChequesForBatch(String.valueOf(batchId));
+			/*
+			 * Controller -> Service
+			 */
+			cheques = chequeService.getChequesForBatch(String.valueOf(batchId));
 
 		} catch (RuntimeException e) {
 
@@ -133,10 +159,12 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	private void displayCurrentCheque() {
 
 		if (cheques == null || cheques.isEmpty()) {
+
 			return;
 		}
 
 		if (currentIndex < 0 || currentIndex >= cheques.size()) {
+
 			return;
 		}
 
@@ -168,11 +196,11 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 
 		if (cheque.getAmount() != null) {
 
-		    decAmount.setValue(cheque.getAmount());
+			decAmount.setValue(cheque.getAmount());
 
 		} else {
 
-		    decAmount.setRawValue("");
+			decAmount.setRawValue("");
 		}
 
 		// -----------------------------------------------------
@@ -208,6 +236,7 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	public void onClick$btnPrev() {
 
 		if (cheques == null || cheques.isEmpty()) {
+
 			return;
 		}
 
@@ -222,12 +251,6 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	// =========================================================
 	// SAVE & NEXT
 	// =========================================================
-	//
-	// For now this only moves to the next cheque.
-	// Database save will be implemented after the
-	// Data Entry update DAO/service is created.
-	//
-	// =========================================================
 
 	public void onClick$btnSaveNext() {
 
@@ -235,16 +258,98 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 			return;
 		}
 
-		if (currentIndex < cheques.size() - 1) {
+		if (loggedInUserId == null) {
 
-			currentIndex++;
+			Messagebox.show("Unable to identify the logged-in user.", "Data Entry", Messagebox.OK, Messagebox.ERROR);
 
-			displayCurrentCheque();
+			return;
+		}
 
-		} else {
+		InwardCheque currentCheque = cheques.get(currentIndex);
 
-			Messagebox.show("You have reached the last cheque in this batch.", "Data Entry", Messagebox.OK,
-					Messagebox.INFORMATION);
+		try {
+
+			// 1. READ VALUES FROM SCREEN
+
+			String accountNumber = txtAccountNo.getValue();
+
+			BigDecimal amount = decAmount.getValue();
+
+			java.util.Date selectedDate = dtChequeDate.getValue();
+
+			LocalDate chequeDate = null;
+
+			if (selectedDate != null) {
+				chequeDate = new java.sql.Date(selectedDate.getTime()).toLocalDate();
+			}
+
+			/*
+			 * --------------------------------------------------------- 2. SAVE ONLY
+			 * CHANGED DATA ENTRY FIELDS
+			 * ---------------------------------------------------------
+			 */
+
+			if (!sameString(currentCheque.getAccountNumber(), accountNumber)) {
+
+				chequeService.saveDataEntryCorrections(currentCheque.getChequeNumber(), batchId, accountNumber, null,
+						null, loggedInUserId);
+			}
+
+			if (!sameBigDecimal(currentCheque.getAmount(), amount)) {
+
+				chequeService.saveDataEntryCorrections(currentCheque.getChequeNumber(), batchId, null, amount, null,
+						loggedInUserId);
+			}
+
+			if (!sameLocalDate(currentCheque.getChequeDate(), chequeDate)) {
+
+				chequeService.saveDataEntryCorrections(currentCheque.getChequeNumber(), batchId, null, null, chequeDate,
+						loggedInUserId);
+			}
+
+		
+		//	 3. CHANGE CHEQUE STATUS 
+
+			chequeService.updateChequeStatus(currentCheque.getChequeNumber(), "DATA_ENTRY_COMPLETED", loggedInUserId);
+			
+			if (currentIndex == cheques.size() - 1) {
+
+			    boolean completed = batchService.completeDataEntry(
+			        batchId,
+			        loggedInUserId
+			    );
+
+			    if (completed) {
+			        Clients.showNotification(
+			            "Batch completed and ready for Checker.",
+			            Clients.NOTIFICATION_TYPE_INFO,
+			            null,
+			            "top_center",
+			            3000
+			        );
+			    }
+			}
+
+		// 4. MOVE TO NEXT CHEQUE
+			
+			if (currentIndex < cheques.size() - 1) {
+
+				currentIndex++;
+
+				displayCurrentCheque();
+
+			} else {
+
+				Messagebox.show("Data Entry completed for this cheque.", "Data Entry", Messagebox.OK,
+						Messagebox.INFORMATION);
+			}
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			Messagebox.show("Unable to save Data Entry for cheque " + currentCheque.getChequeNumber() + ".",
+					"Data Entry", Messagebox.OK, Messagebox.ERROR);
 		}
 	}
 
@@ -263,33 +368,25 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 
 	private void updateNavigationButtons() {
 
-		if (cheques == null || cheques.isEmpty()) {
-
-			btnPrev.setDisabled(true);
-			btnSaveNext.setDisabled(true);
-
-			return;
+			if (cheques == null || cheques.isEmpty()) {
+	
+				btnPrev.setDisabled(true);
+				btnSaveNext.setDisabled(true);
+	
+				return;
+			}
+	
+			// PREVIOUS
+			btnPrev.setDisabled(currentIndex == 0);
+	
+			// SAVE / SAVE & NEXT
+		
+			if (currentIndex == cheques.size() - 1) {
+			    btnSaveNext.setLabel("Save & Submit to Checker");
+			} else {
+			    btnSaveNext.setLabel("Save & Next →");
+			}	
 		}
-
-		// -----------------------------------------------------
-		// PREVIOUS
-		// -----------------------------------------------------
-
-		btnPrev.setDisabled(currentIndex == 0);
-
-		// -----------------------------------------------------
-		// SAVE & NEXT
-		// -----------------------------------------------------
-
-		if (currentIndex == cheques.size() - 1) {
-
-			btnSaveNext.setLabel("Save");
-
-		} else {
-
-			btnSaveNext.setLabel("Save & Next →");
-		}
-	}
 
 	// =========================================================
 	// NULL SAFE STRING
@@ -298,5 +395,42 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	private String safeString(String value) {
 
 		return value == null ? "" : value;
+	}
+
+	// helper methods to check the cheque fields are changed or not
+
+	private boolean sameString(String oldValue, String newValue) {
+
+		String oldText = oldValue == null ? "" : oldValue.trim();
+
+		String newText = newValue == null ? "" : newValue.trim();
+
+		return oldText.equals(newText);
+	}
+
+	private boolean sameBigDecimal(BigDecimal oldValue, BigDecimal newValue) {
+
+		if (oldValue == null && newValue == null) {
+			return true;
+		}
+
+		if (oldValue == null || newValue == null) {
+			return false;
+		}
+
+		return oldValue.compareTo(newValue) == 0;
+	}
+
+	private boolean sameLocalDate(LocalDate oldValue, LocalDate newValue) {
+
+		if (oldValue == null && newValue == null) {
+			return true;
+		}
+
+		if (oldValue == null || newValue == null) {
+			return false;
+		}
+
+		return oldValue.equals(newValue);
 	}
 }

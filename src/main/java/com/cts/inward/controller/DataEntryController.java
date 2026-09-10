@@ -22,16 +22,9 @@ public class DataEntryController extends GenericForwardComposer<Component> {
 
 	private static final long serialVersionUID = 1L;
 
-	// ---------------------------------------------------------
 	// ZUL components
-	// ---------------------------------------------------------
-
 	private Listbox batchListbox;
-
-	// ---------------------------------------------------------
 	// Service
-	// ---------------------------------------------------------
-
 	private BatchService batchService;
 
 	// ---------------------------------------------------------
@@ -112,8 +105,12 @@ public class DataEntryController extends GenericForwardComposer<Component> {
 
 		pendingCell.setStyle("text-align:center;");
 
-		pendingCell.appendChild(new Label(String.valueOf(batch.getTotalCheques()) + " Cheques"));
+		int pendingCount =
+		        batchService.getDataEntryPendingCount(batch.getBatchId());
 
+		pendingCell.appendChild(
+		        new Label(String.valueOf(pendingCount) + " Cheques")
+		);
 		item.appendChild(pendingCell);
 
 		// -----------------------------------------------------

@@ -68,21 +68,6 @@
                     sclass="menu-label" />
 
             </a>
-
-
-            <!-- Reports -->
-            <a
-                href="/zul/inward-maker/reports.zul"
-                sclass="${arg.active eq 'reports' ? 'menu-item active-menu' : 'menu-item'}">
-
-                <n:i class="fa-solid fa-chart-simple menu-icon"></n:i>
-
-                <label
-                    value="Reports"
-                    sclass="menu-label" />
-
-            </a>
-
         </vlayout>
 
 

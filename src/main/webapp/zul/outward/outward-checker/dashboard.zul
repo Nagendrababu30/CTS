@@ -12,27 +12,63 @@
 
 <zk>
 
-    <!-- ========================================================= -->
-    <!-- PAGE CSS                                                  -->
-    <!-- ========================================================= -->
+    <style><![CDATA[
 
-    <style>
-        <![CDATA[
-        .checker-dashboard-content {
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            overflow: hidden !important;
             background: #F4F7FB;
         }
 
+        .checker-dashboard-content {
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            background: #F4F7FB;
+        }
+
+        .checker-dashboard-layout {
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            padding: 24px 30px;
+            overflow: auto;
+            background: #F4F7FB;
+        }
+
+        /* =====================================================
+           PAGE TITLE
+           ===================================================== */
+
+        .checker-page-title {
+            font-size: 26px;
+            font-weight: bold;
+            color: #122B49;
+        }
+
+        .checker-page-subtitle {
+            font-size: 14px;
+            color: #667085;
+        }
+
+        /* =====================================================
+           SUMMARY CARDS
+           ===================================================== */
+
         .checker-dashboard-card {
             background: #FFFFFF;
-            border: 1px solid #E5E7EB;
+            border: 1px solid #DCE5F0;
             border-radius: 8px;
-            padding: 20px;
+            padding: 18px;
             box-sizing: border-box;
         }
 
         .checker-dashboard-card-label {
             font-size: 14px;
-            color: #6B7280;
+            color: #667085;
         }
 
         .checker-dashboard-card-value {
@@ -41,9 +77,13 @@
             color: #172B4D;
         }
 
+        /* =====================================================
+           TABLE PANEL
+           ===================================================== */
+
         .checker-dashboard-section {
             background: #FFFFFF;
-            border: 1px solid #E5E7EB;
+            border: 1px solid #DCE5F0;
             border-radius: 8px;
             padding: 20px;
             box-sizing: border-box;
@@ -52,47 +92,110 @@
         .checker-dashboard-section-title {
             font-size: 18px;
             font-weight: bold;
-            color: #172B4D;
+            color: #122B49;
         }
-        ]]>
-    </style>
+
+        /* =====================================================
+           FILTER
+           ===================================================== */
+
+        .filter-label {
+            font-size: 14px;
+            color: #667085;
+            margin-right: 8px;
+        }
+
+        .filter-btn {
+            margin-left: 6px;
+            border: 1px solid #D0D5DD;
+            border-radius: 5px;
+            background: white;
+            color: #344054;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .active-filter {
+            background: #175CD3;
+            color: white;
+            border-color: #175CD3;
+        }
+
+        /* =====================================================
+           BATCH TABLE
+           ===================================================== */
+
+        .checker-batch-grid {
+            width: 100%;
+        }
+
+        .checker-batch-grid .z-listbox-body {
+            overflow-y: auto !important;
+        }
+
+        .checker-batch-grid .z-listcell-content {
+            padding: 12px 10px;
+        }
+
+        /* =====================================================
+           PAGINATION
+           ===================================================== */
+
+        .pagination-btn {
+            min-width: 36px;
+            height: 34px;
+            border: 1px solid #D0D5DD;
+            border-radius: 5px;
+            background: white;
+            color: #344054;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .pagination-btn:hover {
+            background: #F2F4F7;
+        }
+
+        .pagination-active {
+            background: #175CD3 !important;
+            color: white !important;
+            border-color: #175CD3 !important;
+        }
+
+        .pagination-disabled {
+            opacity: 0.45;
+            cursor: default;
+        }
+
+    ]]></style>
 
 
-    <!-- ========================================================= -->
-    <!-- COMMON LAYOUT CONTENT                                     -->
-    <!-- Header + Checker Sidebar come from layout.zul             -->
-    <!-- ========================================================= -->
+    <!-- =========================================================
+         COMMON LAYOUT CONTENT
+         Header + Checker Sidebar come from layout.zul
+         ========================================================= -->
 
     <div
         self="@define(content)"
         width="100%"
         height="100%"
-        style="
-            width:100%;
-            height:100%;
-            background:#F4F7FB;
-        ">
+        sclass="checker-dashboard-content">
 
-        <!-- ===================================================== -->
-        <!-- CHECKER DASHBOARD CONTROLLER                          -->
-        <!-- ===================================================== -->
+
+        <!-- =====================================================
+             CHECKER DASHBOARD CONTROLLER
+             ===================================================== -->
 
         <vlayout
             apply="com.iispl.cts.controller.outward.checker.CheckerDashboardController"
-            width="100%"
-            height="100%"
             spacing="20px"
-            sclass="checker-dashboard-content"
-            style="
-                padding:25px;
-                box-sizing:border-box;
-                overflow:auto;
-            ">
+            sclass="checker-dashboard-layout"
+            hflex="1">
 
 
-            <!-- ================================================= -->
-            <!-- PAGE TITLE                                         -->
-            <!-- ================================================= -->
+            <!-- =================================================
+                 PAGE TITLE
+                 ================================================= -->
 
             <vlayout
                 spacing="5px"
@@ -100,125 +203,239 @@
 
                 <label
                     value="Checker Dashboard"
-                    style="
-                        font-size:26px;
-                        font-weight:bold;
-                        color:#172B4D;
-                    "/>
+                    sclass="checker-page-title"/>
 
                 <label
                     value="Monitor and verify outward batches"
-                    style="
-                        font-size:14px;
-                        color:#6B7280;
-                    "/>
+                    sclass="checker-page-subtitle"/>
 
             </vlayout>
 
 
-            <!-- ================================================= -->
-            <!-- SUMMARY CARDS                                      -->
-            <!-- ================================================= -->
+            <!-- =================================================
+                 SUMMARY CARDS
+                 ================================================= -->
 
             <hlayout
                 width="100%"
-                spacing="15px"
+                spacing="20px"
                 style="margin-bottom:5px;">
 
 
-                <!-- ============================================= -->
-                <!-- PENDING VERIFICATION                           -->
-                <!-- ============================================= -->
+                <!-- =============================================
+                     PENDING VERIFICATION
+                     ============================================= -->
 
-                <div
-                    width="30%"
-                    sclass="checker-dashboard-card">
+                <hlayout
+                    hflex="1"
+                    sclass="checker-dashboard-card"
+                    valign="middle">
 
-                    <label
-                        value="Pending Verification"
-                        sclass="checker-dashboard-card-label"/>
+                    <vlayout
+                        width="55px"
+                        height="55px"
+                        style="
+                            background:#EAF2FF;
+                            border-radius:8px;
+                            align-items:center;
+                            justify-content:center;
+                        ">
 
-                    <separator
-                        height="8px"/>
+                        <label
+                            sclass="z-icon-folder-o"
+                            style="
+                                font-size:22px;
+                                color:#175CD3;
+                            "/>
 
-                    <label
-                        id="pendingVerificationCount"
-                        value="0"
-                        sclass="checker-dashboard-card-value"/>
+                    </vlayout>
 
-                </div>
+                    <vlayout
+                        spacing="2px"
+                        style="padding-left:14px;">
 
+                        <label
+                            value="Pending Verification"
+                            sclass="checker-dashboard-card-label"/>
 
-                <!-- ============================================= -->
-                <!-- CBS VALIDATION                                 -->
-                <!-- ============================================= -->
+                        <label
+                            id="pendingVerificationCount"
+                            value="0"
+                            sclass="checker-dashboard-card-value"
+                            style="color:#175CD3;"/>
 
-                <div
-                    width="30%"
-                    sclass="checker-dashboard-card">
+                    </vlayout>
 
-                    <label
-                        value="CBS Validation"
-                        sclass="checker-dashboard-card-label"/>
-
-                    <separator
-                        height="8px"/>
-
-                    <label
-                        id="cbsValidationCount"
-                        value="0"
-                        sclass="checker-dashboard-card-value"/>
-
-                </div>
+                </hlayout>
 
 
-                <!-- ============================================= -->
-                <!-- READY TO SEND                                  -->
-                <!-- ============================================= -->
+                <!-- =============================================
+                     CBS VALIDATION
+                     ============================================= -->
 
-                <div
-                    width="30%"
-                    sclass="checker-dashboard-card">
+                <hlayout
+                    hflex="1"
+                    sclass="checker-dashboard-card"
+                    valign="middle">
 
-                    <label
-                        value="Ready To Send"
-                        sclass="checker-dashboard-card-label"/>
+                    <vlayout
+                        width="55px"
+                        height="55px"
+                        style="
+                            background:#F4F0FF;
+                            border-radius:8px;
+                            align-items:center;
+                            justify-content:center;
+                        ">
 
-                    <separator
-                        height="8px"/>
+                        <label
+                            sclass="z-icon-cog"
+                            style="
+                                font-size:22px;
+                                color:#7A5AF8;
+                            "/>
 
-                    <label
-                        id="readyToSendCount"
-                        value="0"
-                        sclass="checker-dashboard-card-value"/>
+                    </vlayout>
 
-                </div>
+                    <vlayout
+                        spacing="2px"
+                        style="padding-left:14px;">
+
+                        <label
+                            value="CBS Validation"
+                            sclass="checker-dashboard-card-label"/>
+
+                        <label
+                            id="cbsValidationCount"
+                            value="0"
+                            sclass="checker-dashboard-card-value"
+                            style="color:#7A5AF8;"/>
+
+                    </vlayout>
+
+                </hlayout>
+
+
+                <!-- =============================================
+                     READY TO SEND
+                     ============================================= -->
+
+                <hlayout
+                    hflex="1"
+                    sclass="checker-dashboard-card"
+                    valign="middle">
+
+                    <vlayout
+                        width="55px"
+                        height="55px"
+                        style="
+                            background:#ECFDF3;
+                            border-radius:8px;
+                            align-items:center;
+                            justify-content:center;
+                        ">
+
+                        <label
+                            sclass="z-icon-check"
+                            style="
+                                font-size:22px;
+                                color:#12B76A;
+                            "/>
+
+                    </vlayout>
+
+                    <vlayout
+                        spacing="2px"
+                        style="padding-left:14px;">
+
+                        <label
+                            value="Ready To Send"
+                            sclass="checker-dashboard-card-label"/>
+
+                        <label
+                            id="readyToSendCount"
+                            value="0"
+                            sclass="checker-dashboard-card-value"
+                            style="color:#12B76A;"/>
+
+                    </vlayout>
+
+                </hlayout>
 
             </hlayout>
 
 
-            <!-- ================================================= -->
-            <!-- BATCH TABLE                                       -->
-            <!-- ================================================= -->
+            <!-- =================================================
+                 CHECKER BATCH TABLE PANEL
+                 ================================================= -->
 
-            <div
-                width="100%"
-                sclass="checker-dashboard-section">
+            <vlayout
+                sclass="checker-dashboard-section"
+                spacing="0"
+                width="100%">
 
-                <label
-                    value="Checker Batch Queue"
-                    sclass="checker-dashboard-section-title"/>
 
-                <separator
-                    height="15px"/>
+                <!-- =============================================
+                     TABLE HEADER
+                     ============================================= -->
 
+                <hlayout
+                    valign="middle"
+                    width="100%"
+                    style="padding-bottom:16px;">
+
+                    <label
+                        value="Checker Batch Queue"
+                        sclass="checker-dashboard-section-title"/>
+
+                    <space hflex="1"/>
+
+                    <!-- =========================================
+                         FILTER STATUS
+                         ========================================= -->
+
+                    <label
+                        value="Filter Status:"
+                        sclass="filter-label"/>
+
+                    <button
+                        id="allBtn"
+                        label="All"
+                        sclass="filter-btn active-filter"/>
+
+                    <button
+                        id="availableBtn"
+                        label="Available"
+                        sclass="filter-btn"/>
+
+                    <button
+                        id="myBatchesBtn"
+                        label="My Batches"
+                        sclass="filter-btn"/>
+
+                </hlayout>
+
+
+                <!-- =============================================
+                     BATCH LIST
+                     ============================================= -->
 
                 <listbox
                     id="batchListbox"
                     width="100%"
-                    mold="paging"
-                    pageSize="10"
-                    emptyMessage="No batches available for verification.">
+                    height="450px"
+                    sclass="checker-batch-grid"
+                    emptyMessage="No batches available for verification."
+                    nonselectableTags="button"
+                    style="
+                        border:1px solid #E4E7EC;
+                        border-radius:6px;
+                    ">
+
+
+                    <!-- =========================================
+                         COLUMNS
+                         ========================================= -->
 
                     <listhead>
 
@@ -228,25 +445,143 @@
 
                         <listheader
                             label="Total Cheques"
-                            width="15%"/>
+                            width="15%"
+                            align="center"/>
 
                         <listheader
                             label="Status"
-                            width="20%"/>
+                            width="20%"
+                            align="center"/>
 
                         <listheader
                             label="Assignment"
-                            width="20%"/>
+                            width="20%"
+                            align="center"/>
 
                         <listheader
                             label="Action"
-                            width="15%"/>
+                            width="25%"
+                            align="center"/>
 
                     </listhead>
 
                 </listbox>
 
-            </div>
+
+                <!-- =================================================
+                     PAGINATION
+                     
+                     No "pack" attribute is used.
+                     This is compatible with your ZK version.
+                     ================================================= -->
+
+                <div
+                    width="100%"
+                    style="
+                        text-align:center;
+                        padding:15px 0 5px 0;
+                    ">
+
+                    <hlayout
+                        id="paginationLayout"
+                        spacing="6px"
+                        valign="middle"
+                        style="
+                            display:inline-flex;
+                            align-items:center;
+                        ">
+
+
+                        <!-- =====================================
+                             PREVIOUS
+                             ===================================== -->
+
+                        <button
+                            id="previousPageButton"
+                            label="Previous"
+                            sclass="pagination-btn"/>
+
+
+                        <!-- =====================================
+                             PAGE 1
+                             ===================================== -->
+
+                        <button
+                            id="page1Button"
+                            label="1"
+                            sclass="pagination-btn pagination-active"/>
+
+
+                        <!-- =====================================
+                             PAGE 2
+                             ===================================== -->
+
+                        <button
+                            id="page2Button"
+                            label="2"
+                            sclass="pagination-btn"/>
+
+
+                        <!-- =====================================
+                             PAGE 3
+                             ===================================== -->
+
+                        <button
+                            id="page3Button"
+                            label="3"
+                            sclass="pagination-btn"/>
+
+
+                        <!-- =====================================
+                             PAGE 4
+                             ===================================== -->
+
+                        <button
+                            id="page4Button"
+                            label="4"
+                            sclass="pagination-btn"/>
+
+
+                        <!-- =====================================
+                             PAGE 5
+                             ===================================== -->
+
+                        <button
+                            id="page5Button"
+                            label="5"
+                            sclass="pagination-btn"/>
+
+
+                        <!-- =====================================
+                             NEXT
+                             ===================================== -->
+
+                        <button
+                            id="nextPageButton"
+                            label="Next"
+                            sclass="pagination-btn"/>
+
+
+                        <!-- =====================================
+                             PAGINATION INFORMATION
+                             ===================================== -->
+
+                        <label
+                            id="paginationInfo"
+                            value=""
+                            style="
+                                margin-left:15px;
+                                font-size:13px;
+                                color:#667085;
+                                font-weight:600;
+                                white-space:nowrap;
+                            "/>
+
+                    </hlayout>
+
+                </div>
+
+            </vlayout>
 
         </vlayout>
 

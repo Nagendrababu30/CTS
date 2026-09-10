@@ -93,6 +93,7 @@
             background: white;
             color: #344054;
             font-weight: 600;
+            cursor: pointer;
         }
 
         .active-filter {
@@ -113,6 +114,36 @@
             padding: 12px 10px;
         }
 
+        /* =====================================================
+           PAGINATION BUTTONS
+           ===================================================== */
+
+        .pagination-btn {
+            min-width: 36px;
+            height: 34px;
+            border: 1px solid #D0D5DD;
+            border-radius: 5px;
+            background: white;
+            color: #344054;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .pagination-btn:hover {
+            background: #F2F4F7;
+        }
+
+        .pagination-active {
+            background: #175CD3 !important;
+            color: white !important;
+            border-color: #175CD3 !important;
+        }
+
+        .pagination-disabled {
+            opacity: 0.45;
+            cursor: default;
+        }
+
     ]]></style>
 
 
@@ -128,7 +159,7 @@
 
 
         <!-- =====================================================
-             OUTWARD MAKER DASHBOARD CONTROLLER
+             OUTWARD MAKER DASHBOARD
              ===================================================== -->
 
         <vlayout
@@ -369,14 +400,6 @@
 
                     <!-- =========================================
                          COLUMNS
-
-                         MUST MATCH CONTROLLER RENDERER:
-
-                         1. Batch No
-                         2. Total Cheques
-                         3. Status
-                         4. Action
-                         5. Assignment
                          ========================================= -->
 
                     <listhead>
@@ -407,20 +430,122 @@
 
                     </listhead>
 
-
-                    <!--
-                        IMPORTANT:
-
-                        No hard-coded listitem rows here.
-
-                        OutwardMakerDashboardController will call:
-
-                            batchListbox.setModel(model);
-
-                        and its renderer will create the rows.
-                    -->
-
                 </listbox>
+
+
+                <!-- =================================================
+                     PAGINATION
+                     
+                     NOTE:
+                     No "pack" attribute is used on Hlayout because
+                     your ZK version does not support setPack().
+                     ================================================= -->
+
+                <div
+                    width="100%"
+                    style="
+                        text-align:center;
+                        padding:15px 0 5px 0;
+                    ">
+
+                    <hlayout
+                        id="paginationLayout"
+                        spacing="6px"
+                        valign="middle"
+                        style="
+                            display:inline-flex;
+                            align-items:center;
+                        ">
+
+
+                        <!-- =====================================
+                             PREVIOUS
+                             ===================================== -->
+
+                        <button
+                            id="previousPageButton"
+                            label="Previous"
+                            sclass="pagination-btn"/>
+
+
+                        <!-- =====================================
+                             PAGE 1
+                             ===================================== -->
+
+                        <button
+                            id="page1Button"
+                            label="1"
+                            sclass="pagination-btn pagination-active"/>
+
+
+                        <!-- =====================================
+                             PAGE 2
+                             ===================================== -->
+
+                        <button
+                            id="page2Button"
+                            label="2"
+                            sclass="pagination-btn"/>
+
+
+                        <!-- =====================================
+                             PAGE 3
+                             ===================================== -->
+
+                        <button
+                            id="page3Button"
+                            label="3"
+                            sclass="pagination-btn"/>
+
+
+                        <!-- =====================================
+                             PAGE 4
+                             ===================================== -->
+
+                        <button
+                            id="page4Button"
+                            label="4"
+                            sclass="pagination-btn"/>
+
+
+                        <!-- =====================================
+                             PAGE 5
+                             ===================================== -->
+
+                        <button
+                            id="page5Button"
+                            label="5"
+                            sclass="pagination-btn"/>
+
+
+                        <!-- =====================================
+                             NEXT
+                             ===================================== -->
+
+                        <button
+                            id="nextPageButton"
+                            label="Next"
+                            sclass="pagination-btn"/>
+
+
+                        <!-- =====================================
+                             PAGINATION INFORMATION
+                             ===================================== -->
+
+                        <label
+                            id="paginationInfo"
+                            value=""
+                            style="
+                                margin-left:15px;
+                                font-size:13px;
+                                color:#667085;
+                                font-weight:600;
+                                white-space:nowrap;
+                            "/>
+
+                    </hlayout>
+
+                </div>
 
             </vlayout>
 

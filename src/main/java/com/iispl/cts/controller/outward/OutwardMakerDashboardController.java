@@ -8,9 +8,9 @@ import java.util.List;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Session;
+import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Wire;
-import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.ListModelList;
@@ -22,7 +22,6 @@ import org.zkoss.zul.Messagebox;
 
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.model.outward.OutwardValidationResult;
-import com.iispl.cts.model.outward.UserSession;
 import com.iispl.cts.service.outward.OutwardMakerDashboardService;
 
 public class OutwardMakerDashboardController
@@ -46,6 +45,51 @@ public class OutwardMakerDashboardController
     @Wire
     private Label readyToSubmitCount;
 
+    @Wire
+    private Button allBtn;
+
+    @Wire
+    private Button availableBtn;
+
+    @Wire
+    private Button myBatchesBtn;
+
+    // =========================================================
+    // PAGINATION COMPONENTS
+    // =========================================================
+
+    @Wire
+    private Button previousPageButton;
+
+    @Wire
+    private Button nextPageButton;
+
+    @Wire
+    private Button page1Button;
+
+    @Wire
+    private Button page2Button;
+
+    @Wire
+    private Button page3Button;
+
+    @Wire
+    private Button page4Button;
+
+    @Wire
+    private Button page5Button;
+
+    @Wire
+    private Label paginationInfo;
+
+    // =========================================================
+    // PAGINATION
+    // =========================================================
+
+    private int currentPage = 1;
+
+    private static final int PAGE_SIZE = 5;
+
     // =========================================================
     // SERVICE
     // =========================================================
@@ -59,6 +103,12 @@ public class OutwardMakerDashboardController
     private String currentUserId;
 
     // =========================================================
+    // CURRENT FILTER
+    // =========================================================
+
+    private String currentFilter = "ALL";
+
+    // =========================================================
     // AFTER COMPOSE
     // =========================================================
 
@@ -68,138 +118,423 @@ public class OutwardMakerDashboardController
 
         super.doAfterCompose(comp);
 
-     // =====================================================
-     // GET LOGGED-IN USER FROM SESSION
-     // =====================================================
+        // =====================================================
+        // GET LOGGED-IN USER FROM SESSION
+        // =====================================================
 
-     Session sessionUser =
-             Executions.getCurrent()
-                     .getSession();
+        Session sessionUser =
+                Executions.getCurrent()
+                        .getSession();
 
-     if (sessionUser == null) {
+        if (sessionUser == null) {
 
-         System.out.println(
-                 "No logged-in user session found."
-         );
+            System.out.println(
+                    "No logged-in user session found."
+            );
 
-         Executions.sendRedirect("/zul/login.zul");
+            Executions.sendRedirect("/zul/login.zul");
 
-         return;
-     }
+            return;
+        }
 
+        // =====================================================
+        // GET LOGGED-IN USER ID FROM SESSION
+        // =====================================================
 
-     // =====================================================
-     // GET LOGGED-IN USER ID FROM SESSION
-     // =====================================================
-     //
-     // Existing session design:
-     // session attribute = "userId"
-     //
+        Object sessionUserId =
+                sessionUser.getAttribute("userId");
 
-     Object sessionUserId =
-             sessionUser.getAttribute("userId");
+        if (sessionUserId == null) {
 
-     if (sessionUserId == null) {
+            System.out.println(
+                    "No logged-in user ID found in session."
+            );
 
-         System.out.println(
-                 "No logged-in user ID found in session."
-         );
+            Executions.sendRedirect("/zul/login.zul");
 
-         Executions.sendRedirect("/zul/login.zul");
+            return;
+        }
 
-         return;
-     }
+        // =====================================================
+        // CONVERT SESSION USER ID TO LONG
+        // =====================================================
 
+        long userId;
 
-     // =====================================================
-     // CONVERT SESSION USER ID TO LONG
-     // =====================================================
+        if (sessionUserId instanceof Number) {
 
-     long userId;
+            userId =
+                    ((Number) sessionUserId)
+                            .longValue();
 
-     if (sessionUserId instanceof Number) {
+        } else {
 
-         userId =
-                 ((Number) sessionUserId)
-                         .longValue();
+            try {
 
-     } else {
+                userId =
+                        Long.parseLong(
+                                sessionUserId.toString()
+                        );
 
-         try {
+            } catch (NumberFormatException e) {
 
-             userId =
-                     Long.parseLong(
-                             sessionUserId.toString()
-                     );
+                System.out.println(
+                        "Invalid userId in session: "
+                                + sessionUserId
+                );
 
-         } catch (NumberFormatException e) {
+                Executions.sendRedirect("/zul/login.zul");
 
-             System.out.println(
-                     "Invalid userId in session: "
-                     + sessionUserId
-             );
+                return;
+            }
+        }
 
-             Executions.sendRedirect("/zul/login.zul");
+        // =====================================================
+        // DYNAMIC LOGGED-IN USER ID
+        // =====================================================
 
-             return;
-         }
-     }
+        currentUserId =
+                String.valueOf(userId);
 
+        System.out.println(
+                "======================================"
+        );
 
-     // =====================================================
-     // CHECK OUTWARD MAKER ROLE
-     // =====================================================
+        System.out.println(
+                "OUTWARD MAKER DASHBOARD"
+        );
 
-    
+        System.out.println(
+                "Current Maker User : "
+                        + currentUserId
+        );
 
-     // =====================================================
-     // DYNAMIC LOGGED-IN USER ID
-     // =====================================================
+        // =====================================================
+        // INITIALIZE SERVICE
+        // =====================================================
 
-     currentUserId =
-             String.valueOf(userId);
+        service =
+                new OutwardMakerDashboardService();
 
+        // =====================================================
+        // INITIAL FILTER
+        // =====================================================
 
-     System.out.println(
-             "======================================"
-     );
+        currentFilter = "ALL";
 
-     System.out.println(
-             "OUTWARD MAKER DASHBOARD"
-     );
+        // =====================================================
+        // INITIAL PAGE
+        // =====================================================
 
-     System.out.println(
-             "doAfterCompose() START"
-     );
+        currentPage = 1;
 
-     System.out.println(
-             "Current Maker User : "
-             + currentUserId
-     );
+        // =====================================================
+        // UPDATE FILTER BUTTON STYLE
+        // =====================================================
 
-     
+        updateFilterButtonStyles();
 
+        // =====================================================
+        // REGISTER FILTER EVENTS
+        // =====================================================
 
-     // =====================================================
-     // INITIALIZE SERVICE
-     // =====================================================
+        registerFilterEvents();
 
-     service =
-             new OutwardMakerDashboardService();
+        // =====================================================
+        // REGISTER PAGINATION EVENTS
+        // =====================================================
 
-     loadDashboard();
+        registerPaginationEvents();
 
+        // =====================================================
+        // LOAD DASHBOARD
+        // =====================================================
 
-     System.out.println(
-             "======================================"
-     );
+        loadDashboard();
 
-     System.out.println(
-             "doAfterCompose() END"
-     );
+        System.out.println(
+                "======================================"
+        );
+
+        System.out.println(
+                "doAfterCompose() END"
+        );
     }
 
-    
+    // =========================================================
+    // REGISTER FILTER EVENTS
+    // =========================================================
+
+    private void registerFilterEvents() {
+
+        System.out.println(
+                "Registering dashboard filter events..."
+        );
+
+        System.out.println(
+                "allBtn = " + allBtn
+        );
+
+        System.out.println(
+                "availableBtn = " + availableBtn
+        );
+
+        System.out.println(
+                "myBatchesBtn = " + myBatchesBtn
+        );
+
+        // -----------------------------------------------------
+        // ALL
+        // -----------------------------------------------------
+
+        if (allBtn != null) {
+
+            allBtn.addEventListener(
+                    Events.ON_CLICK,
+                    event -> {
+
+                        System.out.println(
+                                "ALL BUTTON CLICKED"
+                        );
+
+                        currentFilter = "ALL";
+
+                        currentPage = 1;
+
+                        updateFilterButtonStyles();
+
+                        loadBatches();
+                    }
+            );
+        }
+
+        // -----------------------------------------------------
+        // AVAILABLE
+        // -----------------------------------------------------
+
+        if (availableBtn != null) {
+
+            availableBtn.addEventListener(
+                    Events.ON_CLICK,
+                    event -> {
+
+                        System.out.println(
+                                "AVAILABLE BUTTON CLICKED"
+                        );
+
+                        currentFilter = "AVAILABLE";
+
+                        currentPage = 1;
+
+                        updateFilterButtonStyles();
+
+                        loadBatches();
+                    }
+            );
+        }
+
+        // -----------------------------------------------------
+        // MY BATCHES
+        // -----------------------------------------------------
+
+        if (myBatchesBtn != null) {
+
+            myBatchesBtn.addEventListener(
+                    Events.ON_CLICK,
+                    event -> {
+
+                        System.out.println(
+                                "MY BATCHES BUTTON CLICKED"
+                        );
+
+                        currentFilter = "MY_BATCHES";
+
+                        currentPage = 1;
+
+                        updateFilterButtonStyles();
+
+                        loadBatches();
+                    }
+            );
+        }
+    }
+
+    // =========================================================
+    // REGISTER PAGINATION EVENTS
+    // =========================================================
+
+    private void registerPaginationEvents() {
+
+        // -----------------------------------------------------
+        // PREVIOUS
+        // -----------------------------------------------------
+
+        if (previousPageButton != null) {
+
+            previousPageButton.addEventListener(
+                    Events.ON_CLICK,
+                    event -> {
+
+                        if (currentPage > 1) {
+
+                            currentPage--;
+
+                            loadBatches();
+                        }
+                    }
+            );
+        }
+
+        // -----------------------------------------------------
+        // NEXT
+        // -----------------------------------------------------
+
+        if (nextPageButton != null) {
+
+            nextPageButton.addEventListener(
+                    Events.ON_CLICK,
+                    event -> {
+
+                        int totalPages =
+                                getTotalPages();
+
+                        if (currentPage < totalPages) {
+
+                            currentPage++;
+
+                            loadBatches();
+                        }
+                    }
+            );
+        }
+
+        // -----------------------------------------------------
+        // PAGE 1
+        // -----------------------------------------------------
+
+        registerPageButton(
+                page1Button,
+                1
+        );
+
+        // -----------------------------------------------------
+        // PAGE 2
+        // -----------------------------------------------------
+
+        registerPageButton(
+                page2Button,
+                2
+        );
+
+        // -----------------------------------------------------
+        // PAGE 3
+        // -----------------------------------------------------
+
+        registerPageButton(
+                page3Button,
+                3
+        );
+
+        // -----------------------------------------------------
+        // PAGE 4
+        // -----------------------------------------------------
+
+        registerPageButton(
+                page4Button,
+                4
+        );
+
+        // -----------------------------------------------------
+        // PAGE 5
+        // -----------------------------------------------------
+
+        registerPageButton(
+                page5Button,
+                5
+        );
+    }
+
+    // =========================================================
+    // REGISTER INDIVIDUAL PAGE BUTTON
+    // =========================================================
+
+    private void registerPageButton(
+            Button button,
+            int pageNumber) {
+
+        if (button == null) {
+            return;
+        }
+
+        button.addEventListener(
+                Events.ON_CLICK,
+                event -> {
+
+                    int totalPages =
+                            getTotalPages();
+
+                    if (pageNumber <= totalPages) {
+
+                        currentPage =
+                                pageNumber;
+
+                        loadBatches();
+                    }
+                }
+        );
+    }
+
+    // =========================================================
+    // UPDATE FILTER BUTTON STYLES
+    // =========================================================
+
+    private void updateFilterButtonStyles() {
+
+        if (allBtn != null) {
+
+            allBtn.setSclass(
+                    "filter-btn"
+                            +
+                            (
+                                    "ALL".equals(
+                                            currentFilter
+                                    )
+                                            ? " active-filter"
+                                            : ""
+                            )
+            );
+        }
+
+        if (availableBtn != null) {
+
+            availableBtn.setSclass(
+                    "filter-btn"
+                            +
+                            (
+                                    "AVAILABLE".equals(
+                                            currentFilter
+                                    )
+                                            ? " active-filter"
+                                            : ""
+                            )
+            );
+        }
+
+        if (myBatchesBtn != null) {
+
+            myBatchesBtn.setSclass(
+                    "filter-btn"
+                            +
+                            (
+                                    "MY_BATCHES".equals(
+                                            currentFilter
+                                    )
+                                            ? " active-filter"
+                                            : ""
+                            )
+            );
+        }
+    }
 
     // =========================================================
     // LOAD DASHBOARD
@@ -244,24 +579,52 @@ public class OutwardMakerDashboardController
         try {
 
             System.out.println(
-                    "Calling service.getBatches()..."
+                    "======================================"
             );
+
+            System.out.println(
+                    "LOAD BATCHES"
+            );
+
+            System.out.println(
+                    "Current Filter : "
+                            + currentFilter
+            );
+
+            System.out.println(
+                    "Current Page   : "
+                            + currentPage
+            );
+
+            System.out.println(
+                    "Current User   : "
+                            + currentUserId
+            );
+
+            // -------------------------------------------------
+            // GET ALL BATCHES FROM DATABASE
+            // -------------------------------------------------
 
             List<OutwardBatch> batches =
                     service.getBatches();
 
             if (batches == null) {
-                batches = new ArrayList<>();
+
+                batches =
+                        new ArrayList<>();
             }
 
             System.out.println(
-                    "Batches returned = "
-                    + batches.size()
+                    "Total DB Batches : "
+                            + batches.size()
             );
 
             // -------------------------------------------------
-            // DEBUG DATABASE VALUES
+            // APPLY FILTER
             // -------------------------------------------------
+
+            List<OutwardBatch> filteredBatches =
+                    new ArrayList<>();
 
             for (OutwardBatch batch : batches) {
 
@@ -269,43 +632,106 @@ public class OutwardMakerDashboardController
                     continue;
                 }
 
+                if (matchesCurrentFilter(batch)) {
+
+                    filteredBatches.add(batch);
+                }
+            }
+
+            System.out.println(
+                    "Filtered Batches : "
+                            + filteredBatches.size()
+            );
+
+            // -------------------------------------------------
+            // CALCULATE TOTAL PAGES
+            // -------------------------------------------------
+
+            int totalPages =
+                    calculateTotalPages(
+                            filteredBatches.size()
+                    );
+
+            // -------------------------------------------------
+            // SAFETY CHECK
+            // -------------------------------------------------
+
+            if (totalPages == 0) {
+
+                currentPage = 1;
+
+            } else if (currentPage > totalPages) {
+
+                currentPage = totalPages;
+            }
+
+            // -------------------------------------------------
+            // PAGINATED DATA
+            // -------------------------------------------------
+
+            List<OutwardBatch> pageBatches =
+                    getPageData(
+                            filteredBatches
+                    );
+
+            System.out.println(
+                    "Total Pages     : "
+                            + totalPages
+            );
+
+            System.out.println(
+                    "Current Page     : "
+                            + currentPage
+            );
+
+            System.out.println(
+                    "Page Batches     : "
+                            + pageBatches.size()
+            );
+
+            // -------------------------------------------------
+            // DEBUG DATABASE VALUES
+            // -------------------------------------------------
+
+            for (OutwardBatch batch : pageBatches) {
+
                 System.out.println(
                         "--------------------------------------"
                 );
 
                 System.out.println(
                         "Batch Number      : "
-                        + batch.getBatchNumber()
+                                + batch.getBatchNumber()
                 );
 
                 System.out.println(
                         "Number Of Cheques : "
-                        + batch.getNumberOfCheques()
+                                + batch.getNumberOfCheques()
                 );
 
                 System.out.println(
                         "Batch Status      : "
-                        + batch.getBatchStatus()
+                                + batch.getBatchStatus()
                 );
 
                 System.out.println(
                         "Maker User        : "
-                        + batch.getMakerUserNumber()
+                                + batch.getMakerUserNumber()
                 );
 
                 System.out.println(
                         "Lock Status       : "
-                        + batch.getLockStatus()
+                                + batch.getLockStatus()
                 );
 
                 System.out.println(
                         "Locked By         : "
-                        + batch.getLockedBy()
+                                + batch.getLockedBy()
                 );
 
                 System.out.println(
                         "Locked At         : "
-                        + batch.getLockedAt()
+                                + batch.getLockedAt()
                 );
             }
 
@@ -316,7 +742,7 @@ public class OutwardMakerDashboardController
             ListModelList<OutwardBatch> model =
                     new ListModelList<>();
 
-            model.addAll(batches);
+            model.addAll(pageBatches);
 
             // -------------------------------------------------
             // RENDERER
@@ -346,8 +772,21 @@ public class OutwardMakerDashboardController
 
             batchListbox.setModel(model);
 
+            // -------------------------------------------------
+            // UPDATE PAGINATION UI
+            // -------------------------------------------------
+
+            updatePagination(
+                    filteredBatches.size(),
+                    totalPages
+            );
+
             System.out.println(
                     "Dashboard model loaded successfully."
+            );
+
+            System.out.println(
+                    "======================================"
             );
 
         } catch (Exception e) {
@@ -356,8 +795,8 @@ public class OutwardMakerDashboardController
 
             Messagebox.show(
                     "Unable to load batches from database.\n\n"
-                    + "Error: "
-                    + safeExceptionMessage(e),
+                            + "Error: "
+                            + safeExceptionMessage(e),
                     "Dashboard Error",
                     Messagebox.OK,
                     Messagebox.ERROR
@@ -366,19 +805,377 @@ public class OutwardMakerDashboardController
     }
 
     // =========================================================
+    // GET PAGE DATA
+    // =========================================================
+
+    private List<OutwardBatch> getPageData(
+            List<OutwardBatch> filteredBatches) {
+
+        List<OutwardBatch> pageData =
+                new ArrayList<>();
+
+        if (filteredBatches == null
+                || filteredBatches.isEmpty()) {
+
+            return pageData;
+        }
+
+        int startIndex =
+                (currentPage - 1)
+                        * PAGE_SIZE;
+
+        if (startIndex >= filteredBatches.size()) {
+
+            return pageData;
+        }
+
+        int endIndex =
+                Math.min(
+                        startIndex + PAGE_SIZE,
+                        filteredBatches.size()
+                );
+
+        pageData.addAll(
+                filteredBatches.subList(
+                        startIndex,
+                        endIndex
+                )
+        );
+
+        return pageData;
+    }
+
+    // =========================================================
+    // CALCULATE TOTAL PAGES
+    // =========================================================
+
+    private int calculateTotalPages(
+            int totalRecords) {
+
+        if (totalRecords <= 0) {
+
+            return 0;
+        }
+
+        return (
+                totalRecords + PAGE_SIZE - 1
+        ) / PAGE_SIZE;
+    }
+
+    // =========================================================
+    // GET TOTAL PAGES
+    // =========================================================
+
+    private int getTotalPages() {
+
+        if (service == null) {
+            return 0;
+        }
+
+        try {
+
+            List<OutwardBatch> batches =
+                    service.getBatches();
+
+            if (batches == null) {
+
+                return 0;
+            }
+
+            int filteredCount = 0;
+
+            for (OutwardBatch batch : batches) {
+
+                if (batch != null
+                        &&
+                        matchesCurrentFilter(batch)) {
+
+                    filteredCount++;
+                }
+            }
+
+            return calculateTotalPages(
+                    filteredCount
+            );
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            return 0;
+        }
+    }
+
+    // =========================================================
+    // UPDATE PAGINATION
+    // =========================================================
+
+    private void updatePagination(
+            int totalRecords,
+            int totalPages) {
+
+        // -----------------------------------------------------
+        // PREVIOUS
+        // -----------------------------------------------------
+
+        if (previousPageButton != null) {
+
+            previousPageButton.setDisabled(
+                    currentPage <= 1
+                            || totalPages <= 1
+            );
+
+            previousPageButton.setSclass(
+                    currentPage <= 1
+                            || totalPages <= 1
+                            ? "pagination-btn pagination-disabled"
+                            : "pagination-btn"
+            );
+        }
+
+        // -----------------------------------------------------
+        // NEXT
+        // -----------------------------------------------------
+
+        if (nextPageButton != null) {
+
+            nextPageButton.setDisabled(
+                    totalPages == 0
+                            || currentPage >= totalPages
+            );
+
+            nextPageButton.setSclass(
+                    totalPages == 0
+                            || currentPage >= totalPages
+                            ? "pagination-btn pagination-disabled"
+                            : "pagination-btn"
+            );
+        }
+
+        // -----------------------------------------------------
+        // PAGE BUTTONS
+        // -----------------------------------------------------
+
+        updatePageButton(
+                page1Button,
+                1,
+                totalPages
+        );
+
+        updatePageButton(
+                page2Button,
+                2,
+                totalPages
+        );
+
+        updatePageButton(
+                page3Button,
+                3,
+                totalPages
+        );
+
+        updatePageButton(
+                page4Button,
+                4,
+                totalPages
+        );
+
+        updatePageButton(
+                page5Button,
+                5,
+                totalPages
+        );
+
+        // -----------------------------------------------------
+        // PAGINATION INFO
+        // -----------------------------------------------------
+
+        if (paginationInfo != null) {
+
+            if (totalRecords == 0) {
+
+                paginationInfo.setValue(
+                        "Showing 0 of 0"
+                );
+
+            } else {
+
+                int start =
+                        (
+                                (currentPage - 1)
+                                        * PAGE_SIZE
+                        ) + 1;
+
+                int end =
+                        Math.min(
+                                currentPage * PAGE_SIZE,
+                                totalRecords
+                        );
+
+                paginationInfo.setValue(
+                        "Showing "
+                                + start
+                                + "-"
+                                + end
+                                + " of "
+                                + totalRecords
+                );
+            }
+        }
+    }
+
+    // =========================================================
+    // UPDATE PAGE BUTTON
+    // =========================================================
+
+    private void updatePageButton(
+            Button button,
+            int pageNumber,
+            int totalPages) {
+
+        if (button == null) {
+            return;
+        }
+
+        boolean visible =
+                pageNumber <= totalPages;
+
+        button.setVisible(visible);
+
+        if (!visible) {
+
+            return;
+        }
+
+        button.setDisabled(false);
+
+        if (currentPage == pageNumber) {
+
+            button.setSclass(
+                    "pagination-btn pagination-active"
+            );
+
+        } else {
+
+            button.setSclass(
+                    "pagination-btn"
+            );
+        }
+    }
+
+    // =========================================================
+    // CHECK CURRENT FILTER
+    // =========================================================
+
+    private boolean matchesCurrentFilter(
+            OutwardBatch batch) {
+
+        if (batch == null) {
+            return false;
+        }
+
+        // -----------------------------------------------------
+        // ALL
+        // -----------------------------------------------------
+
+        if ("ALL".equals(currentFilter)) {
+
+            return true;
+        }
+
+        // -----------------------------------------------------
+        // AVAILABLE
+        // -----------------------------------------------------
+
+        if ("AVAILABLE".equals(currentFilter)) {
+
+            return isBatchAvailable(batch);
+        }
+
+        // -----------------------------------------------------
+        // MY BATCHES
+        // -----------------------------------------------------
+
+        if ("MY_BATCHES".equals(currentFilter)) {
+
+            return isMyBatch(batch);
+        }
+
+        return true;
+    }
+
+    // =========================================================
+    // CHECK AVAILABLE BATCH
+    // =========================================================
+
+    private boolean isBatchAvailable(
+            OutwardBatch batch) {
+
+        if (batch == null) {
+            return false;
+        }
+
+        String makerUserNumber =
+                batch.getMakerUserNumber();
+
+        String lockedBy =
+                batch.getLockedBy();
+
+        String lockStatus =
+                batch.getLockStatus();
+
+        boolean hasMakerAssignment =
+                hasValue(
+                        makerUserNumber
+                );
+
+        boolean hasLockedBy =
+                hasValue(
+                        lockedBy
+                );
+
+        boolean lockStatusLocked =
+                isLockedStatus(
+                        lockStatus
+                );
+
+        return !hasMakerAssignment
+                &&
+                !hasLockedBy
+                &&
+                !lockStatusLocked;
+    }
+
+    // =========================================================
+    // CHECK MY BATCH
+    // =========================================================
+
+    private boolean isMyBatch(
+            OutwardBatch batch) {
+
+        if (batch == null) {
+            return false;
+        }
+
+        if (!hasValue(currentUserId)) {
+            return false;
+        }
+
+        String makerUserNumber =
+                batch.getMakerUserNumber();
+
+        if (!hasValue(makerUserNumber)) {
+            return false;
+        }
+
+        return currentUserId.trim()
+                .equalsIgnoreCase(
+                        makerUserNumber.trim()
+                );
+    }
+
+    // =========================================================
     // RENDER ONE BATCH ROW
-    //
-    // ZUL COLUMN ORDER:
-    //
-    // 1. Batch No
-    // 2. Total Cheques
-    // 3. Status
-    // 4. Action
-    // 5. Assignment
-    //
-    // IMPORTANT:
-    //
-    // Do NOT add Maker User as a separate column.
     // =========================================================
 
     private void renderBatchRow(
@@ -471,21 +1268,11 @@ public class OutwardMakerDashboardController
                         lockStatus
                 );
 
-        /*
-         * A batch is available only when:
-         *
-         * 1. No Maker has claimed it
-         * 2. Nobody has locked it
-         *
-         * The actual assignment information is obtained
-         * from outward_batch_assignment by the DAO.
-         */
-
         boolean isAvailable =
                 !hasMakerAssignment
-                &&
+                        &&
                 !hasLockedBy
-                &&
+                        &&
                 !lockStatusLocked;
 
         // =====================================================
@@ -501,16 +1288,15 @@ public class OutwardMakerDashboardController
                     new Button("Open");
 
             openButton.setWidth("75px");
-
             openButton.setHeight("32px");
 
             openButton.setStyle(
                     "background:#12B76A;"
-                    + "color:white;"
-                    + "border:none;"
-                    + "border-radius:5px;"
-                    + "font-weight:bold;"
-                    + "cursor:pointer;"
+                            + "color:white;"
+                            + "border:none;"
+                            + "border-radius:5px;"
+                            + "font-weight:bold;"
+                            + "cursor:pointer;"
             );
 
             openButton.addEventListener(
@@ -532,7 +1318,7 @@ public class OutwardMakerDashboardController
 
             lockedLabel.setStyle(
                     "color:#E74C3C;"
-                    + "font-weight:bold;"
+                            + "font-weight:bold;"
             );
 
             actionCell.appendChild(
@@ -551,35 +1337,23 @@ public class OutwardMakerDashboardController
 
         if (hasMakerAssignment) {
 
-            /*
-             * Batch has already been assigned to a Maker.
-             */
-
             assignmentCell.appendChild(
                     new Label(
                             "Maker "
-                            + makerUserNumber
+                                    + makerUserNumber
                     )
             );
 
         } else if (hasLockedBy) {
 
-            /*
-             * Locked but Maker number is not available.
-             */
-
             assignmentCell.appendChild(
                     new Label(
                             "Locked by "
-                            + lockedBy
+                                    + lockedBy
                     )
             );
 
         } else {
-
-            /*
-             * Nobody has claimed this batch.
-             */
 
             assignmentCell.appendChild(
                     new Label("Available")
@@ -632,12 +1406,12 @@ public class OutwardMakerDashboardController
 
         System.out.println(
                 "Batch : "
-                + cleanBatchNumber
+                        + cleanBatchNumber
         );
 
         System.out.println(
                 "User  : "
-                + userId
+                        + userId
         );
 
         System.out.println(
@@ -659,8 +1433,8 @@ public class OutwardMakerDashboardController
 
                 Messagebox.show(
                         "Batch "
-                        + cleanBatchNumber
-                        + " was not found.",
+                                + cleanBatchNumber
+                                + " was not found.",
                         "Batch Not Found",
                         Messagebox.OK,
                         Messagebox.ERROR
@@ -679,10 +1453,10 @@ public class OutwardMakerDashboardController
 
                 Messagebox.show(
                         "Batch "
-                        + cleanBatchNumber
-                        + " is already assigned to Maker "
-                        + batch.getMakerUserNumber()
-                        + ".",
+                                + cleanBatchNumber
+                                + " is already assigned to Maker "
+                                + batch.getMakerUserNumber()
+                                + ".",
                         "Batch Locked",
                         Messagebox.OK,
                         Messagebox.EXCLAMATION
@@ -701,10 +1475,10 @@ public class OutwardMakerDashboardController
 
                 Messagebox.show(
                         "Batch "
-                        + cleanBatchNumber
-                        + " is already locked by "
-                        + batch.getLockedBy()
-                        + ".",
+                                + cleanBatchNumber
+                                + " is already locked by "
+                                + batch.getLockedBy()
+                                + ".",
                         "Batch Locked",
                         Messagebox.OK,
                         Messagebox.EXCLAMATION
@@ -731,19 +1505,14 @@ public class OutwardMakerDashboardController
 
                 Messagebox.show(
                         "Batch "
-                        + cleanBatchNumber
-                        + " could not be opened.\n\n"
-                        + "It may already be assigned "
-                        + "or locked by another Maker.",
+                                + cleanBatchNumber
+                                + " could not be opened.\n\n"
+                                + "It may already be assigned "
+                                + "or locked by another Maker.",
                         "Batch Locked",
                         Messagebox.OK,
                         Messagebox.ERROR
                 );
-
-                /*
-                 * Reload immediately so this Maker sees
-                 * the latest database state.
-                 */
 
                 loadBatches();
 
@@ -823,8 +1592,8 @@ public class OutwardMakerDashboardController
 
             Messagebox.show(
                     "Batch "
-                    + cleanBatchNumber
-                    + " is valid and ready for Checker.",
+                            + cleanBatchNumber
+                            + " is valid and ready for Checker.",
                     "Batch Ready",
                     Messagebox.OK,
                     Messagebox.INFORMATION
@@ -836,10 +1605,10 @@ public class OutwardMakerDashboardController
 
             Messagebox.show(
                     "Unable to open batch "
-                    + cleanBatchNumber
-                    + ".\n\n"
-                    + "Error: "
-                    + safeExceptionMessage(e),
+                            + cleanBatchNumber
+                            + ".\n\n"
+                            + "Error: "
+                            + safeExceptionMessage(e),
                     "Open Batch Error",
                     Messagebox.OK,
                     Messagebox.ERROR
@@ -870,16 +1639,16 @@ public class OutwardMakerDashboardController
 
         int totalErrors =
                 dataEntry
-                + micr
-                + amountAccount;
+                        + micr
+                        + amountAccount;
 
         if (totalErrors == 0) {
 
             Messagebox.show(
                     "Batch "
-                    + batchNumber
-                    + " has no validation errors.\n\n"
-                    + "The batch is ready for Checker.",
+                            + batchNumber
+                            + " has no validation errors.\n\n"
+                            + "The batch is ready for Checker.",
                     "Validation Successful",
                     Messagebox.OK,
                     Messagebox.INFORMATION
@@ -890,19 +1659,19 @@ public class OutwardMakerDashboardController
 
         String message =
                 "Batch "
-                + batchNumber
-                + " validation completed.\n\n"
-                + "Total Cheques: "
-                + result.getTotalCheques()
-                + "\n\n"
-                + "Data Entry Errors: "
-                + dataEntry
-                + "\n"
-                + "MICR Errors: "
-                + micr
-                + "\n"
-                + "Amount / Account Errors: "
-                + amountAccount;
+                        + batchNumber
+                        + " validation completed.\n\n"
+                        + "Total Cheques: "
+                        + result.getTotalCheques()
+                        + "\n\n"
+                        + "Data Entry Errors: "
+                        + dataEntry
+                        + "\n"
+                        + "MICR Errors: "
+                        + micr
+                        + "\n"
+                        + "Amount / Account Errors: "
+                        + amountAccount;
 
         Messagebox.show(
                 message,
@@ -921,8 +1690,8 @@ public class OutwardMakerDashboardController
 
         Executions.sendRedirect(
                 "/outward-maker-data-entry.zul"
-                + "?batchNumber="
-                + encode(batchNumber)
+                        + "?batchNumber="
+                        + encode(batchNumber)
         );
     }
 
@@ -935,8 +1704,8 @@ public class OutwardMakerDashboardController
 
         Executions.sendRedirect(
                 "/outward-maker-micr-repair.zul"
-                + "?batchNumber="
-                + encode(batchNumber)
+                        + "?batchNumber="
+                        + encode(batchNumber)
         );
     }
 
@@ -949,8 +1718,8 @@ public class OutwardMakerDashboardController
 
         Executions.sendRedirect(
                 "/outward-maker-amount-account.zul"
-                + "?batchNumber="
-                + encode(batchNumber)
+                        + "?batchNumber="
+                        + encode(batchNumber)
         );
     }
 
@@ -995,8 +1764,8 @@ public class OutwardMakerDashboardController
 
             Messagebox.show(
                     "Unable to find batch.\n\n"
-                    + "Error: "
-                    + safeExceptionMessage(e),
+                            + "Error: "
+                            + safeExceptionMessage(e),
                     "Batch Error",
                     Messagebox.OK,
                     Messagebox.ERROR
@@ -1025,11 +1794,11 @@ public class OutwardMakerDashboardController
                 )
                 ||
                 "IN_PROGRESS".equalsIgnoreCase(
-                    cleanStatus
+                        cleanStatus
                 )
                 ||
                 "ASSIGNED".equalsIgnoreCase(
-                    cleanStatus
+                        cleanStatus
                 );
     }
 

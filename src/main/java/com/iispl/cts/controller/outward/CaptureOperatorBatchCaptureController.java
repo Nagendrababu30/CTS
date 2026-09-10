@@ -1,18 +1,23 @@
 package com.iispl.cts.controller.outward;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Session;
+import org.zkoss.zk.ui.event.UploadEvent;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.Wire;
+import org.zkoss.util.media.Media;
+
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Intbox;
+import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
-import org.zkoss.zul.Textbox;
+import org.zkoss.zul.Fileupload;
 
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.service.outward.CaptureOperatorBatchService;
@@ -22,19 +27,50 @@ public class CaptureOperatorBatchCaptureController
 
     private static final long serialVersionUID = 1L;
 
+    // =========================================================
+    // ZUL COMPONENTS
+    // =========================================================
+
     @Wire
     private Combobox branchCodeCombo;
 
     @Wire
-    private Textbox branchNameTextbox;
+    private org.zkoss.zul.Textbox branchNameTextbox;
 
     @Wire
     private Intbox numberOfCheques;
 
     @Wire
-    private Textbox batchFolderPath;
+    private Fileupload batchFilesUpload;
+
+    @Wire
+    private Label selectedFilesLabel;
+
+
+    // =========================================================
+    // SERVICE
+    // =========================================================
 
     private CaptureOperatorBatchService service;
+
+
+    // =========================================================
+    // UPLOADED FILES
+    // =========================================================
+
+    /*
+     * Important:
+     *
+     * Your ZK Fileupload supports only ONE file per upload.
+     *
+     * Therefore every time the user selects a file,
+     * we ADD it to this list.
+     *
+     * We DO NOT clear the list during upload.
+     */
+
+    private final List<Media> uploadedFiles =
+            new ArrayList<>();
 
 
     // =========================================================
@@ -47,27 +83,33 @@ public class CaptureOperatorBatchCaptureController
 
         super.doAfterCompose(component);
 
-        // -------------------------------------------------
-        // CURRENT LOGGED-IN USER
-        // -------------------------------------------------
+        // -----------------------------------------------------
+        // CURRENT SESSION
+        // -----------------------------------------------------
 
         Session session =
                 Executions.getCurrent().getSession();
 
         if (session == null) {
 
-            Executions.sendRedirect("/zul/login.zul");
+            Executions.sendRedirect(
+                    "/zul/login.zul");
+
             return;
         }
+
 
         Object sessionUserId =
                 session.getAttribute("userId");
 
         if (sessionUserId == null) {
 
-            Executions.sendRedirect("/zul/login.zul");
+            Executions.sendRedirect(
+                    "/zul/login.zul");
+
             return;
         }
+
 
         long userId;
 
@@ -87,37 +129,33 @@ public class CaptureOperatorBatchCaptureController
 
             } catch (NumberFormatException e) {
 
-                Executions.sendRedirect("/zul/login.zul");
+                Executions.sendRedirect(
+                        "/zul/login.zul");
+
                 return;
             }
         }
 
+
         System.out.println(
                 "CAPTURE OPERATOR SESSION: "
-                + "userId=" + userId);
+                + "userId="
+                + userId);
 
 
-        // -------------------------------------------------
+        // -----------------------------------------------------
         // SERVICE
-        // -------------------------------------------------
+        // -----------------------------------------------------
 
         service =
                 new CaptureOperatorBatchService();
 
 
-        // -------------------------------------------------
+        // -----------------------------------------------------
         // LOAD BRANCHES
-        // -------------------------------------------------
+        // -----------------------------------------------------
 
         loadBranches();
-
-
-        // -------------------------------------------------
-        // TEMPORARY DEFAULT FOLDER PATH
-        // -------------------------------------------------
-
-        batchFolderPath.setValue(
-                "/home/iispl/Desktop");
     }
 
 
@@ -127,7 +165,9 @@ public class CaptureOperatorBatchCaptureController
 
     private void loadBranches() {
 
-        branchCodeCombo.getItems().clear();
+        branchCodeCombo
+                .getItems()
+                .clear();
 
         try {
 
@@ -143,13 +183,16 @@ public class CaptureOperatorBatchCaptureController
                 return;
             }
 
-            for (String[] branch : branches) {
+
+            for (String[] branch :
+                    branches) {
 
                 if (branch == null ||
                         branch.length < 2) {
 
                     continue;
                 }
+
 
                 Comboitem item =
                         new Comboitem();
@@ -164,9 +207,10 @@ public class CaptureOperatorBatchCaptureController
                         "branchName",
                         branch[1]);
 
-                branchCodeCombo.appendChild(
-                        item);
+                branchCodeCombo
+                        .appendChild(item);
             }
+
 
         } catch (Exception e) {
 
@@ -190,21 +234,27 @@ public class CaptureOperatorBatchCaptureController
     public void onBranchSelected() {
 
         Comboitem selectedItem =
-                branchCodeCombo.getSelectedItem();
+                branchCodeCombo
+                        .getSelectedItem();
 
         if (selectedItem == null) {
 
-            branchNameTextbox.setValue("");
+            branchNameTextbox
+                    .setValue("");
 
             return;
         }
 
+
         String branchCode =
                 selectedItem.getValue();
 
+
         String branchName =
                 (String) selectedItem
-                        .getAttribute("branchName");
+                        .getAttribute(
+                                "branchName");
+
 
         if (branchName == null ||
                 branchName.trim().isEmpty()) {
@@ -214,10 +264,215 @@ public class CaptureOperatorBatchCaptureController
                             branchCode);
         }
 
+
         branchNameTextbox.setValue(
                 branchName == null
                         ? ""
                         : branchName);
+    }
+
+
+    // =========================================================
+    // FILE UPLOAD
+    // =========================================================
+
+    @Listen("onUpload = #batchFilesUpload")
+    public void onBatchFilesUpload(
+            UploadEvent event) {
+
+        try {
+
+            // -------------------------------------------------
+            // GET ONE FILE
+            // -------------------------------------------------
+
+            Media media =
+                    event.getMedia();
+
+
+            if (media == null) {
+
+                selectedFilesLabel.setValue(
+                        "No file selected.");
+
+                return;
+            }
+
+
+            String fileName =
+                    media.getName();
+
+
+            if (fileName == null ||
+                    fileName.trim().isEmpty()) {
+
+                Messagebox.show(
+                        "Invalid file selected.",
+                        "Upload Error",
+                        Messagebox.OK,
+                        Messagebox.ERROR);
+
+                return;
+            }
+
+
+            // -------------------------------------------------
+            // CHECK DUPLICATE FILE
+            // -------------------------------------------------
+
+            for (Media existing :
+                    uploadedFiles) {
+
+                if (existing != null &&
+                        existing.getName() != null &&
+                        existing.getName()
+                                .equalsIgnoreCase(
+                                        fileName)) {
+
+                    Messagebox.show(
+                            "File already selected:\n\n"
+                            + fileName,
+                            "Duplicate File",
+                            Messagebox.OK,
+                            Messagebox.EXCLAMATION);
+
+                    return;
+                }
+            }
+
+
+            // -------------------------------------------------
+            // CHECK XML COUNT
+            // -------------------------------------------------
+
+            if (fileName
+                    .toLowerCase()
+                    .endsWith(".xml")) {
+
+                for (Media existing :
+                        uploadedFiles) {
+
+                    if (existing != null &&
+                            existing.getName() != null &&
+                            existing.getName()
+                                    .toLowerCase()
+                                    .endsWith(".xml")) {
+
+                        Messagebox.show(
+                                "Only one XML file is allowed.",
+                                "XML Validation",
+                                Messagebox.OK,
+                                Messagebox.EXCLAMATION);
+
+                        return;
+                    }
+                }
+            }
+
+
+            // -------------------------------------------------
+            // ADD FILE
+            // -------------------------------------------------
+
+            uploadedFiles.add(
+                    media);
+
+
+            // -------------------------------------------------
+            // COUNT FILES
+            // -------------------------------------------------
+
+            int xmlCount = 0;
+            int imageCount = 0;
+
+
+            for (Media selectedMedia :
+                    uploadedFiles) {
+
+                if (selectedMedia == null ||
+                        selectedMedia.getName() == null) {
+
+                    continue;
+                }
+
+
+                String lowerName =
+                        selectedMedia
+                                .getName()
+                                .toLowerCase();
+
+
+                if (lowerName.endsWith(".xml")) {
+
+                    xmlCount++;
+
+                } else if (
+                        lowerName.endsWith(".jpg")
+                        || lowerName.endsWith(".jpeg")
+                        || lowerName.endsWith(".png")
+                        || lowerName.endsWith(".tif")
+                        || lowerName.endsWith(".tiff")
+                        || lowerName.endsWith(".bmp")) {
+
+                    imageCount++;
+                }
+            }
+
+
+            // -------------------------------------------------
+            // UPDATE LABEL
+            // -------------------------------------------------
+
+            selectedFilesLabel.setValue(
+                    "Files selected: "
+                    + uploadedFiles.size()
+                    + " | XML: "
+                    + xmlCount
+                    + " | Images: "
+                    + imageCount);
+
+
+            // -------------------------------------------------
+            // LOG
+            // -------------------------------------------------
+
+            System.out.println(
+                    "=================================");
+
+            System.out.println(
+                    "FILE ADDED");
+
+            System.out.println(
+                    "File: "
+                    + fileName);
+
+            System.out.println(
+                    "Total files: "
+                    + uploadedFiles.size());
+
+            System.out.println(
+                    "XML files: "
+                    + xmlCount);
+
+            System.out.println(
+                    "Image files: "
+                    + imageCount);
+
+            System.out.println(
+                    "=================================");
+
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            Messagebox.show(
+                    "Unable to process selected file.\n\n"
+                    + e.getMessage(),
+                    "Upload Error",
+                    Messagebox.OK,
+                    Messagebox.ERROR);
+        }
     }
 
 
@@ -245,7 +500,8 @@ public class CaptureOperatorBatchCaptureController
             // -------------------------------------------------
 
             Comboitem selectedItem =
-                    branchCodeCombo.getSelectedItem();
+                    branchCodeCombo
+                            .getSelectedItem();
 
             if (selectedItem == null) {
 
@@ -257,6 +513,7 @@ public class CaptureOperatorBatchCaptureController
 
                 return;
             }
+
 
             String branchCode =
                     selectedItem.getValue();
@@ -283,17 +540,13 @@ public class CaptureOperatorBatchCaptureController
 
 
             // -------------------------------------------------
-            // FOLDER PATH
+            // FILE VALIDATION
             // -------------------------------------------------
 
-            String folderPath =
-                    batchFolderPath.getValue();
-
-            if (folderPath == null ||
-                    folderPath.trim().isEmpty()) {
+            if (uploadedFiles.isEmpty()) {
 
                 Messagebox.show(
-                        "Please enter the batch folder path.",
+                        "Please select the XML file and cheque images.",
                         "Validation",
                         Messagebox.OK,
                         Messagebox.EXCLAMATION);
@@ -301,20 +554,55 @@ public class CaptureOperatorBatchCaptureController
                 return;
             }
 
-            folderPath =
-                    folderPath.trim();
 
-            System.out.println(
-                    "Folder Path: "
-                    + folderPath);
+            int xmlCount = 0;
+
+
+            for (Media media :
+                    uploadedFiles) {
+
+                if (media != null &&
+                        media.getName() != null &&
+                        media.getName()
+                                .toLowerCase()
+                                .endsWith(".xml")) {
+
+                    xmlCount++;
+                }
+            }
+
+
+            if (xmlCount == 0) {
+
+                Messagebox.show(
+                        "No XML file was selected.",
+                        "Validation",
+                        Messagebox.OK,
+                        Messagebox.EXCLAMATION);
+
+                return;
+            }
+
+
+            if (xmlCount > 1) {
+
+                Messagebox.show(
+                        "Please select only one XML file.",
+                        "Validation",
+                        Messagebox.OK,
+                        Messagebox.EXCLAMATION);
+
+                return;
+            }
 
 
             // -------------------------------------------------
-            // CURRENT LOGGED-IN USER
+            // SESSION
             // -------------------------------------------------
 
             Session session =
-                    Executions.getCurrent().getSession();
+                    Executions.getCurrent()
+                            .getSession();
 
             if (session == null) {
 
@@ -324,12 +612,17 @@ public class CaptureOperatorBatchCaptureController
                         Messagebox.OK,
                         Messagebox.EXCLAMATION);
 
-                Executions.sendRedirect("/login.zul");
+                Executions.sendRedirect(
+                        "/zul/login.zul");
+
                 return;
             }
 
+
             Object sessionUserId =
-                    session.getAttribute("userId");
+                    session.getAttribute(
+                            "userId");
+
 
             if (sessionUserId == null) {
 
@@ -339,11 +632,15 @@ public class CaptureOperatorBatchCaptureController
                         Messagebox.OK,
                         Messagebox.EXCLAMATION);
 
-                Executions.sendRedirect("/login.zul");
+                Executions.sendRedirect(
+                        "/zul/login.zul");
+
                 return;
             }
 
+
             long userId;
+
 
             if (sessionUserId instanceof Number) {
 
@@ -357,9 +654,11 @@ public class CaptureOperatorBatchCaptureController
 
                     userId =
                             Long.parseLong(
-                                    sessionUserId.toString());
+                                    sessionUserId
+                                            .toString());
 
-                } catch (NumberFormatException e) {
+                } catch (
+                        NumberFormatException e) {
 
                     Messagebox.show(
                             "Invalid user session. Please login again.",
@@ -367,38 +666,28 @@ public class CaptureOperatorBatchCaptureController
                             Messagebox.OK,
                             Messagebox.EXCLAMATION);
 
-                    Executions.sendRedirect("/login.zul");
+                    Executions.sendRedirect(
+                            "/zul/login.zul");
+
                     return;
                 }
             }
 
-            System.out.println(
-                    "Created By (Logged-in User ID): "
-                    + userId);
+
+            int createdBy =
+                    Math.toIntExact(
+                            userId);
 
 
             // -------------------------------------------------
             // SERVICE
             // -------------------------------------------------
 
-            /*
-             * Existing service flow is preserved.
-             *
-             * If captureBatch() currently accepts int,
-             * use Math.toIntExact(userId).
-             *
-             * This safely converts the session long to int
-             * without silently overflowing.
-             */
-
-            int createdBy =
-                    Math.toIntExact(userId);
-
             OutwardBatch batch =
                     service.captureBatch(
                             branchCode,
                             chequeCount,
-                            folderPath,
+                            uploadedFiles,
                             createdBy);
 
 
@@ -425,10 +714,11 @@ public class CaptureOperatorBatchCaptureController
 
 
             // -------------------------------------------------
-            // CLEAR FORM
+            // CLEAR
             // -------------------------------------------------
 
             clearForm();
+
 
         } catch (IllegalArgumentException e) {
 
@@ -437,6 +727,7 @@ public class CaptureOperatorBatchCaptureController
                     "Validation",
                     Messagebox.OK,
                     Messagebox.EXCLAMATION);
+
 
         } catch (Exception e) {
 
@@ -459,16 +750,19 @@ public class CaptureOperatorBatchCaptureController
 
     private void clearForm() {
 
-        branchCodeCombo.setSelectedItem(
-                null);
+        branchCodeCombo
+                .setSelectedItem(null);
 
-        branchNameTextbox.setValue("");
+        branchNameTextbox
+                .setValue("");
 
-        numberOfCheques.setValue(
-                null);
+        numberOfCheques
+                .setValue(null);
 
-        // Keep temporary default path
-        batchFolderPath.setValue(
-                "/home/iispl/Desktop");
+        uploadedFiles.clear();
+
+        selectedFilesLabel
+                .setValue(
+                        "No files selected.");
     }
 }

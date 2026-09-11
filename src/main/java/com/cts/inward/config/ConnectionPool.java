@@ -67,6 +67,15 @@ public class ConnectionPool {
             dataSource.setMinPoolSize(5);
             dataSource.setAcquireIncrement(5);
             dataSource.setMaxPoolSize(20);
+            dataSource.setAutoCommitOnClose(true);
+
+            // Test connections before checkout to discard stale ones
+            dataSource.setTestConnectionOnCheckout(true);
+            dataSource.setPreferredTestQuery("SELECT 1");
+
+            // Discard connections idle for more than 5 minutes
+            dataSource.setMaxIdleTime(300);
+            dataSource.setIdleConnectionTestPeriod(60);
 
             return dataSource;
 

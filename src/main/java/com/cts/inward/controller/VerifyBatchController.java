@@ -73,8 +73,10 @@ public class VerifyBatchController extends GenericForwardComposer<Component> {
          * userId is INTEGER in database,
          * therefore Integer is used in Java.
          */
-        userId = (Integer) Executions.getCurrent()
-                .getAttribute("userId");
+        Object userIdAttr = Executions.getCurrent().getAttribute("userId");
+        if (userIdAttr instanceof Number) {
+            userId = ((Number) userIdAttr).intValue();
+        }
 
         // Print current user ID
         System.out.println(

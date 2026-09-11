@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ocr>
+    <batch>
+        <batch_id>1</batch_id>
+        <file_id>2</file_id>
+        <presenting_bank_name>CTS Inward Bank</presenting_bank_name>
+        <total_cheques>5</total_cheques>
+
+        <cheque>
+            <cheque_number>100001</cheque_number>
+            <account_number>2401010001</account_number>
+            <cheque_amount>125000.00</cheque_amount>
+            <cheque_date>2026-09-05</cheque_date>
+            <presenting_date>2026-09-11</presenting_date>
+            <amount_in_words>One Lakh Twenty Five Thousand Only</amount_in_words>
+            <micr_code>101240001</micr_code>
+            <city_code>101</city_code>
+            <bank_code>240</bank_code>
+            <branch_code>001</branch_code>
+            <drawer_name>Rahul Enterprises</drawer_name>
+            <payee_name>ABC Suppliers</payee_name>
+            <payee_account_number>2401019001</payee_account_number>
+        </cheque>
+
+        <cheque>
+            <cheque_number>100002</cheque_number>
+            <account_number>2401020002</account_number>
+            <cheque_amount>87500.00</cheque_amount>
+            <cheque_date>2026-09-06</cheque_date>
+            <presenting_date>2026-09-11</presenting_date>
+            <amount_in_words>Eighty Seven Thousand Five Hundred Only</amount_in_words>
+            <micr_code>102240002</micr_code>
+            <city_code>102</city_code>
+            <bank_code>240</bank_code>
+            <branch_code>002</branch_code>
+            <drawer_name>Priya Textiles</drawer_name>
+            <payee_name>Metro Traders</payee_name>
+            <payee_account_number>2401029002</payee_account_number>
+        </cheque>
+
+        <cheque>
+            <cheque_number>100003</cheque_number>
+            <account_number>2401030003</account_number>
+            <cheque_amount>45500.00</cheque_amount>
+            <cheque_date>2026-09-07</cheque_date>
+            <presenting_date>2026-09-11</presenting_date>
+            <amount_in_words>Forty Five Thousand Five Hundred Only</amount_in_words>
+            <micr_code>103240003</micr_code>
+            <city_code>103</city_code>
+            <bank_code>240</bank_code>
+            <branch_code>003</branch_code>
+            <drawer_name>Vijaya Stores</drawer_name>
+            <payee_name>South Mart</payee_name>
+            <payee_account_number>2401039003</payee_account_number>
+        </cheque>
+
+        <cheque>
+            <cheque_number>100004</cheque_number>
+            <account_number>2401040004</account_number>
+            <cheque_amount>210000.00</cheque_amount>
+            <cheque_date>2026-09-10</cheque_date>
+            <presenting_date>2026-09-11</presenting_date>
+            <amount_in_words>Two Lakh Ten Thousand Only</amount_in_words>
+            <micr_code>104240004</micr_code>
+            <city_code>104</city_code>
+            <bank_code>240</bank_code>
+            <branch_code>004</branch_code>
+            <drawer_name>Amaravati Industries</drawer_name>
+            <payee_name>National Distributors</payee_name>
+            <payee_account_number>2401049004</payee_account_number>
+        </cheque>
+
+        <cheque>
+            <cheque_number>100005</cheque_number>
+            <account_number>2401050005</account_number>
+            <cheque_amount>65000.00</cheque_amount>
+            <cheque_date>2026-09-09</cheque_date>
+            <presenting_date>2026-09-11</presenting_date>
+            <amount_in_words>Sixty Five Thousand Only</amount_in_words>
+            <micr_code>105240005</micr_code>
+            <city_code>105</city_code>
+            <bank_code>240</bank_code>
+            <branch_code>005</branch_code>
+            <drawer_name>Coastal Retailers</drawer_name>
+            <payee_name>City Supplies</payee_name>
+            <payee_account_number>2401059005</payee_account_number>
+        </cheque>
+    </batch>
+</ocr>

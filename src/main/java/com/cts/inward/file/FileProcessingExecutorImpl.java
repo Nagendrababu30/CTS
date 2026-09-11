@@ -69,8 +69,10 @@ public class FileProcessingExecutorImpl
                 } catch (Exception e) {
                     System.err.println(
                             "[FileProcessingExecutor] ERROR processing file: "
-                            + filePath);
+                            + filePath
+                            + " — stopping batch, remaining files will not be processed.");
                     e.printStackTrace();
+                    break; // stop processing remaining files in this batch
                 }
             }
         });

@@ -4,6 +4,6 @@ import com.cts.inward.model.OcrBatchData;
 
 public interface OcrBatchDao {
 
-	void saveBatch(OcrBatchData batchData);
+	long saveBatch(OcrBatchData batchData);
 	
 }

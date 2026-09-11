@@ -29,8 +29,8 @@ public class OcrChequeDaoImpl implements OcrChequeDao {
                 + "(ocr_batch_id, cheque_number, account_number, "
                 + "amount, micr_code, cheque_date, presenting_date, "
                 + "branch_code, city_code, bank_code, "
-                + "drawer_name, payee_name, payee_account_number) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "drawer_name, payee_name, payee_account_number, amount_in_words) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -48,12 +48,42 @@ public class OcrChequeDaoImpl implements OcrChequeDao {
             statement.setString(11, chequeData.getDrawerName());
             statement.setString(12, chequeData.getPayeeName());
             statement.setString(13, chequeData.getPayeeAccountNumber());
+            statement.setString(14, chequeData.getAmountInWords());
 
             statement.executeUpdate();
 
         } catch (SQLException e) {
             throw new IllegalStateException(
                     "Failed to save OCR cheque: " + chequeData.getChequeNumber(), e);
+        }
+    }
+
+    /*
+     * Links ocr_cheque_data.inward_cheque_id to the corresponding
+     * inward_cheque.inward_cheque_id using cheque_number as the bridge.
+     *
+     * Single UPDATE for the entire batch — efficient, no loop needed.
+     */
+    @Override
+    public void linkInwardChequeIds(long ocrBatchId) {
+
+        String sql =
+                "UPDATE ocr_cheque_data o "
+                + "SET inward_cheque_id = ic.inward_cheque_id "
+                + "FROM inward_cheque ic "
+                + "WHERE o.cheque_number = ic.cheque_number "
+                + "AND o.ocr_batch_id = ?";
+
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setLong(1, ocrBatchId);
+            statement.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new IllegalStateException(
+                    "Failed to link inward_cheque_id for ocr_batch_id: "
+                    + ocrBatchId, e);
         }
     }
 }

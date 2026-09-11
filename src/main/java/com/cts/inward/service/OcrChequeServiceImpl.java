@@ -23,10 +23,12 @@ public class OcrChequeServiceImpl
     }
 
     @Override
-    public void saveCheque(
-            OcrChequeData chequeData) {
+    public void saveCheque(OcrChequeData chequeData) {
+        ocrChequeDataDao.saveCheque(chequeData);
+    }
 
-        ocrChequeDataDao.saveCheque(
-                chequeData);
+    @Override
+    public void linkInwardChequeIds(long ocrBatchId) {
+        ocrChequeDataDao.linkInwardChequeIds(ocrBatchId);
     }
 }

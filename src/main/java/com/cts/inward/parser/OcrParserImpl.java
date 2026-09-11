@@ -62,6 +62,7 @@ public class OcrParserImpl implements OcrParser {
 
             switch (elementName) {
 
+            case "batch_id":
             case "batch_code":
                 batchCode = Long.parseLong(reader.getElementText());
                 break;
@@ -106,6 +107,7 @@ public class OcrParserImpl implements OcrParser {
         String drawerName = null;
         String payeeName = null;
         String payeeAccountNumber = null;
+        String amountInWords = null;
 
         while (reader.hasNext()) {
 
@@ -141,6 +143,7 @@ public class OcrParserImpl implements OcrParser {
                 break;
 
             case "presenting_date":
+            case "presentingdate":
                 presentingDate = LocalDate.parse(reader.getElementText());
                 break;
 
@@ -172,6 +175,10 @@ public class OcrParserImpl implements OcrParser {
                 payeeAccountNumber = reader.getElementText();
                 break;
 
+            case "amount_in_words":
+                amountInWords = reader.getElementText();
+                break;
+
             default:
                 break;
             }
@@ -190,6 +197,7 @@ public class OcrParserImpl implements OcrParser {
                 branchCode,
                 drawerName,
                 payeeName,
-                payeeAccountNumber);
+                payeeAccountNumber,
+                amountInWords);
     }
 }

@@ -48,14 +48,16 @@ public class IncomingFileWatcherImpl implements IncomingFileWatcher {
             return;
         }
 
-        registerDirectory(fileConfiguration.getIncomingPath()
-                .resolve("pxf"));
+        registerDirectory(fileConfiguration.getIncomingPath().resolve("pxf"));
+        registerDirectory(fileConfiguration.getIncomingPath().resolve("pibf"));
+        registerDirectory(fileConfiguration.getIncomingPath().resolve("ocr"));
 
-        registerDirectory(fileConfiguration.getIncomingPath()
-                .resolve("pibf"));
-
-        registerDirectory(fileConfiguration.getIncomingPath()
-                .resolve("ocr"));
+        /*
+         * Files were moved to incoming/ BEFORE the watcher registered.
+         * Group them by batch name and submit each batch as one ordered
+         * task: PXF → OCR → PIBF on a single thread.
+         */
+        submitExistingFilesOrdered();
 
         Thread watcherThread = new Thread(
                 this::watchIncomingDirectories,
@@ -63,6 +65,119 @@ public class IncomingFileWatcherImpl implements IncomingFileWatcher {
 
         watcherThread.setDaemon(false);
         watcherThread.start();
+    }
+
+    /*
+     * Groups all files in incoming/{pxf,ocr,pibf}/ by batch name,
+     * then submits each batch group as one ordered task to the executor.
+     *
+     * Batch name extraction:
+     *   BATCH001.xml          → BATCH001
+     *   BATCH001_OCR.xml      → BATCH001
+     *   wPIBF_BATCH001_01.img → BATCH001
+     */
+    private void submitExistingFilesOrdered() {
+
+        java.util.Map<String, java.util.Map<String, String>> batchMap =
+                new java.util.LinkedHashMap<>();
+
+        collectFiles(
+                fileConfiguration.getIncomingPath().resolve("pxf"),
+                "pxf",
+                batchMap);
+
+        collectFiles(
+                fileConfiguration.getIncomingPath().resolve("ocr"),
+                "ocr",
+                batchMap);
+
+        collectFiles(
+                fileConfiguration.getIncomingPath().resolve("pibf"),
+                "pibf",
+                batchMap);
+
+        for (java.util.Map.Entry<String, java.util.Map<String, String>> entry
+                : batchMap.entrySet()) {
+
+            String batchName = entry.getKey();
+            java.util.Map<String, String> filesByType = entry.getValue();
+
+            java.util.List<String> ordered = new java.util.ArrayList<>();
+
+            if (filesByType.containsKey("pxf")) {
+                ordered.add(filesByType.get("pxf"));
+            }
+            if (filesByType.containsKey("ocr")) {
+                ordered.add(filesByType.get("ocr"));
+            }
+            if (filesByType.containsKey("pibf")) {
+                ordered.add(filesByType.get("pibf"));
+            }
+
+            System.out.println(
+                    "[FileWatcher] Submitting batch: "
+                    + batchName
+                    + " files in order: "
+                    + ordered);
+
+            fileProcessingExecutor.submitBatch(ordered);
+        }
+    }
+
+    private void collectFiles(
+            Path directory,
+            String fileType,
+            java.util.Map<String, java.util.Map<String, String>> batchMap) {
+
+        try {
+            if (!Files.exists(directory)) {
+                return;
+            }
+
+            Files.list(directory)
+                    .filter(Files::isRegularFile)
+                    .forEach(filePath -> {
+
+                        String batchName =
+                                extractBatchName(
+                                        filePath.getFileName().toString());
+
+                        batchMap
+                                .computeIfAbsent(
+                                        batchName,
+                                        k -> new java.util.LinkedHashMap<>())
+                                .put(fileType, filePath.toString());
+                    });
+
+        } catch (IOException e) {
+            throw new IllegalStateException(
+                    "Failed to scan incoming directory: " + directory, e);
+        }
+    }
+
+    /*
+     * Extracts the batch name token from a filename.
+     *
+     * Examples:
+     *   BATCH001.xml          → BATCH001
+     *   BATCH001_OCR.xml      → BATCH001
+     *   wPIBF_BATCH001_01.img → BATCH001
+     */
+    private String extractBatchName(String fileName) {
+
+        String nameWithoutExtension = fileName.contains(".")
+                ? fileName.substring(0, fileName.lastIndexOf('.'))
+                : fileName;
+
+        String[] parts = nameWithoutExtension.split("_");
+
+        for (String part : parts) {
+            if (part.toUpperCase().startsWith("BATCH")) {
+                return part.toUpperCase();
+            }
+        }
+
+        return nameWithoutExtension.toUpperCase();
     }
 
     @Override

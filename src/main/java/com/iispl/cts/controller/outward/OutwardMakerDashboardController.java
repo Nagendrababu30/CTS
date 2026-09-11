@@ -1689,7 +1689,7 @@ public class OutwardMakerDashboardController
             String batchNumber) {
 
         Executions.sendRedirect(
-                "/outward-maker-data-entry.zul"
+                "/zul/outward/outward-maker/outward-maker-data-entry.zul"
                         + "?batchNumber="
                         + encode(batchNumber)
         );
@@ -1703,7 +1703,7 @@ public class OutwardMakerDashboardController
             String batchNumber) {
 
         Executions.sendRedirect(
-                "/outward-maker-micr-repair.zul"
+                "/zul/outward/outward-maker/outward-maker-micr-repair.zul"
                         + "?batchNumber="
                         + encode(batchNumber)
         );
@@ -1774,6 +1774,7 @@ public class OutwardMakerDashboardController
 
         return null;
     }
+    
 
     // =========================================================
     // CHECK LOCK STATUS

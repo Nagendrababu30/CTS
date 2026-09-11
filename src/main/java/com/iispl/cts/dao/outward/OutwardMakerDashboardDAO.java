@@ -19,16 +19,31 @@ import javax.sql.DataSource;
 
 public class OutwardMakerDashboardDAO {
 
-	private final javax.sql.DataSource dataSource =ConnectionPool.getDataSource();
+    private final javax.sql.DataSource dataSource = ConnectionPool.getDataSource();
 
     // ============================================================
     // GET ALL BATCHES
     // ============================================================
+    
+    
 
     public List<OutwardBatch> getBatches() throws SQLException {
 
         List<OutwardBatch> batches = new ArrayList<>();
 
+        /*
+         * IMPORTANT:
+         *
+         * LEFT JOIN is used here because a newly created batch may
+         * not have a Maker assignment yet.
+         *
+         * Such a batch must still appear in the Maker Dashboard
+         * as AVAILABLE.
+         *
+         * RELEASED is also included because a Maker can release
+         * a previously locked batch and another Maker must then
+         * be able to see and take it.
+         */
         String sql =
                 "SELECT " +
                 "    ob.batch_number, " +
@@ -48,12 +63,24 @@ public class OutwardMakerDashboardDAO {
 
                 "FROM public.outward_batch ob " +
 
-                "INNER JOIN public.outward_batch_assignment mba " +
+                /*
+                 * DO NOT change this back to INNER JOIN.
+                 *
+                 * A new batch may not have an assignment row.
+                 */
+                "LEFT JOIN public.outward_batch_assignment mba " +
                 "    ON ob.batch_number = mba.batch_number " +
+                "    AND UPPER(mba.assignment_role) = 'MAKER' " +
+                "    AND UPPER(mba.assignment_status) IN " +
+                "        ('ASSIGNED', 'IN_PROGRESS', 'RELEASED') " +
 
-                "WHERE UPPER(mba.assignment_role) = 'MAKER' " +
-                "  AND UPPER(mba.assignment_status) IN ('ASSIGNED', 'IN_PROGRESS') " +
-                "  AND UPPER(ob.batch_status) NOT IN ('SUBMITTED_TO_CHECKER', 'COMPLETED', 'REJECTED') " +
+                /*
+                 * Batch-level status filtering.
+                 *
+                 * No Maker assignment is required here.
+                 */
+                "WHERE UPPER(ob.batch_status) NOT IN " +
+                "    ('SUBMITTED_TO_CHECKER', 'COMPLETED', 'REJECTED') " +
 
                 "ORDER BY ob.batch_number";
 
@@ -220,13 +247,42 @@ public class OutwardMakerDashboardDAO {
                         batch.setLockStatus(
                                 "LOCKED"
                         );
+
+                    } else if ("RELEASED".equalsIgnoreCase(
+                            assignmentStatus)) {
+
+                        /*
+                         * RELEASED means the previous Maker has
+                         * released the lock.
+                         *
+                         * The batch is available to another Maker.
+                         *
+                         * The database assignment row still contains
+                         * the previous Maker's user_id, so clear the
+                         * UI ownership fields.
+                         */
+                        batch.setLockStatus(
+                                "AVAILABLE"
+                        );
+
+                        batch.setMakerUserNumber(null);
+                        batch.setLockedBy(null);
+                        batch.setLockedAt(null);
+
+                    } else {
+
+                        batch.setLockStatus(
+                                "AVAILABLE"
+                        );
                     }
 
                 } else {
 
                     /*
-                     * No active Maker assignment means the batch
-                     * is available from the assignment perspective.
+                     * No Maker assignment exists.
+                     *
+                     * This is the important case for a newly
+                     * created Capture batch.
                      */
                     batch.setLockStatus(
                             "AVAILABLE"
@@ -437,6 +493,16 @@ public class OutwardMakerDashboardDAO {
                 // 5. NEW ASSIGNMENT ONLY WHEN BATCH IS AVAILABLE
                 // =================================================
 
+                /*
+                 * A released batch is available again.
+                 *
+                 * We intentionally keep the existing CAPTURED rule
+                 * here because the existing workflow originally
+                 * allowed a new Maker assignment only for CAPTURED.
+                 *
+                 * RELEASED itself is an assignment status, not a
+                 * batch status.
+                 */
                 if (!"CAPTURED".equalsIgnoreCase(currentStatus)) {
 
                     throw new SQLException(
@@ -499,244 +565,255 @@ public class OutwardMakerDashboardDAO {
                 con.setAutoCommit(true);
             }
         }
-    }    // ============================================================
+    }
+
+    // ============================================================
     // GET CHEQUES
     // ============================================================
- // ============================================================
- // GET CHEQUES
- // ============================================================
 
- public List<OutwardCheque> getCheques(String batchNumber) throws SQLException {
+    public List<OutwardCheque> getCheques(
+            String batchNumber) throws SQLException {
 
-     List<OutwardCheque> cheques = new ArrayList<>();
+        List<OutwardCheque> cheques = new ArrayList<>();
 
-     if (batchNumber == null || batchNumber.trim().isEmpty()) {
-         throw new SQLException("Batch number is required.");
-     }
+        if (batchNumber == null || batchNumber.trim().isEmpty()) {
+            throw new SQLException("Batch number is required.");
+        }
 
-     String sql =
-             "SELECT " +
-             "    oc.batch_number, " +
-             "    oc.cheque_number, " +
-             "    oc.city_code, " +
-             "    oc.bank_code, " +
-             "    oc.branch_code, " +
-             "    oc.drawer_account_number, " +
-             "    oc.drawer_name, " +
-             "    oc.payee_account_number, " +
-             "    oc.payee_name, " +
-             "    oc.amount, " +
-             "    oc.amount_in_words, " +
-             "    oc.cheque_date, " +
-             "    oc.front_image_path, " +
-             "    oc.back_image_path, " +
-             "    oc.cheque_status, " +
-             "    ob.created_by AS batch_created_by, " +
-             "    ob.created_at AS batch_created_at " +
-             "FROM public.outward_cheque oc " +
-             "INNER JOIN public.outward_batch ob " +
-             "    ON ob.batch_number = oc.batch_number " +
-             "WHERE oc.batch_number = ? " +
-             "ORDER BY oc.cheque_number";
+        String sql =
+                "SELECT " +
+                "    oc.batch_number, " +
+                "    oc.cheque_number, " +
+                "    oc.city_code, " +
+                "    oc.bank_code, " +
+                "    oc.branch_code, " +
+                "    oc.drawer_account_number, " +
+                "    oc.drawer_name, " +
+                "    oc.payee_account_number, " +
+                "    oc.payee_name, " +
+                "    oc.amount, " +
+                "    oc.amount_in_words, " +
+                "    oc.cheque_date, " +
+                "    oc.front_image_path, " +
+                "    oc.back_image_path, " +
+                "    oc.cheque_status, " +
+                "    ob.created_by AS batch_created_by, " +
+                "    ob.created_at AS batch_created_at " +
+                "FROM public.outward_cheque oc " +
+                "INNER JOIN public.outward_batch ob " +
+                "    ON ob.batch_number = oc.batch_number " +
+                "WHERE oc.batch_number = ? " +
+                "ORDER BY oc.cheque_number";
 
-     try (Connection con = dataSource.getConnection();
-          PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = dataSource.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-         ps.setString(1, batchNumber.trim());
+            ps.setString(1, batchNumber.trim());
 
-         try (ResultSet rs = ps.executeQuery()) {
+            try (ResultSet rs = ps.executeQuery()) {
 
-             while (rs.next()) {
+                while (rs.next()) {
 
-                 OutwardCheque cheque = new OutwardCheque();
+                    OutwardCheque cheque = new OutwardCheque();
 
-                 // =================================================
-                 // BATCH NUMBER
-                 // =================================================
+                    // =================================================
+                    // BATCH NUMBER
+                    // =================================================
 
-                 cheque.setBatchNumber(
-                         rs.getString("batch_number")
-                 );
+                    cheque.setBatchNumber(
+                            rs.getString("batch_number")
+                    );
 
-                 // =================================================
-                 // CHEQUE NUMBER
-                 // =================================================
+                    // =================================================
+                    // CHEQUE NUMBER
+                    // =================================================
 
-                 cheque.setChequeNumber(
-                         rs.getString("cheque_number")
-                 );
+                    cheque.setChequeNumber(
+                            rs.getString("cheque_number")
+                    );
 
-                 // =================================================
-                 // CITY CODE
-                 // =================================================
+                    // =================================================
+                    // CITY CODE
+                    // =================================================
 
-                 cheque.setCityCode(
-                         rs.getString("city_code")
-                 );
+                    cheque.setCityCode(
+                            rs.getString("city_code")
+                    );
 
-                 // =================================================
-                 // BANK CODE
-                 // =================================================
+                    // =================================================
+                    // BANK CODE
+                    // =================================================
 
-                 cheque.setBankCode(
-                         rs.getString("bank_code")
-                 );
+                    cheque.setBankCode(
+                            rs.getString("bank_code")
+                    );
 
-                 // =================================================
-                 // BRANCH CODE
-                 // =================================================
+                    // =================================================
+                    // BRANCH CODE
+                    // =================================================
 
-                 cheque.setBranchCode(
-                         rs.getString("branch_code")
-                 );
+                    cheque.setBranchCode(
+                            rs.getString("branch_code")
+                    );
 
-                 // =================================================
-                 // DRAWER ACCOUNT NUMBER
-                 // =================================================
+                    // =================================================
+                    // DRAWER ACCOUNT NUMBER
+                    // =================================================
 
-                 cheque.setDrawerAccountNumber(
-                         rs.getString("drawer_account_number")
-                 );
+                    cheque.setDrawerAccountNumber(
+                            rs.getString("drawer_account_number")
+                    );
 
-                 // =================================================
-                 // DRAWER NAME
-                 // =================================================
+                    // =================================================
+                    // DRAWER NAME
+                    // =================================================
 
-                 cheque.setDrawerName(
-                         rs.getString("drawer_name")
-                 );
+                    cheque.setDrawerName(
+                            rs.getString("drawer_name")
+                    );
 
-                 // =================================================
-                 // DEPOSITOR ACCOUNT NUMBER
-                 // =================================================
+                    // =================================================
+                    // DEPOSITOR ACCOUNT NUMBER
+                    // =================================================
 
-                 cheque.setDepositorAccountNumber(
-                         rs.getString("payee_account_number")
-                 );
+                    cheque.setDepositorAccountNumber(
+                            rs.getString("payee_account_number")
+                    );
 
-                 // =================================================
-                 // DEPOSITOR NAME
-                 // =================================================
+                    // =================================================
+                    // DEPOSITOR NAME
+                    // =================================================
 
-                 cheque.setDepositorName(
-                         rs.getString("payee_name")
-                 );
+                    cheque.setDepositorName(
+                            rs.getString("payee_name")
+                    );
 
-                 // =================================================
-                 // PAYEE NAME
-                 // =================================================
+                    // =================================================
+                    // PAYEE NAME
+                    // =================================================
 
-                 cheque.setPayeeName(
-                         rs.getString("payee_name")
-                 );
+                    cheque.setPayeeName(
+                            rs.getString("payee_name")
+                    );
 
-                 // =================================================
-                 // AMOUNT
-                 // =================================================
+                    // =================================================
+                    // AMOUNT
+                    // =================================================
 
-                 cheque.setAmount(
-                         rs.getBigDecimal("amount")
-                 );
+                    cheque.setAmount(
+                            rs.getBigDecimal("amount")
+                    );
 
-                 // =================================================
-                 // AMOUNT IN WORDS
-                 // =================================================
+                    // =================================================
+                    // AMOUNT IN WORDS
+                    // =================================================
 
-                 cheque.setAmountInWords(
-                         rs.getString("amount_in_words")
-                 );
+                    cheque.setAmountInWords(
+                            rs.getString("amount_in_words")
+                    );
 
-                 // =================================================
-                 // CHEQUE DATE
-                 // =================================================
+                    // =================================================
+                    // CHEQUE DATE
+                    // =================================================
 
-                 Date chequeDate = rs.getDate("cheque_date");
+                    Date chequeDate =
+                            rs.getDate("cheque_date");
 
-                 if (chequeDate != null) {
-                     cheque.setChequeDate(
-                             chequeDate.toLocalDate()
-                     );
-                 } else {
-                     cheque.setChequeDate(null);
-                 }
+                    if (chequeDate != null) {
 
-                 // =================================================
-                 // FRONT IMAGE PATH
-                 // =================================================
+                        cheque.setChequeDate(
+                                chequeDate.toLocalDate()
+                        );
 
-                 cheque.setFrontImagePath(
-                         rs.getString("front_image_path")
-                 );
+                    } else {
 
-                 // =================================================
-                 // BACK IMAGE PATH
-                 // =================================================
+                        cheque.setChequeDate(null);
+                    }
 
-                 cheque.setBackImagePath(
-                         rs.getString("back_image_path")
-                 );
+                    // =================================================
+                    // FRONT IMAGE PATH
+                    // =================================================
 
-                 // =================================================
-                 // CHEQUE STATUS
-                 // =================================================
+                    cheque.setFrontImagePath(
+                            rs.getString("front_image_path")
+                    );
 
-                 cheque.setChequeStatus(
-                         rs.getString("cheque_status")
-                 );
+                    // =================================================
+                    // BACK IMAGE PATH
+                    // =================================================
 
-                 // =================================================
-                 // CREATED BY
-                 // =================================================
+                    cheque.setBackImagePath(
+                            rs.getString("back_image_path")
+                    );
 
-                 int batchCreatedBy =
-                         rs.getInt("batch_created_by");
+                    // =================================================
+                    // CHEQUE STATUS
+                    // =================================================
 
-                 if (!rs.wasNull()) {
-                     cheque.setCreatedBy(
-                             String.valueOf(batchCreatedBy)
-                     );
-                 } else {
-                     cheque.setCreatedBy(null);
-                 }
+                    cheque.setChequeStatus(
+                            rs.getString("cheque_status")
+                    );
 
-                 // =================================================
-                 // CREATED AT
-                 // =================================================
+                    // =================================================
+                    // CREATED BY
+                    // =================================================
 
-                 Timestamp batchCreatedAt =
-                         rs.getTimestamp("batch_created_at");
+                    int batchCreatedBy =
+                            rs.getInt("batch_created_by");
 
-                 if (batchCreatedAt != null) {
-                     cheque.setCreatedAt(
-                             batchCreatedAt.toLocalDateTime()
-                     );
-                 } else {
-                     cheque.setCreatedAt(null);
-                 }
+                    if (!rs.wasNull()) {
 
-                 // =================================================
-                 // UPDATED BY
-                 // =================================================
+                        cheque.setCreatedBy(
+                                String.valueOf(batchCreatedBy)
+                        );
 
-                 cheque.setUpdatedBy(null);
+                    } else {
 
-                 // =================================================
-                 // UPDATED AT
-                 // =================================================
+                        cheque.setCreatedBy(null);
+                    }
 
-                 cheque.setUpdatedAt(null);
+                    // =================================================
+                    // CREATED AT
+                    // =================================================
 
-                 // =================================================
-                 // ADD CHEQUE
-                 // =================================================
+                    Timestamp batchCreatedAt =
+                            rs.getTimestamp("batch_created_at");
 
-                 cheques.add(cheque);
-             }
-         }
-     }
+                    if (batchCreatedAt != null) {
 
-     return cheques;
- }
+                        cheque.setCreatedAt(
+                                batchCreatedAt.toLocalDateTime()
+                        );
+
+                    } else {
+
+                        cheque.setCreatedAt(null);
+                    }
+
+                    // =================================================
+                    // UPDATED BY
+                    // =================================================
+
+                    cheque.setUpdatedBy(null);
+
+                    // =================================================
+                    // UPDATED AT
+                    // =================================================
+
+                    cheque.setUpdatedAt(null);
+
+                    // =================================================
+                    // ADD CHEQUE
+                    // =================================================
+
+                    cheques.add(cheque);
+                }
+            }
+        }
+
+        return cheques;
+    }
+
     // ============================================================
     // CHECK BATCH EXISTS
     // ============================================================
@@ -790,7 +867,7 @@ public class OutwardMakerDashboardDAO {
         }
 
         try (Connection con =
-        		dataSource.getConnection()) {
+                     dataSource.getConnection()) {
 
             con.setAutoCommit(false);
 
@@ -854,59 +931,127 @@ public class OutwardMakerDashboardDAO {
             }
         }
     }
-   
- // ============================================================
- // UPDATE CHEQUE STATUS
- // ============================================================
 
- public boolean updateChequeStatus(
-         String batchNumber,
-         String chequeNumber,
-         String status) throws SQLException {
+    // ============================================================
+    // UPDATE CHEQUE STATUS
+    // ============================================================
 
-     String sql =
-             "UPDATE public.outward_cheque "
-             + "SET cheque_status = ? "
-             + "WHERE batch_number = ? "
-             + "AND cheque_number = ?";
+    public boolean updateChequeStatus(
+            String batchNumber,
+            String chequeNumber,
+            String status) throws SQLException {
 
-     try (Connection con =
-    		 dataSource.getConnection();
-          PreparedStatement ps =
-                  con.prepareStatement(sql)) {
+        String sql =
+                "UPDATE public.outward_cheque "
+                + "SET cheque_status = ? "
+                + "WHERE batch_number = ? "
+                + "AND cheque_number = ?";
 
-         ps.setString(1, status);
-         ps.setString(2, batchNumber);
-         ps.setString(3, chequeNumber);
+        try (Connection con =
+                     dataSource.getConnection();
 
-         return ps.executeUpdate() > 0;
-     }
- }
+             PreparedStatement ps =
+                     con.prepareStatement(sql)) {
 
+            ps.setString(1, status);
+            ps.setString(2, batchNumber);
+            ps.setString(3, chequeNumber);
 
- // ============================================================
- // UPDATE BATCH STATUS
- // ============================================================
+            return ps.executeUpdate() > 0;
+        }
+    }
 
- public boolean updateBatchStatus(
-         String batchNumber,
-         String status) throws SQLException {
+    // ============================================================
+    // UPDATE BATCH STATUS
+    // ============================================================
 
-     String sql =
-             "UPDATE public.outward_batch "
-             + "SET batch_status = ? "
-             + "WHERE batch_number = ?";
+    public boolean updateBatchStatus(
+            String batchNumber,
+            String status) throws SQLException {
 
-     try (Connection con =
-    		 dataSource.getConnection();
-          PreparedStatement ps =
-                  con.prepareStatement(sql)) {
+        String sql =
+                "UPDATE public.outward_batch "
+                + "SET batch_status = ? "
+                + "WHERE batch_number = ?";
 
-         ps.setString(1, status);
-         ps.setString(2, batchNumber);
+        try (Connection con =
+                     dataSource.getConnection();
 
-         return ps.executeUpdate() > 0;
-     }
- }
+             PreparedStatement ps =
+                     con.prepareStatement(sql)) {
+
+            ps.setString(1, status);
+            ps.setString(2, batchNumber);
+
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    // ============================================================
+    // RELEASE MAKER LOCK
+    // ============================================================
+
+    public boolean releaseBatchLock(
+            String batchNumber,
+            String userId) throws SQLException {
+
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()) {
+
+            throw new SQLException(
+                    "Batch number is required."
+            );
+        }
+
+        if (userId == null ||
+                userId.trim().isEmpty()) {
+
+            throw new SQLException(
+                    "User ID is required."
+            );
+        }
+
+        int makerId;
+
+        try {
+
+            makerId = Integer.parseInt(
+                    userId.trim()
+            );
+
+        } catch (NumberFormatException e) {
+
+            throw new SQLException(
+                    "Invalid maker user ID: " + userId
+            );
+        }
+
+        String sql =
+                "UPDATE public.outward_batch_assignment " +
+                "SET assignment_status = 'RELEASED' " +
+                "WHERE batch_number = ? " +
+                "AND user_id = ? " +
+                "AND UPPER(assignment_role) = 'MAKER' " +
+                "AND UPPER(assignment_status) IN " +
+                "    ('ASSIGNED', 'IN_PROGRESS')";
+
+        try (Connection con =
+                     dataSource.getConnection();
+
+             PreparedStatement ps =
+                     con.prepareStatement(sql)) {
+
+            ps.setString(
+                    1,
+                    batchNumber.trim()
+            );
+
+            ps.setInt(
+                    2,
+                    makerId
+            );
+
+            return ps.executeUpdate() > 0;
+        }
+    }
 }
-

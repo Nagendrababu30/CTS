@@ -34,9 +34,8 @@ public class ChequeDaoImpl implements ChequeDao {
                 "INSERT INTO inward_cheque "
                 + "(cheque_number, batch_id, account_number, drawer_name, "
                 + "amount, micr_code, cheque_date, presenting_date, "
-                + "payee_name, payee_account_number, amount_in_words, "
-                + "city_code, bank_code, branch_code) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "payee_name, payee_account_number, amount_in_words) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -52,9 +51,6 @@ public class ChequeDaoImpl implements ChequeDao {
             statement.setString(9, cheque.getPayeeName());
             statement.setString(10, cheque.getPayeeAccountNumber());
             statement.setString(11, cheque.getAmountInWords());
-            statement.setString(12, cheque.getCityCode());
-            statement.setString(13, cheque.getBankCode());
-            statement.setString(14, cheque.getBranchCode());
 
             statement.executeUpdate();
 
@@ -66,14 +62,21 @@ public class ChequeDaoImpl implements ChequeDao {
 
     @Override
     public List<InwardCheque> getChequesForBatch(String batchId) {
-
-        String sql =
-                "SELECT cheque_number, batch_id, account_number, "
-                + "drawer_name, amount, micr_code, cheque_date, "
-                + "presenting_date "
-                + "FROM inward_cheque "
-                + "WHERE batch_id = ? "
-                + "ORDER BY cheque_number";
+    	String sql =
+    	        "SELECT c.cheque_number, c.batch_id, c.account_number, "
+    	        + "c.drawer_name, c.amount, c.micr_code, c.cheque_date, "
+    	        + "c.presenting_date "
+    	        + "FROM public.inward_cheque c "
+    	        + "INNER JOIN LATERAL ( "
+    	        + "    SELECT h.status "
+    	        + "    FROM public.inward_cheque_status_history h "
+    	        + "    WHERE h.cheque_number = c.cheque_number "
+    	        + "    ORDER BY h.status_history_id DESC "
+    	        + "    LIMIT 1 "
+    	        + ") latest ON TRUE "
+    	        + "WHERE c.batch_id = ? "
+    	        + "AND latest.status = 'DATA_ENTRY' "
+    	        + "ORDER BY c.cheque_number";
 
         List<InwardCheque> cheques = new ArrayList<>();
 
@@ -168,7 +171,7 @@ public class ChequeDaoImpl implements ChequeDao {
                 + "rejection_reason_code, return_reason_code, "
                 + "maker_id, maker_action, maker_action_on, "
                 + "checker_id, checker_action, checker_action_on, remarks) "
-                + "VALUES (?, ?, NULL, NULL, ?, ?, NULL, NULL, NULL, NULL, NULL)";
+                + "VALUES (?, ?, NULL, NULL, ?, ?, CURRENT_TIMESTAMP, NULL, NULL, NULL, NULL)";
 
         try (Connection connection = dataSource.getConnection()) {
 

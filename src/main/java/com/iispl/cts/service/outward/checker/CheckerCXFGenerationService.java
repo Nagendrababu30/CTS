@@ -5,71 +5,112 @@ import com.iispl.cts.model.outward.OutwardCheque;
 import java.io.File;
 import java.io.FileWriter;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * ============================================================
+ * CHECKER CFX GENERATION SERVICE
+ * ============================================================
+ *
+ * Generates CFX XML for a Checker batch.
+ *
+ * Rules:
+ *
+ * 1. Every batch has CFX.
+ * 2. CFX is independent of RRF.
+ * 3. All cheques belonging to the selected batch are included.
+ * 4. RRF/rejected-cheque logic is NOT handled here.
+ *
+ * NOTE:
+ * This is the development/test implementation.
+ * Production NPCI CFX structure must follow the applicable
+ * CTS/NPCI specification.
+ *
+ * ============================================================
+ */
 public class CheckerCXFGenerationService {
 
-    /**
-     * Generate CXF XML file for the selected batch.
-     *
-     * Temporary development version.
-     */
+    // ============================================================
+    // GENERATE CFX
+    // ============================================================
+
     public String generateCXF(
             String batchNumber,
-            List<OutwardCheque> cheques) {
+            List<OutwardCheque> cheques) throws Exception {
+
+        // ========================================================
+        // VALIDATE BATCH
+        // ========================================================
 
         if (batchNumber == null ||
                 batchNumber.trim().isEmpty()) {
 
             throw new IllegalArgumentException(
-                    "Batch number is required."
+                    "Batch number is required"
             );
         }
+
+        // ========================================================
+        // VALIDATE CHEQUES
+        // ========================================================
 
         if (cheques == null ||
                 cheques.isEmpty()) {
 
             throw new IllegalArgumentException(
-                    "No cheques available for CXF generation."
+                    "No cheque records found for batch: "
+                            + batchNumber
             );
         }
 
+        batchNumber = batchNumber.trim();
 
-        /*
-         * Create output directory.
-         *
-         * Change this path later to your
-         * actual CTS outward file directory.
-         */
+        // ========================================================
+        // OUTPUT DIRECTORY
+        // ========================================================
+
         String directoryPath =
-                "C:/CTS/OUTWARD/" +
-                batchNumber;
+                "C:/CTS/OUTWARD/"
+                        + batchNumber;
 
         File directory =
                 new File(directoryPath);
 
         if (!directory.exists()) {
 
-            directory.mkdirs();
+            if (!directory.mkdirs()) {
+
+                throw new IllegalStateException(
+                        "Unable to create output directory: "
+                                + directory.getAbsolutePath()
+                );
+            }
         }
 
+        if (!directory.isDirectory()) {
 
-        /*
-         * CXF file name.
-         */
-        String fileName =
-                batchNumber + ".CXF.XML";
+            throw new IllegalStateException(
+                    "Output path is not a directory: "
+                            + directory.getAbsolutePath()
+            );
+        }
 
-        File cxfFile =
+        // ========================================================
+        // CFX FILE
+        // ========================================================
+
+        File cfxFile =
                 new File(
                         directory,
-                        fileName
+                        batchNumber + ".CFX.XML"
                 );
 
+        // ========================================================
+        // WRITE CFX XML
+        // ========================================================
 
         try (FileWriter writer =
-                     new FileWriter(cxfFile)) {
+                     new FileWriter(cfxFile)) {
 
             writer.write(
                     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -79,154 +120,211 @@ public class CheckerCXFGenerationService {
                     "<OutwardBatch>\n"
             );
 
+            // ----------------------------------------------------
+            // BATCH NUMBER
+            // ----------------------------------------------------
+
             writer.write(
                     "    <BatchNumber>"
-                            + escapeXML(batchNumber)
-                            + "</BatchNumber>\n"
             );
+
+            writer.write(
+                    escapeXml(batchNumber)
+            );
+
+            writer.write(
+                    "</BatchNumber>\n"
+            );
+
+            // ----------------------------------------------------
+            // CHEQUE COUNT
+            // ----------------------------------------------------
 
             writer.write(
                     "    <ChequeCount>"
-                            + cheques.size()
-                            + "</ChequeCount>\n"
             );
 
+            writer.write(
+                    String.valueOf(cheques.size())
+            );
+
+            writer.write(
+                    "</ChequeCount>\n"
+            );
+
+            // ----------------------------------------------------
+            // CHEQUES
+            // ----------------------------------------------------
 
             writer.write(
                     "    <Cheques>\n"
             );
 
-
             for (OutwardCheque cheque :
                     cheques) {
+
+                if (cheque == null) {
+                    continue;
+                }
 
                 writer.write(
                         "        <Cheque>\n"
                 );
 
+                // ------------------------------------------------
+                // CHEQUE NUMBER
+                // ------------------------------------------------
 
-                writer.write(
-                        "            <ChequeNumber>"
-                                + escapeXML(
-                                        cheque.getChequeNumber()
-                                )
-                                + "</ChequeNumber>\n"
+                writeElement(
+                        writer,
+                        "ChequeNumber",
+                        cheque.getChequeNumber(),
+                        12
                 );
 
+                // ------------------------------------------------
+                // CITY CODE
+                // ------------------------------------------------
 
-                writer.write(
-                        "            <CityCode>"
-                                + escapeXML(
-                                        cheque.getCityCode()
-                                )
-                                + "</CityCode>\n"
+                writeElement(
+                        writer,
+                        "CityCode",
+                        cheque.getCityCode(),
+                        12
                 );
 
+                // ------------------------------------------------
+                // BANK CODE
+                // ------------------------------------------------
 
-                writer.write(
-                        "            <BankCode>"
-                                + escapeXML(
-                                        cheque.getBankCode()
-                                )
-                                + "</BankCode>\n"
+                writeElement(
+                        writer,
+                        "BankCode",
+                        cheque.getBankCode(),
+                        12
                 );
 
+                // ------------------------------------------------
+                // BRANCH CODE
+                // ------------------------------------------------
 
-                writer.write(
-                        "            <BranchCode>"
-                                + escapeXML(
-                                        cheque.getBranchCode()
-                                )
-                                + "</BranchCode>\n"
+                writeElement(
+                        writer,
+                        "BranchCode",
+                        cheque.getBranchCode(),
+                        12
                 );
 
+                // ------------------------------------------------
+                // DRAWER ACCOUNT NUMBER
+                // ------------------------------------------------
 
-                writer.write(
-                        "            <DrawerAccountNumber>"
-                                + escapeXML(
-                                        cheque.getDrawerAccountNumber()
-                                )
-                                + "</DrawerAccountNumber>\n"
+                writeElement(
+                        writer,
+                        "DrawerAccountNumber",
+                        cheque.getDrawerAccountNumber(),
+                        12
                 );
 
+                // ------------------------------------------------
+                // DRAWER NAME
+                // ------------------------------------------------
 
-                writer.write(
-                        "            <DrawerName>"
-                                + escapeXML(
-                                        cheque.getDrawerName()
-                                )
-                                + "</DrawerName>\n"
+                writeElement(
+                        writer,
+                        "DrawerName",
+                        cheque.getDrawerName(),
+                        12
                 );
 
+                // ------------------------------------------------
+                // DEPOSITOR ACCOUNT NUMBER
+                // ------------------------------------------------
 
-                writer.write(
-                        "            <DepositorAccountNumber>"
-                                + escapeXML(
-                                        cheque.getDepositorAccountNumber()
-                                )
-                                + "</DepositorAccountNumber>\n"
+                writeElement(
+                        writer,
+                        "DepositorAccountNumber",
+                        cheque.getDepositorAccountNumber(),
+                        12
                 );
 
+                // ------------------------------------------------
+                // DEPOSITOR NAME
+                // ------------------------------------------------
 
-                writer.write(
-                        "            <DepositorName>"
-                                + escapeXML(
-                                        cheque.getDepositorName()
-                                )
-                                + "</DepositorName>\n"
+                writeElement(
+                        writer,
+                        "DepositorName",
+                        cheque.getDepositorName(),
+                        12
                 );
 
+                // ------------------------------------------------
+                // PAYEE NAME
+                // ------------------------------------------------
 
-                writer.write(
-                        "            <PayeeName>"
-                                + escapeXML(
-                                        cheque.getPayeeName()
-                                )
-                                + "</PayeeName>\n"
+                writeElement(
+                        writer,
+                        "PayeeName",
+                        cheque.getPayeeName(),
+                        12
                 );
 
+                // ------------------------------------------------
+                // AMOUNT
+                // ------------------------------------------------
 
-                writer.write(
-                        "            <Amount>"
-                                + amount(
-                                        cheque.getAmount()
-                                )
-                                + "</Amount>\n"
+                BigDecimal amount =
+                        cheque.getAmount();
+
+                writeElement(
+                        writer,
+                        "Amount",
+                        amount == null
+                                ? ""
+                                : amount.toString(),
+                        12
                 );
 
+                // ------------------------------------------------
+                // AMOUNT IN WORDS
+                // ------------------------------------------------
 
-                writer.write(
-                        "            <AmountInWords>"
-                                + escapeXML(
-                                        cheque.getAmountInWords()
-                                )
-                                + "</AmountInWords>\n"
+                writeElement(
+                        writer,
+                        "AmountInWords",
+                        cheque.getAmountInWords(),
+                        12
                 );
 
+                // ------------------------------------------------
+                // CHEQUE DATE
+                // ------------------------------------------------
 
-                writer.write(
-                        "            <ChequeDate>"
-                                + date(
-                                        cheque.getChequeDate()
-                                )
-                                + "</ChequeDate>\n"
+                writeElement(
+                        writer,
+                        "ChequeDate",
+                        cheque.getChequeDate() == null
+                                ? ""
+                                : cheque.getChequeDate().toString(),
+                        12
                 );
 
+                // ------------------------------------------------
+                // CHEQUE STATUS
+                // ------------------------------------------------
 
-                writer.write(
-                        "            <ChequeStatus>"
-                                + escapeXML(
-                                        cheque.getChequeStatus()
-                                )
-                                + "</ChequeStatus>\n"
+                writeElement(
+                        writer,
+                        "ChequeStatus",
+                        cheque.getChequeStatus(),
+                        12
                 );
-
 
                 writer.write(
                         "        </Cheque>\n"
                 );
             }
-
 
             writer.write(
                     "    </Cheques>\n"
@@ -235,22 +333,94 @@ public class CheckerCXFGenerationService {
             writer.write(
                     "</OutwardBatch>\n"
             );
+        }
 
+        // ========================================================
+        // VERIFY FILE
+        // ========================================================
 
-        } catch (Exception e) {
+        if (!cfxFile.exists()) {
 
-            throw new RuntimeException(
-                    "Unable to generate CXF file.",
-                    e
+            throw new IllegalStateException(
+                    "CFX file was not created: "
+                            + cfxFile.getAbsolutePath()
             );
         }
 
+        if (cfxFile.length() == 0) {
 
-        return cxfFile.getAbsolutePath();
+            throw new IllegalStateException(
+                    "Generated CFX file is empty: "
+                            + cfxFile.getAbsolutePath()
+            );
+        }
+
+        // ========================================================
+        // LOG
+        // ========================================================
+
+        System.out.println(
+                "CFX generated successfully: "
+                        + cfxFile.getAbsolutePath()
+        );
+
+        System.out.println(
+                "Batch: "
+                        + batchNumber
+                        + ", Cheques: "
+                        + cheques.size()
+        );
+
+        // ========================================================
+        // RETURN PATH
+        // ========================================================
+
+        return cfxFile.getAbsolutePath();
     }
 
+    // ============================================================
+    // WRITE XML ELEMENT
+    // ============================================================
 
-    private String escapeXML(
+    private void writeElement(
+            FileWriter writer,
+            String elementName,
+            String value,
+            int spaces) throws Exception {
+
+        StringBuilder indentation =
+                new StringBuilder();
+
+        for (int i = 0; i < spaces; i++) {
+            indentation.append(" ");
+        }
+
+        writer.write(
+                indentation.toString()
+        );
+
+        writer.write(
+                "<"
+                        + elementName
+                        + ">"
+        );
+
+        writer.write(
+                escapeXml(value)
+        );
+
+        writer.write(
+                "</"
+                        + elementName
+                        + ">\n"
+        );
+    }
+
+    // ============================================================
+    // ESCAPE XML
+    // ============================================================
+
+    private String escapeXml(
             String value) {
 
         if (value == null) {
@@ -263,27 +433,5 @@ public class CheckerCXFGenerationService {
                 .replace(">", "&gt;")
                 .replace("\"", "&quot;")
                 .replace("'", "&apos;");
-    }
-
-
-    private String amount(
-            BigDecimal value) {
-
-        if (value == null) {
-            return "0.00";
-        }
-
-        return value.toPlainString();
-    }
-
-
-    private String date(
-            LocalDate value) {
-
-        if (value == null) {
-            return "";
-        }
-
-        return value.toString();
     }
 }

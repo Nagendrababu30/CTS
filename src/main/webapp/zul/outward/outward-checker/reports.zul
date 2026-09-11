@@ -67,28 +67,28 @@
                 sclass="filter-card">
 
                 <label
-                    value="Rejected Cheque Reports"
+                    value="Batch Reports"
                     sclass="section-title"/>
 
                 <separator
                     height="8px"/>
 
                 <label
-                    value="Select a branch to view rejected cheques and generate RRF, CIBF or CFX files."
+                    value="Select a batch number to generate CFX, CIBF and, when applicable, RRF files."
                     sclass="filter-label"/>
 
             </div>
 
 
             <!-- ================================================= -->
-            <!-- BRANCH SELECTION                                  -->
+            <!-- BATCH SELECTION                                    -->
             <!-- ================================================= -->
 
             <div
                 sclass="section-card">
 
                 <label
-                    value="Branch Selection"
+                    value="Batch Selection"
                     sclass="section-title"/>
 
                 <separator
@@ -100,7 +100,7 @@
                     valign="center">
 
                     <label
-                        value="Branch Number"
+                        value="Batch Number"
                         style="
                             font-size:15px;
                             font-weight:600;
@@ -109,14 +109,14 @@
                         "/>
 
                     <combobox
-                        id="branchCombo"
+                        id="batchCombo"
                         width="320px"
-                        placeholder="Select Branch Number"
+                        placeholder="Select Batch Number"
                         readonly="true"/>
 
                     <button
-                        id="viewRejectedBtn"
-                        label="View Rejected Cheques"
+                        id="loadBatchBtn"
+                        label="Load Batch"
                         sclass="primary-button"
                         disabled="true"/>
 
@@ -126,11 +126,130 @@
 
 
             <!-- ================================================= -->
-            <!-- REJECTED CHEQUES                                  -->
+            <!-- SELECTED BATCH INFORMATION                         -->
             <!-- ================================================= -->
 
             <div
-                sclass="section-card">
+                id="batchInfoCard"
+                sclass="section-card"
+                visible="false">
+
+                <label
+                    value="Selected Batch"
+                    sclass="section-title"/>
+
+                <separator
+                    height="15px"/>
+
+                <hlayout
+                    width="100%"
+                    spacing="40px"
+                    valign="center">
+
+                    <vlayout
+                        width="25%"
+                        spacing="5px">
+
+                        <label
+                            value="Batch Number"
+                            style="
+                                font-size:13px;
+                                color:#6B778C;
+                            "/>
+
+                        <label
+                            id="selectedBatchNumber"
+                            value="—"
+                            style="
+                                font-size:17px;
+                                font-weight:bold;
+                                color:#172B4D;
+                            "/>
+
+                    </vlayout>
+
+
+                    <vlayout
+                        width="25%"
+                        spacing="5px">
+
+                        <label
+                            value="Total Cheques"
+                            style="
+                                font-size:13px;
+                                color:#6B778C;
+                            "/>
+
+                        <label
+                            id="selectedBatchChequeCount"
+                            value="—"
+                            style="
+                                font-size:17px;
+                                font-weight:bold;
+                                color:#172B4D;
+                            "/>
+
+                    </vlayout>
+
+
+                    <vlayout
+                        width="25%"
+                        spacing="5px">
+
+                        <label
+                            value="Rejected Cheques"
+                            style="
+                                font-size:13px;
+                                color:#6B778C;
+                            "/>
+
+                        <label
+                            id="selectedBatchRejectedCount"
+                            value="—"
+                            style="
+                                font-size:17px;
+                                font-weight:bold;
+                                color:#172B4D;
+                            "/>
+
+                    </vlayout>
+
+
+                    <vlayout
+                        width="25%"
+                        spacing="5px">
+
+                        <label
+                            value="Report Status"
+                            style="
+                                font-size:13px;
+                                color:#6B778C;
+                            "/>
+
+                        <label
+                            id="batchReportStatus"
+                            value="—"
+                            style="
+                                font-size:17px;
+                                font-weight:bold;
+                                color:#172B4D;
+                            "/>
+
+                    </vlayout>
+
+                </hlayout>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- REJECTED CHEQUES                                   -->
+            <!-- ================================================= -->
+
+            <div
+                id="rejectedChequeCard"
+                sclass="section-card"
+                visible="false">
 
                 <label
                     value="Rejected Cheques"
@@ -150,7 +269,7 @@
 
                         <listheader
                             label="Batch ID"
-                            width="18%"/>
+                            width="15%"/>
 
                         <listheader
                             label="Cheque Number"
@@ -158,7 +277,7 @@
 
                         <listheader
                             label="Account Number"
-                            width="16%"/>
+                            width="17%"/>
 
                         <listheader
                             label="Amount"
@@ -166,11 +285,11 @@
 
                         <listheader
                             label="Rejection Reason"
-                            width="19%"/>
+                            width="20%"/>
 
                         <listheader
-                            label="Rejected By"
-                            width="12%"/>
+                            label="Checker Remarks"
+                            width="13%"/>
 
                         <listheader
                             label="Status"
@@ -184,11 +303,13 @@
 
 
             <!-- ================================================= -->
-            <!-- FILE GENERATION                                   -->
+            <!-- FILE GENERATION                                    -->
             <!-- ================================================= -->
 
             <div
-                sclass="section-card">
+                id="generateFilesCard"
+                sclass="section-card"
+                visible="false">
 
                 <label
                     value="Generate Files"
@@ -198,7 +319,7 @@
                     height="15px"/>
 
                 <label
-                    value="Generate the required file in XML or PDF format."
+                    value="CFX and CIBF are available for every batch. RRF is available only when the batch contains rejected cheques."
                     sclass="filter-label"/>
 
                 <separator
@@ -210,6 +331,7 @@
                 <!-- ============================================= -->
 
                 <div
+                    id="rrfCard"
                     style="
                         width:100%;
                         padding:18px;
@@ -244,7 +366,17 @@
                                     color:#6B778C;
                                 "/>
 
+                            <label
+                                id="rrfStatusLabel"
+                                value="Select a batch"
+                                style="
+                                    font-size:13px;
+                                    font-weight:600;
+                                    color:#6B778C;
+                                "/>
+
                         </vlayout>
+
 
                         <hlayout
                             width="75%"
@@ -271,10 +403,11 @@
 
 
                 <!-- ============================================= -->
-                <!-- CIBF                                          -->
+                <!-- CFX                                           -->
                 <!-- ============================================= -->
 
                 <div
+                    id="cfxCard"
                     style="
                         width:100%;
                         padding:18px;
@@ -295,70 +428,6 @@
                             spacing="5px">
 
                             <label
-                                value="CIBF"
-                                style="
-                                    font-size:19px;
-                                    font-weight:bold;
-                                    color:#172B4D;
-                                "/>
-
-                            <label
-                                value="CIBF File"
-                                style="
-                                    font-size:13px;
-                                    color:#6B778C;
-                                "/>
-
-                        </vlayout>
-
-                        <hlayout
-                            width="75%"
-                            spacing="12px"
-                            valign="center">
-
-                            <button
-                                id="generateCibfXmlBtn"
-                                label="Generate CIBF XML"
-                                sclass="primary-button"
-                                disabled="true"/>
-
-                            <button
-                                id="generateCibfPdfBtn"
-                                label="Generate CIBF PDF"
-                                sclass="secondary-button"
-                                disabled="true"/>
-
-                        </hlayout>
-
-                    </hlayout>
-
-                </div>
-
-
-                <!-- ============================================= -->
-                <!-- CFX                                           -->
-                <!-- ============================================= -->
-
-                <div
-                    style="
-                        width:100%;
-                        padding:18px;
-                        box-sizing:border-box;
-                        border:1px solid #D9E2EC;
-                        border-radius:8px;
-                        background:#FFFFFF;
-                    ">
-
-                    <hlayout
-                        width="100%"
-                        valign="center"
-                        spacing="20px">
-
-                        <vlayout
-                            width="25%"
-                            spacing="5px">
-
-                            <label
                                 value="CFX"
                                 style="
                                     font-size:19px;
@@ -367,13 +436,23 @@
                                 "/>
 
                             <label
-                                value="CFX File"
+                                value="Cheque Data File"
                                 style="
                                     font-size:13px;
                                     color:#6B778C;
                                 "/>
 
+                            <label
+                                id="cfxStatusLabel"
+                                value="Available for every batch"
+                                style="
+                                    font-size:13px;
+                                    font-weight:600;
+                                    color:#2E7D32;
+                                "/>
+
                         </vlayout>
+
 
                         <hlayout
                             width="75%"
@@ -397,6 +476,107 @@
                     </hlayout>
 
                 </div>
+
+
+                <!-- ============================================= -->
+                <!-- CIBF                                          -->
+                <!-- ============================================= -->
+
+                <div
+                    id="cibfCard"
+                    style="
+                        width:100%;
+                        padding:18px;
+                        box-sizing:border-box;
+                        border:1px solid #D9E2EC;
+                        border-radius:8px;
+                        background:#FFFFFF;
+                    ">
+
+                    <hlayout
+                        width="100%"
+                        valign="center"
+                        spacing="20px">
+
+                        <vlayout
+                            width="25%"
+                            spacing="5px">
+
+                            <label
+                                value="CIBF"
+                                style="
+                                    font-size:19px;
+                                    font-weight:bold;
+                                    color:#172B4D;
+                                "/>
+
+                            <label
+                                value="Cheque Image File"
+                                style="
+                                    font-size:13px;
+                                    color:#6B778C;
+                                "/>
+
+                            <label
+                                id="cibfStatusLabel"
+                                value="Available for every batch"
+                                style="
+                                    font-size:13px;
+                                    font-weight:600;
+                                    color:#2E7D32;
+                                "/>
+
+                        </vlayout>
+
+
+                        <hlayout
+                            width="75%"
+                            spacing="12px"
+                            valign="center">
+
+                            <button
+                                id="generateCibfBtn"
+                                label="Generate CIBF"
+                                sclass="primary-button"
+                                disabled="true"/>
+
+                        </hlayout>
+
+                    </hlayout>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- NPCI ACTION                                        -->
+            <!-- ================================================= -->
+
+            <div
+                id="npciCard"
+                sclass="section-card"
+                visible="false">
+
+                <label
+                    value="NPCI Submission"
+                    sclass="section-title"/>
+
+                <separator
+                    height="15px"/>
+
+                <label
+                    value="Generate the required reports before sending the batch to NPCI."
+                    sclass="filter-label"/>
+
+                <separator
+                    height="15px"/>
+
+                <button
+                    id="sendToNpciBtn"
+                    label="Send to NPCI"
+                    sclass="primary-button"
+                    disabled="true"/>
 
             </div>
 

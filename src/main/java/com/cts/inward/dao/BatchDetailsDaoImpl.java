@@ -329,7 +329,7 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
 
                 FROM inward_cheque c
 
-                LEFT JOIN account_master a
+                LEFT JOIN inward_account_master a
                     ON a.account_number =
                        c.account_number
 
@@ -421,7 +421,6 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
                     FROM inward_cheque_status_history
                     WHERE cheque_number = ?
                       AND status = 'SENT_TO_CHECKER'
-                      AND checker_id = ?
                     ORDER BY status_history_id DESC
                     LIMIT 1
                 )
@@ -510,20 +509,6 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
             ps.setString(
                     7,
                     chequeNumber);
-
-            // checker_id in subquery
-            if (checkerId == null) {
-
-                ps.setNull(
-                        8,
-                        java.sql.Types.INTEGER);
-
-            } else {
-
-                ps.setInt(
-                        8,
-                        checkerId);
-            }
 
             int updatedRows =
                     ps.executeUpdate();

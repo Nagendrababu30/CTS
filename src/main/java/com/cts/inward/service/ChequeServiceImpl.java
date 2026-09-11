@@ -30,8 +30,12 @@ public class ChequeServiceImpl implements ChequeService {
 
 	@Override
 	public List<InwardCheque> getChequesForBatch(String batchId) {
-
 		return chequeDao.getChequesForBatch(batchId);
+	}
+
+	@Override
+	public List<InwardCheque> getAllChequesForBatch(long batchId) {
+		return chequeDao.getAllChequesForBatch(batchId);
 	}
 
 	@Override

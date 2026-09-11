@@ -11,6 +11,8 @@ public interface ChequeService {
 
 	List<InwardCheque> getChequesForBatch(String batchId);
 
+	List<InwardCheque> getAllChequesForBatch(long batchId);
+
 	List<InwardCheque> getMicrMismatchCheques(String batchId);
 
 	InwardCheque getCheque(String chequeId);

@@ -70,7 +70,7 @@ public class CheckerReportController extends GenericForwardComposer<Component> {
                         xmlBuilder.append("            <DrawerName>").append(item.get("drawerName") != null ? item.get("drawerName") : "").append("</DrawerName>\n");
                         xmlBuilder.append("            <PresentingBank>").append(item.get("bankName") != null ? item.get("bankName") : "").append("</PresentingBank>\n");
                         xmlBuilder.append("            <ChequeDate>").append(item.get("chequeDate") != null ? item.get("chequeDate") : "").append("</ChequeDate>\n");
-                        xmlBuilder.append("            <ReturnReason>").append(item.get("returnReason") != null ? item.get("returnReason") : "CBS_FAILURE").append("</ReturnReason>\n");
+                        xmlBuilder.append("            <ReturnReason>").append(item.get("returnReason") != null ? item.get("returnReason") : "").append("</ReturnReason>\n");
                         xmlBuilder.append("            <Remark>").append(item.get("remark") != null ? item.get("remark") : "").append("</Remark>\n");
                         xmlBuilder.append("        </Cheque>\n");
                     }

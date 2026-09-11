@@ -228,23 +228,23 @@ public class FileProcessingServiceImpl
     @Override
     public void processPxfFile(String filePath) {
 
-        PxfParserResult result =
-                pxfParser.parse(filePath);
+        PxfParserResult result = pxfParser.parse(filePath);
+        NpciBatchData batchData = result.getBatchData();
+        List<NpciChequeData> chequeDataList = result.getChequeDataList();
 
-        NpciBatchData batchData =
-                result.getBatchData();
-
-        List<NpciChequeData> chequeDataList =
-                result.getChequeDataList();
+        System.out.println("[PXF] Parsed batch: " + batchData.getBatchId()
+                + ", cheques parsed: " + chequeDataList.size());
 
         batchService.saveBatch(batchData);
 
-        for (NpciChequeData chequeData :
-                chequeDataList) {
+        System.out.println("[PXF] Batch saved: " + batchData.getBatchId());
 
-            chequeService.saveCheque(
-                    chequeData);
+        for (NpciChequeData chequeData : chequeDataList) {
+            chequeService.saveCheque(chequeData);
+            System.out.println("[PXF] Cheque saved: " + chequeData.getChequeNumber());
         }
+
+        System.out.println("[PXF] All cheques saved for batch: " + batchData.getBatchId());
     }
 
     @Override
@@ -269,10 +269,14 @@ public class FileProcessingServiceImpl
                 pibfProcessor.extractImages(filePath);
 
         List<InwardCheque> cheques =
-                chequeService.getChequesForBatch(
-                        String.valueOf(batchId));
+                chequeService.getAllChequesForBatch(batchId);
 
         if (imageDataList.size() != cheques.size()) {
+            System.err.println(
+                    "[PIBF] Image count mismatch — "
+                    + "PIBF images: " + imageDataList.size()
+                    + ", DB cheques: " + cheques.size()
+                    + ", batchId: " + batchId);
             throw new IllegalStateException(
                     "PIBF image count does not match "
                     + "cheque count for batch: "

@@ -60,7 +60,7 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
                     WHERE h.cheque_number = c.cheque_number 
                     ORDER BY h.status_history_id DESC 
                     LIMIT 1
-                ) = 'REJECTED'
+                ) = 'REJECT'
                 ORDER BY c.batch_id, c.cheque_number
                 """;
 
@@ -114,7 +114,7 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
                     WHERE h.cheque_number = c.cheque_number 
                     ORDER BY h.status_history_id DESC 
                     LIMIT 1
-                ) = 'APPROVED'
+                ) = 'ACCEPT'
                 ORDER BY c.batch_id, c.cheque_number
                 """;
 

@@ -13,6 +13,8 @@ public interface ChequeDao {
 
 	List<InwardCheque> getChequesForBatch(String batchId);
 
+	List<InwardCheque> getAllChequesForBatch(long batchId);
+
 	void saveDataEntryCorrections(String chequeNumber, long batchId, String accountNumber, BigDecimal amount,
 			LocalDate chequeDate, long userId);
 

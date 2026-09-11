@@ -8,13 +8,13 @@ import com.cts.inward.dto.ReturnReasonDto;
 
 public interface MicrRepairService {
 
-    List<MicrComparisonDto> compareBatch(long batchId);
+    List<MicrRepairBatchDto> getRepairBatches();
 
     boolean needsMicrRepair(long batchId);
 
-    List<MicrRepairBatchDto> getRepairBatches();
-
     int getNextRepairIndex(long batchId);
+
+    List<MicrComparisonDto> compareBatch(long batchId);
 
     String getFrontImagePath(String chequeNumber);
 
@@ -38,4 +38,11 @@ public interface MicrRepairService {
     boolean markBatchDataEntry(
             long batchId,
             long userId);
+
+    int getBatchChequePosition(
+            long batchId,
+            String chequeNumber);
+
+    int getBatchTotalChequeCount(
+            long batchId);
 }

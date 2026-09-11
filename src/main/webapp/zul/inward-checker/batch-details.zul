@@ -246,6 +246,52 @@
 
                     </hlayout>
 
+                    <!-- FRONT / BACK TOGGLE -->
+
+                    <hlayout
+
+                        width="100%"
+
+                        spacing="8px"
+
+                        valign="middle">
+
+                        <button
+
+                            id="btnFront"
+
+                            label="Front"
+
+                            sclass="image-button image-button-active"/>
+
+                        <button
+
+                            id="btnBack"
+
+                            label="Back"
+
+                            sclass="image-button"/>
+
+                    </hlayout>
+
+                    <!-- ACTUAL CHEQUE IMAGE -->
+
+                    <div
+
+                        width="100%"
+
+                        height="300px"
+
+                        style="display:flex; justify-content:center; align-items:center; border:1px solid #eee; background:#fafafa; overflow:auto;">
+
+                        <image
+
+                            id="chequeImage"
+
+                            style="max-width:100%; max-height:290px;"/>
+
+                    </div>
+
 
 
 

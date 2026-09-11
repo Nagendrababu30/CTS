@@ -8,27 +8,21 @@ public class FileSummaryServiceImpl
 
     private final FileSummaryDao fileSummaryDao;
 
-    private FileSummaryServiceImpl(
-            FileSummaryDao fileSummaryDao) {
-
-        this.fileSummaryDao =
-                fileSummaryDao;
+    private FileSummaryServiceImpl(FileSummaryDao fileSummaryDao) {
+        this.fileSummaryDao = fileSummaryDao;
     }
 
-    public static FileSummaryServiceImpl of(
-            FileSummaryDao fileSummaryDao) {
-
-        return new FileSummaryServiceImpl(
-                fileSummaryDao);
+    public static FileSummaryServiceImpl of(FileSummaryDao fileSummaryDao) {
+        return new FileSummaryServiceImpl(fileSummaryDao);
     }
 
     @Override
-    public void updateFileStage(
-            long fileId,
-            FileStage fileStage) {
+    public void insertFileSummary(long fileId, String fileName) {
+        fileSummaryDao.insertFileSummary(fileId, fileName);
+    }
 
-        fileSummaryDao.updateFileStage(
-                fileId,
-                fileStage);
+    @Override
+    public void updateFileStage(long fileId, FileStage fileStage) {
+        fileSummaryDao.updateFileStage(fileId, fileStage);
     }
 }

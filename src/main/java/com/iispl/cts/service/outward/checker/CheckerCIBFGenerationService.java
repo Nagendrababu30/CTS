@@ -3,44 +3,76 @@ package com.iispl.cts.service.outward.checker;
 import com.iispl.cts.model.outward.OutwardCheque;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.FileWriter;
 import java.util.List;
 
+/**
+ * ============================================================
+ * CHECKER CIBF GENERATION SERVICE
+ * ============================================================
+ *
+ * Generates CIBF file for a batch after Checker processing.
+ *
+ * Rule:
+ * - Every batch has CIBF.
+ * - CIBF is independent of RRF.
+ * - RRF availability/rejection logic is NOT handled here.
+ *
+ * NOTE:
+ * This is the existing development/test implementation.
+ * Production NPCI CIBF format must follow the applicable
+ * CTS/NPCI specification.
+ *
+ * ============================================================
+ */
 public class CheckerCIBFGenerationService {
 
+    // ============================================================
+    // GENERATE CIBF
+    // ============================================================
+
     /**
-     * Development CIBF generation.
+     * Generate CIBF for the supplied batch.
      *
-     * Validates the front/back cheque images
-     * and creates a batch CIBF output file.
-     *
-     * This is NOT the final NPCI production CIBF format.
+     * @param batchNumber Batch number
+     * @param cheques     Cheques belonging to the batch
+     * @return Absolute path of generated CIBF file
+     * @throws Exception if generation fails
      */
     public String generateCIBF(
             String batchNumber,
-            List<OutwardCheque> cheques) {
+            List<OutwardCheque> cheques) throws Exception {
+
+        // ========================================================
+        // VALIDATE BATCH NUMBER
+        // ========================================================
 
         if (batchNumber == null ||
                 batchNumber.trim().isEmpty()) {
 
             throw new IllegalArgumentException(
-                    "Batch number is required."
+                    "Batch number is required"
             );
         }
+
+        // ========================================================
+        // VALIDATE CHEQUES
+        // ========================================================
 
         if (cheques == null ||
                 cheques.isEmpty()) {
 
             throw new IllegalArgumentException(
-                    "No cheques available for CIBF generation."
+                    "No cheque records found for batch: "
+                            + batchNumber
             );
         }
 
+        batchNumber = batchNumber.trim();
 
-        // =========================================
+        // ========================================================
         // OUTPUT DIRECTORY
-        // =========================================
+        // ========================================================
 
         String directoryPath =
                 "C:/CTS/OUTWARD/"
@@ -53,104 +85,200 @@ public class CheckerCIBFGenerationService {
 
             if (!directory.mkdirs()) {
 
-                throw new RuntimeException(
-                        "Unable to create output directory:\n"
-                                + directoryPath
+                throw new IllegalStateException(
+                        "Unable to create output directory: "
+                                + directory.getAbsolutePath()
                 );
             }
         }
 
+        if (!directory.isDirectory()) {
 
-        // =========================================
+            throw new IllegalStateException(
+                    "Output path is not a directory: "
+                            + directory.getAbsolutePath()
+            );
+        }
+
+        // ========================================================
         // CIBF FILE
-        // =========================================
-
-        String fileName =
-                batchNumber + ".CIBF";
+        // ========================================================
 
         File cibfFile =
                 new File(
                         directory,
-                        fileName
+                        batchNumber + ".CIBF"
                 );
 
-
-        // =========================================
-        // VALIDATE IMAGES
-        // =========================================
+        // ========================================================
+        // GENERATE DEVELOPMENT CIBF
+        // ========================================================
 
         int validImages = 0;
 
-        for (OutwardCheque cheque : cheques) {
+        try (FileWriter writer =
+                     new FileWriter(cibfFile)) {
 
-            String frontImage =
-                    cheque.getFrontImagePath();
+            // ----------------------------------------------------
+            // HEADER
+            // ----------------------------------------------------
 
-            String backImage =
-                    cheque.getBackImagePath();
-
-
-            if (frontImage != null &&
-                    !frontImage.trim().isEmpty()) {
-
-                File frontFile =
-                        new File(frontImage);
-
-                if (frontFile.exists() &&
-                        frontFile.isFile()) {
-
-                    validImages++;
-                }
-            }
-
-
-            if (backImage != null &&
-                    !backImage.trim().isEmpty()) {
-
-                File backFile =
-                        new File(backImage);
-
-                if (backFile.exists() &&
-                        backFile.isFile()) {
-
-                    validImages++;
-                }
-            }
-        }
-
-
-        // =========================================
-        // DEVELOPMENT OUTPUT
-        // =========================================
-
-        try (FileOutputStream output =
-                     new FileOutputStream(cibfFile)) {
-
-            String header =
+            writer.write(
                     "CTS CIBF DEVELOPMENT FILE\n"
-                            + "BatchNumber="
+            );
+
+            writer.write(
+                    "BatchNumber="
                             + batchNumber
                             + "\n"
-                            + "ChequeCount="
-                            + cheques.size()
-                            + "\n"
-                            + "ValidImages="
-                            + validImages
-                            + "\n";
-
-            output.write(
-                    header.getBytes("UTF-8")
             );
 
-        } catch (IOException e) {
+            writer.write(
+                    "ChequeCount="
+                            + cheques.size()
+                            + "\n"
+            );
 
-            throw new RuntimeException(
-                    "Unable to generate CIBF file.",
-                    e
+            // ----------------------------------------------------
+            // CHECK IMAGES
+            // ----------------------------------------------------
+
+            for (OutwardCheque cheque :
+                    cheques) {
+
+                if (cheque == null) {
+                    continue;
+                }
+
+                String frontImage =
+                        cheque.getFrontImagePath();
+
+                String backImage =
+                        cheque.getBackImagePath();
+
+                boolean frontValid =
+                        isValidImage(frontImage);
+
+                boolean backValid =
+                        isValidImage(backImage);
+
+                if (frontValid ||
+                        backValid) {
+
+                    validImages++;
+                }
+
+                writer.write(
+                        "ChequeNumber="
+                                + safe(
+                                        cheque.getChequeNumber()
+                                )
+                                + "\n"
+                );
+
+                writer.write(
+                        "FrontImage="
+                                + safe(frontImage)
+                                + "\n"
+                );
+
+                writer.write(
+                        "BackImage="
+                                + safe(backImage)
+                                + "\n"
+                );
+            }
+
+            // ----------------------------------------------------
+            // IMAGE SUMMARY
+            // ----------------------------------------------------
+
+            writer.write(
+                    "ValidImages="
+                            + validImages
+                            + "\n"
+            );
+
+            writer.write(
+                    "GenerationStatus=SUCCESS\n"
             );
         }
 
+        // ========================================================
+        // VERIFY FILE
+        // ========================================================
+
+        if (!cibfFile.exists()) {
+
+            throw new IllegalStateException(
+                    "CIBF file was not created: "
+                            + cibfFile.getAbsolutePath()
+            );
+        }
+
+        if (cibfFile.length() == 0) {
+
+            throw new IllegalStateException(
+                    "Generated CIBF file is empty: "
+                            + cibfFile.getAbsolutePath()
+            );
+        }
+
+        // ========================================================
+        // LOG
+        // ========================================================
+
+        System.out.println(
+                "CIBF generated successfully: "
+                        + cibfFile.getAbsolutePath()
+        );
+
+        System.out.println(
+                "Batch: "
+                        + batchNumber
+                        + ", Cheques: "
+                        + cheques.size()
+                        + ", Valid Images: "
+                        + validImages
+        );
+
+        // ========================================================
+        // RETURN PATH
+        // ========================================================
 
         return cibfFile.getAbsolutePath();
+    }
+
+    // ============================================================
+    // VALIDATE IMAGE
+    // ============================================================
+
+    private boolean isValidImage(
+            String imagePath) {
+
+        if (imagePath == null ||
+                imagePath.trim().isEmpty()) {
+
+            return false;
+        }
+
+        File imageFile =
+                new File(
+                        imagePath.trim()
+                );
+
+        return imageFile.exists() &&
+                imageFile.isFile();
+    }
+
+    // ============================================================
+    // SAFE STRING
+    // ============================================================
+
+    private String safe(String value) {
+
+        return value == null
+                ? ""
+                : value;
     }
 }

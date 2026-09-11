@@ -90,4 +90,35 @@ public class InwardFileDaoImpl
                     "Failed to mark file as processed, fileId: " + fileId, e);
         }
     }
+
+    /*
+     * Resolves file_id from the file_path stored in inward_file.
+     * Used by FileProcessingServiceImpl to update inward_file_summary
+     * when a file moves to PROCESSING or ARCHIVE.
+     * Returns -1 if not found.
+     */
+    @Override
+    public long getFileIdByPath(String filePath) {
+
+        String sql =
+                "SELECT file_id FROM inward_file WHERE file_path = ?";
+
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, filePath);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getLong("file_id");
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new IllegalStateException(
+                    "Failed to get file_id for path: " + filePath, e);
+        }
+
+        return -1L;
+    }
 }

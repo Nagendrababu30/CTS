@@ -157,7 +157,9 @@ public class SessionManagementController
                         ocrBatchService,
                         ocrChequeService,
                         imageService,
-                        chequeImageService);
+                        chequeImageService,
+                        fileSummaryService,
+                        inwardFileDao);
 
         // 6. Lightweight ingestion service — used only by executor
         InwardIngestionServiceImpl ingestionForExecutor =

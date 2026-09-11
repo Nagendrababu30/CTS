@@ -252,6 +252,7 @@ public class BatchDaoImpl implements BatchDao {
 			}
 		}
 	}
+
 	@Override
 	public List<NpciBatchData> getBatchesByStatus(String batchStatus) {
 

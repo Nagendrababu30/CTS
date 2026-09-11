@@ -1,95 +1,101 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?page title="Batches Queue"
-    contentType="text/html;charset=UTF-8"?>
-
-<?init class="com.cts.admin.controller.LayoutInit"
-        pageTitle="Batches Queue"
-        active="batchesQueue"?>
+<?page title="Batch Queue" contentType="text/html;charset=UTF-8"?>
 
 <?init class="org.zkoss.zk.ui.util.Composition"
         arg0="/zul/common/layout.zul"?>
 
 <zk>
 
-    <!-- ========================================================= -->
-    <!-- COMMON LAYOUT CONTENT                                     -->
-    <!-- Header + Checker Sidebar come from layout.zul             -->
-    <!-- ========================================================= -->
+    <div self="@define(content)"
+         width="100%"
+         height="100%"
+         sclass="checker-page-content">
 
-    <div
-        self="@define(content)"
-        width="100%"
-        height="100%"
-        style="
-            width:100%;
-            height:100%;
-            background:#F4F7FB;
-        ">
+        <vlayout id="batchQueueContent"
+                 width="100%"
+                 height="100%"
+                 spacing="20px"
+                 apply="com.iispl.cts.controller.outward.checker.CheckerBatchQueueController">
 
-        <!-- ===================================================== -->
-        <!-- CHECKER BATCHES QUEUE CONTROLLER                      -->
-        <!-- ===================================================== -->
+            <label value="Batch Queue"
+                   sclass="page-title"/>
 
-        <vlayout
-            apply="com.iispl.cts.controller.outward.checker.CheckerBatchesQueueController"
-            width="100%"
-            height="100%"
-            spacing="20px"
-            style="
-                padding:35px 55px;
-                box-sizing:border-box;
-                overflow:auto;
-            ">
+            <label value="Batches assigned to you for Checker verification"
+                   sclass="page-subtitle"/>
 
 
-            <!-- ================================================= -->
-            <!-- PAGE TITLE                                         -->
-            <!-- ================================================= -->
+            <!-- Search -->
 
-            <label
-                value="Batches Queue"
-                style="
-                    font-size:32px;
-                    font-weight:bold;
-                    color:#0F172A;
-                    display:block;
-                    margin-bottom:10px;
-                "/>
+            <hlayout width="100%"
+                     valign="middle"
+                     spacing="10px"
+                     sclass="search-row">
+
+                <textbox id="batchSearchTextbox"
+                         placeholder="Search batch number..."
+                         hflex="1"
+                         sclass="search-box"/>
+
+                <button id="searchButton"
+                        label="Search"
+                        iconSclass="z-icon-search"
+                        sclass="primary-button"/>
+
+                <button id="refreshButton"
+                        label="Refresh"
+                        iconSclass="z-icon-refresh"
+                        sclass="secondary-button"/>
+
+            </hlayout>
 
 
-            <!-- ================================================= -->
-            <!-- BATCH TABLE                                        -->
-            <!-- ================================================= -->
+            <!-- Section -->
 
-            <listbox
-                id="queueListbox"
-                width="100%"
-                mold="paging"
-                pageSize="10"
-                emptyMessage="No batches found">
+            <label value="My Batches"
+                   sclass="section-title"/>
 
-                <listhead>
 
-                    <listheader
-                        label="Batch No"
-                        width="30%"/>
+            <!-- Batch List -->
 
-                    <listheader
-                        label="Total Cheques"
-                        width="25%"/>
+            <listbox id="batchListbox"
+                     hflex="1"
+                     emptyMessage="No batches assigned to you."
+                     sclass="checker-batch-listbox">
 
-                    <listheader
-                        label="Status"
-                        width="25%"/>
+                <listhead sizable="true">
 
-                    <listheader
-                        label="Action"
-                        width="20%"/>
+                    <listheader label="Batch No"
+                                width="30%"/>
+
+                    <listheader label="Total Cheques"
+                                width="25%"
+                                align="center"/>
+
+                    <listheader label="Status"
+                                width="25%"
+                                align="center"/>
+
+                    <listheader label="Action"
+                                width="20%"
+                                align="center"/>
 
                 </listhead>
 
             </listbox>
+
+
+            <!-- Pagination -->
+
+            <hlayout width="100%"
+                     valign="middle"
+                     sclass="pagination-container">
+
+                <paging id="batchPaging"
+                        pageSize="10"
+                        totalSize="0"/>
+
+            </hlayout>
 
         </vlayout>
 

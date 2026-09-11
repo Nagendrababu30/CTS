@@ -1,0 +1,291 @@
+<?page title="Checker Processing" contentType="text/html;charset=UTF-8"?>
+
+<zk>
+
+	<vlayout id="processingPage" width="100%" height="100%"
+		sclass="checker-page-content"
+		apply="com.iispl.cts.controller.outward.checker.CheckerProcessingController">
+
+		<!-- ===================================================== -->
+		<!-- PAGE HEADER -->
+		<!-- ===================================================== -->
+
+		<hlayout width="100%" valign="middle" sclass="page-header">
+
+			<vlayout spacing="2px">
+
+				<label id="verificationBatchId" value="Batch"
+					sclass="page-title" />
+
+				<label id="chequeSequence" value="Cheque"
+					sclass="page-subtitle" />
+
+			</vlayout>
+
+			<space hflex="1" />
+
+			<button id="backButton" label="Back to Queue"
+				iconSclass="z-icon-arrow-left" sclass="secondary-button" />
+
+		</hlayout>
+
+
+		<!-- ===================================================== -->
+		<!-- CHEQUE INFORMATION -->
+		<!-- ===================================================== -->
+
+		<hlayout width="100%" spacing="20px">
+
+			<!-- ================================================= -->
+			<!-- LEFT : CHEQUE IMAGE -->
+			<!-- ================================================= -->
+
+			<vlayout width="45%" height="100%"
+				sclass="processing-card">
+
+				<label value="Cheque Image" sclass="section-title" />
+
+				<separator />
+
+				<div width="100%" height="100%"
+					sclass="cheque-image-container">
+
+					<!-- IMPORTANT:
+						Do not use content="" here.
+					-->
+
+					<image id="chequeImage" width="100%" height="100%" />
+
+				</div>
+
+			</vlayout>
+
+
+			<!-- ================================================= -->
+			<!-- RIGHT : CHEQUE DETAILS -->
+			<!-- ================================================= -->
+
+			<vlayout width="55%" height="100%" spacing="12px"
+				sclass="processing-card">
+
+				<label value="Cheque Details" sclass="section-title" />
+
+				<separator />
+
+
+				<!-- CHEQUE NUMBER -->
+
+				<hlayout width="100%" valign="middle"
+					sclass="detail-row">
+
+					<label value="Cheque Number" width="180px"
+						sclass="detail-label" />
+
+					<label id="chequeNumberLabel" value="-"
+						sclass="detail-value" />
+
+				</hlayout>
+
+
+				<!-- DRAWER ACCOUNT NUMBER -->
+
+				<hlayout width="100%" valign="middle"
+					sclass="detail-row">
+
+					<label value="Drawer Account" width="180px"
+						sclass="detail-label" />
+
+					<label id="accountNumberLabel" value="-"
+						sclass="detail-value" />
+
+				</hlayout>
+
+
+				<!-- CBS VALIDATION -->
+
+				<hlayout width="100%" valign="middle"
+					sclass="cbs-validation-row">
+
+					<label id="accountVerificationIcon" value=""
+						sclass="cbs-validation-icon" />
+
+					<label id="accountVerificationMessage"
+						value="CBS validation pending" sclass="cbs-validation-message" />
+
+				</hlayout>
+
+
+				<!-- DRAWER -->
+
+				<hlayout width="100%" valign="middle"
+					sclass="detail-row">
+
+					<label value="Drawer Name" width="180px"
+						sclass="detail-label" />
+
+					<label id="drawerNameLabel" value="-"
+						sclass="detail-value" />
+
+				</hlayout>
+
+
+				<!-- PAYEE -->
+
+				<hlayout width="100%" valign="middle"
+					sclass="detail-row">
+
+					<label value="Payee Name" width="180px"
+						sclass="detail-label" />
+
+					<label id="payeeNameLabel" value="-"
+						sclass="detail-value" />
+
+				</hlayout>
+
+
+				<!-- AMOUNT -->
+
+				<hlayout width="100%" valign="middle"
+					sclass="detail-row">
+
+					<label value="Amount" width="180px"
+						sclass="detail-label" />
+
+					<label id="amountLabel" value="-"
+						sclass="detail-value" />
+
+				</hlayout>
+
+
+				<!-- AMOUNT IN WORDS -->
+
+				<hlayout width="100%" valign="middle"
+					sclass="detail-row">
+
+					<label value="Amount in Words" width="180px"
+						sclass="detail-label" />
+
+					<label id="amountInWordsLabel" value="-"
+						multiline="true" sclass="detail-value" />
+
+				</hlayout>
+
+
+				<!-- CHEQUE DATE -->
+
+				<hlayout width="100%" valign="middle"
+					sclass="detail-row">
+
+					<label value="Cheque Date" width="180px"
+						sclass="detail-label" />
+
+					<label id="chequeDateLabel" value="-"
+						sclass="detail-value" />
+
+				</hlayout>
+
+
+				<!-- MICR -->
+
+				<hlayout width="100%" valign="middle"
+					sclass="detail-row">
+
+					<label value="MICR" width="180px"
+						sclass="detail-label" />
+
+					<label id="micrLabel" value="-"
+						sclass="detail-value" />
+
+				</hlayout>
+
+			</vlayout>
+
+		</hlayout>
+
+
+		<!-- ===================================================== -->
+		<!-- CHECKER DECISION -->
+		<!-- ===================================================== -->
+
+		<vlayout width="100%" sclass="processing-card" spacing="12px">
+
+			<label value="Checker Decision" sclass="section-title" />
+
+			<separator />
+
+
+			<!-- DECISION BUTTONS -->
+
+			<hlayout width="100%" valign="middle" spacing="10px">
+
+				<button id="acceptButton" label="Accept"
+					iconSclass="z-icon-check" sclass="success-button" />
+
+				<button id="rejectButton" label="Reject"
+					iconSclass="z-icon-close" sclass="danger-button" />
+
+				<button id="sendBackButton" label="Send Back to Maker"
+					iconSclass="z-icon-arrow-left" sclass="secondary-button" />
+
+			</hlayout>
+
+
+			<!-- REASON -->
+
+			<hlayout width="100%" valign="middle">
+
+				<label value="Reason" width="180px"
+					sclass="detail-label" />
+
+				<combobox id="reasonCombobox" width="350px"
+					placeholder="Select reason" disabled="true" />
+
+			</hlayout>
+
+
+			<!-- REMARKS -->
+
+			<hlayout width="100%" valign="top">
+
+				<label value="Remarks" width="180px"
+					sclass="detail-label" />
+
+				<textbox id="checkerRemarksTextbox" width="500px"
+					rows="3" maxlength="1000" placeholder="Enter remarks if required" />
+
+			</hlayout>
+
+
+			<!-- SAVE -->
+
+			<hlayout width="100%" valign="middle">
+
+				<space hflex="1" />
+
+				<button id="saveNextButton" label="Save &amp; Next"
+					iconSclass="z-icon-arrow-right" sclass="primary-button" />
+
+			</hlayout>
+
+		</vlayout>
+
+
+		<!-- ===================================================== -->
+		<!-- PROCESSING PAGINATION -->
+		<!-- ===================================================== -->
+
+		<hlayout width="100%" valign="middle"
+			sclass="pagination-container">
+
+			<label id="processingPageInfo" value=""
+				sclass="pagination-info" />
+
+			<space hflex="1" />
+
+			<paging id="processingPaging" pageSize="10" totalSize="0" />
+
+		</hlayout>
+
+	</vlayout>
+
+</zk>

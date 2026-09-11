@@ -38,7 +38,7 @@ public class CheckerBatchVerificationController
 
     @Wire
     private Label acceptedChequeLabel;
-
+    
     @Wire
     private Label rejectedChequeLabel;
 

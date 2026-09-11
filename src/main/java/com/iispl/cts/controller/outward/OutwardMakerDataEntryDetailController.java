@@ -10,6 +10,8 @@ import java.util.Map;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Sessions;
+import org.zkoss.zk.ui.event.Event;
+import org.zkoss.zk.ui.event.InputEvent;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.Wire;
@@ -585,4 +587,104 @@ public class OutwardMakerDataEntryDetailController extends SelectorComposer<Comp
             }
         }
     }
+    @Listen("onChange = #amountTextbox; onChanging = #amountTextbox")
+    public void onAmountChanged(Event event) {
+        BigDecimal enteredAmount = null;
+
+        if (event instanceof InputEvent) {
+            // Fires immediately on every key stroke
+            String val = ((InputEvent) event).getValue();
+            if (val != null && !val.trim().isEmpty()) {
+                try {
+                    String cleanVal = val.replace(",", "").trim();
+                    enteredAmount = new BigDecimal(cleanVal);
+                } catch (NumberFormatException ignored) {
+                    return;
+                }
+            }
+        } else {
+            // Fires on blur, Enter, or Tab
+            enteredAmount = amountTextbox.getValue();
+        }
+
+        if (enteredAmount == null || enteredAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            if (amountInWordsTextbox != null) {
+                amountInWordsTextbox.setValue("");
+            }
+            return;
+        }
+
+        String words = convertNumberToIndianWords(enteredAmount);
+        if (amountInWordsTextbox != null) {
+            amountInWordsTextbox.setValue(words);
+        }
+    }
+    public static String convertNumberToIndianWords(BigDecimal amount) {
+        if (amount == null) return "";
+
+        long rupees = amount.longValue();
+        int paise = amount.remainder(BigDecimal.ONE).multiply(new BigDecimal(100)).intValue();
+
+        StringBuilder result = new StringBuilder();
+
+        if (rupees == 0) {
+            result.append("Zero Rupees");
+        } else {
+            result.append(convertToIndianFormat(rupees)).append(" Rupees");
+        }
+
+        if (paise > 0) {
+            result.append(" and ").append(convertToIndianFormat(paise)).append(" Paise");
+        }
+
+        result.append(" Only");
+        return result.toString();
+    }
+
+    private static final String[] units = {
+        "", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
+        "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen",
+        "Seventeen", "Eighteen", "Nineteen"
+    };
+
+    private static final String[] tens = {
+        "", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"
+    };
+
+    private static String convertToIndianFormat(long n) {
+        if (n < 0) return "Minus " + convertToIndianFormat(-n);
+        if (n == 0) return "";
+
+        StringBuilder words = new StringBuilder();
+
+        if (n / 10000000 > 0) {
+            words.append(convertToIndianFormat(n / 10000000)).append(" Crore ");
+            n %= 10000000;
+        }
+        if (n / 100000 > 0) {
+            words.append(convertToIndianFormat(n / 100000)).append(" Lakh ");
+            n %= 100000;
+        }
+        if (n / 1000 > 0) {
+            words.append(convertToIndianFormat(n / 1000)).append(" Thousand ");
+            n %= 1000;
+        }
+        if (n / 100 > 0) {
+            words.append(convertToIndianFormat(n / 100)).append(" Hundred ");
+            n %= 100;
+        }
+        if (n > 0) {
+            if (words.length() > 0) words.append("and ");
+            if (n < 20) {
+                words.append(units[(int) n]);
+            } else {
+                words.append(tens[(int) (n / 10)]);
+                if (n % 10 > 0) {
+                    words.append(" ").append(units[(int) (n % 10)]);
+                }
+            }
+        }
+        return words.toString().trim();
+    }
+
 }

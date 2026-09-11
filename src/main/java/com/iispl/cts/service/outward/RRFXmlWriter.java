@@ -2,184 +2,200 @@ package com.iispl.cts.service.outward;
 
 import com.iispl.cts.model.outward.OutwardCheque;
 
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamWriter;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
+import java.io.FileWriter;
 import java.util.List;
 
+/**
+ * Generates RRF XML file for rejected cheques.
+ *
+ * IMPORTANT:
+ * Only rejected cheques should be passed to this writer.
+ * The Reports DAO is responsible for identifying rejected
+ * cheques from cheque_processing.
+ */
 public class RRFXmlWriter {
 
+    /**
+     * Generate RRF XML for rejected cheques.
+     *
+     * @param batchNumber    Batch number
+     * @param rejectedCheques Only rejected cheques
+     * @param outputDirectory Output directory
+     * @return Generated RRF file
+     * @throws Exception if generation fails
+     */
     public File generateRRF(
             String batchNumber,
-            List<OutwardCheque> cheques,
+            List<OutwardCheque> rejectedCheques,
             String outputDirectory) throws Exception {
 
-        File directory =
-                new File(outputDirectory);
-
-        if (!directory.exists()
-                && !directory.mkdirs()) {
-
-            throw new Exception(
-                    "Unable to create output directory: "
-                            + directory.getAbsolutePath()
-            );
+        // -----------------------------
+        // Basic validation
+        // -----------------------------
+        if (batchNumber == null || batchNumber.trim().isEmpty()) {
+            throw new IllegalArgumentException("Batch number is required");
         }
 
-        String fileName =
-                "RRF_" + batchNumber + ".XML";
+        if (rejectedCheques == null || rejectedCheques.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "RRF not available for this batch - no rejected cheques found");
+        }
 
-        File outputFile =
-                new File(directory, fileName);
+        if (outputDirectory == null || outputDirectory.trim().isEmpty()) {
+            throw new IllegalArgumentException("Output directory is required");
+        }
 
-        XMLOutputFactory factory =
-                XMLOutputFactory.newFactory();
+        batchNumber = batchNumber.trim();
 
-        try (FileOutputStream fos =
-                     new FileOutputStream(outputFile)) {
+        // -----------------------------
+        // Create output directory
+        // -----------------------------
+        File directory = new File(outputDirectory);
 
-            XMLStreamWriter writer =
-                    factory.createXMLStreamWriter(
-                            fos,
-                            StandardCharsets.UTF_8.name()
-                    );
+        if (!directory.exists()) {
+            if (!directory.mkdirs()) {
+                throw new IllegalStateException(
+                        "Unable to create output directory: "
+                                + directory.getAbsolutePath());
+            }
+        }
 
-            writer.writeStartDocument(
-                    StandardCharsets.UTF_8.name(),
-                    "1.0"
-            );
+        if (!directory.isDirectory()) {
+            throw new IllegalStateException(
+                    "Output path is not a directory: "
+                            + directory.getAbsolutePath());
+        }
 
-            writer.writeStartElement(
-                    "FileHeader"
-            );
+        // -----------------------------
+        // RRF file
+        // -----------------------------
+        File rrfFile = new File(
+                directory,
+                "RRF_" + batchNumber + ".XML"
+        );
 
-            writeElement(
-                    writer,
-                    "BatchNumber",
-                    batchNumber
-            );
+        // -----------------------------
+        // Generate XML
+        // -----------------------------
+        try (FileWriter writer = new FileWriter(rrfFile)) {
 
-            writeElement(
-                    writer,
-                    "ItemCount",
-                    cheques.size()
-            );
+            writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 
-            writer.writeEndElement();
+            writer.write("<RRF>\n");
 
-            writer.writeStartElement(
-                    "Items"
-            );
+            // -----------------------------
+            // File Header
+            // -----------------------------
+            writer.write("    <FileHeader>\n");
 
-            for (OutwardCheque cheque : cheques) {
+            writer.write("        <BatchNumber>");
+            writer.write(escapeXml(batchNumber));
+            writer.write("</BatchNumber>\n");
 
-                writer.writeStartElement(
-                        "Item"
+            writer.write("        <ItemCount>");
+            writer.write(String.valueOf(rejectedCheques.size()));
+            writer.write("</ItemCount>\n");
+
+            writer.write("    </FileHeader>\n");
+
+            // -----------------------------
+            // Rejected cheque items
+            // -----------------------------
+            writer.write("    <Items>\n");
+
+            for (OutwardCheque cheque : rejectedCheques) {
+
+                if (cheque == null) {
+                    continue;
+                }
+
+                writer.write("        <Item>\n");
+
+                writer.write("            <ChequeNumber>");
+                writer.write(escapeXml(cheque.getChequeNumber()));
+                writer.write("</ChequeNumber>\n");
+
+                writer.write("            <CityCode>");
+                writer.write(escapeXml(cheque.getCityCode()));
+                writer.write("</CityCode>\n");
+
+                writer.write("            <BankCode>");
+                writer.write(escapeXml(cheque.getBankCode()));
+                writer.write("</BankCode>\n");
+
+                writer.write("            <BranchCode>");
+                writer.write(escapeXml(cheque.getBranchCode()));
+                writer.write("</BranchCode>\n");
+
+                writer.write("            <DrawerAccountNumber>");
+                writer.write(
+                        escapeXml(cheque.getDrawerAccountNumber())
                 );
+                writer.write("</DrawerAccountNumber>\n");
 
-                writeElement(
-                        writer,
-                        "ChequeNumber",
-                        cheque.getChequeNumber()
+                writer.write("            <DrawerName>");
+                writer.write(
+                        escapeXml(cheque.getDrawerName())
                 );
+                writer.write("</DrawerName>\n");
 
-                writeElement(
-                        writer,
-                        "CityCode",
-                        cheque.getCityCode()
+                writer.write("            <DepositorAccountNumber>");
+                writer.write(
+                        escapeXml(cheque.getDepositorAccountNumber())
                 );
+                writer.write("</DepositorAccountNumber>\n");
 
-                writeElement(
-                        writer,
-                        "BankCode",
-                        cheque.getBankCode()
+                writer.write("            <Amount>");
+                writer.write(
+                        cheque.getAmount() == null
+                                ? ""
+                                : cheque.getAmount().toString()
                 );
+                writer.write("</Amount>\n");
 
-                writeElement(
-                        writer,
-                        "BranchCode",
-                        cheque.getBranchCode()
+                writer.write("            <ChequeDate>");
+                writer.write(
+                        cheque.getChequeDate() == null
+                                ? ""
+                                : cheque.getChequeDate().toString()
                 );
+                writer.write("</ChequeDate>\n");
 
-                writeElement(
-                        writer,
-                        "DrawerAccountNumber",
-                        cheque.getDrawerAccountNumber()
-                );
-
-                writeElement(
-                        writer,
-                        "DrawerName",
-                        cheque.getDrawerName()
-                );
-
-                writeElement(
-                        writer,
-                        "DepositorAccountNumber",
-                        cheque.getDepositorAccountNumber()
-                );
-
-                writeElement(
-                        writer,
-                        "Amount",
-                        cheque.getAmount()
-                );
-
-                writeElement(
-                        writer,
-                        "ChequeDate",
-                        cheque.getChequeDate()
-                );
-
-                writer.writeEndElement();
+                writer.write("        </Item>\n");
             }
 
-            writer.writeEndElement();
+            writer.write("    </Items>\n");
 
-            writer.writeEndDocument();
-
-            writer.flush();
-            writer.close();
+            writer.write("</RRF>\n");
         }
 
-        return outputFile;
+        // -----------------------------
+        // Verify file
+        // -----------------------------
+        if (!rrfFile.exists()) {
+            throw new IllegalStateException(
+                    "RRF file was not created: "
+                            + rrfFile.getAbsolutePath());
+        }
+
+        return rrfFile;
     }
 
+    /**
+     * Escape XML special characters.
+     */
+    private String escapeXml(String value) {
 
-    private void writeElement(
-            XMLStreamWriter writer,
-            String name,
-            Object value) throws Exception {
-
-        writer.writeStartElement(name);
-
-        if (value != null) {
-
-            if (value instanceof BigDecimal) {
-
-                writer.writeCharacters(
-                        ((BigDecimal) value)
-                                .toPlainString()
-                );
-
-            } else if (value instanceof LocalDate) {
-
-                writer.writeCharacters(
-                        value.toString()
-                );
-
-            } else {
-
-                writer.writeCharacters(
-                        String.valueOf(value)
-                );
-            }
+        if (value == null) {
+            return "";
         }
 
-        writer.writeEndElement();
+        return value
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&apos;");
     }
 }

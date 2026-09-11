@@ -10,36 +10,51 @@
 
 <zk>
     <!-- =========================================================
-         GLOBAL STYLING
+         ENTERPRISE BANKING STYLING
          ========================================================= -->
     <style><![CDATA[
         html, body {
             margin: 0 !important;
             padding: 0 !important;
             height: 100% !important;
-            overflow: hidden !important;
-            background: #F4F7FB;
+            background: #F1F5F9;
         }
 
         .z-window-embedded-cnt, .z-window-content {
             padding: 0 !important;
         }
 
-        /* Equal-height compact card container */
+        /* Modern Banking Clean Cards */
         .equal-card {
             background: #FFFFFF !important;
-            border: 1px solid #DCE5F0 !important;
-            border-radius: 6px !important;
-            box-shadow: 0 1px 3px rgba(16, 24, 40, 0.04) !important;
+            border: 1px solid #E2E8F0 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
         }
         .equal-card > .z-groupbox-content {
-            padding: 0 !important;
-            height: 100% !important;
+            padding: 16px 20px 20px 20px !important;
+            box-sizing: border-box !important;
         }
 
-        /* Standard textboxes and decimalboxes */
-        input.single-field-box {
-            height: 38px !important;
+        /* Header Icon Box */
+        .card-header-icon {
+            width: 32px;
+            height: 32px;
+            background: #EFF6FF;
+            border: 1px solid #DBEAFE;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #2563EB;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        /* Modern Unified Form Fields (Height: 36px) */
+        input.single-field-box,
+        .z-decimalbox.single-field-box {
+            height: 36px !important;
             font-size: 13px !important;
             border: 1px solid #CBD5E1 !important;
             border-radius: 6px !important;
@@ -47,107 +62,122 @@
             color: #0F172A !important;
             background: #F8FAFC !important;
             font-weight: 500 !important;
-            transition: all 0.2s ease !important;
             box-sizing: border-box !important;
+            transition: all 0.15s ease-in-out !important;
         }
-        input.single-field-box:focus {
+        input.single-field-box:focus,
+        .z-decimalbox.single-field-box:focus {
             background: #FFFFFF !important;
-            border-color: #2457D6 !important;
-            box-shadow: 0 0 0 3px rgba(36, 87, 214, 0.15) !important;
+            border-color: #2563EB !important;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
             outline: none !important;
         }
 
-        /* 1. Datebox Outer Container */
+        /* Unified Datebox */
         .z-datebox.single-field-box {
-            height: 38px !important;
+            height: 36px !important;
             border: 1px solid #CBD5E1 !important;
             border-radius: 6px !important;
             background: #F8FAFC !important;
-            padding: 0 !important;
             display: inline-flex !important;
             align-items: center !important;
             box-sizing: border-box !important;
-            position: relative !important;
         }
         .z-datebox.single-field-box:focus-within {
             background: #FFFFFF !important;
-            border-color: #2457D6 !important;
-            box-shadow: 0 0 0 3px rgba(36, 87, 214, 0.15) !important;
+            border-color: #2563EB !important;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
         }
-
-        /* 2. Datebox Inner Input */
         .z-datebox.single-field-box > input.z-datebox-input {
             border: none !important;
             background: transparent !important;
-            box-shadow: none !important;
-            height: 36px !important;
-            padding: 0 0 0 12px !important;
+            height: 34px !important;
             font-size: 13px !important;
-            color: #0F172A !important;
             font-weight: 500 !important;
-            width: calc(100% - 36px) !important;
+            color: #0F172A !important;
+            padding-left: 10px !important;
+            box-shadow: none !important;
             outline: none !important;
         }
-
-        /* 3. Datebox Button / Calendar Icon */
         .z-datebox.single-field-box > a.z-datebox-button {
             border: none !important;
             background: transparent !important;
-            box-shadow: none !important;
-            height: 36px !important;
-            width: 36px !important;
+            height: 34px !important;
+            width: 34px !important;
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
-            cursor: pointer !important;
-            padding: 0 !important;
         }
 
-        /* 4. Calendar Popup Overlay */
-        .z-datebox-popup {
-            background: #FFFFFF !important;
+        /* Unified Combobox */
+        .z-combobox.single-field-box {
+            height: 36px !important;
             border: 1px solid #CBD5E1 !important;
-            border-radius: 8px !important;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18) !important;
-            z-index: 99999 !important;
+            border-radius: 6px !important;
+            background: #F8FAFC !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            box-sizing: border-box !important;
         }
-        .z-datebox-popup .z-calendar {
+        .z-combobox.single-field-box:focus-within {
             background: #FFFFFF !important;
+            border-color: #2563EB !important;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+        }
+        .z-combobox.single-field-box > input.z-combobox-input {
+            border: none !important;
+            background: transparent !important;
+            height: 34px !important;
+            font-size: 12.5px !important;
+            font-weight: 500 !important;
+            color: #0F172A !important;
+            padding-left: 10px !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+        .z-combobox.single-field-box > a.z-combobox-button {
+            border: none !important;
+            background: transparent !important;
+            height: 34px !important;
+            width: 32px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
         }
 
-        /* Field labels matching old design */
+        /* Field Labels */
         .single-field-label {
             font-size: 11px !important;
-            font-weight: 600 !important;
-            color: #1E293B !important;
-            letter-spacing: 0.2px;
+            font-weight: 700 !important;
+            color: #475569 !important;
+            letter-spacing: 0.3px;
         }
         .label-star {
-            color: #DC2626 !important;
+            color: #EF4444 !important;
             font-weight: 700 !important;
             font-size: 11px !important;
             margin-left: 2px;
         }
 
-        /* Image toolbar buttons */
+        /* Toolbar Buttons */
         .icon-symbol-btn {
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
+            background: #FFFFFF !important;
+            border: 1px solid #CBD5E1 !important;
+            border-radius: 6px !important;
             color: #334155 !important;
-            font-size: 18px !important;
+            font-size: 16px !important;
             font-weight: bold !important;
             cursor: pointer !important;
-            height: 30px !important;
-            padding: 0 !important;
+            height: 32px !important;
+            width: 32px !important;
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
-            transition: color 0.15s ease, transform 0.1s ease !important;
+            transition: all 0.15s ease !important;
         }
         .icon-symbol-btn:hover {
-            background: #E2E8F0 !important;
-            border-radius: 4px !important;
+            background: #F1F5F9 !important;
+            border-color: #94A3B8 !important;
             color: #0F172A !important;
         }
     ]]></style>
@@ -157,309 +187,231 @@
         self="@define(content)"
         width="100%"
         height="100%"
-        style="width:100%; height:100%; background:#F4F7FB;">
+        style="width:100%; height:100%; background:#F1F5F9;">
 
         <vlayout
             apply="com.iispl.cts.controller.outward.OutwardMakerDataEntryDetailController"
-            spacing="8px"
+            spacing="12px"
             width="100%"
             height="100%"
-            style="padding:10px 16px; box-sizing:border-box; overflow:auto;">
+            style="padding:14px 20px; box-sizing:border-box; overflow:auto;">
 
             <!-- =================================================
                  BATCH HEADER STRIP & METRICS PILLS
                  ================================================= -->
-            <groupbox
-                width="100%"
-                style="background:white; border:1px solid #DCE5F0; border-radius:6px;">
-                <hlayout
-                    width="100%"
-                    valign="middle"
-                    style="padding:6px 14px;">
+            <div width="100%" style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:8px; padding:8px 16px; box-shadow:0 1px 2px rgba(0,0,0,0.03);">
+                <hlayout width="100%" valign="middle">
 
                     <!-- Back Button -->
                     <button
                         id="backToListButton"
                         label="←"
                         tooltiptext="Back to Data Entry"
-                        width="30px"
-                        height="30px"
-                        style="background:#F1F5F9 !important; color:#334155 !important; border:1px solid #CBD5E1 !important; border-radius:50% !important; font-size:16px !important; font-weight:bold !important; line-height:1 !important; cursor:pointer !important; padding:0 !important; margin-right:12px !important; display:inline-flex !important; align-items:center !important; justify-content:center !important;"/>
+                        width="32px"
+                        height="32px"
+                        style="background:#F8FAFC !important; color:#334155 !important; border:1px solid #CBD5E1 !important; border-radius:6px !important; font-size:15px !important; font-weight:bold !important; cursor:pointer !important; margin-right:12px !important; display:inline-flex !important; align-items:center !important; justify-content:center !important;"/>
 
                     <!-- Batch ID -->
-                    <label
-                        value="Batch No : "
-                        style="font-size:13px; font-weight:700; color:#334155;"/>
-                    <label
-                        id="batchIdLabel"
-                        value=""
-                        style="font-size:14px; font-weight:700; color:#175CD3;"/>
+                    <label value="Batch No : " style="font-size:13px; font-weight:600; color:#64748B;"/>
+                    <label id="batchIdLabel" value="" style="font-size:13px; font-weight:700; color:#1E293B;"/>
 
-                    <!-- Equal Space 1 -->
                     <space hflex="1"/>
 
                     <!-- Total Cheques Pill -->
-                    <div style="background:#F1F5F9; border:1px solid #CBD5E1; border-radius:12px; padding:3px 14px; display:inline-flex; align-items:center; justify-content:center; min-width:110px;">
-                        <label value="Total: " style="font-size:11px; font-weight:600; color:#475569;"/>
+                    <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:16px; padding:4px 14px; display:inline-flex; align-items:center;">
+                        <label value="Total: " style="font-size:11px; font-weight:600; color:#64748B;"/>
                         <label id="totalChequesLabel" value="0" style="font-size:12px; font-weight:700; color:#0F172A; margin-left:4px;"/>
                     </div>
 
-                    <!-- Equal Space 2 -->
-                    <space hflex="1"/>
+                    <space width="8px"/>
 
                     <!-- Completed Cheques Pill -->
-                    <div style="background:#ECFDF5; border:1px solid #A7F3D0; border-radius:12px; padding:3px 14px; display:inline-flex; align-items:center; justify-content:center; min-width:110px;">
-                        <label value="Completed: " style="font-size:11px; font-weight:600; color:#065F46;"/>
-                        <label id="completedChequesLabel" value="0" style="font-size:12px; font-weight:700; color:#047857; margin-left:4px;"/>
+                    <div style="background:#ECFDF5; border:1px solid #A7F3D0; border-radius:16px; padding:4px 14px; display:inline-flex; align-items:center;">
+                        <label value="Completed: " style="font-size:11px; font-weight:600; color:#047857;"/>
+                        <label id="completedChequesLabel" value="0" style="font-size:12px; font-weight:700; color:#065F46; margin-left:4px;"/>
                     </div>
 
-                    <!-- Equal Space 3 -->
-                    <space hflex="1"/>
+                    <space width="8px"/>
 
                     <!-- Reject Requested Pill -->
-                    <div style="background:#FFF1F2; border:1px solid #FDA4AF; border-radius:12px; padding:3px 14px; display:inline-flex; align-items:center; justify-content:center; min-width:110px;">
+                    <div style="background:#FFF1F2; border:1px solid #FECDD3; border-radius:16px; padding:4px 14px; display:inline-flex; align-items:center;">
                         <label value="Reject Req: " style="font-size:11px; font-weight:600; color:#BE123C;"/>
-                        <label id="rejectedChequesLabel" value="0" style="font-size:12px; font-weight:700; color:#E11D48; margin-left:4px;"/>
+                        <label id="rejectedChequesLabel" value="0" style="font-size:12px; font-weight:700; color:#9F1239; margin-left:4px;"/>
                     </div>
 
-                    <!-- Equal Space 4 -->
-                    <space hflex="1"/>
+                    <space width="8px"/>
 
                     <!-- Pending Cheques Pill -->
-                    <div style="background:#FFFBEB; border:1px solid #FDE68A; border-radius:12px; padding:3px 14px; display:inline-flex; align-items:center; justify-content:center; min-width:110px;">
-                        <label value="Pending: " style="font-size:11px; font-weight:600; color:#92400E;"/>
-                        <label id="pendingChequesLabel" value="0" style="font-size:12px; font-weight:700; color:#B45309; margin-left:4px;"/>
+                    <div style="background:#FFFBEB; border:1px solid #FDE68A; border-radius:16px; padding:4px 14px; display:inline-flex; align-items:center;">
+                        <label value="Pending: " style="font-size:11px; font-weight:600; color:#B45309;"/>
+                        <label id="pendingChequesLabel" value="0" style="font-size:12px; font-weight:700; color:#92400E; margin-left:4px;"/>
                     </div>
 
-                    <!-- Equal Space 5 -->
                     <space hflex="1"/>
 
                     <!-- Cheque Progress Counter -->
-                    <label
-                        id="chequeProgressLabel"
-                        value=""
-                        style="font-size:13px; font-weight:700; color:#175CD3;"/>
+                    <label id="chequeProgressLabel" value="" style="font-size:13px; font-weight:700; color:#2563EB;"/>
                 </hlayout>
-            </groupbox>
+            </div>
 
-            <!-- =================================================
-                 MAIN SPLIT ROW
+           <!-- =================================================
+                 MAIN SPLIT ROW (EQUAL BALANCED HEIGHTS)
                  ================================================= -->
-            <hlayout
-                width="100%"
-                height="450px"
-                spacing="14px"
-                valign="top">
+            <hlayout width="100%" spacing="16px" valign="top">
 
-                <!-- LEFT: SCANNED CHEQUE CARD -->
-                <groupbox
-                    hflex="7"
-                    height="450px"
-                    sclass="equal-card">
-                    <caption style="background: transparent !important; border: none !important; margin-left: 10px !important; padding: 2px 0 !important;">
-                        <label value="Scanned Cheque" 
-                               style="background: #EFF6FF !important; border: 1px solid #70A6FF !important; color: #0F5FD7 !important; border-radius: 9999px !important; padding: 3px 12px !important; font-size: 11px !important; font-weight: 700 !important; letter-spacing: 0.3px !important; display: inline-flex !important; align-items: center !important; line-height: 1 !important;" />
-                    </caption>
+                <!-- LEFT CARD: SCANNED CHEQUE VIEW -->
+                <groupbox hflex="1" height="455px" sclass="equal-card">
+                    <vlayout width="100%" height="100%" spacing="10px">
+                        
+                        <!-- Header with Blue Icon & Subtitle -->
+                        <hlayout spacing="10px" valign="middle" width="100%">
+                            <div sclass="card-header-icon">
+                                <label value="📄" style="font-size:14px;"/>
+                            </div>
+                            <vlayout spacing="1px">
+                                <label value="Scanned Cheque" style="font-size:14px; font-weight:700; color:#1E293B;"/>
+                                <label value="Verify the scanned cheque image and enter the details" style="font-size:11.5px; color:#64748B;"/>
+                            </vlayout>
+                        </hlayout>
 
-                    <vlayout
-                        width="100%"
-                        height="100%"
-                        spacing="6px"
-                        style="padding:8px; box-sizing:border-box; justify-content:space-between;">
-
-                        <!-- CHEQUE CANVAS (STRICT SINGLE-IMAGE CONTAINER) -->
-                        <div
-                            width="100%"
-                            height="350px"
-                            style="display:flex; align-items:center; justify-content:center; background:#F8FAFC; border:1px solid #EAECF0; border-radius:4px; overflow:hidden; padding:4px; box-sizing:border-box;">
+                        <!-- Cheque Image Viewport (Fills exact remaining card height) -->
+                        <div width="100%" vflex="1"
+                             style="display:flex; align-items:center; justify-content:center; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; overflow:hidden; padding:4px; box-sizing:border-box;">
                             
-                            <image
-                                id="frontImage"
-                                visible="true"
-                                style="max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; display:block !important; margin:auto;"/>
+                            <image id="frontImage" visible="true"
+                                   style="max-width:100%; max-height:100%; width:100%; height:100%; object-fit:contain; display:block !important; margin:auto;"/>
                                 
-                            <image
-                                id="backImage"
-                                visible="false"
-                                style="display:none !important; width:0; height:0; visibility:hidden;"/>
+                            <image id="backImage" visible="false"
+                                   style="display:none !important; width:0; height:0; visibility:hidden;"/>
                         </div>
 
-                        <!-- IMAGE TOOLBAR -->
-                        <hlayout
-                            width="100%"
-                            spacing="8px"
-                            valign="middle"
-                            style="justify-content:center; padding:2px 0;">
-                            
+                        <!-- Spacer to lock bottom toolbar position -->
+                        <space height="2px"/>
+
+                        <!-- Image Tools Toolbar -->
+                        <hlayout width="100%" spacing="8px" valign="middle">
                             <button id="toggleImageSideButton" label="View Back" 
-                                    width="90px" 
-                                    height="30px" 
-                                    style="background:#0091FF; color:white; border:none; font-size:12px; font-weight:600; border-radius:4px; cursor:pointer;"/>         
-                            <space width="10px"/>        
-                            <button id="zoomInButton" label="+" tooltiptext="Zoom In" width="32px" height="30px" sclass="icon-symbol-btn"/>
-                            <button id="zoomOutButton" label="−" tooltiptext="Zoom Out" width="32px" height="30px" sclass="icon-symbol-btn"/>
-                            <button id="rotateButton" label="↻" tooltiptext="Rotate" width="32px" height="30px" sclass="icon-symbol-btn"/>
+                                    width="96px" height="32px" 
+                                    style="background:#2563EB !important; color:#FFFFFF !important; border:none !important; font-size:12px !important; font-weight:600 !important; border-radius:6px !important; cursor:pointer !important;"/>         
+                            <space width="2px"/>        
+                            <button id="zoomInButton" label="+" tooltiptext="Zoom In" sclass="icon-symbol-btn"/>
+                            <button id="zoomOutButton" label="−" tooltiptext="Zoom Out" sclass="icon-symbol-btn"/>
+                            <button id="rotateButton" label="↻" tooltiptext="Rotate" sclass="icon-symbol-btn"/>
                         </hlayout>
                     </vlayout>
                 </groupbox>
 
-                <!-- RIGHT: CHEQUE DATA VERIFICATION FORM -->
-                <groupbox
-                    hflex="7"
-                    height="450px"
-                    sclass="equal-card">
-                    <caption style="background: transparent !important; border: none !important; margin-left: 10px !important; padding: 2px 0 !important;">
-                        <label value="Cheque Data Verification" 
-                               style="background: #EFF6FF !important; border: 1px solid #70A6FF !important; color: #0F5FD7 !important; border-radius: 9999px !important; padding: 3px 12px !important; font-size: 11px !important; font-weight: 700 !important; letter-spacing: 0.3px !important; display: inline-flex !important; align-items: center !important; line-height: 1 !important;" />
-                    </caption>
-                    
-                    <vlayout
-                        width="100%"
-                        height="100%"
-                        style="padding:14px 18px; box-sizing:border-box; justify-content:space-between;">
+                <!-- RIGHT CARD: CHEQUE DATA VERIFICATION FORM -->
+                <groupbox hflex="1" height="455px" sclass="equal-card">
+                    <vlayout width="100%" height="100%" spacing="10px">
 
-                        <!-- ROW 1: CHEQUE NUMBER & ACCOUNT NUMBER -->
-                        <hlayout width="100%" spacing="16px">
+                        <!-- Header with Blue Icon & Subtitle -->
+                        <hlayout spacing="10px" valign="middle" width="100%">
+                            <div sclass="card-header-icon">
+                                <label value="🗂" style="font-size:14px;"/>
+                            </div>
+                            <vlayout spacing="1px">
+                                <label value="Data Verification" style="font-size:14px; font-weight:700; color:#1E293B;"/>
+                                <label value="Verify and confirm the extracted data from the cheque" style="font-size:11.5px; color:#64748B;"/>
+                            </vlayout>
+                        </hlayout>
+
+                        <!-- Row 1: Cheque Number & Account Number -->
+                        <hlayout width="100%" spacing="12px">
                             <vlayout hflex="1" spacing="4px">
                                 <hlayout spacing="0" valign="middle">
                                     <label value="CHEQUE NUMBER" sclass="single-field-label"/>
                                     <label value="*" sclass="label-star"/>
                                 </hlayout>
-                                <textbox
-                                    id="chequeNumberTextbox"
-                                    width="100%"
-                                    placeholder="Enter cheque number"
-                                    sclass="single-field-box"/>
+                                <textbox id="chequeNumberTextbox" width="100%" placeholder="Enter cheque number" sclass="single-field-box"/>
                             </vlayout>
                             <vlayout hflex="1" spacing="4px">
                                 <hlayout spacing="0" valign="middle">
                                     <label value="ACCOUNT NUMBER" sclass="single-field-label"/>
                                     <label value="*" sclass="label-star"/>
                                 </hlayout>
-                                <textbox
-                                    id="accountNumberTextbox"
-                                    width="100%"
-                                    placeholder="Enter account number"
-                                    sclass="single-field-box"/>
+                                <textbox id="accountNumberTextbox" width="100%" placeholder="Enter account number" sclass="single-field-box"/>
                             </vlayout>
                         </hlayout>
 
-                        <!-- ROW 2: CHEQUE DATE & DRAWER NAME -->
-                        <hlayout width="100%" spacing="16px">
+                        <!-- Row 2: Cheque Date & Drawer Name -->
+                        <hlayout width="100%" spacing="12px">
                             <vlayout hflex="1" spacing="4px">
                                 <hlayout spacing="0" valign="middle">
                                     <label value="CHEQUE DATE" sclass="single-field-label"/>
                                     <label value="*" sclass="label-star"/>
                                 </hlayout>
-                                <datebox 
-                                    id="chequeDatebox" 
-                                    width="100%" 
-                                    format="yyyy-MM-dd"
-                                    buttonVisible="true"
-                                    readonly="false"
-                                    sclass="single-field-box" />
+                                <datebox id="chequeDatebox" width="100%" format="yyyy-MM-dd" buttonVisible="true" readonly="false" sclass="single-field-box" />
                             </vlayout>
                             <vlayout hflex="1" spacing="4px">
                                 <hlayout spacing="0" valign="middle">
                                     <label value="DRAWER NAME" sclass="single-field-label"/>
                                     <label value="*" sclass="label-star"/>
                                 </hlayout>
-                                <textbox
-                                    id="drawerNameTextbox"
-                                    width="100%"
-                                    placeholder="Enter drawer name"
-                                    sclass="single-field-box"/>
+                                <textbox id="drawerNameTextbox" width="100%" placeholder="Enter drawer name" sclass="single-field-box"/>
                             </vlayout>
                         </hlayout>
 
-                        <!-- ROW 3: PAYEE NAME & AMOUNT -->
-                        <hlayout width="100%" spacing="16px">
+                        <!-- Row 3: Payee Name & Amount -->
+                        <hlayout width="100%" spacing="12px">
                             <vlayout hflex="1" spacing="4px">
                                 <hlayout spacing="0" valign="middle">
                                     <label value="PAYEE NAME" sclass="single-field-label"/>
                                     <label value="*" sclass="label-star"/>
                                 </hlayout>
-                                <textbox
-                                    id="payeeNameTextbox"
-                                    width="100%"
-                                    placeholder="Enter payee name"
-                                    sclass="single-field-box"/>
+                                <textbox id="payeeNameTextbox" width="100%" placeholder="Enter payee name" sclass="single-field-box"/>
                             </vlayout>
                             <vlayout hflex="1" spacing="4px">
                                 <hlayout spacing="0" valign="middle">
                                     <label value="AMOUNT (₹)" sclass="single-field-label"/>
                                     <label value="*" sclass="label-star"/>
                                 </hlayout>
-                                <decimalbox
-                                    id="amountTextbox"
-                                    width="100%"
-                                    format="###,##0.00"
-                                    placeholder="0.00"
-                                    sclass="single-field-box"/>
+                                <decimalbox id="amountTextbox" width="100%" format="###,##0.00" placeholder="0.00" instant="true" sclass="single-field-box"/>
                             </vlayout>
                         </hlayout>
 
-                        <!-- ROW 4: AMOUNT IN WORDS -->
+                        <!-- Row 4: Amount In Words -->
                         <vlayout width="100%" spacing="4px">
                             <hlayout spacing="0" valign="middle">
                                 <label value="AMOUNT IN WORDS" sclass="single-field-label"/>
                                 <label value="*" sclass="label-star"/>
                             </hlayout>
-                            <textbox
-                                id="amountInWordsTextbox"
-                                width="100%"
-                                placeholder="Enter amount in words"
-                                sclass="single-field-box"/>
+                            <textbox id="amountInWordsTextbox" width="100%" placeholder="Enter amount in words" sclass="single-field-box"/>
                         </vlayout>
+                        <space height="5px"/>
 
-                        <!-- ACTIONS CONTAINER: 2 ROWS -->
-                        <vlayout width="100%" spacing="10px" style="margin-top:12px;">
-
-                            <!-- TOP ROW: PRIMARY NAVIGATION & VERIFICATION -->
-                            <hlayout width="100%" valign="middle" style="justify-content:flex-end;">
-                                <button
-                                    id="prevButton"
-                                    label="Prev"
-                                    width="90px"
-                                    height="34px"
-                                    style="background:#0091FF !important; color:#FFFFFF !important; border:none !important; font-size:12px !important; font-weight:600 !important; border-radius:4px !important; cursor:pointer !important;"/>
-
-                                <button
-                                    id="saveNextButton"
-                                    label="💾 Save &amp; Next"
-                                    width="140px"
-                                    height="34px"
-                                    style="background:#0091FF !important; color:#FFFFFF !important; border:none !important; margin-left:12px !important; font-size:12px !important; font-weight:600 !important; border-radius:4px !important; cursor:pointer !important;"/>
+                        <!-- Actions pinned evenly at the bottom -->
+                        <vlayout width="100%" spacing="8px" style="margin-top:auto;">
+                            <!-- TOP ROW: Navigation & Verification -->
+                            <hlayout width="100%" valign="middle" spacing="8px">
+                                <button id="prevButton" label="Prev" width="80px" height="36px"
+                                        style="background:#2563EB !important; color:#FFFFFF !important; border:none !important; font-size:12px !important; font-weight:600 !important; border-radius:6px !important; cursor:pointer !important;"/>
+                                <button id="saveNextButton" label="💾 Save &amp; Next" width="130px" height="36px"
+                                        style="background:#2563EB !important; color:#FFFFFF !important; border:none !important; font-size:12px !important; font-weight:600 !important; border-radius:6px !important; cursor:pointer !important;"/>
                             </hlayout>
 
-                            <!-- BOTTOM ROW: REJECTION WORKFLOW -->
-                            <hlayout width="100%" valign="middle" style="justify-content:flex-end; align-items:center;">
-                               <combobox
-    id="rejectReasonCombobox"
-    placeholder="Select Return/Rejection Reason..."
-    readonly="true"
-    autodrop="true"
-    autocomplete="true"
-    width="280px"
-    height="32px"
-    style="font-size:12px;"/>
-								
-                                <button
-                                    id="rejectRequestButton"
-                                    label="⚠ Reject Request"
-                                    tooltiptext="Submit rejection request for Checker review"
-                                    width="140px"
-                                    height="32px"
-                                    style="background:#FFF1F2 !important; color:#E11D48 !important; border:1px solid #FDA4AF !important; margin-left:12px !important; font-size:12px !important; font-weight:600 !important; border-radius:4px !important; cursor:pointer !important;"/>
+                            <!-- BOTTOM ROW: Rejection Action -->
+                            <hlayout width="100%" valign="middle" spacing="8px">
+                                <combobox id="rejectReasonCombobox"
+                                          placeholder="Select Rejection Reason..."
+                                          readonly="true"
+                                          autodrop="true"
+                                          autocomplete="true"
+                                          hflex="1"
+                                          sclass="single-field-box"/>
+                                <button id="rejectRequestButton"
+                                        label="⚠ Reject Request"
+                                        tooltiptext="Submit rejection request for Checker review"
+                                        width="135px"
+                                        height="36px"
+                                        style="background:#FFF1F2 !important; color:#BE123C !important; border:1px solid #FECDD3 !important; font-size:12px !important; font-weight:600 !important; border-radius:6px !important; cursor:pointer !important;"/>
                             </hlayout>
-
                         </vlayout>
 
                     </vlayout>
                 </groupbox>
 
             </hlayout>
-
         </vlayout>
 
     </div>

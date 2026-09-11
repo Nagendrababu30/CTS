@@ -84,6 +84,15 @@ public class SendBatchToCheckerDaoImpl implements SendBatchToCheckerDao {
                 WHERE batch_id = ?
                 """;
 
+        // Query 3: Insert SENT_TO_CHECKER status for all cheques in the batch
+        String insertChequeSql = """
+                INSERT INTO inward_cheque_status_history
+                (cheque_number, status)
+                SELECT cheque_number, 'SENT_TO_CHECKER'
+                FROM inward_cheque
+                WHERE batch_id = ?
+                """;
+
         try (Connection connection = dataSource.getConnection()) {
             
             // 1. Start Transaction
@@ -91,7 +100,8 @@ public class SendBatchToCheckerDaoImpl implements SendBatchToCheckerDao {
 
             try (
                 PreparedStatement historyStmt = connection.prepareStatement(updateHistorySql);
-                PreparedStatement lockStmt = connection.prepareStatement(unlockBatchSql)
+                PreparedStatement lockStmt = connection.prepareStatement(unlockBatchSql);
+                PreparedStatement chequeStmt = connection.prepareStatement(insertChequeSql)
             ) {
                 // 2. Execute History Update
                 historyStmt.setLong(1, batchId);
@@ -103,9 +113,13 @@ public class SendBatchToCheckerDaoImpl implements SendBatchToCheckerDao {
                 
                 // 3. Execute Unlock Update
                 lockStmt.setLong(1, batchId);
-                lockStmt.executeUpdate(); // We don't strictly check rowsAffected here in case the lock was already cleared somehow
+                lockStmt.executeUpdate();
+
+                // 4. Insert SENT_TO_CHECKER status for all cheques in the batch
+                chequeStmt.setLong(1, batchId);
+                chequeStmt.executeUpdate();
                 
-                // 4. Commit the transaction if BOTH queries succeeded
+                // 5. Commit all three queries
                 connection.commit(); 
                 
             } catch (Exception e) {

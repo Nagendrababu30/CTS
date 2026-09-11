@@ -360,9 +360,8 @@ public class CheckerDashboardController
              * =====================================================
              */
 
-            if ("AVAILABLE".equals(
-                    batch.getLockStatus())
-                    && batch.getUserId() == null) {
+            if (("AVAILABLE".equals(batch.getLockStatus())
+                    || "UNLOCKED".equals(batch.getLockStatus()))) {
 
                 availableCountValue++;
             }
@@ -486,12 +485,10 @@ public class CheckerDashboardController
             else if ("AVAILABLE".equals(
                     selectedFilter)) {
 
-                if ("AVAILABLE".equals(
-                        batch.getLockStatus())
-                        && batch.getUserId() == null) {
+                if ("AVAILABLE".equals(batch.getLockStatus())
+                        || "UNLOCKED".equals(batch.getLockStatus())) {
 
-                    filteredBatches.add(
-                            batch);
+                    filteredBatches.add(batch);
                 }
             }
 
@@ -663,9 +660,8 @@ public class CheckerDashboardController
              * =================================================
              */
 
-            if ("AVAILABLE".equals(
-                    batch.getLockStatus())
-                    && batch.getUserId() == null) {
+            if ("AVAILABLE".equals(batch.getLockStatus())
+                    || "UNLOCKED".equals(batch.getLockStatus())) {
 
                 Button openButton =
                         new Button(

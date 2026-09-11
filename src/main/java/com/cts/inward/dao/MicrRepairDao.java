@@ -8,19 +8,67 @@ import com.cts.inward.model.OcrChequeData;
 
 public interface MicrRepairDao {
 
-    List<NpciChequeData> getNpciCheques(long batchId);
+    /*
+     * -------------------------------------------------------------------------
+     * NPCI / OCR DATA
+     * -------------------------------------------------------------------------
+     */
 
-    List<OcrChequeData> getOcrCheques(long batchId);
+    List<NpciChequeData> getNpciCheques(
+            long batchId);
 
-    String getCompletedRepairedMicr(String chequeNumber);
+    List<OcrChequeData> getOcrCheques(
+            long batchId);
 
-    String getLatestChequeStatus(String chequeNumber);
 
-    long getBatchIdByChequeNumber(String chequeNumber);
+    /*
+     * -------------------------------------------------------------------------
+     * MICR REPAIR
+     * -------------------------------------------------------------------------
+     */
 
-    String getFrontImagePath(String chequeNumber);
+    String getCompletedRepairedMicr(
+            String chequeNumber);
 
-    String getBackImagePath(String chequeNumber);
+    String getLatestChequeStatus(
+            String chequeNumber);
+
+
+    /*
+     * -------------------------------------------------------------------------
+     * BATCH / CHEQUE INFORMATION
+     * -------------------------------------------------------------------------
+     */
+
+    long getBatchIdByChequeNumber(
+            String chequeNumber);
+
+    int getBatchChequePosition(
+            long batchId,
+            String chequeNumber);
+
+    int getBatchTotalChequeCount(
+            long batchId);
+
+
+    /*
+     * -------------------------------------------------------------------------
+     * IMAGES
+     * -------------------------------------------------------------------------
+     */
+
+    String getFrontImagePath(
+            String chequeNumber);
+
+    String getBackImagePath(
+            String chequeNumber);
+
+
+    /*
+     * -------------------------------------------------------------------------
+     * MAKER RETURN
+     * -------------------------------------------------------------------------
+     */
 
     List<ReturnReasonDto> getMakerReturnReasons();
 
@@ -30,12 +78,26 @@ public interface MicrRepairDao {
             String makerRemarks,
             long userId);
 
+
+    /*
+     * -------------------------------------------------------------------------
+     * MICR REPAIR SAVE
+     * -------------------------------------------------------------------------
+     */
+
     boolean saveMicrRepair(
             String chequeNumber,
             String originalMicr,
             String repairedMicr,
             String remarks,
             long userId);
+
+
+    /*
+     * -------------------------------------------------------------------------
+     * MOVE BATCH TO DATA ENTRY
+     * -------------------------------------------------------------------------
+     */
 
     boolean markBatchReadyForDataEntry(
             long batchId,

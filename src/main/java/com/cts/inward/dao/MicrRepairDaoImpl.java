@@ -21,9 +21,6 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
     private static final String STATUS_DATA_ENTRY =
             "DATA_ENTRY";
 
-    private static final String STATUS_MICR_MISMATCH =
-            "MICR_MISMATCH";
-
 
     /*
      * ---------------------------------------------------------------------
@@ -407,6 +404,94 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
      * ---------------------------------------------------------------------
      */
     @Override
+    public int getBatchChequePosition(
+            long batchId,
+            String chequeNumber) {
+
+        String sql =
+                "SELECT position_no "
+                + "FROM ("
+                + "SELECT cheque_number, "
+                + "ROW_NUMBER() OVER ("
+                + "PARTITION BY batch_id "
+                + "ORDER BY inward_cheque_id"
+                + ") AS position_no "
+                + "FROM public.inward_cheque "
+                + "WHERE batch_id = ?"
+                + ") x "
+                + "WHERE cheque_number = ?";
+
+        try (
+                Connection connection =
+                        ConnectionPool.getDataSource().getConnection();
+                PreparedStatement statement =
+                        connection.prepareStatement(sql)
+        ) {
+
+            statement.setLong(1, batchId);
+            statement.setString(2, chequeNumber);
+
+            try (ResultSet resultSet =
+                    statement.executeQuery()) {
+
+                if (resultSet.next()) {
+                    return resultSet.getInt("position_no");
+                }
+            }
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Failed to find batch position for cheque "
+                            + chequeNumber
+                            + " in batch "
+                            + batchId,
+                    e);
+        }
+
+        return 0;
+    }
+
+
+    @Override
+    public int getBatchTotalChequeCount(
+            long batchId) {
+
+        String sql =
+                "SELECT COUNT(*) "
+                + "FROM public.inward_cheque "
+                + "WHERE batch_id = ?";
+
+        try (
+                Connection connection =
+                        ConnectionPool.getDataSource().getConnection();
+                PreparedStatement statement =
+                        connection.prepareStatement(sql)
+        ) {
+
+            statement.setLong(1, batchId);
+
+            try (ResultSet resultSet =
+                    statement.executeQuery()) {
+
+                if (resultSet.next()) {
+                    return resultSet.getInt(1);
+                }
+            }
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Failed to find total cheque count for batch "
+                            + batchId,
+                    e);
+        }
+
+        return 0;
+    }
+
+
+    @Override
     public String getFrontImagePath(
             String chequeNumber) {
 
@@ -562,7 +647,7 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
      *
      * 1. Insert return request
      * 2. Insert RETURN_BY_MAKER status history
-     * 3. Check remaining MICR_MISMATCH cheques
+     * 3. Check remaining MICR_REPAIR cheques
      * 4. If none remain, insert DATA_ENTRY batch history
      * ---------------------------------------------------------------------
      */
@@ -753,7 +838,7 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
 
             /*
              * ---------------------------------------------------------
-             * 4. Count remaining MICR mismatches
+             * 4. Count remaining MICR repair cheques
              *
              * Only the latest status for each cheque is considered.
              * ---------------------------------------------------------
@@ -768,10 +853,8 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                     (
                         SELECT h.status
                         FROM public.inward_cheque_status_history h
-                        WHERE h.cheque_number =
-                                c.cheque_number
-                        ORDER BY
-                            h.status_history_id DESC
+                        WHERE h.cheque_number = c.cheque_number
+                        ORDER BY h.status_history_id DESC
                         LIMIT 1
                     ) latest
                         ON TRUE
@@ -780,19 +863,14 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                     """;
 
             try (PreparedStatement statement =
-                         connection.prepareStatement(
-                                 pendingMicrSql)) {
+                    connection.prepareStatement(pendingMicrSql)) {
 
                 statement.setLong(
                         1,
                         batchId);
 
-                statement.setString(
-                        2,
-                        STATUS_MICR_MISMATCH);
-
                 try (ResultSet resultSet =
-                             statement.executeQuery()) {
+                        statement.executeQuery()) {
 
                     if (resultSet.next()) {
 
@@ -805,7 +883,7 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
 
             /*
              * ---------------------------------------------------------
-             * 5. If no MICR mismatch remains, batch becomes DATA_ENTRY
+             * 5. If no MICR repair remains, batch becomes DATA_ENTRY
              * ---------------------------------------------------------
              */
             if (pendingMicrCount == 0) {

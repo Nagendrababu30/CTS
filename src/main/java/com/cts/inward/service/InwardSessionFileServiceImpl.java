@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.cts.inward.config.FileConfiguration;
+import com.cts.inward.dao.InwardFileDao;
 import com.cts.inward.enums.FileStage;
 import com.cts.inward.enums.FileType;
 import com.cts.inward.model.InwardFile;
@@ -17,25 +18,27 @@ public class InwardSessionFileServiceImpl
 
     private final FileConfiguration fileConfiguration;
     private final FileSummaryService fileSummaryService;
+    private final InwardFileDao inwardFileDao;
 
     private InwardSessionFileServiceImpl(
             FileConfiguration fileConfiguration,
-            FileSummaryService fileSummaryService) {
+            FileSummaryService fileSummaryService,
+            InwardFileDao inwardFileDao) {
 
-        this.fileConfiguration =
-                fileConfiguration;
-
-        this.fileSummaryService =
-                fileSummaryService;
+        this.fileConfiguration = fileConfiguration;
+        this.fileSummaryService = fileSummaryService;
+        this.inwardFileDao = inwardFileDao;
     }
 
     public static InwardSessionFileServiceImpl of(
             FileConfiguration fileConfiguration,
-            FileSummaryService fileSummaryService) {
+            FileSummaryService fileSummaryService,
+            InwardFileDao inwardFileDao) {
 
         return new InwardSessionFileServiceImpl(
                 fileConfiguration,
-                fileSummaryService);
+                fileSummaryService,
+                inwardFileDao);
     }
 
     @Override
@@ -45,23 +48,18 @@ public class InwardSessionFileServiceImpl
         for (Map.Entry<FileType, List<InwardFile>> entry :
                 files.entrySet()) {
 
-            for (InwardFile file :
-                    entry.getValue()) {
-
+            for (InwardFile file : entry.getValue()) {
                 moveFileToIncoming(file);
             }
         }
     }
 
     @Override
-    public void moveFileToIncoming(
-            InwardFile file) {
+    public void moveFileToIncoming(InwardFile file) {
 
         try {
 
-            Path sourceFile =
-                    Path.of(
-                            file.getFilePath());
+            Path sourceFile = Path.of(file.getFilePath());
 
             Path targetDirectory =
                     fileConfiguration
@@ -71,8 +69,7 @@ public class InwardSessionFileServiceImpl
                                             .name()
                                             .toLowerCase());
 
-            Files.createDirectories(
-                    targetDirectory);
+            Files.createDirectories(targetDirectory);
 
             Path targetFile =
                     targetDirectory.resolve(
@@ -84,15 +81,19 @@ public class InwardSessionFileServiceImpl
                     StandardCopyOption.REPLACE_EXISTING);
 
             /*
-             * Update FILE_SUMMARY only after
-             * the physical file move succeeds.
+             * File physically moved — mark as PROCESSED immediately.
+             * This prevents re-processing in future sessions.
+             */
+            inwardFileDao.markAsProcessed(file.getFileId());
+
+            /*
+             * Update FILE_SUMMARY stage to INCOMING.
              */
             fileSummaryService.updateFileStage(
                     file.getFileId(),
                     FileStage.INCOMING);
 
         } catch (IOException e) {
-
             throw new IllegalStateException(
                     "Failed to move CHI file to incoming: "
                             + file.getFilePath(),

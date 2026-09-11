@@ -7,6 +7,9 @@ import com.iispl.cts.model.outward.OutwardValidationResult;
 
 public class OutwardValidationService {
 
+    // =========================================================
+    // VALIDATE CHEQUES
+    // =========================================================
     public OutwardValidationResult validate(
             List<OutwardCheque> cheques) {
 
@@ -17,9 +20,7 @@ public class OutwardValidationService {
             return result;
         }
 
-        result.setTotalCheques(
-                cheques.size()
-        );
+        result.setTotalCheques(cheques.size());
 
         int micrErrors = 0;
 
@@ -29,77 +30,27 @@ public class OutwardValidationService {
                 continue;
             }
 
-            String cityCode =
-                    cheque.getCityCode();
-
-            String bankCode =
-                    cheque.getBankCode();
-
-            String branchCode =
-                    cheque.getBranchCode();
-
-            boolean micrError = false;
-
-            /*
-             * CITY CODE
-             * Must contain exactly 3 numeric digits.
-             */
-            if (isBlank(cityCode)
-                    || !cityCode.trim()
-                            .matches("^[0-9]{3}$")) {
-
-                micrError = true;
-            }
-
-            /*
-             * BANK CODE
-             * Must contain exactly 3 numeric digits.
-             */
-            if (isBlank(bankCode)
-                    || !bankCode.trim()
-                            .matches("^[0-9]{3}$")) {
-
-                micrError = true;
-            }
-
-            /*
-             * BRANCH CODE
-             * Must contain exactly 3 numeric digits.
-             */
-            if (isBlank(branchCode)
-                    || !branchCode.trim()
-                            .matches("^[0-9]{3}$")) {
-
-                micrError = true;
-            }
+            boolean micrError =
+                    !isValidMicrCode(cheque.getCityCode())
+                    || !isValidMicrCode(cheque.getBankCode())
+                    || !isValidMicrCode(cheque.getBranchCode());
 
             if (micrError) {
                 micrErrors++;
             }
         }
 
-        result.setMicrErrors(
-                micrErrors
-        );
+        result.setMicrErrors(micrErrors);
 
-        /*
-         * Currently only MICR validation
-         * is implemented.
-         */
         result.setDataEntryErrors(0);
-
         result.setAmountAccountErrors(0);
 
         return result;
     }
 
-    /*
-     * Returns the first MICR component
-     * which contains an error.
-     *
-     * Used by Controller/UI for
-     * highlighting the incorrect field.
-     */
+    // =========================================================
+    // GET MICR ERROR TYPE
+    // =========================================================
     public String getMicrErrorType(
             OutwardCheque cheque) {
 
@@ -107,43 +58,45 @@ public class OutwardValidationService {
             return null;
         }
 
-        String cityCode =
-                cheque.getCityCode();
-
-        if (isBlank(cityCode)
-                || !cityCode.trim()
-                        .matches("^[0-9]{3}$")) {
-
+        if (!isValidMicrCode(
+                cheque.getCityCode())) {
             return "CITY";
         }
 
-        String bankCode =
-                cheque.getBankCode();
-
-        if (isBlank(bankCode)
-                || !bankCode.trim()
-                        .matches("^[0-9]{3}$")) {
-
+        if (!isValidMicrCode(
+                cheque.getBankCode())) {
             return "BANK";
         }
 
-        String branchCode =
-                cheque.getBranchCode();
-
-        if (isBlank(branchCode)
-                || !branchCode.trim()
-                        .matches("^[0-9]{3}$")) {
-
+        if (!isValidMicrCode(
+                cheque.getBranchCode())) {
             return "BRANCH";
         }
 
         return null;
     }
 
-    private boolean isBlank(
+    // =========================================================
+    // MICR CODE VALIDATION
+    // =========================================================
+    public boolean isValidMicrCode(
             String value) {
 
-        return value == null
-                || value.trim().isEmpty();
+        if (value == null
+                || value.trim().isEmpty()) {
+            return false;
+        }
+
+        String code = value.trim();
+
+        if (!code.matches("^[0-9]{3}$")) {
+            return false;
+        }
+
+        if ("000".equals(code)) {
+            return false;
+        }
+
+        return true;
     }
 }

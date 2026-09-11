@@ -12,6 +12,7 @@ import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Datebox;
 import org.zkoss.zul.Decimalbox;
+import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
@@ -19,6 +20,8 @@ import org.zkoss.zul.Textbox;
 import com.cts.admin.model.User;
 import com.cts.inward.dao.BatchDaoImpl;
 import com.cts.inward.dao.ChequeDaoImpl;
+import com.cts.inward.dao.ChequeImageDaoImpl;
+import com.cts.inward.model.ChequeImage;
 import com.cts.inward.model.InwardCheque;
 import com.cts.inward.service.BatchService;
 import com.cts.inward.service.BatchServiceImpl;
@@ -47,6 +50,8 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	private Label lblChequeInfo;
 	private Label lblMicrBand;
 
+	private Image imgCheque;
+
 	private Textbox txtChequeNo;
 	private Textbox txtAccountNo;
 
@@ -64,11 +69,15 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 
 	private int currentIndex = 0;
 
+	private String currentFrontImagePath;
+	private String currentBackImagePath;
+
 	// =========================================================
 	// SERVICE
 	// =========================================================
 	private BatchService batchService;
 	private ChequeService chequeService;
+	private ChequeImageDaoImpl chequeImageDao;
 
 	// =========================================================
 	// PAGE INITIALIZATION
@@ -84,6 +93,7 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		 */
 		chequeService = ChequeServiceImpl.of(ChequeDaoImpl.of());
 		batchService = BatchServiceImpl.of(BatchDaoImpl.of());
+		chequeImageDao = ChequeImageDaoImpl.of();
 		
 		String batchIdParameter = Executions.getCurrent().getParameter("batchId");
 
@@ -223,6 +233,12 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		lblMicrBand.setValue(safeString(cheque.getMicrCode()));
 
 		// -----------------------------------------------------
+		// CHEQUE IMAGE
+		// -----------------------------------------------------
+
+		loadChequeImages(cheque.getChequeNumber());
+
+		// -----------------------------------------------------
 		// NAVIGATION
 		// -----------------------------------------------------
 
@@ -351,6 +367,78 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 			Messagebox.show("Unable to save Data Entry for cheque " + currentCheque.getChequeNumber() + ".",
 					"Data Entry", Messagebox.OK, Messagebox.ERROR);
 		}
+	}
+
+	// =========================================================
+	// CHEQUE IMAGE LOADING
+	// =========================================================
+
+	private void loadChequeImages(String chequeNumber) {
+
+		currentFrontImagePath = null;
+		currentBackImagePath = null;
+
+		try {
+			ChequeImage image = chequeImageDao.findByChequeNumber(chequeNumber);
+			if (image != null) {
+				currentFrontImagePath = image.getFrontPath();
+				currentBackImagePath = image.getBackPath();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		showFrontImage();
+	}
+
+	private void showFrontImage() {
+
+		if (imgCheque == null) return;
+
+		if (currentFrontImagePath != null
+				&& !currentFrontImagePath.trim().isEmpty()) {
+			try {
+				byte[] bytes = java.nio.file.Files.readAllBytes(
+						java.nio.file.Path.of(currentFrontImagePath));
+				imgCheque.setContent(new org.zkoss.image.AImage("front.jpg", bytes));
+			} catch (Exception e) {
+				e.printStackTrace();
+				imgCheque.setContent((org.zkoss.image.AImage) null);
+			}
+		} else {
+			imgCheque.setContent((org.zkoss.image.AImage) null);
+		}
+	}
+
+	private void showBackImage() {
+
+		if (imgCheque == null) return;
+
+		if (currentBackImagePath != null
+				&& !currentBackImagePath.trim().isEmpty()) {
+			try {
+				byte[] bytes = java.nio.file.Files.readAllBytes(
+						java.nio.file.Path.of(currentBackImagePath));
+				imgCheque.setContent(new org.zkoss.image.AImage("back.jpg", bytes));
+			} catch (Exception e) {
+				e.printStackTrace();
+				imgCheque.setContent((org.zkoss.image.AImage) null);
+			}
+		} else {
+			imgCheque.setContent((org.zkoss.image.AImage) null);
+		}
+	}
+
+	// =========================================================
+	// FRONT / BACK BUTTON HANDLERS
+	// =========================================================
+
+	public void onClick$btnSideFront() {
+		showFrontImage();
+	}
+
+	public void onClick$btnSideBack() {
+		showBackImage();
 	}
 
 	// =========================================================

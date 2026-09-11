@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.cts.inward.config.FileConfiguration;
 import com.cts.inward.dto.PxfParserResult;
+import com.cts.inward.enums.FileStage;
 import com.cts.inward.enums.FileType;
 import com.cts.inward.model.ChequeImage;
 import com.cts.inward.model.ChequeImagePaths;
@@ -46,6 +47,9 @@ public class FileProcessingServiceImpl
     private final ImageService imageService;
     private final ChequeImageService chequeImageService;
 
+    private final FileSummaryService fileSummaryService;
+    private final com.cts.inward.dao.InwardFileDao inwardFileDao;
+
     private FileProcessingServiceImpl(
             FileConfiguration fileConfiguration,
             PxfParser pxfParser,
@@ -56,7 +60,9 @@ public class FileProcessingServiceImpl
             OcrBatchService ocrBatchService,
             OcrChequeService ocrChequeService,
             ImageService imageService,
-            ChequeImageService chequeImageService) {
+            ChequeImageService chequeImageService,
+            FileSummaryService fileSummaryService,
+            com.cts.inward.dao.InwardFileDao inwardFileDao) {
 
         this.fileConfiguration = fileConfiguration;
         this.pxfParser = pxfParser;
@@ -68,6 +74,8 @@ public class FileProcessingServiceImpl
         this.ocrChequeService = ocrChequeService;
         this.imageService = imageService;
         this.chequeImageService = chequeImageService;
+        this.fileSummaryService = fileSummaryService;
+        this.inwardFileDao = inwardFileDao;
     }
 
     public static FileProcessingServiceImpl of(
@@ -80,7 +88,9 @@ public class FileProcessingServiceImpl
             OcrBatchService ocrBatchService,
             OcrChequeService ocrChequeService,
             ImageService imageService,
-            ChequeImageService chequeImageService) {
+            ChequeImageService chequeImageService,
+            FileSummaryService fileSummaryService,
+            com.cts.inward.dao.InwardFileDao inwardFileDao) {
 
         return new FileProcessingServiceImpl(
                 fileConfiguration,
@@ -92,7 +102,9 @@ public class FileProcessingServiceImpl
                 ocrBatchService,
                 ocrChequeService,
                 imageService,
-                chequeImageService);
+                chequeImageService,
+                fileSummaryService,
+                inwardFileDao);
     }
 
     @Override
@@ -149,8 +161,17 @@ public class FileProcessingServiceImpl
             Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
 
             System.out.println(
-                    "[FileProcessing] Moved to processing: "
-                    + target);
+                    "[FileProcessing] Moved to processing: " + target);
+
+            /*
+             * Resolve file_id from the original incoming path
+             * and update inward_file_summary stage to PROCESSING.
+             */
+            long fileId = inwardFileDao.getFileIdByPath(
+                    normalizePathForDb(filePath));
+            if (fileId > 0) {
+                fileSummaryService.updateFileStage(fileId, FileStage.PROCESSING);
+            }
 
             return target.toString();
 
@@ -185,8 +206,16 @@ public class FileProcessingServiceImpl
             Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
 
             System.out.println(
-                    "[FileProcessing] Archived: "
-                    + target);
+                    "[FileProcessing] Archived: " + target);
+
+            /*
+             * Update inward_file_summary stage to ARCHIVE.
+             */
+            long fileId = inwardFileDao.getFileIdByPath(
+                    normalizePathForDb(filePath));
+            if (fileId > 0) {
+                fileSummaryService.updateFileStage(fileId, FileStage.ARCHIVE);
+            }
 
         } catch (IOException e) {
 
@@ -301,6 +330,14 @@ public class FileProcessingServiceImpl
          * Uses cheque_number as the bridge — single UPDATE for the batch.
          */
         ocrChequeService.linkInwardChequeIds(generatedOcrBatchId);
+    }
+
+    /*
+     * Converts Windows backslash paths to forward slashes
+     * to match the file_path values stored in the DB.
+     */
+    private String normalizePathForDb(String filePath) {
+        return filePath.replace("\\", "/");
     }
 
     private String extractBatchId(String filePath) {

@@ -4,7 +4,7 @@ import com.cts.inward.enums.FileStage;
 
 public interface FileSummaryService {
 
-    void updateFileStage(
-            long fileId,
-            FileStage fileStage);
+    void insertFileSummary(long fileId, String fileName);
+
+    void updateFileStage(long fileId, FileStage fileStage);
 }

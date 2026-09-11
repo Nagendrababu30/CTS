@@ -5,15 +5,24 @@ import java.util.Map;
 
 public interface BatchDetailsService {
 
-	Map<String, Object> getMicrDetails(String chequeNumber);
+    Map<String, Object> getMicrDetails(
+            String chequeNumber);
 
-	List<Map<String, Object>> getChequesByBatchId(String batchId);
+    List<Map<String, Object>> getChequesByBatchId(
+            Long batchId);
 
-	Map<String, Object> getDataEntryDetails(String chequeNumber);
+    Map<String, Object> getDataEntryDetails(
+            String chequeNumber);
 
-	Map<String, Object> getCbsValidation(String chequeNumber);
+    Map<String, Object> getCbsValidation(
+            String chequeNumber);
 
-	void saveCheckerDecision(String chequeNumber, String status, String rejectionReasonCode, String returnReasonCode,
-			Long checkerId, String checkerAction, String remarks);
-
+    void saveCheckerDecision(
+            String chequeNumber,
+            String status,
+            String rejectionReasonCode,
+            String returnReasonCode,
+            Integer checkerId,
+            String checkerAction,
+            String remarks);
 }

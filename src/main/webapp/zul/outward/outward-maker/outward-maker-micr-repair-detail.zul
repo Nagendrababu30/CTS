@@ -11,9 +11,15 @@
 
 <zk>
 
-    <style><![CDATA[
+    <style>
+        <![CDATA[
 
-        html, body {
+        /* =========================================================
+           PAGE / ZK RESET
+           ========================================================= */
+
+        html,
+        body {
             margin: 0 !important;
             padding: 0 !important;
             height: 100% !important;
@@ -26,6 +32,10 @@
             padding: 0 !important;
         }
 
+        /* =========================================================
+           CARD
+           ========================================================= */
+
         .equal-card {
             background: #FFFFFF !important;
             border: 1px solid #DCE5F0 !important;
@@ -37,6 +47,10 @@
             padding: 0 !important;
             height: 100% !important;
         }
+
+        /* =========================================================
+           INPUT BOX
+           ========================================================= */
 
         .single-field-box {
             height: 38px !important;
@@ -57,6 +71,10 @@
             outline: none !important;
         }
 
+        /* =========================================================
+           FIELD LABEL
+           ========================================================= */
+
         .single-field-label {
             font-size: 13px !important;
             font-weight: 700 !important;
@@ -64,10 +82,45 @@
             letter-spacing: 0.2px;
         }
 
+        /* =========================================================
+           MICR STATUS
+           ========================================================= */
+
+        .micr-error-label {
+            color: #D92D20 !important;
+            font-weight: bold !important;
+        }
+
+        .micr-status-label {
+            color: #D92D20 !important;
+        }
+
         .micr-component-error {
             color: #D92D20 !important;
             font-weight: 700 !important;
         }
+
+        .micr-component-error,
+        .micr-component-error .z-textbox-input {
+            background-color: #FEE4E2 !important;
+            border: 1px solid #D92D20 !important;
+        }
+
+        .corrected-micr-box {
+            height: 38px !important;
+            font-size: 13px !important;
+            box-sizing: border-box !important;
+        }
+
+        .micr-component-corrected,
+        .micr-component-corrected .z-textbox-input {
+            background-color: #E6F4EA !important;
+            border: 1px solid #008000 !important;
+        }
+
+        /* =========================================================
+           REQUIRED FIELD STAR
+           ========================================================= */
 
         .label-star {
             color: #DC2626 !important;
@@ -75,6 +128,10 @@
             font-size: 13px !important;
             margin-left: 2px;
         }
+
+        /* =========================================================
+           IMAGE TOOLBAR
+           ========================================================= */
 
         .icon-symbol-btn {
             background: transparent !important;
@@ -98,12 +155,12 @@
             color: #0F172A !important;
         }
 
-    ]]></style>
+        ]]>
+    </style>
 
 
     <!-- =========================================================
          CONTENT
-         
          Header + Sidebar are supplied by common/layout.zul
          ========================================================= -->
 
@@ -221,6 +278,9 @@
                             box-sizing:border-box;
                             justify-content:space-between;
                         ">
+
+
+                        <!-- CHEQUE IMAGE AREA -->
 
                         <vlayout
                             width="100%"
@@ -345,11 +405,15 @@
                         ">
 
 
-                        <!-- ROW 1 -->
+                        <!-- =====================================
+                             ROW 1
+                             CHEQUE NUMBER + CURRENT STATUS
+                             ===================================== -->
 
                         <hlayout
                             width="100%"
                             spacing="16px">
+
 
                             <!-- CHEQUE NUMBER -->
 
@@ -390,11 +454,15 @@
                         </hlayout>
 
 
-                        <!-- ROW 2 -->
+                        <!-- =====================================
+                             ROW 2
+                             CITY CODE + BANK CODE
+                             ===================================== -->
 
                         <hlayout
                             width="100%"
                             spacing="16px">
+
 
                             <!-- CITY CODE -->
 
@@ -458,11 +526,15 @@
                         </hlayout>
 
 
-                        <!-- ROW 3 -->
+                        <!-- =====================================
+                             ROW 3
+                             BRANCH CODE + ORIGINAL MICR
+                             ===================================== -->
 
                         <hlayout
                             width="100%"
                             spacing="16px">
+
 
                             <!-- BRANCH CODE -->
 
@@ -534,6 +606,9 @@
                     align-items:center;
                 ">
 
+
+                <!-- PREVIOUS -->
+
                 <button
                     id="prevButton"
                     label="Prev"
@@ -544,6 +619,9 @@
                         font-weight:600;
                         cursor:pointer;
                     "/>
+
+
+                <!-- SAVE & NEXT -->
 
                 <button
                     id="saveNextButton"
@@ -560,6 +638,9 @@
                         cursor:pointer;
                     "/>
 
+
+                <!-- REJECT -->
+
                 <button
                     id="rejectButton"
                     label="Reject"
@@ -574,6 +655,7 @@
                         font-weight:bold;
                         cursor:pointer;
                     "/>
+
 
                 <!-- Hidden buttons for controller safety -->
 

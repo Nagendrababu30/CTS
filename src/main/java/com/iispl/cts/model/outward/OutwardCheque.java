@@ -1,7 +1,6 @@
 package com.iispl.cts.model.outward;
 
 import java.io.Serializable;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,7 +14,6 @@ public class OutwardCheque implements Serializable {
     // =========================
 
     private String batchNumber;
-
     private String chequeNumber;
 
     // =========================
@@ -23,9 +21,7 @@ public class OutwardCheque implements Serializable {
     // =========================
 
     private String cityCode;
-
     private String bankCode;
-
     private String branchCode;
 
     // =========================
@@ -33,7 +29,6 @@ public class OutwardCheque implements Serializable {
     // =========================
 
     private String drawerAccountNumber;
-
     private String drawerName;
 
     // =========================
@@ -41,7 +36,6 @@ public class OutwardCheque implements Serializable {
     // =========================
 
     private String depositorAccountNumber;
-
     private String depositorName;
 
     // =========================
@@ -49,15 +43,14 @@ public class OutwardCheque implements Serializable {
     // =========================
 
     private String payeeName;
+    private String payeeAccountNumber;
 
     // =========================
     // CHEQUE DETAILS
     // =========================
 
     private BigDecimal amount;
-
     private String amountInWords;
-
     private LocalDate chequeDate;
 
     // =========================
@@ -65,7 +58,6 @@ public class OutwardCheque implements Serializable {
     // =========================
 
     private String frontImagePath;
-
     private String backImagePath;
 
     // =========================
@@ -79,13 +71,16 @@ public class OutwardCheque implements Serializable {
     // =========================
 
     private String createdBy;
-
     private LocalDateTime createdAt;
-
     private String updatedBy;
-
     private LocalDateTime updatedAt;
 
+    // =========================
+    // CHECKER
+    // =========================
+
+    private Integer returnReasonId;
+    private String checkerRemarks;
 
     // =========================
     // CONSTRUCTORS
@@ -98,7 +93,6 @@ public class OutwardCheque implements Serializable {
         this.batchNumber = batchNumber;
         this.chequeNumber = chequeNumber;
     }
-
 
     // =========================
     // GETTERS / SETTERS
@@ -184,6 +178,14 @@ public class OutwardCheque implements Serializable {
         this.payeeName = payeeName;
     }
 
+    public String getPayeeAccountNumber() {
+        return payeeAccountNumber;
+    }
+
+    public void setPayeeAccountNumber(String payeeAccountNumber) {
+        this.payeeAccountNumber = payeeAccountNumber;
+    }
+
     public BigDecimal getAmount() {
         return amount;
     }
@@ -264,18 +266,51 @@ public class OutwardCheque implements Serializable {
         this.updatedAt = updatedAt;
     }
 
+    public Integer getReturnReasonId() {
+        return returnReasonId;
+    }
+
+    public void setReturnReasonId(Integer returnReasonId) {
+        this.returnReasonId = returnReasonId;
+    }
+
+    public String getCheckerRemarks() {
+        return checkerRemarks;
+    }
+
+    public void setCheckerRemarks(String checkerRemarks) {
+        this.checkerRemarks = checkerRemarks;
+    }
+
+    public static long getSerialversionuid() {
+        return serialVersionUID;
+    }
 
     @Override
     public String toString() {
-        return "OutwardCheque{" +
-                "batchNumber='" + batchNumber + '\'' +
-                ", chequeNumber='" + chequeNumber + '\'' +
-                ", cityCode='" + cityCode + '\'' +
-                ", bankCode='" + bankCode + '\'' +
-                ", branchCode='" + branchCode + '\'' +
-                ", amount=" + amount +
-                ", chequeDate=" + chequeDate +
-                ", chequeStatus='" + chequeStatus + '\'' +
-                '}';
+        return "OutwardCheque [batchNumber=" + batchNumber
+                + ", chequeNumber=" + chequeNumber
+                + ", cityCode=" + cityCode
+                + ", bankCode=" + bankCode
+                + ", branchCode=" + branchCode
+                + ", drawerAccountNumber=" + drawerAccountNumber
+                + ", drawerName=" + drawerName
+                + ", depositorAccountNumber=" + depositorAccountNumber
+                + ", depositorName=" + depositorName
+                + ", payeeName=" + payeeName
+                + ", payeeAccountNumber=" + payeeAccountNumber
+                + ", amount=" + amount
+                + ", amountInWords=" + amountInWords
+                + ", chequeDate=" + chequeDate
+                + ", frontImagePath=" + frontImagePath
+                + ", backImagePath=" + backImagePath
+                + ", chequeStatus=" + chequeStatus
+                + ", createdBy=" + createdBy
+                + ", createdAt=" + createdAt
+                + ", updatedBy=" + updatedBy
+                + ", updatedAt=" + updatedAt
+                + ", returnReasonId=" + returnReasonId
+                + ", checkerRemarks=" + checkerRemarks
+                + "]";
     }
 }

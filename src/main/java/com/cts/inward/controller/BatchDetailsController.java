@@ -17,10 +17,13 @@ import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Hlayout;
+import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Vlayout;
 
 import com.cts.inward.dao.BatchDetailsDaoImpl;
+import com.cts.inward.dao.ChequeImageDaoImpl;
+import com.cts.inward.model.ChequeImage;
 import com.cts.inward.service.BatchDetailsService;
 import com.cts.inward.service.BatchDetailsServiceImpl;
 
@@ -42,6 +45,22 @@ public class BatchDetailsController
     private int currentChequeIndex = 0;
 
     private BatchDetailsService batchDetailsService;
+
+    // =========================================================
+    // CHEQUE IMAGE
+    // =========================================================
+
+    private Image chequeImage;
+
+    private Button btnFront;
+
+    private Button btnBack;
+
+    private String currentFrontImagePath;
+
+    private String currentBackImagePath;
+
+    private ChequeImageDaoImpl chequeImageDao;
 
 
     // =========================================================
@@ -402,6 +421,16 @@ public class BatchDetailsController
                         BatchDetailsDaoImpl.of()
                 );
 
+        chequeImageDao = ChequeImageDaoImpl.of();
+
+        // Wire front/back button events
+        if (btnFront != null) {
+            btnFront.addEventListener(Events.ON_CLICK, event -> showFrontImage());
+        }
+        if (btnBack != null) {
+            btnBack.addEventListener(Events.ON_CLICK, event -> showBackImage());
+        }
+
 
         // -----------------------------------------------------
         // Get batch ID from URL
@@ -733,7 +762,7 @@ public class BatchDetailsController
 
             imageChequeDate.setValue(
                     "DATE: "
-                            + nullToEmpty(
+                            + formatDate(
                                     chequeDate
                             )
             );
@@ -785,6 +814,12 @@ public class BatchDetailsController
         // =====================================================
 
         updateChequeNavigation();
+
+        // =====================================================
+        // CHEQUE IMAGE
+        // =====================================================
+
+        loadChequeImages(chequeNumber);
     }
 
 
@@ -1331,9 +1366,7 @@ public class BatchDetailsController
             if (oldChequeDate != null) {
 
                 oldChequeDate.setValue(
-                        nullToEmpty(
-                                oldDate
-                        )
+                        formatDate(oldDate)
                 );
             }
 
@@ -1341,7 +1374,7 @@ public class BatchDetailsController
             if (correctedChequeDate != null) {
 
                 correctedChequeDate.setValue(
-                        newDate
+                        formatDate(newDate)
                 );
             }
 
@@ -1376,9 +1409,7 @@ public class BatchDetailsController
             if (chequeDate != null) {
 
                 chequeDate.setValue(
-                        nullToEmpty(
-                                oldDate
-                        )
+                        formatDate(oldDate)
                 );
             }
         }
@@ -2429,6 +2460,92 @@ public class BatchDetailsController
         }
     }
 
+    // =========================================================
+    // CHEQUE IMAGE LOADING
+    // =========================================================
+
+    private void loadChequeImages(String chequeNumber) {
+
+        currentFrontImagePath = null;
+        currentBackImagePath = null;
+
+        try {
+            ChequeImage image =
+                    chequeImageDao.findByChequeNumber(chequeNumber);
+            if (image != null) {
+                currentFrontImagePath = image.getFrontPath();
+                currentBackImagePath = image.getBackPath();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Default to front image
+        showFrontImage();
+
+        // Reset button styles
+        if (btnFront != null) {
+            btnFront.setSclass("image-button image-button-active");
+        }
+        if (btnBack != null) {
+            btnBack.setSclass("image-button");
+        }
+    }
+
+    private void showFrontImage() {
+
+        if (chequeImage == null) return;
+
+        if (btnFront != null) {
+            btnFront.setSclass("image-button image-button-active");
+        }
+        if (btnBack != null) {
+            btnBack.setSclass("image-button");
+        }
+
+        if (currentFrontImagePath != null
+                && !currentFrontImagePath.trim().isEmpty()) {
+            try {
+                byte[] bytes = java.nio.file.Files.readAllBytes(
+                        java.nio.file.Path.of(currentFrontImagePath));
+                chequeImage.setContent(
+                        new org.zkoss.image.AImage("front.jpg", bytes));
+            } catch (Exception e) {
+                e.printStackTrace();
+                chequeImage.setContent((org.zkoss.image.AImage) null);
+            }
+        } else {
+            chequeImage.setContent((org.zkoss.image.AImage) null);
+        }
+    }
+
+    private void showBackImage() {
+
+        if (chequeImage == null) return;
+
+        if (btnFront != null) {
+            btnFront.setSclass("image-button");
+        }
+        if (btnBack != null) {
+            btnBack.setSclass("image-button image-button-active");
+        }
+
+        if (currentBackImagePath != null
+                && !currentBackImagePath.trim().isEmpty()) {
+            try {
+                byte[] bytes = java.nio.file.Files.readAllBytes(
+                        java.nio.file.Path.of(currentBackImagePath));
+                chequeImage.setContent(
+                        new org.zkoss.image.AImage("back.jpg", bytes));
+            } catch (Exception e) {
+                e.printStackTrace();
+                chequeImage.setContent((org.zkoss.image.AImage) null);
+            }
+        } else {
+            chequeImage.setContent((org.zkoss.image.AImage) null);
+        }
+    }
+
     private void updateChequeNavigation() {
 
         Button[] chequeButtons = {
@@ -2911,16 +3028,47 @@ public class BatchDetailsController
     // FORMAT AMOUNT
     // =========================================================
 
-    private String formatAmount(
-            String value) {
+    private String formatAmount(String value) {
 
-        if (value == null
-                || value.trim().isEmpty()) {
-
+        if (value == null || value.trim().isEmpty()) {
             return "";
         }
 
-
         return "₹ " + value;
+    }
+
+    // =========================================================
+    // FORMAT DATE — converts any date string to dd/MM/yyyy
+    // Handles: yyyy-MM-dd, yyyy-MM-dd HH:mm:ss, dd/MM/yyyy
+    // =========================================================
+
+    private String formatDate(String value) {
+
+        if (value == null || value.trim().isEmpty()) {
+            return "";
+        }
+
+        try {
+            // Strip time part if present
+            String datePart = value.trim().split(" ")[0];
+
+            java.time.LocalDate date;
+
+            if (datePart.contains("-")) {
+                // yyyy-MM-dd
+                date = java.time.LocalDate.parse(datePart);
+            } else if (datePart.contains("/")) {
+                // already dd/MM/yyyy
+                return datePart;
+            } else {
+                return value;
+            }
+
+            return date.format(
+                    java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+
+        } catch (Exception e) {
+            return value;
+        }
     }
 }

@@ -74,14 +74,13 @@
 
 
                 <!-- =====================================================
-                     CHEQUE IMAGE - 55%
+                     CHEQUE IMAGE
                      ===================================================== -->
 
                 <vlayout hflex="55"
+                         vflex="1"
                          spacing="12px"
                          sclass="processing-card cheque-image-card">
-
-                    <!-- IMAGE TITLE -->
 
                     <label value="Cheque Image"
                            sclass="section-title"/>
@@ -160,10 +159,11 @@
 
 
                 <!-- =====================================================
-                     CHEQUE DETAILS - 42%
+                     CHEQUE DETAILS
                      ===================================================== -->
 
                 <vlayout hflex="42"
+                         vflex="1"
                          spacing="14px"
                          sclass="processing-card cheque-details-card">
 
@@ -178,7 +178,6 @@
                     <div vflex="1"
                          width="100%"
                          sclass="cheque-details-scroll">
-
 
                         <!-- =================================================
                              CHEQUE INFORMATION
@@ -303,31 +302,31 @@
                             <!-- CBS VALIDATION -->
 
                             <hlayout id="cbsValidationRow"
-         width="100%"
-         spacing="8px"
-         valign="top"
-         sclass="cbs-validation-row">
+                                     width="100%"
+                                     spacing="8px"
+                                     valign="top"
+                                     sclass="cbs-validation-row">
 
-    <label id="accountVerificationIcon"
-           value=""
-           sclass="cbs-validation-icon"/>
+                                <label id="accountVerificationIcon"
+                                       value=""
+                                       sclass="cbs-validation-icon"/>
 
-    <vlayout spacing="2px"
-             hflex="1">
+                                <vlayout spacing="2px"
+                                         hflex="1">
 
-        <label id="accountVerificationMessage"
-               value="CBS Validation Pending"
-               sclass="cbs-validation-message"/>
+                                    <label id="accountVerificationMessage"
+                                           value="CBS Validation Pending"
+                                           sclass="cbs-validation-message"/>
 
-        <label id="accountVerificationReason"
-               value=""
-               visible="false"
-               multiline="true"
-               sclass="cbs-validation-reason"/>
+                                    <label id="accountVerificationReason"
+                                           value=""
+                                           visible="false"
+                                           multiline="true"
+                                           sclass="cbs-validation-reason"/>
 
-    </vlayout>
+                                </vlayout>
 
-</hlayout>
+                            </hlayout>
 
                         </vlayout>
 

@@ -6,27 +6,31 @@ import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Wire;
+import org.zkoss.zk.ui.event.Events;
+
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Hlayout;
+import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Vlayout;
 
 import com.cts.admin.model.User;
+
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.model.outward.OutwardCheque;
 import com.iispl.cts.model.outward.ReturnReason;
+
 import com.iispl.cts.service.outward.checker.CheckerBatchService;
 import com.iispl.cts.service.outward.checker.CheckerProcessingService;
 
-public class CheckerProcessingController
-        extends SelectorComposer<Vlayout> {
+
+public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
     private static final long serialVersionUID = 1L;
-
 
     // ============================================================
     // WIRED COMPONENTS
@@ -40,6 +44,21 @@ public class CheckerProcessingController
 
     @Wire
     private Button backButton;
+
+
+    // ============================================================
+    // CHEQUE IMAGE
+    // ============================================================
+
+    @Wire
+    private Image chequeImage;
+
+    @Wire
+    private Button frontButton;
+
+    @Wire
+    private Button backSideButton;
+
 
     @Wire
     private Label chequeNumberLabel;
@@ -124,16 +143,12 @@ public class CheckerProcessingController
     // ============================================================
 
     @Override
-    public void doAfterCompose(
-            Vlayout comp) throws Exception {
+    public void doAfterCompose(Vlayout comp) throws Exception {
 
         super.doAfterCompose(comp);
 
-        batchService =
-                new CheckerBatchService();
-
-        processingService =
-                new CheckerProcessingService();
+        batchService = new CheckerBatchService();
+        processingService = new CheckerProcessingService();
 
 
         // ========================================================
@@ -147,15 +162,13 @@ public class CheckerProcessingController
         if (currentUser == null) {
 
             Executions.sendRedirect(
-                    Executions.getCurrent()
-                            .getContextPath()
+                    Executions.getCurrent().getContextPath()
                             + "/login.zul");
 
             return;
         }
 
-        checkerUserId =
-                currentUser.getUserId();
+        checkerUserId = currentUser.getUserId();
 
 
         // ========================================================
@@ -172,8 +185,7 @@ public class CheckerProcessingController
             return;
         }
 
-        batchNumber =
-                batchNumber.trim();
+        batchNumber = batchNumber.trim();
 
 
         // ========================================================
@@ -194,32 +206,130 @@ public class CheckerProcessingController
                 event -> goBackToQueue());
 
 
+        // ========================================================
+        // FRONT / BACK IMAGE BUTTONS
+        // ========================================================
+
+        frontButton.addEventListener(
+                Events.ON_CLICK,
+                event -> showFrontImage());
+
+        backSideButton.addEventListener(
+                Events.ON_CLICK,
+                event -> showBackImage());
+
+
+        // ========================================================
+        // CHECKER ACTION BUTTONS
+        // ========================================================
+
         acceptButton.addEventListener(
                 "onClick",
-                event -> selectAction("ACCEPT"));
-
+                event -> confirmAction("ACCEPT"));
 
         rejectButton.addEventListener(
                 "onClick",
-                event -> selectAction("REJECT"));
-
+                event -> confirmAction("REJECT"));
 
         sendBackButton.addEventListener(
                 "onClick",
-                event -> selectAction("SEND_BACK"));
+                event -> confirmAction("SEND_BACK"));
 
+
+        // ========================================================
+        // SAVE & NEXT
+        // ========================================================
 
         saveNextButton.addEventListener(
                 "onClick",
                 event -> saveAndNext());
 
-
         saveNextButton.setDisabled(true);
 
+
+        // ========================================================
+        // REASON
+        // ========================================================
 
         reasonCombobox.addEventListener(
                 "onSelect",
                 event -> updateSaveNextButton());
+    }
+
+
+    // ============================================================
+    // SHOW FRONT IMAGE
+    // ============================================================
+
+    private void showFrontImage() {
+
+        if (cheques == null
+                || cheques.isEmpty()
+                || currentChequeIndex >= cheques.size()) {
+
+            return;
+        }
+
+        OutwardCheque currentCheque =
+                cheques.get(currentChequeIndex);
+
+        String frontImagePath =
+                currentCheque.getFrontImagePath();
+
+        if (frontImagePath != null
+                && !frontImagePath.trim().isEmpty()) {
+
+            chequeImage.setSrc(
+                    frontImagePath.trim());
+
+        } else {
+
+            chequeImage.setSrc("");
+
+            Messagebox.show(
+                    "Front image is not available.",
+                    "Image",
+                    Messagebox.OK,
+                    Messagebox.EXCLAMATION);
+        }
+    }
+
+
+    // ============================================================
+    // SHOW BACK IMAGE
+    // ============================================================
+
+    private void showBackImage() {
+
+        if (cheques == null
+                || cheques.isEmpty()
+                || currentChequeIndex >= cheques.size()) {
+
+            return;
+        }
+
+        OutwardCheque currentCheque =
+                cheques.get(currentChequeIndex);
+
+        String backImagePath =
+                currentCheque.getBackImagePath();
+
+        if (backImagePath != null
+                && !backImagePath.trim().isEmpty()) {
+
+            chequeImage.setSrc(
+                    backImagePath.trim());
+
+        } else {
+
+            chequeImage.setSrc("");
+
+            Messagebox.show(
+                    "Back image is not available.",
+                    "Image",
+                    Messagebox.OK,
+                    Messagebox.EXCLAMATION);
+        }
     }
 
 
@@ -260,10 +370,8 @@ public class CheckerProcessingController
 
         String reasonCode = null;
 
-        if ("REJECT".equalsIgnoreCase(
-                selectedAction)
-                || "SEND_BACK".equalsIgnoreCase(
-                        selectedAction)) {
+        if ("REJECT".equalsIgnoreCase(selectedAction)
+                || "SEND_BACK".equalsIgnoreCase(selectedAction)) {
 
             Comboitem selectedItem =
                     reasonCombobox.getSelectedItem();
@@ -279,8 +387,7 @@ public class CheckerProcessingController
                 return;
             }
 
-            reasonCode =
-                    selectedItem.getValue();
+            reasonCode = selectedItem.getValue();
 
             if (reasonCode == null
                     || reasonCode.trim().isEmpty()) {
@@ -294,8 +401,7 @@ public class CheckerProcessingController
                 return;
             }
 
-            reasonCode =
-                    reasonCode.trim();
+            reasonCode = reasonCode.trim();
         }
 
 
@@ -304,8 +410,7 @@ public class CheckerProcessingController
         // ========================================================
 
         OutwardCheque currentCheque =
-                cheques.get(
-                        currentChequeIndex);
+                cheques.get(currentChequeIndex);
 
 
         // ========================================================
@@ -352,7 +457,7 @@ public class CheckerProcessingController
         if (currentChequeIndex >= cheques.size()) {
 
             Executions.sendRedirect(
-                             "/zul/outward/outward-checker/batchesQueue.zul");
+                    "/zul/outward/outward-checker/batchesQueue.zul");
 
             return;
         }
@@ -380,8 +485,7 @@ public class CheckerProcessingController
         }
 
         OutwardCheque cheque =
-                cheques.get(
-                        currentChequeIndex);
+                cheques.get(currentChequeIndex);
 
         displayCheque(cheque);
 
@@ -414,11 +518,9 @@ public class CheckerProcessingController
     private void loadBatch() {
 
         currentBatch =
-                batchService.findBatch(
-                        batchNumber);
+                batchService.findBatch(batchNumber);
 
         if (currentBatch == null) {
-
             return;
         }
 
@@ -439,9 +541,8 @@ public class CheckerProcessingController
     private void loadFirstCheque() {
 
         cheques =
-                batchService
-                        .getChequesByBatchNumber(
-                                batchNumber);
+                batchService.getChequesByBatchNumber(
+                        batchNumber);
 
         if (cheques == null
                 || cheques.isEmpty()) {
@@ -459,8 +560,7 @@ public class CheckerProcessingController
     // DISPLAY CHEQUE
     // ============================================================
 
-    private void displayCheque(
-            OutwardCheque cheque) {
+    private void displayCheque(OutwardCheque cheque) {
 
         chequeNumberLabel.setValue(
                 valueOrDash(
@@ -468,11 +568,12 @@ public class CheckerProcessingController
 
 
         /*
-         * Drawer Account is the account from
-         * which the cheque is drawn.
+         * Drawer Account is the account from which
+         * the cheque is drawn.
          *
          * This account is used for CBS validation.
          */
+
         accountNumberLabel.setValue(
                 valueOrDash(
                         cheque.getDrawerAccountNumber()));
@@ -491,7 +592,7 @@ public class CheckerProcessingController
         amountLabel.setValue(
                 cheque.getAmount() != null
                         ? cheque.getAmount().toString()
-                        : "-" );
+                        : "-");
 
 
         amountInWordsLabel.setValue(
@@ -502,20 +603,36 @@ public class CheckerProcessingController
         chequeDateLabel.setValue(
                 cheque.getChequeDate() != null
                         ? cheque.getChequeDate().toString()
-                        : "-" );
+                        : "-");
 
 
         /*
          * MICR:
          *
-         * City Code
-         * +
-         * Bank Code
-         * +
-         * Branch Code
+         * City Code + Bank Code + Branch Code
          */
+
         micrLabel.setValue(
                 buildMicr(cheque));
+
+
+        // ========================================================
+        // CHEQUE IMAGE
+        // ========================================================
+
+        String frontImagePath =
+                cheque.getFrontImagePath();
+
+        if (frontImagePath != null
+                && !frontImagePath.trim().isEmpty()) {
+
+            chequeImage.setSrc(
+                    frontImagePath.trim());
+
+        } else {
+
+            chequeImage.setSrc("");
+        }
 
 
         // ========================================================
@@ -530,11 +647,9 @@ public class CheckerProcessingController
     // BUILD MICR
     // ============================================================
 
-    private String buildMicr(
-            OutwardCheque cheque) {
+    private String buildMicr(OutwardCheque cheque) {
 
         if (cheque == null) {
-
             return "-";
         }
 
@@ -569,8 +684,7 @@ public class CheckerProcessingController
     // CBS VALIDATION
     // ============================================================
 
-    private void validateCbs(
-            OutwardCheque cheque) {
+    private void validateCbs(OutwardCheque cheque) {
 
         cbsResult =
                 processingService.validateCbsAccount(
@@ -589,15 +703,12 @@ public class CheckerProcessingController
 
             sendBackButton.setDisabled(false);
 
-
-            accountVerificationIcon.setValue(
-                    "✓");
+            accountVerificationIcon.setValue("✓");
 
             accountVerificationMessage.setValue(
                     "CBS Verified");
 
-            accountVerificationReason.setVisible(
-                    false);
+            accountVerificationReason.setVisible(false);
 
             return;
         }
@@ -613,20 +724,16 @@ public class CheckerProcessingController
 
         sendBackButton.setDisabled(true);
 
-
-        accountVerificationIcon.setValue(
-                "✕");
+        accountVerificationIcon.setValue("✕");
 
         accountVerificationMessage.setValue(
                 "CBS Validation Failed");
 
         accountVerificationReason.setValue(
                 processingService
-                        .getCbsValidationMessage(
-                                cbsResult));
+                        .getCbsValidationMessage(cbsResult));
 
-        accountVerificationReason.setVisible(
-                true);
+        accountVerificationReason.setVisible(true);
     }
 
 
@@ -634,8 +741,7 @@ public class CheckerProcessingController
     // VALUE OR DASH
     // ============================================================
 
-    private String valueOrDash(
-            String value) {
+    private String valueOrDash(String value) {
 
         if (value == null
                 || value.trim().isEmpty()) {
@@ -651,8 +757,7 @@ public class CheckerProcessingController
     // SELECT ACTION
     // ============================================================
 
-    private void selectAction(
-            String action) {
+    private void selectAction(String action) {
 
         selectedAction = action;
 
@@ -669,10 +774,8 @@ public class CheckerProcessingController
 
             reasonCombobox.setSelectedItem(null);
 
-
             saveNextButton.setDisabled(
-                    !"PASS".equalsIgnoreCase(
-                            cbsResult));
+                    !"PASS".equalsIgnoreCase(cbsResult));
 
             return;
         }
@@ -694,8 +797,7 @@ public class CheckerProcessingController
     // LOAD REASONS FOR ACTION
     // ============================================================
 
-    private void loadReasonsForAction(
-            String action) {
+    private void loadReasonsForAction(String action) {
 
         reasonCombobox.getItems().clear();
 
@@ -703,8 +805,7 @@ public class CheckerProcessingController
 
 
         List<ReturnReason> reasons =
-                processingService
-                        .getReturnReasons(action);
+                processingService.getReturnReasons(action);
 
 
         if (reasons == null
@@ -723,8 +824,7 @@ public class CheckerProcessingController
             /*
              * IMPORTANT:
              *
-             * Store reason CODE as the
-             * Comboitem value.
+             * Store reason CODE as the Comboitem value.
              *
              * Example:
              *
@@ -732,6 +832,7 @@ public class CheckerProcessingController
              *
              * NOT numeric ID.
              */
+
             item.setValue(
                     reason.getReasonCode());
         }
@@ -757,12 +858,10 @@ public class CheckerProcessingController
         // ACCEPT
         // ========================================================
 
-        if ("ACCEPT".equalsIgnoreCase(
-                selectedAction)) {
+        if ("ACCEPT".equalsIgnoreCase(selectedAction)) {
 
             saveNextButton.setDisabled(
-                    !"PASS".equalsIgnoreCase(
-                            cbsResult));
+                    !"PASS".equalsIgnoreCase(cbsResult));
 
             return;
         }
@@ -772,14 +871,11 @@ public class CheckerProcessingController
         // REJECT / SEND BACK
         // ========================================================
 
-        if ("REJECT".equalsIgnoreCase(
-                selectedAction)
-                || "SEND_BACK".equalsIgnoreCase(
-                        selectedAction)) {
+        if ("REJECT".equalsIgnoreCase(selectedAction)
+                || "SEND_BACK".equalsIgnoreCase(selectedAction)) {
 
             saveNextButton.setDisabled(
-                    reasonCombobox
-                            .getSelectedItem() == null);
+                    reasonCombobox.getSelectedItem() == null);
 
             return;
         }
@@ -799,5 +895,50 @@ public class CheckerProcessingController
                 "/zul/outward/outward-checker/batchesQueue.zul";
 
         Executions.sendRedirect(url);
+    }
+
+
+    // ============================================================
+    // CONFIRM ACTION
+    // ============================================================
+
+    private void confirmAction(String action) {
+
+        String message;
+
+
+        if ("ACCEPT".equalsIgnoreCase(action)) {
+
+            message =
+                    "Are you sure you want to ACCEPT this cheque?";
+
+        } else if ("REJECT".equalsIgnoreCase(action)) {
+
+            message =
+                    "Are you sure you want to REJECT this cheque?";
+
+        } else if ("SEND_BACK".equalsIgnoreCase(action)) {
+
+            message =
+                    "Are you sure you want to SEND BACK this cheque to Maker?";
+
+        } else {
+
+            return;
+        }
+
+
+        Messagebox.show(
+                message,
+                "Confirm Action",
+                Messagebox.YES | Messagebox.NO,
+                Messagebox.QUESTION,
+                event -> {
+
+                    if ("onYes".equals(event.getName())) {
+
+                        selectAction(action);
+                    }
+                });
     }
 }

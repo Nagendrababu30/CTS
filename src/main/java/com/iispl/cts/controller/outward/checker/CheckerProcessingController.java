@@ -4,13 +4,13 @@ import java.util.List;
 
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Sessions;
+import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Wire;
-import org.zkoss.zk.ui.event.Events;
-
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Comboitem;
+import org.zkoss.zul.Div;
 import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
@@ -19,14 +19,11 @@ import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Vlayout;
 
 import com.cts.admin.model.User;
-
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.model.outward.OutwardCheque;
 import com.iispl.cts.model.outward.ReturnReason;
-
 import com.iispl.cts.service.outward.checker.CheckerBatchService;
 import com.iispl.cts.service.outward.checker.CheckerProcessingService;
-
 
 public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
@@ -45,7 +42,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
     @Wire
     private Button backButton;
 
-
     // ============================================================
     // CHEQUE IMAGE
     // ============================================================
@@ -59,6 +55,9 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
     @Wire
     private Button backSideButton;
 
+    // ============================================================
+    // CHEQUE DETAILS
+    // ============================================================
 
     @Wire
     private Label chequeNumberLabel;
@@ -84,6 +83,10 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
     @Wire
     private Label micrLabel;
 
+    // ============================================================
+    // CBS VALIDATION
+    // ============================================================
+
     @Wire
     private Label accountVerificationIcon;
 
@@ -92,6 +95,20 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
     @Wire
     private Label accountVerificationReason;
+
+    // ============================================================
+    // MAKER REJECTION
+    // ============================================================
+
+    @Wire
+    private Div makerRejectionBlock;
+
+    @Wire
+    private Label makerRejectionReason;
+
+    // ============================================================
+    // CHECKER ACTIONS
+    // ============================================================
 
     @Wire
     private Button acceptButton;
@@ -113,7 +130,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
     @Wire
     private Button saveNextButton;
-
 
     // ============================================================
     // STATE
@@ -137,7 +153,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
     private List<OutwardCheque> cheques;
 
-
     // ============================================================
     // INIT
     // ============================================================
@@ -149,7 +164,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
         batchService = new CheckerBatchService();
         processingService = new CheckerProcessingService();
-
 
         // ========================================================
         // CURRENT USER
@@ -170,7 +184,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
         checkerUserId = currentUser.getUserId();
 
-
         // ========================================================
         // BATCH NUMBER
         // ========================================================
@@ -187,15 +200,12 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
         batchNumber = batchNumber.trim();
 
-
         // ========================================================
         // LOAD DATA
         // ========================================================
 
         loadBatch();
-
         loadFirstCheque();
-
 
         // ========================================================
         // BUTTON EVENTS
@@ -204,7 +214,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         backButton.addEventListener(
                 "onClick",
                 event -> goBackToQueue());
-
 
         // ========================================================
         // FRONT / BACK IMAGE BUTTONS
@@ -217,7 +226,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         backSideButton.addEventListener(
                 Events.ON_CLICK,
                 event -> showBackImage());
-
 
         // ========================================================
         // CHECKER ACTION BUTTONS
@@ -235,7 +243,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
                 "onClick",
                 event -> confirmAction("SEND_BACK"));
 
-
         // ========================================================
         // SAVE & NEXT
         // ========================================================
@@ -246,7 +253,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
         saveNextButton.setDisabled(true);
 
-
         // ========================================================
         // REASON
         // ========================================================
@@ -255,7 +261,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
                 "onSelect",
                 event -> updateSaveNextButton());
     }
-
 
     // ============================================================
     // SHOW FRONT IMAGE
@@ -294,7 +299,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         }
     }
 
-
     // ============================================================
     // SHOW BACK IMAGE
     // ============================================================
@@ -332,7 +336,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         }
     }
 
-
     // ============================================================
     // SAVE & NEXT
     // ============================================================
@@ -345,7 +348,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
             return;
         }
-
 
         // ========================================================
         // ACTION VALIDATION
@@ -362,7 +364,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
             return;
         }
-
 
         // ========================================================
         // REASON CODE
@@ -404,14 +405,12 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
             reasonCode = reasonCode.trim();
         }
 
-
         // ========================================================
         // CURRENT CHEQUE
         // ========================================================
 
         OutwardCheque currentCheque =
                 cheques.get(currentChequeIndex);
-
 
         // ========================================================
         // SAVE
@@ -425,7 +424,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
                         selectedAction,
                         reasonCode,
                         checkerRemarksTextbox.getValue());
-
 
         // ========================================================
         // SAVE FAILED
@@ -442,13 +440,11 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
             return;
         }
 
-
         // ========================================================
         // SAVE SUCCESSFUL
         // ========================================================
 
         currentChequeIndex++;
-
 
         // ========================================================
         // ALL CHEQUES COMPLETED
@@ -462,14 +458,12 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
             return;
         }
 
-
         // ========================================================
         // LOAD NEXT CHEQUE
         // ========================================================
 
         loadCurrentCheque();
     }
-
 
     // ============================================================
     // LOAD CURRENT CHEQUE
@@ -489,13 +483,11 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
         displayCheque(cheque);
 
-
         chequeSequence.setValue(
                 String.format(
                         "%02d / %02d",
                         currentChequeIndex + 1,
                         cheques.size()));
-
 
         selectedAction = null;
 
@@ -509,7 +501,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
         saveNextButton.setDisabled(true);
     }
-
 
     // ============================================================
     // LOAD BATCH
@@ -533,7 +524,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
                         + currentBatch.getNumberOfCheques());
     }
 
-
     // ============================================================
     // LOAD FIRST CHEQUE
     // ============================================================
@@ -555,7 +545,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         loadCurrentCheque();
     }
 
-
     // ============================================================
     // DISPLAY CHEQUE
     // ============================================================
@@ -565,7 +554,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         chequeNumberLabel.setValue(
                 valueOrDash(
                         cheque.getChequeNumber()));
-
 
         /*
          * Drawer Account is the account from which
@@ -578,33 +566,27 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
                 valueOrDash(
                         cheque.getDrawerAccountNumber()));
 
-
         drawerNameLabel.setValue(
                 valueOrDash(
                         cheque.getDrawerName()));
 
-
         payeeNameLabel.setValue(
                 valueOrDash(
                         cheque.getPayeeName()));
-
 
         amountLabel.setValue(
                 cheque.getAmount() != null
                         ? cheque.getAmount().toString()
                         : "-");
 
-
         amountInWordsLabel.setValue(
                 valueOrDash(
                         cheque.getAmountInWords()));
-
 
         chequeDateLabel.setValue(
                 cheque.getChequeDate() != null
                         ? cheque.getChequeDate().toString()
                         : "-");
-
 
         /*
          * MICR:
@@ -614,7 +596,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
         micrLabel.setValue(
                 buildMicr(cheque));
-
 
         // ========================================================
         // CHEQUE IMAGE
@@ -634,6 +615,11 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
             chequeImage.setSrc("");
         }
 
+        // ========================================================
+        // MAKER REJECTION
+        // ========================================================
+
+        displayMakerRejection(cheque);
 
         // ========================================================
         // CBS VALIDATION
@@ -642,6 +628,98 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         validateCbs(cheque);
     }
 
+    // ============================================================
+    // DISPLAY MAKER REJECTION
+    // ============================================================
+
+    private void displayMakerRejection(OutwardCheque cheque) {
+
+        /*
+         * Always reset the Maker rejection block first.
+         *
+         * This is important because the next cheque may not
+         * have been rejected by Maker.
+         */
+
+        makerRejectionBlock.setVisible(false);
+
+        makerRejectionReason.setValue("");
+
+        if (cheque == null) {
+            return;
+        }
+
+        String chequeNumber =
+                cheque.getChequeNumber();
+
+        if (chequeNumber == null
+                || chequeNumber.trim().isEmpty()) {
+
+            return;
+        }
+
+        // ========================================================
+        // GET MAKER REJECTION STATUS
+        // ========================================================
+
+        boolean makerRejected =
+                processingService.isMakerRejected(
+                        batchNumber,
+                        chequeNumber);
+
+        if (!makerRejected) {
+            return;
+        }
+
+        // ========================================================
+        // GET MAKER REASON CODE
+        // ========================================================
+
+        String reasonCode =
+                processingService.getMakerReasonCode(
+                        batchNumber,
+                        chequeNumber);
+
+        if (reasonCode == null
+                || reasonCode.trim().isEmpty()) {
+
+            makerRejectionReason.setValue(
+                    "Reason: Not specified");
+
+            makerRejectionBlock.setVisible(true);
+
+            return;
+        }
+
+        reasonCode = reasonCode.trim();
+
+        // ========================================================
+        // GET REASON DESCRIPTION
+        // ========================================================
+
+        String reasonName =
+                processingService.getMakerReasonName(
+                        reasonCode);
+
+        // ========================================================
+        // DISPLAY
+        // ========================================================
+
+        if (reasonName == null
+                || reasonName.trim().isEmpty()) {
+
+            makerRejectionReason.setValue(
+                    "Reason: " + reasonCode);
+
+        } else {
+
+            makerRejectionReason.setValue(
+                    "Reason: " + reasonName.trim());
+        }
+
+        makerRejectionBlock.setVisible(true);
+    }
+    
 
     // ============================================================
     // BUILD MICR
@@ -662,7 +740,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         String branchCode =
                 cheque.getBranchCode();
 
-
         if (cityCode == null
                 || cityCode.trim().isEmpty()
                 || bankCode == null
@@ -673,12 +750,10 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
             return "-";
         }
 
-
         return cityCode.trim()
                 + bankCode.trim()
                 + branchCode.trim();
     }
-
 
     // ============================================================
     // CBS VALIDATION
@@ -689,7 +764,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         cbsResult =
                 processingService.validateCbsAccount(
                         cheque.getDrawerAccountNumber());
-
 
         // ========================================================
         // CBS PASS
@@ -713,7 +787,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
             return;
         }
 
-
         // ========================================================
         // CBS FAILURE
         // ========================================================
@@ -736,7 +809,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         accountVerificationReason.setVisible(true);
     }
 
-
     // ============================================================
     // VALUE OR DASH
     // ============================================================
@@ -752,7 +824,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         return value;
     }
 
-
     // ============================================================
     // SELECT ACTION
     // ============================================================
@@ -760,7 +831,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
     private void selectAction(String action) {
 
         selectedAction = action;
-
 
         // ========================================================
         // ACCEPT
@@ -780,7 +850,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
             return;
         }
 
-
         // ========================================================
         // REJECT / SEND BACK
         // ========================================================
@@ -792,7 +861,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         saveNextButton.setDisabled(true);
     }
 
-
     // ============================================================
     // LOAD REASONS FOR ACTION
     // ============================================================
@@ -803,17 +871,14 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
         reasonCombobox.setSelectedItem(null);
 
-
         List<ReturnReason> reasons =
                 processingService.getReturnReasons(action);
-
 
         if (reasons == null
                 || reasons.isEmpty()) {
 
             return;
         }
-
 
         for (ReturnReason reason : reasons) {
 
@@ -822,8 +887,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
                             reason.getReasonName());
 
             /*
-             * IMPORTANT:
-             *
              * Store reason CODE as the Comboitem value.
              *
              * Example:
@@ -837,7 +900,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
                     reason.getReasonCode());
         }
     }
-
 
     // ============================================================
     // UPDATE SAVE BUTTON
@@ -853,7 +915,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
             return;
         }
 
-
         // ========================================================
         // ACCEPT
         // ========================================================
@@ -865,7 +926,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
             return;
         }
-
 
         // ========================================================
         // REJECT / SEND BACK
@@ -880,10 +940,8 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
             return;
         }
 
-
         saveNextButton.setDisabled(true);
     }
-
 
     // ============================================================
     // BACK TO QUEUE
@@ -897,7 +955,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         Executions.sendRedirect(url);
     }
 
-
     // ============================================================
     // CONFIRM ACTION
     // ============================================================
@@ -905,7 +962,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
     private void confirmAction(String action) {
 
         String message;
-
 
         if ("ACCEPT".equalsIgnoreCase(action)) {
 
@@ -926,7 +982,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
             return;
         }
-
 
         Messagebox.show(
                 message,

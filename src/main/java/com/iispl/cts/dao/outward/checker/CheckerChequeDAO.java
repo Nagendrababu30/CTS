@@ -229,6 +229,69 @@ public class CheckerChequeDAO {
 
     /*
      * ============================================================
+     * GET MAKER REASON DESCRIPTION
+     * ============================================================
+     *
+     * reasonCode:
+     *
+     *     SIGNATURE_ISSUE
+     *     MICR_CORRECTION
+     *     AMOUNT_CORRECTION
+     *     etc.
+     *
+     * Returns the dynamic reason_name from
+     * return_reason_master.
+     */
+
+    public String getReasonName(
+            String reasonCode) {
+
+        if (reasonCode == null
+                || reasonCode.trim().isEmpty()) {
+
+            return null;
+        }
+
+        String sql =
+                "SELECT reason_name " +
+                "FROM return_reason_master " +
+                "WHERE reason_code = ? " +
+                "AND active = true";
+
+        try (Connection connection =
+                     CTSStaticData.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
+
+            statement.setString(
+                    1,
+                    reasonCode.trim());
+
+            try (ResultSet rs =
+                         statement.executeQuery()) {
+
+                if (rs.next()) {
+
+                    return rs.getString(
+                            "reason_name");
+                }
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            throw new RuntimeException(
+                    "Error while fetching reason description",
+                    e);
+        }
+
+        return null;
+    }
+
+
+    /*
+     * ============================================================
      * GET CHECKER RETURN / REJECTION REASONS
      * ============================================================
      */
@@ -249,7 +312,8 @@ public class CheckerChequeDAO {
                 "AND reason_type = ? " +
                 "ORDER BY reason_name";
 
-        try (Connection connection = CTSStaticData.getConnection();
+        try (Connection connection =
+                     CTSStaticData.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
@@ -480,6 +544,7 @@ public class CheckerChequeDAO {
          * Only ACCEPT and REJECT are considered final
          * Checker decisions.
          */
+
         String remainingChequeSql =
                 "SELECT COUNT(*) " +
                 "FROM cheque_processing " +
@@ -681,6 +746,7 @@ public class CheckerChequeDAO {
                     /*
                      * No unfinished Checker decisions remain.
                      */
+
                     if (remainingCheques == 0) {
 
                         try (PreparedStatement statement =

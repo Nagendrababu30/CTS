@@ -56,6 +56,51 @@ public class CheckerProcessingService {
 
 
     // ============================================================
+    // MAKER REJECTION INFORMATION
+    // ============================================================
+
+    public boolean isMakerRejected(
+            String batchNumber,
+            String chequeNumber) {
+
+        ChequeProcessing processing =
+                chequeDao.getChequeProcessing(
+                        batchNumber,
+                        chequeNumber);
+
+        if (processing == null) {
+            return false;
+        }
+
+        return "REJECT_REQUEST".equalsIgnoreCase(
+                processing.getMakerAction());
+    }
+
+
+    public String getMakerReasonCode(
+            String batchNumber,
+            String chequeNumber) {
+
+        ChequeProcessing processing =
+                chequeDao.getChequeProcessing(
+                        batchNumber,
+                        chequeNumber);
+
+        if (processing == null) {
+            return null;
+        }
+
+        if (!"REJECT_REQUEST".equalsIgnoreCase(
+                processing.getMakerAction())) {
+
+            return null;
+        }
+
+        return processing.getMakerReasonCode();
+    }
+
+
+    // ============================================================
     // CBS VALIDATION
     // ============================================================
 
@@ -407,5 +452,16 @@ public class CheckerProcessingService {
                 checkerAction,
                 checkerReasonCode,
                 checkerRemarks);
+    }
+
+
+	public String getMakerReasonName(String reasonCode) {
+
+        if (reasonCode == null
+                || reasonCode.trim().isEmpty()) {
+            return null;
+        }
+
+        return chequeDao.getReasonName(reasonCode.trim());
     }
 }

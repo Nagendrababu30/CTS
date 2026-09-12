@@ -147,6 +147,10 @@ public class AuthorizationComposer
 		        "/zul/outward/outward-checker/sendToNPCI.zul",
 		        "OUTWARD_CHECKER"
 		);
+		PAGE_PERMISSIONS.put(
+		        "/zul/outward/outward-checker/processing.zul",
+		        "OUTWARD_CHECKER"
+		);
 	}
 
 	@Override

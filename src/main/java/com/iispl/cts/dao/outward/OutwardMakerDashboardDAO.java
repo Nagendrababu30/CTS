@@ -2,6 +2,7 @@ package com.iispl.cts.dao.outward;
 
 import com.cts.inward.config.ConnectionPool;
 import com.iispl.cts.data.CTSStaticData;
+import com.iispl.cts.model.outward.ChequeProcessing;
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.model.outward.OutwardCheque;
 
@@ -19,13 +20,12 @@ import javax.sql.DataSource;
 
 public class OutwardMakerDashboardDAO {
 
-    private final javax.sql.DataSource dataSource = ConnectionPool.getDataSource();
+    private final javax.sql.DataSource dataSource =
+            ConnectionPool.getDataSource();
 
     // ============================================================
     // GET ALL BATCHES
     // ============================================================
-    
-    
 
     public List<OutwardBatch> getBatches() throws SQLException {
 
@@ -43,18 +43,72 @@ public class OutwardMakerDashboardDAO {
          * RELEASED is also included because a Maker can release
          * a previously locked batch and another Maker must then
          * be able to see and take it.
+         *
+         * HOLD / ON_HOLD:
+         *
+         * outward_batch.batch_status remains ON_HOLD.
+         *
+         * If any cheque in the batch has
+         * SENT_BACK_TO_MAKER,
+         * the dashboard displays:
+         *
+         *     count = returned cheque count
+         *     status = SENT_BACK_TO_MAKER
+         *
+         * The actual database batch_status is NOT changed here.
          */
+
         String sql =
                 "SELECT " +
                 "    ob.batch_number, " +
                 "    ob.branch_code, " +
-                "    ob.cheque_count, " +
+
+                // =====================================================
+                // DISPLAY CHEQUE COUNT
+                // =====================================================
+
+                "    CASE " +
+                "        WHEN UPPER(TRIM(ob.batch_status)) IN " +
+                "             ('HOLD', 'ON_HOLD') " +
+                "        THEN ( " +
+                "            SELECT COUNT(*) " +
+                "            FROM public.outward_cheque rc " +
+                "            WHERE rc.batch_number = ob.batch_number " +
+                "              AND UPPER(TRIM(rc.cheque_status)) = " +
+                "                  'SENT_BACK_TO_MAKER' " +
+                "        ) " +
+                "        ELSE ob.cheque_count " +
+                "    END AS display_cheque_count, " +
+
                 "    ob.batch_folder_path, " +
                 "    ob.created_by, " +
                 "    ob.created_at, " +
-                "    ob.batch_status, " +
 
-                // Maker assignment
+                // =====================================================
+                // DISPLAY STATUS
+                // =====================================================
+                //
+                // If even one cheque was sent back by Checker,
+                // dashboard displays SENT_BACK_TO_MAKER.
+                //
+                // Actual outward_batch.batch_status remains ON_HOLD.
+                //
+                "    CASE " +
+                "        WHEN EXISTS ( " +
+                "            SELECT 1 " +
+                "            FROM public.outward_cheque rc " +
+                "            WHERE rc.batch_number = ob.batch_number " +
+                "              AND UPPER(TRIM(rc.cheque_status)) = " +
+                "                  'SENT_BACK_TO_MAKER' " +
+                "        ) " +
+                "        THEN 'SENT_BACK_TO_MAKER' " +
+                "        ELSE ob.batch_status " +
+                "    END AS batch_status, " +
+
+                // =====================================================
+                // MAKER ASSIGNMENT
+                // =====================================================
+
                 "    mba.user_id AS maker_user_id, " +
                 "    mba.assigned_at AS maker_assigned_at, " +
                 "    mba.started_at AS maker_started_at, " +
@@ -68,18 +122,18 @@ public class OutwardMakerDashboardDAO {
                  *
                  * A new batch may not have an assignment row.
                  */
+
                 "LEFT JOIN public.outward_batch_assignment mba " +
                 "    ON ob.batch_number = mba.batch_number " +
                 "    AND UPPER(mba.assignment_role) = 'MAKER' " +
                 "    AND UPPER(mba.assignment_status) IN " +
                 "        ('ASSIGNED', 'IN_PROGRESS', 'RELEASED') " +
 
-                /*
-                 * Batch-level status filtering.
-                 *
-                 * No Maker assignment is required here.
-                 */
-                "WHERE UPPER(ob.batch_status) NOT IN " +
+                // =====================================================
+                // BATCH LEVEL FILTER
+                // =====================================================
+
+                "WHERE UPPER(TRIM(ob.batch_status)) NOT IN " +
                 "    ('SUBMITTED_TO_CHECKER', 'COMPLETED', 'REJECTED') " +
 
                 "ORDER BY ob.batch_number";
@@ -105,7 +159,7 @@ public class OutwardMakerDashboardDAO {
                 );
 
                 batch.setNumberOfCheques(
-                        rs.getInt("cheque_count")
+                        rs.getInt("display_cheque_count")
                 );
 
                 batch.setBatchFolderPath(
@@ -116,9 +170,11 @@ public class OutwardMakerDashboardDAO {
                 // CREATED BY
                 // ====================================================
 
-                int createdBy = rs.getInt("created_by");
+                int createdBy =
+                        rs.getInt("created_by");
 
                 if (!rs.wasNull()) {
+
                     batch.setCreatedBy(
                             String.valueOf(createdBy)
                     );
@@ -132,6 +188,7 @@ public class OutwardMakerDashboardDAO {
                         rs.getTimestamp("created_at");
 
                 if (createdAt != null) {
+
                     batch.setCreatedAt(
                             createdAt.toLocalDateTime()
                     );
@@ -140,6 +197,19 @@ public class OutwardMakerDashboardDAO {
                 // ====================================================
                 // BATCH STATUS
                 // ====================================================
+
+                /*
+                 * IMPORTANT:
+                 *
+                 * This is the DISPLAY status.
+                 *
+                 * For a batch containing at least one
+                 * SENT_BACK_TO_MAKER cheque, SQL returns:
+                 *
+                 *     SENT_BACK_TO_MAKER
+                 *
+                 * Otherwise it returns actual batch_status.
+                 */
 
                 batch.setBatchStatus(
                         rs.getString("batch_status")
@@ -166,6 +236,7 @@ public class OutwardMakerDashboardDAO {
                      * database stores the assignment in
                      * outward_batch_assignment.
                      */
+
                     batch.setLockedBy(
                             makerUser
                     );
@@ -261,6 +332,7 @@ public class OutwardMakerDashboardDAO {
                          * the previous Maker's user_id, so clear the
                          * UI ownership fields.
                          */
+
                         batch.setLockStatus(
                                 "AVAILABLE"
                         );
@@ -284,6 +356,7 @@ public class OutwardMakerDashboardDAO {
                      * This is the important case for a newly
                      * created Capture batch.
                      */
+
                     batch.setLockStatus(
                             "AVAILABLE"
                     );
@@ -304,25 +377,40 @@ public class OutwardMakerDashboardDAO {
             String batchNumber,
             String userId) throws SQLException {
 
-        if (batchNumber == null || batchNumber.trim().isEmpty()) {
-            throw new SQLException("Batch number is required.");
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()) {
+
+            throw new SQLException(
+                    "Batch number is required."
+            );
         }
 
-        if (userId == null || userId.trim().isEmpty()) {
-            throw new SQLException("User ID is required.");
+        if (userId == null ||
+                userId.trim().isEmpty()) {
+
+            throw new SQLException(
+                    "User ID is required."
+            );
         }
 
         int makerId;
 
         try {
-            makerId = Integer.parseInt(userId.trim());
+
+            makerId =
+                    Integer.parseInt(
+                            userId.trim()
+                    );
+
         } catch (NumberFormatException e) {
+
             throw new SQLException(
                     "Invalid maker user ID: " + userId
             );
         }
 
-        try (Connection con = dataSource.getConnection()) {
+        try (Connection con =
+                     dataSource.getConnection()) {
 
             con.setAutoCommit(false);
 
@@ -342,9 +430,13 @@ public class OutwardMakerDashboardDAO {
                 try (PreparedStatement ps =
                              con.prepareStatement(userSql)) {
 
-                    ps.setInt(1, makerId);
+                    ps.setInt(
+                            1,
+                            makerId
+                    );
 
-                    try (ResultSet rs = ps.executeQuery()) {
+                    try (ResultSet rs =
+                                 ps.executeQuery()) {
 
                         if (!rs.next()) {
 
@@ -372,9 +464,13 @@ public class OutwardMakerDashboardDAO {
                 try (PreparedStatement ps =
                              con.prepareStatement(batchSql)) {
 
-                    ps.setString(1, batchNumber.trim());
+                    ps.setString(
+                            1,
+                            batchNumber.trim()
+                    );
 
-                    try (ResultSet rs = ps.executeQuery()) {
+                    try (ResultSet rs =
+                                 ps.executeQuery()) {
 
                         if (!rs.next()) {
 
@@ -405,11 +501,16 @@ public class OutwardMakerDashboardDAO {
                 String existingAssignmentStatus = null;
 
                 try (PreparedStatement ps =
-                             con.prepareStatement(assignmentSql)) {
+                             con.prepareStatement(
+                                     assignmentSql)) {
 
-                    ps.setString(1, batchNumber.trim());
+                    ps.setString(
+                            1,
+                            batchNumber.trim()
+                    );
 
-                    try (ResultSet rs = ps.executeQuery()) {
+                    try (ResultSet rs =
+                                 ps.executeQuery()) {
 
                         if (rs.next()) {
 
@@ -417,7 +518,9 @@ public class OutwardMakerDashboardDAO {
                                     rs.getInt("user_id");
 
                             existingAssignmentStatus =
-                                    rs.getString("assignment_status");
+                                    rs.getString(
+                                            "assignment_status"
+                                    );
                         }
                     }
                 }
@@ -429,6 +532,7 @@ public class OutwardMakerDashboardDAO {
                 if (existingMakerId != null) {
 
                     // Another Maker already owns the batch.
+
                     if (existingMakerId.intValue() != makerId) {
 
                         throw new SQLException(
@@ -440,15 +544,18 @@ public class OutwardMakerDashboardDAO {
 
                     // Same Maker already has the batch in progress.
                     // Do NOT create another assignment.
+
                     if ("IN_PROGRESS".equalsIgnoreCase(
                             existingAssignmentStatus)) {
 
                         con.commit();
+
                         return true;
                     }
 
                     // Same Maker owns the batch but assignment is ASSIGNED.
                     // Resume it.
+
                     if ("ASSIGNED".equalsIgnoreCase(
                             existingAssignmentStatus)) {
 
@@ -463,10 +570,18 @@ public class OutwardMakerDashboardDAO {
                                 "AND UPPER(assignment_status) = 'ASSIGNED'";
 
                         try (PreparedStatement ps =
-                                     con.prepareStatement(resumeSql)) {
+                                     con.prepareStatement(
+                                             resumeSql)) {
 
-                            ps.setString(1, batchNumber.trim());
-                            ps.setInt(2, makerId);
+                            ps.setString(
+                                    1,
+                                    batchNumber.trim()
+                            );
+
+                            ps.setInt(
+                                    2,
+                                    makerId
+                            );
 
                             ps.executeUpdate();
                         }
@@ -477,14 +592,19 @@ public class OutwardMakerDashboardDAO {
                                 "WHERE batch_number = ?";
 
                         try (PreparedStatement ps =
-                                     con.prepareStatement(statusSql)) {
+                                     con.prepareStatement(
+                                             statusSql)) {
 
-                            ps.setString(1, batchNumber.trim());
+                            ps.setString(
+                                    1,
+                                    batchNumber.trim()
+                            );
 
                             ps.executeUpdate();
                         }
 
                         con.commit();
+
                         return true;
                     }
                 }
@@ -494,16 +614,18 @@ public class OutwardMakerDashboardDAO {
                 // =================================================
 
                 /*
-                 * A released batch is available again.
+                 * IMPORTANT:
                  *
-                 * We intentionally keep the existing CAPTURED rule
-                 * here because the existing workflow originally
-                 * allowed a new Maker assignment only for CAPTURED.
+                 * ON_HOLD is NOT allowed here.
                  *
-                 * RELEASED itself is an assignment status, not a
-                 * batch status.
+                 * HOLD / ON_HOLD batches must use the separate
+                 * returned-cheque Maker flow.
+                 *
+                 * Normal new assignment remains CAPTURED only.
                  */
-                if (!"CAPTURED".equalsIgnoreCase(currentStatus)) {
+
+                if (!"CAPTURED".equalsIgnoreCase(
+                        currentStatus)) {
 
                     throw new SQLException(
                             "Batch " + batchNumber +
@@ -527,8 +649,15 @@ public class OutwardMakerDashboardDAO {
                 try (PreparedStatement ps =
                              con.prepareStatement(insertSql)) {
 
-                    ps.setString(1, batchNumber.trim());
-                    ps.setInt(2, makerId);
+                    ps.setString(
+                            1,
+                            batchNumber.trim()
+                    );
+
+                    ps.setInt(
+                            2,
+                            makerId
+                    );
 
                     ps.executeUpdate();
                 }
@@ -545,7 +674,10 @@ public class OutwardMakerDashboardDAO {
                 try (PreparedStatement ps =
                              con.prepareStatement(updateSql)) {
 
-                    ps.setString(1, batchNumber.trim());
+                    ps.setString(
+                            1,
+                            batchNumber.trim()
+                    );
 
                     ps.executeUpdate();
                 }
@@ -574,10 +706,15 @@ public class OutwardMakerDashboardDAO {
     public List<OutwardCheque> getCheques(
             String batchNumber) throws SQLException {
 
-        List<OutwardCheque> cheques = new ArrayList<>();
+        List<OutwardCheque> cheques =
+                new ArrayList<>();
 
-        if (batchNumber == null || batchNumber.trim().isEmpty()) {
-            throw new SQLException("Batch number is required.");
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()) {
+
+            throw new SQLException(
+                    "Batch number is required."
+            );
         }
 
         String sql =
@@ -597,31 +734,47 @@ public class OutwardMakerDashboardDAO {
                 "    oc.front_image_path, " +
                 "    oc.back_image_path, " +
                 "    oc.cheque_status, " +
+                "    oc.return_reason_id, " +
+                "    oc.checker_remarks, " +
                 "    ob.created_by AS batch_created_by, " +
                 "    ob.created_at AS batch_created_at " +
+
                 "FROM public.outward_cheque oc " +
+
                 "INNER JOIN public.outward_batch ob " +
                 "    ON ob.batch_number = oc.batch_number " +
+
                 "WHERE oc.batch_number = ? " +
+
                 "ORDER BY oc.cheque_number";
 
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con =
+                     dataSource.getConnection();
 
-            ps.setString(1, batchNumber.trim());
+             PreparedStatement ps =
+                     con.prepareStatement(sql)) {
 
-            try (ResultSet rs = ps.executeQuery()) {
+            ps.setString(
+                    1,
+                    batchNumber.trim()
+            );
+
+            try (ResultSet rs =
+                         ps.executeQuery()) {
 
                 while (rs.next()) {
 
-                    OutwardCheque cheque = new OutwardCheque();
+                    OutwardCheque cheque =
+                            new OutwardCheque();
 
                     // =================================================
                     // BATCH NUMBER
                     // =================================================
 
                     cheque.setBatchNumber(
-                            rs.getString("batch_number")
+                            rs.getString(
+                                    "batch_number"
+                            )
                     );
 
                     // =================================================
@@ -629,7 +782,9 @@ public class OutwardMakerDashboardDAO {
                     // =================================================
 
                     cheque.setChequeNumber(
-                            rs.getString("cheque_number")
+                            rs.getString(
+                                    "cheque_number"
+                            )
                     );
 
                     // =================================================
@@ -637,7 +792,9 @@ public class OutwardMakerDashboardDAO {
                     // =================================================
 
                     cheque.setCityCode(
-                            rs.getString("city_code")
+                            rs.getString(
+                                    "city_code"
+                            )
                     );
 
                     // =================================================
@@ -645,7 +802,9 @@ public class OutwardMakerDashboardDAO {
                     // =================================================
 
                     cheque.setBankCode(
-                            rs.getString("bank_code")
+                            rs.getString(
+                                    "bank_code"
+                            )
                     );
 
                     // =================================================
@@ -653,7 +812,9 @@ public class OutwardMakerDashboardDAO {
                     // =================================================
 
                     cheque.setBranchCode(
-                            rs.getString("branch_code")
+                            rs.getString(
+                                    "branch_code"
+                            )
                     );
 
                     // =================================================
@@ -661,7 +822,9 @@ public class OutwardMakerDashboardDAO {
                     // =================================================
 
                     cheque.setDrawerAccountNumber(
-                            rs.getString("drawer_account_number")
+                            rs.getString(
+                                    "drawer_account_number"
+                            )
                     );
 
                     // =================================================
@@ -669,7 +832,9 @@ public class OutwardMakerDashboardDAO {
                     // =================================================
 
                     cheque.setDrawerName(
-                            rs.getString("drawer_name")
+                            rs.getString(
+                                    "drawer_name"
+                            )
                     );
 
                     // =================================================
@@ -677,7 +842,9 @@ public class OutwardMakerDashboardDAO {
                     // =================================================
 
                     cheque.setDepositorAccountNumber(
-                            rs.getString("payee_account_number")
+                            rs.getString(
+                                    "payee_account_number"
+                            )
                     );
 
                     // =================================================
@@ -685,7 +852,9 @@ public class OutwardMakerDashboardDAO {
                     // =================================================
 
                     cheque.setDepositorName(
-                            rs.getString("payee_name")
+                            rs.getString(
+                                    "payee_name"
+                            )
                     );
 
                     // =================================================
@@ -693,7 +862,9 @@ public class OutwardMakerDashboardDAO {
                     // =================================================
 
                     cheque.setPayeeName(
-                            rs.getString("payee_name")
+                            rs.getString(
+                                    "payee_name"
+                            )
                     );
 
                     // =================================================
@@ -701,7 +872,9 @@ public class OutwardMakerDashboardDAO {
                     // =================================================
 
                     cheque.setAmount(
-                            rs.getBigDecimal("amount")
+                            rs.getBigDecimal(
+                                    "amount"
+                            )
                     );
 
                     // =================================================
@@ -709,7 +882,9 @@ public class OutwardMakerDashboardDAO {
                     // =================================================
 
                     cheque.setAmountInWords(
-                            rs.getString("amount_in_words")
+                            rs.getString(
+                                    "amount_in_words"
+                            )
                     );
 
                     // =================================================
@@ -717,7 +892,9 @@ public class OutwardMakerDashboardDAO {
                     // =================================================
 
                     Date chequeDate =
-                            rs.getDate("cheque_date");
+                            rs.getDate(
+                                    "cheque_date"
+                            );
 
                     if (chequeDate != null) {
 
@@ -735,7 +912,9 @@ public class OutwardMakerDashboardDAO {
                     // =================================================
 
                     cheque.setFrontImagePath(
-                            rs.getString("front_image_path")
+                            rs.getString(
+                                    "front_image_path"
+                            )
                     );
 
                     // =================================================
@@ -743,7 +922,9 @@ public class OutwardMakerDashboardDAO {
                     // =================================================
 
                     cheque.setBackImagePath(
-                            rs.getString("back_image_path")
+                            rs.getString(
+                                    "back_image_path"
+                            )
                     );
 
                     // =================================================
@@ -751,7 +932,39 @@ public class OutwardMakerDashboardDAO {
                     // =================================================
 
                     cheque.setChequeStatus(
-                            rs.getString("cheque_status")
+                            rs.getString(
+                                    "cheque_status"
+                            )
+                    );
+
+                    // =================================================
+                    // RETURN REASON ID
+                    // =================================================
+
+                    int returnReasonId =
+                            rs.getInt(
+                                    "return_reason_id"
+                            );
+
+                    if (!rs.wasNull()) {
+
+                        cheque.setReturnReasonId(
+                                returnReasonId
+                        );
+
+                    } else {
+
+                        cheque.setReturnReasonId(null);
+                    }
+
+                    // =================================================
+                    // CHECKER REMARKS
+                    // =================================================
+
+                    cheque.setCheckerRemarks(
+                            rs.getString(
+                                    "checker_remarks"
+                            )
                     );
 
                     // =================================================
@@ -759,12 +972,16 @@ public class OutwardMakerDashboardDAO {
                     // =================================================
 
                     int batchCreatedBy =
-                            rs.getInt("batch_created_by");
+                            rs.getInt(
+                                    "batch_created_by"
+                            );
 
                     if (!rs.wasNull()) {
 
                         cheque.setCreatedBy(
-                                String.valueOf(batchCreatedBy)
+                                String.valueOf(
+                                        batchCreatedBy
+                                )
                         );
 
                     } else {
@@ -777,7 +994,9 @@ public class OutwardMakerDashboardDAO {
                     // =================================================
 
                     Timestamp batchCreatedAt =
-                            rs.getTimestamp("batch_created_at");
+                            rs.getTimestamp(
+                                    "batch_created_at"
+                            );
 
                     if (batchCreatedAt != null) {
 
@@ -812,6 +1031,184 @@ public class OutwardMakerDashboardDAO {
         }
 
         return cheques;
+    }
+
+    // ============================================================
+    // GET CHEQUE PROCESSING
+    //
+    // Returns checker action and checker reason CODE.
+    //
+    // Existing database columns remain:
+    //
+    //     maker_reason_id
+    //     checker_reason_id
+    //
+    // Model receives:
+    //
+    //     makerReasonCode
+    //     checkerReasonCode
+    // ============================================================
+
+    public ChequeProcessing getChequeProcessing(
+            String batchNumber,
+            String chequeNumber)
+            throws SQLException {
+
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()) {
+
+            return null;
+        }
+
+        if (chequeNumber == null ||
+                chequeNumber.trim().isEmpty()) {
+
+            return null;
+        }
+
+        String sql =
+                "SELECT " +
+                "    cp.batch_number, " +
+                "    cp.cheque_number, " +
+                "    cp.maker_id, " +
+                "    cp.maker_action, " +
+                "    mr.reason_code AS maker_reason_code, " +
+                "    cp.checker_id, " +
+                "    cp.checker_action, " +
+                "    cr.reason_code AS checker_reason_code " +
+
+                "FROM public.cheque_processing cp " +
+
+                "LEFT JOIN public.return_reason_master mr " +
+                "    ON mr.id = cp.maker_reason_id " +
+
+                "LEFT JOIN public.return_reason_master cr " +
+                "    ON cr.id = cp.checker_reason_id " +
+
+                "WHERE cp.batch_number = ? " +
+                "AND cp.cheque_number = ?";
+
+        try (Connection con =
+                     dataSource.getConnection();
+
+             PreparedStatement ps =
+                     con.prepareStatement(sql)) {
+
+            ps.setString(
+                    1,
+                    batchNumber.trim()
+            );
+
+            ps.setString(
+                    2,
+                    chequeNumber.trim()
+            );
+
+            try (ResultSet rs =
+                         ps.executeQuery()) {
+
+                if (!rs.next()) {
+                    return null;
+                }
+
+                ChequeProcessing processing =
+                        new ChequeProcessing();
+
+                // =================================================
+                // BATCH NUMBER
+                // =================================================
+
+                processing.setBatchNumber(
+                        rs.getString(
+                                "batch_number"
+                        )
+                );
+
+                // =================================================
+                // CHEQUE NUMBER
+                // =================================================
+
+                processing.setChequeNumber(
+                        rs.getString(
+                                "cheque_number"
+                        )
+                );
+
+                // =================================================
+                // MAKER ID
+                // =================================================
+
+                int makerId =
+                        rs.getInt(
+                                "maker_id"
+                        );
+
+                if (!rs.wasNull()) {
+
+                    processing.setMakerId(
+                            makerId
+                    );
+                }
+
+                // =================================================
+                // MAKER ACTION
+                // =================================================
+
+                processing.setMakerAction(
+                        rs.getString(
+                                "maker_action"
+                        )
+                );
+
+                // =================================================
+                // MAKER REASON CODE
+                // =================================================
+
+                processing.setMakerReasonCode(
+                        rs.getString(
+                                "maker_reason_code"
+                        )
+                );
+
+                // =================================================
+                // CHECKER ID
+                // =================================================
+
+                int checkerId =
+                        rs.getInt(
+                                "checker_id"
+                        );
+
+                if (!rs.wasNull()) {
+
+                    processing.setCheckerId(
+                            checkerId
+                    );
+                }
+
+                // =================================================
+                // CHECKER ACTION
+                // =================================================
+
+                processing.setCheckerAction(
+                        rs.getString(
+                                "checker_action"
+                        )
+                );
+
+                // =================================================
+                // CHECKER REASON CODE
+                // =================================================
+
+                processing.setCheckerReasonCode(
+                        rs.getString(
+                                "checker_reason_code"
+                        )
+                );
+
+                return processing;
+            }
+        }
     }
 
     // ============================================================
@@ -907,7 +1304,8 @@ public class OutwardMakerDashboardDAO {
                         "WHERE batch_number = ?";
 
                 try (PreparedStatement ps =
-                             con.prepareStatement(batchSql)) {
+                             con.prepareStatement(
+                                     batchSql)) {
 
                     ps.setString(
                             1,
@@ -952,8 +1350,24 @@ public class OutwardMakerDashboardDAO {
 
             con.setAutoCommit(false);
 
+            ps.setString(
+                    1,
+                    status
+            );
+
+            ps.setString(
+                    2,
+                    batchNumber
+            );
+
+            ps.setString(
+                    3,
+                    chequeNumber
+            );
+
             try (PreparedStatement ps =
                          con.prepareStatement(sql)) {
+
 
                 ps.setString(1, status);
                 ps.setString(2, batchNumber);
@@ -994,8 +1408,20 @@ public class OutwardMakerDashboardDAO {
 
             con.setAutoCommit(false);
 
+
+            ps.setString(
+                    1,
+                    status
+            );
+
+            ps.setString(
+                    2,
+                    batchNumber
+            );
+
             try (PreparedStatement ps =
                          con.prepareStatement(sql)) {
+
 
                 ps.setString(1, status);
                 ps.setString(2, batchNumber);
@@ -1045,9 +1471,10 @@ public class OutwardMakerDashboardDAO {
 
         try {
 
-            makerId = Integer.parseInt(
-                    userId.trim()
-            );
+            makerId =
+                    Integer.parseInt(
+                            userId.trim()
+                    );
 
         } catch (NumberFormatException e) {
 

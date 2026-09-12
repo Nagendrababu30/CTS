@@ -20,7 +20,9 @@ import org.zkoss.zul.Listitem;
 import org.zkoss.zul.ListitemRenderer;
 import org.zkoss.zul.Messagebox;
 
+import com.iispl.cts.model.outward.ChequeProcessing;
 import com.iispl.cts.model.outward.OutwardBatch;
+import com.iispl.cts.model.outward.OutwardCheque;
 import com.iispl.cts.model.outward.OutwardValidationResult;
 import com.iispl.cts.service.outward.OutwardMakerDashboardService;
 
@@ -132,7 +134,9 @@ public class OutwardMakerDashboardController
                     "No logged-in user session found."
             );
 
-            Executions.sendRedirect("/zul/login.zul");
+            Executions.sendRedirect(
+                    "/zul/login.zul"
+            );
 
             return;
         }
@@ -142,7 +146,9 @@ public class OutwardMakerDashboardController
         // =====================================================
 
         Object sessionUserId =
-                sessionUser.getAttribute("userId");
+                sessionUser.getAttribute(
+                        "userId"
+                );
 
         if (sessionUserId == null) {
 
@@ -150,7 +156,9 @@ public class OutwardMakerDashboardController
                     "No logged-in user ID found in session."
             );
 
-            Executions.sendRedirect("/zul/login.zul");
+            Executions.sendRedirect(
+                    "/zul/login.zul"
+            );
 
             return;
         }
@@ -183,7 +191,9 @@ public class OutwardMakerDashboardController
                                 + sessionUserId
                 );
 
-                Executions.sendRedirect("/zul/login.zul");
+                Executions.sendRedirect(
+                        "/zul/login.zul"
+                );
 
                 return;
             }
@@ -545,10 +555,9 @@ public class OutwardMakerDashboardController
         loadBatches();
 
         /*
-         * Summary counts should be obtained through
-         * Service -> DAO when those methods are available.
+         * Summary counts are intentionally not handled here.
          *
-         * No SQL is placed inside this controller.
+         * Existing dashboard functionality remains unchanged.
          */
     }
 
@@ -602,7 +611,7 @@ public class OutwardMakerDashboardController
             );
 
             // -------------------------------------------------
-            // GET ALL BATCHES FROM DATABASE
+            // GET ALL BATCHES
             // -------------------------------------------------
 
             List<OutwardBatch> batches =
@@ -675,17 +684,17 @@ public class OutwardMakerDashboardController
                     );
 
             System.out.println(
-                    "Total Pages     : "
+                    "Total Pages : "
                             + totalPages
             );
 
             System.out.println(
-                    "Current Page     : "
+                    "Current Page : "
                             + currentPage
             );
 
             System.out.println(
-                    "Page Batches     : "
+                    "Page Batches : "
                             + pageBatches.size()
             );
 
@@ -700,7 +709,7 @@ public class OutwardMakerDashboardController
                 );
 
                 System.out.println(
-                        "Batch Number      : "
+                        "Batch Number : "
                                 + batch.getBatchNumber()
                 );
 
@@ -710,27 +719,27 @@ public class OutwardMakerDashboardController
                 );
 
                 System.out.println(
-                        "Batch Status      : "
+                        "Batch Status : "
                                 + batch.getBatchStatus()
                 );
 
                 System.out.println(
-                        "Maker User        : "
+                        "Maker User : "
                                 + batch.getMakerUserNumber()
                 );
 
                 System.out.println(
-                        "Lock Status       : "
+                        "Lock Status : "
                                 + batch.getLockStatus()
                 );
 
                 System.out.println(
-                        "Locked By         : "
+                        "Locked By : "
                                 + batch.getLockedBy()
                 );
 
                 System.out.println(
-                        "Locked At         : "
+                        "Locked At : "
                                 + batch.getLockedAt()
                 );
             }
@@ -773,7 +782,7 @@ public class OutwardMakerDashboardController
             batchListbox.setModel(model);
 
             // -------------------------------------------------
-            // UPDATE PAGINATION UI
+            // UPDATE PAGINATION
             // -------------------------------------------------
 
             updatePagination(
@@ -869,6 +878,7 @@ public class OutwardMakerDashboardController
     private int getTotalPages() {
 
         if (service == null) {
+
             return 0;
         }
 
@@ -1034,6 +1044,7 @@ public class OutwardMakerDashboardController
             int totalPages) {
 
         if (button == null) {
+
             return;
         }
 
@@ -1071,6 +1082,7 @@ public class OutwardMakerDashboardController
             OutwardBatch batch) {
 
         if (batch == null) {
+
             return false;
         }
 
@@ -1112,6 +1124,20 @@ public class OutwardMakerDashboardController
             OutwardBatch batch) {
 
         if (batch == null) {
+
+            return false;
+        }
+
+        // -----------------------------------------------------
+        // HOLD BATCH MUST NOT APPEAR AS AVAILABLE
+        // -----------------------------------------------------
+
+        if (hasValue(batch.getBatchStatus())
+                &&
+                "HOLD".equalsIgnoreCase(
+                        batch.getBatchStatus().trim()
+                )) {
+
             return false;
         }
 
@@ -1154,10 +1180,12 @@ public class OutwardMakerDashboardController
             OutwardBatch batch) {
 
         if (batch == null) {
+
             return false;
         }
 
         if (!hasValue(currentUserId)) {
+
             return false;
         }
 
@@ -1165,6 +1193,7 @@ public class OutwardMakerDashboardController
                 batch.getMakerUserNumber();
 
         if (!hasValue(makerUserNumber)) {
+
             return false;
         }
 
@@ -1183,6 +1212,7 @@ public class OutwardMakerDashboardController
             OutwardBatch batch) {
 
         if (batch == null) {
+
             return;
         }
 
@@ -1241,7 +1271,7 @@ public class OutwardMakerDashboardController
         item.appendChild(statusCell);
 
         // =====================================================
-        // READ ASSIGNMENT / LOCK INFORMATION
+        // ASSIGNMENT / LOCK
         // =====================================================
 
         String makerUserNumber =
@@ -1268,12 +1298,33 @@ public class OutwardMakerDashboardController
                         lockStatus
                 );
 
+        boolean isHold =
+                hasValue(
+                        batch.getBatchStatus()
+                )
+                &&
+                "HOLD".equalsIgnoreCase(
+                        batch.getBatchStatus().trim()
+                );
+
+        boolean isOriginalMaker =
+                hasValue(currentUserId)
+                        &&
+                        hasMakerAssignment
+                        &&
+                        currentUserId.trim()
+                                .equalsIgnoreCase(
+                                        makerUserNumber.trim()
+                                );
+
         boolean isAvailable =
                 !hasMakerAssignment
                         &&
-                !hasLockedBy
+                        !hasLockedBy
                         &&
-                !lockStatusLocked;
+                        !lockStatusLocked
+                        &&
+                        !isHold;
 
         // =====================================================
         // 4. ACTION
@@ -1282,12 +1333,53 @@ public class OutwardMakerDashboardController
         Listcell actionCell =
                 new Listcell();
 
-        if (isAvailable) {
+        // -----------------------------------------------------
+        // HOLD + ORIGINAL MAKER
+        // -----------------------------------------------------
+
+        if (isHold && isOriginalMaker) {
 
             Button openButton =
                     new Button("Open");
 
             openButton.setWidth("75px");
+
+            openButton.setHeight("32px");
+
+            openButton.setStyle(
+                    "background:#12B76A;"
+                            + "color:white;"
+                            + "border:none;"
+                            + "border-radius:5px;"
+                            + "font-weight:bold;"
+                            + "cursor:pointer;"
+            );
+
+            openButton.addEventListener(
+                    Events.ON_CLICK,
+                    event ->
+                            openHoldBatch(
+                                    batch.getBatchNumber()
+                            )
+            );
+
+            actionCell.appendChild(
+                    openButton
+            );
+
+        }
+
+        // -----------------------------------------------------
+        // NORMAL AVAILABLE BATCH
+        // -----------------------------------------------------
+
+        else if (isAvailable) {
+
+            Button openButton =
+                    new Button("Open");
+
+            openButton.setWidth("75px");
+
             openButton.setHeight("32px");
 
             openButton.setStyle(
@@ -1311,7 +1403,13 @@ public class OutwardMakerDashboardController
                     openButton
             );
 
-        } else {
+        }
+
+        // -----------------------------------------------------
+        // LOCKED
+        // -----------------------------------------------------
+
+        else {
 
             Label lockedLabel =
                     new Label("🔒 Locked");
@@ -1364,15 +1462,13 @@ public class OutwardMakerDashboardController
     }
 
     // =========================================================
-    // OPEN + AUTOMATICALLY ASSIGN BATCH
+    // NORMAL OPEN + ASSIGN
+    //
+    // EXISTING FUNCTION
     // =========================================================
 
     private void openAndAssignBatch(
             String batchNumber) {
-
-        // -----------------------------------------------------
-        // VALIDATE BATCH NUMBER
-        // -----------------------------------------------------
 
         if (!hasValue(batchNumber)) {
 
@@ -1388,10 +1484,6 @@ public class OutwardMakerDashboardController
 
         String cleanBatchNumber =
                 batchNumber.trim();
-
-        // -----------------------------------------------------
-        // CURRENT MAKER
-        // -----------------------------------------------------
 
         String userId =
                 currentUserId;
@@ -1444,6 +1536,30 @@ public class OutwardMakerDashboardController
             }
 
             // =================================================
+            // DO NOT OPEN HOLD THROUGH NORMAL FLOW
+            // =================================================
+
+            if (hasValue(
+                    batch.getBatchStatus()
+            )
+                    &&
+                    "HOLD".equalsIgnoreCase(
+                            batch.getBatchStatus().trim()
+                    )) {
+
+                Messagebox.show(
+                        "This batch is on HOLD.\n\n"
+                                + "Please open it through the "
+                                + "returned-cheque workflow.",
+                        "Batch On Hold",
+                        Messagebox.OK,
+                        Messagebox.EXCLAMATION
+                );
+
+                return;
+            }
+
+            // =================================================
             // CHECK EXISTING MAKER ASSIGNMENT
             // =================================================
 
@@ -1488,7 +1604,7 @@ public class OutwardMakerDashboardController
             }
 
             // =================================================
-            // ATOMIC ASSIGNMENT + VALIDATION
+            // ASSIGN + VALIDATE
             // =================================================
 
             OutwardValidationResult result =
@@ -1617,6 +1733,509 @@ public class OutwardMakerDashboardController
     }
 
     // =========================================================
+    // OPEN HOLD BATCH
+    //
+    // IMPORTANT:
+    //
+    // Return reason is obtained from ChequeProcessing.
+    //
+    // OutwardCheque is ONLY used for:
+    //
+    //     cheque number
+    //     cheque status
+    //     checker remarks
+    //
+    // ChequeProcessing is used for:
+    //
+    //     checkerAction
+    //     checkerReasonCode
+    // =========================================================
+
+    private void openHoldBatch(
+            String batchNumber) {
+
+        if (!hasValue(batchNumber)) {
+
+            Messagebox.show(
+                    "Invalid batch number.",
+                    "Batch",
+                    Messagebox.OK,
+                    Messagebox.ERROR
+            );
+
+            return;
+        }
+
+        String cleanBatchNumber =
+                batchNumber.trim();
+
+        try {
+
+            // =================================================
+            // FIND BATCH
+            // =================================================
+
+            OutwardBatch batch =
+                    findBatch(
+                            cleanBatchNumber
+                    );
+
+            if (batch == null) {
+
+                Messagebox.show(
+                        "Batch "
+                                + cleanBatchNumber
+                                + " was not found.",
+                        "Batch Not Found",
+                        Messagebox.OK,
+                        Messagebox.ERROR
+                );
+
+                return;
+            }
+
+            // =================================================
+            // CHECK HOLD STATUS
+            // =================================================
+
+            if (!hasValue(
+                    batch.getBatchStatus()
+            )
+                    ||
+                    !"HOLD".equalsIgnoreCase(
+                            batch.getBatchStatus().trim()
+                    )) {
+
+                Messagebox.show(
+                        "Batch "
+                                + cleanBatchNumber
+                                + " is not in HOLD status.",
+                        "Invalid Batch State",
+                        Messagebox.OK,
+                        Messagebox.EXCLAMATION
+                );
+
+                return;
+            }
+
+            // =================================================
+            // CHECK ORIGINAL MAKER
+            // =================================================
+
+            String assignedMaker =
+                    batch.getMakerUserNumber();
+
+            if (!hasValue(assignedMaker)
+                    ||
+                    !hasValue(currentUserId)
+                    ||
+                    !currentUserId.trim()
+                            .equalsIgnoreCase(
+                                    assignedMaker.trim()
+                            )) {
+
+                Messagebox.show(
+                        "This returned batch is assigned to Maker "
+                                + safeValue(assignedMaker)
+                                + ".\n\n"
+                                + "Only the original Maker can process it.",
+                        "Access Denied",
+                        Messagebox.OK,
+                        Messagebox.ERROR
+                );
+
+                return;
+            }
+
+            // =================================================
+            // GET RETURNED CHEQUES
+            // =================================================
+
+            List<OutwardCheque> returnedCheques =
+                    service.getReturnedCheques(
+                            cleanBatchNumber
+                    );
+
+            if (returnedCheques == null
+                    || returnedCheques.isEmpty()) {
+
+                Messagebox.show(
+                        "No returned cheques were found for batch "
+                                + cleanBatchNumber
+                                + ".",
+                        "Returned Cheques",
+                        Messagebox.OK,
+                        Messagebox.EXCLAMATION
+                );
+
+                return;
+            }
+
+            System.out.println(
+                    "Returned Cheques : "
+                            + returnedCheques.size()
+            );
+
+            // =================================================
+            // PROCESS FIRST RETURNED CHEQUE
+            // =================================================
+
+            OutwardCheque selectedCheque =
+                    returnedCheques.get(0);
+
+            if (selectedCheque == null) {
+
+                Messagebox.show(
+                        "Returned cheque information is invalid.",
+                        "Returned Cheque",
+                        Messagebox.OK,
+                        Messagebox.ERROR
+                );
+
+                return;
+            }
+
+            // =================================================
+            // CHEQUE NUMBER
+            // =================================================
+
+            String chequeNumber =
+                    selectedCheque.getChequeNumber();
+
+            if (!hasValue(chequeNumber)) {
+
+                Messagebox.show(
+                        "Returned cheque number is missing.",
+                        "Returned Cheque",
+                        Messagebox.OK,
+                        Messagebox.ERROR
+                );
+
+                return;
+            }
+
+            chequeNumber =
+                    chequeNumber.trim();
+
+            // =================================================
+            // VERIFY SENT BACK STATUS
+            // =================================================
+
+            if (!hasValue(
+                    selectedCheque.getChequeStatus()
+            )
+                    ||
+                    !"SENT_BACK_TO_MAKER".equalsIgnoreCase(
+                            selectedCheque.getChequeStatus().trim()
+                    )) {
+
+                Messagebox.show(
+                        "Cheque "
+                                + chequeNumber
+                                + " is not marked as "
+                                + "SENT_BACK_TO_MAKER.",
+                        "Returned Cheque",
+                        Messagebox.OK,
+                        Messagebox.ERROR
+                );
+
+                return;
+            }
+
+            // =================================================
+            // GET CHEQUE PROCESSING INFORMATION
+            //
+            // IMPORTANT:
+            //
+            // This uses your existing ChequeProcessing model.
+            // =================================================
+
+            ChequeProcessing processing =
+                    service.getChequeProcessing(
+                            cleanBatchNumber,
+                            chequeNumber
+                    );
+
+            if (processing == null) {
+
+                Messagebox.show(
+                        "Cheque processing information was not found "
+                                + "for cheque "
+                                + chequeNumber
+                                + ".",
+                        "Checker Return",
+                        Messagebox.OK,
+                        Messagebox.ERROR
+                );
+
+                return;
+            }
+
+            // =================================================
+            // READ CHECKER INFORMATION
+            // =================================================
+
+            String checkerAction =
+                    processing.getCheckerAction();
+
+            String checkerReasonCode =
+                    processing.getCheckerReasonCode();
+
+            // =================================================
+            // CHECKER REMARKS
+            //
+            // Existing OutwardCheque field.
+            // =================================================
+
+            String checkerRemarks =
+                    selectedCheque.getCheckerRemarks();
+
+            System.out.println(
+                    "======================================"
+            );
+
+            System.out.println(
+                    "RETURNED CHEQUE"
+            );
+
+            System.out.println(
+                    "Batch Number : "
+                            + cleanBatchNumber
+            );
+
+            System.out.println(
+                    "Cheque Number : "
+                            + chequeNumber
+            );
+
+            System.out.println(
+                    "Checker Action : "
+                            + checkerAction
+            );
+
+            System.out.println(
+                    "Checker Reason Code : "
+                            + checkerReasonCode
+            );
+
+            System.out.println(
+                    "Checker Remarks : "
+                            + checkerRemarks
+            );
+
+            System.out.println(
+                    "======================================"
+            );
+
+            // =================================================
+            // CHECK SEND BACK ACTION
+            // =================================================
+
+            if (!hasValue(checkerAction)
+                    ||
+                    !"SEND_BACK".equalsIgnoreCase(
+                            checkerAction.trim()
+                    )) {
+
+                Messagebox.show(
+                        "Cheque "
+                                + chequeNumber
+                                + " is not marked as SEND_BACK "
+                                + "in cheque_processing.",
+                        "Invalid Return",
+                        Messagebox.OK,
+                        Messagebox.ERROR
+                );
+
+                return;
+            }
+
+            // =================================================
+            // MICR
+            // =================================================
+
+            if (isMicrReturnReason(
+                    checkerReasonCode
+            )) {
+
+                openHoldMicrRepair(
+                        cleanBatchNumber,
+                        chequeNumber
+                );
+
+                return;
+            }
+
+            // =================================================
+            // DATA ENTRY
+            // =================================================
+
+            if (isDataEntryReturnReason(
+                    checkerReasonCode
+            )) {
+
+                openHoldDataEntry(
+                        cleanBatchNumber,
+                        chequeNumber
+                );
+
+                return;
+            }
+
+            // =================================================
+            // UNKNOWN REASON
+            // =================================================
+
+            Messagebox.show(
+                    "Unknown Checker return reason.\n\n"
+                            + "Reason Code: "
+                            + safeValue(
+                                    checkerReasonCode
+                            )
+                            + "\n"
+                            + "Cheque: "
+                            + chequeNumber,
+                    "Checker Return Reason",
+                    Messagebox.OK,
+                    Messagebox.ERROR
+            );
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            Messagebox.show(
+                    "Unable to open returned cheque.\n\n"
+                            + "Batch: "
+                            + cleanBatchNumber
+                            + "\n\n"
+                            + "Error: "
+                            + safeExceptionMessage(e),
+                    "Returned Cheque Error",
+                    Messagebox.OK,
+                    Messagebox.ERROR
+            );
+        }
+    }
+
+    // =========================================================
+    // CHECK MICR RETURN REASON
+    // =========================================================
+
+    private boolean isMicrReturnReason(
+            String checkerReasonCode) {
+
+        if (!hasValue(checkerReasonCode)) {
+
+            return false;
+        }
+
+        return "MICR".equalsIgnoreCase(
+                checkerReasonCode.trim()
+        );
+    }
+
+    // =========================================================
+    // CHECK DATA ENTRY RETURN REASON
+    // =========================================================
+
+    private boolean isDataEntryReturnReason(
+            String checkerReasonCode) {
+
+        if (!hasValue(checkerReasonCode)) {
+
+            return false;
+        }
+
+        String cleanReasonCode =
+                checkerReasonCode.trim();
+
+        return "DATA_ENTRY".equalsIgnoreCase(
+                    cleanReasonCode
+               )
+               ||
+               "DATA ENTRY".equalsIgnoreCase(
+                    cleanReasonCode
+               );
+    }
+
+    // =========================================================
+    // OPEN HOLD DATA ENTRY
+    // =========================================================
+
+    private void openHoldDataEntry(
+            String batchNumber,
+            String chequeNumber) {
+
+        if (!hasValue(batchNumber)
+                || !hasValue(chequeNumber)) {
+
+            Messagebox.show(
+                    "Batch number or cheque number is missing.",
+                    "Data Entry",
+                    Messagebox.OK,
+                    Messagebox.ERROR
+            );
+
+            return;
+        }
+
+        String url =
+                "/zul/outward/outward-maker/"
+                        + "outward-maker-data-entry.zul"
+                        + "?batchNumber="
+                        + encode(batchNumber)
+                        + "&returnMode=HOLD"
+                        + "&chequeNumber="
+                        + encode(chequeNumber);
+
+        System.out.println(
+                "Opening HOLD Data Entry : "
+                        + url
+        );
+
+        Executions.sendRedirect(url);
+    }
+
+    // =========================================================
+    // OPEN HOLD MICR REPAIR
+    // =========================================================
+
+    private void openHoldMicrRepair(
+            String batchNumber,
+            String chequeNumber) {
+
+        if (!hasValue(batchNumber)
+                || !hasValue(chequeNumber)) {
+
+            Messagebox.show(
+                    "Batch number or cheque number is missing.",
+                    "MICR Repair",
+                    Messagebox.OK,
+                    Messagebox.ERROR
+            );
+
+            return;
+        }
+
+        String url =
+                "/zul/outward/outward-maker/"
+                        + "outward-maker-micr-repair.zul"
+                        + "?batchNumber="
+                        + encode(batchNumber)
+                        + "&returnMode=HOLD"
+                        + "&chequeNumber="
+                        + encode(chequeNumber);
+
+        System.out.println(
+                "Opening HOLD MICR Repair : "
+                        + url
+        );
+
+        Executions.sendRedirect(url);
+    }
+
+    // =========================================================
     // SHOW VALIDATION RESULT
     // =========================================================
 
@@ -1625,6 +2244,7 @@ public class OutwardMakerDashboardController
             OutwardValidationResult result) {
 
         if (result == null) {
+
             return;
         }
 
@@ -1689,7 +2309,8 @@ public class OutwardMakerDashboardController
             String batchNumber) {
 
         Executions.sendRedirect(
-                "/zul/outward/outward-maker/outward-maker-data-entry.zul"
+                "/zul/outward/outward-maker/"
+                        + "outward-maker-data-entry.zul"
                         + "?batchNumber="
                         + encode(batchNumber)
         );
@@ -1703,7 +2324,8 @@ public class OutwardMakerDashboardController
             String batchNumber) {
 
         Executions.sendRedirect(
-                "/zul/outward/outward-maker/outward-maker-micr-repair.zul"
+                "/zul/outward/outward-maker/"
+                        + "outward-maker-micr-repair.zul"
                         + "?batchNumber="
                         + encode(batchNumber)
         );
@@ -1731,6 +2353,7 @@ public class OutwardMakerDashboardController
             String batchNumber) {
 
         if (!hasValue(batchNumber)) {
+
             return null;
         }
 
@@ -1740,6 +2363,7 @@ public class OutwardMakerDashboardController
                     service.getBatches();
 
             if (batches == null) {
+
                 return null;
             }
 
@@ -1774,7 +2398,6 @@ public class OutwardMakerDashboardController
 
         return null;
     }
-    
 
     // =========================================================
     // CHECK LOCK STATUS
@@ -1784,6 +2407,7 @@ public class OutwardMakerDashboardController
             String status) {
 
         if (!hasValue(status)) {
+
             return false;
         }
 
@@ -1792,15 +2416,15 @@ public class OutwardMakerDashboardController
 
         return "LOCKED".equalsIgnoreCase(
                     cleanStatus
-                )
-                ||
-                "IN_PROGRESS".equalsIgnoreCase(
-                        cleanStatus
-                )
-                ||
-                "ASSIGNED".equalsIgnoreCase(
-                        cleanStatus
-                );
+               )
+               ||
+               "IN_PROGRESS".equalsIgnoreCase(
+                    cleanStatus
+               )
+               ||
+               "ASSIGNED".equalsIgnoreCase(
+                    cleanStatus
+               );
     }
 
     // =========================================================
@@ -1823,6 +2447,7 @@ public class OutwardMakerDashboardController
             String value) {
 
         if (!hasValue(value)) {
+
             return "-";
         }
 
@@ -1837,6 +2462,7 @@ public class OutwardMakerDashboardController
             Exception e) {
 
         if (e == null) {
+
             return "Unknown error";
         }
 

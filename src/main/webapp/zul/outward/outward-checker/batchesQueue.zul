@@ -18,6 +18,10 @@
                  spacing="20px"
                  apply="com.iispl.cts.controller.outward.checker.CheckerBatchQueueController">
 
+            <!-- ===================================================== -->
+            <!-- PAGE HEADER -->
+            <!-- ===================================================== -->
+
             <label value="Batch Queue"
                    sclass="page-title"/>
 
@@ -25,7 +29,9 @@
                    sclass="page-subtitle"/>
 
 
-            <!-- Search -->
+            <!-- ===================================================== -->
+            <!-- SEARCH -->
+            <!-- ===================================================== -->
 
             <hlayout width="100%"
                      valign="middle"
@@ -50,13 +56,12 @@
             </hlayout>
 
 
-            <!-- Section -->
+            <!-- ===================================================== -->
+            <!-- BATCH LIST -->
+            <!-- ===================================================== -->
 
             <label value="My Batches"
                    sclass="section-title"/>
-
-
-            <!-- Batch List -->
 
             <listbox id="batchListbox"
                      hflex="1"
@@ -85,7 +90,9 @@
             </listbox>
 
 
-            <!-- Pagination -->
+            <!-- ===================================================== -->
+            <!-- PAGINATION -->
+            <!-- ===================================================== -->
 
             <hlayout width="100%"
                      valign="middle"

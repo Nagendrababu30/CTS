@@ -208,7 +208,7 @@ public OutwardValidationResult assignAndValidate(
                 dao.updateChequeStatus(
                         cleanBatchNumber,
                         cheque.getChequeNumber(),
-                        "MICR_VERIFIED"
+                        "MICR_COMPLETED"
                 );
             }
         }
@@ -229,7 +229,7 @@ public OutwardValidationResult assignAndValidate(
 
         dao.updateBatchStatus(
                 cleanBatchNumber,
-                "READY_FOR_CHECKER"
+                "MICR_VERIFIED"
         );
     }
 

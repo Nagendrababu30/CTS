@@ -191,16 +191,17 @@ public class OutwardMakerDataEntryDetailDAO {
      * Records Maker Verification on Save & Next.
      * maker_reason_id is explicitly set to NULL.
      */
+   
     public boolean saveMakerVerify(String batchNumber, String chequeNumber, int makerId) throws SQLException {
         String sql = "INSERT INTO public.cheque_processing "
-                   + "(batch_number, cheque_number, maker_id, maker_action, maker_reason_id) "
+                   + "(batch_number, cheque_number, maker_id, maker_action, maker_reason_code) "
                    + "VALUES (?, ?, ?, 'VERIFY', NULL) "
                    + "ON CONFLICT (batch_number, cheque_number) DO UPDATE SET "
                    + "  maker_id = EXCLUDED.maker_id, "
                    + "  maker_action = 'VERIFY', "
-                   + "  maker_reason_id = NULL";
+                   + "  maker_reason_code = NULL";
 
-        try (Connection con = CTSStaticData.getConnection();
+        try (Connection con = dataSource.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, batchNumber);
@@ -210,51 +211,31 @@ public class OutwardMakerDataEntryDetailDAO {
             return ps.executeUpdate() > 0;
         }
     }
-
     /**
      * Records Maker Rejection Request with the selected reason ID.
      */
-    public boolean saveMakerReject(String batchNumber, String chequeNumber, int makerId, int reasonId) throws SQLException {
-        String sql = "INSERT INTO public.cheque_processing "
-                   + "(batch_number, cheque_number, maker_id, maker_action, maker_reason_id) "
-                   + "VALUES (?, ?, ?, 'REJECT_REQUEST', ?) "
-                   + "ON CONFLICT (batch_number, cheque_number) DO UPDATE SET "
-                   + "  maker_id = EXCLUDED.maker_id, "
-                   + "  maker_action = 'REJECT_REQUEST', "
-                   + "  maker_reason_id = EXCLUDED.maker_reason_id";
-
-        try (Connection con = CTSStaticData.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-
-            ps.setString(1, batchNumber);
-            ps.setString(2, chequeNumber);
-            ps.setInt(3, makerId);
-            ps.setInt(4, reasonId);
-
-            return ps.executeUpdate() > 0;
-        }
-    }
+    /**
+     * Records Maker Rejection Request and marks the cheque as REJECT_REQUESTED.
+     */
+    
 /**
 * Fetches all reasons from public.return_reason_master
 */
-    public Map<Integer, String> getReturnReasons() {
-        Map<Integer, String> reasons = new java.util.LinkedHashMap<>();
+    public Map<String, String> getReturnReasons() {
+        Map<String, String> reasons = new java.util.LinkedHashMap<>();
         
-        // Correct column names matching your Supabase table
-        String sql = "SELECT id, reason_name FROM public.return_reason_master WHERE active = true ORDER BY id ASC";
+        String sql = "SELECT reason_code, reason_name FROM public.return_reason_master WHERE active = true ORDER BY reason_name ASC";
 
-        try (Connection con = CTSStaticData.getConnection();
+        try (Connection con = dataSource.getConnection();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                // Read by column index to prevent any naming issues:
-                // Column 1 is 'id', Column 2 is 'reason_name'
-                int id = rs.getInt(1);
-                String reasonName = rs.getString(2);
-                reasons.put(id, reasonName);
+                String code = rs.getString("reason_code");
+                String name = rs.getString("reason_name");
+                reasons.put(code, name);
             }
-            System.out.println("[DEBUG-CTS] Successfully loaded " + reasons.size() + " reasons from database.");
+            System.out.println("[DEBUG-CTS] Successfully loaded " + reasons.size() + " return reasons from database.");
 
         } catch (Exception e) {
             System.err.println("[DEBUG-CTS] Failed to load return reasons: " + e.getMessage());
@@ -262,13 +243,72 @@ public class OutwardMakerDataEntryDetailDAO {
         }
         return reasons;
     }
+    public boolean saveMakerReject(String batchNumber, String chequeNumber, int makerId, String reasonCode) {
+        String insertProcessingSql = "INSERT INTO public.cheque_processing "
+                                   + "(batch_number, cheque_number, maker_id, maker_action, maker_reason_code) "
+                                   + "VALUES (?, ?, ?, 'REJECT_REQUEST', ?) "
+                                   + "ON CONFLICT (batch_number, cheque_number) DO UPDATE SET "
+                                   + "  maker_id = EXCLUDED.maker_id, "
+                                   + "  maker_action = 'REJECT_REQUEST', "
+                                   + "  maker_reason_code = EXCLUDED.maker_reason_code";
 
+        String updateChequeStatusSql = "UPDATE public.outward_cheque "
+                                     + "SET cheque_status = 'REJECT_REQUESTED' "
+                                     + "WHERE batch_number = ? AND cheque_number = ?";
+
+        Connection con = null;
+        try {
+            con = dataSource.getConnection();
+            con.setAutoCommit(false); // Begin transaction
+
+            // 1. Insert/Update cheque_processing audit record
+            try (PreparedStatement ps1 = con.prepareStatement(insertProcessingSql)) {
+                ps1.setString(1, batchNumber);
+                ps1.setString(2, chequeNumber);
+                ps1.setInt(3, makerId);
+                ps1.setString(4, reasonCode);
+                ps1.executeUpdate();
+            }
+
+            // 2. Update outward_cheque table status
+            try (PreparedStatement ps2 = con.prepareStatement(updateChequeStatusSql)) {
+                ps2.setString(1, batchNumber);
+                ps2.setString(2, chequeNumber);
+                ps2.executeUpdate();
+            }
+
+            con.commit();
+            System.out.println("[DEBUG-CTS] Successfully recorded reject for Cheque " + chequeNumber + " with reason: " + reasonCode);
+            return true;
+
+        } catch (SQLException e) {
+            System.err.println("[DEBUG-CTS] SQL Error in saveMakerReject: " + e.getMessage());
+            e.printStackTrace();
+            if (con != null) {
+                try {
+                    con.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            return false;
+        } finally {
+            if (con != null) {
+                try {
+                    con.setAutoCommit(true);
+                    con.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }
 /**
 * Updates cheque status in public.outward_cheque
 */
 public boolean updateChequeStatus(String batchNumber, String chequeNumber, String status) throws SQLException {
 String sql = "UPDATE public.outward_cheque SET cheque_status = ? WHERE batch_number = ? AND cheque_number = ?";
-try (Connection con = CTSStaticData.getConnection();
+try (Connection con = dataSource.getConnection();
 PreparedStatement ps = con.prepareStatement(sql)) {
 ps.setString(1, status);
 ps.setString(2, batchNumber);

@@ -254,13 +254,13 @@
                 </hlayout>
             </div>
 
-           <!-- =================================================
+            <!-- =================================================
                  MAIN SPLIT ROW (EQUAL BALANCED HEIGHTS)
                  ================================================= -->
             <hlayout width="100%" spacing="16px" valign="top">
 
                 <!-- LEFT CARD: SCANNED CHEQUE VIEW -->
-                <groupbox hflex="1" height="455px" sclass="equal-card">
+                <groupbox hflex="1" height="465px" sclass="equal-card">
                     <vlayout width="100%" height="100%" spacing="10px">
                         
                         <!-- Header with Blue Icon & Subtitle -->
@@ -302,7 +302,7 @@
                 </groupbox>
 
                 <!-- RIGHT CARD: CHEQUE DATA VERIFICATION FORM -->
-                <groupbox hflex="1" height="455px" sclass="equal-card">
+                <groupbox hflex="1" height="465px" sclass="equal-card">
                     <vlayout width="100%" height="100%" spacing="10px">
 
                         <!-- Header with Blue Icon & Subtitle -->
@@ -376,9 +376,11 @@
                                 <label value="AMOUNT IN WORDS" sclass="single-field-label"/>
                                 <label value="*" sclass="label-star"/>
                             </hlayout>
-                            <textbox id="amountInWordsTextbox" width="100%" placeholder="Enter amount in words" sclass="single-field-box"/>
+                            <textbox id="amountInWordsTextbox" width="100%" placeholder="Enter amount in words" readonly="true" sclass="single-field-box"/>
                         </vlayout>
-                        <space height="5px"/>
+
+                        <!-- Extra spacing between form fields and bottom actions -->
+                        <space height="12px"/>
 
                         <!-- Actions pinned evenly at the bottom -->
                         <vlayout width="100%" spacing="8px" style="margin-top:auto;">
@@ -386,23 +388,16 @@
                             <hlayout width="100%" valign="middle" spacing="8px">
                                 <button id="prevButton" label="Prev" width="80px" height="36px"
                                         style="background:#2563EB !important; color:#FFFFFF !important; border:none !important; font-size:12px !important; font-weight:600 !important; border-radius:6px !important; cursor:pointer !important;"/>
-                                <button id="saveNextButton" label="💾 Save &amp; Next" width="130px" height="36px"
+                                <button id="saveNextButton" label="💾 Save &amp; Next" hflex="1" height="36px"
                                         style="background:#2563EB !important; color:#FFFFFF !important; border:none !important; font-size:12px !important; font-weight:600 !important; border-radius:6px !important; cursor:pointer !important;"/>
                             </hlayout>
 
-                            <!-- BOTTOM ROW: Rejection Action -->
-                            <hlayout width="100%" valign="middle" spacing="8px">
-                                <combobox id="rejectReasonCombobox"
-                                          placeholder="Select Rejection Reason..."
-                                          readonly="true"
-                                          autodrop="true"
-                                          autocomplete="true"
-                                          hflex="1"
-                                          sclass="single-field-box"/>
+                            <!-- BOTTOM ROW: Clean Rejection Action Button -->
+                            <hlayout width="100%" valign="middle">
                                 <button id="rejectRequestButton"
                                         label="⚠ Reject Request"
                                         tooltiptext="Submit rejection request for Checker review"
-                                        width="135px"
+                                        width="100%"
                                         height="36px"
                                         style="background:#FFF1F2 !important; color:#BE123C !important; border:1px solid #FECDD3 !important; font-size:12px !important; font-weight:600 !important; border-radius:6px !important; cursor:pointer !important;"/>
                             </hlayout>
@@ -412,7 +407,86 @@
                 </groupbox>
 
             </hlayout>
+
+          <!-- =========================================================
+     MODAL WINDOW: CHEQUE REJECTION (ENTERPRISE BANKING STANDARD)
+     ========================================================= -->
+<window id="rejectModalWindow" 
+        border="none" 
+        width="420px"
+        visible="false" 
+        closable="false" 
+        position="center,center"
+        style="background: #FFFFFF; border-radius: 10px; box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08); border: 1px solid #E2E8F0; overflow: hidden;">
+
+    <vlayout spacing="0" width="100%">
+        <!-- Clean Header Strip -->
+        <div width="100%" style="padding: 14px 20px; background: #FFFFFF; border-bottom: 1px solid #F1F5F9; display: flex; align-items: center; justify-content: space-between;">
+            <hlayout spacing="8px" valign="middle">
+                <div style="width: 26px; height: 26px; border-radius: 6px; background: #FFF1F2; border: 1px solid #FECDD3; display: flex; align-items: center; justify-content: center;">
+                    <label value="⚠" style="font-size: 13px; color: #BE123C; font-weight: 700; line-height: 1;"/>
+                </div>
+                <label value="Confirm Cheque Rejection" style="font-size: 14px; font-weight: 700; color: #0F172A; letter-spacing: -0.2px;"/>
+            </hlayout>
+
+            <button label="✕" 
+                    onClick="rejectModalWindow.setVisible(false)"
+                    tooltiptext="Close"
+                    style="background: transparent !important; border: none !important; color: #94A3B8 !important; font-size: 13px !important; font-weight: 700 !important; cursor: pointer !important; padding: 2px 6px !important; line-height: 1 !important;"/>
+        </div>
+
+        <!-- Form Body -->
+        <vlayout spacing="14px" style="padding: 18px 20px 20px 20px;">
+            <!-- Reason Field -->
+            <vlayout spacing="5px" width="100%">
+                <hlayout spacing="0" valign="middle">
+                    <label value="REJECTION REASON" style="font-size: 11px; font-weight: 700; color: #475569; letter-spacing: 0.3px;"/>
+                    <label value="*" sclass="label-star"/>
+                </hlayout>
+                <combobox id="modalRejectReasonCombobox" 
+                          width="100%" 
+                          height="36px"
+                          placeholder="Select CTS return reason..." 
+                          readonly="true" 
+                          autodrop="true" 
+                          autocomplete="true"
+                          style="font-size: 12.5px; font-weight: 500;"/>
+            </vlayout>
+
+            <!-- Remarks Field -->
+            <vlayout spacing="5px" width="100%">
+                <hlayout spacing="0" valign="middle">
+                    <label value="MAKER REMARKS" style="font-size: 11px; font-weight: 700; color: #475569; letter-spacing: 0.3px;"/>
+                    <label value="(OPTIONAL)" style="font-size: 10px; font-weight: 600; color: #94A3B8; margin-left: 4px;"/>
+                </hlayout>
+                <textbox id="modalRejectRemarksTextbox" 
+                         width="100%" 
+                         rows="2" 
+                         placeholder="Add clarification notes for Checker review..." 
+                         style="font-size: 12.5px; color: #0F172A; line-height: 1.4; padding: 8px 10px; border: 1px solid #CBD5E1; border-radius: 6px; background: #F8FAFC; resize: none; box-sizing: border-box; font-family: inherit;"/>
+            </vlayout>
         </vlayout>
 
+        <!-- Centered Professional Action Footer -->
+        <div width="100%" style="padding: 12px 20px; background: #F8FAFC; border-top: 1px solid #E2E8F0; display: flex; justify-content: center; align-items: center;">
+            <hlayout spacing="10px" style="justify-content: center;">
+                <button id="cancelRejectModalButton" 
+                        label="Cancel" 
+                        height="34px" 
+                        width="90px"
+                        onClick="rejectModalWindow.setVisible(false)"
+                        style="background: #FFFFFF !important; color: #334155 !important; border: 1px solid #CBD5E1 !important; border-radius: 6px !important; font-size: 12px !important; font-weight: 600 !important; cursor: pointer !important; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;"/>
+
+                <button id="confirmRejectModalButton" 
+                        label="Confirm &amp; Reject" 
+                        height="34px" 
+                        width="140px"
+                        forward="onClick=spaceOwner.onConfirmRejectModal"
+                        style="background: #BE123C !important; color: #FFFFFF !important; border: none !important; border-radius: 6px !important; font-size: 12px !important; font-weight: 600 !important; cursor: pointer !important; box-shadow: 0 1px 2px rgba(190, 18, 60, 0.25) !important;"/>
+            </hlayout>
+        </div>
+    </vlayout>
+</window>
+        </vlayout>
     </div>
 </zk>

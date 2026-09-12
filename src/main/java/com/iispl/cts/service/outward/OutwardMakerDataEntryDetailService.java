@@ -57,7 +57,7 @@ public class OutwardMakerDataEntryDetailService {
 	    }
 	}
 
-	public boolean recordMakerReject(String batchNumber, String chequeNumber, int makerId, int reasonId) {
+	public boolean recordMakerReject(String batchNumber, String chequeNumber, int makerId, String reasonId) {
 	    try {
 	        dao.updateChequeStatus(batchNumber, chequeNumber, "REJECT_REQUESTED");
 	        return dao.saveMakerReject(batchNumber, chequeNumber, makerId, reasonId);
@@ -67,7 +67,7 @@ public class OutwardMakerDataEntryDetailService {
 	    }
 	}
 
-	public Map<Integer, String> getReturnReasons() {
+	public Map<String, String> getReturnReasons() {
 		// TODO Auto-generated method stub
 		return dao.getReturnReasons();
 	}

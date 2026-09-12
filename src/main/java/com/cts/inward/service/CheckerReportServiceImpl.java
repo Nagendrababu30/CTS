@@ -1,11 +1,11 @@
 package com.cts.inward.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import com.cts.inward.dao.CheckerReportDao;
 import com.cts.inward.dao.CheckerReportDaoImpl;
-
 
 public class CheckerReportServiceImpl implements CheckerReportService {
 
@@ -20,16 +20,6 @@ public class CheckerReportServiceImpl implements CheckerReportService {
     }
 
     @Override
-    public List<Map<String, Object>> getRrfReportData() {
-        return reportDao.getRrfReportData();
-    }
-
-    @Override
-    public List<Map<String, Object>> getApprovedReportData() {
-        return reportDao.getApprovedReportData();
-    }
-
-    @Override
     public String generateRrfXml() {
         List<Map<String, Object>> rrfData = reportDao.getRrfReportData();
 
@@ -37,6 +27,7 @@ public class CheckerReportServiceImpl implements CheckerReportService {
             return null;
         }
 
+        List<Long> statusHistoryIds = new ArrayList<>();
         StringBuilder xmlBuilder = new StringBuilder();
 
         xmlBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -48,8 +39,13 @@ public class CheckerReportServiceImpl implements CheckerReportService {
         xmlBuilder.append("    <ReturnedCheques>\n");
 
         for (Map<String, Object> item : rrfData) {
+            Long statusHistoryId = ((Number) item.get("statusHistoryId")).longValue();
+            statusHistoryIds.add(statusHistoryId);
+
+            String batchId = String.format("BATCH%03d", ((Number) item.get("batchId")).longValue());
+
             xmlBuilder.append("        <Cheque>\n");
-            xmlBuilder.append("            <BatchID>").append(item.get("batchId")).append("</BatchID>\n");
+            xmlBuilder.append("            <BatchID>").append(batchId).append("</BatchID>\n");
             xmlBuilder.append("            <ChequeNumber>").append(item.get("chequeNo") != null ? item.get("chequeNo") : "").append("</ChequeNumber>\n");
             xmlBuilder.append("            <ChequeAmount>").append(item.get("amount") != null ? item.get("amount") : "").append("</ChequeAmount>\n");
             xmlBuilder.append("            <DrawerAccountNumber>").append(item.get("drawerAccountNo") != null ? item.get("drawerAccountNo") : "").append("</DrawerAccountNumber>\n");
@@ -66,6 +62,8 @@ public class CheckerReportServiceImpl implements CheckerReportService {
         xmlBuilder.append("    </ReturnedCheques>\n");
         xmlBuilder.append("</RRFDocument>");
 
+        reportDao.updateRrfReportGenerated(statusHistoryIds);
+
         return xmlBuilder.toString();
     }
 
@@ -77,6 +75,7 @@ public class CheckerReportServiceImpl implements CheckerReportService {
             return null;
         }
 
+        List<Long> statusHistoryIds = new ArrayList<>();
         StringBuilder xmlBuilder = new StringBuilder();
 
         xmlBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -88,8 +87,13 @@ public class CheckerReportServiceImpl implements CheckerReportService {
         xmlBuilder.append("    <Cheques>\n");
 
         for (Map<String, Object> item : approvedData) {
+            Long statusHistoryId = ((Number) item.get("statusHistoryId")).longValue();
+            statusHistoryIds.add(statusHistoryId);
+
+            String batchId = String.format("BATCH%03d", ((Number) item.get("batchId")).longValue());
+
             xmlBuilder.append("        <Cheque>\n");
-            xmlBuilder.append("            <BatchID>").append(item.get("batchId")).append("</BatchID>\n");
+            xmlBuilder.append("            <BatchID>").append(batchId).append("</BatchID>\n");
             xmlBuilder.append("            <ChequeNumber>").append(item.get("chequeNo") != null ? item.get("chequeNo") : "").append("</ChequeNumber>\n");
             xmlBuilder.append("            <ChequeAmount>").append(item.get("amount") != null ? item.get("amount") : "").append("</ChequeAmount>\n");
             xmlBuilder.append("            <AccountNumber>").append(item.get("accountNumber") != null ? item.get("accountNumber") : "").append("</AccountNumber>\n");
@@ -104,7 +108,8 @@ public class CheckerReportServiceImpl implements CheckerReportService {
         xmlBuilder.append("    </Cheques>\n");
         xmlBuilder.append("</ApprovedChequesDocument>");
 
+        reportDao.updateApprovedReportGenerated(statusHistoryIds);
+
         return xmlBuilder.toString();
-        
     }
 }

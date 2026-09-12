@@ -1330,7 +1330,7 @@ public class OutwardMakerDashboardDAO {
         }
     }
 
-    // ============================================================
+ // ============================================================
     // UPDATE CHEQUE STATUS
     // ============================================================
 
@@ -1346,10 +1346,9 @@ public class OutwardMakerDashboardDAO {
                 + "AND cheque_number = ?";
 
         try (Connection con =
-                     dataSource.getConnection();
+                     dataSource.getConnection()) {
 
-             PreparedStatement ps =
-                     con.prepareStatement(sql)) {
+            con.setAutoCommit(false);
 
             ps.setString(
                     1,
@@ -1366,7 +1365,28 @@ public class OutwardMakerDashboardDAO {
                     chequeNumber
             );
 
-            return ps.executeUpdate() > 0;
+            try (PreparedStatement ps =
+                         con.prepareStatement(sql)) {
+
+
+                ps.setString(1, status);
+                ps.setString(2, batchNumber);
+                ps.setString(3, chequeNumber);
+
+                boolean updated = ps.executeUpdate() > 0;
+
+                if (updated) {
+                    con.commit();
+                } else {
+                    con.rollback();
+                }
+
+                return updated;
+
+            } catch (SQLException e) {
+                con.rollback();
+                throw e;
+            }
         }
     }
 
@@ -1384,10 +1404,10 @@ public class OutwardMakerDashboardDAO {
                 + "WHERE batch_number = ?";
 
         try (Connection con =
-                     dataSource.getConnection();
+                     dataSource.getConnection()) {
 
-             PreparedStatement ps =
-                     con.prepareStatement(sql)) {
+            con.setAutoCommit(false);
+
 
             ps.setString(
                     1,
@@ -1399,7 +1419,27 @@ public class OutwardMakerDashboardDAO {
                     batchNumber
             );
 
-            return ps.executeUpdate() > 0;
+            try (PreparedStatement ps =
+                         con.prepareStatement(sql)) {
+
+
+                ps.setString(1, status);
+                ps.setString(2, batchNumber);
+
+                boolean updated = ps.executeUpdate() > 0;
+
+                if (updated) {
+                    con.commit();
+                } else {
+                    con.rollback();
+                }
+
+                return updated;
+
+            } catch (SQLException e) {
+                con.rollback();
+                throw e;
+            }
         }
     }
 

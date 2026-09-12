@@ -306,6 +306,7 @@ public class OutwardMakerDashboardService {
                 // MICR VALID
                 // -------------------------------------------------
 
+
                 else {
 
                     dao.updateChequeStatus(
@@ -314,6 +315,8 @@ public class OutwardMakerDashboardService {
                             "MICR_VERIFIED"
                     );
                 }
+
+                
             }
         }
 
@@ -330,11 +333,19 @@ public class OutwardMakerDashboardService {
 
         } else {
 
+
             dao.updateBatchStatus(
                     cleanBatchNumber,
                     "READY_FOR_CHECKER"
             );
         }
+
+        dao.updateBatchStatus(
+                cleanBatchNumber,
+                "MICR_VERIFIED"
+        );
+    }
+
 
         // =====================================================
         // STEP 6: RETURN VALIDATION RESULT

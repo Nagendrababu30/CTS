@@ -24,6 +24,7 @@ import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
+import org.zkoss.zul.Window;
 
 import com.iispl.cts.model.outward.OutwardCheque;
 import com.iispl.cts.service.outward.OutwardMakerDataEntryDetailService;
@@ -80,7 +81,7 @@ public class OutwardMakerDataEntryDetailController extends SelectorComposer<Comp
     @Wire
     private Image backImage;
 
-    // Toolbar & Action Buttons
+    // Toolbar & Main Action Buttons
     @Wire
     private Button backToListButton;
 
@@ -105,8 +106,21 @@ public class OutwardMakerDataEntryDetailController extends SelectorComposer<Comp
     @Wire
     private Button saveNextButton;
 
+    // Modal Components
     @Wire
-    private Combobox rejectReasonCombobox;
+    private Window rejectModalWindow;
+
+    @Wire
+    private Combobox modalRejectReasonCombobox;
+
+    @Wire
+    private Textbox modalRejectRemarksTextbox;
+
+    @Wire
+    private Button cancelRejectModalButton;
+
+    @Wire
+    private Button confirmRejectModalButton;
 
     // Service & State
     private OutwardMakerDataEntryDetailService service;
@@ -161,7 +175,7 @@ public class OutwardMakerDataEntryDetailController extends SelectorComposer<Comp
         if (allVerified) {
             currentIndex = cheques.size() - 1; // Land on last cheque
             updateBatchSummaryMetrics();
-            loadRejectReasons();
+            loadRejectReasonsIntoModal();
             loadCheque();
 
             Messagebox.show(
@@ -180,7 +194,7 @@ public class OutwardMakerDataEntryDetailController extends SelectorComposer<Comp
 
         currentIndex = findFirstPendingChequeIndex();
         updateBatchSummaryMetrics();
-        loadRejectReasons(); // Loaded right before initial cheque display
+        loadRejectReasonsIntoModal();
         loadCheque();
     }
 
@@ -249,9 +263,6 @@ public class OutwardMakerDataEntryDetailController extends SelectorComposer<Comp
         if (amountInWordsTextbox != null) {
             amountInWordsTextbox.setValue(cheque.getAmountInWords() != null ? cheque.getAmountInWords() : "");
         }
-        if (rejectReasonCombobox != null) {
-            rejectReasonCombobox.setSelectedIndex(-1);
-        }
 
         updateNavButtons();
     }
@@ -261,9 +272,9 @@ public class OutwardMakerDataEntryDetailController extends SelectorComposer<Comp
             boolean isFirst = (currentIndex == 0);
             prevButton.setDisabled(isFirst);
             if (isFirst) {
-                prevButton.setStyle("background:#CBD5E1 !important; color:#94A3B8 !important; border:none !important; font-size:12px !important; font-weight:600 !important; border-radius:4px !important; cursor:not-allowed !important;");
+                prevButton.setStyle("background:#CBD5E1 !important; color:#94A3B8 !important; border:none !important; font-size:12px !important; font-weight:600 !important; border-radius:6px !important; cursor:not-allowed !important;");
             } else {
-                prevButton.setStyle("background:#0091FF !important; color:#FFFFFF !important; border:none !important; font-size:12px !important; font-weight:600 !important; border-radius:4px !important; cursor:pointer !important;");
+                prevButton.setStyle("background:#2563EB !important; color:#FFFFFF !important; border:none !important; font-size:12px !important; font-weight:600 !important; border-radius:6px !important; cursor:pointer !important;");
             }
         }
     }
@@ -334,7 +345,7 @@ public class OutwardMakerDataEntryDetailController extends SelectorComposer<Comp
         Object sessionUserIdObj = Sessions.getCurrent().getAttribute("userId");
         int makerId = (sessionUserIdObj instanceof Number) ? ((Number) sessionUserIdObj).intValue() : 1;
 
-        // Persists cheque fields and records maker action 'VERIFY' in public.cheque_processing
+        // Persists cheque fields and records maker action 'VERIFY'
         service.saveAndVerifyCheque(cheque, makerId);
 
         // Sync Metrics Strip
@@ -345,33 +356,80 @@ public class OutwardMakerDataEntryDetailController extends SelectorComposer<Comp
     }
 
     // =========================================================
-    // ACTION 2: REJECT REQUEST LISTENER
+    // MODAL REJECTION WORKFLOW
     // =========================================================
+
+    /**
+     * Open the Rejection Modal Window when user clicks '⚠ Reject Request'
+     */
+    /**
+     * Open the Rejection Modal Window when user clicks '⚠ Reject Request'
+     */
     @Listen("onClick = #rejectRequestButton")
-    public void onRejectRequest() {
+    public void onOpenRejectModal() {
+        if (rejectModalWindow != null) {
+            // Populate/refresh items right at modal launch time
+            loadRejectReasonsIntoModal();
+
+            if (modalRejectReasonCombobox != null) {
+                modalRejectReasonCombobox.setSelectedIndex(-1);
+            }
+            if (modalRejectRemarksTextbox != null) {
+                modalRejectRemarksTextbox.setValue("");
+            }
+
+            rejectModalWindow.setVisible(true);
+            rejectModalWindow.doModal();
+        }
+    }
+
+    @Listen("onClick = #cancelRejectModalButton; onClose = #rejectModalWindow")
+    public void onCancelRejectModal() {
+        if (rejectModalWindow != null) {
+            rejectModalWindow.setVisible(false);
+        }
+    }
+
+    /**
+     * Submit Rejection from the Modal
+     */
+    /**
+     * Submit Rejection from the Modal
+     */
+    @Listen("onConfirmRejectModal = #rejectModalWindow; onClick = #confirmRejectModalButton")
+    public void onConfirmRejectModal() {
         OutwardCheque currentCheque = cheques.get(currentIndex);
 
-        Comboitem selectedItem = rejectReasonCombobox.getSelectedItem();
+        Comboitem selectedItem = modalRejectReasonCombobox != null ? modalRejectReasonCombobox.getSelectedItem() : null;
         if (selectedItem == null || selectedItem.getValue() == null) {
-            Messagebox.show("Please select a rejection reason from the dropdown.", 
-                            "Validation", Messagebox.OK, Messagebox.EXCLAMATION);
-            rejectReasonCombobox.setFocus(true);
+            Messagebox.show(
+                "Please select a rejection reason before proceeding.", 
+                "Validation", 
+                Messagebox.OK, 
+                Messagebox.EXCLAMATION
+            );
+            if (modalRejectReasonCombobox != null) modalRejectReasonCombobox.setFocus(true);
             return;
         }
 
-        int reasonId = ((Number) selectedItem.getValue()).intValue();
+        // Fix: reason_code is a VARCHAR String, not a Number
+        String reasonCode = selectedItem.getValue().toString();
 
         Object sessionUserIdObj = Sessions.getCurrent().getAttribute("userId");
         int makerId = (sessionUserIdObj instanceof Number) ? ((Number) sessionUserIdObj).intValue() : 1;
 
         boolean success = service.recordMakerReject(
-            currentCheque.getBatchNumber(), 
-            currentCheque.getChequeNumber(), 
-            makerId, 
-            reasonId
+            currentCheque.getBatchNumber(),
+            currentCheque.getChequeNumber(),
+            makerId,
+            reasonCode // ensure service accepts String
         );
 
         if (success) {
+            if (rejectModalWindow != null) {
+                rejectModalWindow.setVisible(false);
+            }
+
             currentCheque.setChequeStatus("REJECT_REQUESTED");
             updateBatchSummaryMetrics();
             handleNextOrComplete();
@@ -409,7 +467,6 @@ public class OutwardMakerDataEntryDetailController extends SelectorComposer<Comp
                 currentIndex = firstPending;
                 loadCheque();
             } else {
-                // FIX: Safely parse userId as Number (prevents Long to Integer ClassCastException)
                 Object sessionUserIdObj = Sessions.getCurrent().getAttribute("userId");
                 int currentUserId = (sessionUserIdObj instanceof Number) ? ((Number) sessionUserIdObj).intValue() : 1;
 
@@ -551,17 +608,28 @@ public class OutwardMakerDataEntryDetailController extends SelectorComposer<Comp
     }
 
     // =========================================================
-    // REJECTION REASONS LOADER
+    // REJECTION REASONS LOADER (POPULATES MODAL COMBOBOX)
     // =========================================================
-    private void loadRejectReasons() {
-        if (rejectReasonCombobox == null) {
-            System.err.println("[DEBUG-CTS] Combobox is NULL");
+   
+    
+    
+ // =========================================================
+    // REJECTION REASONS LOADER (POPULATES MODAL COMBOBOX)
+    // =========================================================
+    private void loadRejectReasonsIntoModal() {
+        // Fallback resolution in case nested @Wire was delayed
+        if (modalRejectReasonCombobox == null && rejectModalWindow != null) {
+            modalRejectReasonCombobox = (Combobox) rejectModalWindow.getFellowIfAny("modalRejectReasonCombobox");
+        }
+
+        if (modalRejectReasonCombobox == null) {
+            System.err.println("[DEBUG-CTS] modalRejectReasonCombobox is NULL!");
             return;
         }
 
-        rejectReasonCombobox.getItems().clear();
+        modalRejectReasonCombobox.getItems().clear();
 
-        Map<Integer, String> reasons = null;
+        Map<String, String> reasons = null;
         try {
             reasons = service.getReturnReasons();
         } catch (Exception ex) {
@@ -569,22 +637,21 @@ public class OutwardMakerDataEntryDetailController extends SelectorComposer<Comp
             ex.printStackTrace();
         }
 
-        System.out.println("[DEBUG-CTS] Reasons map fetched: " + (reasons != null ? reasons.size() : "NULL"));
+        if (reasons != null && !reasons.isEmpty()) {
+            for (Map.Entry<String, String> entry : reasons.entrySet()) {
+                String code = entry.getKey();
+                String name = entry.getValue();
 
-        // If DB returned nothing, add test items to verify the UI displays
-        if (reasons == null || reasons.isEmpty()) {
-            System.out.println("[DEBUG-CTS] Populating HARDCODED test reasons to verify UI...");
-            rejectReasonCombobox.appendItem("01 - Funds Insufficient").setValue(1);
-            rejectReasonCombobox.appendItem("02 - Image Not Clear / Illegible").setValue(2);
-            rejectReasonCombobox.appendItem("03 - Drawer Signature Missing / Differs").setValue(3);
-            rejectReasonCombobox.appendItem("04 - Amount in Words and Figures Differ").setValue(4);
-            rejectReasonCombobox.appendItem("05 - Instrument Mutilated / Torn").setValue(5);
-        } else {
-            for (Map.Entry<Integer, String> entry : reasons.entrySet()) {
-                Comboitem item = new Comboitem(entry.getValue());
-                item.setValue(((Number) entry.getKey()).intValue());
-                rejectReasonCombobox.appendChild(item);
+                // Format: CODE - Description
+                String displayLabel = code + " - " + name;
+
+                Comboitem item = new Comboitem(displayLabel);
+                item.setValue(code); // String varchar reason_code
+                modalRejectReasonCombobox.appendChild(item);
             }
+            System.out.println("[DEBUG-CTS] Appended " + modalRejectReasonCombobox.getItemCount() + " items to combobox.");
+        } else {
+            System.err.println("[DEBUG-CTS] return_reason_master query returned 0 rows or NULL.");
         }
     }
     @Listen("onChange = #amountTextbox; onChanging = #amountTextbox")
@@ -592,7 +659,6 @@ public class OutwardMakerDataEntryDetailController extends SelectorComposer<Comp
         BigDecimal enteredAmount = null;
 
         if (event instanceof InputEvent) {
-            // Fires immediately on every key stroke
             String val = ((InputEvent) event).getValue();
             if (val != null && !val.trim().isEmpty()) {
                 try {
@@ -603,7 +669,6 @@ public class OutwardMakerDataEntryDetailController extends SelectorComposer<Comp
                 }
             }
         } else {
-            // Fires on blur, Enter, or Tab
             enteredAmount = amountTextbox.getValue();
         }
 
@@ -619,6 +684,7 @@ public class OutwardMakerDataEntryDetailController extends SelectorComposer<Comp
             amountInWordsTextbox.setValue(words);
         }
     }
+
     public static String convertNumberToIndianWords(BigDecimal amount) {
         if (amount == null) return "";
 
@@ -665,10 +731,6 @@ public class OutwardMakerDataEntryDetailController extends SelectorComposer<Comp
             words.append(convertToIndianFormat(n / 100000)).append(" Lakh ");
             n %= 100000;
         }
-        if (n / 1000 > 0) {
-            words.append(convertToIndianFormat(n / 1000)).append(" Thousand ");
-            n %= 1000;
-        }
         if (n / 100 > 0) {
             words.append(convertToIndianFormat(n / 100)).append(" Hundred ");
             n %= 100;
@@ -686,5 +748,5 @@ public class OutwardMakerDataEntryDetailController extends SelectorComposer<Comp
         }
         return words.toString().trim();
     }
-
+    
 }

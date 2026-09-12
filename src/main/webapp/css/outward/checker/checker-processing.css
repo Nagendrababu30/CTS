@@ -11,7 +11,8 @@
 
 .checker-processing-page {
     width: 100%;
-    min-height: 100%;
+    height: 100%;
+    min-height: 0;
     padding: clamp(16px, 2vw, 24px);
     box-sizing: border-box;
     overflow: auto;
@@ -25,6 +26,8 @@
 
 #processingPage {
     width: 100%;
+    height: 100%;
+    min-height: 0;
 }
 
 
@@ -64,6 +67,7 @@
 
 .cheque-information-row {
     width: 100%;
+    min-height: 0;
     align-items: stretch;
     box-sizing: border-box;
 }
@@ -74,6 +78,8 @@
    ============================================================ */
 
 .processing-card {
+    min-width: 0;
+    min-height: 0;
     background: #ffffff;
     border: 1px solid #dce3ec;
     border-radius: 8px;
@@ -86,43 +92,36 @@
 /* ============================================================
    CHEQUE IMAGE CARD
    55%
+
+   IMPORTANT:
+   No fixed height here.
+   ZK vflex="1" controls the available height.
    ============================================================ */
 
 .cheque-image-card {
     width: 55%;
-    flex: 0 0 55%;
     min-width: 0;
-
-    /*
-     * Dynamic height.
-     * Changes according to viewport height.
-     */
-    height: clamp(
-        460px,
-        calc(100vh - 270px),
-        700px
-    );
+    min-height: 0;
+    height: auto;
+    box-sizing: border-box;
 }
 
 
 /* ============================================================
    CHEQUE DETAILS CARD
    42%
+
+   IMPORTANT:
+   No fixed height here.
+   ZK vflex="1" controls the available height.
    ============================================================ */
 
 .cheque-details-card {
     width: 42%;
-    flex: 0 0 42%;
     min-width: 0;
-
-    /*
-     * Same dynamic height as image card.
-     */
-    height: clamp(
-        460px,
-        calc(100vh - 270px),
-        700px
-    );
+    min-height: 0;
+    height: auto;
+    box-sizing: border-box;
 }
 
 
@@ -142,8 +141,7 @@
    ZK SEPARATOR
    ============================================================ */
 
-.processing-card > .z-separator,
-.processing-card > separator {
+.processing-card > .z-separator {
     margin: 0;
 }
 
@@ -166,18 +164,13 @@
 .image-side-button {
     min-width: 74px;
     height: 32px;
-
     padding: 0 14px;
-
     border: 1px solid #cbd5e1;
     border-radius: 5px;
-
     background: #ffffff;
     color: #526275;
-
     font-size: 12px;
     font-weight: 500;
-
     box-sizing: border-box;
 }
 
@@ -195,36 +188,28 @@
 
 /* ============================================================
    CHEQUE IMAGE CONTAINER
-   Dynamic Height
+
+   IMPORTANT:
+   Do NOT give this a fixed height.
+
+   The ZUL already has:
+       vflex="1"
+
+   Therefore ZK will allocate the remaining space here.
    ============================================================ */
 
 .cheque-image-container {
     width: 100%;
-
-    /*
-     * The ZUL currently specifies height="350px".
-     * !important allows this responsive CSS to override that
-     * fixed inline ZK height.
-     */
-    height: clamp(
-        240px,
-        40vh,
-        480px
-    ) !important;
-
-    min-height: 220px;
-
+    min-width: 0;
+    min-height: 0;
+    height: auto;
     background: #f8fafc;
-
     border: 1px solid #dfe5ed;
     border-radius: 6px;
-
     box-sizing: border-box;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     overflow: hidden;
 }
 
@@ -235,12 +220,11 @@
 
 .cheque-image-container .z-image,
 .cheque-image-container img {
+    display: block;
     max-width: 100%;
     max-height: 100%;
-
     width: auto;
     height: auto;
-
     object-fit: contain;
 }
 
@@ -258,15 +242,11 @@
 .image-control-button,
 .image-zoom-button {
     height: 30px;
-
     border: 1px solid #cbd5e1;
     border-radius: 5px;
-
     background: #ffffff;
     color: #526275;
-
     font-size: 12px;
-
     box-sizing: border-box;
 }
 
@@ -287,9 +267,7 @@
 
 .zoom-level {
     min-width: 42px;
-
     text-align: center;
-
     font-size: 12px;
     color: #526275;
 }
@@ -301,21 +279,12 @@
 
 .cheque-details-scroll {
     width: 100%;
-
-    /*
-     * Details scroll internally.
-     */
+    min-width: 0;
+    min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
-
     padding-right: 8px;
-
     box-sizing: border-box;
-
-    /*
-     * Prevent content from forcing the card wider.
-     */
-    min-width: 0;
 }
 
 
@@ -332,12 +301,9 @@
 .detail-section-title {
     font-size: 13px;
     font-weight: 600;
-
     color: #34475d;
-
     text-transform: uppercase;
     letter-spacing: 0.4px;
-
     line-height: 20px;
 }
 
@@ -349,11 +315,8 @@
 .section-divider {
     width: 100%;
     height: 1px;
-
     background: #e2e7ed;
-
     margin-bottom: 4px;
-
     box-sizing: border-box;
 }
 
@@ -364,17 +327,10 @@
 
 .detail-row {
     width: 100%;
-
-    min-height: 30px;
-
-    padding: 5px 0;
-
-    box-sizing: border-box;
-
-    /*
-     * Important for narrow screens.
-     */
     min-width: 0;
+    min-height: 30px;
+    padding: 5px 0;
+    box-sizing: border-box;
 }
 
 
@@ -384,14 +340,10 @@
 
 .detail-label {
     width: clamp(130px, 12vw, 190px);
-
     flex-shrink: 0;
-
     font-size: 13px;
     color: #68788b;
-
     line-height: 20px;
-
     box-sizing: border-box;
 }
 
@@ -402,14 +354,10 @@
 
 .detail-value {
     min-width: 0;
-
     font-size: 14px;
     font-weight: 500;
-
     color: #17283d;
-
     line-height: 20px;
-
     overflow-wrap: anywhere;
     word-break: break-word;
 }
@@ -421,14 +369,10 @@
 
 .amount-value {
     min-width: 0;
-
     font-size: 14px;
     font-weight: 600;
-
     color: #17283d;
-
     line-height: 20px;
-
     overflow-wrap: anywhere;
 }
 
@@ -439,15 +383,11 @@
 
 .micr-value {
     min-width: 0;
-
     font-size: 13px;
     font-weight: 500;
-
     color: #17283d;
-
     letter-spacing: 0.6px;
     line-height: 20px;
-
     overflow-wrap: anywhere;
 }
 
@@ -484,30 +424,16 @@
 }
 
 .cbs-validation-message {
+    min-width: 0;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 500;
+    color: #526b82;
+    overflow-wrap: anywhere;
 }
 
 .cbs-validation-reason {
     font-size: 12px;
     line-height: 18px;
-}
-
-.cbs-validation-icon {
-    min-width: 16px;
-
-    font-size: 13px;
-}
-
-.cbs-validation-message {
-    min-width: 0;
-
-    font-size: 12px;
-    font-weight: 500;
-
-    color: #526b82;
-
-    overflow-wrap: anywhere;
 }
 
 
@@ -536,9 +462,7 @@
 
 .decision-area {
     width: 100%;
-
     padding: 2px 2px 8px 2px;
-
     box-sizing: border-box;
 }
 
@@ -550,12 +474,9 @@
 .action-title {
     font-size: 12px;
     font-weight: 600;
-
     color: #6a798a;
-
     text-transform: uppercase;
     letter-spacing: 0.7px;
-
     line-height: 18px;
 }
 
@@ -566,9 +487,7 @@
 
 .decision-buttons {
     width: 100%;
-
     min-height: 40px;
-
     box-sizing: border-box;
 }
 
@@ -579,7 +498,6 @@
 
 .form-row {
     width: 100%;
-
     box-sizing: border-box;
 }
 
@@ -590,13 +508,9 @@
 
 .form-label {
     font-size: 13px;
-
     color: #68788b;
-
     line-height: 34px;
-
     flex-shrink: 0;
-
     box-sizing: border-box;
 }
 
@@ -608,7 +522,6 @@
 .form-control {
     min-width: 0;
     max-width: 700px;
-
     box-sizing: border-box;
 }
 
@@ -655,10 +568,7 @@
         padding: 18px;
     }
 
-    .cheque-image-card {
-        padding: 16px;
-    }
-
+    .cheque-image-card,
     .cheque-details-card {
         padding: 16px;
     }
@@ -685,9 +595,10 @@
     }
 
     /*
-     * Change the 55 / 3 / 42 desktop layout into
-     * a vertical layout.
+     * Change the 55 / 3 / 42 desktop layout
+     * into a vertical layout.
      */
+
     .cheque-information-row {
         flex-direction: column;
         width: 100%;
@@ -696,37 +607,41 @@
     .cheque-image-card,
     .cheque-details-card {
         width: 100% !important;
-        flex: 0 0 100%;
-
         min-width: 0;
-
         height: auto;
     }
 
+    /*
+     * Give the stacked cards enough space,
+     * but allow them to grow/shrink naturally.
+     */
+
     .cheque-image-card {
-        min-height: 440px;
+        min-height: clamp(380px, 55vh, 600px);
     }
 
     .cheque-details-card {
-        min-height: 440px;
+        min-height: clamp(320px, 45vh, 500px);
     }
 
     /*
      * The 3% horizontal gap is no longer required
      * when the cards are stacked.
      */
+
     .cheque-information-row > .z-space {
         width: 100% !important;
         height: 16px !important;
         min-height: 16px;
     }
 
+    /*
+     * In stacked mode the image needs a usable
+     * minimum area.
+     */
+
     .cheque-image-container {
-        height: clamp(
-            260px,
-            45vh,
-            450px
-        ) !important;
+        min-height: 240px;
     }
 
     .detail-label {
@@ -766,23 +681,27 @@
     /*
      * Header can wrap naturally.
      */
+
     .processing-header {
         flex-wrap: wrap;
     }
 
-    .cheque-image-card,
+    .cheque-image-card {
+        min-height: clamp(360px, 60vh, 520px);
+    }
+
     .cheque-details-card {
-        min-height: 400px;
+        min-height: clamp(320px, 50vh, 460px);
     }
 
     .cheque-image-container {
-        height: 300px !important;
         min-height: 220px;
     }
 
     /*
      * Front / Back controls.
      */
+
     .image-side-controls {
         flex-wrap: wrap;
     }
@@ -794,6 +713,7 @@
     /*
      * Details.
      */
+
     .detail-label {
         width: 135px;
         font-size: 12px;
@@ -811,6 +731,7 @@
     /*
      * Action buttons can wrap.
      */
+
     .decision-buttons {
         flex-wrap: wrap;
         height: auto;
@@ -820,6 +741,7 @@
     /*
      * Form rows become vertical.
      */
+
     .form-row {
         flex-direction: column;
         align-items: stretch;
@@ -839,6 +761,7 @@
     /*
      * Save button remains right aligned.
      */
+
     #saveNextButton {
         min-width: 140px;
     }
@@ -870,8 +793,16 @@
         font-size: 12px;
     }
 
+    .cheque-image-card {
+        min-height: 340px;
+    }
+
+    .cheque-details-card {
+        min-height: 300px;
+    }
+
     .cheque-image-container {
-        height: 260px !important;
+        min-height: 200px;
     }
 
     #saveNextButton {

@@ -1,5 +1,6 @@
 package com.iispl.cts.service.outward.checker;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -12,17 +13,23 @@ import com.iispl.cts.model.outward.ReturnReason;
 public class CheckerProcessingService {
 
     private final CheckerChequeDAO chequeDao;
+
     private final CheckerAssignmentDAO assignmentDao;
+
 
     public CheckerProcessingService() {
 
-        this.chequeDao = new CheckerChequeDAO();
-        this.assignmentDao = new CheckerAssignmentDAO();
+        this.chequeDao =
+                new CheckerChequeDAO();
+
+        this.assignmentDao =
+                new CheckerAssignmentDAO();
     }
 
-    // =========================
+
+    // ============================================================
     // GET CURRENT CHEQUE
-    // =========================
+    // ============================================================
 
     public OutwardCheque getCheque(
             String batchNumber,
@@ -33,9 +40,10 @@ public class CheckerProcessingService {
                 chequeNumber);
     }
 
-    // =========================
+
+    // ============================================================
     // GET PROCESSING DETAILS
-    // =========================
+    // ============================================================
 
     public ChequeProcessing getChequeProcessing(
             String batchNumber,
@@ -46,9 +54,10 @@ public class CheckerProcessingService {
                 chequeNumber);
     }
 
-    // =========================
+
+    // ============================================================
     // CBS VALIDATION
-    // =========================
+    // ============================================================
 
     /*
      * Validate drawer account in CBS.
@@ -59,6 +68,7 @@ public class CheckerProcessingService {
      * ACCOUNT_INACTIVE
      * PASS
      */
+
     public String validateCbsAccount(
             String accountNumber) {
 
@@ -70,7 +80,7 @@ public class CheckerProcessingService {
 
         Map<String, String> account =
                 chequeDao.getCbsAccount(
-                        accountNumber);
+                        accountNumber.trim());
 
         if (account == null) {
 
@@ -89,9 +99,10 @@ public class CheckerProcessingService {
         return "PASS";
     }
 
-    // =========================
+
+    // ============================================================
     // CBS UI MESSAGE
-    // =========================
+    // ============================================================
 
     public String getCbsValidationMessage(
             String cbsResult) {
@@ -116,9 +127,10 @@ public class CheckerProcessingService {
         return "CBS validation failed.";
     }
 
-    // =========================
+
+    // ============================================================
     // ACCEPT ALLOWED
-    // =========================
+    // ============================================================
 
     public boolean isAcceptAllowed(
             String cbsResult) {
@@ -126,43 +138,67 @@ public class CheckerProcessingService {
         return "PASS".equals(cbsResult);
     }
 
-    // =========================
+
+    // ============================================================
     // RETURN REASONS
-    // =========================
+    // ============================================================
 
-    public List<ReturnReason> getReturnReasons() {
+    public List<ReturnReason> getReturnReasons(
+            String reasonType) {
 
-        return chequeDao.getReturnReasons();
+        if (reasonType == null
+                || reasonType.trim().isEmpty()) {
+
+            return Collections.emptyList();
+        }
+
+        return chequeDao.getReturnReasons(
+                reasonType.trim().toUpperCase());
     }
 
-    // =========================
+
+    // ============================================================
     // SAVE CHECKER DECISION
-    // =========================
+    // ============================================================
 
     /*
      * ACCEPT:
-     *     CBS validation is performed again.
+     *
+     *     CBS must PASS.
+     *     No reason.
+     *     Final decision.
      *
      * REJECT:
-     *     Reason is mandatory.
+     *
+     *     Reason mandatory.
+     *     Final decision.
      *
      * SEND_BACK:
-     *     Reason is mandatory.
      *
-     * checkerRemarks:
-     *     Optional checker remarks.
+     *     CBS must PASS.
+     *     Reason mandatory.
+     *     Not a final Checker decision.
+     *
+     * Important:
+     *
+     *     ACCEPT / REJECT cannot be performed again on
+     *     an already-final cheque.
+     *
+     *     SEND_BACK can be followed by another Checker
+     *     decision after Maker rework and resubmission.
      */
+
     public boolean saveCheckerDecision(
             String batchNumber,
             String chequeNumber,
             long checkerId,
             String checkerAction,
-            Integer checkerReasonId,
+            String checkerReasonCode,
             String checkerRemarks) {
 
-        // =========================
+        // ========================================================
         // BASIC VALIDATION
-        // =========================
+        // ========================================================
 
         if (batchNumber == null
                 || batchNumber.trim().isEmpty()) {
@@ -176,20 +212,48 @@ public class CheckerProcessingService {
             return false;
         }
 
+        if (checkerId <= 0) {
+
+            return false;
+        }
+
         if (checkerAction == null
                 || checkerAction.trim().isEmpty()) {
 
             return false;
         }
 
-        // =========================
+        batchNumber =
+                batchNumber.trim();
+
+        chequeNumber =
+                chequeNumber.trim();
+
+        checkerAction =
+                checkerAction.trim().toUpperCase();
+
+
+        // ========================================================
+        // VALID ACTION
+        // ========================================================
+
+        if (!"ACCEPT".equals(checkerAction)
+                && !"REJECT".equals(checkerAction)
+                && !"SEND_BACK".equals(checkerAction)) {
+
+            return false;
+        }
+
+
+        // ========================================================
         // VERIFY BATCH ASSIGNMENT
-        // =========================
+        // ========================================================
 
         /*
          * Only the Checker who currently owns
          * the batch can make a decision.
          */
+
         if (!assignmentDao.isBatchAssignedToChecker(
                 batchNumber,
                 checkerId)) {
@@ -197,33 +261,83 @@ public class CheckerProcessingService {
             return false;
         }
 
-        // =========================
-        // ACCEPT
-        // =========================
+
+        // ========================================================
+        // GET CURRENT CHEQUE
+        // ========================================================
+
+        OutwardCheque cheque =
+                chequeDao.getCheque(
+                        batchNumber,
+                        chequeNumber);
+
+        if (cheque == null) {
+
+            return false;
+        }
+
+
+        // ========================================================
+        // GET CURRENT PROCESSING STATE
+        // ========================================================
+
+        ChequeProcessing processing =
+                chequeDao.getChequeProcessing(
+                        batchNumber,
+                        chequeNumber);
+
+        if (processing == null) {
+
+            return false;
+        }
+
+
+        // ========================================================
+        // PREVENT DUPLICATE FINAL DECISION
+        // ========================================================
 
         /*
-         * Re-read the cheque from DB.
+         * ACCEPT and REJECT are final Checker decisions.
          *
-         * Never trust the CBS result coming
-         * from the UI.
+         * Once either has been saved, the same cheque must
+         * not be processed again.
+         *
+         * SEND_BACK is intentionally not treated as final,
+         * because Maker can rework and submit the cheque again.
          */
-        if ("ACCEPT".equalsIgnoreCase(
-                checkerAction)) {
 
-            OutwardCheque cheque =
-                    chequeDao.getCheque(
-                            batchNumber,
-                            chequeNumber);
+        String existingCheckerAction =
+                processing.getCheckerAction();
 
-            if (cheque == null) {
+        if (existingCheckerAction != null) {
+
+            existingCheckerAction =
+                    existingCheckerAction.trim().toUpperCase();
+
+            if (("ACCEPT".equals(existingCheckerAction)
+                    || "REJECT".equals(existingCheckerAction))) {
 
                 return false;
             }
+        }
 
-            /*
-             * Drawer account is the account
-             * that is validated against CBS.
-             */
+
+        // ========================================================
+        // CBS VALIDATION
+        // ========================================================
+
+        /*
+         * ACCEPT and SEND_BACK require successful CBS
+         * validation.
+         *
+         * REJECT does not require CBS PASS because the
+         * Checker may reject the cheque for a valid reason
+         * even when CBS validation fails.
+         */
+
+        if ("ACCEPT".equals(checkerAction)
+                || "SEND_BACK".equals(checkerAction)) {
+
             String accountNumber =
                     cheque.getDrawerAccountNumber();
 
@@ -231,42 +345,67 @@ public class CheckerProcessingService {
                     validateCbsAccount(
                             accountNumber);
 
-            if (!isAcceptAllowed(
-                    cbsResult)) {
+            if (!"PASS".equals(cbsResult)) {
 
                 return false;
             }
         }
 
-        // =========================
-        // REJECT / SEND BACK
-        // =========================
 
-        /*
-         * Reason is mandatory for
-         * Reject and Send Back.
-         */
-        if ("REJECT".equalsIgnoreCase(
-                checkerAction)
-                || "SEND_BACK".equalsIgnoreCase(
-                        checkerAction)) {
+        // ========================================================
+        // REASON VALIDATION
+        // ========================================================
 
-            if (checkerReasonId == null) {
+        if ("REJECT".equals(checkerAction)
+                || "SEND_BACK".equals(checkerAction)) {
+
+            if (checkerReasonCode == null
+                    || checkerReasonCode.trim().isEmpty()) {
 
                 return false;
             }
+
+            checkerReasonCode =
+                    checkerReasonCode.trim();
         }
 
-        // =========================
+
+        // ========================================================
+        // ACCEPT MUST NOT HAVE A REASON
+        // ========================================================
+
+        if ("ACCEPT".equals(checkerAction)) {
+
+            checkerReasonCode = null;
+        }
+
+
+        // ========================================================
+        // NORMALIZE REMARKS
+        // ========================================================
+
+        if (checkerRemarks != null) {
+
+            checkerRemarks =
+                    checkerRemarks.trim();
+
+            if (checkerRemarks.isEmpty()) {
+
+                checkerRemarks = null;
+            }
+        }
+
+
+        // ========================================================
         // SAVE TO DATABASE
-        // =========================
+        // ========================================================
 
         return chequeDao.saveCheckerDecision(
                 batchNumber,
                 chequeNumber,
                 checkerId,
                 checkerAction,
-                checkerReasonId,
+                checkerReasonCode,
                 checkerRemarks);
     }
 }

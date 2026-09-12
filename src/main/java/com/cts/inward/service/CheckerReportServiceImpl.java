@@ -6,6 +6,7 @@ import java.util.Map;
 import com.cts.inward.dao.CheckerReportDao;
 import com.cts.inward.dao.CheckerReportDaoImpl;
 
+
 public class CheckerReportServiceImpl implements CheckerReportService {
 
     private final CheckerReportDao reportDao;
@@ -104,5 +105,6 @@ public class CheckerReportServiceImpl implements CheckerReportService {
         xmlBuilder.append("</ApprovedChequesDocument>");
 
         return xmlBuilder.toString();
+        
     }
 }

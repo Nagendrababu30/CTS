@@ -932,7 +932,7 @@ public class OutwardMakerDashboardDAO {
         }
     }
 
-    // ============================================================
+ // ============================================================
     // UPDATE CHEQUE STATUS
     // ============================================================
 
@@ -948,16 +948,31 @@ public class OutwardMakerDashboardDAO {
                 + "AND cheque_number = ?";
 
         try (Connection con =
-                     dataSource.getConnection();
+                     dataSource.getConnection()) {
 
-             PreparedStatement ps =
-                     con.prepareStatement(sql)) {
+            con.setAutoCommit(false);
 
-            ps.setString(1, status);
-            ps.setString(2, batchNumber);
-            ps.setString(3, chequeNumber);
+            try (PreparedStatement ps =
+                         con.prepareStatement(sql)) {
 
-            return ps.executeUpdate() > 0;
+                ps.setString(1, status);
+                ps.setString(2, batchNumber);
+                ps.setString(3, chequeNumber);
+
+                boolean updated = ps.executeUpdate() > 0;
+
+                if (updated) {
+                    con.commit();
+                } else {
+                    con.rollback();
+                }
+
+                return updated;
+
+            } catch (SQLException e) {
+                con.rollback();
+                throw e;
+            }
         }
     }
 
@@ -975,15 +990,30 @@ public class OutwardMakerDashboardDAO {
                 + "WHERE batch_number = ?";
 
         try (Connection con =
-                     dataSource.getConnection();
+                     dataSource.getConnection()) {
 
-             PreparedStatement ps =
-                     con.prepareStatement(sql)) {
+            con.setAutoCommit(false);
 
-            ps.setString(1, status);
-            ps.setString(2, batchNumber);
+            try (PreparedStatement ps =
+                         con.prepareStatement(sql)) {
 
-            return ps.executeUpdate() > 0;
+                ps.setString(1, status);
+                ps.setString(2, batchNumber);
+
+                boolean updated = ps.executeUpdate() > 0;
+
+                if (updated) {
+                    con.commit();
+                } else {
+                    con.rollback();
+                }
+
+                return updated;
+
+            } catch (SQLException e) {
+                con.rollback();
+                throw e;
+            }
         }
     }
 

@@ -24,7 +24,7 @@ public class CheckerBatchService {
     public List<OutwardBatch> getCheckerBatches(
             String checkerUserId,
             String searchText,
-            int pageNo,
+            int pageNo,	
             int pageSize) {
 
         int offset = pageNo * pageSize;

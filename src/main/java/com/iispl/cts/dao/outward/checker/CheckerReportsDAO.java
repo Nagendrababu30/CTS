@@ -66,7 +66,7 @@ public class CheckerReportsDAO {
                         + "       created_at, "
                         + "       batch_status "
                         + "FROM public.outward_batch "
-                        + "WHERE UPPER(batch_status) = 'ASSIGNED' "
+                        + "WHERE UPPER(batch_status) = 'CHECKER_COMPLETED' "
                         + "ORDER BY batch_number DESC";
 
         try (Connection connection =

@@ -1,368 +1,245 @@
-.micr-repair-content {
-    padding: 25px;
-    box-sizing: border-box;
-    background: #f4f7fc;
-    overflow: auto;
-}
+/* =============================================================
+   INWARD MICR REPAIR — matches outward MICR repair reference
+   ============================================================= */
 
-
-/* =========================
-   TOP INFORMATION
-   ========================= */
-
-.top-information {
-    margin-bottom: 10px;
-}
-
-.batch-label {
-    font-size: 16px;
-    font-weight: bold;
-    color: #172b4d;
-}
-
-.cheque-counter {
-    margin-left: 20px;
-    font-size: 16px;
-    color: #2455d6;
-    font-weight: bold;
-}
-
-
-/* =========================
-   IMAGE BUTTONS
-   ========================= */
-
-.image-buttons {
-    margin-bottom: 15px;
-}
-
-.image-button {
-    min-width: 125px;
-    height: 52px;
-
-    background: #ffffff !important;
-    color: #27364d !important;
-
-    border: 1px solid #d9e1ec !important;
+/* ---------- Card ---------- */
+.micr-card {
+    background: #FFFFFF !important;
+    border: 1px solid #DCE5F0 !important;
     border-radius: 6px !important;
-
-    font-size: 16px !important;
-    font-weight: 500 !important;
-
-    box-shadow: none !important;
+    box-shadow: 0 1px 3px rgba(16,24,40,0.04) !important;
 }
 
-.image-button:hover {
-    background: #f5f8fc !important;
+.micr-card > .z-groupbox-content {
+    padding: 0 !important;
+    height: 100% !important;
 }
 
-.image-button-active {
-    background: #0754b8 !important;
-    color: #ffffff !important;
-    border-color: #0754b8 !important;
+.micr-caption {
+    font-size: 13px !important;
     font-weight: bold !important;
+    color: #122B49 !important;
 }
 
-
-/* =========================
-   MAIN AREA
-   ========================= */
-
-.repair-area {
-    width: 100%;
-}
-
-.image-panel {
-    background: #ffffff;
-    border: 1px solid #dce3ee;
-    border-radius: 7px;
-}
-
-.image-container {
-    padding: 24px;
-    box-sizing: border-box;
-    background: #ffffff;
-}
-
-.image-header {
-    width: 100%;
-    margin-bottom: 15px;
-}
-
-.bank-name {
-    color: #2455d6;
-    font-size: 23px;
-    font-weight: bold;
-}
-
-.image-cheque-number {
-    margin-left: auto;
-    color: #172b4d;
-    font-size: 22px;
-    font-weight: bold;
-}
-
-.cheque-image {
-    width: 100%;
-    height: 430px;
-    object-fit: contain;
-    border: 1px solid #dce3ee;
-    background: #effdf3;
-}
-
-
-/* =========================
-   DETAILS PANEL
-   ========================= */
-
-.details-panel {
-    background: #f8fafc;
-    border: 1px solid #dce3ee;
-    border-radius: 7px;
-}
-
-.details-layout {
-    padding: 24px;
-    box-sizing: border-box;
-}
-
-.details-title {
-    color: #27364d;
-    font-size: 25px;
-    font-weight: bold;
-    margin-bottom: 12px;
-}
-
-
-/* =========================
-   SECTIONS
-   ========================= */
-
-.section-title {
-    display: block;
-    font-size: 14px;
-    font-weight: bold;
-    margin-top: 5px;
-    margin-bottom: 7px;
-}
-
-.npci-title {
-    color: #475569;
-}
-
-.ocr-title {
-    color: #2455d6;
-    margin-top: 14px;
-}
-
-
-/* =========================
-   FIELD LABELS
-   ========================= */
-
-.field-label {
-    display: block;
-    color: #27364d;
-    font-size: 14px;
-    font-weight: 600;
-    margin-top: 7px;
-    margin-bottom: 4px;
-}
-
-
-/* =========================
-   NPCI READ ONLY
-   ========================= */
-
-.readonly-field {
-    width: 100%;
-
-    background: #eef2f7 !important;
-    color: #27364d !important;
-
-    border: 1px solid #d9e1ec !important;
-    border-radius: 5px !important;
-
-    font-size: 14px !important;
-}
-
-.npci-micr-field {
-    font-weight: bold !important;
-    background: #e9eef5 !important;
-}
-
-
-/* =========================
-   OCR NORMAL FIELD
-   ========================= */
-
-.ocr-field {
-    width: 100%;
-
-    background: #ffffff !important;
-    color: #27364d !important;
-
-    border: 1px solid #d9e1ec !important;
-    border-radius: 5px !important;
-
-    font-size: 14px !important;
-}
-
-
-/* =========================
-   OCR ERROR FIELD
-   ========================= */
-
-.ocr-error {
-    background: #fff1f1 !important;
-    color: #b42318 !important;
-
-    border: 1px solid #ef4444 !important;
-
-    box-shadow: 0 0 0 1px #ef4444 !important;
-
-    font-weight: bold !important;
-}
-
-
-/* =========================
-   CORRECTED MICR
-   ========================= */
-
-.corrected-label {
-    color: #2455d6 !important;
-    margin-top: 12px;
-}
-
-.corrected-field {
-    width: 100%;
-
-    background: #ffffff !important;
-    color: #172b4d !important;
-
-    border: 2px solid #2455d6 !important;
-    border-radius: 5px !important;
-
-    font-weight: bold !important;
-}
-
-
-/* =========================
-   NAVIGATION BUTTONS
-   ========================= */
-
-.navigation-buttons {
-    margin-top: 18px;
-    padding-bottom: 10px;
-}
-
-.secondary-button {
-    min-width: 110px;
-
-    background: #ffffff !important;
-    color: #64748b !important;
-
-    border: 1px solid #d9e1ec !important;
-    border-radius: 5px !important;
-
-    padding: 9px 18px !important;
-
-    font-size: 14px !important;
-    font-weight: 600 !important;
-
-    box-shadow: none !important;
-}
-
-.secondary-button:hover {
+/* ---------- Back button ---------- */
+.micr-back-btn {
+    min-width: 32px !important;
+    height: 32px !important;
     background: #f1f5f9 !important;
-}
-
-
-/* =========================
-   SAVE & NEXT
-   ========================= */
-
-.save-next-button {
-    min-width: 130px;
-
-    background: #2455d6 !important;
-    color: #ffffff !important;
-
-    border: 1px solid #2455d6 !important;
-    border-radius: 5px !important;
-
-    padding: 9px 18px !important;
-
-    font-size: 14px !important;
+    color: #2b3a55 !important;
+    border: 1px solid #d0d5dd !important;
+    border-radius: 6px !important;
+    font-size: 15px !important;
     font-weight: bold !important;
+    box-shadow: none !important;
+    cursor: pointer;
 }
 
-.save-next-button:hover {
+.micr-back-btn:hover {
+    background: #e2e8f0 !important;
+}
+
+/* ---------- Count badges ---------- */
+.micr-count-badge {
+    display: inline-flex !important;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 999px;
+    margin-left: 8px;
+}
+
+.micr-count-total     { background: #eff6ff; border: 1px solid #bfdbfe; }
+.micr-count-completed { background: #f0fdf4; border: 1px solid #bbf7d0; }
+.micr-count-pending   { background: #fff7ed; border: 1px solid #fed7aa; }
+
+.micr-count-text { font-size: 13px; font-weight: 700; }
+.micr-count-total .micr-count-text    { color: #1d4ed8; }
+.micr-count-completed .micr-count-text { color: #15803d; }
+.micr-count-pending .micr-count-text  { color: #c2410c; }
+
+/* ---------- Field label ---------- */
+.micr-field-label {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #1E293B !important;
+    letter-spacing: 0.2px;
+    display: block;
+}
+
+.micr-star {
+    color: #DC2626 !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+}
+
+/* ---------- Read-only field (cheque number) ---------- */
+.micr-readonly-field {
+    height: 38px !important;
+    font-size: 13px !important;
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 6px !important;
+    padding: 6px 12px !important;
+    color: #0F172A !important;
+    background: #F8FAFC !important;
+    font-weight: 500 !important;
+    width: 100% !important;
+}
+
+/* ---------- Current status labels ---------- */
+.micr-status-error {
+    color: #D92D20 !important;
+    font-weight: bold !important;
+    font-size: 14px !important;
+    display: block;
+    padding-top: 8px;
+}
+
+.micr-status-ok {
+    color: #15803d !important;
+    font-weight: bold !important;
+    font-size: 14px !important;
+    display: block;
+    padding-top: 8px;
+}
+
+/* ---------- Editable MICR field — normal ---------- */
+.micr-editable-field {
+    height: 38px !important;
+    font-size: 13px !important;
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 6px !important;
+    padding: 6px 12px !important;
+    color: #0F172A !important;
+    background: #F8FAFC !important;
+    font-weight: 500 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.micr-editable-field:focus {
+    background: #FFFFFF !important;
+    border-color: #2457D6 !important;
+    box-shadow: 0 0 0 3px rgba(36,87,214,0.15) !important;
+}
+
+/* ---------- Mismatch — pink-red background + red border ---------- */
+.micr-field-error .z-textbox-inp,
+.micr-field-error .z-textbox-inp:focus,
+.micr-field-error {
+    background-color: #FEE4E2 !important;
+    border: 1.5px solid #D92D20 !important;
+    color: #D92D20 !important;
+    font-weight: 600 !important;
+}
+
+/* ---------- Image toggle button ---------- */
+.micr-toggle-btn {
+    height: 34px !important;
+    background: #2457D6 !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 5px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+    cursor: pointer;
+}
+
+.micr-toggle-btn:hover {
     background: #1745b8 !important;
 }
 
-
-/* =========================
-   RETURN
-   ========================= */
-
-.return-button {
-    min-width: 100px;
-
-    background: #ffffff !important;
-    color: #b42318 !important;
-
-    border: 1px solid #f0a6a0 !important;
-    border-radius: 5px !important;
-
-    padding: 9px 18px !important;
-
-    font-size: 14px !important;
-    font-weight: bold !important;
-
+/* ---------- Zoom buttons ---------- */
+.micr-zoom-btn {
+    height: 34px !important;
+    background: transparent !important;
+    border: none !important;
     box-shadow: none !important;
+    color: #334155 !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
-.return-button:hover {
-    background: #fff1f1 !important;
-    color: #912018 !important;
+.micr-zoom-btn:hover {
+    background: #E2E8F0 !important;
+    border-radius: 4px !important;
 }
 
-.return-window {
-    background: #ffffff;
-    border: 1px solid #dce3ee;
-    border-radius: 7px;
+/* ---------- Prev button ---------- */
+.micr-prev-btn {
+    height: 38px !important;
+    min-width: 90px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    background: #ffffff !important;
+    color: #64748b !important;
+    border: 1px solid #d0d5dd !important;
+    border-radius: 5px !important;
+    box-shadow: none !important;
+    cursor: pointer;
 }
 
-.return-form {
-    padding: 25px;
-    box-sizing: border-box;
+/* ---------- Return button ---------- */
+.micr-return-btn {
+    height: 38px !important;
+    min-width: 100px !important;
+    background: #ffffff !important;
+    color: #D92D20 !important;
+    border: 1px solid #D92D20 !important;
+    border-radius: 5px !important;
+    font-size: 13px !important;
+    font-weight: bold !important;
+    box-shadow: none !important;
+    cursor: pointer;
 }
+
+.micr-return-btn:hover {
+    background: #FEF3F2 !important;
+}
+
+/* ---------- Save & Next button ---------- */
+.micr-save-btn {
+    height: 38px !important;
+    min-width: 140px !important;
+    background: #2457D6 !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 5px !important;
+    font-size: 13px !important;
+    font-weight: bold !important;
+    box-shadow: 0 2px 6px rgba(36,87,214,0.25) !important;
+    cursor: pointer;
+}
+
+.micr-save-btn:hover {
+    background: #1745b8 !important;
+}
+
+/* ---------- Return window ---------- */
+.return-window { background: #ffffff; }
+.return-form   { padding: 20px; box-sizing: border-box; }
 
 .return-field-label {
-    color: #27364d;
-    font-size: 14px;
-    font-weight: bold;
-    margin-top: 5px;
-    margin-bottom: 4px;
+    font-size: 13px; font-weight: 700; color: #1E293B;
+    display: block; margin-bottom: 4px;
 }
 
-.return-form .z-combobox-input {
-    height: 38px;
-    border: 1px solid #d9e1ec !important;
-    border-radius: 5px !important;
-    background: #ffffff !important;
-    color: #27364d !important;
+.return-window-buttons { margin-top: 12px; }
+
+.secondary-button {
+    min-width: 90px !important; height: 36px !important;
+    background: #f8fafc !important; color: #64748b !important;
+    border: 1px solid #e2e8f0 !important; border-radius: 5px !important;
+    font-size: 13px !important; font-weight: 600 !important; box-shadow: none !important;
 }
 
-.return-form .z-textbox {
-    border: 1px solid #d9e1ec !important;
-    border-radius: 5px !important;
-    background: #ffffff !important;
-    color: #27364d !important;
-    padding: 8px !important;
-}
-
-.return-window-buttons {
-    margin-top: 12px;
+.return-button {
+    min-width: 130px !important; height: 36px !important;
+    background: #D92D20 !important; color: #ffffff !important;
+    border: none !important; border-radius: 5px !important;
+    font-size: 13px !important; font-weight: 700 !important;
 }

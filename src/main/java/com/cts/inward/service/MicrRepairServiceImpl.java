@@ -722,4 +722,32 @@ public class MicrRepairServiceImpl
                         batchId,
                         userId);
     }
+
+    @Override
+    public int getBatchMicrCompletedCount(long batchId) {
+
+        List<MicrComparisonDto> comparisons = compareBatch(batchId);
+        if (comparisons == null) return 0;
+        int count = 0;
+        for (MicrComparisonDto c : comparisons) {
+            if (c != null && !c.isNeedsMicrRepair()) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    @Override
+    public int getBatchMicrPendingCount(long batchId) {
+
+        List<MicrComparisonDto> comparisons = compareBatch(batchId);
+        if (comparisons == null) return 0;
+        int count = 0;
+        for (MicrComparisonDto c : comparisons) {
+            if (c != null && c.isNeedsMicrRepair()) {
+                count++;
+            }
+        }
+        return count;
+    }
 }

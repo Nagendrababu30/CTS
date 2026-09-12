@@ -24,280 +24,327 @@ import com.iispl.cts.service.outward.checker.CheckerBatchService;
 
 public class CheckerBatchQueueController extends SelectorComposer<Vlayout> {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	/*
-	 * processing.zul location:
-	 *
-	 * src/main/webapp/ zul/ outward/ outward-checker/ processing.zul
-	 */
-	private static final String PROCESSING_PAGE = "/zul/outward/outward-checker/processing.zul";
-	@Wire
-	private Textbox batchSearchTextbox;
+    /*
+     * Web application URL path.
+     *
+     * DO NOT use:
+     * src/main/webapp/zul/...
+     *
+     * src/main/webapp is the web application root.
+     */
+   
+    @Wire
+    private Textbox batchSearchTextbox;
 
-	@Wire
-	private Button searchButton;
+    @Wire
+    private Button searchButton;
 
-	@Wire
-	private Button refreshButton;
+    @Wire
+    private Button refreshButton;
 
-	@Wire
-	private Listbox batchListbox;
+    @Wire
+    private Listbox batchListbox;
 
-	@Wire
-	private Paging batchPaging;
+    @Wire
+    private Paging batchPaging;
 
-	private CheckerBatchService batchService;
+    private CheckerBatchService batchService;
 
-	private long checkerUserId;
+    private long checkerUserId;
 
-	@Override
-	public void doAfterCompose(Vlayout comp) throws Exception {
+    @Override
+    public void doAfterCompose(Vlayout comp) throws Exception {
 
-		super.doAfterCompose(comp);
+        super.doAfterCompose(comp);
 
-		System.out.println("========================================");
-		System.out.println("CHECKER BATCH QUEUE INITIALIZING");
-		System.out.println("========================================");
+        System.out.println("========================================");
+        System.out.println("CHECKER BATCH QUEUE INITIALIZING");
+        System.out.println("========================================");
 
-		batchService = new CheckerBatchService();
+        batchService = new CheckerBatchService();
 
-		/*
-		 * Get logged-in user.
-		 */
-		User currentUser = (User) Sessions.getCurrent().getAttribute("loggedInUser");
+        /*
+         * Get logged-in user.
+         */
+        User currentUser =
+                (User) Sessions.getCurrent()
+                        .getAttribute("loggedInUser");
 
-		if (currentUser == null) {
+        if (currentUser == null) {
 
-			System.out.println("CHECKER BATCH QUEUE: No logged-in user found.");
+            System.out.println(
+                    "CHECKER BATCH QUEUE: No logged-in user found.");
 
-			return;
-		}
+            return;
+        }
 
-		checkerUserId = currentUser.getUserId();
+        checkerUserId = currentUser.getUserId();
 
-		System.out.println("Checker User ID : " + checkerUserId);
+        System.out.println(
+                "Checker User ID : " + checkerUserId);
 
-		/*
-		 * Load initial batches.
-		 */
-		loadBatches();
+        /*
+         * Load initial batches.
+         */
+        loadBatches();
 
-		/*
-		 * Search button.
-		 */
-		if (searchButton != null) {
+        /*
+         * Search button.
+         */
+        if (searchButton != null) {
 
-			searchButton.addEventListener(Events.ON_CLICK, event -> {
+            searchButton.addEventListener(
+                    Events.ON_CLICK,
+                    event -> {
 
-				System.out.println("CHECKER BATCH QUEUE: Search clicked.");
+                        System.out.println(
+                                "CHECKER BATCH QUEUE: Search clicked.");
 
-				batchPaging.setActivePage(0);
+                        batchPaging.setActivePage(0);
 
-				loadBatches();
-			});
-		}
+                        loadBatches();
+                    });
+        }
 
-		/*
-		 * Refresh button.
-		 */
-		if (refreshButton != null) {
+        /*
+         * Refresh button.
+         */
+        if (refreshButton != null) {
 
-			refreshButton.addEventListener(Events.ON_CLICK, event -> {
+            refreshButton.addEventListener(
+                    Events.ON_CLICK,
+                    event -> {
 
-				System.out.println("CHECKER BATCH QUEUE: Refresh clicked.");
+                        System.out.println(
+                                "CHECKER BATCH QUEUE: Refresh clicked.");
 
-				batchSearchTextbox.setValue("");
+                        batchSearchTextbox.setValue("");
 
-				batchPaging.setActivePage(0);
+                        batchPaging.setActivePage(0);
 
-				loadBatches();
-			});
-		}
+                        loadBatches();
+                    });
+        }
 
-		/*
-		 * Pagination.
-		 */
-		if (batchPaging != null) {
+        /*
+         * Pagination.
+         */
+        if (batchPaging != null) {
 
-			batchPaging.addEventListener("onPaging", event -> {
+            batchPaging.addEventListener(
+                    "onPaging",
+                    event -> {
 
-				System.out.println("CHECKER BATCH QUEUE: Page changed.");
+                        System.out.println(
+                                "CHECKER BATCH QUEUE: Page changed.");
 
-				loadBatches();
-			});
-		}
+                        loadBatches();
+                    });
+        }
 
-		System.out.println("CHECKER BATCH QUEUE INITIALIZED SUCCESSFULLY.");
+        System.out.println(
+                "CHECKER BATCH QUEUE INITIALIZED SUCCESSFULLY.");
 
-		System.out.println("========================================");
-	}
+        System.out.println("========================================");
+    }
 
-	/**
-	 * Loads batches assigned to the logged-in checker.
-	 */
-	private void loadBatches() {
+    /**
+     * Loads batches assigned to the logged-in checker.
+     */
+    private void loadBatches() {
 
-		if (batchService == null) {
+        if (batchService == null) {
 
-			System.out.println("CHECKER BATCH QUEUE: batchService is null.");
+            System.out.println(
+                    "CHECKER BATCH QUEUE: batchService is null.");
 
-			return;
-		}
+            return;
+        }
 
-		if (batchPaging == null || batchSearchTextbox == null || batchListbox == null) {
+        if (batchPaging == null
+                || batchSearchTextbox == null
+                || batchListbox == null) {
 
-			System.out.println("CHECKER BATCH QUEUE: Required ZUL components are not wired.");
+            System.out.println(
+                    "CHECKER BATCH QUEUE: "
+                    + "Required ZUL components are not wired.");
 
-			return;
-		}
+            return;
+        }
 
-		int pageSize = batchPaging.getPageSize();
+        int pageSize = batchPaging.getPageSize();
 
-		int pageNo = batchPaging.getActivePage();
+        int pageNo = batchPaging.getActivePage();
 
-		String searchText = batchSearchTextbox.getValue();
+        String searchText = batchSearchTextbox.getValue();
 
-		if (searchText == null) {
-			searchText = "";
-		}
+        if (searchText == null) {
+            searchText = "";
+        }
 
-		searchText = searchText.trim();
+        searchText = searchText.trim();
 
-		String checkerId = String.valueOf(checkerUserId);
+        String checkerId =
+                String.valueOf(checkerUserId);
 
-		System.out.println("----------------------------------------");
-		System.out.println("Loading checker batches");
-		System.out.println("Checker ID : " + checkerId);
-		System.out.println("Search     : " + searchText);
-		System.out.println("Page No    : " + pageNo);
-		System.out.println("Page Size  : " + pageSize);
-		System.out.println("----------------------------------------");
+        System.out.println("----------------------------------------");
+        System.out.println("Loading checker batches");
+        System.out.println("Checker ID : " + checkerId);
+        System.out.println("Search     : " + searchText);
+        System.out.println("Page No    : " + pageNo);
+        System.out.println("Page Size  : " + pageSize);
+        System.out.println("----------------------------------------");
 
-		List<OutwardBatch> batches = batchService.getCheckerBatches(checkerId, searchText, pageNo, pageSize);
+        List<OutwardBatch> batches =
+                batchService.getCheckerBatches(
+                        checkerId,
+                        searchText,
+                        pageNo,
+                        pageSize);
 
-		int totalSize = batchService.getCheckerBatchCount(checkerId, searchText);
+        int totalSize =
+                batchService.getCheckerBatchCount(
+                        checkerId,
+                        searchText);
 
-		batchPaging.setTotalSize(totalSize);
+        batchPaging.setTotalSize(totalSize);
 
-		/*
-		 * Remove existing rows.
-		 */
-		batchListbox.getItems().clear();
+        /*
+         * Remove existing rows.
+         */
+        batchListbox.getItems().clear();
 
-		if (batches == null || batches.isEmpty()) {
+        if (batches == null || batches.isEmpty()) {
 
-			System.out.println("No checker batches found.");
+            System.out.println(
+                    "No checker batches found.");
 
-			return;
-		}
+            return;
+        }
 
-		/*
-		 * Create list rows.
-		 */
-		for (OutwardBatch batch : batches) {
+        /*
+         * Create list rows.
+         */
+        for (OutwardBatch batch : batches) {
 
-			if (batch == null) {
-				continue;
-			}
+            if (batch == null) {
+                continue;
+            }
 
-			Listitem item = new Listitem();
+            Listitem item = new Listitem();
 
-			/*
-			 * ---------------------------------------- Batch Number
-			 * ----------------------------------------
-			 */
-			Listcell batchNumberCell = new Listcell();
+            /*
+             * Batch Number
+             */
+            Listcell batchNumberCell = new Listcell();
 
-			String batchNumber = batch.getBatchNumber();
+            String batchNumber =
+                    batch.getBatchNumber();
 
-			batchNumberCell.appendChild(new Label(batchNumber != null ? batchNumber : "-"));
+            batchNumberCell.appendChild(
+                    new Label(
+                            batchNumber != null
+                                    ? batchNumber
+                                    : "-"));
 
-			item.appendChild(batchNumberCell);
+            item.appendChild(batchNumberCell);
 
-			/*
-			 * ---------------------------------------- Total Cheques
-			 * ----------------------------------------
-			 */
-			Listcell chequeCountCell = new Listcell();
+            /*
+             * Total Cheques
+             */
+            Listcell chequeCountCell =
+                    new Listcell();
 
-			chequeCountCell.appendChild(new Label(String.valueOf(batch.getNumberOfCheques())));
+            chequeCountCell.appendChild(
+                    new Label(
+                            String.valueOf(
+                                    batch.getNumberOfCheques())));
 
-			item.appendChild(chequeCountCell);
+            item.appendChild(chequeCountCell);
 
-			/*
-			 * ---------------------------------------- Status
-			 * ----------------------------------------
-			 */
-			Listcell statusCell = new Listcell();
+            /*
+             * Status
+             */
+            Listcell statusCell =
+                    new Listcell();
 
-			String status = batch.getBatchStatus();
+            String status =
+                    batch.getBatchStatus();
 
-			statusCell.appendChild(new Label(status != null ? status : "-"));
+            statusCell.appendChild(
+                    new Label(
+                            status != null
+                                    ? status
+                                    : "-"));
 
-			item.appendChild(statusCell);
+            item.appendChild(statusCell);
 
-			/*
-			 * ---------------------------------------- Action
-			 * ----------------------------------------
-			 */
-			Listcell actionCell = new Listcell();
+            /*
+             * Action
+             */
+            Listcell actionCell =
+                    new Listcell();
 
-			Button openButton = new Button("Open");
+            Button openButton =
+                    new Button("Open");
 
-			openButton.addEventListener(Events.ON_CLICK, event -> openBatch(batch));
+            openButton.addEventListener(
+                    Events.ON_CLICK,
+                    event -> openBatch(batch));
 
-			actionCell.appendChild(openButton);
+            actionCell.appendChild(openButton);
 
-			item.appendChild(actionCell);
+            item.appendChild(actionCell);
 
-			batchListbox.appendChild(item);
-		}
-	}
+            batchListbox.appendChild(item);
+        }
+    }
 
-	/**
-	 * Opens the selected batch in processing.zul.
-	 */
-	private void openBatch(OutwardBatch batch) {
+    /**
+     * Opens the selected batch in processing.zul.
+     */
+    private void openBatch(OutwardBatch batch) {
 
-		System.out.println("========================================");
-		System.out.println("OPEN BUTTON CLICKED");
-		System.out.println("========================================");
+        if (batch == null) {
+            System.out.println(
+                    "OPEN BATCH ERROR: Batch object is null.");
+            return;
+        }
 
-		if (batch == null) {
-			System.out.println("OPEN BATCH ERROR: Batch object is null.");
-			return;
-		}
+        String batchNumber = batch.getBatchNumber();
 
-		String batchNumber = batch.getBatchNumber();
+        if (batchNumber == null
+                || batchNumber.trim().isEmpty()) {
 
-		if (batchNumber == null || batchNumber.trim().isEmpty()) {
-			System.out.println("OPEN BATCH ERROR: Batch number is empty.");
-			return;
-		}
+            System.out.println(
+                    "OPEN BATCH ERROR: Batch number is empty.");
+            return;
+        }
 
-		batchNumber = batchNumber.trim();
+        batchNumber = batchNumber.trim();
 
-		try {
+        try {
 
-			String contextPath = Executions.getCurrent().getContextPath();
+            String url =
+                    "/zul/outward/outward-checker/processing.zul"
+                    + "?batchNumber="
+                    + URLEncoder.encode(
+                            batchNumber,
+                            StandardCharsets.UTF_8);
 
-			String encodedBatchNumber = URLEncoder.encode(batchNumber, StandardCharsets.UTF_8);
+            System.out.println(
+                    "Opening processing page: " + url);
 
-			String url = contextPath + PROCESSING_PAGE + "?batchNumber=" + encodedBatchNumber;
+            Executions.sendRedirect(url);
 
-			System.out.println("Batch Number    : " + batchNumber);
-			System.out.println("Context Path    : " + contextPath);
-			System.out.println("Processing Page : " + PROCESSING_PAGE);
-			System.out.println("Encoded Batch   : " + encodedBatchNumber);
-			System.out.println("Final URL       : " + url);
-			System.out.println("========================================");
+        } catch (Exception e) {
 
-			Executions.sendRedirect(url);
+            System.out.println(
+                    "OPEN BATCH ERROR: Unable to open processing page.");
 
-		} catch (Exception e) {
-			System.out.println("OPEN BATCH ERROR: Unable to open processing page.");
-			e.printStackTrace();
-		}
-	}
+            e.printStackTrace();
+        }
+    }
 }

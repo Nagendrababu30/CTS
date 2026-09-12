@@ -21,6 +21,7 @@ public class CheckerChequeDAO {
      * GET PARTICULAR CHEQUE
      * ============================================================
      */
+
     public OutwardCheque getCheque(
             String batchNumber,
             String chequeNumber) {
@@ -47,8 +48,7 @@ public class CheckerChequeDAO {
                 "WHERE batch_number = ? " +
                 "AND cheque_number = ?";
 
-        try (Connection connection =
-                     CTSStaticData.getConnection();
+        try (Connection connection = CTSStaticData.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
@@ -59,8 +59,7 @@ public class CheckerChequeDAO {
 
                 if (rs.next()) {
 
-                    OutwardCheque cheque =
-                            new OutwardCheque();
+                    OutwardCheque cheque = new OutwardCheque();
 
                     cheque.setBatchNumber(
                             rs.getString("batch_number"));
@@ -145,6 +144,7 @@ public class CheckerChequeDAO {
      * GET CHEQUE PROCESSING INFORMATION
      * ============================================================
      */
+
     public ChequeProcessing getChequeProcessing(
             String batchNumber,
             String chequeNumber) {
@@ -154,24 +154,22 @@ public class CheckerChequeDAO {
                 "       cheque_number, " +
                 "       maker_id, " +
                 "       maker_action, " +
-                "       maker_reason_id, " +
+                "       maker_reason_code, " +
                 "       checker_id, " +
                 "       checker_action, " +
-                "       checker_reason_id " +
+                "       checker_reason_code " +
                 "FROM cheque_processing " +
                 "WHERE batch_number = ? " +
                 "AND cheque_number = ?";
 
-        try (Connection connection =
-                     CTSStaticData.getConnection();
+        try (Connection connection = CTSStaticData.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
             statement.setString(1, batchNumber);
             statement.setString(2, chequeNumber);
 
-            try (ResultSet rs =
-                         statement.executeQuery()) {
+            try (ResultSet rs = statement.executeQuery()) {
 
                 if (rs.next()) {
 
@@ -195,13 +193,8 @@ public class CheckerChequeDAO {
                     processing.setMakerAction(
                             rs.getString("maker_action"));
 
-                    Object makerReasonId =
-                            rs.getObject("maker_reason_id");
-
-                    if (makerReasonId != null) {
-                        processing.setMakerReasonId(
-                                ((Number) makerReasonId).intValue());
-                    }
+                    processing.setMakerReasonCode(
+                            rs.getString("maker_reason_code"));
 
                     Object checkerId =
                             rs.getObject("checker_id");
@@ -214,13 +207,8 @@ public class CheckerChequeDAO {
                     processing.setCheckerAction(
                             rs.getString("checker_action"));
 
-                    Object checkerReasonId =
-                            rs.getObject("checker_reason_id");
-
-                    if (checkerReasonId != null) {
-                        processing.setCheckerReasonId(
-                                ((Number) checkerReasonId).intValue());
-                    }
+                    processing.setCheckerReasonCode(
+                            rs.getString("checker_reason_code"));
 
                     return processing;
                 }
@@ -241,48 +229,56 @@ public class CheckerChequeDAO {
 
     /*
      * ============================================================
-     * GET ACTIVE RETURN / REJECTION REASONS
+     * GET CHECKER RETURN / REJECTION REASONS
      * ============================================================
      */
-    public List<ReturnReason> getReturnReasons() {
+
+    public List<ReturnReason> getReturnReasons(
+            String reasonType) {
 
         List<ReturnReason> reasons =
                 new ArrayList<>();
 
         String sql =
-                "SELECT id, " +
-                "       reason_code, " +
+                "SELECT reason_code, " +
                 "       reason_name, " +
                 "       active " +
                 "FROM return_reason_master " +
                 "WHERE active = true " +
+                "AND role_name = 'CHECKER' " +
+                "AND reason_type = ? " +
                 "ORDER BY reason_name";
 
-        try (Connection connection =
-                     CTSStaticData.getConnection();
+        try (Connection connection = CTSStaticData.getConnection();
              PreparedStatement statement =
-                     connection.prepareStatement(sql);
-             ResultSet rs =
-                     statement.executeQuery()) {
+                     connection.prepareStatement(sql)) {
 
-            while (rs.next()) {
+            statement.setString(
+                    1,
+                    reasonType);
 
-                ReturnReason reason =
-                        new ReturnReason();
+            try (ResultSet resultSet =
+                         statement.executeQuery()) {
 
-                reason.setId(
-                        rs.getInt("id"));
+                while (resultSet.next()) {
 
-                reason.setReasonCode(
-                        rs.getString("reason_code"));
+                    ReturnReason reason =
+                            new ReturnReason();
 
-                reason.setReasonName(
-                        rs.getString("reason_name"));
+                    reason.setReasonCode(
+                            resultSet.getString(
+                                    "reason_code"));
 
-                reason.setActive(
-                        rs.getBoolean("active"));
+                    reason.setReasonName(
+                            resultSet.getString(
+                                    "reason_name"));
 
-                reasons.add(reason);
+                    reason.setActive(
+                            resultSet.getBoolean(
+                                    "active"));
+
+                    reasons.add(reason);
+                }
             }
 
         } catch (Exception e) {
@@ -290,7 +286,7 @@ public class CheckerChequeDAO {
             e.printStackTrace();
 
             throw new RuntimeException(
-                    "Error while fetching return reasons",
+                    "Error while fetching Checker reasons",
                     e);
         }
 
@@ -304,73 +300,80 @@ public class CheckerChequeDAO {
      * ============================================================
      *
      * ACCEPT:
-     *     No reason required.
+     *     No reason.
+     *     Cheque -> CHECKER_ACCEPTED
      *
      * REJECT:
      *     Reason mandatory.
+     *     Cheque -> CHECKER_REJECTED
      *
      * SEND_BACK:
      *     Reason mandatory.
+     *     Cheque -> SENT_BACK_TO_MAKER
+     *     Batch  -> ON_HOLD
      *
-     * Checker remarks are optional and are saved in
-     * outward_cheque.checker_remarks.
+     * If ACCEPT / REJECT makes every cheque in the batch final:
      *
-     * Both cheque_processing and outward_cheque are updated
-     * inside the same database transaction.
+     *     Batch -> CHECKER_COMPLETED
+     *
+     * Batch completion is determined from cheque_processing
+     * checker_action, not from Maker statuses.
+     *
+     * All changes are performed in one transaction.
      */
+
     public boolean saveCheckerDecision(
             String batchNumber,
             String chequeNumber,
             long checkerId,
             String checkerAction,
-            Integer checkerReasonId,
+            String checkerReasonCode,
             String checkerRemarks) {
 
-        String updateProcessingSql =
-                "UPDATE cheque_processing " +
-                "SET checker_id = ?, " +
-                "    checker_action = ?, " +
-                "    checker_reason_id = ? " +
-                "WHERE batch_number = ? " +
-                "AND cheque_number = ?";
+        if (batchNumber == null
+                || batchNumber.trim().isEmpty()) {
+
+            throw new IllegalArgumentException(
+                    "Batch number is required");
+        }
+
+        if (chequeNumber == null
+                || chequeNumber.trim().isEmpty()) {
+
+            throw new IllegalArgumentException(
+                    "Cheque number is required");
+        }
+
+        if (checkerAction == null
+                || checkerAction.trim().isEmpty()) {
+
+            throw new IllegalArgumentException(
+                    "Checker action is required");
+        }
+
+        checkerAction =
+                checkerAction.trim().toUpperCase();
+
 
         /*
-         * checker_remarks exists in the current
-         * outward_cheque table.
-         *
-         * Do NOT use updated_by / updated_at.
+         * ========================================================
+         * DETERMINE CHEQUE STATUS
+         * ========================================================
          */
-        String updateChequeSql =
-                "UPDATE outward_cheque " +
-                "SET cheque_status = ?, " +
-                "    return_reason_id = ?, " +
-                "    checker_remarks = ? " +
-                "WHERE batch_number = ? " +
-                "AND cheque_number = ?";
 
         String chequeStatus;
 
-        /*
-         * --------------------------------------------------------
-         * ACCEPT
-         * --------------------------------------------------------
-         */
-        if ("ACCEPT".equalsIgnoreCase(checkerAction)) {
+        if ("ACCEPT".equals(checkerAction)) {
 
             chequeStatus =
                     "CHECKER_ACCEPTED";
 
-            checkerReasonId = null;
-        }
+            checkerReasonCode = null;
 
-        /*
-         * --------------------------------------------------------
-         * REJECT
-         * --------------------------------------------------------
-         */
-        else if ("REJECT".equalsIgnoreCase(checkerAction)) {
+        } else if ("REJECT".equals(checkerAction)) {
 
-            if (checkerReasonId == null) {
+            if (checkerReasonCode == null
+                    || checkerReasonCode.trim().isEmpty()) {
 
                 throw new IllegalArgumentException(
                         "Reject reason is mandatory");
@@ -378,16 +381,11 @@ public class CheckerChequeDAO {
 
             chequeStatus =
                     "CHECKER_REJECTED";
-        }
 
-        /*
-         * --------------------------------------------------------
-         * SEND BACK
-         * --------------------------------------------------------
-         */
-        else if ("SEND_BACK".equalsIgnoreCase(checkerAction)) {
+        } else if ("SEND_BACK".equals(checkerAction)) {
 
-            if (checkerReasonId == null) {
+            if (checkerReasonCode == null
+                    || checkerReasonCode.trim().isEmpty()) {
 
                 throw new IllegalArgumentException(
                         "Send Back reason is mandatory");
@@ -395,14 +393,8 @@ public class CheckerChequeDAO {
 
             chequeStatus =
                     "SENT_BACK_TO_MAKER";
-        }
 
-        /*
-         * --------------------------------------------------------
-         * INVALID ACTION
-         * --------------------------------------------------------
-         */
-        else {
+        } else {
 
             throw new IllegalArgumentException(
                     "Invalid Checker action: "
@@ -411,15 +403,50 @@ public class CheckerChequeDAO {
 
 
         /*
-         * --------------------------------------------------------
-         * Normalize remarks
-         * --------------------------------------------------------
-         *
-         * Empty remarks are stored as NULL instead of
-         * an empty string.
+         * ========================================================
+         * NORMALIZE REASON
+         * ========================================================
          */
-        if (checkerRemarks != null &&
-                checkerRemarks.trim().isEmpty()) {
+
+        if (checkerReasonCode != null) {
+
+            checkerReasonCode =
+                    checkerReasonCode.trim();
+
+            if (checkerReasonCode.isEmpty()) {
+                checkerReasonCode = null;
+            }
+        }
+
+
+        /*
+         * ========================================================
+         * VALIDATE REASON
+         * ========================================================
+         */
+
+        if ("REJECT".equals(checkerAction)
+                || "SEND_BACK".equals(checkerAction)) {
+
+            if (!isValidCheckerReason(
+                    checkerReasonCode,
+                    checkerAction)) {
+
+                throw new IllegalArgumentException(
+                        "Invalid Checker reason: "
+                                + checkerReasonCode);
+            }
+        }
+
+
+        /*
+         * ========================================================
+         * NORMALIZE REMARKS
+         * ========================================================
+         */
+
+        if (checkerRemarks != null
+                && checkerRemarks.trim().isEmpty()) {
 
             checkerRemarks = null;
         }
@@ -427,9 +454,59 @@ public class CheckerChequeDAO {
 
         /*
          * ========================================================
+         * SQL
+         * ========================================================
+         */
+
+        String updateProcessingSql =
+                "UPDATE cheque_processing " +
+                "SET checker_id = ?, " +
+                "    checker_action = ?, " +
+                "    checker_reason_code = ? " +
+                "WHERE batch_number = ? " +
+                "AND cheque_number = ?";
+
+        String updateChequeSql =
+                "UPDATE outward_cheque " +
+                "SET cheque_status = ?, " +
+                "    checker_remarks = ? " +
+                "WHERE batch_number = ? " +
+                "AND cheque_number = ?";
+
+
+        /*
+         * Used after ACCEPT / REJECT.
+         *
+         * Only ACCEPT and REJECT are considered final
+         * Checker decisions.
+         */
+        String remainingChequeSql =
+                "SELECT COUNT(*) " +
+                "FROM cheque_processing " +
+                "WHERE batch_number = ? " +
+                "AND (checker_action IS NULL " +
+                "OR UPPER(checker_action) NOT IN " +
+                "('ACCEPT', 'REJECT'))";
+
+
+        String updateBatchCompletedSql =
+                "UPDATE outward_batch " +
+                "SET batch_status = 'CHECKER_COMPLETED' " +
+                "WHERE batch_number = ?";
+
+
+        String updateBatchHoldSql =
+                "UPDATE outward_batch " +
+                "SET batch_status = 'ON_HOLD' " +
+                "WHERE batch_number = ?";
+
+
+        /*
+         * ========================================================
          * DATABASE TRANSACTION
          * ========================================================
          */
+
         try (Connection connection =
                      CTSStaticData.getConnection()) {
 
@@ -438,10 +515,11 @@ public class CheckerChequeDAO {
             try {
 
                 /*
-                 * ------------------------------------------------
-                 * 1. Update cheque_processing
-                 * ------------------------------------------------
+                 * =================================================
+                 * 1. UPDATE CHEQUE PROCESSING
+                 * =================================================
                  */
+
                 int processingRows;
 
                 try (PreparedStatement statement =
@@ -454,19 +532,19 @@ public class CheckerChequeDAO {
 
                     statement.setString(
                             2,
-                            checkerAction.toUpperCase());
+                            checkerAction);
 
-                    if (checkerReasonId == null) {
+                    if (checkerReasonCode == null) {
 
                         statement.setNull(
                                 3,
-                                java.sql.Types.INTEGER);
+                                java.sql.Types.VARCHAR);
 
                     } else {
 
-                        statement.setInt(
+                        statement.setString(
                                 3,
-                                checkerReasonId);
+                                checkerReasonCode);
                     }
 
                     statement.setString(
@@ -481,12 +559,8 @@ public class CheckerChequeDAO {
                             statement.executeUpdate();
                 }
 
-                /*
-                 * Processing record must already exist.
-                 */
-                if (processingRows != 1) {
 
-                    connection.rollback();
+                if (processingRows != 1) {
 
                     throw new RuntimeException(
                             "Cheque processing record not found");
@@ -494,10 +568,11 @@ public class CheckerChequeDAO {
 
 
                 /*
-                 * ------------------------------------------------
-                 * 2. Update outward_cheque
-                 * ------------------------------------------------
+                 * =================================================
+                 * 2. UPDATE OUTWARD CHEQUE
+                 * =================================================
                  */
+
                 int chequeRows;
 
                 try (PreparedStatement statement =
@@ -508,50 +583,33 @@ public class CheckerChequeDAO {
                             1,
                             chequeStatus);
 
-                    if (checkerReasonId == null) {
-
-                        statement.setNull(
-                                2,
-                                java.sql.Types.INTEGER);
-
-                    } else {
-
-                        statement.setInt(
-                                2,
-                                checkerReasonId);
-                    }
-
                     if (checkerRemarks == null) {
 
                         statement.setNull(
-                                3,
+                                2,
                                 java.sql.Types.VARCHAR);
 
                     } else {
 
                         statement.setString(
-                                3,
+                                2,
                                 checkerRemarks);
                     }
 
                     statement.setString(
-                            4,
+                            3,
                             batchNumber);
 
                     statement.setString(
-                            5,
+                            4,
                             chequeNumber);
 
                     chequeRows =
                             statement.executeUpdate();
                 }
 
-                /*
-                 * Cheque record must exist.
-                 */
-                if (chequeRows != 1) {
 
-                    connection.rollback();
+                if (chequeRows != 1) {
 
                     throw new RuntimeException(
                             "Cheque record not found");
@@ -559,10 +617,99 @@ public class CheckerChequeDAO {
 
 
                 /*
-                 * ------------------------------------------------
-                 * 3. Commit
-                 * ------------------------------------------------
+                 * =================================================
+                 * 3. UPDATE BATCH STATUS
+                 * =================================================
+                 *
+                 * SEND_BACK:
+                 *
+                 *     Batch becomes ON_HOLD immediately.
+                 *
+                 * ACCEPT / REJECT:
+                 *
+                 *     Check whether any cheque still has no
+                 *     final Checker decision.
                  */
+
+                if ("SEND_BACK".equals(checkerAction)) {
+
+                    try (PreparedStatement statement =
+                                 connection.prepareStatement(
+                                         updateBatchHoldSql)) {
+
+                        statement.setString(
+                                1,
+                                batchNumber);
+
+                        int batchRows =
+                                statement.executeUpdate();
+
+                        if (batchRows != 1) {
+
+                            throw new RuntimeException(
+                                    "Batch record not found");
+                        }
+                    }
+
+                } else {
+
+                    int remainingCheques;
+
+                    try (PreparedStatement statement =
+                                 connection.prepareStatement(
+                                         remainingChequeSql)) {
+
+                        statement.setString(
+                                1,
+                                batchNumber);
+
+                        try (ResultSet rs =
+                                     statement.executeQuery()) {
+
+                            if (!rs.next()) {
+
+                                throw new RuntimeException(
+                                        "Unable to determine batch completion");
+                            }
+
+                            remainingCheques =
+                                    rs.getInt(1);
+                        }
+                    }
+
+
+                    /*
+                     * No unfinished Checker decisions remain.
+                     */
+                    if (remainingCheques == 0) {
+
+                        try (PreparedStatement statement =
+                                     connection.prepareStatement(
+                                             updateBatchCompletedSql)) {
+
+                            statement.setString(
+                                    1,
+                                    batchNumber);
+
+                            int batchRows =
+                                    statement.executeUpdate();
+
+                            if (batchRows != 1) {
+
+                                throw new RuntimeException(
+                                        "Batch record not found");
+                            }
+                        }
+                    }
+                }
+
+
+                /*
+                 * =================================================
+                 * 4. COMMIT
+                 * =================================================
+                 */
+
                 connection.commit();
 
                 return true;
@@ -587,51 +734,45 @@ public class CheckerChequeDAO {
 
     /*
      * ============================================================
-     * GET RETURN REASON BY ID
+     * VALIDATE CHECKER REASON
      * ============================================================
      */
-    public ReturnReason getReturnReasonById(
-            int reasonId) {
+
+    private boolean isValidCheckerReason(
+            String reasonCode,
+            String action) {
+
+        if (reasonCode == null
+                || reasonCode.trim().isEmpty()) {
+
+            return false;
+        }
 
         String sql =
-                "SELECT id, " +
-                "       reason_code, " +
-                "       reason_name, " +
-                "       active " +
+                "SELECT reason_code " +
                 "FROM return_reason_master " +
-                "WHERE id = ?";
+                "WHERE reason_code = ? " +
+                "AND active = true " +
+                "AND role_name = 'CHECKER' " +
+                "AND reason_type = ?";
 
         try (Connection connection =
                      CTSStaticData.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
-            statement.setInt(
+            statement.setString(
                     1,
-                    reasonId);
+                    reasonCode);
+
+            statement.setString(
+                    2,
+                    action.toUpperCase());
 
             try (ResultSet rs =
                          statement.executeQuery()) {
 
-                if (rs.next()) {
-
-                    ReturnReason reason =
-                            new ReturnReason();
-
-                    reason.setId(
-                            rs.getInt("id"));
-
-                    reason.setReasonCode(
-                            rs.getString("reason_code"));
-
-                    reason.setReasonName(
-                            rs.getString("reason_name"));
-
-                    reason.setActive(
-                            rs.getBoolean("active"));
-
-                    return reason;
-                }
+                return rs.next();
             }
 
         } catch (Exception e) {
@@ -639,12 +780,9 @@ public class CheckerChequeDAO {
             e.printStackTrace();
 
             throw new RuntimeException(
-                    "Error while fetching return reason: "
-                            + reasonId,
+                    "Error while validating Checker reason",
                     e);
         }
-
-        return null;
     }
 
 
@@ -653,21 +791,14 @@ public class CheckerChequeDAO {
      * GET CBS ACCOUNT
      * ============================================================
      *
-     * Used by CheckerProcessingService for CBS validation.
+     * Only drawer_account_number is validated.
      *
-     * Only these CBS fields are required currently:
+     * Conditions:
      *
-     *     account_number
-     *     account_holder_name
-     *     account_status
-     *
-     * We intentionally do not check:
-     *
-     *     balance
-     *     account type
-     *     branch
-     *     any other CBS condition
+     * 1. Account exists.
+     * 2. Account is ACTIVE.
      */
+
     public Map<String, String> getCbsAccount(
             String accountNumber) {
 

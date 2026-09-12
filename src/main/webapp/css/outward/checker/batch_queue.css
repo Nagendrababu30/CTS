@@ -1,0 +1,55 @@
+/* =========================================================
+   BATCH QUEUE
+   ========================================================= */
+
+.checker-page-content {
+    padding: 24px 32px;
+    box-sizing: border-box;
+}
+
+/* Page title */
+.page-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+/* Page subtitle */
+.page-subtitle {
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+/* Search row */
+.search-row {
+    margin-top: 8px;
+    margin-bottom: 4px;
+}
+
+/* Search box */
+.search-box {
+    height: 42px;
+}
+
+/* Buttons */
+.primary-button,
+.secondary-button {
+    height: 42px;
+}
+
+/* Section title */
+.section-title {
+    font-size: 17px;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+/* Batch table */
+.checker-batch-listbox {
+    width: 100%;
+}
+
+/* Pagination */
+.pagination-container {
+    margin-top: 4px;
+}

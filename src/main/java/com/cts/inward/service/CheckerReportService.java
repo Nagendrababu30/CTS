@@ -12,4 +12,5 @@ public interface CheckerReportService {
     String generateRrfXml();
 
     String generateApprovedXml();
+    
 }

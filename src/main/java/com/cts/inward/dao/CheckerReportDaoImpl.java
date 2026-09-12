@@ -81,7 +81,7 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
                 row.put("drawerName", rs.getString("drawer_name"));
                 row.put("bankName", rs.getString("presenting_bank_name"));
                 row.put("chequeDate", rs.getDate("cheque_date")); 
-                row.put("returnReason", rs.getString("return_reason"));
+                row.put("returnReason", rs.getString("rejection_reason_code"));
                 row.put("remark", rs.getString("remark"));
                 
                 rrfList.add(row);

@@ -10,11 +10,9 @@ public class OutwardValidationService {
     // =========================================================
     // VALIDATE CHEQUES
     // =========================================================
-    public OutwardValidationResult validate(
-            List<OutwardCheque> cheques) {
+    public OutwardValidationResult validate(List<OutwardCheque> cheques) {
 
-        OutwardValidationResult result =
-                new OutwardValidationResult();
+        OutwardValidationResult result = new OutwardValidationResult();
 
         if (cheques == null) {
             return result;
@@ -30,11 +28,7 @@ public class OutwardValidationService {
                 continue;
             }
 
-            boolean micrError =
-                    !isValidMicrCode(cheque.getCityCode())
-                    || !isValidMicrCode(cheque.getBankCode())
-                    || !isValidMicrCode(cheque.getBranchCode());
-
+            boolean micrError = !isValidMicrCode(cheque.getCityCode()) || !isValidMicrCode(cheque.getBankCode()) || !isValidMicrCode(cheque.getBranchCode());
             if (micrError) {
                 micrErrors++;
             }
@@ -48,42 +42,32 @@ public class OutwardValidationService {
         return result;
     }
 
-    // =========================================================
     // GET MICR ERROR TYPE
-    // =========================================================
-    public String getMicrErrorType(
-            OutwardCheque cheque) {
+    public String getMicrErrorType(OutwardCheque cheque) {
 
         if (cheque == null) {
             return null;
         }
 
-        if (!isValidMicrCode(
-                cheque.getCityCode())) {
+        if (!isValidMicrCode(cheque.getCityCode())) {
             return "CITY";
         }
 
-        if (!isValidMicrCode(
-                cheque.getBankCode())) {
+        if (!isValidMicrCode(cheque.getBankCode())) {
             return "BANK";
         }
 
-        if (!isValidMicrCode(
-                cheque.getBranchCode())) {
+        if (!isValidMicrCode(cheque.getBranchCode())) {
             return "BRANCH";
         }
 
         return null;
     }
 
-    // =========================================================
     // MICR CODE VALIDATION
-    // =========================================================
-    public boolean isValidMicrCode(
-            String value) {
+    public boolean isValidMicrCode(String value) {
 
-        if (value == null
-                || value.trim().isEmpty()) {
+        if (value == null || value.trim().isEmpty()) {
             return false;
         }
 

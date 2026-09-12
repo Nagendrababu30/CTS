@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?page title="Micr Repair Detail"?>
 
 <?init class="com.cts.admin.controller.LayoutInit"
@@ -10,667 +9,274 @@
         arg0="/zul/common/layout.zul"?>
 
 <zk>
-
-    <style>
-        <![CDATA[
-
-        /* =========================================================
-           PAGE / ZK RESET
-           ========================================================= */
-
-        html,
-        body {
-            margin: 0 !important;
-            padding: 0 !important;
-            height: 100% !important;
-            overflow: hidden !important;
-            background: #F4F7FB;
-        }
-
-        .z-window-embedded-cnt,
-        .z-window-content {
-            padding: 0 !important;
-        }
-
-        /* =========================================================
-           CARD
-           ========================================================= */
-
-        .equal-card {
-            background: #FFFFFF !important;
-            border: 1px solid #DCE5F0 !important;
-            border-radius: 6px !important;
-            box-shadow: 0 1px 3px rgba(16, 24, 40, 0.04) !important;
-        }
-
-        .equal-card > .z-groupbox-content {
-            padding: 0 !important;
-            height: 100% !important;
-        }
-
-        /* =========================================================
-           INPUT BOX
-           ========================================================= */
-
-        .single-field-box {
-            height: 38px !important;
-            font-size: 13px !important;
-            border: 1px solid #CBD5E1 !important;
-            border-radius: 6px !important;
-            padding: 6px 12px !important;
-            color: #0F172A !important;
-            background: #F8FAFC !important;
-            font-weight: 500 !important;
-            transition: all 0.2s ease !important;
-        }
-
-        .single-field-box:focus {
-            background: #FFFFFF !important;
-            border-color: #2457D6 !important;
-            box-shadow: 0 0 0 3px rgba(36, 87, 214, 0.15) !important;
-            outline: none !important;
-        }
-
-        /* =========================================================
-           FIELD LABEL
-           ========================================================= */
-
-        .single-field-label {
-            font-size: 13px !important;
-            font-weight: 700 !important;
-            color: #1E293B !important;
-            letter-spacing: 0.2px;
-        }
-
-        /* =========================================================
-           MICR STATUS
-           ========================================================= */
-
-        .micr-error-label {
-            color: #D92D20 !important;
-            font-weight: bold !important;
-        }
-
-        .micr-status-label {
-            color: #D92D20 !important;
-        }
-
-        .micr-component-error {
-            color: #D92D20 !important;
-            font-weight: 700 !important;
-        }
-
-        .micr-component-error,
-        .micr-component-error .z-textbox-input {
-            background-color: #FEE4E2 !important;
-            border: 1px solid #D92D20 !important;
-        }
-
-        .corrected-micr-box {
-            height: 38px !important;
-            font-size: 13px !important;
-            box-sizing: border-box !important;
-        }
-
-        .micr-component-corrected,
-        .micr-component-corrected .z-textbox-input {
-            background-color: #E6F4EA !important;
-            border: 1px solid #008000 !important;
-        }
-
-        /* =========================================================
-           REQUIRED FIELD STAR
-           ========================================================= */
-
-        .label-star {
-            color: #DC2626 !important;
-            font-weight: 700 !important;
-            font-size: 13px !important;
-            margin-left: 2px;
-        }
-
-        /* =========================================================
-           IMAGE TOOLBAR
-           ========================================================= */
-
-        .icon-symbol-btn {
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-            color: #334155 !important;
-            font-size: 18px !important;
-            font-weight: bold !important;
-            cursor: pointer !important;
-            height: 30px !important;
-            padding: 0 !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            transition: color 0.15s ease, transform 0.1s ease !important;
-        }
-
-        .icon-symbol-btn:hover {
-            background: #E2E8F0 !important;
-            border-radius: 4px !important;
-            color: #0F172A !important;
-        }
-
-        ]]>
-    </style>
-
-
-    <!-- =========================================================
-         CONTENT
-         Header + Sidebar are supplied by common/layout.zul
-         ========================================================= -->
-
-    <div
-        self="@define(content)"
-        width="100%"
-        height="100%"
-        style="
-            width:100%;
-            height:100%;
-            background:#F4F7FB;
-        ">
-
-
-        <!-- =====================================================
-             MICR REPAIR DETAIL CONTROLLER
-             ===================================================== -->
-
-        <vlayout
-            apply="com.iispl.cts.controller.outward.OutwardMakerMicrRepairDetailController"
-            spacing="8px"
-            width="100%"
-            height="100%"
-            style="
-                padding:10px 16px;
-                box-sizing:border-box;
-                overflow:auto;
-            ">
-
-
-            <!-- =================================================
-                 BATCH HEADER STRIP
-                 ================================================= -->
-
-            <groupbox
-                width="100%"
-                style="
-                    background:white;
-                    border:1px solid #DCE5F0;
-                    border-radius:6px;
-                ">
-
-                <hlayout
-                    width="100%"
-                    valign="middle"
-                    style="padding:4px 14px;">
-
-                    <label
-                        value="Batch ID : "
-                        style="
-                            font-size:14px;
-                            font-weight:bold;
-                            color:#334155;
-                        "/>
-
-                    <label
-                        id="batchIdLabel"
-                        value=""
-                        style="
-                            font-size:15px;
-                            font-weight:bold;
-                            color:#175CD3;
-                        "/>
-
-                    <space hflex="1"/>
-
-                    <label
-                        id="chequeProgressLabel"
-                        value=""
-                        style="
-                            font-size:14px;
-                            font-weight:bold;
-                            color:#175CD3;
-                        "/>
-
-                </hlayout>
-
-            </groupbox>
-
-
-            <!-- =================================================
-                 MAIN SPLIT ROW
-                 ================================================= -->
-
-            <hlayout
-                width="100%"
-                height="430px"
-                spacing="14px"
-                valign="top">
-
-
-                <!-- =============================================
-                     LEFT: SCANNED CHEQUE
-                     ============================================= -->
-
-                <groupbox
-                    hflex="7"
-                    height="430px"
-                    sclass="equal-card">
-
-                    <caption
-                        label="Scanned Cheque"
-                        style="
-                            font-size:13px;
-                            font-weight:bold;
-                            color:#122B49;
-                        "/>
-
-                    <vlayout
-                        width="100%"
-                        height="100%"
-                        spacing="6px"
-                        style="
-                            padding:6px;
-                            box-sizing:border-box;
-                            justify-content:space-between;
-                        ">
-
-
-                        <!-- CHEQUE IMAGE AREA -->
-
-                        <vlayout
-                            width="100%"
-                            height="340px"
-                            style="
-                                overflow:hidden;
-                                text-align:center;
-                                align-items:center;
-                                justify-content:center;
-                                background:#F8FAFC;
-                                border:1px solid #EAECF0;
-                                border-radius:4px;
-                                padding:6px;
-                                box-sizing:border-box;
-                            ">
-
-                            <image
-                                id="frontImage"
-                                src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Subcheck_FRONT.png"
-                                width="100%"
-                                height="100%"
-                                visible="true"
-                                style="
-                                    object-fit:contain;
-                                    max-width:100%;
-                                    max-height:100%;
-                                    display:block;
-                                    margin:auto;
-                                "/>
-
-                            <image
-                                id="backImage"
-                                src="https://placehold.co/900x400?text=Cheque+Back"
-                                width="100%"
-                                height="100%"
-                                visible="false"
-                                style="
-                                    object-fit:contain;
-                                    max-width:100%;
-                                    max-height:100%;
-                                    display:block;
-                                    margin:auto;
-                                "/>
-
-                        </vlayout>
-
-
-                        <!-- IMAGE TOOLBAR -->
-
-                        <hlayout
-                            width="100%"
-                            spacing="4px"
-                            style="
-                                justify-content:center;
-                                padding:2px 0;
-                            ">
-
-                            <button
-                                id="frontImageButton"
-                                label="Front"
-                                hflex="1"
-                                sclass="img-tool-btn"/>
-
-                            <button
-                                id="backImageButton"
-                                label="Back"
-                                hflex="1"
-                                sclass="img-tool-btn"/>
-
-                            <button
-                                id="zoomInButton"
-                                label="+"
-                                tooltiptext="Zoom In"
-                                hflex="1"
-                                sclass="icon-symbol-btn"/>
-
-                            <button
-                                id="zoomOutButton"
-                                label="−"
-                                tooltiptext="Zoom Out"
-                                hflex="1"
-                                sclass="icon-symbol-btn"/>
-
-                            <button
-                                id="rotateButton"
-                                label="↻"
-                                tooltiptext="Rotate"
-                                hflex="1"
-                                sclass="icon-symbol-btn"/>
-
-                        </hlayout>
-
-                    </vlayout>
-
-                </groupbox>
-
-
-                <!-- =============================================
-                     RIGHT: MICR REPAIR
-                     ============================================= -->
-
-                <groupbox
-                    hflex="7"
-                    height="430px"
-                    sclass="equal-card">
-
-                    <caption
-                        label="MICR Repair"
-                        style="
-                            font-size:13px;
-                            font-weight:bold;
-                            color:#122B49;
-                        "/>
-
-                    <vlayout
-                        width="100%"
-                        height="100%"
-                        spacing="10px"
-                        style="
-                            padding:14px 18px;
-                            box-sizing:border-box;
-                        ">
-
-
-                        <!-- =====================================
-                             ROW 1
-                             CHEQUE NUMBER + CURRENT STATUS
-                             ===================================== -->
-
-                        <hlayout
-                            width="100%"
-                            spacing="16px">
-
-
-                            <!-- CHEQUE NUMBER -->
-
-                            <vlayout
-                                hflex="1"
-                                spacing="4px">
-
-                                <label
-                                    value="Cheque Number"
-                                    sclass="single-field-label"/>
-
-                                <textbox
-                                    id="chequeNumberTextbox"
-                                    width="100%"
-                                    readonly="true"
-                                    sclass="single-field-box"/>
-
-                            </vlayout>
-
-
-                            <!-- CURRENT STATUS -->
-
-                            <vlayout
-                                hflex="1"
-                                spacing="4px">
-
-                                <label
-                                    value="Current Status"
-                                    sclass="single-field-label"/>
-
-                                <label
-                                    id="currentStatusLabel"
-                                    value="MICR_ERROR"
-                                    sclass="micr-error-label"/>
-
-                            </vlayout>
-
-                        </hlayout>
-
-
-                        <!-- =====================================
-                             ROW 2
-                             CITY CODE + BANK CODE
-                             ===================================== -->
-
-                        <hlayout
-                            width="100%"
-                            spacing="16px">
-
-
-                            <!-- CITY CODE -->
-
-                            <vlayout
-                                hflex="1"
-                                spacing="4px">
-
-                                <hlayout
-                                    spacing="0"
-                                    valign="middle">
-
-                                    <label
-                                        id="cityCodeLabel"
-                                        value="City Code"
-                                        sclass="single-field-label"/>
-
-                                    <label
-                                        value="*"
-                                        sclass="label-star"/>
-
-                                </hlayout>
-
-                                <textbox
-                                    id="cityCodeTextbox"
-                                    width="100%"
-                                    placeholder="Enter corrected city code"
-                                    sclass="corrected-micr-box"/>
-
-                            </vlayout>
-
-
-                            <!-- BANK CODE -->
-
-                            <vlayout
-                                hflex="1"
-                                spacing="4px">
-
-                                <hlayout
-                                    spacing="0"
-                                    valign="middle">
-
-                                    <label
-                                        id="bankCodeLabel"
-                                        value="Bank Code"
-                                        sclass="single-field-label"/>
-
-                                    <label
-                                        value="*"
-                                        sclass="label-star"/>
-
-                                </hlayout>
-
-                                <textbox
-                                    id="bankCodeTextbox"
-                                    width="100%"
-                                    placeholder="Enter corrected bank code"
-                                    sclass="corrected-micr-box"/>
-
-                            </vlayout>
-
-                        </hlayout>
-
-
-                        <!-- =====================================
-                             ROW 3
-                             BRANCH CODE + ORIGINAL MICR
-                             ===================================== -->
-
-                        <hlayout
-                            width="100%"
-                            spacing="16px">
-
-
-                            <!-- BRANCH CODE -->
-
-                            <vlayout
-                                hflex="1"
-                                spacing="4px">
-
-                                <hlayout
-                                    spacing="0"
-                                    valign="middle">
-
-                                    <label
-                                        id="branchCodeLabel"
-                                        value="Branch Code"
-                                        sclass="single-field-label"/>
-
-                                    <label
-                                        value="*"
-                                        sclass="label-star"/>
-
-                                </hlayout>
-
-                                <textbox
-                                    id="branchCodeTextbox"
-                                    width="100%"
-                                    placeholder="Enter corrected branch code"
-                                    sclass="corrected-micr-box"/>
-
-                            </vlayout>
-
-
-                            <!-- ORIGINAL MICR -->
-
-                            <vlayout
-                                hflex="1"
-                                spacing="4px">
-
-                                <label
-                                    value="Original MICR"
-                                    sclass="single-field-label"/>
-
-                                <textbox
-                                    id="originalMicrTextbox"
-                                    width="100%"
-                                    readonly="true"
-                                    placeholder="Original MICR"
-                                    sclass="single-field-box"/>
-
-                            </vlayout>
-
-                        </hlayout>
-
-                    </vlayout>
-
-                </groupbox>
-
-            </hlayout>
-
-
-            <!-- =================================================
-                 BOTTOM ACTION BAR
-                 ================================================= -->
-
-            <hlayout
-                width="100%"
-                valign="middle"
-                style="
-                    padding-top:4px;
-                    align-items:center;
-                ">
-
-
-                <!-- PREVIOUS -->
-
-                <button
-                    id="prevButton"
-                    label="Prev"
-                    width="90px"
-                    style="
-                        height:38px;
-                        font-size:13px;
-                        font-weight:600;
-                        cursor:pointer;
-                    "/>
-
-
-                <!-- SAVE & NEXT -->
-
-                <button
-                    id="saveNextButton"
-                    label="💾 Save &amp; Next"
-                    width="145px"
-                    style="
-                        height:38px;
-                        background:#2457D6;
-                        color:white;
-                        border:none;
-                        margin-left:8px;
-                        font-size:13px;
-                        font-weight:bold;
-                        cursor:pointer;
-                    "/>
-
-
-                <!-- REJECT -->
-
-                <button
-                    id="rejectButton"
-                    label="Reject"
-                    width="110px"
-                    style="
-                        height:38px;
-                        background:white;
-                        color:#D92D20;
-                        border:1px solid #D92D20;
-                        margin-left:8px;
-                        font-size:13px;
-                        font-weight:bold;
-                        cursor:pointer;
-                    "/>
-
-
-                <!-- Hidden buttons for controller safety -->
-
-                <button
-                    id="nextButton"
-                    visible="false"/>
-
-                <button
-                    id="backButton"
-                    visible="false"/>
-
-            </hlayout>
-
-        </vlayout>
-
-    </div>
-
+	<style>
+		<![CDATA[ html, body { margin: 0; padding: 0; height: 100%;
+		background: #EBF2F7; }
+
+		.z-window-embedded-cnt, .z-window-content { padding: 0; }
+
+		/* Soft Rounded Container Cards */ .template-card { background:
+		#FFFFFF; border: 1px solid #D2E3EF; border-radius: 12px;
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03); } .template-card >
+		.z-groupbox-content { padding: 16px; box-sizing: border-box;
+		height: 100%; }
+
+		/* Soft Badge Titles */ .section-title-badge { background:
+		#E2F0F9; color: #2B7A9E; font-size: 13px; font-weight: 700;
+		padding: 6px 16px; border-radius: 20px; display: inline-block; }
+
+		/* Metric Pill Badges */ .metric-pill { padding: 4px 12px;
+		border-radius: 12px; font-size: 12px; font-weight: 600; display:
+		inline-flex; align-items: center; } .pill-total { background:
+		#D9EBF7; color: #1D5C80; } .pill-completed { background:
+		#D2F1E4; color: #156E43; } .pill-pending { background: #FDE8D7;
+		color: #8C4710; }
+
+		/* Template Form Controls */ input.single-field-box,
+		.corrected-micr-box { height: 38px; font-size: 13px; border: 1px
+		solid #C4DCEC; border-radius: 8px; padding: 6px 12px; color:
+		#2C3E50; background: #F4F8FA; font-weight: 500; box-sizing:
+		border-box; transition: all 0.15s ease-in-out; }
+		input.single-field-box:focus, .corrected-micr-box:focus {
+		background: #FFFFFF; border-color: #38A2D7; box-shadow: 0 0 0
+		3px rgba(56, 162, 215, 0.2); outline: none; }
+
+		/* Field Labels */ .single-field-label { font-size: 11px;
+		font-weight: 700; color: #5A738E; letter-spacing: 0.3px; }
+		.label-star { color: #E74C3C; font-weight: 700; font-size: 11px;
+		margin-left: 2px; }
+
+		/* MICR Validation Highlighting */ .micr-component-error,
+		.micr-component-error .z-textbox-input { background-color:
+		#FCE8E6 !important; border: 1px solid #E74C3C !important; }
+		.micr-component-corrected, .micr-component-corrected
+		.z-textbox-input { background-color: #E8F8F0 !important; border:
+		1px solid #2ECC71 !important; }
+
+		.status-label { font-weight: bold; }
+
+		.status-repaired { color: #2ECC71 !important; }
+
+		.status-error { color: #E74C3C !important; }
+
+		/* Template Buttons */ .btn-cyan { background: #38A2D7; color:
+		#FFFFFF; border: none; border-radius: 6px; font-size: 12px;
+		font-weight: 600; cursor: pointer; transition: background 0.15s
+		ease; } .btn-cyan:hover { background: #2D8ABA; }
+
+		.btn-cyan-outline { background: #EBF5FB; color: #38A2D7; border:
+		1px solid #BCE0F2; border-radius: 6px; font-size: 12px;
+		font-weight: 600; cursor: pointer; }
+
+		.icon-symbol-btn { background: #FFFFFF; border: 1px solid
+		#C4DCEC; border-radius: 6px; color: #4A6572; font-size: 15px;
+		font-weight: bold; cursor: pointer; height: 32px; width: 32px;
+		display: inline-flex; align-items: center; justify-content:
+		center; }
+
+		.cheque-image { object-fit: contain; max-width: 100%;
+		max-height: 100%; display: block; margin: auto; } ]]>
+	</style>
+
+	<!-- CONTENT ROOT -->
+	<div self="@define(content)" width="100%" height="100%"
+		style="width:100%; height:100%; background:#EBF2F7;">
+
+		<vlayout
+			apply="com.iispl.cts.controller.outward.OutwardMakerMicrRepairDetailController"
+			spacing="12px" width="100%" height="100%"
+			style="padding:12px 18px; box-sizing:border-box; overflow:auto;">
+
+			<!-- =================================================
+				BATCH HEADER STRIP & METRICS PILLS (NO REJECTED)
+				================================================= -->
+			<div width="100%"
+				style="background:#FFFFFF; border:1px solid #D2E3EF; border-radius:10px; padding:10px 18px; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+				<hlayout width="100%" valign="middle" spacing="12px">
+
+					<!-- ADD THIS BUTTON RIGHT HERE -->
+					<button id="btnBackToQueue" 
+                            label="←" 
+                            tooltiptext="Back to Batch Queue" 
+                            style="cursor: pointer; background: #FFFFFF; border: 1px solid #C4DCEC; border-radius: 6px; font-size: 16px; font-weight: bold; color: #4A6572; height: 28px; width: 28px; line-height: 24px; text-align: center; padding: 0;" />
+
+					<!-- Batch ID -->
+					<label value="Batch No : "
+						style="font-size:13px; font-weight:700; color:#4A6572;" />
+					<label id="batchIdLabel" value=""
+						style="font-size:13px; font-weight:800; color:#2B7A9E;" />
+
+					<space hflex="1" />
+
+					<!-- Metric Status Pills -->
+					<div sclass="metric-pill pill-total">
+						<label value="Total: " style="font-weight:600;" />
+						<label id="totalPillLabel" value="0"
+							style="font-weight:800; margin-left:4px;" />
+					</div>
+					<div sclass="metric-pill pill-completed">
+						<label value="Completed: "
+							style="font-weight:600;" />
+						<label id="completedPillLabel" value="0"
+							style="font-weight:800; margin-left:4px;" />
+					</div>
+					<div sclass="metric-pill pill-pending">
+						<label value="Pending: "
+							style="font-weight:600;" />
+						<label id="pendingPillLabel" value="0"
+							style="font-weight:800; margin-left:4px;" />
+					</div>
+
+					<space width="10px" />
+
+					<!-- Cheque Progress Counter -->
+					<label id="chequeProgressLabel" value=""
+						style="font-size:13px; font-weight:800; color:#2B7A9E;" />
+				</hlayout>
+			</div>
+
+			<!-- =================================================
+				MAIN SPLIT ROW
+				================================================= -->
+			<hlayout width="100%" spacing="16px" valign="top">
+
+				<!-- LEFT CARD: SCANNED CHEQUE VIEW -->
+				<groupbox hflex="1" height="465px"
+					sclass="template-card">
+					<vlayout width="100%" height="100%"
+						spacing="10px">
+
+						<!-- Header Badge -->
+						<hlayout width="100%">
+							<div sclass="section-title-badge">
+								<label value="Scanned Cheque" />
+							</div>
+						</hlayout>
+
+						<!-- Cheque Image Viewport -->
+						<div width="100%" vflex="1"
+							style="display:flex; align-items:center; justify-content:center; background:#F4F8FA; border:1px solid #D2E3EF; border-radius:8px; overflow:hidden; padding:4px; box-sizing:border-box;">
+
+							<image id="frontImage" sclass="cheque-image"
+								visible="true"
+								src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Subcheck_FRONT.png"
+								width="100%" height="100%" />
+
+							<image id="backImage" sclass="cheque-image"
+								visible="false"
+								src="https://placehold.co/900x400?text=Cheque+Back" width="100%"
+								height="100%" />
+						</div>
+
+						<!-- Image Tools Toolbar -->
+						<hlayout width="100%" spacing="8px"
+							valign="middle">
+							<button id="frontImageButton" label="Front"
+								width="85px" height="32px" sclass="btn-cyan" />
+							<button id="backImageButton"
+								label="View Back" width="95px" height="32px"
+								sclass="btn-cyan-outline" />
+							<space width="4px" />
+							<button id="zoomInButton" label="+"
+								tooltiptext="Zoom In" sclass="icon-symbol-btn" />
+							<button id="zoomOutButton" label="−"
+								tooltiptext="Zoom Out" sclass="icon-symbol-btn" />
+							<button id="rotateButton" label="↻"
+								tooltiptext="Rotate" sclass="icon-symbol-btn" />
+						</hlayout>
+					</vlayout>
+				</groupbox>
+
+				<!-- RIGHT CARD: MICR REPAIR FORM -->
+				<groupbox hflex="1" height="465px"
+					sclass="template-card">
+					<vlayout width="100%" vflex="1" spacing="12px">
+
+						<!-- Header Badge -->
+						<hlayout width="100%">
+							<div sclass="section-title-badge">
+								<label value="Cheque Data Verification" />
+							</div>
+						</hlayout>
+
+						<!-- Row 1: Cheque Number & Current Status -->
+						<hlayout width="100%" spacing="12px">
+							<vlayout hflex="1" spacing="4px">
+								<label value="CHEQUE NUMBER"
+									sclass="single-field-label" />
+								<textbox id="chequeNumberTextbox"
+									width="100%" readonly="true" sclass="single-field-box" />
+							</vlayout>
+							<vlayout hflex="1" spacing="4px">
+								<label value="CURRENT STATUS"
+									sclass="single-field-label" />
+								<label id="currentStatusLabel"
+									value="MICR_ERROR"
+									style="font-size:13px; font-weight:800; color:#E74C3C; margin-top:8px;" />
+							</vlayout>
+						</hlayout>
+
+						<!-- Row 2: City Code & Bank Code -->
+						<hlayout width="100%" spacing="12px">
+							<vlayout hflex="1" spacing="4px">
+								<hlayout spacing="0" valign="middle">
+									<label id="cityCodeLabel"
+										value="CITY CODE" sclass="single-field-label" />
+									<label value="*"
+										sclass="label-star" />
+								</hlayout>
+								<textbox id="cityCodeTextbox"
+									width="100%" placeholder="Enter city code"
+									sclass="corrected-micr-box" />
+							</vlayout>
+							<vlayout hflex="1" spacing="4px">
+								<hlayout spacing="0" valign="middle">
+									<label id="bankCodeLabel"
+										value="BANK CODE" sclass="single-field-label" />
+									<label value="*"
+										sclass="label-star" />
+								</hlayout>
+								<textbox id="bankCodeTextbox"
+									width="100%" placeholder="Enter bank code"
+									sclass="corrected-micr-box" />
+							</vlayout>
+						</hlayout>
+
+						<!-- Row 3: Branch Code -->
+						<hlayout width="100%" spacing="12px">
+							<vlayout hflex="1" spacing="4px">
+								<hlayout spacing="0" valign="middle">
+									<label id="branchCodeLabel"
+										value="BRANCH CODE" sclass="single-field-label" />
+									<label value="*"
+										sclass="label-star" />
+								</hlayout>
+								<textbox id="branchCodeTextbox"
+									width="100%" placeholder="Enter branch code"
+									sclass="corrected-micr-box" />
+							</vlayout>
+							<vlayout hflex="1" />
+						</hlayout>
+
+						<!-- Flexible spacer pushes bottom actions -->
+						<space vflex="1" />
+
+						<!-- Actions Row -->
+						<hlayout width="100%" valign="middle"
+							spacing="10px">
+							<button id="prevButton" label="Prev"
+								width="85px" height="36px" sclass="btn-cyan-outline" />
+							<button id="saveNextButton"
+								label="💾 Save &amp; Next" width="130px" height="36px"
+								sclass="btn-cyan" />
+							<button id="nextButton" visible="false" />
+						</hlayout>
+
+					</vlayout>
+				</groupbox>
+
+			</hlayout>
+		</vlayout>
+
+	</div>
 </zk>

@@ -179,6 +179,7 @@
                          width="100%"
                          sclass="cheque-details-scroll">
 
+
                         <!-- =================================================
                              CHEQUE INFORMATION
                              ================================================= -->
@@ -329,6 +330,24 @@
                             </hlayout>
 
                         </vlayout>
+
+
+                        <!-- =================================================
+                             MAKER REJECTION
+                             ================================================= -->
+
+                        <div id="makerRejectionBlock"
+                             visible="false"
+                             sclass="maker-rejection-block">
+
+                            <label value="✕  REJECTED BY MAKER"
+                                   sclass="maker-rejection-title"/>
+
+                            <label id="makerRejectionReason"
+                                   value=""
+                                   sclass="maker-rejection-reason"/>
+
+                        </div>
 
 
                         <!-- =================================================

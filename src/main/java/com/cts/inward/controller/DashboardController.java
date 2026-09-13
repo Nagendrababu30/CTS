@@ -379,7 +379,7 @@ public class DashboardController
              * -------------------------------------------------------------
              */
             Label userIdLabel =
-                    new Label("-");
+                    new Label("Not Assigned");
 
             if (locked
                     && batch.getLockUserId()
@@ -554,7 +554,7 @@ public class DashboardController
                     || batchStatus.isEmpty())) {
 
             actionButton.setLabel(
-                    "Lock & Validate");
+                    "Lock & Open");
 
             actionButton.setIconSclass(
                     "z-icon-lock");
@@ -596,10 +596,10 @@ public class DashboardController
                                     batchId);
 
             actionButton.setLabel(
-                    "Open");
+                    "MICR Repair");
 
             actionButton.setIconSclass(
-                    "z-icon-folder-open");
+                    "z-icon-wrench");
 
             actionButton.setSclass(
                     "btn btn-action");
@@ -637,10 +637,10 @@ public class DashboardController
             }
 
             actionButton.setLabel(
-                    "Open");
+                    "Data Entry");
 
             actionButton.setIconSclass(
-                    "z-icon-folder-open");
+                    "z-icon-edit");
 
             actionButton.setSclass(
                     "btn btn-action");

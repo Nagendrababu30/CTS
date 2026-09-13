@@ -55,6 +55,18 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
     @Wire
     private Button backSideButton;
 
+    @Wire
+    private Button rotateButton;
+
+    @Wire
+    private Button zoomOutButton;
+
+    @Wire
+    private Button zoomInButton;
+
+    @Wire
+    private Label zoomLevelLabel;
+
     // ============================================================
     // CHEQUE DETAILS
     // ============================================================
@@ -141,6 +153,21 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
     private int currentChequeIndex = 0;
 
+    /*
+     * Image display state.
+     *
+     * 1.0 = 100%
+     * 1.25 = 125%
+     * 1.50 = 150%
+     * ...
+     *
+     * Rotation:
+     * 0 -> 90 -> 180 -> 270 -> 0
+     */
+    private double imageScale = 1.0;
+
+    private int imageRotation = 0;
+
     private CheckerBatchService batchService;
 
     private CheckerProcessingService processingService;
@@ -163,6 +190,7 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         super.doAfterCompose(comp);
 
         batchService = new CheckerBatchService();
+
         processingService = new CheckerProcessingService();
 
         // ========================================================
@@ -205,6 +233,7 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         // ========================================================
 
         loadBatch();
+
         loadFirstCheque();
 
         // ========================================================
@@ -226,6 +255,22 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         backSideButton.addEventListener(
                 Events.ON_CLICK,
                 event -> showBackImage());
+
+        // ========================================================
+        // IMAGE CONTROLS
+        // ========================================================
+
+        rotateButton.addEventListener(
+                Events.ON_CLICK,
+                event -> rotateImage());
+
+        zoomOutButton.addEventListener(
+                Events.ON_CLICK,
+                event -> zoomOut());
+
+        zoomInButton.addEventListener(
+                Events.ON_CLICK,
+                event -> zoomIn());
 
         // ========================================================
         // CHECKER ACTION BUTTONS
@@ -287,6 +332,8 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
             chequeImage.setSrc(
                     frontImagePath.trim());
 
+            applyImageTransform();
+
         } else {
 
             chequeImage.setSrc("");
@@ -324,6 +371,8 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
             chequeImage.setSrc(
                     backImagePath.trim());
 
+            applyImageTransform();
+
         } else {
 
             chequeImage.setSrc("");
@@ -334,6 +383,75 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
                     Messagebox.OK,
                     Messagebox.EXCLAMATION);
         }
+    }
+
+    // ============================================================
+    // ZOOM IN
+    // ============================================================
+
+    private void zoomIn() {
+
+        if (imageScale < 3.0) {
+
+            imageScale += 0.25;
+
+        }
+
+        applyImageTransform();
+    }
+
+    // ============================================================
+    // ZOOM OUT
+    // ============================================================
+
+    private void zoomOut() {
+
+        if (imageScale > 0.50) {
+
+            imageScale -= 0.25;
+
+        }
+
+        applyImageTransform();
+    }
+
+    // ============================================================
+    // ROTATE IMAGE
+    // ============================================================
+
+    private void rotateImage() {
+
+        imageRotation += 90;
+
+        if (imageRotation >= 360) {
+
+            imageRotation = 0;
+
+        }
+
+        applyImageTransform();
+    }
+
+    // ============================================================
+    // APPLY IMAGE TRANSFORM
+    // ============================================================
+
+    private void applyImageTransform() {
+
+        String transform =
+                "transform: scale("
+                        + imageScale
+                        + ") rotate("
+                        + imageRotation
+                        + "deg);"
+                        + " transform-origin: center center;";
+
+        chequeImage.setStyle(transform);
+
+        zoomLevelLabel.setValue(
+                String.format(
+                        "%.0f%%",
+                        imageScale * 100));
     }
 
     // ============================================================
@@ -478,6 +596,20 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
             return;
         }
 
+        // ========================================================
+        // RESET IMAGE FOR NEW CHEQUE
+        // ========================================================
+
+        imageScale = 1.0;
+
+        imageRotation = 0;
+
+        applyImageTransform();
+
+        // ========================================================
+        // LOAD CHEQUE
+        // ========================================================
+
         OutwardCheque cheque =
                 cheques.get(currentChequeIndex);
 
@@ -512,6 +644,7 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
                 batchService.findBatch(batchNumber);
 
         if (currentBatch == null) {
+
             return;
         }
 
@@ -610,6 +743,8 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
             chequeImage.setSrc(
                     frontImagePath.trim());
 
+            applyImageTransform();
+
         } else {
 
             chequeImage.setSrc("");
@@ -632,7 +767,8 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
     // DISPLAY MAKER REJECTION
     // ============================================================
 
-    private void displayMakerRejection(OutwardCheque cheque) {
+    private void displayMakerRejection(
+            OutwardCheque cheque) {
 
         /*
          * Always reset the Maker rejection block first.
@@ -646,6 +782,7 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         makerRejectionReason.setValue("");
 
         if (cheque == null) {
+
             return;
         }
 
@@ -668,6 +805,7 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
                         chequeNumber);
 
         if (!makerRejected) {
+
             return;
         }
 
@@ -719,15 +857,16 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
         makerRejectionBlock.setVisible(true);
     }
-    
 
     // ============================================================
     // BUILD MICR
     // ============================================================
 
-    private String buildMicr(OutwardCheque cheque) {
+    private String buildMicr(
+            OutwardCheque cheque) {
 
         if (cheque == null) {
+
             return "-";
         }
 
@@ -759,7 +898,8 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
     // CBS VALIDATION
     // ============================================================
 
-    private void validateCbs(OutwardCheque cheque) {
+    private void validateCbs(
+            OutwardCheque cheque) {
 
         cbsResult =
                 processingService.validateCbsAccount(
@@ -804,7 +944,8 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
         accountVerificationReason.setValue(
                 processingService
-                        .getCbsValidationMessage(cbsResult));
+                        .getCbsValidationMessage(
+                                cbsResult));
 
         accountVerificationReason.setVisible(true);
     }
@@ -813,7 +954,8 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
     // VALUE OR DASH
     // ============================================================
 
-    private String valueOrDash(String value) {
+    private String valueOrDash(
+            String value) {
 
         if (value == null
                 || value.trim().isEmpty()) {
@@ -828,7 +970,8 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
     // SELECT ACTION
     // ============================================================
 
-    private void selectAction(String action) {
+    private void selectAction(
+            String action) {
 
         selectedAction = action;
 
@@ -865,14 +1008,16 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
     // LOAD REASONS FOR ACTION
     // ============================================================
 
-    private void loadReasonsForAction(String action) {
+    private void loadReasonsForAction(
+            String action) {
 
         reasonCombobox.getItems().clear();
 
         reasonCombobox.setSelectedItem(null);
 
         List<ReturnReason> reasons =
-                processingService.getReturnReasons(action);
+                processingService.getReturnReasons(
+                        action);
 
         if (reasons == null
                 || reasons.isEmpty()) {
@@ -919,10 +1064,12 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         // ACCEPT
         // ========================================================
 
-        if ("ACCEPT".equalsIgnoreCase(selectedAction)) {
+        if ("ACCEPT".equalsIgnoreCase(
+                selectedAction)) {
 
             saveNextButton.setDisabled(
-                    !"PASS".equalsIgnoreCase(cbsResult));
+                    !"PASS".equalsIgnoreCase(
+                            cbsResult));
 
             return;
         }
@@ -931,11 +1078,14 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         // REJECT / SEND BACK
         // ========================================================
 
-        if ("REJECT".equalsIgnoreCase(selectedAction)
-                || "SEND_BACK".equalsIgnoreCase(selectedAction)) {
+        if ("REJECT".equalsIgnoreCase(
+                selectedAction)
+                || "SEND_BACK".equalsIgnoreCase(
+                        selectedAction)) {
 
             saveNextButton.setDisabled(
-                    reasonCombobox.getSelectedItem() == null);
+                    reasonCombobox
+                            .getSelectedItem() == null);
 
             return;
         }
@@ -959,7 +1109,8 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
     // CONFIRM ACTION
     // ============================================================
 
-    private void confirmAction(String action) {
+    private void confirmAction(
+            String action) {
 
         String message;
 

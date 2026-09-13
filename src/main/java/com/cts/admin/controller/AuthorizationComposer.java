@@ -63,6 +63,7 @@ public class AuthorizationComposer
 		 * Data Entry page.
 		 */
 		PAGE_PERMISSIONS.put("/zul/inward-maker/data-entry.zul", "INWARD_MAKER");
+		PAGE_PERMISSIONS.put("/zul/inward-maker/data-entryform.zul", "INWARD_MAKER");
 
 		/*
 		 * These pages can remain protected if they still exist, but they are no longer

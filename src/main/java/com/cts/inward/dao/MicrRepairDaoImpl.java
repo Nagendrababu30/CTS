@@ -18,88 +18,122 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
     private static final String STATUS_RETURN_BY_MAKER =
             "RETURN_BY_MAKER";
 
+    private static final String STATUS_MICR_REPAIRED =
+            "MICR_REPAIRED";
+
     private static final String STATUS_DATA_ENTRY =
             "DATA_ENTRY";
 
+    // =========================================================
+    // Get NPCI Cheques
+    // =========================================================
 
-    /*
-     * ---------------------------------------------------------------------
-     * NPCI CHEQUES
-     * ---------------------------------------------------------------------
-     */
     @Override
-    public List<NpciChequeData> getNpciCheques(long batchId) {
+    public List<NpciChequeData> getNpciCheques(
+            long batchId) {
 
         String sql =
                 "SELECT "
-                + "inward_cheque_id, "
-                + "cheque_number, "
-                + "batch_id, "
-                + "account_number, "
-                + "cheque_date, "
-                + "presenting_date, "
-                + "amount, "
-                + "amount_in_words, "
-                + "micr_code, "
-                + "city_code, "
-                + "bank_code, "
-                + "branch_code, "
-                + "drawer_name, "
-                + "payee_name, "
-                + "payee_account_number "
-                + "FROM public.inward_cheque "
-                + "WHERE batch_id = ? "
-                + "ORDER BY inward_cheque_id";
+                        + "inward_cheque_id, "
+                        + "cheque_number, "
+                        + "batch_id, "
+                        + "account_number, "
+                        + "cheque_date, "
+                        + "presenting_date, "
+                        + "amount, "
+                        + "amount_in_words, "
+                        + "micr_code, "
+                        + "city_code, "
+                        + "bank_code, "
+                        + "branch_code, "
+                        + "drawer_name, "
+                        + "payee_name, "
+                        + "payee_account_number "
+                        + "FROM public.inward_cheque "
+                        + "WHERE batch_id = ? "
+                        + "ORDER BY inward_cheque_id";
 
         List<NpciChequeData> cheques =
                 new ArrayList<>();
 
         try (
                 Connection connection =
-                        ConnectionPool.getDataSource().getConnection();
+                        ConnectionPool
+                                .getDataSource()
+                                .getConnection();
 
                 PreparedStatement statement =
                         connection.prepareStatement(sql)
         ) {
 
-            statement.setLong(1, batchId);
+            statement.setLong(
+                    1,
+                    batchId);
 
-            try (ResultSet resultSet =
-                         statement.executeQuery()) {
+            try (
+                    ResultSet resultSet =
+                            statement.executeQuery()
+            ) {
 
                 while (resultSet.next()) {
 
                     NpciChequeData cheque =
                             NpciChequeData.of(
-                                    resultSet.getString("cheque_number"),
-                                    resultSet.getLong("batch_id"),
-                                    resultSet.getString("account_number"),
+                                    resultSet.getString(
+                                            "cheque_number"),
 
-                                    resultSet.getDate("cheque_date") != null
-                                            ? resultSet.getDate("cheque_date").toLocalDate()
+                                    resultSet.getLong(
+                                            "batch_id"),
+
+                                    resultSet.getString(
+                                            "account_number"),
+
+                                    resultSet.getDate(
+                                            "cheque_date") != null
+                                            ? resultSet
+                                                    .getDate(
+                                                            "cheque_date")
+                                                    .toLocalDate()
                                             : null,
 
-                                    resultSet.getDate("presenting_date") != null
-                                            ? resultSet.getDate("presenting_date").toLocalDate()
+                                    resultSet.getDate(
+                                            "presenting_date") != null
+                                            ? resultSet
+                                                    .getDate(
+                                                            "presenting_date")
+                                                    .toLocalDate()
                                             : null,
 
-                                    resultSet.getBigDecimal("amount"),
-                                    resultSet.getString("amount_in_words"),
-                                    resultSet.getString("micr_code"),
-                                    resultSet.getString("city_code"),
-                                    resultSet.getString("bank_code"),
-                                    resultSet.getString("branch_code"),
-                                    resultSet.getString("drawer_name"),
-                                    resultSet.getString("payee_name"),
-                                    resultSet.getString("payee_account_number")
-                            );
+                                    resultSet.getBigDecimal(
+                                            "amount"),
 
-                    /*
-                     * inward_cheque_id is generated by PostgreSQL.
-                     * Here we are only reading the generated value.
-                     */
+                                    resultSet.getString(
+                                            "amount_in_words"),
+
+                                    resultSet.getString(
+                                            "micr_code"),
+
+                                    resultSet.getString(
+                                            "city_code"),
+
+                                    resultSet.getString(
+                                            "bank_code"),
+
+                                    resultSet.getString(
+                                            "branch_code"),
+
+                                    resultSet.getString(
+                                            "drawer_name"),
+
+                                    resultSet.getString(
+                                            "payee_name"),
+
+                                    resultSet.getString(
+                                            "payee_account_number"));
+
                     cheque.setInwardChequeId(
-                            resultSet.getLong("inward_cheque_id"));
+                            resultSet.getLong(
+                                    "inward_cheque_id"));
 
                     cheques.add(cheque);
                 }
@@ -116,65 +150,54 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
         return cheques;
     }
 
+    // =========================================================
+    // Get OCR Cheques
+    // =========================================================
 
-    /*
-     * ---------------------------------------------------------------------
-     * OCR CHEQUES
-     * ---------------------------------------------------------------------
-     *
-     * Correct relationship:
-     *
-     * inward_batch.batch_id
-     *          |
-     *          v
-     * ocr_batch.batch_id
-     *          |
-     *          v
-     * ocr_batch.ocr_batch_id
-     *          |
-     *          v
-     * ocr_cheque_data.ocr_batch_id
-     *
-     * OCR file_id is NOT used to match the two datasets.
-     * ---------------------------------------------------------------------
-     */
     @Override
-    public List<OcrChequeData> getOcrCheques(long batchId) {
+    public List<OcrChequeData> getOcrCheques(
+            long batchId) {
 
         String sql =
                 "SELECT "
-                + "o.inward_cheque_id, "
-                + "o.cheque_number, "
-                + "o.account_number, "
-                + "o.amount, "
-                + "o.micr_code, "
-                + "o.cheque_date, "
-                + "o.branch_code, "
-                + "o.city_code, "
-                + "o.bank_code, "
-                + "o.payee_name, "
-                + "o.payee_account_number "
-                + "FROM public.ocr_cheque_data o "
-                + "INNER JOIN public.ocr_batch ob "
-                + "ON o.ocr_batch_id = ob.ocr_batch_id "
-                + "WHERE ob.batch_id = ? "
-                + "ORDER BY o.inward_cheque_id";
+                        + "o.inward_cheque_id, "
+                        + "o.cheque_number, "
+                        + "o.account_number, "
+                        + "o.amount, "
+                        + "o.micr_code, "
+                        + "o.cheque_date, "
+                        + "o.branch_code, "
+                        + "o.city_code, "
+                        + "o.bank_code, "
+                        + "o.payee_name, "
+                        + "o.payee_account_number "
+                        + "FROM public.ocr_cheque_data o "
+                        + "INNER JOIN public.ocr_batch ob "
+                        + "ON o.ocr_batch_id = ob.ocr_batch_id "
+                        + "WHERE ob.batch_id = ? "
+                        + "ORDER BY o.inward_cheque_id";
 
         List<OcrChequeData> cheques =
                 new ArrayList<>();
 
         try (
                 Connection connection =
-                        ConnectionPool.getDataSource().getConnection();
+                        ConnectionPool
+                                .getDataSource()
+                                .getConnection();
 
                 PreparedStatement statement =
                         connection.prepareStatement(sql)
         ) {
 
-            statement.setLong(1, batchId);
+            statement.setLong(
+                    1,
+                    batchId);
 
-            try (ResultSet resultSet =
-                         statement.executeQuery()) {
+            try (
+                    ResultSet resultSet =
+                            statement.executeQuery()
+            ) {
 
                 while (resultSet.next()) {
 
@@ -182,42 +205,56 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                             OcrChequeData.of();
 
                     cheque.setInwardChequeId(
-                            resultSet.getLong("inward_cheque_id"));
+                            resultSet.getLong(
+                                    "inward_cheque_id"));
 
                     cheque.setChequeNumber(
-                            resultSet.getString("cheque_number"));
+                            resultSet.getString(
+                                    "cheque_number"));
 
                     cheque.setBatchId(
                             batchId);
 
                     cheque.setAccountNumber(
-                            resultSet.getString("account_number"));
+                            resultSet.getString(
+                                    "account_number"));
 
                     cheque.setChequeDate(
-                            resultSet.getDate("cheque_date") != null
-                                    ? resultSet.getDate("cheque_date").toLocalDate()
+                            resultSet.getDate(
+                                    "cheque_date") != null
+                                    ? resultSet
+                                            .getDate(
+                                                    "cheque_date")
+                                            .toLocalDate()
                                     : null);
 
                     cheque.setChequeAmount(
-                            resultSet.getBigDecimal("amount"));
+                            resultSet.getBigDecimal(
+                                    "amount"));
 
                     cheque.setMicrCode(
-                            resultSet.getString("micr_code"));
+                            resultSet.getString(
+                                    "micr_code"));
 
                     cheque.setBranchSpecificCode(
-                            resultSet.getString("branch_code"));
+                            resultSet.getString(
+                                    "branch_code"));
 
                     cheque.setCityCode(
-                            resultSet.getString("city_code"));
+                            resultSet.getString(
+                                    "city_code"));
 
                     cheque.setBankCode(
-                            resultSet.getString("bank_code"));
+                            resultSet.getString(
+                                    "bank_code"));
 
                     cheque.setPayeeName(
-                            resultSet.getString("payee_name"));
+                            resultSet.getString(
+                                    "payee_name"));
 
                     cheque.setPayeeAccountNumber(
-                            resultSet.getString("payee_account_number"));
+                            resultSet.getString(
+                                    "payee_account_number"));
 
                     cheques.add(cheque);
                 }
@@ -234,40 +271,26 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
         return cheques;
     }
 
+    // =========================================================
+    // Get Completed Repaired MICR
+    // =========================================================
 
-    /*
-     * ---------------------------------------------------------------------
-     * COMPLETED MICR REPAIR
-     * ---------------------------------------------------------------------
-     *
-     * Updated schema:
-     *
-     * inward_micr_repair_history
-     * --------------------------------
-     * micr_repair_id
-     * cheque_no
-     * old_value
-     * new_value
-     * changed_by
-     * varified_by
-     *
-     * The latest row is treated as the latest saved repair.
-     * ---------------------------------------------------------------------
-     */
     @Override
     public String getCompletedRepairedMicr(
             String chequeNumber) {
 
         String sql =
                 "SELECT new_value "
-                + "FROM public.inward_micr_repair_history "
-                + "WHERE cheque_no = ? "
-                + "ORDER BY micr_repair_id DESC "
-                + "LIMIT 1";
+                        + "FROM public.inward_micr_repair_history "
+                        + "WHERE cheque_no = ? "
+                        + "ORDER BY micr_repair_id DESC "
+                        + "LIMIT 1";
 
         try (
                 Connection connection =
-                        ConnectionPool.getDataSource().getConnection();
+                        ConnectionPool
+                                .getDataSource()
+                                .getConnection();
 
                 PreparedStatement statement =
                         connection.prepareStatement(sql)
@@ -277,8 +300,10 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                     1,
                     chequeNumber);
 
-            try (ResultSet resultSet =
-                         statement.executeQuery()) {
+            try (
+                    ResultSet resultSet =
+                            statement.executeQuery()
+            ) {
 
                 if (resultSet.next()) {
 
@@ -298,26 +323,26 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
         return null;
     }
 
+    // =========================================================
+    // Get Latest Cheque Status
+    // =========================================================
 
-    /*
-     * ---------------------------------------------------------------------
-     * LATEST CHEQUE STATUS
-     * ---------------------------------------------------------------------
-     */
     @Override
     public String getLatestChequeStatus(
             String chequeNumber) {
 
         String sql =
                 "SELECT status "
-                + "FROM public.inward_cheque_status_history "
-                + "WHERE cheque_number = ? "
-                + "ORDER BY status_history_id DESC "
-                + "LIMIT 1";
+                        + "FROM public.inward_cheque_status_history "
+                        + "WHERE cheque_number = ? "
+                        + "ORDER BY status_history_id DESC "
+                        + "LIMIT 1";
 
         try (
                 Connection connection =
-                        ConnectionPool.getDataSource().getConnection();
+                        ConnectionPool
+                                .getDataSource()
+                                .getConnection();
 
                 PreparedStatement statement =
                         connection.prepareStatement(sql)
@@ -327,8 +352,10 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                     1,
                     chequeNumber);
 
-            try (ResultSet resultSet =
-                         statement.executeQuery()) {
+            try (
+                    ResultSet resultSet =
+                            statement.executeQuery()
+            ) {
 
                 if (resultSet.next()) {
 
@@ -348,25 +375,25 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
         return null;
     }
 
+    // =========================================================
+    // Get Batch ID By Cheque Number
+    // =========================================================
 
-    /*
-     * ---------------------------------------------------------------------
-     * GET BATCH ID BY CHEQUE NUMBER
-     * ---------------------------------------------------------------------
-     */
     @Override
     public long getBatchIdByChequeNumber(
             String chequeNumber) {
 
         String sql =
                 "SELECT batch_id "
-                + "FROM public.inward_cheque "
-                + "WHERE cheque_number = ? "
-                + "LIMIT 1";
+                        + "FROM public.inward_cheque "
+                        + "WHERE cheque_number = ? "
+                        + "LIMIT 1";
 
         try (
                 Connection connection =
-                        ConnectionPool.getDataSource().getConnection();
+                        ConnectionPool
+                                .getDataSource()
+                                .getConnection();
 
                 PreparedStatement statement =
                         connection.prepareStatement(sql)
@@ -376,8 +403,10 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                     1,
                     chequeNumber);
 
-            try (ResultSet resultSet =
-                         statement.executeQuery()) {
+            try (
+                    ResultSet resultSet =
+                            statement.executeQuery()
+            ) {
 
                 if (resultSet.next()) {
 
@@ -397,12 +426,10 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
         return 0L;
     }
 
+    // =========================================================
+    // Get Batch Cheque Position
+    // =========================================================
 
-    /*
-     * ---------------------------------------------------------------------
-     * FRONT IMAGE
-     * ---------------------------------------------------------------------
-     */
     @Override
     public int getBatchChequePosition(
             long batchId,
@@ -410,32 +437,44 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
 
         String sql =
                 "SELECT position_no "
-                + "FROM ("
-                + "SELECT cheque_number, "
-                + "ROW_NUMBER() OVER ("
-                + "PARTITION BY batch_id "
-                + "ORDER BY inward_cheque_id"
-                + ") AS position_no "
-                + "FROM public.inward_cheque "
-                + "WHERE batch_id = ?"
-                + ") x "
-                + "WHERE cheque_number = ?";
+                        + "FROM ("
+                        + "SELECT cheque_number, "
+                        + "ROW_NUMBER() OVER ("
+                        + "PARTITION BY batch_id "
+                        + "ORDER BY inward_cheque_id"
+                        + ") AS position_no "
+                        + "FROM public.inward_cheque "
+                        + "WHERE batch_id = ?"
+                        + ") x "
+                        + "WHERE cheque_number = ?";
 
         try (
                 Connection connection =
-                        ConnectionPool.getDataSource().getConnection();
+                        ConnectionPool
+                                .getDataSource()
+                                .getConnection();
+
                 PreparedStatement statement =
                         connection.prepareStatement(sql)
         ) {
 
-            statement.setLong(1, batchId);
-            statement.setString(2, chequeNumber);
+            statement.setLong(
+                    1,
+                    batchId);
 
-            try (ResultSet resultSet =
-                    statement.executeQuery()) {
+            statement.setString(
+                    2,
+                    chequeNumber);
+
+            try (
+                    ResultSet resultSet =
+                            statement.executeQuery()
+            ) {
 
                 if (resultSet.next()) {
-                    return resultSet.getInt("position_no");
+
+                    return resultSet.getInt(
+                            "position_no");
                 }
             }
 
@@ -452,6 +491,9 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
         return 0;
     }
 
+    // =========================================================
+    // Get Batch Total Cheque Count
+    // =========================================================
 
     @Override
     public int getBatchTotalChequeCount(
@@ -459,22 +501,30 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
 
         String sql =
                 "SELECT COUNT(*) "
-                + "FROM public.inward_cheque "
-                + "WHERE batch_id = ?";
+                        + "FROM public.inward_cheque "
+                        + "WHERE batch_id = ?";
 
         try (
                 Connection connection =
-                        ConnectionPool.getDataSource().getConnection();
+                        ConnectionPool
+                                .getDataSource()
+                                .getConnection();
+
                 PreparedStatement statement =
                         connection.prepareStatement(sql)
         ) {
 
-            statement.setLong(1, batchId);
+            statement.setLong(
+                    1,
+                    batchId);
 
-            try (ResultSet resultSet =
-                    statement.executeQuery()) {
+            try (
+                    ResultSet resultSet =
+                            statement.executeQuery()
+            ) {
 
                 if (resultSet.next()) {
+
                     return resultSet.getInt(1);
                 }
             }
@@ -490,6 +540,9 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
         return 0;
     }
 
+    // =========================================================
+    // Front Image
+    // =========================================================
 
     @Override
     public String getFrontImagePath(
@@ -497,9 +550,9 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
 
         String sql =
                 "SELECT front_image "
-                + "FROM public.inward_cheque_image "
-                + "WHERE cheque_number = ? "
-                + "LIMIT 1";
+                        + "FROM public.inward_cheque_image "
+                        + "WHERE cheque_number = ? "
+                        + "LIMIT 1";
 
         return getImagePath(
                 sql,
@@ -507,21 +560,19 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                 "front_image");
     }
 
+    // =========================================================
+    // Back Image
+    // =========================================================
 
-    /*
-     * ---------------------------------------------------------------------
-     * BACK IMAGE
-     * ---------------------------------------------------------------------
-     */
     @Override
     public String getBackImagePath(
             String chequeNumber) {
 
         String sql =
                 "SELECT back_image "
-                + "FROM public.inward_cheque_image "
-                + "WHERE cheque_number = ? "
-                + "LIMIT 1";
+                        + "FROM public.inward_cheque_image "
+                        + "WHERE cheque_number = ? "
+                        + "LIMIT 1";
 
         return getImagePath(
                 sql,
@@ -529,12 +580,10 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                 "back_image");
     }
 
+    // =========================================================
+    // Get Image Path
+    // =========================================================
 
-    /*
-     * ---------------------------------------------------------------------
-     * COMMON IMAGE METHOD
-     * ---------------------------------------------------------------------
-     */
     private String getImagePath(
             String sql,
             String chequeNumber,
@@ -542,7 +591,9 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
 
         try (
                 Connection connection =
-                        ConnectionPool.getDataSource().getConnection();
+                        ConnectionPool
+                                .getDataSource()
+                                .getConnection();
 
                 PreparedStatement statement =
                         connection.prepareStatement(sql)
@@ -552,8 +603,10 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                     1,
                     chequeNumber);
 
-            try (ResultSet resultSet =
-                         statement.executeQuery()) {
+            try (
+                    ResultSet resultSet =
+                            statement.executeQuery()
+            ) {
 
                 if (resultSet.next()) {
 
@@ -573,23 +626,10 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
         return null;
     }
 
+    // =========================================================
+    // Get Maker Return Reasons
+    // =========================================================
 
-    /*
-     * ---------------------------------------------------------------------
-     * MAKER RETURN REASONS
-     * ---------------------------------------------------------------------
-     *
-     * Updated schema:
-     *
-     * inward_cheque_return_reason
-     * --------------------------------
-     * return_reason_code
-     * description
-     * applicable_role
-     *
-     * There is no status column here.
-     * ---------------------------------------------------------------------
-     */
     @Override
     public List<ReturnReasonDto> getMakerReturnReasons() {
 
@@ -598,15 +638,18 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
 
         String sql =
                 "SELECT "
-                + "return_reason_code, "
-                + "description "
-                + "FROM public.inward_cheque_return_reason "
-                + "WHERE applicable_role IN ('MAKER', 'BOTH') "
-                + "ORDER BY description";
+                        + "return_reason_code, "
+                        + "description "
+                        + "FROM public.inward_cheque_return_reason "
+                        + "WHERE applicable_role IN "
+                        + "('MAKER', 'BOTH') "
+                        + "ORDER BY description";
 
         try (
                 Connection connection =
-                        ConnectionPool.getDataSource().getConnection();
+                        ConnectionPool
+                                .getDataSource()
+                                .getConnection();
 
                 PreparedStatement statement =
                         connection.prepareStatement(sql);
@@ -621,10 +664,9 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                         new ReturnReasonDto(
                                 resultSet.getString(
                                         "return_reason_code"),
+
                                 resultSet.getString(
-                                        "description")
-                        )
-                );
+                                        "description")));
             }
 
         } catch (SQLException e) {
@@ -637,20 +679,10 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
         return reasons;
     }
 
+    // =========================================================
+    // Save Maker Return
+    // =========================================================
 
-    /*
-     * ---------------------------------------------------------------------
-     * SAVE MAKER RETURN
-     * ---------------------------------------------------------------------
-     *
-     * This performs:
-     *
-     * 1. Insert return request
-     * 2. Insert RETURN_BY_MAKER status history
-     * 3. Check remaining MICR_REPAIR cheques
-     * 4. If none remain, insert DATA_ENTRY batch history
-     * ---------------------------------------------------------------------
-     */
     @Override
     public boolean saveMakerReturn(
             String chequeNumber,
@@ -669,23 +701,26 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
 
             connection.setAutoCommit(false);
 
+            // -------------------------------------------------
+            // Return record
+            // -------------------------------------------------
 
-            /*
-             * ---------------------------------------------------------
-             * 1. Save cheque return
-             * ---------------------------------------------------------
-             */
             String returnSql =
                     "INSERT INTO public.inward_cheque_return "
-                    + "(cheque_number, "
-                    + "return_reason_code, "
-                    + "maker_remarks, "
-                    + "requested_by, "
-                    + "return_status) "
-                    + "VALUES (?, ?, ?, ?, ?)";
+                            + "("
+                            + "cheque_number, "
+                            + "return_reason_code, "
+                            + "maker_remarks, "
+                            + "requested_by, "
+                            + "return_status"
+                            + ") "
+                            + "VALUES (?, ?, ?, ?, ?)";
 
-            try (PreparedStatement statement =
-                         connection.prepareStatement(returnSql)) {
+            try (
+                    PreparedStatement statement =
+                            connection.prepareStatement(
+                                    returnSql)
+            ) {
 
                 statement.setString(
                         1,
@@ -723,34 +758,40 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                 if (inserted != 1) {
 
                     connection.rollback();
+
                     return false;
                 }
             }
 
+            // -------------------------------------------------
+            // Cheque status history
+            // -------------------------------------------------
 
-            /*
-             * ---------------------------------------------------------
-             * 2. Save cheque status history
-             * ---------------------------------------------------------
-             */
             String historySql =
                     "INSERT INTO public.inward_cheque_status_history "
-                    + "(cheque_number, "
-                    + "status, "
-                    + "rejection_reason_code, "
-                    + "return_reason_code, "
-                    + "maker_id, "
-                    + "maker_action, "
-                    + "maker_action_on, "
-                    + "checker_id, "
-                    + "checker_action, "
-                    + "checker_action_on, "
-                    + "remarks) "
-                    + "VALUES (?, ?, NULL, ?, ?, ?, "
-                    + "CURRENT_TIMESTAMP, NULL, NULL, NULL, ?)";
+                            + "("
+                            + "cheque_number, "
+                            + "status, "
+                            + "rejection_reason_code, "
+                            + "return_reason_code, "
+                            + "maker_id, "
+                            + "maker_action, "
+                            + "maker_action_on, "
+                            + "checker_id, "
+                            + "checker_action, "
+                            + "checker_action_on, "
+                            + "remarks"
+                            + ") "
+                            + "VALUES "
+                            + "(?, ?, NULL, ?, ?, ?, "
+                            + "CURRENT_TIMESTAMP, "
+                            + "NULL, NULL, NULL, ?)";
 
-            try (PreparedStatement statement =
-                         connection.prepareStatement(historySql)) {
+            try (
+                    PreparedStatement statement =
+                            connection.prepareStatement(
+                                    historySql)
+            ) {
 
                 statement.setString(
                         1,
@@ -792,33 +833,37 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                 if (inserted != 1) {
 
                     connection.rollback();
+
                     return false;
                 }
             }
 
+            // -------------------------------------------------
+            // Find batch
+            // -------------------------------------------------
 
-            /*
-             * ---------------------------------------------------------
-             * 3. Find batch ID
-             * ---------------------------------------------------------
-             */
             long batchId = 0L;
 
             String batchIdSql =
                     "SELECT batch_id "
-                    + "FROM public.inward_cheque "
-                    + "WHERE cheque_number = ? "
-                    + "LIMIT 1";
+                            + "FROM public.inward_cheque "
+                            + "WHERE cheque_number = ? "
+                            + "LIMIT 1";
 
-            try (PreparedStatement statement =
-                         connection.prepareStatement(batchIdSql)) {
+            try (
+                    PreparedStatement statement =
+                            connection.prepareStatement(
+                                    batchIdSql)
+            ) {
 
                 statement.setString(
                         1,
                         chequeNumber);
 
-                try (ResultSet resultSet =
-                             statement.executeQuery()) {
+                try (
+                        ResultSet resultSet =
+                                statement.executeQuery()
+                ) {
 
                     if (resultSet.next()) {
 
@@ -832,21 +877,17 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
             if (batchId <= 0L) {
 
                 connection.rollback();
+
                 return false;
             }
 
+            // -------------------------------------------------
+            // Check remaining MICR repair cheques
+            // -------------------------------------------------
 
-            /*
-             * ---------------------------------------------------------
-             * 4. Count remaining MICR repair cheques
-             *
-             * Only the latest status for each cheque is considered.
-             * ---------------------------------------------------------
-             */
             int pendingMicrCount = 0;
 
-            String pendingMicrSql =
-                    """
+            String pendingMicrSql = """
                     SELECT COUNT(*)
                     FROM public.inward_cheque c
                     INNER JOIN LATERAL
@@ -857,20 +898,25 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                         ORDER BY h.status_history_id DESC
                         LIMIT 1
                     ) latest
-                        ON TRUE
+                    ON TRUE
                     WHERE c.batch_id = ?
-                      AND latest.status = 'MICR_REPAIR'
+                    AND latest.status = 'MICR_REPAIR'
                     """;
 
-            try (PreparedStatement statement =
-                    connection.prepareStatement(pendingMicrSql)) {
+            try (
+                    PreparedStatement statement =
+                            connection.prepareStatement(
+                                    pendingMicrSql)
+            ) {
 
                 statement.setLong(
                         1,
                         batchId);
 
-                try (ResultSet resultSet =
-                        statement.executeQuery()) {
+                try (
+                        ResultSet resultSet =
+                                statement.executeQuery()
+                ) {
 
                     if (resultSet.next()) {
 
@@ -880,33 +926,35 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                 }
             }
 
-
             /*
-             * ---------------------------------------------------------
-             * 5. If no MICR repair remains, batch becomes DATA_ENTRY
-             * ---------------------------------------------------------
+             * If no MICR_REPAIR cheque remains,
+             * the batch can move to DATA_ENTRY.
              */
             if (pendingMicrCount == 0) {
 
                 String latestBatchStatusSql =
                         "SELECT batch_status "
-                        + "FROM public.inward_batch_history "
-                        + "WHERE batch_id = ? "
-                        + "ORDER BY batch_history_id DESC "
-                        + "LIMIT 1";
+                                + "FROM public.inward_batch_history "
+                                + "WHERE batch_id = ? "
+                                + "ORDER BY batch_history_id DESC "
+                                + "LIMIT 1";
 
                 String latestBatchStatus = null;
 
-                try (PreparedStatement statement =
-                             connection.prepareStatement(
-                                     latestBatchStatusSql)) {
+                try (
+                        PreparedStatement statement =
+                                connection.prepareStatement(
+                                        latestBatchStatusSql)
+                ) {
 
                     statement.setLong(
                             1,
                             batchId);
 
-                    try (ResultSet resultSet =
-                                 statement.executeQuery()) {
+                    try (
+                            ResultSet resultSet =
+                                    statement.executeQuery()
+                    ) {
 
                         if (resultSet.next()) {
 
@@ -917,23 +965,27 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                     }
                 }
 
-
                 if (!STATUS_DATA_ENTRY.equalsIgnoreCase(
                         latestBatchStatus)) {
 
                     String batchHistorySql =
                             "INSERT INTO public.inward_batch_history "
-                            + "(batch_id, "
-                            + "batch_status, "
-                            + "changed_on, "
-                            + "changed_by, "
-                            + "reason, "
-                            + "remarks) "
-                            + "VALUES (?, ?, CURRENT_TIMESTAMP, ?, ?, ?)";
+                                    + "("
+                                    + "batch_id, "
+                                    + "batch_status, "
+                                    + "changed_on, "
+                                    + "changed_by, "
+                                    + "reason, "
+                                    + "remarks"
+                                    + ") "
+                                    + "VALUES "
+                                    + "(?, ?, CURRENT_TIMESTAMP, ?, ?, ?)";
 
-                    try (PreparedStatement statement =
-                                 connection.prepareStatement(
-                                         batchHistorySql)) {
+                    try (
+                            PreparedStatement statement =
+                                    connection.prepareStatement(
+                                            batchHistorySql)
+                    ) {
 
                         statement.setLong(
                                 1,
@@ -962,12 +1014,12 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                         if (inserted != 1) {
 
                             connection.rollback();
+
                             return false;
                         }
                     }
                 }
             }
-
 
             connection.commit();
 
@@ -978,8 +1030,11 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
             if (connection != null) {
 
                 try {
+
                     connection.rollback();
+
                 } catch (SQLException rollbackException) {
+
                     rollbackException.printStackTrace();
                 }
             }
@@ -994,32 +1049,23 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
             if (connection != null) {
 
                 try {
+
                     connection.setAutoCommit(true);
+
                     connection.close();
+
                 } catch (SQLException closeException) {
+
                     closeException.printStackTrace();
                 }
             }
         }
     }
 
+    // =========================================================
+    // Save MICR Repair
+    // =========================================================
 
-    /*
-     * ---------------------------------------------------------------------
-     * SAVE MICR REPAIR
-     * ---------------------------------------------------------------------
-     *
-     * IMPORTANT:
-     *
-     * inward_cheque.micr_code is NOT updated.
-     *
-     * Original received NPCI data remains unchanged.
-     *
-     * The corrected MICR is stored in:
-     *
-     * inward_micr_repair_history
-     * ---------------------------------------------------------------------
-     */
     @Override
     public boolean saveMicrRepair(
             String chequeNumber,
@@ -1039,84 +1085,115 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
 
             connection.setAutoCommit(false);
 
+            // -------------------------------------------------
+            // MICR repair history
+            // -------------------------------------------------
 
-            /*
-             * ---------------------------------------------------------
-             * 1. Save MICR repair history
-             * ---------------------------------------------------------
-             */
-            String repairHistorySql =
-                    "INSERT INTO public.inward_micr_repair_history "
-                    + "(cheque_no, "
-                    + "old_value, "
-                    + "new_value, "
-                    + "changed_by, "
-                    + "varified_by) "
-                    + "VALUES (?, ?, ?, ?, NULL)";
+            // -------------------------------------------------
+            // MICR repair history (UPDATE if exists, else INSERT)
+            // -------------------------------------------------
 
-            try (PreparedStatement statement =
-                         connection.prepareStatement(
-                                 repairHistorySql)) {
+            Long existingRepairId = null;
+            String checkExistingSql =
+                    "SELECT micr_repair_id "
+                            + "FROM public.inward_micr_repair_history "
+                            + "WHERE cheque_no = ? "
+                            + "ORDER BY micr_repair_id DESC "
+                            + "LIMIT 1";
 
-                statement.setString(
-                        1,
-                        chequeNumber);
+            try (PreparedStatement checkStmt = connection.prepareStatement(checkExistingSql)) {
+                checkStmt.setString(1, chequeNumber);
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (rs.next()) {
+                        existingRepairId = rs.getLong("micr_repair_id");
+                    }
+                }
+            }
 
-                statement.setString(
-                        2,
-                        originalMicr);
+            if (existingRepairId != null) {
+                // Update the previously saved row with the latest corrected MICR
+                String updateHistorySql =
+                        "UPDATE public.inward_micr_repair_history "
+                                + "SET new_value = ?, changed_by = ? "
+                                + "WHERE micr_repair_id = ?";
 
-                statement.setString(
-                        3,
-                        repairedMicr);
+                try (PreparedStatement updateStmt = connection.prepareStatement(updateHistorySql)) {
+                    updateStmt.setString(1, repairedMicr);
+                    updateStmt.setLong(2, userId);
+                    updateStmt.setLong(3, existingRepairId);
 
-                statement.setLong(
-                        4,
-                        userId);
+                    int updated = updateStmt.executeUpdate();
+                    if (updated != 1) {
+                        connection.rollback();
+                        return false;
+                    }
+                }
+            } else {
+                // First time save: insert new row
+                String insertHistorySql =
+                        "INSERT INTO public.inward_micr_repair_history "
+                                + "(cheque_no, old_value, new_value, changed_by, varified_by) "
+                                + "VALUES (?, ?, ?, ?, NULL)";
 
-                int inserted =
-                        statement.executeUpdate();
+                try (PreparedStatement insertStmt = connection.prepareStatement(insertHistorySql)) {
+                    insertStmt.setString(1, chequeNumber);
+                    insertStmt.setString(2, originalMicr);
+                    insertStmt.setString(3, repairedMicr);
+                    insertStmt.setLong(4, userId);
 
-                if (inserted != 1) {
-
-                    connection.rollback();
-                    return false;
+                    int inserted = insertStmt.executeUpdate();
+                    if (inserted != 1) {
+                        connection.rollback();
+                        return false;
+                    }
                 }
             }
 
 
-            /*
-             * ---------------------------------------------------------
-             * 2. Save cheque status history
-             * ---------------------------------------------------------
-             */
+            // -------------------------------------------------
+            // IMPORTANT:
+            // Individual repaired cheque = MICR_REPAIRED
+            //
+            // Do NOT use DATA_ENTRY here.
+            // -------------------------------------------------
+
             String statusHistorySql =
                     "INSERT INTO public.inward_cheque_status_history "
-                    + "(cheque_number, "
-                    + "status, "
-                    + "rejection_reason_code, "
-                    + "return_reason_code, "
-                    + "maker_id, "
-                    + "maker_action, "
-                    + "maker_action_on, "
-                    + "checker_id, "
-                    + "checker_action, "
-                    + "checker_action_on, "
-                    + "remarks) "
-                    + "VALUES (?, ?, NULL, NULL, ?, ?, "
-                    + "CURRENT_TIMESTAMP, NULL, NULL, NULL, ?)";
+                            + "("
+                            + "cheque_number, "
+                            + "status, "
+                            + "rejection_reason_code, "
+                            + "return_reason_code, "
+                            + "maker_id, "
+                            + "maker_action, "
+                            + "maker_action_on, "
+                            + "checker_id, "
+                            + "checker_action, "
+                            + "checker_action_on, "
+                            + "remarks"
+                            + ") "
+                            + "VALUES "
+                            + "(?, ?, NULL, NULL, ?, ?, "
+                            + "CURRENT_TIMESTAMP, "
+                            + "NULL, NULL, NULL, ?)";
 
-            try (PreparedStatement statement =
-                         connection.prepareStatement(
-                                 statusHistorySql)) {
+            try (
+                    PreparedStatement statement =
+                            connection.prepareStatement(
+                                    statusHistorySql)
+            ) {
 
                 statement.setString(
                         1,
                         chequeNumber);
 
+                /*
+                 * CORRECT:
+                 * MICR_REPAIRED
+                 */
                 statement.setString(
                         2,
-                        STATUS_DATA_ENTRY);
+                        STATUS_MICR_REPAIRED);
 
                 statement.setLong(
                         3,
@@ -1124,7 +1201,7 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
 
                 statement.setString(
                         4,
-                        "MICR_REPAIRED");
+                        STATUS_MICR_REPAIRED);
 
                 if (remarks == null
                         || remarks.trim().isEmpty()) {
@@ -1146,10 +1223,10 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                 if (inserted != 1) {
 
                     connection.rollback();
+
                     return false;
                 }
             }
-
 
             connection.commit();
 
@@ -1160,8 +1237,11 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
             if (connection != null) {
 
                 try {
+
                     connection.rollback();
+
                 } catch (SQLException rollbackException) {
+
                     rollbackException.printStackTrace();
                 }
             }
@@ -1176,21 +1256,23 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
             if (connection != null) {
 
                 try {
+
                     connection.setAutoCommit(true);
+
                     connection.close();
+
                 } catch (SQLException closeException) {
+
                     closeException.printStackTrace();
                 }
             }
         }
     }
 
+    // =========================================================
+    // Mark Batch Ready For Data Entry
+    // =========================================================
 
-    /*
-     * ---------------------------------------------------------------------
-     * MARK BATCH READY FOR DATA ENTRY
-     * ---------------------------------------------------------------------
-     */
     @Override
     public boolean markBatchReadyForDataEntry(
             long batchId,
@@ -1202,9 +1284,7 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
             return false;
         }
 
-
         Connection connection = null;
-
 
         try {
 
@@ -1215,19 +1295,15 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
 
             connection.setAutoCommit(false);
 
-
             /*
-             * ---------------------------------------------------------
-             * 1. Mark applicable cheques as DATA_ENTRY.
+             * At this point the service has already checked
+             * that no cheque still needs MICR repair.
              *
-             * RETURN_BY_MAKER cheques are excluded.
+             * Move applicable cheques to DATA_ENTRY.
              *
-             * DATA_ENTRY cheques are also excluded so that this
-             * operation is idempotent.
-             * ---------------------------------------------------------
+             * RETURN_BY_MAKER must remain RETURN_BY_MAKER.
              */
-            String chequeStatusSql =
-                    """
+            String chequeStatusSql = """
                     INSERT INTO public.inward_cheque_status_history
                     (
                         cheque_number,
@@ -1257,28 +1333,24 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                     FROM public.inward_cheque c
                     LEFT JOIN LATERAL
                     (
-                        SELECT
-                            h.status
+                        SELECT h.status
                         FROM public.inward_cheque_status_history h
-                        WHERE h.cheque_number =
-                                c.cheque_number
-                        ORDER BY
-                            h.status_history_id DESC
+                        WHERE h.cheque_number = c.cheque_number
+                        ORDER BY h.status_history_id DESC
                         LIMIT 1
                     ) latest
-                        ON TRUE
+                    ON TRUE
                     WHERE c.batch_id = ?
-                      AND COALESCE(
-                            latest.status,
-                            ''
-                          ) NOT IN (
-                            'RETURN_BY_MAKER',
-                            'DATA_ENTRY',
-                            'DATA_ENTRY_COMPLETED',
-                            'SENT_TO_CHECKER'
-                          )
+                    AND COALESCE(
+                        latest.status,
+                        ''
+                    ) NOT IN (
+                        'RETURN_BY_MAKER',
+                        'DATA_ENTRY',
+                        'DATA_ENTRY_COMPLETED',
+                        'SENT_TO_CHECKER'
+                    )
                     """;
-
 
             try (
                     PreparedStatement statement =
@@ -1297,25 +1369,19 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                 statement.executeUpdate();
             }
 
+            // -------------------------------------------------
+            // Check latest batch status
+            // -------------------------------------------------
 
-            /*
-             * ---------------------------------------------------------
-             * 2. Check the latest batch status.
-             * ---------------------------------------------------------
-             */
-            String latestBatchStatusSql =
-                    """
+            String latestBatchStatusSql = """
                     SELECT batch_status
                     FROM public.inward_batch_history
                     WHERE batch_id = ?
-                    ORDER BY
-                        batch_history_id DESC
+                    ORDER BY batch_history_id DESC
                     LIMIT 1
                     """;
 
-
             String latestBatchStatus = null;
-
 
             try (
                     PreparedStatement statement =
@@ -1326,7 +1392,6 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                 statement.setLong(
                         1,
                         batchId);
-
 
                 try (
                         ResultSet resultSet =
@@ -1342,19 +1407,14 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                 }
             }
 
+            // -------------------------------------------------
+            // Move batch to DATA_ENTRY only once
+            // -------------------------------------------------
 
-            /*
-             * ---------------------------------------------------------
-             * 3. Move batch to DATA_ENTRY.
-             *
-             * Do not create duplicate DATA_ENTRY records.
-             * ---------------------------------------------------------
-             */
-            if (!"DATA_ENTRY".equalsIgnoreCase(
+            if (!STATUS_DATA_ENTRY.equalsIgnoreCase(
                     latestBatchStatus)) {
 
-                String batchHistorySql =
-                        """
+                String batchHistorySql = """
                         INSERT INTO public.inward_batch_history
                         (
                             batch_id,
@@ -1375,7 +1435,6 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                         )
                         """;
 
-
                 try (
                         PreparedStatement statement =
                                 connection.prepareStatement(
@@ -1390,10 +1449,8 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                             2,
                             userId);
 
-
                     int inserted =
                             statement.executeUpdate();
-
 
                     if (inserted != 1) {
 
@@ -1404,30 +1461,29 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                 }
             }
 
-
             connection.commit();
 
             return true;
-
 
         } catch (SQLException e) {
 
             if (connection != null) {
 
                 try {
+
                     connection.rollback();
+
                 } catch (SQLException rollbackException) {
+
                     rollbackException.printStackTrace();
                 }
             }
-
 
             throw new RuntimeException(
                     "Failed to move batch "
                             + batchId
                             + " to DATA_ENTRY",
                     e);
-
 
         } finally {
 
@@ -1436,6 +1492,7 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                 try {
 
                     connection.setAutoCommit(true);
+
                     connection.close();
 
                 } catch (SQLException closeException) {

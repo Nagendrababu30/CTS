@@ -36,5 +36,9 @@ public interface BatchDao {
 	 */
 	long getBatchIdByFileName(String batchName);
 
-   
+	List<NpciBatchData> getBatchesForMaker(Long userId);
+
+	List<NpciBatchData> getBatchesByStatusAndMaker(String batchStatus, Long userId);
+
+	Long getBatchLockOwner(long batchId);
 }

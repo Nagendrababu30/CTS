@@ -64,6 +64,13 @@ public class MicrComparisonDto {
     // -------------------------------------------------------------------------
 
     private boolean needsMicrRepair;
+    private boolean micrRepaired;
+    
+    private String repairedMicrCode;
+    private String repairedCityCode;
+    private String repairedBankCode;
+    private String repairedBranchCode;
+
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -456,6 +463,51 @@ public class MicrComparisonDto {
         this.needsMicrRepair =
                 needsMicrRepair;
     }
+    
+    public boolean isMicrRepaired() {
+
+        return micrRepaired;
+    }
+
+    public void setMicrRepaired(
+            boolean micrRepaired) {
+
+        this.micrRepaired =
+                micrRepaired;
+    }
+    
+    public String getRepairedMicrCode() {
+        return repairedMicrCode;
+    }
+
+    public void setRepairedMicrCode(String repairedMicrCode) {
+        this.repairedMicrCode = repairedMicrCode;
+    }
+
+    public String getRepairedCityCode() {
+        return repairedCityCode;
+    }
+
+    public void setRepairedCityCode(String repairedCityCode) {
+        this.repairedCityCode = repairedCityCode;
+    }
+
+    public String getRepairedBankCode() {
+        return repairedBankCode;
+    }
+
+    public void setRepairedBankCode(String repairedBankCode) {
+        this.repairedBankCode = repairedBankCode;
+    }
+
+    public String getRepairedBranchCode() {
+        return repairedBranchCode;
+    }
+
+    public void setRepairedBranchCode(String repairedBranchCode) {
+        this.repairedBranchCode = repairedBranchCode;
+    }
+
 
     // -------------------------------------------------------------------------
     // MICR mismatch only

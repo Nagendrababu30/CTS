@@ -7,6 +7,8 @@
 
 <zk>
 
+	<style src="/css/outward/checker/batch_queue.css"/>
+
     <div self="@define(content)"
          width="100%"
          height="100%"

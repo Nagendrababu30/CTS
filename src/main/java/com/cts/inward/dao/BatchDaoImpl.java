@@ -451,4 +451,121 @@ public class BatchDaoImpl implements BatchDao {
 
 	    return batches;
 	}
+
+	@Override
+	public List<NpciBatchData> getBatchesForMaker(Long userId) {
+		String sql = """
+				SELECT
+				    b.batch_id,
+				    b.file_id,
+				    b.presenting_bank_name,
+				    b.total_cheques
+				FROM inward_batch b
+				LEFT JOIN LATERAL (
+				    SELECT bl.user_id, bl.lock_status
+				    FROM inward_batch_lock bl
+				    WHERE bl.batch_id = b.batch_id
+				    ORDER BY bl.locked_time DESC, bl.lock_id DESC
+				    LIMIT 1
+				) l ON TRUE
+				WHERE (l.lock_status IS NULL OR l.lock_status <> 'LOCKED' OR (? IS NOT NULL AND l.user_id = ?))
+				ORDER BY b.batch_id
+				""";
+		List<NpciBatchData> batches = new ArrayList<>();
+		try (Connection connection = dataSource.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql)) {
+			if (userId != null) {
+				statement.setLong(1, userId);
+				statement.setLong(2, userId);
+			} else {
+				statement.setNull(1, java.sql.Types.BIGINT);
+				statement.setNull(2, java.sql.Types.BIGINT);
+			}
+			try (ResultSet resultSet = statement.executeQuery()) {
+				while (resultSet.next()) {
+					batches.add(new NpciBatchData(resultSet.getLong("batch_id"), resultSet.getLong("file_id"),
+							resultSet.getString("presenting_bank_name"), resultSet.getInt("total_cheques")));
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Error retrieving batches for maker", e);
+		}
+		return batches;
+	}
+
+	@Override
+	public List<NpciBatchData> getBatchesByStatusAndMaker(String batchStatus, Long userId) {
+		String sql = """
+				SELECT
+				    b.batch_id,
+				    b.file_id,
+				    b.presenting_bank_name,
+				    b.total_cheques
+				FROM public.inward_batch b
+				INNER JOIN LATERAL (
+				    SELECT h.batch_status
+				    FROM public.inward_batch_history h
+				    WHERE h.batch_id = b.batch_id
+				    ORDER BY h.changed_on DESC, h.batch_history_id DESC
+				    LIMIT 1
+				) latest ON TRUE
+				LEFT JOIN LATERAL (
+				    SELECT bl.user_id, bl.lock_status
+				    FROM public.inward_batch_lock bl
+				    WHERE bl.batch_id = b.batch_id
+				    ORDER BY bl.locked_time DESC, bl.lock_id DESC
+				    LIMIT 1
+				) l ON TRUE
+				WHERE latest.batch_status = ?
+				  AND (l.lock_status IS NULL OR l.lock_status <> 'LOCKED' OR (? IS NOT NULL AND l.user_id = ?))
+				ORDER BY b.batch_id
+				""";
+		List<NpciBatchData> batches = new ArrayList<>();
+		try (Connection connection = dataSource.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql)) {
+			statement.setString(1, batchStatus);
+			if (userId != null) {
+				statement.setLong(2, userId);
+				statement.setLong(3, userId);
+			} else {
+				statement.setNull(2, java.sql.Types.BIGINT);
+				statement.setNull(3, java.sql.Types.BIGINT);
+			}
+			try (ResultSet resultSet = statement.executeQuery()) {
+				while (resultSet.next()) {
+					batches.add(new NpciBatchData(resultSet.getLong("batch_id"), resultSet.getLong("file_id"),
+							resultSet.getString("presenting_bank_name"), resultSet.getInt("total_cheques")));
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Error retrieving batches by status and maker", e);
+		}
+		return batches;
+	}
+
+	@Override
+	public Long getBatchLockOwner(long batchId) {
+		String sql = """
+				SELECT bl.user_id, bl.lock_status
+				FROM public.inward_batch_lock bl
+				WHERE bl.batch_id = ?
+				ORDER BY bl.locked_time DESC, bl.lock_id DESC
+				LIMIT 1
+				""";
+		try (Connection connection = dataSource.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql)) {
+			statement.setLong(1, batchId);
+			try (ResultSet resultSet = statement.executeQuery()) {
+				if (resultSet.next()) {
+					String status = resultSet.getString("lock_status");
+					if ("LOCKED".equalsIgnoreCase(status)) {
+						return resultSet.getLong("user_id");
+					}
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Error checking batch lock owner for batch " + batchId, e);
+		}
+		return null;
+	}
 }

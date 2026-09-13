@@ -45,4 +45,8 @@ public interface MicrRepairService {
 
     int getBatchTotalChequeCount(
             long batchId);
+
+    int getBatchMicrCompletedCount(long batchId);
+
+    int getBatchMicrPendingCount(long batchId);
 }

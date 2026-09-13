@@ -1,46 +1,314 @@
-.main-window { padding: 20px; background: #f4f5f7; }
-.content-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        
-        /* Top Alert & Bottom Note */
-.alert-box { background: #eef2fa; padding: 10px; border-radius: 4px; align-items: center; margin-bottom: 15px; }
-.alert-icon { color: #2b4c9e; font-size: 16px; margin-right: 10px; }
-        .alert-text { color: #333; font-weight: bold; }
-        .note-box { margin-top: 15px; align-items: center; }
-        .note-icon { color: gray; margin-right: 5px; }
-        .note-text { color: gray; font-size: 12px; }
+/* =============================================================
+   INWARD SEND TO CHECKER
+   Same visual language as Inward Maker Dashboard
+   Static CSS — no RGB / animated effects
+   ============================================================= */
+@import
+	url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap')
+	;
 
-        /* Grid Styling */
-        .custom-grid { border: none; }
-        .custom-columns { background: #f8f9fa; border-bottom: 2px solid #eee; }
-        .custom-column { font-weight: bold; color: #555; }
+:root {
+	--bg-app: #EAF0FA;
+	--bg-app-2: #E4ECF8;
+	--surface: #FFFFFF;
+	--surface-2: #FCFDFF;
+	--border: #E4EAF3;
+	--border-mid: #D0D5DD;
+	--text-primary: #0B1F3F;
+	--text-secondary: #2B3A55;
+	--text-muted: #667085;
+	--brand-blue: #175CD3;
+	--brand-indigo: #4F46E5;
+	--brand-green: #12B76A;
+}
 
-        /* Buttons */
-        .btn-cancel { background: white; color: #333; border: 1px solid #ccc; padding: 6px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        .btn-submit, .btn-ok { background: #2b4c9e; color: white; border: none; padding: 6px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        .btn-ok { margin-top: 25px; width: 120px; padding: 8px; }
+/* =============================================================
+   PAGE
+   ============================================================= */
+.main-window {
+	width: 100%;
+	height: 100%;
+	padding: 28px 32px 32px;
+	box-sizing: border-box;
+	background: radial-gradient(1200px 600px at 0% 0%, rgba(23, 92, 211, 0.10),
+		transparent 60%),
+		radial-gradient(1000px 600px at 100% 0%, rgba(122, 90, 248, 0.10),
+		transparent 60%), linear-gradient(180deg, var(--bg-app) 0%,
+		var(--bg-app-2) 100%);
+	overflow: auto;
+}
 
-        /* Modals Common */
-        .modal-vlayout { padding: 25px; text-align: center; }
-        .modal-btn-container { margin-top: 25px; justify-content: center; }
-        
-        /* Confirmation Modal */
-        .confirm-msg { font-size: 15px; color: #333; }
-        
-        /* Success Modal */
-        .success-icon-bg { background: #e8f5e9; border-radius: 50%; width: 60px; height: 60px; line-height: 60px; margin: 0 auto; margin-bottom: 15px; }
-        .success-icon { color: #4caf50; font-size: 30px; }
-        .success-title { font-size: 18px; font-weight: bold; color: #333; margin-bottom: 20px; }
-        .success-note { font-size: 13px; color: #777; }
-        
-        /* Success Details Grid */
-        .details-grid { border: none; margin-bottom: 20px; width: 80%; margin-left: auto; margin-right: auto; }
-        .details-row { border: none; background: transparent; }
-        .details-label { font-weight: bold; color: #555; text-align: right; }
-        .details-value { font-weight: bold; color: #333; text-align: left; }
-        .details-value-green { color: #4caf50; font-weight: bold; text-align: left; }
+/* =============================================================
+   MAIN CARD
+   ============================================================= */
+.content-container {
+	width: 100%;
+	box-sizing: border-box;
+	background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2)
+		100%);
+	padding: 22px 20px 18px;
+	border: 1px solid var(--border);
+	border-radius: 16px;
+	box-shadow: 0 6px 18px rgba(16, 24, 40, 0.07), 0 2px 6px
+		rgba(16, 24, 40, 0.03);
+	position: relative;
+	overflow: hidden;
+}
 
-        /* Status Badge (Used in Java Controller) */
-        .status-badge-ready { border: 1px solid #4caf50; border-radius: 4px; padding: 2px 8px; display: inline-flex; align-items: center; justify-content: center; }
-        .status-icon-ready { color: #4caf50; margin-right: 5px; }
-        .status-text-ready { color: #4caf50; font-weight: bold; }
-        .btn-action-send { background: #2b4c9e; color: white; border: none; padding: 5px 15px; border-radius: 4px; cursor: pointer; }
+.content-container::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	height: 4px;
+	background: var(--brand-blue);
+}
+
+/* =============================================================
+   ALERT
+   ============================================================= */
+.alert-box {
+	background: #EFF6FF;
+	border: 1px solid #D6E4FF;
+	padding: 11px 12px;
+	border-radius: 8px;
+	align-items: center;
+	margin-bottom: 15px;
+	box-sizing: border-box;
+}
+
+.alert-icon {
+	color: var(--brand-blue);
+	font-size: 15px;
+	margin-right: 10px;
+}
+
+.alert-text {
+	color: var(--text-primary);
+	font-family: 'Inter', sans-serif;
+	font-size: 13px;
+	font-weight: 600;
+}
+
+/* =============================================================
+   NOTE
+   ============================================================= */
+.note-box {
+	margin-top: 15px;
+	align-items: center;
+}
+
+.note-icon {
+	color: var(--text-muted);
+	margin-right: 5px;
+}
+
+.note-text {
+	color: var(--text-muted);
+	font-family: 'Inter', sans-serif;
+	font-size: 12px;
+}
+
+/* =============================================================
+   GRID
+   ============================================================= */
+.custom-grid {
+	width: 100%;
+	border: 1px solid var(--border) !important;
+	border-radius: 10px !important;
+	overflow: hidden;
+	background: #FFFFFF;
+}
+
+.custom-grid .z-grid-header, .custom-grid .z-columns, .custom-columns {
+	background: var(--brand-blue) !important;
+	border-bottom: none !important;
+}
+
+.custom-column, .custom-grid .z-column, .custom-grid .z-column-content {
+	color: #FFFFFF !important;
+	background: transparent !important;
+	font-family: 'Inter', sans-serif !important;
+	font-size: 12px !important;
+	font-weight: 700 !important;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	padding: 15px 12px !important;
+	border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.custom-grid .z-column * {
+	color: #FFFFFF !important;
+	background: transparent !important;
+}
+
+/* =============================================================
+   DATA ROWS
+   ============================================================= */
+.custom-grid .z-row {
+	background: #FFFFFF;
+	border-bottom: 1px solid #EEF2F8 !important;
+}
+
+.custom-grid .z-row:nth-child(even) {
+	background: #FCFDFF;
+}
+
+.custom-grid .z-row:hover {
+	background: #F6F9FF !important;
+	box-shadow: inset 4px 0 0 var(--brand-blue);
+}
+
+.custom-grid .z-row-content, .custom-grid .z-cell {
+	color: #1D2939;
+	font-family: 'Inter', sans-serif;
+	font-size: 13px;
+	font-weight: 500;
+	padding: 15px 12px !important;
+	border-right: 1px solid rgba(228, 234, 243, 0.7) !important;
+}
+
+/* =============================================================
+   BUTTONS
+   ============================================================= */
+.btn-cancel {
+	background: #FFFFFF !important;
+	color: var(--text-secondary) !important;
+	border: 1px solid var(--border-mid) !important;
+	padding: 7px 20px;
+	border-radius: 6px;
+	font-family: 'Plus Jakarta Sans', sans-serif;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.btn-submit, .btn-ok, .btn-action-send {
+	background: linear-gradient(135deg, #175CD3 0%, #4F46E5 100%) !important;
+	color: #FFFFFF !important;
+	border: none !important;
+	padding: 7px 20px;
+	border-radius: 6px;
+	font-family: 'Plus Jakarta Sans', sans-serif;
+	font-weight: 700;
+	cursor: pointer;
+	box-shadow: 0 4px 14px rgba(23, 92, 211, 0.22);
+}
+
+.btn-ok {
+	margin-top: 25px;
+	width: 120px;
+	padding: 8px;
+}
+
+/* =============================================================
+   MODALS
+   ============================================================= */
+.modal-vlayout {
+	padding: 25px;
+	text-align: center;
+}
+
+.modal-btn-container {
+	margin-top: 25px;
+	justify-content: center;
+}
+
+.confirm-msg {
+	font-family: 'Inter', sans-serif;
+	font-size: 15px;
+	color: var(--text-primary);
+}
+
+/* =============================================================
+   SUCCESS
+   ============================================================= */
+.success-icon-bg {
+	background: #ECFDF3;
+	border: 1px solid #ABEFC6;
+	border-radius: 50%;
+	width: 60px;
+	height: 60px;
+	line-height: 60px;
+	margin: 0 auto 15px;
+}
+
+.success-icon {
+	color: var(--brand-green);
+	font-size: 30px;
+}
+
+.success-title {
+	font-family: 'Plus Jakarta Sans', sans-serif;
+	font-size: 18px;
+	font-weight: 800;
+	color: var(--text-primary);
+	margin-bottom: 20px;
+}
+
+.success-note {
+	font-family: 'Inter', sans-serif;
+	font-size: 13px;
+	color: var(--text-muted);
+}
+
+/* =============================================================
+   SUCCESS DETAILS
+   ============================================================= */
+.details-grid {
+	border: none;
+	margin-bottom: 20px;
+	width: 80%;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.details-row {
+	border: none;
+	background: transparent;
+}
+
+.details-label {
+	font-weight: 700;
+	color: var(--text-secondary);
+	text-align: right;
+}
+
+.details-value {
+	font-weight: 700;
+	color: var(--text-primary);
+	text-align: left;
+}
+
+.details-value-green {
+	color: #15803D;
+	font-weight: 700;
+	text-align: left;
+}
+
+/* =============================================================
+   READY STATUS
+   ============================================================= */
+.status-badge-ready {
+	border: 1px solid #86EFAC;
+	background: #F0FDF4;
+	border-radius: 999px;
+	padding: 4px 10px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.status-icon-ready, .status-text-ready {
+	color: #15803D;
+	font-weight: 700;
+}
+
+/* =============================================================
+   RESPONSIVE
+   ============================================================= */
+@media ( max-width : 1024px) {
+	.main-window {
+		padding: 22px 20px;
+	}
+}

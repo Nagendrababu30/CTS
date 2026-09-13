@@ -24,6 +24,11 @@ public class SendBatchToCheckerDaoImpl implements SendBatchToCheckerDao {
 
     @Override
     public List<NpciBatchData> getReadyBatches() {
+        return getReadyBatches(null);
+    }
+
+    @Override
+    public List<NpciBatchData> getReadyBatches(Long userId) {
         String sql = """
                 SELECT 
                     b.batch_id, 
@@ -31,6 +36,13 @@ public class SendBatchToCheckerDaoImpl implements SendBatchToCheckerDao {
                     b.presenting_bank_name, 
                     b.total_cheques
                 FROM inward_batch b
+                LEFT JOIN LATERAL (
+                    SELECT bl.user_id, bl.lock_status
+                    FROM inward_batch_lock bl
+                    WHERE bl.batch_id = b.batch_id
+                    ORDER BY bl.locked_time DESC, bl.lock_id DESC
+                    LIMIT 1
+                ) l ON TRUE
                 WHERE (
                     SELECT h.batch_status
                     FROM inward_batch_history h
@@ -38,6 +50,7 @@ public class SendBatchToCheckerDaoImpl implements SendBatchToCheckerDao {
                     ORDER BY h.changed_on DESC
                     LIMIT 1
                 ) = 'DATA_ENTRY_COMPLETED'
+                  AND (l.lock_status IS NULL OR l.lock_status <> 'LOCKED' OR (? IS NOT NULL AND l.user_id = ?))
                 ORDER BY b.batch_id
                 """;
 
@@ -45,17 +58,25 @@ public class SendBatchToCheckerDaoImpl implements SendBatchToCheckerDao {
 
         try (
             Connection connection = dataSource.getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql);
-            ResultSet resultSet = statement.executeQuery()
+            PreparedStatement statement = connection.prepareStatement(sql)
         ) {
-            while (resultSet.next()) {
-                NpciBatchData batch = new NpciBatchData(
-                        resultSet.getLong("batch_id"),
-                        resultSet.getLong("file_id"),
-                        resultSet.getString("presenting_bank_name"),
-                        resultSet.getInt("total_cheques")
-                );
-                batches.add(batch);
+            if (userId != null) {
+                statement.setLong(1, userId);
+                statement.setLong(2, userId);
+            } else {
+                statement.setNull(1, java.sql.Types.BIGINT);
+                statement.setNull(2, java.sql.Types.BIGINT);
+            }
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    NpciBatchData batch = new NpciBatchData(
+                            resultSet.getLong("batch_id"),
+                            resultSet.getLong("file_id"),
+                            resultSet.getString("presenting_bank_name"),
+                            resultSet.getInt("total_cheques")
+                    );
+                    batches.add(batch);
+                }
             }
         } catch (Exception e) {
             throw new RuntimeException("Error retrieving DATA_ENTRY_COMPLETED batches", e);

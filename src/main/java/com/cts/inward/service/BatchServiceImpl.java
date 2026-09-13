@@ -39,7 +39,15 @@ public class BatchServiceImpl implements BatchService {
 	@Override
 	public List<InwardBatch> getAvailableBatchesForMaker(String userId) {
 
-		List<NpciBatchData> batches = batchDao.getBatchesByStatus("DATA_ENTRY");
+		Long uId = null;
+		if (userId != null && !userId.trim().isEmpty()) {
+			try {
+				uId = Long.parseLong(userId.trim());
+			} catch (NumberFormatException ignored) {
+			}
+		}
+
+		List<NpciBatchData> batches = batchDao.getBatchesByStatusAndMaker("DATA_ENTRY", uId);
 
 		List<InwardBatch> result = new ArrayList<>();
 

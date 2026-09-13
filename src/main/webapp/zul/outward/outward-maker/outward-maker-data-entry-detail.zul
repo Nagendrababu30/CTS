@@ -385,22 +385,26 @@
                         <!-- Actions pinned evenly at the bottom -->
                         <vlayout width="100%" spacing="8px" style="margin-top:auto;">
                             <!-- TOP ROW: Navigation & Verification -->
-                            <hlayout width="100%" valign="middle" spacing="8px">
-                                <button id="prevButton" label="Prev" width="80px" height="36px"
-                                        style="background:#2563EB !important; color:#FFFFFF !important; border:none !important; font-size:12px !important; font-weight:600 !important; border-radius:6px !important; cursor:pointer !important;"/>
-                                <button id="saveNextButton" label="💾 Save &amp; Next" hflex="1" height="36px"
-                                        style="background:#2563EB !important; color:#FFFFFF !important; border:none !important; font-size:12px !important; font-weight:600 !important; border-radius:6px !important; cursor:pointer !important;"/>
-                            </hlayout>
+  <hlayout spacing="8px" valign="middle" width="100%" style="margin-top: 15px;">
+    <!-- Prev Button -->
+    <button id="btnPrev" label="Prev" 
+            sclass="btn-secondary" 
+            hflex="1" height="40px" 
+            style="font-size: 13px; font-weight: 600; padding: 0 4px; text-align: center;" />
 
-                            <!-- BOTTOM ROW: Clean Rejection Action Button -->
-                            <hlayout width="100%" valign="middle">
-                                <button id="rejectRequestButton"
-                                        label="⚠ Reject Request"
-                                        tooltiptext="Submit rejection request for Checker review"
-                                        width="100%"
-                                        height="36px"
-                                        style="background:#FFF1F2 !important; color:#BE123C !important; border:1px solid #FECDD3 !important; font-size:12px !important; font-weight:600 !important; border-radius:6px !important; cursor:pointer !important;"/>
-                            </hlayout>
+    <!-- Save & Next Button -->
+    <button id="btnSaveNext" label="💾 Save &amp; Next" 
+            sclass="btn-primary" 
+            hflex="1" height="40px" 
+            style="background-color: #2563eb; color: #fff; font-size: 12px; font-weight: 600; padding: 0 2px; text-align: center; white-space: nowrap;" />
+
+    <!-- Reject Request Button -->
+    <button id="btnReject" label="⚠ Reject Request" 
+            sclass="btn-danger" 
+            tooltiptext="Reject Request"
+            hflex="1" height="40px" 
+            style="background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; font-size: 13px; font-weight: 600; padding: 0 4px; text-align: center; white-space: nowrap;" />
+</hlayout>
                         </vlayout>
 
                     </vlayout>

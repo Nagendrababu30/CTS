@@ -80,7 +80,7 @@ public class OutwardMakerDashboardDAO {
                  * No Maker assignment is required here.
                  */
                 "WHERE UPPER(ob.batch_status) NOT IN " +
-                "    ('SUBMITTED_TO_CHECKER', 'COMPLETED', 'REJECTED') " +
+                "    ('SUBMITTED_TO_CHECKER', 'COMPLETED', 'REJECTED','CHECKER_COMPLETED') " +
 
                 "ORDER BY ob.batch_number";
 

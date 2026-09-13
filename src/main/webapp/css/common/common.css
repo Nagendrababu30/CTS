@@ -805,30 +805,24 @@ body {
    SIDEBAR / WEST REGION
    ========================================================= */
 
+.z-west,
 .z-borderlayout > .z-west {
     margin: 0 !important;
     padding: 0 !important;
-
     border: none !important;
-
     background-color: #071422 !important;
-
     overflow: hidden !important;
 }
-
 .z-west-body {
     width: 100% !important;
     height: 100% !important;
-
     margin: 0 !important;
     padding: 0 !important;
-
     border: none !important;
-
     background-color: #071422 !important;
-
     overflow: hidden !important;
 }
+
 
 
 /* =========================================================

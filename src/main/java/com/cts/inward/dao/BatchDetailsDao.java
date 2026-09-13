@@ -22,4 +22,6 @@ public interface BatchDetailsDao {
             String checkerAction,
             String remarks);
 
+    boolean completeVerification(Long batchId, Integer checkerId);
+
 }

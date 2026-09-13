@@ -52,6 +52,10 @@ public class BatchDetailsController
 
     private Image chequeImage;
 
+    private Component chequeImageContainer;
+
+    private Component chequePreview;
+
     private Button btnFront;
 
     private Button btnBack;
@@ -254,6 +258,8 @@ public class BatchDetailsController
     private Button previousCheque;
 
     private Button nextCheque;
+
+    private Button completeVerification;
 
 
     // =========================================================
@@ -507,6 +513,8 @@ public class BatchDetailsController
                     "NO CHEQUES FOUND FOR BATCH ID = "
                             + batchId
             );
+
+            updateCompleteVerificationButtonState();
         }
     }
 
@@ -2503,19 +2511,39 @@ public class BatchDetailsController
             btnBack.setSclass("image-button");
         }
 
+        boolean imageLoaded = false;
         if (currentFrontImagePath != null
                 && !currentFrontImagePath.trim().isEmpty()) {
             try {
-                byte[] bytes = java.nio.file.Files.readAllBytes(
-                        java.nio.file.Path.of(currentFrontImagePath));
-                chequeImage.setContent(
-                        new org.zkoss.image.AImage("front.jpg", bytes));
+                java.io.File file = new java.io.File(currentFrontImagePath);
+                if (file.exists() && file.isFile()) {
+                    byte[] bytes = java.nio.file.Files.readAllBytes(file.toPath());
+                    chequeImage.setContent(
+                            new org.zkoss.image.AImage("front.jpg", bytes));
+                    imageLoaded = true;
+                }
             } catch (Exception e) {
                 e.printStackTrace();
-                chequeImage.setContent((org.zkoss.image.AImage) null);
+            }
+        }
+
+        if (imageLoaded) {
+            chequeImage.setVisible(true);
+            if (chequeImageContainer != null) {
+                chequeImageContainer.setVisible(true);
+            }
+            if (chequePreview != null) {
+                chequePreview.setVisible(false);
             }
         } else {
             chequeImage.setContent((org.zkoss.image.AImage) null);
+            chequeImage.setVisible(false);
+            if (chequeImageContainer != null) {
+                chequeImageContainer.setVisible(false);
+            }
+            if (chequePreview != null) {
+                chequePreview.setVisible(true);
+            }
         }
     }
 
@@ -2530,19 +2558,39 @@ public class BatchDetailsController
             btnBack.setSclass("image-button image-button-active");
         }
 
+        boolean imageLoaded = false;
         if (currentBackImagePath != null
                 && !currentBackImagePath.trim().isEmpty()) {
             try {
-                byte[] bytes = java.nio.file.Files.readAllBytes(
-                        java.nio.file.Path.of(currentBackImagePath));
-                chequeImage.setContent(
-                        new org.zkoss.image.AImage("back.jpg", bytes));
+                java.io.File file = new java.io.File(currentBackImagePath);
+                if (file.exists() && file.isFile()) {
+                    byte[] bytes = java.nio.file.Files.readAllBytes(file.toPath());
+                    chequeImage.setContent(
+                            new org.zkoss.image.AImage("back.jpg", bytes));
+                    imageLoaded = true;
+                }
             } catch (Exception e) {
                 e.printStackTrace();
-                chequeImage.setContent((org.zkoss.image.AImage) null);
+            }
+        }
+
+        if (imageLoaded) {
+            chequeImage.setVisible(true);
+            if (chequeImageContainer != null) {
+                chequeImageContainer.setVisible(true);
+            }
+            if (chequePreview != null) {
+                chequePreview.setVisible(false);
             }
         } else {
             chequeImage.setContent((org.zkoss.image.AImage) null);
+            chequeImage.setVisible(false);
+            if (chequeImageContainer != null) {
+                chequeImageContainer.setVisible(false);
+            }
+            if (chequePreview != null) {
+                chequePreview.setVisible(true);
+            }
         }
     }
 
@@ -2664,6 +2712,8 @@ public class BatchDetailsController
                             >= cheques.size() - 1
             );
         }
+
+        updateCompleteVerificationButtonState();
     }
 
 
@@ -2877,6 +2927,82 @@ public class BatchDetailsController
         Executions.sendRedirect(
                 "/zul/inward-checker/verification.zul"
         );
+    }
+
+
+    // =========================================================
+    // COMPLETE VERIFICATION - BUTTON STATE & CLICK
+    // =========================================================
+
+    private void updateCompleteVerificationButtonState() {
+
+        if (completeVerification == null) {
+            return;
+        }
+
+        if (cheques == null || cheques.isEmpty()) {
+            completeVerification.setDisabled(true);
+            return;
+        }
+
+        boolean isLastCheque = (currentChequeIndex == cheques.size() - 1);
+        completeVerification.setDisabled(!isLastCheque);
+    }
+
+    public void onClick$completeVerification() {
+
+        if (completeVerification == null) {
+            return;
+        }
+
+        if (cheques == null || cheques.isEmpty()) {
+            completeVerification.setDisabled(true);
+            return;
+        }
+
+        // Second-layer safety check: must be on the last cheque
+        if (currentChequeIndex != cheques.size() - 1) {
+            updateCompleteVerificationButtonState();
+            return;
+        }
+
+        if (batchId == null) {
+            Messagebox.show(
+                    "Batch ID is missing.",
+                    "Error",
+                    Messagebox.OK,
+                    Messagebox.ERROR);
+            return;
+        }
+
+        try {
+            boolean returnedToMaker =
+                    batchDetailsService.completeVerification(batchId, userId);
+
+            if (returnedToMaker) {
+                Messagebox.show(
+                        "Batch contains returned cheque(s). Batch has been returned to Maker for reprocessing.",
+                        "Verification Completed - Returned to Maker",
+                        Messagebox.OK,
+                        Messagebox.INFORMATION,
+                        event -> Executions.sendRedirect("/zul/inward-checker/verification.zul"));
+            } else {
+                Messagebox.show(
+                        "Verification completed successfully.",
+                        "Verification Completed",
+                        Messagebox.OK,
+                        Messagebox.INFORMATION,
+                        event -> Executions.sendRedirect("/zul/inward-checker/verification.zul"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Messagebox.show(
+                    "Failed to complete verification: " + e.getMessage(),
+                    "Error",
+                    Messagebox.OK,
+                    Messagebox.ERROR);
+        }
     }
 
 

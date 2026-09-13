@@ -25,4 +25,8 @@ public interface BatchDetailsService {
             Integer checkerId,
             String checkerAction,
             String remarks);
+
+    boolean completeVerification(
+            Long batchId,
+            Integer checkerId);
 }

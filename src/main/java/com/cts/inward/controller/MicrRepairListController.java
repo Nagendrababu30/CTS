@@ -27,6 +27,7 @@ public class MicrRepairListController
     private Label emptyMessage;
 
     private MicrRepairService micrRepairService;
+    private Long loggedInUserId;
 
 
     @Override
@@ -39,7 +40,19 @@ public class MicrRepairListController
         micrRepairService =
                 new MicrRepairServiceImpl();
 
+        loadLoggedInUser();
+
         loadRepairBatches();
+    }
+
+    private void loadLoggedInUser() {
+        org.zkoss.zk.ui.Session session =
+                Executions.getCurrent().getSession();
+        com.cts.admin.model.User user =
+                (com.cts.admin.model.User) session.getAttribute("loggedInUser");
+        if (user != null) {
+            loggedInUserId = user.getUserId();
+        }
     }
 
 
@@ -49,10 +62,11 @@ public class MicrRepairListController
                 .getChildren()
                 .clear();
 
+        loadLoggedInUser();
 
         List<MicrRepairBatchDto> batches =
                 micrRepairService
-                        .getRepairBatches();
+                        .getRepairBatches(loggedInUserId);
 
 
         if (batches == null

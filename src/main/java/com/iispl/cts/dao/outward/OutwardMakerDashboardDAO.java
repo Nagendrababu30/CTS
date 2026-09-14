@@ -29,6 +29,7 @@ public class OutwardMakerDashboardDAO {
     // GET ALL BATCHES
     // ============================================================
 
+  
     public List<OutwardBatch> getBatches() throws SQLException {
 
         // =========================================================
@@ -44,7 +45,6 @@ public class OutwardMakerDashboardDAO {
                         : null;
 
         if (sessionUserId == null) {
-
             throw new SQLException(
                     "Maker user ID is required."
             );
@@ -53,14 +53,11 @@ public class OutwardMakerDashboardDAO {
         int currentMakerUserId;
 
         try {
-
             currentMakerUserId =
                     Integer.parseInt(
                             sessionUserId.toString().trim()
                     );
-
         } catch (NumberFormatException e) {
-
             throw new SQLException(
                     "Invalid maker user ID: "
                             + sessionUserId
@@ -71,7 +68,6 @@ public class OutwardMakerDashboardDAO {
                 new ArrayList<>();
 
         String sql =
-
                 "SELECT " +
                 "    ob.batch_number, " +
                 "    ob.branch_code, " +
@@ -153,7 +149,6 @@ public class OutwardMakerDashboardDAO {
                 "    AND UPPER(TRIM(mba.assignment_status)) IN " +
                 "        ('ASSIGNED', 'IN_PROGRESS', 'RELEASED') " +
 
-
                 // =================================================
                 // BATCH FILTER
                 // =================================================
@@ -171,9 +166,7 @@ public class OutwardMakerDashboardDAO {
 
                 "      ( " +
                 "          COALESCE(rc.returned_cheque_count, 0) = 0 " +
-
                 "          AND " +
-
                 "          UPPER(TRIM(ob.batch_status)) NOT IN " +
                 "              ('SUBMITTED_TO_CHECKER', " +
                 "               'CHECKER_COMPLETED', " +
@@ -181,9 +174,7 @@ public class OutwardMakerDashboardDAO {
                 "               'REJECTED', " +
                 "               'HOLD', " +
                 "               'ON_HOLD') " +
-
                 "          AND " +
-
                 "          ( " +
 
                 // -------------------------------------------------
@@ -232,11 +223,8 @@ public class OutwardMakerDashboardDAO {
                 // =================================================
 
                 "      ( " +
-
                 "          COALESCE(rc.returned_cheque_count, 0) > 0 " +
-
                 "          AND " +
-
                 "          EXISTS ( " +
                 "              SELECT 1 " +
                 "              FROM public.outward_batch_assignment original_maker " +
@@ -257,17 +245,16 @@ public class OutwardMakerDashboardDAO {
                 "                        LIMIT 1 " +
                 "                    ) " +
                 "          ) " +
-
                 "      ) " +
 
-                /*
-                 * Batch-level status filtering.
-                 *
-                 * No Maker assignment is required here.
-                 */
-                "WHERE UPPER(ob.batch_status) NOT IN " +
-                "    ('SUBMITTED_TO_CHECKER', 'COMPLETED', 'REJECTED','CHECKER_COMPLETED') " +
-
+                // =================================================
+                // IMPORTANT:
+                //
+                // DO NOT ADD ANOTHER WHERE CLAUSE HERE.
+                //
+                // The main WHERE above already contains the complete
+                // normal + returned batch filtering.
+                // =================================================
 
                 "ORDER BY ob.batch_number";
 
@@ -293,7 +280,6 @@ public class OutwardMakerDashboardDAO {
                     currentMakerUserId
             );
 
-
             try (
                     ResultSet rs =
                             ps.executeQuery()
@@ -305,7 +291,6 @@ public class OutwardMakerDashboardDAO {
                     OutwardBatch batch =
                             new OutwardBatch();
 
-
                     // ====================================================
                     // BASIC BATCH INFORMATION
                     // ====================================================
@@ -316,13 +301,11 @@ public class OutwardMakerDashboardDAO {
                             )
                     );
 
-
                     batch.setBranchCode(
                             rs.getString(
                                     "branch_code"
                             )
                     );
-
 
                     // ====================================================
                     // NORMAL BATCH COUNT
@@ -334,7 +317,6 @@ public class OutwardMakerDashboardDAO {
                             )
                     );
 
-
                     // ====================================================
                     // RETURNED CHEQUE COUNT
                     // ====================================================
@@ -343,7 +325,6 @@ public class OutwardMakerDashboardDAO {
                             rs.getInt(
                                     "returned_cheque_count"
                             );
-
 
                     if (returnedChequeCount > 0) {
 
@@ -355,7 +336,6 @@ public class OutwardMakerDashboardDAO {
                         );
                     }
 
-
                     // ====================================================
                     // BATCH FOLDER PATH
                     // ====================================================
@@ -366,7 +346,6 @@ public class OutwardMakerDashboardDAO {
                             )
                     );
 
-
                     // ====================================================
                     // CREATED BY
                     // ====================================================
@@ -375,7 +354,6 @@ public class OutwardMakerDashboardDAO {
                             rs.getInt(
                                     "created_by"
                             );
-
 
                     if (!rs.wasNull()) {
 
@@ -386,7 +364,6 @@ public class OutwardMakerDashboardDAO {
                         );
                     }
 
-
                     // ====================================================
                     // CREATED AT
                     // ====================================================
@@ -396,14 +373,12 @@ public class OutwardMakerDashboardDAO {
                                     "created_at"
                             );
 
-
                     if (createdAt != null) {
 
                         batch.setCreatedAt(
                                 createdAt.toLocalDateTime()
                         );
                     }
-
 
                     // ====================================================
                     // BATCH STATUS
@@ -415,7 +390,6 @@ public class OutwardMakerDashboardDAO {
                             )
                     );
 
-
                     // ====================================================
                     // RETURNED BATCH DISPLAY STATUS
                     // ====================================================
@@ -426,7 +400,6 @@ public class OutwardMakerDashboardDAO {
                                 "SENT_TO_MAKER"
                         );
                     }
-
 
                     // ====================================================
                     // MAKER ASSIGNMENT
@@ -445,7 +418,6 @@ public class OutwardMakerDashboardDAO {
                                     "maker_user_id"
                             );
 
-
                     if (!rs.wasNull()) {
 
                         String makerUser =
@@ -453,17 +425,14 @@ public class OutwardMakerDashboardDAO {
                                         makerUserId
                                 );
 
-
                         batch.setMakerUserNumber(
                                 makerUser
                         );
-
 
                         batch.setLockedBy(
                                 makerUser
                         );
                     }
-
 
                     // ====================================================
                     // MAKER ASSIGNED AT
@@ -474,19 +443,16 @@ public class OutwardMakerDashboardDAO {
                                     "maker_assigned_at"
                             );
 
-
                     if (makerAssignedAt != null) {
 
                         batch.setMakerStartedAt(
                                 makerAssignedAt.toLocalDateTime()
                         );
 
-
                         batch.setLockedAt(
                                 makerAssignedAt.toLocalDateTime()
                         );
                     }
-
 
                     // ====================================================
                     // MAKER STARTED AT
@@ -497,14 +463,12 @@ public class OutwardMakerDashboardDAO {
                                     "maker_started_at"
                             );
 
-
                     if (makerStartedAt != null) {
 
                         batch.setMakerStartedAt(
                                 makerStartedAt.toLocalDateTime()
                         );
                     }
-
 
                     // ====================================================
                     // MAKER COMPLETED AT
@@ -515,14 +479,12 @@ public class OutwardMakerDashboardDAO {
                                     "maker_completed_at"
                             );
 
-
                     if (makerCompletedAt != null) {
 
                         batch.setMakerCompletedAt(
                                 makerCompletedAt.toLocalDateTime()
                         );
                     }
-
 
                     // ====================================================
                     // MAKER ASSIGNMENT STATUS
@@ -533,11 +495,9 @@ public class OutwardMakerDashboardDAO {
                                     "maker_assignment_status"
                             );
 
-
                     batch.setMakerAssignmentStatus(
                             assignmentStatus
                     );
-
 
                     // ====================================================
                     // LOCK STATUS
@@ -595,7 +555,6 @@ public class OutwardMakerDashboardDAO {
                         );
                     }
 
-
                     // ====================================================
                     // RETURNED BATCH
                     // ====================================================
@@ -607,7 +566,6 @@ public class OutwardMakerDashboardDAO {
                                         "returned_maker_user_id"
                                 );
 
-
                         if (!rs.wasNull()) {
 
                             batch.setMakerUserNumber(
@@ -616,7 +574,6 @@ public class OutwardMakerDashboardDAO {
                                     )
                             );
                         }
-
 
                         // =================================================
                         // Returned batch must be available to the
@@ -627,22 +584,18 @@ public class OutwardMakerDashboardDAO {
                                 null
                         );
 
-
                         batch.setLockedAt(
                                 null
                         );
-
 
                         batch.setLockStatus(
                                 "AVAILABLE"
                         );
 
-
                         batch.setMakerAssignmentStatus(
                                 "RETURNED"
                         );
                     }
-
 
                     batches.add(
                             batch
@@ -651,9 +604,9 @@ public class OutwardMakerDashboardDAO {
             }
         }
 
-
         return batches;
     }
+
 
     // ============================================================
     // ASSIGN BATCH TO MAKER

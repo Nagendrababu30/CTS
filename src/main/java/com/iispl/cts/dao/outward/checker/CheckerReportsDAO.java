@@ -160,6 +160,64 @@ public class CheckerReportsDAO {
 
         return batches;
     }
+    
+    public int getTotalChequeCount(String batchNumber) {
+
+        String sql =
+                "SELECT COUNT(*) " +
+                "FROM public.outward_cheque " +
+                "WHERE batch_number = ?";
+
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, batchNumber);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(
+                    "Error while getting total cheque count for batch: "
+                            + batchNumber, e);
+        }
+
+        return 0;
+    }
+
+
+    public int getValidChequeCount(String batchNumber) {
+
+        String sql =
+                "SELECT COUNT(*) " +
+                "FROM public.outward_cheque " +
+                "WHERE batch_number = ? " +
+                "AND UPPER(cheque_status) = 'CHECKER_ACCEPTED'";
+
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, batchNumber);
+
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(
+                    "Error while getting valid cheque count for batch: "
+                            + batchNumber, e);
+        }
+
+        return 0;
+    }
 
     // ============================================================
     // GET SINGLE BATCH
@@ -286,8 +344,6 @@ public class CheckerReportsDAO {
                         + "       branch_code, "
                         + "       drawer_account_number, "
                         + "       drawer_name, "
-                        + "       depositor_account_number, "
-                        + "       depositor_name, "
                         + "       payee_account_number, "
                         + "       payee_name, "
                         + "       amount, "
@@ -380,8 +436,6 @@ public class CheckerReportsDAO {
                         + "       oc.branch_code, "
                         + "       oc.drawer_account_number, "
                         + "       oc.drawer_name, "
-                        + "       oc.depositor_account_number, "
-                        + "       oc.depositor_name, "
                         + "       oc.payee_account_number, "
                         + "       oc.payee_name, "
                         + "       oc.amount, "
@@ -558,6 +612,109 @@ public class CheckerReportsDAO {
     }
 
     // ============================================================
+    // CHECK WHETHER BATCH IS READY FOR NPCI
+    // ============================================================
+
+    public boolean isBatchReadyForNPCI(
+            String batchNumber) {
+
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()) {
+
+            return false;
+        }
+
+        String sql =
+                "SELECT EXISTS ( " +
+                "    SELECT 1 " +
+                "    FROM public.outward_batch " +
+                "    WHERE batch_number = ? " +
+                "      AND UPPER(batch_status) = 'CHECKER_COMPLETED' " +
+                ")";
+
+        try (Connection connection =
+                     dataSource.getConnection();
+
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
+
+            statement.setString(
+                    1,
+                    batchNumber.trim()
+            );
+
+            try (ResultSet rs =
+                         statement.executeQuery()) {
+
+                if (rs.next()) {
+                    return rs.getBoolean(1);
+                }
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            throw new RuntimeException(
+                    "Error while checking NPCI readiness for batch: "
+                            + batchNumber,
+                    e
+            );
+        }
+
+        return false;
+    }
+
+
+    // ============================================================
+    // MARK BATCH AS SENT TO NPCI
+    // ============================================================
+
+    public boolean markBatchAsNPCISent(
+            String batchNumber) {
+
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()) {
+
+            return false;
+        }
+
+        String sql =
+                "UPDATE public.outward_batch " +
+                "SET batch_status = 'NPCI_SENT' " +
+                "WHERE batch_number = ? " +
+                "  AND UPPER(batch_status) = 'CHECKER_COMPLETED'";
+
+        try (Connection connection =
+                     dataSource.getConnection();
+
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
+
+            statement.setString(
+                    1,
+                    batchNumber.trim()
+            );
+
+            int updatedRows =
+                    statement.executeUpdate();
+
+            return updatedRows > 0;
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            throw new RuntimeException(
+                    "Error while marking batch as NPCI_SENT: "
+                            + batchNumber,
+                    e
+            );
+        }
+    }
+
+
+    // ============================================================
     // MAP OUTWARD CHEQUE
     // ============================================================
 
@@ -602,22 +759,6 @@ public class CheckerReportsDAO {
 
         cheque.setDrawerName(
                 rs.getString("drawer_name")
-        );
-
-        // ========================================================
-        // DEPOSITOR
-        // ========================================================
-
-        cheque.setDepositorAccountNumber(
-                rs.getString(
-                        "depositor_account_number"
-                )
-        );
-
-        cheque.setDepositorName(
-                rs.getString(
-                        "depositor_name"
-                )
         );
 
         // ========================================================

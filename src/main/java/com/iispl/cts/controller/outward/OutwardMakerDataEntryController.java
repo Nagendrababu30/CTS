@@ -27,10 +27,12 @@ public class OutwardMakerDataEntryController
     private final OutwardMakerDataEntryDAO dataEntryDAO =
             new OutwardMakerDataEntryDAO();
 
+
     @Override
     public void doAfterCompose(Component comp) throws Exception {
 
         super.doAfterCompose(comp);
+
 
         // =====================================================
         // GET LOGGED-IN USER FROM SESSION
@@ -47,16 +49,19 @@ public class OutwardMakerDataEntryController
             );
 
             Executions.sendRedirect(
-                    "/zul/login.zul");
+                    "/zul/login.zul"
+            );
 
             return;
         }
+
 
         // =====================================================
         // GET LOGGED-IN USER ID FROM SESSION
         // =====================================================
         //
         // Existing session design:
+        //
         // session attribute = "userId"
         //
 
@@ -70,10 +75,12 @@ public class OutwardMakerDataEntryController
             );
 
             Executions.sendRedirect(
-                    "/zul/login.zul");
+                    "/zul/login.zul"
+            );
 
             return;
         }
+
 
         // =====================================================
         // CONVERT SESSION USER ID TO LONG
@@ -104,11 +111,13 @@ public class OutwardMakerDataEntryController
                 );
 
                 Executions.sendRedirect(
-                        "/zul/login.zul");
+                        "/zul/login.zul"
+                );
 
                 return;
             }
         }
+
 
         // =====================================================
         // DYNAMIC LOGGED-IN USER ID
@@ -131,6 +140,7 @@ public class OutwardMakerDataEntryController
                 + userId
         );
 
+
         // =====================================================
         // LOAD USER-SPECIFIC BATCHES
         // =====================================================
@@ -138,121 +148,304 @@ public class OutwardMakerDataEntryController
         loadBatches(userId);
     }
 
+
+    // =========================================================
+    // LOAD BATCHES
+    // =========================================================
+
     private void loadBatches(long userId) {
 
         if (batchListbox == null) {
             return;
         }
 
+
         batchListbox.getItems().clear();
 
+
         // =====================================================
-        // FETCH ONLY BATCHES ASSIGNED TO THIS MAKER
+        // FETCH USER-SPECIFIC DATA ENTRY BATCHES
         // =====================================================
 
         List<OutwardBatch> batches =
                 dataEntryDAO.getBatchesForMaker(
-                        userId);
-
-        if (batches != null) {
-
-            for (OutwardBatch batch : batches) {
-
-                Listitem item =
-                        new Listitem();
-
-                // =================================================
-                // 1. BATCH ID
-                // =================================================
-
-                String batchNumber =
-                        batch.getBatchNumber();
-
-                Listcell cellBatchId =
-                        new Listcell(
-                                batchNumber);
-
-                cellBatchId.setStyle(
-                        "font-weight: 600; color: #1E293B;"
+                        userId
                 );
 
-                item.appendChild(
-                        cellBatchId);
+
+        if (batches == null) {
+            return;
+        }
+
+
+        for (OutwardBatch batch : batches) {
+
+            if (batch == null) {
+                continue;
+            }
+
+
+            Listitem item =
+                    new Listitem();
+
+
+            // =================================================
+            // 1. BATCH ID
+            // =================================================
+
+            String batchNumber =
+                    batch.getBatchNumber();
+
+
+            Listcell cellBatchId =
+                    new Listcell(
+                            batchNumber
+                    );
+
+            cellBatchId.setStyle(
+                    "font-weight: 600; color: #1E293B;"
+            );
+
+
+            item.appendChild(
+                    cellBatchId
+            );
+
+
+            // =================================================
+            // 2. TOTAL CHEQUES
+            // =================================================
+
+            int totalCheques =
+                    batch.getNumberOfCheques() != null
+                            ? batch.getNumberOfCheques()
+                            : 0;
+
+
+            item.appendChild(
+                    new Listcell(
+                            String.valueOf(
+                                    totalCheques
+                            )
+                    )
+            );
+
+
+            // =================================================
+            // 3. BATCH STATUS
+            // =================================================
+
+            Listcell cellStatus =
+                    new Listcell();
+
+
+            String status =
+                    batch.getBatchStatus() != null
+                            ? batch.getBatchStatus().trim()
+                            : "UNKNOWN";
+
+
+            Label lblStatus =
+                    new Label(status);
+
+
+            lblStatus.setSclass(
+                    "status-badge "
+                    + (
+                        "COMPLETED".equalsIgnoreCase(status)
+                            ? "badge-completed"
+                            : "badge-assigned"
+                    )
+            );
+
+
+            cellStatus.appendChild(
+                    lblStatus
+            );
+
+
+            item.appendChild(
+                    cellStatus
+            );
+
+
+            // =================================================
+            // 4. ACTION BUTTON
+            // =================================================
+
+            Listcell cellAction =
+                    new Listcell();
+
+
+            Button btn =
+                    new Button();
+
+
+            btn.setSclass(
+                    "action-btn"
+            );
+
+
+            // =================================================
+            // RETURNED FROM CHECKER
+            //
+            // IMPORTANT:
+            //
+            // DAO returns/display-maps the actual DB status:
+            //
+            //     SENT_BACK_TO_MAKER
+            //
+            // as:
+            //
+            //     SENT_TO_MAKER
+            //
+            // Therefore controller MUST check:
+            //
+            //     SENT_TO_MAKER
+            //
+            // =================================================
+
+            if ("SENT_TO_MAKER".equalsIgnoreCase(status)) {
+
 
                 // =================================================
-                // 2. TOTAL CHEQUES
+                // RETURNED BATCH
                 // =================================================
 
-                int totalCheques =
-                        batch.getNumberOfCheques() != null
-                                ? batch.getNumberOfCheques()
-                                : 0;
-
-                item.appendChild(
-                        new Listcell(
-                                String.valueOf(
-                                        totalCheques)));
-
-                // =================================================
-                // 3. BATCH STATUS
-                // =================================================
-
-                Listcell cellStatus =
-                        new Listcell();
-
-                String status =
-                        batch.getBatchStatus() != null
-                                ? batch.getBatchStatus()
-                                : "UNKNOWN";
-
-                Label lblStatus =
-                        new Label(status);
-
-                lblStatus.setSclass(
-                        "status-badge "
-                        + ("COMPLETED".equalsIgnoreCase(status)
-                                ? "badge-completed"
-                                : "badge-assigned")
+                btn.setLabel(
+                        "Open"
                 );
 
-                cellStatus.appendChild(
-                        lblStatus);
-
-                item.appendChild(
-                        cellStatus);
-
-                // =================================================
-                // 4. ACTION BUTTON
-                // =================================================
-
-                Listcell cellAction =
-                        new Listcell();
-
-                Button btn =
-                        new Button("Process");
-
-                btn.setSclass(
-                        "action-btn");
 
                 btn.addEventListener(
                         "onClick",
                         e -> {
 
-                            Executions.sendRedirect(
+                            System.out.println(
+                                    "======================================"
+                            );
+
+                            System.out.println(
+                                    "OPENING RETURNED DATA ENTRY BATCH"
+                            );
+
+                            System.out.println(
+                                    "Batch Number : "
+                                    + batchNumber
+                            );
+
+                            System.out.println(
+                                    "Status       : SENT_TO_MAKER"
+                            );
+
+                            System.out.println(
+                                    "Return Mode  : RETURNED"
+                            );
+
+
+                            String url =
                                     "outward-maker-data-entry-detail.zul"
                                     + "?batchId="
-                                    + batchNumber);
-                        });
+                                    + batchNumber
+                                    + "&returnMode=RETURNED";
 
-                cellAction.appendChild(
-                        btn);
 
-                item.appendChild(
-                        cellAction);
+                            System.out.println(
+                                    "URL          : "
+                                    + url
+                            );
 
-                batchListbox.appendChild(
-                        item);
+                            System.out.println(
+                                    "======================================"
+                            );
+
+
+                            Executions.sendRedirect(
+                                    url
+                            );
+                        }
+                );
+
+
+            } else {
+
+
+                // =================================================
+                // NORMAL DATA ENTRY
+                // =================================================
+
+                btn.setLabel(
+                        "Process"
+                );
+
+
+                btn.addEventListener(
+                        "onClick",
+                        e -> {
+
+                            String url =
+                                    "outward-maker-data-entry-detail.zul"
+                                    + "?batchId="
+                                    + batchNumber;
+
+
+                            System.out.println(
+                                    "======================================"
+                            );
+
+                            System.out.println(
+                                    "OPENING NORMAL DATA ENTRY BATCH"
+                            );
+
+                            System.out.println(
+                                    "Batch Number : "
+                                    + batchNumber
+                            );
+
+                            System.out.println(
+                                    "Status       : "
+                                    + status
+                            );
+
+                            System.out.println(
+                                    "URL          : "
+                                    + url
+                            );
+
+                            System.out.println(
+                                    "======================================"
+                            );
+
+
+                            Executions.sendRedirect(
+                                    url
+                            );
+                        }
+                );
             }
+
+
+            // =================================================
+            // ADD ACTION BUTTON
+            // =================================================
+
+            cellAction.appendChild(
+                    btn
+            );
+
+
+            item.appendChild(
+                    cellAction
+            );
+
+
+            // =================================================
+            // ADD ROW TO LIST
+            // =================================================
+
+            batchListbox.appendChild(
+                    item
+            );
         }
     }
 }

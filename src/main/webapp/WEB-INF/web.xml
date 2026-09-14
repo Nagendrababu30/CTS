@@ -47,4 +47,8 @@
 		<welcome-file>default.xhtml</welcome-file>
 		<welcome-file>zul/common/layout.zul</welcome-file>
 	</welcome-file-list>
+	
+	<session-config>
+		<session-timeout>60</session-timeout>
+	</session-config>
 </web-app>

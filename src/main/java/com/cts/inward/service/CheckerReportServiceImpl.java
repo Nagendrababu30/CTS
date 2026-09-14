@@ -1,11 +1,26 @@
+
 package com.cts.inward.service;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.cts.inward.dao.CheckerReportDao;
 import com.cts.inward.dao.CheckerReportDaoImpl;
+
+import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRMapCollectionDataSource;
+import net.sf.jasperreports.engine.export.JRXmlExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleXmlExporterOutput;
+
 
 public class CheckerReportServiceImpl implements CheckerReportService {
 
@@ -20,96 +35,98 @@ public class CheckerReportServiceImpl implements CheckerReportService {
     }
 
     @Override
-    public String generateRrfXml() {
+    public byte[] generateRrfXml() {
         List<Map<String, Object>> rrfData = reportDao.getRrfReportData();
 
-        if (rrfData.isEmpty()) {
+        if (rrfData == null || rrfData.isEmpty()) {
             return null;
         }
 
-        List<Long> statusHistoryIds = new ArrayList<>();
-        StringBuilder xmlBuilder = new StringBuilder();
+        try {
+            InputStream inputStream = getClass().getResourceAsStream("/reports/rrf_report.jrxml");
 
-        xmlBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        xmlBuilder.append("<RRFDocument>\n");
-        xmlBuilder.append("    <Header>\n");
-        xmlBuilder.append("        <FileDescription>Return Reason File (RRF) - CBS Failures</FileDescription>\n");
-        xmlBuilder.append("        <TotalRecords>").append(rrfData.size()).append("</TotalRecords>\n");
-        xmlBuilder.append("    </Header>\n");
-        xmlBuilder.append("    <ReturnedCheques>\n");
+            if (inputStream == null) {
+                throw new RuntimeException("RRF JRXML file not found: /reports/rrf_report.jrxml");
+            }
 
-        for (Map<String, Object> item : rrfData) {
-            Long statusHistoryId = ((Number) item.get("statusHistoryId")).longValue();
-            statusHistoryIds.add(statusHistoryId);
+            JasperReport jasperReport = JasperCompileManager.compileReport(inputStream);
+            JRDataSource dataSource =new JRMapCollectionDataSource( new ArrayList<Map<String, ?>>(rrfData));
+            Map<String, Object> parameters = new HashMap<>();
 
-            String batchId = String.format("BATCH%03d", ((Number) item.get("batchId")).longValue());
+            parameters.put("FILE_DESCRIPTION", "Return Reason File (RRF) - CBS Failures");
+            parameters.put("TOTAL_RECORDS", rrfData.size());
 
-            xmlBuilder.append("        <Cheque>\n");
-            xmlBuilder.append("            <BatchID>").append(batchId).append("</BatchID>\n");
-            xmlBuilder.append("            <ChequeNumber>").append(item.get("chequeNo") != null ? item.get("chequeNo") : "").append("</ChequeNumber>\n");
-            xmlBuilder.append("            <ChequeAmount>").append(item.get("amount") != null ? item.get("amount") : "").append("</ChequeAmount>\n");
-            xmlBuilder.append("            <DrawerAccountNumber>").append(item.get("drawerAccountNo") != null ? item.get("drawerAccountNo") : "").append("</DrawerAccountNumber>\n");
-            xmlBuilder.append("            <PayeeAccountNumber>").append(item.get("payeeAccountNo") != null ? item.get("payeeAccountNo") : "").append("</PayeeAccountNumber>\n");
-            xmlBuilder.append("            <PayeeName>").append(item.get("payeeName") != null ? item.get("payeeName") : "").append("</PayeeName>\n");
-            xmlBuilder.append("            <DrawerName>").append(item.get("drawerName") != null ? item.get("drawerName") : "").append("</DrawerName>\n");
-            xmlBuilder.append("            <PresentingBank>").append(item.get("bankName") != null ? item.get("bankName") : "").append("</PresentingBank>\n");
-            xmlBuilder.append("            <ChequeDate>").append(item.get("chequeDate") != null ? item.get("chequeDate") : "").append("</ChequeDate>\n");
-            xmlBuilder.append("            <ReturnReason>").append(item.get("returnReason") != null ? item.get("returnReason") : "").append("</ReturnReason>\n");
-            xmlBuilder.append("            <Remark>").append(item.get("remark") != null ? item.get("remark") : "").append("</Remark>\n");
-            xmlBuilder.append("        </Cheque>\n");
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
+            byte[] xmlBytes = exportToXml(jasperPrint);
+
+            List<Long> statusHistoryIds = extractStatusHistoryIds(rrfData);
+            reportDao.updateRrfReportGenerated(statusHistoryIds);
+
+            return xmlBytes;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error generating RRF Jasper XML", e);
         }
-
-        xmlBuilder.append("    </ReturnedCheques>\n");
-        xmlBuilder.append("</RRFDocument>");
-
-        reportDao.updateRrfReportGenerated(statusHistoryIds);
-
-        return xmlBuilder.toString();
     }
 
     @Override
-    public String generateApprovedXml() {
+    public byte[] generateApprovedXml() {
         List<Map<String, Object>> approvedData = reportDao.getApprovedReportData();
 
-        if (approvedData.isEmpty()) {
+        if (approvedData == null || approvedData.isEmpty()) {
             return null;
         }
 
+        try {
+            InputStream inputStream = getClass().getResourceAsStream("/reports/approved_report.jrxml");
+
+            if (inputStream == null) {
+                throw new RuntimeException("Approved JRXML file not found: /reports/approved_report.jrxml");
+            }
+
+            JasperReport jasperReport = JasperCompileManager.compileReport(inputStream);
+            JRDataSource dataSource = new JRMapCollectionDataSource( new ArrayList<Map<String, ?>>(approvedData));
+            Map<String, Object> parameters = new HashMap<>();
+
+            parameters.put("FILE_DESCRIPTION", "Approved Cheques Report");
+            parameters.put("TOTAL_RECORDS", approvedData.size());
+
+            JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
+            byte[] xmlBytes = exportToXml(jasperPrint);
+
+            List<Long> statusHistoryIds = extractStatusHistoryIds(approvedData);
+            reportDao.updateApprovedReportGenerated(statusHistoryIds);
+
+            return xmlBytes;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error generating Approved Jasper XML", e);
+        }
+    }
+
+    private byte[] exportToXml(JasperPrint jasperPrint) throws Exception {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        JRXmlExporter exporter = new JRXmlExporter();
+
+        exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+        exporter.setExporterOutput(new SimpleXmlExporterOutput(outputStream));
+        exporter.exportReport();
+
+        return outputStream.toByteArray();
+    }
+
+    private List<Long> extractStatusHistoryIds(List<Map<String, Object>> data) {
         List<Long> statusHistoryIds = new ArrayList<>();
-        StringBuilder xmlBuilder = new StringBuilder();
 
-        xmlBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        xmlBuilder.append("<ApprovedChequesDocument>\n");
-        xmlBuilder.append("    <Header>\n");
-        xmlBuilder.append("        <FileDescription>Approved Cheques Report</FileDescription>\n");
-        xmlBuilder.append("        <TotalRecords>").append(approvedData.size()).append("</TotalRecords>\n");
-        xmlBuilder.append("    </Header>\n");
-        xmlBuilder.append("    <Cheques>\n");
+        for (Map<String, Object> item : data) {
+            Object value = item.get("statusHistoryId");
 
-        for (Map<String, Object> item : approvedData) {
-            Long statusHistoryId = ((Number) item.get("statusHistoryId")).longValue();
-            statusHistoryIds.add(statusHistoryId);
-
-            String batchId = String.format("BATCH%03d", ((Number) item.get("batchId")).longValue());
-
-            xmlBuilder.append("        <Cheque>\n");
-            xmlBuilder.append("            <BatchID>").append(batchId).append("</BatchID>\n");
-            xmlBuilder.append("            <ChequeNumber>").append(item.get("chequeNo") != null ? item.get("chequeNo") : "").append("</ChequeNumber>\n");
-            xmlBuilder.append("            <ChequeAmount>").append(item.get("amount") != null ? item.get("amount") : "").append("</ChequeAmount>\n");
-            xmlBuilder.append("            <AccountNumber>").append(item.get("accountNumber") != null ? item.get("accountNumber") : "").append("</AccountNumber>\n");
-            xmlBuilder.append("            <DrawerName>").append(item.get("drawerName") != null ? item.get("drawerName") : "").append("</DrawerName>\n");
-            xmlBuilder.append("            <PayeeAccountNumber>").append(item.get("payeeAccountNo") != null ? item.get("payeeAccountNo") : "").append("</PayeeAccountNumber>\n");
-            xmlBuilder.append("            <PayeeName>").append(item.get("payeeName") != null ? item.get("payeeName") : "").append("</PayeeName>\n");
-            xmlBuilder.append("            <PresentingBank>").append(item.get("bankName") != null ? item.get("bankName") : "").append("</PresentingBank>\n");
-            xmlBuilder.append("            <ChequeDate>").append(item.get("chequeDate") != null ? item.get("chequeDate") : "").append("</ChequeDate>\n");
-            xmlBuilder.append("        </Cheque>\n");
+            if (value instanceof Number) {
+                statusHistoryIds.add(((Number) value).longValue());
+            }
         }
 
-        xmlBuilder.append("    </Cheques>\n");
-        xmlBuilder.append("</ApprovedChequesDocument>");
-
-        reportDao.updateApprovedReportGenerated(statusHistoryIds);
-
-        return xmlBuilder.toString();
+        return statusHistoryIds;
     }
 }
+

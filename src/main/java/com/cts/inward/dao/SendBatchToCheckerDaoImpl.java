@@ -47,7 +47,7 @@ public class SendBatchToCheckerDaoImpl implements SendBatchToCheckerDao {
                     SELECT h.batch_status
                     FROM inward_batch_history h
                     WHERE h.batch_id = b.batch_id
-                    ORDER BY h.changed_on DESC
+                    ORDER BY h.changed_on DESC NULLS LAST, h.batch_history_id DESC
                     LIMIT 1
                 ) = 'DATA_ENTRY_COMPLETED'
                   AND (l.lock_status IS NULL OR l.lock_status <> 'LOCKED' OR (? IS NOT NULL AND l.user_id = ?))

@@ -60,7 +60,8 @@ public class CheckerDashboardDAO {
                 "     'READY_FOR_CHECKER', " +
                 "     'SUBMITTED', " +
                 "     'CHECKER_PENDING', " +
-                "     'PENDING_CHECKER') " +
+                "     'PENDING_CHECKER', " +
+        "     'CHECKER_COMPLETED') " +
                 "ORDER BY ob.created_at DESC";
 
         try (Connection con = dataSource.getConnection();

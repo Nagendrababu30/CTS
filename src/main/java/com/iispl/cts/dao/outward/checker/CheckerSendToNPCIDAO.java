@@ -23,13 +23,6 @@ import java.util.List;
  * 3. Check whether a particular batch is ready.
  * 4. Mark a batch as NPCI_SENT after successful submission.
  *
- * IMPORTANT:
- *
- * Once batch_status becomes NPCI_SENT, the existing
- * CheckerDashboardDAO will automatically stop displaying
- * that batch because its dashboard query only selects
- * specific Checker statuses.
- *
  * ============================================================
  */
 public class CheckerSendToNPCIDAO {
@@ -41,6 +34,7 @@ public class CheckerSendToNPCIDAO {
     private final javax.sql.DataSource dataSource =
             ConnectionPool.getDataSource();
 
+
     // ============================================================
     // GET BATCHES READY FOR NPCI
     // ============================================================
@@ -49,8 +43,9 @@ public class CheckerSendToNPCIDAO {
      * Gets batches which have completed Checker processing
      * and are ready to be sent to NPCI.
      *
-     * The current project uses ASSIGNED as the temporary
-     * completed/report status, so that status is preserved here.
+     * Current completed Checker status:
+     *
+     * CHECKER_COMPLETED
      *
      * @return list of batches ready for NPCI
      */
@@ -68,24 +63,28 @@ public class CheckerSendToNPCIDAO {
                 "    ob.created_by, " +
                 "    ob.created_at, " +
                 "    ob.batch_status, " +
+
                 "    COUNT(oc.cheque_number) AS total_cheques, " +
+
                 "    COUNT(CASE " +
                 "        WHEN UPPER(COALESCE(oc.cheque_status, '')) " +
-                "             <> 'REJECT' " +
+                "             = 'CHECKER_ACCEPTED' " +
                 "        THEN 1 " +
                 "    END) AS accepted_cheques, " +
+
                 "    COUNT(CASE " +
-                "        WHEN UPPER(COALESCE(cp.checker_action, '')) " +
-                "             = 'REJECT' " +
+                "        WHEN UPPER(COALESCE(oc.cheque_status, '')) " +
+                "             = 'CHECKER_REJECTED' " +
                 "        THEN 1 " +
                 "    END) AS rejected_cheques " +
+
                 "FROM public.outward_batch ob " +
+
                 "LEFT JOIN public.outward_cheque oc " +
                 "    ON ob.batch_number = oc.batch_number " +
-                "LEFT JOIN public.cheque_processing cp " +
-                "    ON cp.batch_number = oc.batch_number " +
-                "   AND cp.cheque_number = oc.cheque_number " +
-                "WHERE UPPER(ob.batch_status) = 'ASSIGNED' " +
+
+                "WHERE UPPER(ob.batch_status) = 'CHECKER_COMPLETED' " +
+
                 "GROUP BY " +
                 "    ob.batch_number, " +
                 "    ob.branch_code, " +
@@ -94,7 +93,9 @@ public class CheckerSendToNPCIDAO {
                 "    ob.created_by, " +
                 "    ob.created_at, " +
                 "    ob.batch_status " +
+
                 "ORDER BY ob.created_at DESC";
+
 
         try (
                 Connection con =
@@ -112,6 +113,7 @@ public class CheckerSendToNPCIDAO {
                 OutwardBatch batch =
                         new OutwardBatch();
 
+
                 // ====================================================
                 // BATCH NUMBER
                 // ====================================================
@@ -119,6 +121,7 @@ public class CheckerSendToNPCIDAO {
                 batch.setBatchNumber(
                         rs.getString("batch_number")
                 );
+
 
                 // ====================================================
                 // BRANCH
@@ -128,6 +131,7 @@ public class CheckerSendToNPCIDAO {
                         rs.getString("branch_code")
                 );
 
+
                 // ====================================================
                 // TOTAL CHEQUE COUNT
                 // ====================================================
@@ -136,6 +140,7 @@ public class CheckerSendToNPCIDAO {
                         rs.getInt("total_cheques")
                 );
 
+
                 // ====================================================
                 // FOLDER PATH
                 // ====================================================
@@ -143,6 +148,7 @@ public class CheckerSendToNPCIDAO {
                 batch.setBatchFolderPath(
                         rs.getString("batch_folder_path")
                 );
+
 
                 // ====================================================
                 // CREATED BY
@@ -158,6 +164,7 @@ public class CheckerSendToNPCIDAO {
                     );
                 }
 
+
                 // ====================================================
                 // CREATED AT
                 // ====================================================
@@ -170,6 +177,7 @@ public class CheckerSendToNPCIDAO {
                     );
                 }
 
+
                 // ====================================================
                 // STATUS
                 // ====================================================
@@ -177,6 +185,7 @@ public class CheckerSendToNPCIDAO {
                 batch.setBatchStatus(
                         rs.getString("batch_status")
                 );
+
 
                 // ====================================================
                 // ADD BATCH
@@ -195,8 +204,10 @@ public class CheckerSendToNPCIDAO {
             );
         }
 
+
         return batches;
     }
+
 
     // ============================================================
     // CHECK WHETHER BATCH IS READY
@@ -205,6 +216,8 @@ public class CheckerSendToNPCIDAO {
     /**
      * Checks whether a particular batch is currently
      * ready for NPCI submission.
+     *
+     * Batch must be in CHECKER_COMPLETED status.
      *
      * @param batchNumber batch number
      * @return true when batch is ready
@@ -218,13 +231,15 @@ public class CheckerSendToNPCIDAO {
             return false;
         }
 
+
         String sql =
                 "SELECT EXISTS (" +
                 "    SELECT 1 " +
                 "    FROM public.outward_batch " +
                 "    WHERE batch_number = ? " +
-                "      AND UPPER(batch_status) = 'ASSIGNED' " +
+                "      AND UPPER(batch_status) = 'CHECKER_COMPLETED' " +
                 ")";
+
 
         try (
                 Connection con =
@@ -238,6 +253,7 @@ public class CheckerSendToNPCIDAO {
                     1,
                     batchNumber.trim()
             );
+
 
             try (
                     ResultSet rs =
@@ -260,8 +276,10 @@ public class CheckerSendToNPCIDAO {
             );
         }
 
+
         return false;
     }
+
 
     // ============================================================
     // MARK BATCH AS NPCI SENT
@@ -272,15 +290,6 @@ public class CheckerSendToNPCIDAO {
      *
      * This must be called ONLY after the actual NPCI submission
      * has succeeded.
-     *
-     * Once the status becomes NPCI_SENT:
-     *
-     *     Checker Dashboard
-     *              ↓
-     *     does not return this batch
-     *
-     * because CheckerDashboardDAO only loads its allowed
-     * Checker statuses.
      *
      * @param batchNumber batch to update
      * @return true if successfully updated
@@ -294,11 +303,13 @@ public class CheckerSendToNPCIDAO {
             return false;
         }
 
+
         String sql =
                 "UPDATE public.outward_batch " +
                 "SET batch_status = 'NPCI_SENT' " +
                 "WHERE batch_number = ? " +
                 "  AND UPPER(batch_status) <> 'NPCI_SENT'";
+
 
         try (
                 Connection con =
@@ -313,8 +324,10 @@ public class CheckerSendToNPCIDAO {
                     batchNumber.trim()
             );
 
+
             int updated =
                     ps.executeUpdate();
+
 
             return updated == 1;
 
@@ -328,6 +341,7 @@ public class CheckerSendToNPCIDAO {
             );
         }
     }
+
 
     // ============================================================
     // GET BATCH STATUS
@@ -348,10 +362,12 @@ public class CheckerSendToNPCIDAO {
             return null;
         }
 
+
         String sql =
                 "SELECT batch_status " +
                 "FROM public.outward_batch " +
                 "WHERE batch_number = ?";
+
 
         try (
                 Connection con =
@@ -365,6 +381,7 @@ public class CheckerSendToNPCIDAO {
                     1,
                     batchNumber.trim()
             );
+
 
             try (
                     ResultSet rs =
@@ -388,6 +405,7 @@ public class CheckerSendToNPCIDAO {
                     e
             );
         }
+
 
         return null;
     }

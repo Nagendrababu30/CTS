@@ -53,7 +53,7 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
                         WHERE h.cheque_number = c.cheque_number
                         ORDER BY h.status_history_id DESC
                         LIMIT 1
-                    ) AS return_reason,
+                    ) AS rejection_reason_code,
 
                     (
                         SELECT h.remarks

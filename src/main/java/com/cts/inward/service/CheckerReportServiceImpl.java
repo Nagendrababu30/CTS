@@ -263,7 +263,7 @@ public class CheckerReportServiceImpl implements CheckerReportService {
             addElement(
                     document,
                     cheque,
-                    "bank_name",
+                    "presenting_bank_name",
                     row.get("bankName"));
 
             addElement(
@@ -275,14 +275,14 @@ public class CheckerReportServiceImpl implements CheckerReportService {
             addElement(
                     document,
                     cheque,
-                    "return_reason",
+                    "rejection_reason_code",
                     row.get("returnReason"));
 
             addElement(
                     document,
                     cheque,
-                    "remark",
-                    row.get("remark"));
+                    "remarks",
+                    row.get("remarks"));
         }
 
         return convertDocumentToBytes(document);
@@ -354,7 +354,7 @@ public class CheckerReportServiceImpl implements CheckerReportService {
             addElement(
                     document,
                     cheque,
-                    "bank_name",
+                    "presenting_bank_name",
                     row.get("bankName"));
 
             addElement(

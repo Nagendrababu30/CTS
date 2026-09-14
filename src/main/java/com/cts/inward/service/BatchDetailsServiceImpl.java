@@ -66,4 +66,14 @@ public class BatchDetailsServiceImpl implements BatchDetailsService {
                 checkerAction,
                 remarks);
     }
+
+    @Override
+    public boolean completeVerification(
+            Long batchId,
+            Integer checkerId) {
+
+        return batchDetailsDao.completeVerification(
+                batchId,
+                checkerId);
+    }
 }

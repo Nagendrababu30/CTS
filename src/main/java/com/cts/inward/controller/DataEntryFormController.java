@@ -18,7 +18,7 @@ import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
-
+import org.zkoss.zk.ui.util.Composer;
 import com.cts.admin.model.User;
 import com.cts.inward.dao.BatchDaoImpl;
 import com.cts.inward.dao.ChequeDaoImpl;
@@ -49,6 +49,7 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	private Button btnZoomIn;
 	private Button btnZoomOut;
 	private Button btnRotate;
+	private Button btnResetView;
 
 	private Label lblBatchInfo;
 	private Label lblTotalCheques;
@@ -117,6 +118,17 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 			return;
 		}
 
+		Long lockOwner = BatchDaoImpl.of().getBatchLockOwner(batchId);
+		if (lockOwner != null && (loggedInUserId == null || !lockOwner.equals(loggedInUserId))) {
+			Messagebox.show(
+					"This batch is locked by another user.",
+					"Access Denied",
+					Messagebox.OK,
+					Messagebox.EXCLAMATION,
+					e -> Executions.sendRedirect("/zul/inward-maker/data-entry.zul"));
+			return;
+		}
+
 		loadCheques();
 
 		if (cheques != null && !cheques.isEmpty()) {
@@ -170,16 +182,21 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		// HEADER & METRICS
 		// -----------------------------------------------------
 		if (lblBatchInfo != null) {
-			lblBatchInfo.setValue(String.valueOf(batchId));
+			lblBatchInfo.setValue("Batch No : " + batchId);
 		}
 
 		int total = cheques.size();
-		int completed = currentIndex;
-		int pending = Math.max(0, total - completed);
+		int pending = 0;
+		try {
+			pending = batchService.getDataEntryPendingCount(batchId);
+		} catch (Exception e) {
+			pending = Math.max(0, total - currentIndex);
+		}
+		int completed = Math.max(0, total - pending);
 
-		if (lblTotalCheques != null) lblTotalCheques.setValue(String.valueOf(total));
-		if (lblCompletedCheques != null) lblCompletedCheques.setValue(String.valueOf(completed));
-		if (lblPendingCheques != null) lblPendingCheques.setValue(String.valueOf(pending));
+		if (lblTotalCheques != null) lblTotalCheques.setValue("Total: " + total);
+		if (lblCompletedCheques != null) lblCompletedCheques.setValue("Completed: " + completed);
+		if (lblPendingCheques != null) lblPendingCheques.setValue("Pending: " + pending);
 		if (lblChequeInfo != null) lblChequeInfo.setValue("Cheque " + (currentIndex + 1) + " of " + total);
 
 		// -----------------------------------------------------
@@ -371,18 +388,31 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 			// 3. CHANGE CHEQUE STATUS
 			chequeService.updateChequeStatus(currentCheque.getChequeNumber(), "DATA_ENTRY_COMPLETED", loggedInUserId);
 
+			// 4. UPDATE IN-MEMORY CHEQUE SO NAVIGATING BACK REFLECTS SAVED VALUES
+			InwardCheque updatedCheque = InwardCheque.of(
+					currentCheque.getChequeNumber(),
+					currentCheque.getBatchId(),
+					accountNumber,
+					currentCheque.getDrawerName(),
+					amount,
+					currentCheque.getMicrCode(),
+					chequeDate,
+					currentCheque.getPresentingDate());
+			cheques.set(currentIndex, updatedCheque);
+
+			// Pop-up for 2 seconds saying "Changes saved"
+			Clients.showNotification(
+					"Changes saved",
+					Clients.NOTIFICATION_TYPE_INFO,
+					null,
+					"top_right",
+					2000);
+
 			if (currentIndex == cheques.size() - 1) {
-				boolean completed = batchService.completeDataEntry(batchId, loggedInUserId);
+				batchService.completeDataEntry(batchId, loggedInUserId);
 
-				if (completed) {
-					Clients.showNotification("Batch completed and ready for Checker.",
-							Clients.NOTIFICATION_TYPE_INFO, null, "top_center", 3000);
-				}
-
-				Messagebox.show("Data Entry completed for this batch.", "Data Entry", Messagebox.OK,
-						Messagebox.INFORMATION, ev -> {
-							Executions.sendRedirect("/zul/inward-maker/data-entry.zul");
-						});
+				String redirectUrl = Executions.encodeURL("/zul/inward-maker/send-to-checker.zul");
+				Clients.evalJavaScript("setTimeout(function() { window.location.href = '" + redirectUrl + "'; }, 2000);");
 			} else {
 				currentIndex++;
 				displayCurrentCheque();
@@ -505,6 +535,12 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		applyImageTransform();
 	}
 
+	public void onClick$btnResetView() {
+		zoomLevel = 100;
+		rotationAngle = 0;
+		applyImageTransform();
+	}
+
 	private void applyImageTransform() {
 		if (imgCheque == null) return;
 		double scale = zoomLevel / 100.0;
@@ -546,7 +582,7 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 
 		// SAVE / SAVE & NEXT
 		if (currentIndex == cheques.size() - 1) {
-			btnSaveNext.setLabel("Save & Submit to Checker");
+			btnSaveNext.setLabel("Save & Send to Checker");
 		} else {
 			btnSaveNext.setLabel("Save & Next →");
 		}

@@ -1,3 +1,4 @@
+
 package com.iispl.cts.dao.outward.checker;
 
 import java.sql.Connection;
@@ -48,18 +49,21 @@ public class CheckerChequeDAO {
                 "WHERE batch_number = ? " +
                 "AND cheque_number = ?";
 
-        try (Connection connection = CTSStaticData.getConnection();
+        try (Connection connection =
+                     CTSStaticData.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
             statement.setString(1, batchNumber);
             statement.setString(2, chequeNumber);
 
-            try (ResultSet rs = statement.executeQuery()) {
+            try (ResultSet rs =
+                         statement.executeQuery()) {
 
                 if (rs.next()) {
 
-                    OutwardCheque cheque = new OutwardCheque();
+                    OutwardCheque cheque =
+                            new OutwardCheque();
 
                     cheque.setBatchNumber(
                             rs.getString("batch_number"));
@@ -68,13 +72,15 @@ public class CheckerChequeDAO {
                             rs.getString("cheque_number"));
 
                     cheque.setDrawerAccountNumber(
-                            rs.getString("drawer_account_number"));
+                            rs.getString(
+                                    "drawer_account_number"));
 
                     cheque.setDrawerName(
                             rs.getString("drawer_name"));
 
                     cheque.setPayeeAccountNumber(
-                            rs.getString("payee_account_number"));
+                            rs.getString(
+                                    "payee_account_number"));
 
                     cheque.setPayeeName(
                             rs.getString("payee_name"));
@@ -94,10 +100,12 @@ public class CheckerChequeDAO {
                     }
 
                     cheque.setFrontImagePath(
-                            rs.getString("front_image_path"));
+                            rs.getString(
+                                    "front_image_path"));
 
                     cheque.setBackImagePath(
-                            rs.getString("back_image_path"));
+                            rs.getString(
+                                    "back_image_path"));
 
                     cheque.setChequeStatus(
                             rs.getString("cheque_status"));
@@ -112,15 +120,19 @@ public class CheckerChequeDAO {
                             rs.getString("city_code"));
 
                     Object reasonObject =
-                            rs.getObject("return_reason_id");
+                            rs.getObject(
+                                    "return_reason_id");
 
                     if (reasonObject != null) {
+
                         cheque.setReturnReasonId(
-                                ((Number) reasonObject).intValue());
+                                ((Number) reasonObject)
+                                        .intValue());
                     }
 
                     cheque.setCheckerRemarks(
-                            rs.getString("checker_remarks"));
+                            rs.getString(
+                                    "checker_remarks"));
 
                     return cheque;
                 }
@@ -136,6 +148,144 @@ public class CheckerChequeDAO {
         }
 
         return null;
+    }
+
+
+    /*
+     * ============================================================
+     * GET ALL CHEQUES FOR A BATCH
+     * ============================================================
+     */
+
+    public List<OutwardCheque> getChequesByBatch(
+            String batchNumber) {
+
+        List<OutwardCheque> cheques =
+                new ArrayList<>();
+
+        String sql =
+                "SELECT batch_number, " +
+                "       cheque_number, " +
+                "       drawer_account_number, " +
+                "       drawer_name, " +
+                "       payee_account_number, " +
+                "       payee_name, " +
+                "       amount, " +
+                "       amount_in_words, " +
+                "       cheque_date, " +
+                "       front_image_path, " +
+                "       back_image_path, " +
+                "       cheque_status, " +
+                "       bank_code, " +
+                "       branch_code, " +
+                "       city_code, " +
+                "       return_reason_id, " +
+                "       checker_remarks " +
+                "FROM outward_cheque " +
+                "WHERE batch_number = ? " +
+                "ORDER BY cheque_number";
+
+        try (Connection connection =
+                     CTSStaticData.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
+
+            statement.setString(
+                    1,
+                    batchNumber);
+
+            try (ResultSet rs =
+                         statement.executeQuery()) {
+
+                while (rs.next()) {
+
+                    OutwardCheque cheque =
+                            new OutwardCheque();
+
+                    cheque.setBatchNumber(
+                            rs.getString("batch_number"));
+
+                    cheque.setChequeNumber(
+                            rs.getString("cheque_number"));
+
+                    cheque.setDrawerAccountNumber(
+                            rs.getString(
+                                    "drawer_account_number"));
+
+                    cheque.setDrawerName(
+                            rs.getString("drawer_name"));
+
+                    cheque.setPayeeAccountNumber(
+                            rs.getString(
+                                    "payee_account_number"));
+
+                    cheque.setPayeeName(
+                            rs.getString("payee_name"));
+
+                    cheque.setAmount(
+                            rs.getBigDecimal("amount"));
+
+                    cheque.setAmountInWords(
+                            rs.getString("amount_in_words"));
+
+                    Date chequeDate =
+                            rs.getDate("cheque_date");
+
+                    if (chequeDate != null) {
+
+                        cheque.setChequeDate(
+                                chequeDate.toLocalDate());
+                    }
+
+                    cheque.setFrontImagePath(
+                            rs.getString(
+                                    "front_image_path"));
+
+                    cheque.setBackImagePath(
+                            rs.getString(
+                                    "back_image_path"));
+
+                    cheque.setChequeStatus(
+                            rs.getString("cheque_status"));
+
+                    cheque.setBankCode(
+                            rs.getString("bank_code"));
+
+                    cheque.setBranchCode(
+                            rs.getString("branch_code"));
+
+                    cheque.setCityCode(
+                            rs.getString("city_code"));
+
+                    Object reasonObject =
+                            rs.getObject(
+                                    "return_reason_id");
+
+                    if (reasonObject != null) {
+
+                        cheque.setReturnReasonId(
+                                ((Number) reasonObject)
+                                        .intValue());
+                    }
+
+                    cheque.setCheckerRemarks(
+                            rs.getString(
+                                    "checker_remarks"));
+
+                    cheques.add(cheque);
+                }
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            throw new RuntimeException(
+                    "Error while fetching cheques for batch",
+                    e);
+        }
+
+        return cheques;
     }
 
 
@@ -162,14 +312,16 @@ public class CheckerChequeDAO {
                 "WHERE batch_number = ? " +
                 "AND cheque_number = ?";
 
-        try (Connection connection = CTSStaticData.getConnection();
+        try (Connection connection =
+                     CTSStaticData.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
             statement.setString(1, batchNumber);
             statement.setString(2, chequeNumber);
 
-            try (ResultSet rs = statement.executeQuery()) {
+            try (ResultSet rs =
+                         statement.executeQuery()) {
 
                 if (rs.next()) {
 
@@ -186,29 +338,36 @@ public class CheckerChequeDAO {
                             rs.getObject("maker_id");
 
                     if (makerId != null) {
+
                         processing.setMakerId(
-                                ((Number) makerId).intValue());
+                                ((Number) makerId)
+                                        .intValue());
                     }
 
                     processing.setMakerAction(
                             rs.getString("maker_action"));
 
                     processing.setMakerReasonCode(
-                            rs.getString("maker_reason_code"));
+                            rs.getString(
+                                    "maker_reason_code"));
 
                     Object checkerId =
                             rs.getObject("checker_id");
 
                     if (checkerId != null) {
+
                         processing.setCheckerId(
-                                ((Number) checkerId).intValue());
+                                ((Number) checkerId)
+                                        .intValue());
                     }
 
                     processing.setCheckerAction(
-                            rs.getString("checker_action"));
+                            rs.getString(
+                                    "checker_action"));
 
                     processing.setCheckerReasonCode(
-                            rs.getString("checker_reason_code"));
+                            rs.getString(
+                                    "checker_reason_code"));
 
                     return processing;
                 }
@@ -231,16 +390,6 @@ public class CheckerChequeDAO {
      * ============================================================
      * GET MAKER REASON DESCRIPTION
      * ============================================================
-     *
-     * reasonCode:
-     *
-     *     SIGNATURE_ISSUE
-     *     MICR_CORRECTION
-     *     AMOUNT_CORRECTION
-     *     etc.
-     *
-     * Returns the dynamic reason_name from
-     * return_reason_master.
      */
 
     public String getReasonName(
@@ -362,28 +511,6 @@ public class CheckerChequeDAO {
      * ============================================================
      * SAVE CHECKER DECISION
      * ============================================================
-     *
-     * ACCEPT:
-     *     No reason.
-     *     Cheque -> CHECKER_ACCEPTED
-     *
-     * REJECT:
-     *     Reason mandatory.
-     *     Cheque -> CHECKER_REJECTED
-     *
-     * SEND_BACK:
-     *     Reason mandatory.
-     *     Cheque -> SENT_BACK_TO_MAKER
-     *     Batch  -> ON_HOLD
-     *
-     * If ACCEPT / REJECT makes every cheque in the batch final:
-     *
-     *     Batch -> CHECKER_COMPLETED
-     *
-     * Batch completion is determined from cheque_processing
-     * checker_action, not from Maker statuses.
-     *
-     * All changes are performed in one transaction.
      */
 
     public boolean saveCheckerDecision(
@@ -417,13 +544,6 @@ public class CheckerChequeDAO {
 
         checkerAction =
                 checkerAction.trim().toUpperCase();
-
-
-        /*
-         * ========================================================
-         * DETERMINE CHEQUE STATUS
-         * ========================================================
-         */
 
         String chequeStatus;
 
@@ -465,29 +585,16 @@ public class CheckerChequeDAO {
                             + checkerAction);
         }
 
-
-        /*
-         * ========================================================
-         * NORMALIZE REASON
-         * ========================================================
-         */
-
         if (checkerReasonCode != null) {
 
             checkerReasonCode =
                     checkerReasonCode.trim();
 
             if (checkerReasonCode.isEmpty()) {
+
                 checkerReasonCode = null;
             }
         }
-
-
-        /*
-         * ========================================================
-         * VALIDATE REASON
-         * ========================================================
-         */
 
         if ("REJECT".equals(checkerAction)
                 || "SEND_BACK".equals(checkerAction)) {
@@ -502,25 +609,11 @@ public class CheckerChequeDAO {
             }
         }
 
-
-        /*
-         * ========================================================
-         * NORMALIZE REMARKS
-         * ========================================================
-         */
-
         if (checkerRemarks != null
                 && checkerRemarks.trim().isEmpty()) {
 
             checkerRemarks = null;
         }
-
-
-        /*
-         * ========================================================
-         * SQL
-         * ========================================================
-         */
 
         String updateProcessingSql =
                 "UPDATE cheque_processing " +
@@ -537,14 +630,6 @@ public class CheckerChequeDAO {
                 "WHERE batch_number = ? " +
                 "AND cheque_number = ?";
 
-
-        /*
-         * Used after ACCEPT / REJECT.
-         *
-         * Only ACCEPT and REJECT are considered final
-         * Checker decisions.
-         */
-
         String remainingChequeSql =
                 "SELECT COUNT(*) " +
                 "FROM cheque_processing " +
@@ -553,24 +638,15 @@ public class CheckerChequeDAO {
                 "OR UPPER(checker_action) NOT IN " +
                 "('ACCEPT', 'REJECT'))";
 
-
         String updateBatchCompletedSql =
                 "UPDATE outward_batch " +
                 "SET batch_status = 'CHECKER_COMPLETED' " +
                 "WHERE batch_number = ?";
 
-
         String updateBatchHoldSql =
                 "UPDATE outward_batch " +
                 "SET batch_status = 'ON_HOLD' " +
                 "WHERE batch_number = ?";
-
-
-        /*
-         * ========================================================
-         * DATABASE TRANSACTION
-         * ========================================================
-         */
 
         try (Connection connection =
                      CTSStaticData.getConnection()) {
@@ -578,12 +654,6 @@ public class CheckerChequeDAO {
             connection.setAutoCommit(false);
 
             try {
-
-                /*
-                 * =================================================
-                 * 1. UPDATE CHEQUE PROCESSING
-                 * =================================================
-                 */
 
                 int processingRows;
 
@@ -624,19 +694,11 @@ public class CheckerChequeDAO {
                             statement.executeUpdate();
                 }
 
-
                 if (processingRows != 1) {
 
                     throw new RuntimeException(
                             "Cheque processing record not found");
                 }
-
-
-                /*
-                 * =================================================
-                 * 2. UPDATE OUTWARD CHEQUE
-                 * =================================================
-                 */
 
                 int chequeRows;
 
@@ -673,28 +735,11 @@ public class CheckerChequeDAO {
                             statement.executeUpdate();
                 }
 
-
                 if (chequeRows != 1) {
 
                     throw new RuntimeException(
                             "Cheque record not found");
                 }
-
-
-                /*
-                 * =================================================
-                 * 3. UPDATE BATCH STATUS
-                 * =================================================
-                 *
-                 * SEND_BACK:
-                 *
-                 *     Batch becomes ON_HOLD immediately.
-                 *
-                 * ACCEPT / REJECT:
-                 *
-                 *     Check whether any cheque still has no
-                 *     final Checker decision.
-                 */
 
                 if ("SEND_BACK".equals(checkerAction)) {
 
@@ -742,11 +787,6 @@ public class CheckerChequeDAO {
                         }
                     }
 
-
-                    /*
-                     * No unfinished Checker decisions remain.
-                     */
-
                     if (remainingCheques == 0) {
 
                         try (PreparedStatement statement =
@@ -768,13 +808,6 @@ public class CheckerChequeDAO {
                         }
                     }
                 }
-
-
-                /*
-                 * =================================================
-                 * 4. COMMIT
-                 * =================================================
-                 */
 
                 connection.commit();
 
@@ -856,13 +889,6 @@ public class CheckerChequeDAO {
      * ============================================================
      * GET CBS ACCOUNT
      * ============================================================
-     *
-     * Only drawer_account_number is validated.
-     *
-     * Conditions:
-     *
-     * 1. Account exists.
-     * 2. Account is ACTIVE.
      */
 
     public Map<String, String> getCbsAccount(
@@ -923,3 +949,4 @@ public class CheckerChequeDAO {
         return account;
     }
 }
+

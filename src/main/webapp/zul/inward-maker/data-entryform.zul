@@ -253,6 +253,9 @@
 					inp.addEventListener('input', handler);
 					inp.addEventListener('keyup', handler);
 					inp.addEventListener('change', handler);
+					setTimeout(function() {
+						updateAmountWordsFromInput(inp);
+					}, 300);
 				}
 			}
 		});

@@ -48,7 +48,7 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
                     ) AS status_history_id,
 
                     (
-                        SELECT h.return_reason_code
+                        SELECT h.rejection_reason_code
                         FROM inward_cheque_status_history h
                         WHERE h.cheque_number = c.cheque_number
                         ORDER BY h.status_history_id DESC
@@ -61,7 +61,7 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
                         WHERE h.cheque_number = c.cheque_number
                         ORDER BY h.status_history_id DESC
                         LIMIT 1
-                    ) AS remark
+                    ) AS remarks
 
                 FROM inward_cheque c
                 JOIN inward_batch b
@@ -142,10 +142,11 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
                         rs.getString("rejection_reason_code"));
 
                 row.put(
-                        "remark",
-                        rs.getString("remark"));
+                        "remarks",
+                        rs.getString("remarks"));
 
                 rrfList.add(row);
+                
             }
 
         } catch (Exception e) {

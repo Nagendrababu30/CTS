@@ -115,6 +115,17 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 			return;
 		}
 
+		Long lockOwner = BatchDaoImpl.of().getBatchLockOwner(batchId);
+		if (lockOwner != null && (loggedInUserId == null || !lockOwner.equals(loggedInUserId))) {
+			Messagebox.show(
+					"This batch is locked by another user.",
+					"Access Denied",
+					Messagebox.OK,
+					Messagebox.EXCLAMATION,
+					e -> Executions.sendRedirect("/zul/inward-maker/data-entry.zul"));
+			return;
+		}
+
 		loadCheques();
 
 		if (cheques != null && !cheques.isEmpty()) {

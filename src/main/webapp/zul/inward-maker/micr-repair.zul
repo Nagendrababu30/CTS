@@ -7,326 +7,564 @@
 <?init class="org.zkoss.zk.ui.util.Composition"
         arg0="/zul/common/layout.zul"?>
 
-<zk>
+<zk xmlns:w="client">
 
     <style src="/css/inward/maker/micr-repair.css"/>
+
+    <script src="/javascript/inward/maker/micr-repair.js"/>
 
     <div
         self="@define(content)"
         width="100%"
         height="100%"
-        sclass="content">
+        sclass="micr-page-bg">
 
         <vlayout
             width="100%"
             height="100%"
             apply="com.cts.inward.controller.MicrRepairController"
-            sclass="micr-repair-content">
+            spacing="12px"
+            sclass="micr-content-layout">
 
-            <!-- ========================================================= -->
-            <!-- TOP INFORMATION                                            -->
-            <!-- ========================================================= -->
+            <!-- ============================================================
+                 BATCH HEADER STRIP (Floating Card)
+                 ============================================================ -->
 
             <hlayout
                 width="100%"
                 valign="middle"
-                spacing="20px"
-                sclass="top-information">
+                sclass="micr-header-card">
 
-                <label
-                    id="batchLabel"
-                    value="Batch ID :"
-                    sclass="batch-label"/>
+                <!-- Left: Back Button & Batch Title -->
+                <hlayout
+                    spacing="12px"
+                    valign="middle"
+                    sclass="micr-header-left">
 
-                <label
-                    id="chequeCounter"
-                    value="☷  Cheque 1 of 0"
-                    sclass="cheque-counter"/>
+                    <button
+                        id="backToList"
+                        label="←"
+                        tooltiptext="Back to MICR Repair List"
+                        sclass="micr-back-btn"/>
+
+                    <label
+                        id="batchLabel"
+                        value="Batch No : —"
+                        sclass="micr-batch-title"/>
+
+                </hlayout>
+
+                <!-- Center/Right: Badges Spread Horizontally in the Box -->
+                <hlayout
+                    hflex="1"
+                    valign="middle"
+                    sclass="micr-header-badges">
+
+                    <div
+                        sclass="micr-count-badge micr-count-total">
+
+                        <label
+                            id="totalCountLabel"
+                            value="Total: 0"
+                            sclass="micr-count-text"/>
+
+                    </div>
+
+                    <div
+                        sclass="micr-count-badge micr-count-completed">
+
+                        <label
+                            id="completedCountLabel"
+                            value="Completed: 0"
+                            sclass="micr-count-text"/>
+
+                    </div>
+
+                    <div
+                        sclass="micr-count-badge micr-count-pending">
+
+                        <label
+                            id="pendingCountLabel"
+                            value="Pending: 0"
+                            sclass="micr-count-text"/>
+
+                    </div>
+
+                    <div
+                        sclass="micr-counter-pill">
+
+                        <label
+                            id="chequeCounter"
+                            value="Cheque 1 of 0"
+                            sclass="micr-counter-text"/>
+
+                    </div>
+
+                </hlayout>
 
             </hlayout>
 
-            <!-- ========================================================= -->
-            <!-- IMAGE SWITCH                                               -->
-            <!-- ========================================================= -->
 
-            <hlayout
-                spacing="10px"
-                sclass="image-buttons">
-
-                <button
-                    id="frontButton"
-                    label="Front"
-                    sclass="image-button image-button-active"/>
-
-                <button
-                    id="backButton"
-                    label="Back"
-                    sclass="image-button"/>
-
-            </hlayout>
-
-            <!-- ========================================================= -->
-            <!-- MAIN REPAIR AREA                                           -->
-            <!-- ========================================================= -->
+            <!-- ============================================================
+                 MAIN SPLIT ROW
+                 ============================================================ -->
 
             <hlayout
                 width="100%"
-                spacing="25px"
-                sclass="repair-area">
+                vflex="1"
+                spacing="14px"
+                valign="top"
+                sclass="micr-split-row">
 
-                <!-- ===================================================== -->
-                <!-- IMAGE PANEL                                           -->
-                <!-- ===================================================== -->
 
-                <panel
+                <!-- =====================================================
+                     LEFT — Cheque (Floating Card)
+                     ===================================================== -->
+
+                <groupbox
                     hflex="1"
-                    height="520px"
-                    border="normal"
-                    sclass="image-panel">
+                    vflex="1"
+                    sclass="micr-card">
 
-                    <panelchildren>
+                    <caption
+                        label="Cheque"
+                        sclass="micr-caption"/>
 
-                        <vlayout
-                            width="100%"
-                            height="100%"
-                            sclass="image-container">
+                    <vlayout
+                        width="100%"
+                        vflex="1"
+                        spacing="8px"
+                        sclass="micr-card-body">
 
-                            <hlayout
-                                width="100%"
-                                valign="middle"
-                                sclass="image-header">
+                        <!-- Image area -->
 
-                                <label
-                                    id="bankName"
-                                    value=""
-                                    sclass="bank-name"/>
-
-                                <label
-                                    id="chequeNumberImage"
-                                    value=""
-                                    sclass="image-cheque-number"/>
-
-                            </hlayout>
+                        <div
+                            vflex="1"
+                            sclass="micr-image-area">
 
                             <image
                                 id="chequeImage"
                                 width="100%"
-                                height="430px"
-                                sclass="cheque-image"/>
+                                height="100%"
+                                sclass="micr-image-display"/>
 
-                        </vlayout>
+                        </div>
 
-                    </panelchildren>
 
-                </panel>
+                        <!-- Image toolbar -->
 
-                <!-- ===================================================== -->
-                <!-- MICR COMPARISON PANEL                                 -->
-                <!-- ===================================================== -->
-
-                <panel
-                    hflex="1"
-                    height="520px"
-                    border="normal"
-                    sclass="details-panel">
-
-                    <panelchildren>
-
-                        <vlayout
+                        <hlayout
                             width="100%"
-                            sclass="details-layout">
+                            spacing="6px"
+                            valign="middle"
+                            sclass="micr-image-toolbar">
 
-                            <label
-                                value="MICR Comparison"
-                                sclass="details-title"/>
+                            <button
+                                id="toggleImageButton"
+                                label="View Back"
+                                hflex="2"
+                                sclass="micr-toggle-btn"/>
 
-                            <hlayout
-                                width="100%"
-                                spacing="20px"
-                                sclass="micr-comparison-columns">
+                            <button
+                                id="zoomInButton"
+                                label="+"
+                                tooltiptext="Zoom In"
+                                hflex="1"
+                                sclass="micr-zoom-btn"/>
 
-                                <!-- ===================================== -->
-                                <!-- NPCI                                   -->
-                                <!-- ===================================== -->
+                            <button
+                                id="zoomOutButton"
+                                label="−"
+                                tooltiptext="Zoom Out"
+                                hflex="1"
+                                sclass="micr-zoom-btn"/>
 
-                                <vlayout
-                                    hflex="1"
-                                    spacing="6px"
-                                    sclass="micr-column">
+                            <button
+                                id="rotateButton"
+                                label="↻"
+                                tooltiptext="Rotate 90°"
+                                hflex="1"
+                                sclass="micr-zoom-btn"/>
 
-                                    <label
-                                        value="NPCI Received Data"
-                                        sclass="section-title npci-title"/>
+                            <button
+                                id="resetViewButton"
+                                label="⟲"
+                                tooltiptext="Reset View"
+                                hflex="1"
+                                sclass="micr-zoom-btn"/>
 
-                                    <label
-                                        value="Cheque Number"
-                                        sclass="field-label"/>
+                        </hlayout>
 
-                                    <textbox
-                                        id="chequeNumber"
-                                        width="100%"
-                                        readonly="true"
-                                        sclass="readonly-field"/>
+                    </vlayout>
+
+                </groupbox>
+
+
+                <!-- =====================================================
+                     RIGHT — Cheque Data Verification
+                     ===================================================== -->
+
+                <groupbox
+                    hflex="1"
+                    vflex="1"
+                    sclass="micr-card">
+
+                    <caption
+                        label="Cheque Data Verification"
+                        sclass="micr-caption"/>
+
+                    <vlayout
+                        width="100%"
+                        vflex="1"
+                        spacing="14px"
+                        sclass="micr-form-body">
+
+
+                        <!-- =================================================
+                             Row 1
+                             ================================================= -->
+
+                        <hlayout
+                            width="100%"
+                            spacing="16px">
+
+                            <vlayout
+                                hflex="1"
+                                spacing="4px">
+
+                                <label
+                                    value="CHEQUE NUMBER"
+                                    sclass="micr-field-label"/>
+
+                                <textbox
+                                    id="chequeNumber"
+                                    width="100%"
+                                    readonly="true"
+                                    sclass="micr-readonly-field"/>
+
+                            </vlayout>
+
+
+                            <vlayout
+                                hflex="1"
+                                spacing="4px">
+
+                                <label
+                                    value="CURRENT STATUS"
+                                    sclass="micr-field-label"/>
+
+                                <label
+                                    id="currentStatusLabel"
+                                    value="—"
+                                    sclass="micr-status-error"/>
+
+                            </vlayout>
+
+                        </hlayout>
+
+
+                        <!-- =================================================
+                             Row 2 — City + Bank
+                             ================================================= -->
+
+                        <hlayout
+                            width="100%"
+                            spacing="16px">
+
+
+                            <!-- =================================================
+                                 City Code
+                                 ================================================= -->
+
+                            <vlayout
+                                hflex="1"
+                                spacing="4px">
+
+                                <hlayout
+                                    spacing="2px"
+                                    valign="middle">
 
                                     <label
                                         value="City Code"
-                                        sclass="field-label"/>
+                                        sclass="micr-field-label"/>
 
-                                    <textbox
-                                        id="npciCityCode"
-                                        width="100%"
-                                        readonly="true"
-                                        sclass="readonly-field"/>
+                                    <label
+                                        value=" *"
+                                        sclass="micr-star"/>
+
+                                </hlayout>
+
+
+                                <textbox
+                                    id="ocrCityCode"
+                                    width="100%"
+                                    maxlength="3"
+                                    sclass="micr-editable-field"
+
+                                    w:onKeyDown="
+                                        var k = event.key;
+
+                                        if (
+                                            k.length === 1
+                                            &amp;&amp;
+                                            !/[0-9]/.test(k)
+                                        ) {
+                                            event.preventDefault();
+                                            return false;
+                                        }
+
+                                        if (
+                                            k.length === 1
+                                            &amp;&amp;
+                                            /[0-9]/.test(k)
+                                            &amp;&amp;
+                                            this.$n().value.length &gt;= 3
+                                            &amp;&amp;
+                                            this.$n().selectionStart === this.$n().selectionEnd
+                                        ) {
+                                            event.preventDefault();
+                                            return false;
+                                        }
+                                    "
+
+                                    w:onInput="
+                                        var input = this.$n();
+
+                                        var value =
+                                            input.value
+                                                .replace(/[^0-9]/g, '')
+                                                .substring(0, 3);
+
+                                        if (input.value !== value) {
+                                            input.value = value;
+                                        }
+                                    "/>
+
+                            </vlayout>
+
+
+                            <!-- =================================================
+                                 Bank Code
+                                 ================================================= -->
+
+                            <vlayout
+                                hflex="1"
+                                spacing="4px">
+
+                                <hlayout
+                                    spacing="2px"
+                                    valign="middle">
 
                                     <label
                                         value="Bank Code"
-                                        sclass="field-label"/>
+                                        sclass="micr-field-label"/>
 
-                                    <textbox
-                                        id="npciBankCode"
-                                        width="100%"
-                                        readonly="true"
-                                        sclass="readonly-field"/>
+                                    <label
+                                        value=" *"
+                                        sclass="micr-star"/>
+
+                                </hlayout>
+
+
+                                <textbox
+                                    id="ocrBankCode"
+                                    width="100%"
+                                    maxlength="3"
+                                    sclass="micr-editable-field"
+
+                                    w:onKeyDown="
+                                        var k = event.key;
+
+                                        if (
+                                            k.length === 1
+                                            &amp;&amp;
+                                            !/[0-9]/.test(k)
+                                        ) {
+                                            event.preventDefault();
+                                            return false;
+                                        }
+
+                                        if (
+                                            k.length === 1
+                                            &amp;&amp;
+                                            /[0-9]/.test(k)
+                                            &amp;&amp;
+                                            this.$n().value.length &gt;= 3
+                                            &amp;&amp;
+                                            this.$n().selectionStart === this.$n().selectionEnd
+                                        ) {
+                                            event.preventDefault();
+                                            return false;
+                                        }
+                                    "
+
+                                    w:onInput="
+                                        var input = this.$n();
+
+                                        var value =
+                                            input.value
+                                                .replace(/[^0-9]/g, '')
+                                                .substring(0, 3);
+
+                                        if (input.value !== value) {
+                                            input.value = value;
+                                        }
+                                    "/>
+
+                            </vlayout>
+
+                        </hlayout>
+
+
+                        <!-- =================================================
+                             Row 3 — Branch Code
+                             ================================================= -->
+
+                        <hlayout
+                            width="100%"
+                            spacing="16px">
+
+                            <vlayout
+                                hflex="1"
+                                spacing="4px">
+
+                                <hlayout
+                                    spacing="2px"
+                                    valign="middle">
 
                                     <label
                                         value="Branch Code"
-                                        sclass="field-label"/>
-
-                                    <textbox
-                                        id="npciBranchCode"
-                                        width="100%"
-                                        readonly="true"
-                                        sclass="readonly-field"/>
+                                        sclass="micr-field-label"/>
 
                                     <label
-                                        value="MICR Code"
-                                        sclass="field-label"/>
+                                        value=" *"
+                                        sclass="micr-star"/>
 
-                                    <textbox
-                                        id="npciMicrCode"
-                                        width="100%"
-                                        readonly="true"
-                                        sclass="readonly-field"/>
+                                </hlayout>
 
-                                </vlayout>
 
-                                <!-- ===================================== -->
-                                <!-- OCR                                    -->
-                                <!-- ===================================== -->
+                                <textbox
+                                    id="ocrBranchCode"
+                                    width="100%"
+                                    maxlength="3"
+                                    sclass="micr-editable-field"
 
-                                <vlayout
-                                    hflex="1"
-                                    spacing="6px"
-                                    sclass="micr-column">
+                                    w:onKeyDown="
+                                        var k = event.key;
 
-                                    <label
-                                        value="OCR Read Data"
-                                        sclass="section-title ocr-title"/>
+                                        if (
+                                            k.length === 1
+                                            &amp;&amp;
+                                            !/[0-9]/.test(k)
+                                        ) {
+                                            event.preventDefault();
+                                            return false;
+                                        }
 
-                                    <label
-                                        value="City Code"
-                                        sclass="field-label"/>
+                                        if (
+                                            k.length === 1
+                                            &amp;&amp;
+                                            /[0-9]/.test(k)
+                                            &amp;&amp;
+                                            this.$n().value.length &gt;= 3
+                                            &amp;&amp;
+                                            this.$n().selectionStart === this.$n().selectionEnd
+                                        ) {
+                                            event.preventDefault();
+                                            return false;
+                                        }
+                                    "
 
-                                    <textbox
-                                        id="ocrCityCode"
-                                        width="100%"
-                                        readonly="true"
-                                        sclass="ocr-field"/>
+                                    w:onInput="
+                                        var input = this.$n();
 
-                                    <label
-                                        value="Bank Code"
-                                        sclass="field-label"/>
+                                        var value =
+                                            input.value
+                                                .replace(/[^0-9]/g, '')
+                                                .substring(0, 3);
 
-                                    <textbox
-                                        id="ocrBankCode"
-                                        width="100%"
-                                        readonly="true"
-                                        sclass="ocr-field"/>
+                                        if (input.value !== value) {
+                                            input.value = value;
+                                        }
+                                    "/>
 
-                                    <label
-                                        value="Branch Code"
-                                        sclass="field-label"/>
+                            </vlayout>
 
-                                    <textbox
-                                        id="ocrBranchCode"
-                                        width="100%"
-                                        readonly="true"
-                                        sclass="ocr-field"/>
 
-                                    <label
-                                        value="MICR Code"
-                                        sclass="field-label"/>
+                            <vlayout
+                                hflex="1"
+                                spacing="4px"/>
 
-                                    <textbox
-                                        id="ocrMicrCode"
-                                        width="100%"
-                                        readonly="true"
-                                        sclass="ocr-field"/>
+                        </hlayout>
 
-                                </vlayout>
 
-                            </hlayout>
+                        <space vflex="1"/>
 
-                        </vlayout>
 
-                    </panelchildren>
+                        <!-- =================================================
+                             Action buttons
+                             ================================================= -->
 
-                </panel>
+                        <hlayout
+                            width="100%"
+                            spacing="10px"
+                            valign="middle"
+                            sclass="micr-action-bar">
+
+                            <!-- Previous -->
+
+                            <button
+                                id="previousButton"
+                                label="Prev"
+                                disabled="true"
+                                sclass="micr-prev-btn"/>
+
+
+                            <!-- Next -->
+
+                            <button
+                                id="nextButton"
+                                label="Next"
+                                sclass="micr-next-btn"/>
+
+
+                            <!-- Push Return / Save buttons to right -->
+
+                            <space hflex="1"/>
+
+
+                            <!-- Return -->
+
+                            <button
+                                id="returnButton"
+                                label="Return"
+                                sclass="micr-return-btn"/>
+
+
+                            <!-- Save & Next -->
+
+                            <button
+                                id="saveNextButton"
+                                label="💾 Save &amp; Next"
+                                sclass="micr-save-btn"/>
+
+                        </hlayout>
+
+                    </vlayout>
+
+                </groupbox>
 
             </hlayout>
 
-            <!-- ========================================================= -->
-            <!-- BOTTOM NAVIGATION                                         -->
-            <!-- ========================================================= -->
-
-            <hlayout
-                width="100%"
-                spacing="8px"
-                valign="middle"
-                sclass="navigation-buttons">
-
-                <label
-                    id="micrRepairCount"
-                    value="MICR Repair Cheques: 0"
-                    sclass="batch-position"
-                    style="font-weight:600; margin-right:12px;"/>
-
-                <button
-                    id="backToList"
-                    label="Back to Queue"
-                    sclass="secondary-button"/>
-
-                <button
-                    id="previousButton"
-                    label="← Prev"
-                    sclass="secondary-button"/>
-
-                <button
-                    id="nextButton"
-                    label="Next →"
-                    sclass="secondary-button"/>
-
-                <button
-                    id="saveNextButton"
-                    label="Save &amp; Next →"
-                    sclass="save-next-button"/>
-
-                <button
-                    id="returnButton"
-                    label="Return"
-                    sclass="return-button"/>
-
-            </hlayout>
-
-            <!-- ========================================================= -->
-            <!-- RETURN WINDOW                                             -->
-            <!-- ========================================================= -->
+            <!-- ================================================================
+                 Return Window (Modal Dialog)
+                 ================================================================ -->
 
             <window
                 id="returnWindow"
                 title="Return Cheque"
                 border="normal"
-                width="500px"
+                width="540px"
                 closable="false"
                 visible="false"
                 position="center"
@@ -334,34 +572,63 @@
 
                 <vlayout
                     width="100%"
-                    spacing="8px"
+                    spacing="18px"
                     sclass="return-form">
 
                     <label
-                        value="Return Reason"
-                        sclass="return-field-label"/>
+                        value="Select a return reason to send this cheque back to Maker queue:"
+                        sclass="return-description"/>
 
-                    <combobox
-                        id="returnReason"
+                    <vlayout
                         width="100%"
-                        readonly="true"
-                        placeholder="Select return reason"/>
+                        spacing="6px">
 
-                    <label
-                        value="Remarks (Optional)"
-                        sclass="return-field-label"/>
+                        <hlayout
+                            spacing="4px"
+                            valign="middle">
 
-                    <textbox
-                        id="returnRemarks"
+                            <label
+                                value="Return Reason"
+                                sclass="return-field-label"/>
+
+                            <label
+                                value=" *"
+                                sclass="micr-star"/>
+
+                        </hlayout>
+
+                        <combobox
+                            id="returnReason"
+                            width="100%"
+                            height="42px"
+                            readonly="true"
+                            placeholder="-- Select return reason --"
+                            sclass="return-combobox"/>
+
+                    </vlayout>
+
+                    <vlayout
                         width="100%"
-                        rows="4"
-                        multiline="true"
-                        maxlength="500"
-                        placeholder="Enter remarks if required"/>
+                        spacing="6px">
+
+                        <label
+                            value="Remarks (Optional)"
+                            sclass="return-field-label"/>
+
+                        <textbox
+                            id="returnRemarks"
+                            width="100%"
+                            rows="3"
+                            multiline="true"
+                            maxlength="500"
+                            placeholder="Enter any maker remarks..."
+                            sclass="return-textbox"/>
+
+                    </vlayout>
 
                     <hlayout
                         width="100%"
-                        spacing="8px"
+                        spacing="14px"
                         sclass="return-window-buttons">
 
                         <button

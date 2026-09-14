@@ -153,6 +153,7 @@ public class OutwardMakerDashboardDAO {
                 "    AND UPPER(TRIM(mba.assignment_status)) IN " +
                 "        ('ASSIGNED', 'IN_PROGRESS', 'RELEASED') " +
 
+
                 // =================================================
                 // BATCH FILTER
                 // =================================================
@@ -258,6 +259,15 @@ public class OutwardMakerDashboardDAO {
                 "          ) " +
 
                 "      ) " +
+
+                /*
+                 * Batch-level status filtering.
+                 *
+                 * No Maker assignment is required here.
+                 */
+                "WHERE UPPER(ob.batch_status) NOT IN " +
+                "    ('SUBMITTED_TO_CHECKER', 'COMPLETED', 'REJECTED','CHECKER_COMPLETED') " +
+
 
                 "ORDER BY ob.batch_number";
 

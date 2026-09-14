@@ -10,6 +10,8 @@ public interface MicrRepairService {
 
     List<MicrRepairBatchDto> getRepairBatches();
 
+    List<MicrRepairBatchDto> getRepairBatches(Long userId);
+
     boolean needsMicrRepair(long batchId);
 
     int getNextRepairIndex(long batchId);
@@ -45,4 +47,8 @@ public interface MicrRepairService {
 
     int getBatchTotalChequeCount(
             long batchId);
+
+    int getBatchMicrCompletedCount(long batchId);
+
+    int getBatchMicrPendingCount(long batchId);
 }

@@ -26,6 +26,7 @@ public class DataEntryController extends GenericForwardComposer<Component> {
 	private Listbox batchListbox;
 	// Service
 	private BatchService batchService;
+	private Long loggedInUserId;
 
 	// ---------------------------------------------------------
 	// Page lifecycle
@@ -38,7 +39,17 @@ public class DataEntryController extends GenericForwardComposer<Component> {
 
 		batchService = BatchServiceImpl.of(BatchDaoImpl.of());
 
+		loadLoggedInUser();
+
 		loadBatches();
+	}
+
+	private void loadLoggedInUser() {
+		org.zkoss.zk.ui.Session session = Executions.getCurrent().getSession();
+		com.cts.admin.model.User user = (com.cts.admin.model.User) session.getAttribute("loggedInUser");
+		if (user != null) {
+			loggedInUserId = user.getUserId();
+		}
 	}
 
 	// ---------------------------------------------------------
@@ -49,9 +60,12 @@ public class DataEntryController extends GenericForwardComposer<Component> {
 
 		batchListbox.getItems().clear();
 
+		loadLoggedInUser();
+
 		try {
 
-			List<InwardBatch> batches = batchService.getAvailableBatchesForMaker(null);
+			String userIdStr = loggedInUserId != null ? String.valueOf(loggedInUserId) : null;
+			List<InwardBatch> batches = batchService.getAvailableBatchesForMaker(userIdStr);
 
 			if (batches == null || batches.isEmpty()) {
 				return;

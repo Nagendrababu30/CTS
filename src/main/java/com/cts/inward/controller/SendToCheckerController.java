@@ -3,6 +3,7 @@ package com.cts.inward.controller;
 import java.util.List;
 
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
@@ -35,13 +36,24 @@ public class SendToCheckerController extends GenericForwardComposer<Component> {
 
     // State
     private Long selectedBatchId; // Changed to Long to match NpciBatchData
+    private Long loggedInUserId;
 
     // Initialize your specific DAO
     private SendBatchToCheckerDao sendBatchDao = SendBatchToCheckerDaoImpl.of();
 
+    private void loadLoggedInUser() {
+        org.zkoss.zk.ui.Session session = Executions.getCurrent().getSession();
+        com.cts.admin.model.User user = (com.cts.admin.model.User) session.getAttribute("loggedInUser");
+        if (user != null) {
+            loggedInUserId = user.getUserId();
+        }
+    }
+
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
+
+        loadLoggedInUser();
 
         // Bind Modal Components
         cancelBtn = (Button) confirmModal.getFellow("cancelBtn");
@@ -86,10 +98,11 @@ public class SendToCheckerController extends GenericForwardComposer<Component> {
 
     private void loadBatches() {
         batchRows.getChildren().clear();
+        loadLoggedInUser();
 
         try {
             // Fetch live data from the database
-            List<NpciBatchData> activeBatches = sendBatchDao.getReadyBatches();
+            List<NpciBatchData> activeBatches = sendBatchDao.getReadyBatches(loggedInUserId);
 
             for (NpciBatchData batch : activeBatches) {
                 Row row = new Row();

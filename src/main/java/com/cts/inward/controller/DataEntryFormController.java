@@ -24,6 +24,7 @@ import com.cts.inward.dao.BatchDaoImpl;
 import com.cts.inward.dao.ChequeDaoImpl;
 import com.cts.inward.dao.ChequeImageDaoImpl;
 import com.cts.inward.model.ChequeImage;
+import com.cts.inward.model.InwardBatch;
 import com.cts.inward.model.InwardCheque;
 import com.cts.inward.service.BatchService;
 import com.cts.inward.service.BatchServiceImpl;
@@ -43,6 +44,7 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	private Button btnNext;
 	private Button btnSaveNext;
 
+	private Button btnSideToggle;
 	private Button btnSideFront;
 	private Button btnSideBack;
 	private Button btnSideToggle;
@@ -56,6 +58,9 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	private Label lblCompletedCheques;
 	private Label lblPendingCheques;
 	private Label lblChequeInfo;
+	private Label lblTotalCheques;
+	private Label lblCompletedCheques;
+	private Label lblPendingCheques;
 	private Label lblMicrBand;
 
 	private Image imgCheque;
@@ -79,9 +84,9 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	private String currentFrontImagePath;
 	private String currentBackImagePath;
 
-	private int zoomLevel = 100;
-	private int rotationAngle = 0;
-	private boolean isShowingFront = true;
+	private boolean showingFront = true;
+	private double currentScale = 1.0;
+	private int currentRotation = 0;
 
 	// =========================================================
 	// SERVICE
@@ -130,6 +135,7 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		}
 
 		loadCheques();
+		updateBatchSummaryCounts();
 
 		if (cheques != null && !cheques.isEmpty()) {
 			currentIndex = 0;
@@ -145,6 +151,30 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		User user = (User) session.getAttribute("loggedInUser");
 		if (user != null) {
 			loggedInUserId = user.getUserId();
+		}
+	}
+
+	private void updateBatchSummaryCounts() {
+
+		try {
+			InwardBatch batch = batchService.getBatch(String.valueOf(batchId));
+			int total = batch != null ? batch.getTotalCheques() : (cheques != null ? cheques.size() : 0);
+			int pending = batchService.getDataEntryPendingCount(batchId);
+			int completed = Math.max(0, total - pending);
+
+			if (lblTotalCheques != null) {
+				lblTotalCheques.setValue(String.valueOf(total));
+			}
+
+			if (lblCompletedCheques != null) {
+				lblCompletedCheques.setValue(String.valueOf(completed));
+			}
+
+			if (lblPendingCheques != null) {
+				lblPendingCheques.setValue(String.valueOf(pending));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -185,23 +215,18 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 			lblBatchInfo.setValue("Batch No : " + batchId);
 		}
 
-		int total = cheques.size();
-		int pending = 0;
-		try {
-			pending = batchService.getDataEntryPendingCount(batchId);
-		} catch (Exception e) {
-			pending = Math.max(0, total - currentIndex);
+		if (lblBatchInfo != null) {
+			lblBatchInfo.setValue(String.valueOf(batchId));
 		}
-		int completed = Math.max(0, total - pending);
 
-		if (lblTotalCheques != null) lblTotalCheques.setValue("Total: " + total);
-		if (lblCompletedCheques != null) lblCompletedCheques.setValue("Completed: " + completed);
-		if (lblPendingCheques != null) lblPendingCheques.setValue("Pending: " + pending);
-		if (lblChequeInfo != null) lblChequeInfo.setValue("Cheque " + (currentIndex + 1) + " of " + total);
+		if (lblChequeInfo != null) {
+			lblChequeInfo.setValue("Cheque " + (currentIndex + 1) + " of " + cheques.size());
+		}
 
 		// -----------------------------------------------------
 		// CHEQUE NUMBER
 		// -----------------------------------------------------
+
 		if (txtChequeNo != null) {
 			txtChequeNo.setValue(safeString(cheque.getChequeNumber()));
 		}
@@ -209,6 +234,7 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		// -----------------------------------------------------
 		// ACCOUNT NUMBER
 		// -----------------------------------------------------
+
 		if (txtAccountNo != null) {
 			txtAccountNo.setValue(safeString(cheque.getAccountNumber()));
 		}
@@ -216,19 +242,19 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		// -----------------------------------------------------
 		// CHEQUE AMOUNT & AMOUNT IN WORDS
 		// -----------------------------------------------------
-		if (cheque.getAmount() != null) {
-			if (decAmount != null) decAmount.setValue(cheque.getAmount());
-			if (txtAmountInWords != null) {
-				txtAmountInWords.setValue(convertNumberToIndianWords(cheque.getAmount()));
+
+		if (decAmount != null) {
+			if (cheque.getAmount() != null) {
+				decAmount.setValue(cheque.getAmount());
+			} else {
+				decAmount.setRawValue("");
 			}
-		} else {
-			if (decAmount != null) decAmount.setRawValue("");
-			if (txtAmountInWords != null) txtAmountInWords.setValue("");
 		}
 
 		// -----------------------------------------------------
 		// CHEQUE DATE
 		// -----------------------------------------------------
+
 		if (dtChequeDate != null) {
 			if (cheque.getChequeDate() != null) {
 				dtChequeDate.setValue(java.sql.Date.valueOf(cheque.getChequeDate()));
@@ -238,8 +264,9 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		}
 
 		// -----------------------------------------------------
-		// MICR (if present)
+		// MICR (Null-safe check to prevent NullPointerException)
 		// -----------------------------------------------------
+
 		if (lblMicrBand != null) {
 			lblMicrBand.setValue(safeString(cheque.getMicrCode()));
 		}
@@ -253,6 +280,9 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		// NAVIGATION
 		// -----------------------------------------------------
 		updateNavigationButtons();
+
+		// Refresh amount in words on client side
+		Clients.evalJavaScript("if (typeof updateAmountWordsFromInput === 'function') { var dec = zk.Widget.$('$decAmount'); if (dec) updateAmountWordsFromInput(dec.getInputNode ? dec.getInputNode() : dec.$n()); }");
 	}
 
 	// =========================================================
@@ -324,6 +354,25 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	}
 
 	// =========================================================
+	// NEXT CHEQUE
+	// =========================================================
+
+	public void onClick$btnNext() {
+
+		if (cheques == null || cheques.isEmpty()) {
+
+			return;
+		}
+
+		if (currentIndex < cheques.size() - 1) {
+
+			currentIndex++;
+
+			displayCurrentCheque();
+		}
+	}
+
+	// =========================================================
 	// SAVE & NEXT
 	// =========================================================
 
@@ -387,6 +436,9 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 
 			// 3. CHANGE CHEQUE STATUS
 			chequeService.updateChequeStatus(currentCheque.getChequeNumber(), "DATA_ENTRY_COMPLETED", loggedInUserId);
+			updateBatchSummaryCounts();
+			
+			if (currentIndex == cheques.size() - 1) {
 
 			// 4. UPDATE IN-MEMORY CHEQUE SO NAVIGATING BACK REFLECTS SAVED VALUES
 			InwardCheque updatedCheque = InwardCheque.of(
@@ -443,12 +495,14 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 			e.printStackTrace();
 		}
 
-		isShowingFront = true;
-		zoomLevel = 100;
-		rotationAngle = 0;
+		showingFront = true;
+		currentScale = 1.0;
+		currentRotation = 0;
+
 		if (btnSideToggle != null) {
 			btnSideToggle.setLabel("View Back");
 		}
+
 		showFrontImage();
 		applyImageTransform();
 	}
@@ -467,6 +521,8 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		} else {
 			imgCheque.setContent((org.zkoss.image.AImage) null);
 		}
+
+		applyImageStyle();
 	}
 
 	private void showBackImage() {
@@ -483,6 +539,19 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		} else {
 			imgCheque.setContent((org.zkoss.image.AImage) null);
 		}
+
+		applyImageStyle();
+	}
+
+	private void applyImageStyle() {
+
+		if (imgCheque != null) {
+			imgCheque.setStyle(String.format(
+					java.util.Locale.US,
+					"object-fit:contain; max-width:100%%; max-height:100%%; display:block; margin:auto; transform: scale(%.2f) rotate(%ddeg); transform-origin: center; transition: transform 0.2s;",
+					currentScale,
+					currentRotation));
+		}
 	}
 
 	public void onClick$btnSideToggle() {
@@ -498,58 +567,63 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		applyImageTransform();
 	}
 
+	public void onClick$btnSideToggle() {
+
+		if (showingFront) {
+			showBackImage();
+			showingFront = false;
+			if (btnSideToggle != null) {
+				btnSideToggle.setLabel("View Front");
+			}
+		} else {
+			showFrontImage();
+			showingFront = true;
+			if (btnSideToggle != null) {
+				btnSideToggle.setLabel("View Back");
+			}
+		}
+	}
+
 	public void onClick$btnSideFront() {
-		isShowingFront = true;
+
+		showFrontImage();
+		showingFront = true;
 		if (btnSideToggle != null) {
 			btnSideToggle.setLabel("View Back");
 		}
-		showFrontImage();
-		applyImageTransform();
 	}
 
 	public void onClick$btnSideBack() {
-		isShowingFront = false;
+
+		showBackImage();
+		showingFront = false;
 		if (btnSideToggle != null) {
 			btnSideToggle.setLabel("View Front");
 		}
-		showBackImage();
-		applyImageTransform();
 	}
 
+	// =========================================================
+	// ZOOM / ROTATE BUTTON HANDLERS
+	// =========================================================
+
 	public void onClick$btnZoomIn() {
-		if (zoomLevel < 260) {
-			zoomLevel += 20;
-			applyImageTransform();
-		}
+
+		currentScale += 0.2;
+		applyImageStyle();
 	}
 
 	public void onClick$btnZoomOut() {
-		if (zoomLevel > 60) {
-			zoomLevel -= 20;
-			applyImageTransform();
+
+		if (currentScale > 0.4) {
+			currentScale -= 0.2;
+			applyImageStyle();
 		}
 	}
 
 	public void onClick$btnRotate() {
-		rotationAngle = (rotationAngle + 90) % 360;
-		applyImageTransform();
-	}
 
-	public void onClick$btnResetView() {
-		zoomLevel = 100;
-		rotationAngle = 0;
-		applyImageTransform();
-	}
-
-	private void applyImageTransform() {
-		if (imgCheque == null) return;
-		double scale = zoomLevel / 100.0;
-		String transformCss = "transform: scale(" + scale + ") rotate(" + rotationAngle + "deg);"
-				+ " transform-origin: center center;"
-				+ " transition: transform 0.2s ease;"
-				+ " max-width: 100%; max-height: 100%; width: auto; height: auto;"
-				+ " object-fit: contain; margin: auto; display: block !important;";
-		imgCheque.setStyle(transformCss);
+		currentRotation = (currentRotation + 90) % 360;
+		applyImageStyle();
 	}
 
 	// =========================================================
@@ -572,8 +646,19 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 			return;
 		}
 
+		if (cheques == null || cheques.isEmpty()) {
+
+			if (btnPrev != null) btnPrev.setDisabled(true);
+			if (btnNext != null) btnNext.setDisabled(true);
+			if (btnSaveNext != null) btnSaveNext.setDisabled(true);
+
+			return;
+		}
+
 		// PREVIOUS
-		btnPrev.setDisabled(currentIndex == 0);
+		if (btnPrev != null) {
+			btnPrev.setDisabled(currentIndex == 0);
+		}
 
 		// NEXT
 		if (btnNext != null) {
@@ -581,83 +666,13 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		}
 
 		// SAVE / SAVE & NEXT
-		if (currentIndex == cheques.size() - 1) {
-			btnSaveNext.setLabel("Save & Send to Checker");
-		} else {
-			btnSaveNext.setLabel("Save & Next →");
-		}
-	}
-
-	// =========================================================
-	// INDIAN NUMBER TO WORDS CONVERSION
-	// =========================================================
-
-	public static String convertNumberToIndianWords(BigDecimal amount) {
-		if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) return "";
-
-		long rupees = amount.longValue();
-		int paise = amount.remainder(BigDecimal.ONE).multiply(new BigDecimal(100)).intValue();
-
-		StringBuilder result = new StringBuilder();
-
-		if (rupees == 0) {
-			result.append("Zero Rupees");
-		} else {
-			result.append(convertToIndianFormat(rupees)).append(" Rupees");
-		}
-
-		if (paise > 0) {
-			result.append(" and ").append(convertToIndianFormat(paise)).append(" Paise");
-		}
-
-		result.append(" Only");
-		return result.toString().toUpperCase();
-	}
-
-	private static final String[] units = {
-		"", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
-		"Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen",
-		"Seventeen", "Eighteen", "Nineteen"
-	};
-
-	private static final String[] tens = {
-		"", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"
-	};
-
-	private static String convertToIndianFormat(long n) {
-		if (n < 0) return "Minus " + convertToIndianFormat(-n);
-		if (n == 0) return "";
-
-		StringBuilder words = new StringBuilder();
-
-		if (n / 10000000 > 0) {
-			words.append(convertToIndianFormat(n / 10000000)).append(" Crore ");
-			n %= 10000000;
-		}
-		if (n / 100000 > 0) {
-			words.append(convertToIndianFormat(n / 100000)).append(" Lakh ");
-			n %= 100000;
-		}
-		if (n / 1000 > 0) {
-			words.append(convertToIndianFormat(n / 1000)).append(" Thousand ");
-			n %= 1000;
-		}
-		if (n / 100 > 0) {
-			words.append(convertToIndianFormat(n / 100)).append(" Hundred ");
-			n %= 100;
-		}
-		if (n > 0) {
-			if (words.length() > 0) words.append("and ");
-			if (n < 20) {
-				words.append(units[(int) n]);
+		if (btnSaveNext != null) {
+			if (currentIndex == cheques.size() - 1) {
+				btnSaveNext.setLabel("Save & Submit to Checker");
 			} else {
-				words.append(tens[(int) (n / 10)]);
-				if (n % 10 > 0) {
-					words.append(" ").append(units[(int) (n % 10)]);
-				}
+				btnSaveNext.setLabel("Save & Next →");
 			}
 		}
-		return words.toString().trim();
 	}
 
 	// =========================================================

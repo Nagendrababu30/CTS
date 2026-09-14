@@ -53,7 +53,7 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
                         WHERE h.cheque_number = c.cheque_number
                         ORDER BY h.status_history_id DESC
                         LIMIT 1
-                    ) AS return_reason,
+                    ) AS rejection_reason_code,
 
                     (
                         SELECT h.remarks
@@ -96,29 +96,54 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
 
                 Map<String, Object> row = new HashMap<>();
 
-                row.put("statusHistoryId", rs.getLong("status_history_id"));
+                row.put(
+                        "statusHistoryId",
+                        rs.getLong("status_history_id"));
 
-                row.put("batchId", rs.getLong("batch_id"));
+                row.put(
+                        "batchId",
+                        rs.getLong("batch_id"));
 
-                row.put("chequeNo", rs.getString("cheque_no"));
+                row.put(
+                        "chequeNo",
+                        rs.getString("cheque_no"));
 
-                row.put("amount", rs.getBigDecimal("amount"));
+                row.put(
+                        "amount",
+                        rs.getBigDecimal("amount"));
 
-                row.put("drawerAccountNo", rs.getString("account_number"));
+                row.put(
+                        "drawerAccountNo",
+                        rs.getString("account_number"));
 
-                row.put("payeeAccountNo", rs.getString("payee_account_number"));
+                row.put(
+                        "payeeAccountNo",
+                        rs.getString("payee_account_number"));
 
-                row.put("payeeName", rs.getString("payee_name"));
+                row.put(
+                        "payeeName",
+                        rs.getString("payee_name"));
 
-                row.put("drawerName", rs.getString("drawer_name"));
+                row.put(
+                        "drawerName",
+                        rs.getString("drawer_name"));
 
-                row.put("bankName", rs.getString("presenting_bank_name"));
+                row.put(
+                        "bankName",
+                        rs.getString("presenting_bank_name"));
 
-                row.put("chequeDate", rs.getDate("cheque_date"));
+                row.put(
+                        "chequeDate",
+                        rs.getDate("cheque_date"));
 
-                row.put("returnReason", rs.getString("rejection_reason_code"));
+               
+                row.put(
+                        "returnReason",
+                        rs.getString("rejection_reason_code"));
 
-                row.put("remark", rs.getString("remark"));
+                row.put(
+                        "remark",
+                        rs.getString("remark"));
 
                 rrfList.add(row);
             }
@@ -128,7 +153,9 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
             e.printStackTrace();
 
             throw new RuntimeException(
-                    "DB Error fetching RRF data: " + e.getMessage(), e);
+                    "DB Error fetching RRF data: "
+                            + e.getMessage(),
+                    e);
         }
 
         return rrfList;
@@ -190,25 +217,45 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
 
                 Map<String, Object> row = new HashMap<>();
 
-                row.put("statusHistoryId", rs.getLong("status_history_id"));
+                row.put(
+                        "statusHistoryId",
+                        rs.getLong("status_history_id"));
 
-                row.put("batchId", rs.getLong("batch_id"));
+                row.put(
+                        "batchId",
+                        rs.getLong("batch_id"));
 
-                row.put("chequeNo", rs.getString("cheque_no"));
+                row.put(
+                        "chequeNo",
+                        rs.getString("cheque_no"));
 
-                row.put("amount", rs.getBigDecimal("amount"));
+                row.put(
+                        "amount",
+                        rs.getBigDecimal("amount"));
 
-                row.put("accountNumber", rs.getString("account_number"));
+                row.put(
+                        "accountNumber",
+                        rs.getString("account_number"));
 
-                row.put("payeeAccountNo", rs.getString("payee_account_number"));
+                row.put(
+                        "payeeAccountNo",
+                        rs.getString("payee_account_number"));
 
-                row.put("payeeName", rs.getString("payee_name"));
+                row.put(
+                        "payeeName",
+                        rs.getString("payee_name"));
 
-                row.put("drawerName",rs.getString("drawer_name"));
+                row.put(
+                        "drawerName",
+                        rs.getString("drawer_name"));
 
-                row.put("bankName", rs.getString("presenting_bank_name"));
+                row.put(
+                        "bankName",
+                        rs.getString("presenting_bank_name"));
 
-                row.put("chequeDate", rs.getDate("cheque_date"));
+                row.put(
+                        "chequeDate",
+                        rs.getDate("cheque_date"));
 
                 approvedList.add(row);
             }
@@ -218,14 +265,17 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
             e.printStackTrace();
 
             throw new RuntimeException(
-                    "DB Error fetching Approved data: " + e.getMessage(), e);
+                    "DB Error fetching Approved data: "
+                            + e.getMessage(),
+                    e);
         }
 
         return approvedList;
     }
 
     @Override
-    public void updateRrfReportGenerated(List<Long> statusHistoryIds) {
+    public void updateRrfReportGenerated(
+            List<Long> statusHistoryIds) {
 
         String sql = """
                 UPDATE inward_cheque_status_history
@@ -235,7 +285,8 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
                 """;
 
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
 
             for (Long statusHistoryId : statusHistoryIds) {
 
@@ -251,12 +302,14 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
 
             throw new RuntimeException(
                     "DB Error updating RRF report status: "
-                            + e.getMessage(), e);
+                            + e.getMessage(),
+                    e);
         }
     }
 
     @Override
-    public void updateApprovedReportGenerated(List<Long> statusHistoryIds) {
+    public void updateApprovedReportGenerated(
+            List<Long> statusHistoryIds) {
 
         String sql = """
                 UPDATE inward_cheque_status_history
@@ -266,7 +319,8 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
                 """;
 
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
 
             for (Long statusHistoryId : statusHistoryIds) {
 
@@ -282,7 +336,9 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
 
             throw new RuntimeException(
                     "DB Error updating Approved report status: "
-                            + e.getMessage(), e);
+                            + e.getMessage(),
+                    e);
         }
     }
 }
+

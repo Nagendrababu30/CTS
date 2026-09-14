@@ -63,11 +63,27 @@ public class ChequeDaoImpl implements ChequeDao {
     @Override
     public List<InwardCheque> getChequesForBatch(String batchId) {
     	String sql =
-    	        "SELECT c.cheque_number, c.batch_id, c.account_number, "
-    	        + "c.drawer_name, c.amount, c.micr_code, c.cheque_date, "
-    	        + "c.presenting_date "
+    	        "SELECT c.cheque_number, c.batch_id, c.drawer_name, c.micr_code, c.presenting_date, "
+    	        + "COALESCE(acc.new_value, c.account_number) AS account_number, "
+    	        + "COALESCE(amt.new_value, CAST(c.amount AS VARCHAR)) AS amount_str, "
+    	        + "COALESCE(dt.new_value, CAST(c.cheque_date AS VARCHAR)) AS cheque_date_str "
     	        + "FROM public.inward_cheque c "
-    	        + "INNER JOIN LATERAL ( "
+    	        + "LEFT JOIN LATERAL ( "
+    	        + "    SELECT new_value FROM inward_cheque_dataentry_history "
+    	        + "    WHERE cheque_no = c.cheque_number AND field_name = 'ACCOUNT_NUMBER' "
+    	        + "    ORDER BY history_id DESC LIMIT 1 "
+    	        + ") acc ON TRUE "
+    	        + "LEFT JOIN LATERAL ( "
+    	        + "    SELECT new_value FROM inward_cheque_dataentry_history "
+    	        + "    WHERE cheque_no = c.cheque_number AND field_name = 'AMOUNT' "
+    	        + "    ORDER BY history_id DESC LIMIT 1 "
+    	        + ") amt ON TRUE "
+    	        + "LEFT JOIN LATERAL ( "
+    	        + "    SELECT new_value FROM inward_cheque_dataentry_history "
+    	        + "    WHERE cheque_no = c.cheque_number AND field_name = 'CHEQUE_DATE' "
+    	        + "    ORDER BY history_id DESC LIMIT 1 "
+    	        + ") dt ON TRUE "
+    	        + "LEFT JOIN LATERAL ( "
     	        + "    SELECT h.status "
     	        + "    FROM public.inward_cheque_status_history h "
     	        + "    WHERE h.cheque_number = c.cheque_number "
@@ -75,7 +91,7 @@ public class ChequeDaoImpl implements ChequeDao {
     	        + "    LIMIT 1 "
     	        + ") latest ON TRUE "
     	        + "WHERE c.batch_id = ? "
-    	        + "AND latest.status = 'DATA_ENTRY' "
+    	        + "AND COALESCE(latest.status, '') <> 'RETURN_BY_MAKER' "
     	        + "ORDER BY c.cheque_number";
 
         List<InwardCheque> cheques = new ArrayList<>();
@@ -89,15 +105,34 @@ public class ChequeDaoImpl implements ChequeDao {
 
                 while (resultSet.next()) {
 
+                    String amtStr = resultSet.getString("amount_str");
+                    BigDecimal amount = null;
+                    if (amtStr != null && !amtStr.trim().isEmpty()) {
+                        try {
+                            amount = new BigDecimal(amtStr.trim());
+                        } catch (Exception e) {
+                            amount = BigDecimal.ZERO;
+                        }
+                    }
+
+                    String dateStr = resultSet.getString("cheque_date_str");
+                    LocalDate chequeDate = null;
+                    if (dateStr != null && !dateStr.trim().isEmpty()) {
+                        try {
+                            chequeDate = LocalDate.parse(dateStr.trim());
+                        } catch (Exception e) {
+                            // fallback null
+                        }
+                    }
+
                     InwardCheque cheque = InwardCheque.of(
                             resultSet.getString("cheque_number"),
                             resultSet.getString("batch_id"),
                             resultSet.getString("account_number"),
                             resultSet.getString("drawer_name"),
-                            resultSet.getBigDecimal("amount"),
+                            amount,
                             resultSet.getString("micr_code"),
-                            resultSet.getDate("cheque_date") != null
-                                    ? resultSet.getDate("cheque_date").toLocalDate() : null,
+                            chequeDate,
                             resultSet.getDate("presenting_date") != null
                                     ? resultSet.getDate("presenting_date").toLocalDate() : null);
 
@@ -165,41 +200,83 @@ public class ChequeDaoImpl implements ChequeDao {
     public void saveDataEntryCorrections(String chequeNumber, long batchId,
             String accountNumber, BigDecimal amount, LocalDate chequeDate, long userId) {
 
-        String sql =
-                "INSERT INTO inward_cheque_dataentry_history "
-                + "(cheque_no, field_name, new_value, changed_by) "
-                + "VALUES (?, ?, ?, ?)";
-
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = dataSource.getConnection()) {
 
             if (accountNumber != null && !accountNumber.trim().isEmpty()) {
-                statement.setString(1, chequeNumber);
-                statement.setString(2, "ACCOUNT_NUMBER");
-                statement.setString(3, accountNumber);
-                statement.setLong(4, userId);
-                statement.executeUpdate();
+                upsertDataEntryHistory(connection, chequeNumber, "ACCOUNT_NUMBER", accountNumber.trim(), userId);
             }
 
             if (amount != null) {
-                statement.setString(1, chequeNumber);
-                statement.setString(2, "AMOUNT");
-                statement.setString(3, amount.toPlainString());
-                statement.setLong(4, userId);
-                statement.executeUpdate();
+                upsertDataEntryHistory(connection, chequeNumber, "AMOUNT", amount.toPlainString(), userId);
             }
 
             if (chequeDate != null) {
-                statement.setString(1, chequeNumber);
-                statement.setString(2, "CHEQUE_DATE");
-                statement.setString(3, chequeDate.toString());
-                statement.setLong(4, userId);
-                statement.executeUpdate();
+                upsertDataEntryHistory(connection, chequeNumber, "CHEQUE_DATE", chequeDate.toString(), userId);
             }
 
         } catch (SQLException e) {
             throw new IllegalStateException(
                     "Failed to save Data Entry corrections for cheque: " + chequeNumber, e);
+        }
+    }
+
+    private void upsertDataEntryHistory(Connection connection, String chequeNumber,
+            String fieldName, String newValue, long userId) throws SQLException {
+
+        String selectSql =
+                "SELECT history_id FROM inward_cheque_dataentry_history "
+                + "WHERE cheque_no = ? AND field_name = ? "
+                + "ORDER BY history_id DESC";
+
+        try (PreparedStatement selectStmt = connection.prepareStatement(selectSql)) {
+            selectStmt.setString(1, chequeNumber);
+            selectStmt.setString(2, fieldName);
+
+            try (ResultSet rs = selectStmt.executeQuery()) {
+                if (rs.next()) {
+                    long existingId = rs.getLong("history_id");
+
+                    // Update existing row
+                    String updateSql =
+                            "UPDATE inward_cheque_dataentry_history "
+                            + "SET new_value = ?, changed_by = ? "
+                            + "WHERE history_id = ?";
+
+                    try (PreparedStatement updateStmt = connection.prepareStatement(updateSql)) {
+                        updateStmt.setString(1, newValue);
+                        updateStmt.setLong(2, userId);
+                        updateStmt.setLong(3, existingId);
+                        updateStmt.executeUpdate();
+                    }
+
+                    // Delete duplicate rows if any exist from previous entries
+                    String deleteDupSql =
+                            "DELETE FROM inward_cheque_dataentry_history "
+                            + "WHERE cheque_no = ? AND field_name = ? AND history_id <> ?";
+
+                    try (PreparedStatement deleteStmt = connection.prepareStatement(deleteDupSql)) {
+                        deleteStmt.setString(1, chequeNumber);
+                        deleteStmt.setString(2, fieldName);
+                        deleteStmt.setLong(3, existingId);
+                        deleteStmt.executeUpdate();
+                    }
+
+                } else {
+                    // Insert new row
+                    String insertSql =
+                            "INSERT INTO inward_cheque_dataentry_history "
+                            + "(cheque_no, field_name, new_value, changed_by) "
+                            + "VALUES (?, ?, ?, ?)";
+
+                    try (PreparedStatement insertStmt = connection.prepareStatement(insertSql)) {
+                        insertStmt.setString(1, chequeNumber);
+                        insertStmt.setString(2, fieldName);
+                        insertStmt.setString(3, newValue);
+                        insertStmt.setLong(4, userId);
+                        insertStmt.executeUpdate();
+                    }
+                }
+            }
         }
     }
 

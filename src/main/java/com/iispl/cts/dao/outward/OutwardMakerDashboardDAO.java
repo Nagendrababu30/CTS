@@ -28,8 +28,7 @@ public class OutwardMakerDashboardDAO {
     // ============================================================
     // GET ALL BATCHES
     // ============================================================
-
-  
+ 
     public List<OutwardBatch> getBatches() throws SQLException {
 
         // =========================================================
@@ -606,8 +605,7 @@ public class OutwardMakerDashboardDAO {
 
         return batches;
     }
-
-
+    
     // ============================================================
     // ASSIGN BATCH TO MAKER
     // ============================================================

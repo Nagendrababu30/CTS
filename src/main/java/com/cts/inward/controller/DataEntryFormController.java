@@ -18,7 +18,7 @@ import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
-import org.zkoss.zk.ui.util.Composer;
+
 import com.cts.admin.model.User;
 import com.cts.inward.dao.BatchDaoImpl;
 import com.cts.inward.dao.ChequeDaoImpl;
@@ -47,7 +47,6 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	private Button btnSideToggle;
 	private Button btnSideFront;
 	private Button btnSideBack;
-	private Button btnSideToggle;
 	private Button btnZoomIn;
 	private Button btnZoomOut;
 	private Button btnRotate;
@@ -58,9 +57,6 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	private Label lblCompletedCheques;
 	private Label lblPendingCheques;
 	private Label lblChequeInfo;
-	private Label lblTotalCheques;
-	private Label lblCompletedCheques;
-	private Label lblPendingCheques;
 	private Label lblMicrBand;
 
 	private Image imgCheque;
@@ -163,15 +159,15 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 			int completed = Math.max(0, total - pending);
 
 			if (lblTotalCheques != null) {
-				lblTotalCheques.setValue(String.valueOf(total));
+				lblTotalCheques.setValue("Total: " + total);
 			}
 
 			if (lblCompletedCheques != null) {
-				lblCompletedCheques.setValue(String.valueOf(completed));
+				lblCompletedCheques.setValue("Completed: " + completed);
 			}
 
 			if (lblPendingCheques != null) {
-				lblPendingCheques.setValue(String.valueOf(pending));
+				lblPendingCheques.setValue("Pending: " + pending);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -215,9 +211,7 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 			lblBatchInfo.setValue("Batch No : " + batchId);
 		}
 
-		if (lblBatchInfo != null) {
-			lblBatchInfo.setValue(String.valueOf(batchId));
-		}
+		updateBatchSummaryCounts();
 
 		if (lblChequeInfo != null) {
 			lblChequeInfo.setValue("Cheque " + (currentIndex + 1) + " of " + cheques.size());
@@ -354,25 +348,6 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	}
 
 	// =========================================================
-	// NEXT CHEQUE
-	// =========================================================
-
-	public void onClick$btnNext() {
-
-		if (cheques == null || cheques.isEmpty()) {
-
-			return;
-		}
-
-		if (currentIndex < cheques.size() - 1) {
-
-			currentIndex++;
-
-			displayCurrentCheque();
-		}
-	}
-
-	// =========================================================
 	// SAVE & NEXT
 	// =========================================================
 
@@ -437,8 +412,6 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 			// 3. CHANGE CHEQUE STATUS
 			chequeService.updateChequeStatus(currentCheque.getChequeNumber(), "DATA_ENTRY_COMPLETED", loggedInUserId);
 			updateBatchSummaryCounts();
-			
-			if (currentIndex == cheques.size() - 1) {
 
 			// 4. UPDATE IN-MEMORY CHEQUE SO NAVIGATING BACK REFLECTS SAVED VALUES
 			InwardCheque updatedCheque = InwardCheque.of(
@@ -504,7 +477,7 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		}
 
 		showFrontImage();
-		applyImageTransform();
+		applyImageStyle();
 	}
 
 	private void showFrontImage() {
@@ -555,65 +528,46 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	}
 
 	public void onClick$btnSideToggle() {
-		isShowingFront = !isShowingFront;
+		showingFront = !showingFront;
 		if (btnSideToggle != null) {
-			btnSideToggle.setLabel(isShowingFront ? "View Back" : "View Front");
+			btnSideToggle.setLabel(showingFront ? "View Back" : "View Front");
 		}
-		if (isShowingFront) {
-			showFrontImage();
-		} else {
-			showBackImage();
-		}
-		applyImageTransform();
-	}
-
-	public void onClick$btnSideToggle() {
-
 		if (showingFront) {
-			showBackImage();
-			showingFront = false;
-			if (btnSideToggle != null) {
-				btnSideToggle.setLabel("View Front");
-			}
-		} else {
 			showFrontImage();
-			showingFront = true;
-			if (btnSideToggle != null) {
-				btnSideToggle.setLabel("View Back");
-			}
+		} else {
+			showBackImage();
 		}
+		applyImageStyle();
 	}
 
 	public void onClick$btnSideFront() {
-
 		showFrontImage();
 		showingFront = true;
 		if (btnSideToggle != null) {
 			btnSideToggle.setLabel("View Back");
 		}
+		applyImageStyle();
 	}
 
 	public void onClick$btnSideBack() {
-
 		showBackImage();
 		showingFront = false;
 		if (btnSideToggle != null) {
 			btnSideToggle.setLabel("View Front");
 		}
+		applyImageStyle();
 	}
 
 	// =========================================================
-	// ZOOM / ROTATE BUTTON HANDLERS
+	// ZOOM / ROTATE / RESET BUTTON HANDLERS
 	// =========================================================
 
 	public void onClick$btnZoomIn() {
-
 		currentScale += 0.2;
 		applyImageStyle();
 	}
 
 	public void onClick$btnZoomOut() {
-
 		if (currentScale > 0.4) {
 			currentScale -= 0.2;
 			applyImageStyle();
@@ -621,8 +575,13 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	}
 
 	public void onClick$btnRotate() {
-
 		currentRotation = (currentRotation + 90) % 360;
+		applyImageStyle();
+	}
+
+	public void onClick$btnResetView() {
+		currentScale = 1.0;
+		currentRotation = 0;
 		applyImageStyle();
 	}
 
@@ -640,18 +599,9 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 
 	private void updateNavigationButtons() {
 		if (cheques == null || cheques.isEmpty()) {
-			btnPrev.setDisabled(true);
-			if (btnNext != null) btnNext.setDisabled(true);
-			btnSaveNext.setDisabled(true);
-			return;
-		}
-
-		if (cheques == null || cheques.isEmpty()) {
-
 			if (btnPrev != null) btnPrev.setDisabled(true);
 			if (btnNext != null) btnNext.setDisabled(true);
 			if (btnSaveNext != null) btnSaveNext.setDisabled(true);
-
 			return;
 		}
 
@@ -668,11 +618,83 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		// SAVE / SAVE & NEXT
 		if (btnSaveNext != null) {
 			if (currentIndex == cheques.size() - 1) {
-				btnSaveNext.setLabel("Save & Submit to Checker");
+				btnSaveNext.setLabel("Save & Send to Checker");
 			} else {
 				btnSaveNext.setLabel("Save & Next →");
 			}
 		}
+	}
+
+	// =========================================================
+	// INDIAN NUMBER TO WORDS CONVERSION
+	// =========================================================
+
+	public static String convertNumberToIndianWords(BigDecimal amount) {
+		if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) return "";
+
+		long rupees = amount.longValue();
+		int paise = amount.remainder(BigDecimal.ONE).multiply(new BigDecimal(100)).intValue();
+
+		StringBuilder result = new StringBuilder();
+
+		if (rupees == 0) {
+			result.append("Zero Rupees");
+		} else {
+			result.append(convertToIndianFormat(rupees)).append(" Rupees");
+		}
+
+		if (paise > 0) {
+			result.append(" and ").append(convertToIndianFormat(paise)).append(" Paise");
+		}
+
+		result.append(" Only");
+		return result.toString().toUpperCase();
+	}
+
+	private static final String[] units = {
+		"", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
+		"Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen",
+		"Seventeen", "Eighteen", "Nineteen"
+	};
+
+	private static final String[] tens = {
+		"", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"
+	};
+
+	private static String convertToIndianFormat(long n) {
+		if (n < 0) return "Minus " + convertToIndianFormat(-n);
+		if (n == 0) return "";
+
+		StringBuilder words = new StringBuilder();
+
+		if (n / 10000000 > 0) {
+			words.append(convertToIndianFormat(n / 10000000)).append(" Crore ");
+			n %= 10000000;
+		}
+		if (n / 100000 > 0) {
+			words.append(convertToIndianFormat(n / 100000)).append(" Lakh ");
+			n %= 100000;
+		}
+		if (n / 1000 > 0) {
+			words.append(convertToIndianFormat(n / 1000)).append(" Thousand ");
+			n %= 1000;
+		}
+		if (n / 100 > 0) {
+			words.append(convertToIndianFormat(n / 100)).append(" Hundred ");
+			n %= 100;
+		}
+		if (n > 0) {
+			if (words.length() > 0) words.append("and ");
+			if (n < 20) {
+				words.append(units[(int) n]);
+			} else {
+				words.append(tens[(int) (n / 10)]);
+				if (n % 10 > 0) {
+					words.append(" ").append(units[(int) (n % 10)]);
+				}
+			}
+		}
+		return words.toString().trim();
 	}
 
 	// =========================================================

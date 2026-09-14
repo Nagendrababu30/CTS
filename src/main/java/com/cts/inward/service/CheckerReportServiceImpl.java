@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -263,7 +264,7 @@ public class CheckerReportServiceImpl implements CheckerReportService {
             addElement(
                     document,
                     cheque,
-                    "bank_name",
+                    "presenting_bank_name",
                     row.get("bankName"));
 
             addElement(
@@ -275,14 +276,14 @@ public class CheckerReportServiceImpl implements CheckerReportService {
             addElement(
                     document,
                     cheque,
-                    "return_reason",
+                    "rejection_reason_code",
                     row.get("returnReason"));
 
             addElement(
                     document,
                     cheque,
-                    "remark",
-                    row.get("remark"));
+                    "remarks",
+                    row.get("remarks"));
         }
 
         return convertDocumentToBytes(document);
@@ -354,7 +355,7 @@ public class CheckerReportServiceImpl implements CheckerReportService {
             addElement(
                     document,
                     cheque,
-                    "bank_name",
+                    "presenting_bank_name",
                     row.get("bankName"));
 
             addElement(

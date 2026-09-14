@@ -146,6 +146,7 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
                         rs.getString("remarks"));
 
                 rrfList.add(row);
+                
             }
 
         } catch (Exception e) {

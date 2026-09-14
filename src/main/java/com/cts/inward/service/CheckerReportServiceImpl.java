@@ -1,11 +1,33 @@
 package com.cts.inward.service;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.zkoss.zk.ui.Executions;
+
 import com.cts.inward.dao.CheckerReportDao;
 import com.cts.inward.dao.CheckerReportDaoImpl;
+
+import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRMapCollectionDataSource;
 
 public class CheckerReportServiceImpl implements CheckerReportService {
 
@@ -16,100 +38,401 @@ public class CheckerReportServiceImpl implements CheckerReportService {
     }
 
     public static CheckerReportService of() {
-        return new CheckerReportServiceImpl(CheckerReportDaoImpl.of());
+        return new CheckerReportServiceImpl(
+                CheckerReportDaoImpl.of());
     }
 
     @Override
-    public String generateRrfXml() {
-        List<Map<String, Object>> rrfData = reportDao.getRrfReportData();
+    public byte[] generateRrfXml() {
 
-        if (rrfData.isEmpty()) {
+        List<Map<String, Object>> rrfData =
+                reportDao.getRrfReportData();
+
+        if (rrfData == null || rrfData.isEmpty()) {
             return null;
         }
 
-        List<Long> statusHistoryIds = new ArrayList<>();
-        StringBuilder xmlBuilder = new StringBuilder();
+        try {
+            InputStream inputStream =
+                    Executions.getCurrent()
+                            .getDesktop()
+                            .getWebApp()
+                            .getResourceAsStream(
+                                    "/WEB-INF/reports/rrf_report.jrxml");
 
-        xmlBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        xmlBuilder.append("<RRFDocument>\n");
-        xmlBuilder.append("    <Header>\n");
-        xmlBuilder.append("        <FileDescription>Return Reason File (RRF) - CBS Failures</FileDescription>\n");
-        xmlBuilder.append("        <TotalRecords>").append(rrfData.size()).append("</TotalRecords>\n");
-        xmlBuilder.append("    </Header>\n");
-        xmlBuilder.append("    <ReturnedCheques>\n");
+            if (inputStream == null) {
+                throw new RuntimeException(
+                        "RRF JRXML file not found: "
+                                + "/WEB-INF/reports/rrf_report.jrxml");
+            }
 
-        for (Map<String, Object> item : rrfData) {
-            Long statusHistoryId = ((Number) item.get("statusHistoryId")).longValue();
-            statusHistoryIds.add(statusHistoryId);
+            JasperReport jasperReport =
+                    JasperCompileManager.compileReport(inputStream);
 
-            String batchId = String.format("BATCH%03d", ((Number) item.get("batchId")).longValue());
+            JRDataSource dataSource =
+                    new JRMapCollectionDataSource(
+                            new ArrayList<Map<String, ?>>(rrfData));
 
-            xmlBuilder.append("        <Cheque>\n");
-            xmlBuilder.append("            <BatchID>").append(batchId).append("</BatchID>\n");
-            xmlBuilder.append("            <ChequeNumber>").append(item.get("chequeNo") != null ? item.get("chequeNo") : "").append("</ChequeNumber>\n");
-            xmlBuilder.append("            <ChequeAmount>").append(item.get("amount") != null ? item.get("amount") : "").append("</ChequeAmount>\n");
-            xmlBuilder.append("            <DrawerAccountNumber>").append(item.get("drawerAccountNo") != null ? item.get("drawerAccountNo") : "").append("</DrawerAccountNumber>\n");
-            xmlBuilder.append("            <PayeeAccountNumber>").append(item.get("payeeAccountNo") != null ? item.get("payeeAccountNo") : "").append("</PayeeAccountNumber>\n");
-            xmlBuilder.append("            <PayeeName>").append(item.get("payeeName") != null ? item.get("payeeName") : "").append("</PayeeName>\n");
-            xmlBuilder.append("            <DrawerName>").append(item.get("drawerName") != null ? item.get("drawerName") : "").append("</DrawerName>\n");
-            xmlBuilder.append("            <PresentingBank>").append(item.get("bankName") != null ? item.get("bankName") : "").append("</PresentingBank>\n");
-            xmlBuilder.append("            <ChequeDate>").append(item.get("chequeDate") != null ? item.get("chequeDate") : "").append("</ChequeDate>\n");
-            xmlBuilder.append("            <ReturnReason>").append(item.get("returnReason") != null ? item.get("returnReason") : "").append("</ReturnReason>\n");
-            xmlBuilder.append("            <Remark>").append(item.get("remark") != null ? item.get("remark") : "").append("</Remark>\n");
-            xmlBuilder.append("        </Cheque>\n");
+            Map<String, Object> parameters =
+                    new HashMap<>();
+
+            parameters.put(
+                    "FILE_DESCRIPTION",
+                    "Return Reason File (RRF) - CBS Failures");
+
+            parameters.put(
+                    "TOTAL_RECORDS",
+                    rrfData.size());
+
+            /*
+             * Jasper is used to compile and fill the report.
+             */
+            JasperPrint jasperPrint =
+                    JasperFillManager.fillReport(
+                            jasperReport,
+                            parameters,
+                            dataSource);
+
+            /*
+             * Build the required business XML.
+             */
+            byte[] xmlBytes =
+                    buildRrfXml(rrfData);
+
+            /*
+             * Update only after successful XML generation.
+             */
+            List<Long> statusHistoryIds =
+                    extractStatusHistoryIds(rrfData);
+
+            reportDao.updateRrfReportGenerated(
+                    statusHistoryIds);
+
+            return xmlBytes;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            throw new RuntimeException(
+                    "Error generating RRF Jasper XML: "
+                            + e.getMessage(),
+                    e);
         }
-
-        xmlBuilder.append("    </ReturnedCheques>\n");
-        xmlBuilder.append("</RRFDocument>");
-
-        reportDao.updateRrfReportGenerated(statusHistoryIds);
-
-        return xmlBuilder.toString();
     }
 
     @Override
-    public String generateApprovedXml() {
-        List<Map<String, Object>> approvedData = reportDao.getApprovedReportData();
+    public byte[] generateApprovedXml() {
 
-        if (approvedData.isEmpty()) {
+        List<Map<String, Object>> approvedData =
+                reportDao.getApprovedReportData();
+
+        if (approvedData == null || approvedData.isEmpty()) {
             return null;
         }
 
-        List<Long> statusHistoryIds = new ArrayList<>();
-        StringBuilder xmlBuilder = new StringBuilder();
+        try {
+            InputStream inputStream =
+                    Executions.getCurrent()
+                            .getDesktop()
+                            .getWebApp()
+                            .getResourceAsStream(
+                                    "/WEB-INF/reports/approved_report.jrxml");
 
-        xmlBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-        xmlBuilder.append("<ApprovedChequesDocument>\n");
-        xmlBuilder.append("    <Header>\n");
-        xmlBuilder.append("        <FileDescription>Approved Cheques Report</FileDescription>\n");
-        xmlBuilder.append("        <TotalRecords>").append(approvedData.size()).append("</TotalRecords>\n");
-        xmlBuilder.append("    </Header>\n");
-        xmlBuilder.append("    <Cheques>\n");
+            if (inputStream == null) {
+                throw new RuntimeException(
+                        "Approved JRXML file not found: "
+                                + "/WEB-INF/reports/approved_report.jrxml");
+            }
 
-        for (Map<String, Object> item : approvedData) {
-            Long statusHistoryId = ((Number) item.get("statusHistoryId")).longValue();
-            statusHistoryIds.add(statusHistoryId);
+            JasperReport jasperReport =
+                    JasperCompileManager.compileReport(inputStream);
 
-            String batchId = String.format("BATCH%03d", ((Number) item.get("batchId")).longValue());
+            JRDataSource dataSource =
+                    new JRMapCollectionDataSource(
+                            new ArrayList<Map<String, ?>>(approvedData));
 
-            xmlBuilder.append("        <Cheque>\n");
-            xmlBuilder.append("            <BatchID>").append(batchId).append("</BatchID>\n");
-            xmlBuilder.append("            <ChequeNumber>").append(item.get("chequeNo") != null ? item.get("chequeNo") : "").append("</ChequeNumber>\n");
-            xmlBuilder.append("            <ChequeAmount>").append(item.get("amount") != null ? item.get("amount") : "").append("</ChequeAmount>\n");
-            xmlBuilder.append("            <AccountNumber>").append(item.get("accountNumber") != null ? item.get("accountNumber") : "").append("</AccountNumber>\n");
-            xmlBuilder.append("            <DrawerName>").append(item.get("drawerName") != null ? item.get("drawerName") : "").append("</DrawerName>\n");
-            xmlBuilder.append("            <PayeeAccountNumber>").append(item.get("payeeAccountNo") != null ? item.get("payeeAccountNo") : "").append("</PayeeAccountNumber>\n");
-            xmlBuilder.append("            <PayeeName>").append(item.get("payeeName") != null ? item.get("payeeName") : "").append("</PayeeName>\n");
-            xmlBuilder.append("            <PresentingBank>").append(item.get("bankName") != null ? item.get("bankName") : "").append("</PresentingBank>\n");
-            xmlBuilder.append("            <ChequeDate>").append(item.get("chequeDate") != null ? item.get("chequeDate") : "").append("</ChequeDate>\n");
-            xmlBuilder.append("        </Cheque>\n");
+            Map<String, Object> parameters =
+                    new HashMap<>();
+
+            parameters.put(
+                    "FILE_DESCRIPTION",
+                    "Approved Cheques Report");
+
+            parameters.put(
+                    "TOTAL_RECORDS",
+                    approvedData.size());
+
+            /*
+             * Jasper is used to compile and fill the report.
+             */
+            JasperPrint jasperPrint =
+                    JasperFillManager.fillReport(
+                            jasperReport,
+                            parameters,
+                            dataSource);
+
+            /*
+             * Build the required business XML.
+             */
+            byte[] xmlBytes =
+                    buildApprovedXml(approvedData);
+
+            /*
+             * Update only after successful XML generation.
+             */
+            List<Long> statusHistoryIds =
+                    extractStatusHistoryIds(approvedData);
+
+            reportDao.updateApprovedReportGenerated(
+                    statusHistoryIds);
+
+            return xmlBytes;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            throw new RuntimeException(
+                    "Error generating Approved Jasper XML: "
+                            + e.getMessage(),
+                    e);
+        }
+    }
+
+    private byte[] buildRrfXml(
+            List<Map<String, Object>> data) throws Exception {
+
+        Document document =
+                DocumentBuilderFactory
+                        .newInstance()
+                        .newDocumentBuilder()
+                        .newDocument();
+
+        Element root =
+                document.createElement("cheques");
+
+        document.appendChild(root);
+
+        for (Map<String, Object> row : data) {
+
+            Element cheque =
+                    document.createElement("cheque");
+
+            root.appendChild(cheque);
+
+            addElement(
+                    document,
+                    cheque,
+                    "batch_id",
+                    row.get("batchId"));
+
+            addElement(
+                    document,
+                    cheque,
+                    "cheque_number",
+                    row.get("chequeNo"));
+
+            addElement(
+                    document,
+                    cheque,
+                    "cheque_amount",
+                    row.get("amount"));
+
+            addElement(
+                    document,
+                    cheque,
+                    "drawer_account_number",
+                    row.get("drawerAccountNo"));
+
+            addElement(
+                    document,
+                    cheque,
+                    "payee_account_number",
+                    row.get("payeeAccountNo"));
+
+            addElement(
+                    document,
+                    cheque,
+                    "payee_name",
+                    row.get("payeeName"));
+
+            addElement(
+                    document,
+                    cheque,
+                    "drawer_name",
+                    row.get("drawerName"));
+
+            addElement(
+                    document,
+                    cheque,
+                    "presenting_bank_name",
+                    row.get("bankName"));
+
+            addElement(
+                    document,
+                    cheque,
+                    "cheque_date",
+                    row.get("chequeDate"));
+
+            addElement(
+                    document,
+                    cheque,
+                    "rejection_reason_code",
+                    row.get("returnReason"));
+
+            addElement(
+                    document,
+                    cheque,
+                    "remarks",
+                    row.get("remarks"));
         }
 
-        xmlBuilder.append("    </Cheques>\n");
-        xmlBuilder.append("</ApprovedChequesDocument>");
+        return convertDocumentToBytes(document);
+    }
 
-        reportDao.updateApprovedReportGenerated(statusHistoryIds);
+    private byte[] buildApprovedXml(
+            List<Map<String, Object>> data) throws Exception {
 
-        return xmlBuilder.toString();
+        Document document =
+                DocumentBuilderFactory
+                        .newInstance()
+                        .newDocumentBuilder()
+                        .newDocument();
+
+        Element root =
+                document.createElement("cheques");
+
+        document.appendChild(root);
+
+        for (Map<String, Object> row : data) {
+
+            Element cheque =
+                    document.createElement("cheque");
+
+            root.appendChild(cheque);
+
+            addElement(
+                    document,
+                    cheque,
+                    "batch_id",
+                    row.get("batchId"));
+
+            addElement(
+                    document,
+                    cheque,
+                    "cheque_number",
+                    row.get("chequeNo"));
+
+            addElement(
+                    document,
+                    cheque,
+                    "cheque_amount",
+                    row.get("amount"));
+
+            addElement(
+                    document,
+                    cheque,
+                    "account_number",
+                    row.get("accountNumber"));
+
+            addElement(
+                    document,
+                    cheque,
+                    "payee_account_number",
+                    row.get("payeeAccountNo"));
+
+            addElement(
+                    document,
+                    cheque,
+                    "payee_name",
+                    row.get("payeeName"));
+
+            addElement(
+                    document,
+                    cheque,
+                    "drawer_name",
+                    row.get("drawerName"));
+
+            addElement(
+                    document,
+                    cheque,
+                    "presenting_bank_name",
+                    row.get("bankName"));
+
+            addElement(
+                    document,
+                    cheque,
+                    "cheque_date",
+                    row.get("chequeDate"));
+        }
+
+        return convertDocumentToBytes(document);
+    }
+
+    private void addElement(
+            Document document,
+            Element parent,
+            String tagName,
+            Object value) {
+
+        Element element =
+                document.createElement(tagName);
+
+        if (value != null) {
+            element.setTextContent(
+                    String.valueOf(value));
+        }
+
+        parent.appendChild(element);
+    }
+
+    private byte[] convertDocumentToBytes(
+            Document document) throws Exception {
+
+        ByteArrayOutputStream outputStream =
+                new ByteArrayOutputStream();
+
+        Transformer transformer =
+                TransformerFactory
+                        .newInstance()
+                        .newTransformer();
+
+        transformer.setOutputProperty(
+                OutputKeys.INDENT,
+                "yes");
+
+        transformer.setOutputProperty(
+                OutputKeys.ENCODING,
+                "UTF-8");
+
+        transformer.setOutputProperty(
+                "{http://xml.apache.org/xslt}indent-amount",
+                "4");
+
+        transformer.transform(
+                new DOMSource(document),
+                new StreamResult(outputStream));
+
+        return outputStream.toByteArray();
+    }
+
+    private List<Long> extractStatusHistoryIds(
+            List<Map<String, Object>> data) {
+
+        List<Long> statusHistoryIds =
+                new ArrayList<>();
+
+        for (Map<String, Object> item : data) {
+
+            Object value =
+                    item.get("statusHistoryId");
+
+            if (value instanceof Number) {
+
+                statusHistoryIds.add(
+                        ((Number) value).longValue());
+            }
+        }
+
+        return statusHistoryIds;
     }
 }

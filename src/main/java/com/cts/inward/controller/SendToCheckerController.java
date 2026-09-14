@@ -5,6 +5,7 @@ import java.util.List;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Hlayout;
@@ -26,13 +27,10 @@ public class SendToCheckerController extends GenericForwardComposer<Component> {
     // UI Components
     private Rows batchRows;
     private Window confirmModal;
-    private Window successModal;
     private Label confirmMessage;
-    private Label successBatchIdLbl;
     
     private Button cancelBtn;
     private Button confirmSendBtn;
-    private Button okBtn;
 
     // State
     private Long selectedBatchId; // Changed to Long to match NpciBatchData
@@ -59,37 +57,41 @@ public class SendToCheckerController extends GenericForwardComposer<Component> {
         cancelBtn = (Button) confirmModal.getFellow("cancelBtn");
         confirmSendBtn = (Button) confirmModal.getFellow("confirmSendBtn");
         confirmMessage = (Label) confirmModal.getFellow("confirmMessage");
-        
-        okBtn = (Button) successModal.getFellow("okBtn");
-        successBatchIdLbl = (Label) successModal.getFellow("successBatchIdLbl");
 
         // Cancel Button: Close the confirmation modal
         cancelBtn.addEventListener(Events.ON_CLICK, event -> {
             confirmModal.setVisible(false);
         });
 
-        // Confirm Button: Send to Database
+        // Confirm Button: Send to Database, show 2s notification, and redirect to dashboard
         confirmSendBtn.addEventListener(Events.ON_CLICK, event -> {
             try {
                 // 1. Update the database using the DAO
                 sendBatchDao.updateBatchStatusToChecker(selectedBatchId);
                 
-                // 2. Hide confirm modal and show success modal
+                // 2. Hide confirm modal
                 confirmModal.setVisible(false);
-                successBatchIdLbl.setValue(": " + selectedBatchId);
-                successModal.doModal();
+
+                // 3. Show notification popup for 2s
+                Clients.showNotification(
+                    "Sent to Checker",
+                    Clients.NOTIFICATION_TYPE_INFO,
+                    null,
+                    "top_center",
+                    2000
+                );
+
+                // 4. Redirect to Inward Maker dashboard after 2s
+                Clients.evalJavaScript(
+                    "setTimeout(function() { window.location.href = '" + 
+                    Executions.encodeURL("/zul/inward-maker/dashboard.zul") + "'; }, 2000);"
+                );
                 
             } catch (Exception e) {
                 e.printStackTrace();
                 Messagebox.show("Error sending batch to checker: " + e.getMessage(), 
                                 "Database Error", Messagebox.OK, Messagebox.ERROR);
             }
-        });
-
-        // OK Button: Close success modal and refresh table
-        okBtn.addEventListener(Events.ON_CLICK, event -> {
-            successModal.setVisible(false);
-            loadBatches(); // Reload the UI with fresh DB data
         });
 
         // Initial Data Load

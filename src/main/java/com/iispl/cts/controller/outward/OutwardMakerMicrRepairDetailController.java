@@ -1663,9 +1663,11 @@ public class OutwardMakerMicrRepairDetailController
                     branchCode
             );
 
-            cheque.setChequeStatus(
-                    "MICR_REPAIRED"
-            );
+            if (returnedMode) {
+                cheque.setChequeStatus("RE_VERIFIED");
+            } else {
+                cheque.setChequeStatus("MICR_REPAIRED");
+            }
         }
 
 

@@ -532,4 +532,176 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
                     e);
         }
     }
+
+    @Override
+    public boolean completeVerification(Long batchId, Integer checkerId) {
+
+        if (batchId == null) {
+            throw new IllegalArgumentException("batchId cannot be null");
+        }
+
+        Connection connection = null;
+
+        try {
+            connection = dataSource.getConnection();
+            connection.setAutoCommit(false);
+
+            // =========================================================
+            // 1. Check if ANY cheque in current batch has RETURN_TO_MAKER
+            // =========================================================
+            String checkReturnedSql = """
+                    SELECT EXISTS (
+                        SELECT 1
+                        FROM inward_cheque_status_history sh
+                        JOIN inward_cheque c ON c.cheque_number = sh.cheque_number
+                        WHERE c.batch_id = ?
+                          AND sh.status = 'RETURN_TO_MAKER'
+                    )
+                    """;
+
+            boolean hasReturnedCheques = false;
+
+            try (PreparedStatement ps = connection.prepareStatement(checkReturnedSql)) {
+                ps.setLong(1, batchId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        hasReturnedCheques = rs.getBoolean(1);
+                    }
+                }
+            }
+
+            // =========================================================
+            // CASE A: NO cheques returned to maker
+            // Do not perform return-to-maker transition.
+            // =========================================================
+            if (!hasReturnedCheques) {
+                connection.commit();
+                return false;
+            }
+
+            // =========================================================
+            // CASE B: At least one cheque returned to maker
+            // Step 1: Find Maker ID from inward_batch_history
+            // =========================================================
+            String findMakerSql = """
+                    SELECT changed_by
+                    FROM inward_batch_history
+                    WHERE batch_id = ?
+                      AND batch_status IN ('SENT_TO_CHECKER', 'DATA_ENTRY', 'DATA_ENTRY_COMPLETED', 'LOCKED')
+                      AND changed_by IS NOT NULL
+                    ORDER BY batch_history_id DESC
+                    LIMIT 1
+                    """;
+
+            Integer makerId = null;
+
+            try (PreparedStatement ps = connection.prepareStatement(findMakerSql)) {
+                ps.setLong(1, batchId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        int id = rs.getInt("changed_by");
+                        if (!rs.wasNull()) {
+                            makerId = id;
+                        }
+                    }
+                }
+            }
+
+            if (makerId == null) {
+                throw new IllegalStateException(
+                        "Maker ID could not be determined from batch history for batch " + batchId);
+            }
+
+            // =========================================================
+            // Step 2: Insert RETURN_TO_MAKER record in inward_batch_history
+            // =========================================================
+            String insertHistorySql = """
+                    INSERT INTO inward_batch_history
+                    (batch_id, batch_status, changed_on, changed_by, reason, remarks)
+                    VALUES (?, 'RETURN_TO_MAKER', CURRENT_TIMESTAMP, ?, 'Returned to Maker by Checker', 'Cheque(s) returned for reprocessing')
+                    """;
+
+            try (PreparedStatement ps = connection.prepareStatement(insertHistorySql)) {
+                ps.setLong(1, batchId);
+                ps.setInt(2, makerId);
+
+                int historyRows = ps.executeUpdate();
+                if (historyRows == 0) {
+                    throw new IllegalStateException(
+                            "Failed to insert RETURN_TO_MAKER into inward_batch_history for batch " + batchId);
+                }
+            }
+
+            // =========================================================
+            // Step 3: Unlock Checker (lock_status = 'UNLOCKED') in inward_batch_lock
+            // Must unlock checker BEFORE locking maker so that the unique
+            // constraint uq_inward_batch_active_lock (only one 'LOCKED' per batch_id)
+            // is not violated.
+            // =========================================================
+            if (checkerId != null) {
+                String unlockCheckerSql = """
+                        UPDATE inward_batch_lock
+                        SET lock_status = 'UNLOCKED',
+                            locked_time = CURRENT_TIMESTAMP
+                        WHERE batch_id = ?
+                          AND user_id = ?
+                        """;
+
+                try (PreparedStatement ps = connection.prepareStatement(unlockCheckerSql)) {
+                    ps.setLong(1, batchId);
+                    ps.setInt(2, checkerId);
+
+                    int checkerLockRows = ps.executeUpdate();
+                    if (checkerLockRows == 0) {
+                        throw new IllegalStateException(
+                                "No lock record found for Checker " + checkerId + " in batch " + batchId);
+                    }
+                }
+            }
+
+            // =========================================================
+            // Step 4: Lock Maker (lock_status = 'LOCKED') in inward_batch_lock
+            // =========================================================
+            String lockMakerSql = """
+                    UPDATE inward_batch_lock
+                    SET lock_status = 'LOCKED',
+                        locked_time = CURRENT_TIMESTAMP
+                    WHERE batch_id = ?
+                      AND user_id = ?
+                    """;
+
+            try (PreparedStatement ps = connection.prepareStatement(lockMakerSql)) {
+                ps.setLong(1, batchId);
+                ps.setInt(2, makerId);
+
+                int makerLockRows = ps.executeUpdate();
+                if (makerLockRows == 0) {
+                    throw new IllegalStateException(
+                            "No lock record found for Maker " + makerId + " in batch " + batchId);
+                }
+            }
+
+            connection.commit();
+            return true;
+
+        } catch (Exception e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (java.sql.SQLException rollbackEx) {
+                    rollbackEx.printStackTrace();
+                }
+            }
+            throw new RuntimeException("Error executing complete verification for batch " + batchId, e);
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.setAutoCommit(true);
+                    connection.close();
+                } catch (java.sql.SQLException closeEx) {
+                    closeEx.printStackTrace();
+                }
+            }
+        }
+    }
 }

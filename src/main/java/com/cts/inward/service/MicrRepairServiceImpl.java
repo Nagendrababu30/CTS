@@ -18,73 +18,103 @@ import com.cts.inward.model.NpciBatchData;
 import com.cts.inward.model.NpciChequeData;
 import com.cts.inward.model.OcrChequeData;
 
-public class MicrRepairServiceImpl
-        implements MicrRepairService {
+public class MicrRepairServiceImpl implements MicrRepairService {
 
-    private static final String STATUS_RETURN_BY_MAKER =
-            "RETURN_BY_MAKER";
+    private static final String STATUS_RETURN_BY_MAKER = "RETURN_BY_MAKER";
+    private static final String STATUS_MICR_REPAIRED = "MICR_REPAIRED";
 
     private final BatchDao batchDao;
-
     private final MicrRepairDao micrRepairDao;
-
     private final MicrMasterDao micrMasterDao;
 
     public MicrRepairServiceImpl() {
-
-        this.batchDao =
-                BatchDaoImpl.of();
-
-        this.micrRepairDao =
-                new MicrRepairDaoImpl();
-
-        this.micrMasterDao =
-                MicrMasterDaoImpl.of();
+        this.batchDao = BatchDaoImpl.of();
+        this.micrRepairDao = new MicrRepairDaoImpl();
+        this.micrMasterDao = MicrMasterDaoImpl.of();
     }
 
     @Override
     public List<MicrRepairBatchDto> getRepairBatches() {
+        return getRepairBatches(null);
+    }
+
+    @Override
+    public List<MicrRepairBatchDto> getRepairBatches(Long userId) {
 
         List<MicrRepairBatchDto> result =
                 new ArrayList<>();
 
         List<NpciBatchData> batches =
-                batchDao.getAllBatches();
+                batchDao.getBatchesForMaker(userId);
 
-        if (batches == null) {
+        if (batches == null
+                || batches.isEmpty()) {
 
             return result;
         }
 
-        for (NpciBatchData batch :
-                batches) {
+        for (NpciBatchData batch : batches) {
+
+            if (batch == null) {
+                continue;
+            }
+
+            long batchId =
+                    batch.getBatchId();
 
             List<MicrComparisonDto> comparisons =
-                    compareBatch(
-                            batch.getBatchId());
+                    compareBatch(batchId);
 
-            int micrErrorCount = 0;
+            if (comparisons == null
+                    || comparisons.isEmpty()) {
 
-            if (comparisons != null) {
+                continue;
+            }
 
-                for (MicrComparisonDto comparison :
-                        comparisons) {
+            int pendingMicrRepairCount = 0;
 
-                    if (comparison != null
-                            && comparison.isNeedsMicrRepair()) {
+            for (MicrComparisonDto comparison :
+                    comparisons) {
 
-                        micrErrorCount++;
-                    }
+                if (comparison == null) {
+                    continue;
+                }
+
+                if (comparison.isNeedsMicrRepair()) {
+
+                    pendingMicrRepairCount++;
                 }
             }
 
-            if (micrErrorCount > 0) {
+            /*
+             * Keep the batch in the MICR Repair queue
+             * while at least one cheque still needs repair.
+             *
+             * Example:
+             *
+             * Cheque 1 -> MICR_REPAIRED
+             * Cheque 2 -> MICR_REPAIR
+             * Cheque 3 -> MICR_REPAIR
+             *
+             * Batch remains in MICR Repair queue.
+             *
+             * When:
+             *
+             * Cheque 1 -> MICR_REPAIRED
+             * Cheque 2 -> MICR_REPAIRED
+             * Cheque 3 -> MICR_REPAIRED
+             *
+             * pendingMicrRepairCount becomes 0
+             * and the batch is removed from this queue.
+             */
+
+            if (pendingMicrRepairCount > 0) {
 
                 result.add(
                         new MicrRepairBatchDto(
-                                batch.getBatchId(),
+                                batchId,
                                 batch.getTotalCheques(),
-                                micrErrorCount));
+                                pendingMicrRepairCount));
             }
         }
 
@@ -92,23 +122,15 @@ public class MicrRepairServiceImpl
     }
 
     @Override
-    public boolean needsMicrRepair(
-            long batchId) {
-
-        List<MicrComparisonDto> comparisons =
-                compareBatch(batchId);
+    public boolean needsMicrRepair(long batchId) {
+        List<MicrComparisonDto> comparisons = compareBatch(batchId);
 
         if (comparisons == null) {
-
             return false;
         }
 
-        for (MicrComparisonDto comparison :
-                comparisons) {
-
-            if (comparison != null
-                    && comparison.isNeedsMicrRepair()) {
-
+        for (MicrComparisonDto comparison : comparisons) {
+            if (comparison != null && comparison.isNeedsMicrRepair()) {
                 return true;
             }
         }
@@ -117,27 +139,17 @@ public class MicrRepairServiceImpl
     }
 
     @Override
-    public int getNextRepairIndex(
-            long batchId) {
-
-        List<MicrComparisonDto> comparisons =
-                compareBatch(batchId);
+    public int getNextRepairIndex(long batchId) {
+        List<MicrComparisonDto> comparisons = compareBatch(batchId);
 
         if (comparisons == null) {
-
             return -1;
         }
 
-        for (int i = 0;
-                i < comparisons.size();
-                i++) {
+        for (int i = 0; i < comparisons.size(); i++) {
+            MicrComparisonDto comparison = comparisons.get(i);
 
-            MicrComparisonDto comparison =
-                    comparisons.get(i);
-
-            if (comparison != null
-                    && comparison.isNeedsMicrRepair()) {
-
+            if (comparison != null && comparison.isNeedsMicrRepair()) {
                 return i;
             }
         }
@@ -146,16 +158,13 @@ public class MicrRepairServiceImpl
     }
 
     @Override
-    public List<MicrComparisonDto> compareBatch(
-            long batchId) {
+    public List<MicrComparisonDto> compareBatch(long batchId) {
 
         List<NpciChequeData> npciCheques =
-                micrRepairDao.getNpciCheques(
-                        batchId);
+                micrRepairDao.getNpciCheques(batchId);
 
         List<OcrChequeData> ocrCheques =
-                micrRepairDao.getOcrCheques(
-                        batchId);
+                micrRepairDao.getOcrCheques(batchId);
 
         List<MicrComparisonDto> result =
                 new ArrayList<>();
@@ -168,64 +177,49 @@ public class MicrRepairServiceImpl
             return result;
         }
 
-        /*
-         * Match OCR data using the stable
-         * inward_cheque_id.
-         */
-        Map<Long, OcrChequeData>
-                ocrByInwardChequeId =
+        Map<Long, OcrChequeData> ocrByInwardChequeId =
                 new HashMap<>();
 
-        for (OcrChequeData ocr :
-                ocrCheques) {
+        for (OcrChequeData ocr : ocrCheques) {
 
             if (ocr == null) {
-
                 continue;
             }
 
             ocrByInwardChequeId.put(
                     ocr.getInwardChequeId(),
-                    ocr);
+                    ocr
+            );
         }
 
-        for (NpciChequeData npci :
-                npciCheques) {
+        for (NpciChequeData npci : npciCheques) {
 
             if (npci == null) {
-
                 continue;
             }
 
-            /*
-             * Check the latest cheque-level status.
-             */
             String latestStatus =
-                    micrRepairDao
-                            .getLatestChequeStatus(
-                                    npci.getChequeNumber());
+                    micrRepairDao.getLatestChequeStatus(
+                            npci.getChequeNumber()
+                    );
 
-            /*
-             * A returned cheque has completed the MICR stage.
-             *
-             * It must NOT:
-             * - appear again in MICR Repair
-             * - go to Data Entry
-             * - cause another MICR mismatch
-             */
-            if (STATUS_RETURN_BY_MAKER
-                    .equalsIgnoreCase(
-                            latestStatus)) {
+            if (STATUS_RETURN_BY_MAKER.equalsIgnoreCase(
+                    latestStatus)) {
 
                 continue;
             }
+
+            boolean micrRepaired =
+                    STATUS_MICR_REPAIRED.equalsIgnoreCase(
+                            latestStatus
+                    );
 
             OcrChequeData ocr =
                     ocrByInwardChequeId.get(
-                            npci.getInwardChequeId());
+                            npci.getInwardChequeId()
+                    );
 
             if (ocr == null) {
-
                 continue;
             }
 
@@ -233,175 +227,164 @@ public class MicrRepairServiceImpl
                     new MicrComparisonDto();
 
             comparison.setInwardChequeId(
-                    npci.getInwardChequeId());
+                    npci.getInwardChequeId()
+            );
 
             comparison.setChequeNumber(
-                    npci.getChequeNumber());
+                    npci.getChequeNumber()
+            );
 
             String npciMicr =
                     normalizeMicr(
-                            npci.getMicrCode());
+                            npci.getMicrCode()
+                    );
 
             String ocrMicr =
                     normalizeMicr(
-                            ocr.getMicrCode());
+                            ocr.getMicrCode()
+                    );
 
             comparison.setNpciMicrCode(
-                    npciMicr);
+                    npciMicr
+            );
 
             comparison.setOcrMicrCode(
-                    ocrMicr);
+                    ocrMicr
+            );
 
-            /*
-             * NPCI MICR:
-             *
-             * 000-000-000
-             * |   |   |
-             * |   |   branch
-             * |   bank
-             * city
-             */
             String npciCity =
-                    getCityCode(
-                            npciMicr);
+                    getCityCode(npciMicr);
 
             String npciBank =
-                    getBankCode(
-                            npciMicr);
+                    getBankCode(npciMicr);
 
             String npciBranch =
-                    getBranchCode(
-                            npciMicr);
+                    getBranchCode(npciMicr);
 
-            /*
-             * OCR MICR.
-             */
             String ocrCity =
-                    getCityCode(
-                            ocrMicr);
+                    getCityCode(ocrMicr);
 
             String ocrBank =
-                    getBankCode(
-                            ocrMicr);
+                    getBankCode(ocrMicr);
 
             String ocrBranch =
-                    getBranchCode(
-                            ocrMicr);
+                    getBranchCode(ocrMicr);
 
             comparison.setNpciCityCode(
-                    npciCity);
+                    npciCity
+            );
 
             comparison.setNpciBankCode(
-                    npciBank);
+                    npciBank
+            );
 
             comparison.setNpciBranchCode(
-                    npciBranch);
+                    npciBranch
+            );
 
             comparison.setOcrCityCode(
-                    ocrCity);
+                    ocrCity
+            );
 
             comparison.setOcrBankCode(
-                    ocrBank);
+                    ocrBank
+            );
 
             comparison.setOcrBranchCode(
-                    ocrBranch);
+                    ocrBranch
+            );
 
             boolean cityMismatch =
                     isDifferent(
                             npciCity,
-                            ocrCity);
+                            ocrCity
+                    );
 
             boolean bankMismatch =
                     isDifferent(
                             npciBank,
-                            ocrBank);
+                            ocrBank
+                    );
 
             boolean branchMismatch =
                     isDifferent(
                             npciBranch,
-                            ocrBranch);
+                            ocrBranch
+                    );
 
             boolean micrMismatch =
                     isDifferent(
                             npciMicr,
-                            ocrMicr);
+                            ocrMicr
+                    );
 
             comparison.setCityCodeMismatch(
-                    cityMismatch);
+                    cityMismatch
+            );
 
             comparison.setBankCodeMismatch(
-                    bankMismatch);
+                    bankMismatch
+            );
 
             comparison.setBranchCodeMismatch(
-                    branchMismatch);
+                    branchMismatch
+            );
 
             comparison.setMicrMismatch(
-                    micrMismatch);
+                    micrMismatch
+            );
 
-            /*
-             * Check NPCI MICR in master.
-             */
             boolean npciMicrFound =
                     !npciMicr.isEmpty()
-                            && micrMasterDao.exists(
-                                    npciMicr);
+                    && micrMasterDao.exists(npciMicr);
 
-            /*
-             * Check OCR MICR in master.
-             */
             boolean ocrMicrFound =
                     !ocrMicr.isEmpty()
-                            && micrMasterDao.exists(
-                                    ocrMicr);
+                    && micrMasterDao.exists(ocrMicr);
 
             comparison.setNpciMicrFoundInMaster(
-                    npciMicrFound);
+                    npciMicrFound
+            );
 
             comparison.setOcrMicrFoundInMaster(
-                    ocrMicrFound);
+                    ocrMicrFound
+            );
 
-            /*
-             * MICR repair is needed when:
-             *
-             * 1. City mismatch
-             * 2. Bank mismatch
-             * 3. Branch mismatch
-             * 4. Entire MICR mismatch
-             * 5. NPCI MICR is not found in master
-             */
             boolean needsRepair =
                     cityMismatch
-                            || bankMismatch
-                            || branchMismatch
-                            || micrMismatch
-                            || !npciMicrFound;
+                    || bankMismatch
+                    || branchMismatch
+                    || micrMismatch
+                    || !npciMicrFound;
 
-            /*
-             * If a valid repair was already saved,
-             * this cheque should no longer appear in
-             * MICR Repair.
-             */
-            if (needsRepair) {
+            // Check if this cheque was already repaired
+            String completedMicr =
+                    micrRepairDao.getCompletedRepairedMicr(
+                            npci.getChequeNumber()
+                    );
 
-                String completedMicr =
-                        micrRepairDao
-                                .getCompletedRepairedMicr(
-                                        npci.getChequeNumber());
+            if (completedMicr != null && completedMicr.trim().length() == 9) {
+                String rep = completedMicr.trim();
+                comparison.setRepairedMicrCode(rep);
+                comparison.setRepairedCityCode(rep.substring(0, 3));
+                comparison.setRepairedBankCode(rep.substring(3, 6));
+                comparison.setRepairedBranchCode(rep.substring(6, 9));
 
-                if (completedMicr != null
-                        && !completedMicr.trim().isEmpty()
-                        && micrMasterDao.exists(
-                                completedMicr.trim())) {
-
+                if (micrMasterDao.exists(rep)) {
                     needsRepair = false;
                 }
             }
 
-            comparison.setNeedsMicrRepair(
-                    needsRepair);
 
-            result.add(
-                    comparison);
+            comparison.setNeedsMicrRepair(
+                    needsRepair
+            );
+
+            comparison.setMicrRepaired(
+                    micrRepaired
+            );
+
+            result.add(comparison);
         }
 
         return result;
@@ -415,53 +398,37 @@ public class MicrRepairServiceImpl
         if (batchId <= 0L
                 || chequeNumber == null
                 || chequeNumber.trim().isEmpty()) {
-
             return 0;
         }
 
-        return micrRepairDao
-                .getBatchChequePosition(
-                        batchId,
-                        chequeNumber.trim());
+        return micrRepairDao.getBatchChequePosition(
+            batchId,
+            chequeNumber.trim()
+        );
     }
 
-
     @Override
-    public int getBatchTotalChequeCount(
-            long batchId) {
-
+    public int getBatchTotalChequeCount(long batchId) {
         if (batchId <= 0L) {
             return 0;
         }
 
-        return micrRepairDao
-                .getBatchTotalChequeCount(batchId);
-    }
-
-
-    @Override
-    public String getFrontImagePath(
-            String chequeNumber) {
-
-        return micrRepairDao
-                .getFrontImagePath(
-                        chequeNumber);
+        return micrRepairDao.getBatchTotalChequeCount(batchId);
     }
 
     @Override
-    public String getBackImagePath(
-            String chequeNumber) {
+    public String getFrontImagePath(String chequeNumber) {
+        return micrRepairDao.getFrontImagePath(chequeNumber);
+    }
 
-        return micrRepairDao
-                .getBackImagePath(
-                        chequeNumber);
+    @Override
+    public String getBackImagePath(String chequeNumber) {
+        return micrRepairDao.getBackImagePath(chequeNumber);
     }
 
     @Override
     public List<ReturnReasonDto> getMakerReturnReasons() {
-
-        return micrRepairDao
-                .getMakerReturnReasons();
+        return micrRepairDao.getMakerReturnReasons();
     }
 
     @Override
@@ -473,41 +440,24 @@ public class MicrRepairServiceImpl
 
         if (chequeNumber == null
                 || chequeNumber.trim().isEmpty()) {
-
             throw new IllegalArgumentException(
-                    "Cheque number is required");
+                "Cheque number is required"
+            );
         }
 
         if (returnReasonCode == null
                 || returnReasonCode.trim().isEmpty()) {
-
             throw new IllegalArgumentException(
-                    "Return reason is required");
+                "Return reason is required"
+            );
         }
 
-        /*
-         * DAO performs:
-         *
-         * 1. inward_cheque_return
-         * 2. inward_cheque_status_history
-         * 3. checks remaining MICR_REPAIR cheques
-         *
-         * IMPORTANT:
-         *
-         * RETURN_BY_MAKER is NEVER inserted into
-         * inward_batch_history.
-         *
-         * The batch changes to DATA_ENTRY only when
-         * no MICR_REPAIR cheque remains.
-         */
-        boolean saved =
-                micrRepairDao.saveMakerReturn(
-                        chequeNumber.trim(),
-                        returnReasonCode.trim(),
-                        makerRemarks,
-                        userId);
-
-        return saved;
+        return micrRepairDao.saveMakerReturn(
+            chequeNumber.trim(),
+            returnReasonCode.trim(),
+            makerRemarks,
+            userId
+        );
     }
 
     @Override
@@ -520,78 +470,56 @@ public class MicrRepairServiceImpl
 
         if (chequeNumber == null
                 || chequeNumber.trim().isEmpty()) {
-
             throw new IllegalArgumentException(
-                    "Cheque number is required");
+                "Cheque number is required"
+            );
         }
 
         if (originalMicr == null
                 || originalMicr.trim().isEmpty()) {
-
             throw new IllegalArgumentException(
-                    "Original MICR code is required");
+                "Original MICR code is required"
+            );
         }
 
         if (repairedMicr == null
                 || repairedMicr.trim().isEmpty()) {
-
             throw new IllegalArgumentException(
-                    "Corrected MICR code is required");
+                "Corrected MICR code is required"
+            );
         }
 
-        originalMicr =
-                originalMicr.trim();
+        originalMicr = originalMicr.trim();
+        repairedMicr = repairedMicr.trim();
 
-        repairedMicr =
-                repairedMicr.trim();
-
-        /*
-         * Corrected MICR must contain exactly
-         * 9 digits.
-         */
-        if (!repairedMicr.matches(
-                "\\d{9}")) {
-
+        if (!repairedMicr.matches("\\d{9}")) {
             throw new IllegalArgumentException(
-                    "Corrected MICR code must contain exactly 9 digits");
+                "Corrected MICR code must contain exactly 9 digits"
+            );
         }
 
-        /*
-         * Corrected MICR must exist in MICR master.
-         */
-        if (!micrMasterDao.exists(
-                repairedMicr)) {
-
+        if (!micrMasterDao.exists(repairedMicr)) {
             throw new IllegalArgumentException(
-                    "Corrected MICR code "
-                            + repairedMicr
-                            + " was not found in MICR master");
+                "Corrected MICR code "
+                + repairedMicr
+                + " was not found in MICR master"
+            );
         }
 
-        /*
-         * Save cheque-level MICR repair.
-         */
         boolean saved =
-                micrRepairDao.saveMicrRepair(
-                        chequeNumber.trim(),
-                        originalMicr,
-                        repairedMicr,
-                        remarks,
-                        userId);
+            micrRepairDao.saveMicrRepair(
+                chequeNumber.trim(),
+                originalMicr,
+                repairedMicr,
+                remarks,
+                userId
+            );
 
-        /*
-         * After repairing this cheque:
-         *
-         * DATA_ENTRY cheque
-         *
-         * Then check whether any other cheque still
-         * needs MICR repair.
-         */
         if (saved) {
-
             updateBatchStatusIfMicrStageComplete(
-                    chequeNumber.trim(),
-                    userId);
+                chequeNumber.trim(),
+                userId
+            );
         }
 
         return saved;
@@ -602,90 +530,52 @@ public class MicrRepairServiceImpl
             long userId) {
 
         long batchId =
-                micrRepairDao
-                        .getBatchIdByChequeNumber(
-                                chequeNumber);
+            micrRepairDao.getBatchIdByChequeNumber(
+                chequeNumber
+            );
 
         if (batchId <= 0L) {
-
             return;
         }
 
-        /*
-         * compareBatch() ignores RETURN_BY_MAKER cheques.
-         *
-         * Therefore:
-         *
-         * no remaining needsMicrRepair()
-         *
-         * means every cheque has completed MICR stage
-         * either by:
-         *
-         * DATA_ENTRY
-         * or
-         * RETURN_BY_MAKER
-         */
-        if (!needsMicrRepair(
-                batchId)) {
-
-            micrRepairDao
-                    .markBatchReadyForDataEntry(
-                            batchId,
-                            userId);
+        if (!needsMicrRepair(batchId)) {
+            micrRepairDao.markBatchReadyForDataEntry(
+                batchId,
+                userId
+            );
         }
     }
 
-    private String normalizeMicr(
-            String micr) {
-
+    private String normalizeMicr(String micr) {
         if (micr == null) {
-
             return "";
         }
 
         return micr.trim();
     }
 
-    private String getCityCode(
-            String micr) {
-
-        if (micr == null
-                || micr.length() != 9) {
-
+    private String getCityCode(String micr) {
+        if (micr == null || micr.length() != 9) {
             return "";
         }
 
-        return micr.substring(
-                0,
-                3);
+        return micr.substring(0, 3);
     }
 
-    private String getBankCode(
-            String micr) {
-
-        if (micr == null
-                || micr.length() != 9) {
-
+    private String getBankCode(String micr) {
+        if (micr == null || micr.length() != 9) {
             return "";
         }
 
-        return micr.substring(
-                3,
-                6);
+        return micr.substring(3, 6);
     }
 
-    private String getBranchCode(
-            String micr) {
-
-        if (micr == null
-                || micr.length() != 9) {
-
+    private String getBranchCode(String micr) {
+        if (micr == null || micr.length() != 9) {
             return "";
         }
 
-        return micr.substring(
-                6,
-                9);
+        return micr.substring(6, 9);
     }
 
     private boolean isDifferent(
@@ -693,17 +583,12 @@ public class MicrRepairServiceImpl
             String second) {
 
         String firstValue =
-                first == null
-                        ? ""
-                        : first.trim();
+            first == null ? "" : first.trim();
 
         String secondValue =
-                second == null
-                        ? ""
-                        : second.trim();
+            second == null ? "" : second.trim();
 
-        return !firstValue.equals(
-                secondValue);
+        return !firstValue.equals(secondValue);
     }
 
     @Override
@@ -711,15 +596,55 @@ public class MicrRepairServiceImpl
             long batchId,
             long userId) {
 
-        if (batchId <= 0L
-                || userId <= 0L) {
-
+        if (batchId <= 0L || userId <= 0L) {
             return false;
         }
 
-        return micrRepairDao
-                .markBatchReadyForDataEntry(
-                        batchId,
-                        userId);
+        return micrRepairDao.markBatchReadyForDataEntry(
+            batchId,
+            userId
+        );
+    }
+
+    @Override
+    public int getBatchMicrCompletedCount(long batchId) {
+        List<MicrComparisonDto> comparisons =
+            compareBatch(batchId);
+
+        if (comparisons == null) {
+            return 0;
+        }
+
+        int count = 0;
+
+        for (MicrComparisonDto comparison : comparisons) {
+            if (comparison != null
+                    && !comparison.isNeedsMicrRepair()) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    @Override
+    public int getBatchMicrPendingCount(long batchId) {
+        List<MicrComparisonDto> comparisons =
+            compareBatch(batchId);
+
+        if (comparisons == null) {
+            return 0;
+        }
+
+        int count = 0;
+
+        for (MicrComparisonDto comparison : comparisons) {
+            if (comparison != null
+                    && comparison.isNeedsMicrRepair()) {
+                count++;
+            }
+        }
+
+        return count;
     }
 }

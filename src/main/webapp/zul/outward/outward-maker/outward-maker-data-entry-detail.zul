@@ -801,6 +801,7 @@
                                 style="margin-top:auto;">
 
 
+
                                 <!-- Prev + Save & Next -->
 
                                 <hlayout
@@ -842,6 +843,31 @@
                                 </hlayout>
 
                             </vlayout>
+
+
+                        <!-- Actions pinned evenly at the bottom -->
+                        <vlayout width="100%" spacing="8px" style="margin-top:auto;">
+                            <!-- TOP ROW: Navigation & Verification -->
+  <hlayout spacing="8px" valign="middle" width="100%" style="margin-top: 15px;">
+    <!-- Prev Button -->
+    <button id="btnPrev" label="Prev" 
+            sclass="btn-secondary" 
+            hflex="1" height="40px" 
+            style="font-size: 13px; font-weight: 600; padding: 0 4px; text-align: center;" />
+
+    <!-- Save & Next Button -->
+    <button id="btnSaveNext" label="💾 Save &amp; Next" 
+            sclass="btn-primary" 
+            hflex="1" height="40px" 
+            style="background-color: #2563eb; color: #fff; font-size: 12px; font-weight: 600; padding: 0 2px; text-align: center; white-space: nowrap;" />
+
+    <!-- Reject Request Button -->
+    <button id="btnReject" label="⚠ Reject Request" 
+            sclass="btn-danger" 
+            tooltiptext="Reject Request"
+            hflex="1" height="40px" 
+            style="background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; font-size: 13px; font-weight: 600; padding: 0 4px; text-align: center; white-space: nowrap;" />
+</hlayout>
 
                         </vlayout>
 

@@ -483,132 +483,266 @@ public class OutwardMakerDataEntryDetailDAO {
         return cheques;
     }
 
+    public void saveCheque(OutwardCheque cheque) {
 
-    // =========================================================
-    // SAVE CHEQUE
-    //
-    // EXISTING FUNCTIONALITY
-    // =========================================================
+        String verificationStatus = "VERIFIED";
 
-    public void saveCheque(
-            OutwardCheque cheque) {
+        /*
+         * =========================================================
+         * CHECK WHETHER THIS PARTICULAR CHEQUE WAS SENT BACK
+         * TO MAKER FOR RE-VERIFICATION
+         * =========================================================
+         */
+
+        String checkReturnedSql =
+                "SELECT COUNT(*) " +
+                "FROM public.outward_cheque " +
+                "WHERE batch_number = ? " +
+                "AND cheque_number = ? " +
+                "AND UPPER(TRIM(cheque_status)) = 'SENT_BACK_TO_MAKER'";
+
+        /*
+         * =========================================================
+         * UPDATE CHEQUE
+         * =========================================================
+         */
 
         String updateCheque =
-                "UPDATE public.outward_cheque "
-              + "SET drawer_account_number = ?, "
-              + "    drawer_name = ?, "
-              + "    payee_name = ?, "
-              + "    amount = ?, "
-              + "    amount_in_words = ?, "
-              + "    cheque_date = ?, "
-              + "    cheque_status = 'VERIFIED' "
-              + "WHERE batch_number = ? "
-              + "AND cheque_number = ?";
+                "UPDATE public.outward_cheque " +
+                "SET drawer_account_number = ?, " +
+                "    drawer_name = ?, " +
+                "    payee_name = ?, " +
+                "    amount = ?, " +
+                "    amount_in_words = ?, " +
+                "    cheque_date = ?, " +
+                "    cheque_status = ? " +
+                "WHERE batch_number = ? " +
+                "AND cheque_number = ?";
 
+        /*
+         * =========================================================
+         * UPDATE CHEQUE VERIFICATION
+         * =========================================================
+         */
 
         String insertVerification =
-                "INSERT INTO public.cheque_verification "
-              + "(batch_number, cheque_number, verified_by, "
-              + " verification_status, verified_at) "
-              + "VALUES (?, ?, 103, 'VERIFIED', CURRENT_TIMESTAMP) "
-              + "ON CONFLICT "
-              + "(batch_number, cheque_number, verified_by) "
-              + "DO UPDATE SET "
-              + "verification_status = 'VERIFIED', "
-              + "verified_at = CURRENT_TIMESTAMP";
+                "INSERT INTO public.cheque_verification " +
+                "(batch_number, cheque_number, verified_by, " +
+                " verification_status, verified_at) " +
+                "VALUES (?, ?, 103, ?, CURRENT_TIMESTAMP) " +
+                "ON CONFLICT " +
+                "(batch_number, cheque_number, verified_by) " +
+                "DO UPDATE SET " +
+                "verification_status = EXCLUDED.verification_status, " +
+                "verified_at = CURRENT_TIMESTAMP";
 
+        try (Connection con = dataSource.getConnection()) {
 
-        try (Connection con =
-                     dataSource.getConnection();
+            /*
+             * =====================================================
+             * START TRANSACTION
+             * =====================================================
+             */
 
-             PreparedStatement ps1 =
-                     con.prepareStatement(
-                             updateCheque
-                     );
+            con.setAutoCommit(false);
 
-             PreparedStatement ps2 =
-                     con.prepareStatement(
-                             insertVerification
-                     )) {
+            try {
 
+                /*
+                 * =================================================
+                 * 1. CHECK CURRENT CHEQUE STATUS
+                 * =================================================
+                 */
 
-            ps1.setString(
-                    1,
-                    cheque.getDrawerAccountNumber()
-            );
+                try (PreparedStatement checkPs =
+                             con.prepareStatement(checkReturnedSql)) {
 
+                    checkPs.setString(
+                            1,
+                            cheque.getBatchNumber()
+                    );
 
-            ps1.setString(
-                    2,
-                    cheque.getDrawerName()
-            );
+                    checkPs.setString(
+                            2,
+                            cheque.getChequeNumber()
+                    );
 
+                    try (ResultSet rs =
+                                 checkPs.executeQuery()) {
 
-            ps1.setString(
-                    3,
-                    cheque.getPayeeName()
-            );
+                        if (rs.next()
+                                && rs.getInt(1) > 0) {
 
+                            /*
+                             * Returned by Checker
+                             * and now verified again by Maker
+                             */
 
-            ps1.setBigDecimal(
-                    4,
-                    cheque.getAmount()
-            );
+                            verificationStatus = "RE_VERIFIED";
+                        }
+                    }
+                }
 
+                /*
+                 * =================================================
+                 * 2. UPDATE OUTWARD CHEQUE
+                 * =================================================
+                 */
 
-            ps1.setString(
-                    5,
-                    cheque.getAmountInWords()
-            );
+                try (PreparedStatement ps1 =
+                             con.prepareStatement(updateCheque)) {
 
+                    ps1.setString(
+                            1,
+                            cheque.getDrawerAccountNumber()
+                    );
 
-            ps1.setDate(
-                    6,
-                    cheque.getChequeDate() != null
-                            ? Date.valueOf(
-                                    cheque.getChequeDate()
-                              )
-                            : null
-            );
+                    ps1.setString(
+                            2,
+                            cheque.getDrawerName()
+                    );
 
+                    ps1.setString(
+                            3,
+                            cheque.getPayeeName()
+                    );
 
-            ps1.setString(
-                    7,
-                    cheque.getBatchNumber()
-            );
+                    ps1.setBigDecimal(
+                            4,
+                            cheque.getAmount()
+                    );
 
+                    ps1.setString(
+                            5,
+                            cheque.getAmountInWords()
+                    );
 
-            ps1.setString(
-                    8,
-                    cheque.getChequeNumber()
-            );
+                    if (cheque.getChequeDate() != null) {
 
+                        ps1.setDate(
+                                6,
+                                Date.valueOf(
+                                        cheque.getChequeDate()
+                                )
+                        );
 
-            ps1.executeUpdate();
+                    } else {
 
+                        ps1.setNull(
+                                6,
+                                java.sql.Types.DATE
+                        );
+                    }
 
-            ps2.setString(
-                    1,
-                    cheque.getBatchNumber()
-            );
+                    /*
+                     * =================================================
+                     * NORMAL CHEQUE
+                     *     VERIFIED
+                     *
+                     * RETURNED CHEQUE
+                     *     RE_VERIFIED
+                     * =================================================
+                     */
 
+                    ps1.setString(
+                            7,
+                            verificationStatus
+                    );
 
-            ps2.setString(
-                    2,
-                    cheque.getChequeNumber()
-            );
+                    ps1.setString(
+                            8,
+                            cheque.getBatchNumber()
+                    );
 
+                    ps1.setString(
+                            9,
+                            cheque.getChequeNumber()
+                    );
 
-            ps2.executeUpdate();
-        }
+                    int updatedRows =
+                            ps1.executeUpdate();
 
+                    if (updatedRows != 1) {
 
-        catch (SQLException e) {
+                        throw new SQLException(
+                                "Cheque update failed for batch "
+                                + cheque.getBatchNumber()
+                                + ", cheque "
+                                + cheque.getChequeNumber()
+                        );
+                    }
+                }
+
+                /*
+                 * =================================================
+                 * 3. UPDATE CHEQUE VERIFICATION
+                 * =================================================
+                 */
+
+                try (PreparedStatement ps2 =
+                             con.prepareStatement(
+                                     insertVerification
+                             )) {
+
+                    ps2.setString(
+                            1,
+                            cheque.getBatchNumber()
+                    );
+
+                    ps2.setString(
+                            2,
+                            cheque.getChequeNumber()
+                    );
+
+                    ps2.setString(
+                            3,
+                            verificationStatus
+                    );
+
+                    ps2.executeUpdate();
+                }
+
+                /*
+                 * =================================================
+                 * 4. COMMIT
+                 * =================================================
+                 */
+
+                con.commit();
+
+            } catch (Exception e) {
+
+                /*
+                 * =================================================
+                 * ROLLBACK IF ANYTHING FAILS
+                 * =================================================
+                 */
+
+                try {
+
+                    con.rollback();
+
+                } catch (SQLException rollbackException) {
+
+                    rollbackException.printStackTrace();
+                }
+
+                throw e;
+            }
+
+        } catch (Exception e) {
 
             e.printStackTrace();
+
+            throw new RuntimeException(
+                    "Error while saving cheque verification for "
+                    + cheque.getBatchNumber()
+                    + " / "
+                    + cheque.getChequeNumber(),
+                    e
+            );
         }
     }
-
 
     // =========================================================
     // REJECT CHEQUE
@@ -1145,6 +1279,52 @@ public class OutwardMakerDataEntryDetailDAO {
         }
     }
 
+    public boolean isReturnedCheque(
+            String batchNumber,
+            String chequeNumber)
+            throws SQLException {
+
+        String sql =
+                "SELECT COUNT(*) "
+              + "FROM public.outward_cheque "
+              + "WHERE batch_number = ? "
+              + "AND cheque_number = ? "
+              + "AND UPPER(TRIM(cheque_status)) "
+              + "    = 'SENT_BACK_TO_MAKER'";
+
+
+        try (Connection con =
+                     dataSource.getConnection();
+
+             PreparedStatement ps =
+                     con.prepareStatement(sql)) {
+
+
+            ps.setString(
+                    1,
+                    batchNumber
+            );
+
+
+            ps.setString(
+                    2,
+                    chequeNumber
+            );
+
+
+            try (ResultSet rs =
+                         ps.executeQuery()) {
+
+                if (rs.next()) {
+
+                    return rs.getInt(1) > 0;
+                }
+            }
+        }
+
+
+        return false;
+    }
 
     // =========================================================
     // UPDATE CHEQUE STATUS

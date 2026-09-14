@@ -11,7 +11,7 @@ import com.iispl.cts.data.CTSStaticData;
 import com.iispl.cts.model.outward.OutwardBatch;
 
 public class CheckerDashboardDAO {
-	private final javax.sql.DataSource dataSource =ConnectionPool.getDataSource();
+private final javax.sql.DataSource dataSource =ConnectionPool.getDataSource();
 
     /*
      * ============================================================

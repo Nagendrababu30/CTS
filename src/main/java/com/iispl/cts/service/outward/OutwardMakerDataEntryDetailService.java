@@ -104,41 +104,31 @@ public class OutwardMakerDataEntryDetailService {
     //
     // Existing functionality unchanged.
     // =========================================================
-
     public boolean saveAndVerifyCheque(
             OutwardCheque cheque,
             int makerId) {
 
         try {
 
-            // =====================================================
-            // 1. UPDATE OUTWARD CHEQUE
-            // =====================================================
-
             dao.saveCheque(cheque);
 
+            String status = cheque.getChequeStatus();
 
-            // =====================================================
-            // 2. ENSURE STATUS IS VERIFIED
-            // =====================================================
+            if (status == null || status.trim().isEmpty()) {
+                status = "VERIFIED";
+            }
 
             dao.updateChequeStatus(
                     cheque.getBatchNumber(),
                     cheque.getChequeNumber(),
-                    "VERIFIED"
+                    status
             );
-
-
-            // =====================================================
-            // 3. SAVE MAKER PROCESSING RECORD
-            // =====================================================
 
             return dao.saveMakerVerify(
                     cheque.getBatchNumber(),
                     cheque.getChequeNumber(),
                     makerId
             );
-
 
         } catch (Exception e) {
 
@@ -147,8 +137,6 @@ public class OutwardMakerDataEntryDetailService {
             return false;
         }
     }
-
-
     // =========================================================
     // RECORD MAKER REJECT
     //

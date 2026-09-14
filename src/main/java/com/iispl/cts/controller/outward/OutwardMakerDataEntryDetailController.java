@@ -1373,9 +1373,18 @@ public class OutwardMakerDataEntryDetailController
         // MARK IN-MEMORY STATUS
         // =====================================================
 
-        cheque.setChequeStatus(
-                "VERIFIED"
-        );
+        if (returnedMode) {
+
+            cheque.setChequeStatus(
+                    "RE_VERIFIED"
+            );
+
+        } else {
+
+            cheque.setChequeStatus(
+                    "VERIFIED"
+            );
+        }
 
 
         // =====================================================

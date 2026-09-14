@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport
+        xmlns="http://jasperreports.sourceforge.net/jasperreports"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://jasperreports.sourceforge.net/jasperreports
+        http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+        name="rrf_report"
+        pageWidth="595"
+        pageHeight="842"
+        columnWidth="555"
+        leftMargin="20"
+        rightMargin="20"
+        topMargin="20"
+        bottomMargin="20">
+
+    <parameter name="FILE_DESCRIPTION"
+               class="java.lang.String"/>
+
+    <parameter name="TOTAL_RECORDS"
+               class="java.lang.Integer"/>
+
+    <field name="batchId"
+           class="java.lang.Long"/>
+
+    <field name="chequeNo"
+           class="java.lang.String"/>
+
+    <field name="amount"
+           class="java.math.BigDecimal"/>
+
+    <field name="drawerAccountNo"
+           class="java.lang.String"/>
+
+    <field name="payeeAccountNo"
+           class="java.lang.String"/>
+
+    <field name="payeeName"
+           class="java.lang.String"/>
+
+    <field name="drawerName"
+           class="java.lang.String"/>
+
+    <field name="bankName"
+           class="java.lang.String"/>
+
+    <field name="chequeDate"
+           class="java.sql.Date"/>
+
+    <field name="returnReason"
+           class="java.lang.String"/>
+
+    <field name="remark"
+           class="java.lang.String"/>
+
+    <title>
+        <band height="60">
+
+            <textField>
+                <reportElement
+                        x="0"
+                        y="0"
+                        width="555"
+                        height="25"/>
+
+                <textFieldExpression>
+                    <![CDATA[$P{FILE_DESCRIPTION}]]>
+                </textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement
+                        x="0"
+                        y="30"
+                        width="555"
+                        height="25"/>
+
+                <textFieldExpression>
+                    <![CDATA["Total Records: " + $P{TOTAL_RECORDS}]]>
+                </textFieldExpression>
+            </textField>
+
+        </band>
+    </title>
+
+    <detail>
+        <band height="200">
+
+            <textField>
+                <reportElement
+                        x="0"
+                        y="0"
+                        width="555"
+                        height="20"/>
+
+                <textFieldExpression>
+                    <![CDATA[
+                    "BatchID: BATCH"
+                    + String.format("%03d", $F{batchId})
+                    ]]>
+                </textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement
+                        x="0"
+                        y="20"
+                        width="555"
+                        height="20"/>
+
+                <textFieldExpression>
+                    <![CDATA[
+                    "ChequeNumber: " + $F{chequeNo}
+                    ]]>
+                </textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement
+                        x="0"
+                        y="40"
+                        width="555"
+                        height="20"/>
+
+                <textFieldExpression>
+                    <![CDATA[
+                    "ChequeAmount: " + $F{amount}
+                    ]]>
+                </textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement
+                        x="0"
+                        y="60"
+                        width="555"
+                        height="20"/>
+
+                <textFieldExpression>
+                    <![CDATA[
+                    "DrawerAccountNumber: "
+                    + $F{drawerAccountNo}
+                    ]]>
+                </textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement
+                        x="0"
+                        y="80"
+                        width="555"
+                        height="20"/>
+
+                <textFieldExpression>
+                    <![CDATA[
+                    "PayeeAccountNumber: "
+                    + $F{payeeAccountNo}
+                    ]]>
+                </textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement
+                        x="0"
+                        y="100"
+                        width="555"
+                        height="20"/>
+
+                <textFieldExpression>
+                    <![CDATA[
+                    "PayeeName: " + $F{payeeName}
+                    ]]>
+                </textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement
+                        x="0"
+                        y="120"
+                        width="555"
+                        height="20"/>
+
+                <textFieldExpression>
+                    <![CDATA[
+                    "DrawerName: " + $F{drawerName}
+                    ]]>
+                </textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement
+                        x="0"
+                        y="140"
+                        width="555"
+                        height="20"/>
+
+                <textFieldExpression>
+                    <![CDATA[
+                    "PresentingBank: " + $F{bankName}
+                    ]]>
+                </textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement
+                        x="0"
+                        y="160"
+                        width="555"
+                        height="20"/>
+
+                <textFieldExpression>
+                    <![CDATA[
+                    "ReturnReason: " + $F{returnReason}
+                    ]]>
+                </textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement
+                        x="0"
+                        y="180"
+                        width="555"
+                        height="20"/>
+
+                <textFieldExpression>
+                    <![CDATA[
+                    "Remark: " + $F{remark}
+                    ]]>
+                </textFieldExpression>
+            </textField>
+
+        </band>
+    </detail>
+
+</jasperReport>

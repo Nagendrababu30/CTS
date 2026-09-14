@@ -2,7 +2,7 @@ package com.cts.inward.service;
 
 public interface CheckerReportService {
 
-    String generateRrfXml();
+    byte[] generateRrfXml();
 
-    String generateApprovedXml();
+    byte[] generateApprovedXml();
 }

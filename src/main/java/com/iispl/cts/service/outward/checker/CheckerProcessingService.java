@@ -1,5 +1,6 @@
 package com.iispl.cts.service.outward.checker;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ public class CheckerProcessingService {
 
         this.assignmentDao =
                 new CheckerAssignmentDAO();
+
     }
 
 
@@ -69,6 +71,7 @@ public class CheckerProcessingService {
                         chequeNumber);
 
         if (processing == null) {
+
             return false;
         }
 
@@ -87,6 +90,7 @@ public class CheckerProcessingService {
                         chequeNumber);
 
         if (processing == null) {
+
             return null;
         }
 
@@ -146,6 +150,53 @@ public class CheckerProcessingService {
 
 
     // ============================================================
+    // CHEQUE DATE VALIDATION
+    // ============================================================
+
+    /*
+     * Validate cheque date.
+     *
+     * Cheque date must:
+     *
+     * 1. Not be older than 3 months from today.
+     * 2. Not be a future/post-dated cheque.
+     *
+     * Possible results:
+     *
+     * CHEQUE_DATE_EXPIRED
+     * CHEQUE_DATE_POST_DATED
+     * PASS
+     */
+
+    public String validateChequeDate(
+            LocalDate chequeDate) {
+
+        if (chequeDate == null) {
+
+            return "CHEQUE_DATE_EXPIRED";
+        }
+
+        LocalDate today =
+                LocalDate.now();
+
+        LocalDate minimumDate =
+                today.minusMonths(3);
+
+        if (chequeDate.isBefore(minimumDate)) {
+
+            return "CHEQUE_DATE_EXPIRED";
+        }
+
+        if (chequeDate.isAfter(today)) {
+
+            return "CHEQUE_DATE_POST_DATED";
+        }
+
+        return "PASS";
+    }
+    
+
+    // ============================================================
     // CBS UI MESSAGE
     // ============================================================
 
@@ -162,6 +213,18 @@ public class CheckerProcessingService {
                 cbsResult)) {
 
             return "Drawer account is inactive.";
+        }
+
+        if ("CHEQUE_DATE_EXPIRED".equals(
+                cbsResult)) {
+
+            return "Cheque date is older than 3 months.";
+        }
+
+        if ("CHEQUE_DATE_POST_DATED".equals(
+                cbsResult)) {
+
+            return "Post-dated cheque is not allowed.";
         }
 
         if ("PASS".equals(cbsResult)) {
@@ -394,6 +457,15 @@ public class CheckerProcessingService {
 
                 return false;
             }
+
+            String chequeDateResult =
+                    validateChequeDate(
+                            cheque.getChequeDate());
+
+            if (!"PASS".equals(chequeDateResult)) {
+
+                return false;
+            }
         }
 
 
@@ -455,13 +527,16 @@ public class CheckerProcessingService {
     }
 
 
-	public String getMakerReasonName(String reasonCode) {
+    public String getMakerReasonName(String reasonCode) {
 
         if (reasonCode == null
                 || reasonCode.trim().isEmpty()) {
+
             return null;
         }
 
-        return chequeDao.getReasonName(reasonCode.trim());
+        return chequeDao.getReasonName(
+                reasonCode.trim());
     }
+
 }

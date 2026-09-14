@@ -1,9 +1,7 @@
 package com.iispl.cts.controller.outward.checker;
 
 import com.iispl.cts.dao.outward.checker.CheckerReportsDAO;
-import com.iispl.cts.dao.outward.checker.CheckerSendToNPCIDAO;
 import com.iispl.cts.model.outward.OutwardBatch;
-import com.iispl.cts.model.outward.OutwardCheque;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
@@ -11,18 +9,23 @@ import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Wire;
 import org.zkoss.zul.Button;
+import org.zkoss.zul.Hbox;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Messagebox;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 
 public class CheckerSendToNPCIController
         extends SelectorComposer<Component> {
 
     private static final long serialVersionUID = 1L;
+
 
     // ============================================================
     // ZUL COMPONENT
@@ -31,19 +34,52 @@ public class CheckerSendToNPCIController
     @Wire
     private Listbox npciBatchListbox;
 
+
     // ============================================================
     // DAO
     // ============================================================
 
-    private CheckerSendToNPCIDAO npciDAO;
-
     private CheckerReportsDAO reportsDAO;
+
 
     // ============================================================
     // CURRENT USER
     // ============================================================
 
     private long currentUserId;
+
+
+    // ============================================================
+    // VALIDATION STATE
+    //
+    // batchNumber -> true/false
+    //
+    // This keeps track of which batch has been verified.
+    // ============================================================
+
+    private final Map<String, Boolean> validationStatus =
+            new HashMap<String, Boolean>();
+
+
+    // ============================================================
+    // SEND BUTTONS
+    //
+    // batchNumber -> Send Button
+    // ============================================================
+
+    private final Map<String, Button> sendButtons =
+            new HashMap<String, Button>();
+
+
+    // ============================================================
+    // STATUS LABELS
+    //
+    // batchNumber -> Status Label
+    // ============================================================
+
+    private final Map<String, Label> statusLabels =
+            new HashMap<String, Label>();
+
 
     // ============================================================
     // INIT
@@ -56,29 +92,28 @@ public class CheckerSendToNPCIController
         super.doAfterCompose(component);
 
         System.out.println();
-
         System.out.println(
                 "======================================"
         );
-
         System.out.println(
                 "SEND TO NPCI CONTROLLER STARTED"
         );
-
         System.out.println(
                 "======================================"
         );
 
-        // ========================================
-        // GET ZK SESSION
-        // ========================================
+
+        // ========================================================
+        // GET SESSION
+        // ========================================================
 
         Session session =
                 Executions.getCurrent().getSession();
 
-        // ========================================
+
+        // ========================================================
         // NO SESSION
-        // ========================================
+        // ========================================================
 
         if (session == null) {
 
@@ -89,16 +124,14 @@ public class CheckerSendToNPCIController
             return;
         }
 
-        // ========================================
-        // GET USER ID FROM SESSION
-        // ========================================
+
+        // ========================================================
+        // GET USER ID
+        // ========================================================
 
         Object sessionUserId =
                 session.getAttribute("userId");
 
-        // ========================================
-        // USER ID NOT FOUND
-        // ========================================
 
         if (sessionUserId == null) {
 
@@ -109,9 +142,10 @@ public class CheckerSendToNPCIController
             return;
         }
 
-        // ========================================
+
+        // ========================================================
         // CONVERT USER ID
-        // ========================================
+        // ========================================================
 
         if (sessionUserId instanceof Number) {
 
@@ -138,31 +172,28 @@ public class CheckerSendToNPCIController
             }
         }
 
-        // ========================================
-        // LOG CURRENT USER
-        // ========================================
 
         System.out.println(
                 "CURRENT CHECKER USER ID = "
                         + currentUserId
         );
 
-        // ========================================
-        // INITIALIZE DAOS
-        // ========================================
 
-        npciDAO =
-                new CheckerSendToNPCIDAO();
+        // ========================================================
+        // INITIALIZE REPORTS DAO
+        // ========================================================
 
         reportsDAO =
                 new CheckerReportsDAO();
 
-        // ========================================
+
+        // ========================================================
         // LOAD BATCHES
-        // ========================================
+        // ========================================================
 
         loadBatches();
     }
+
 
     // ============================================================
     // LOAD BATCHES
@@ -176,6 +207,11 @@ public class CheckerSendToNPCIController
                     "Loading batches ready for NPCI..."
             );
 
+
+            // ====================================================
+            // CLEAR UI
+            // ====================================================
+
             if (npciBatchListbox != null) {
 
                 npciBatchListbox
@@ -183,8 +219,27 @@ public class CheckerSendToNPCIController
                         .clear();
             }
 
+
+            // ====================================================
+            // CLEAR OLD STATE
+            // ====================================================
+
+            validationStatus.clear();
+            sendButtons.clear();
+            statusLabels.clear();
+
+
+            // ====================================================
+            // GET CHECKER COMPLETED BATCHES
+            // ====================================================
+
             List<OutwardBatch> batches =
-                    npciDAO.getBatchesReadyForNPCI();
+                    reportsDAO.getCheckerCompletedBatches();
+
+
+            // ====================================================
+            // NO BATCHES
+            // ====================================================
 
             if (batches == null ||
                     batches.isEmpty()) {
@@ -196,15 +251,22 @@ public class CheckerSendToNPCIController
                 return;
             }
 
+
             System.out.println(
                     "NPCI batches found = "
                             + batches.size()
             );
 
+
+            // ====================================================
+            // ADD BATCH ROWS
+            // ====================================================
+
             for (OutwardBatch batch : batches) {
 
                 addBatchRow(batch);
             }
+
 
         } catch (Exception e) {
 
@@ -220,6 +282,7 @@ public class CheckerSendToNPCIController
         }
     }
 
+
     // ============================================================
     // ADD BATCH ROW
     // ============================================================
@@ -232,8 +295,10 @@ public class CheckerSendToNPCIController
             return;
         }
 
+
         String batchNumber =
                 batch.getBatchNumber();
+
 
         if (batchNumber == null ||
                 batchNumber.trim().isEmpty()) {
@@ -241,48 +306,42 @@ public class CheckerSendToNPCIController
             return;
         }
 
+
         batchNumber =
                 batchNumber.trim();
 
-        // ========================================================
-        // GET ALL CHEQUES
-        // ========================================================
-
-        List<OutwardCheque> allCheques =
-                reportsDAO.getBatchCheques(
-                        batchNumber
-                );
 
         // ========================================================
-        // GET REJECTED CHEQUES
+        // INITIAL VALIDATION STATE
         // ========================================================
 
-        List<OutwardCheque> rejectedCheques =
-                reportsDAO.getRejectedCheques(
-                        batchNumber
-                );
+        validationStatus.put(
+                batchNumber,
+                false
+        );
+
 
         // ========================================================
-        // COUNTS
+        // GET TOTAL CHEQUE COUNT
         // ========================================================
 
         int totalCount =
-                allCheques == null
-                        ? 0
-                        : allCheques.size();
+                reportsDAO.getTotalChequeCount(
+                        batchNumber
+                );
 
-        int rejectedCount =
-                rejectedCheques == null
-                        ? 0
-                        : rejectedCheques.size();
 
-        int acceptedCount =
-                totalCount - rejectedCount;
+        // ========================================================
+        // GET VALID CHEQUE COUNT
+        //
+        // CHECKER_ACCEPTED = VALID
+        // ========================================================
 
-        if (acceptedCount < 0) {
+        int validCount =
+                reportsDAO.getValidChequeCount(
+                        batchNumber
+                );
 
-            acceptedCount = 0;
-        }
 
         // ========================================================
         // CREATE LIST ITEM
@@ -291,28 +350,36 @@ public class CheckerSendToNPCIController
         Listitem item =
                 new Listitem();
 
+
         // ========================================================
-        // BATCH ID
+        // BATCH NUMBER
         // ========================================================
 
         Listcell batchCell =
                 new Listcell();
 
+
         Label batchLabel =
-                new Label(batchNumber);
+                new Label(
+                        batchNumber
+                );
+
 
         batchLabel.setStyle(
                 "font-weight:bold;"
                         + "color:#172B4D;"
         );
 
+
         batchCell.appendChild(
                 batchLabel
         );
 
+
         item.appendChild(
                 batchCell
         );
+
 
         // ========================================================
         // TOTAL CHEQUES
@@ -325,89 +392,163 @@ public class CheckerSendToNPCIController
                         )
                 );
 
+
         item.appendChild(
                 totalCell
         );
 
+
         // ========================================================
-        // ACCEPTED
+        // VALID XML COUNT
         // ========================================================
 
-        Listcell acceptedCell =
+        Listcell validXmlCell =
                 new Listcell(
                         String.valueOf(
-                                acceptedCount
+                                validCount
                         )
                 );
 
-        item.appendChild(
-                acceptedCell
-        );
-
-        // ========================================================
-        // REJECTED
-        // ========================================================
-
-        Listcell rejectedCell =
-                new Listcell(
-                        String.valueOf(
-                                rejectedCount
-                        )
-                );
 
         item.appendChild(
-                rejectedCell
+                validXmlCell
         );
 
+
         // ========================================================
-        // STATUS
+        // VALIDATION STATUS
         // ========================================================
 
-        Listcell statusCell =
+        Listcell validationCell =
                 new Listcell();
 
-        Label statusLabel =
+
+        Label validationLabel =
                 new Label(
-                        "READY FOR NPCI"
+                        "NOT VERIFIED"
                 );
 
-        statusLabel.setStyle(
+
+        validationLabel.setStyle(
                 "font-weight:bold;"
-                        + "color:#1769AA;"
+                        + "color:#B42318;"
         );
 
-        statusCell.appendChild(
-                statusLabel
+
+        validationCell.appendChild(
+                validationLabel
         );
+
 
         item.appendChild(
-                statusCell
+                validationCell
         );
 
+
         // ========================================================
-        // ACTION
+        // STORE STATUS LABEL
+        // ========================================================
+
+        statusLabels.put(
+                batchNumber,
+                validationLabel
+        );
+
+
+        // ========================================================
+        // ACTION CELL
         // ========================================================
 
         Listcell actionCell =
                 new Listcell();
+
+
+        Hbox actionBox =
+                new Hbox();
+
+
+        actionBox.setSpacing(
+                "8px"
+        );
+
+
+        // ========================================================
+        // VALIDATE BUTTON
+        // ========================================================
+
+        Button validateButton =
+                new Button(
+                        "Validate"
+                );
+
+
+        validateButton.setStyle(
+                "background:#1769AA;"
+                        + "color:white;"
+                        + "border:none;"
+                        + "border-radius:5px;"
+                        + "padding:7px 14px;"
+                        + "font-weight:bold;"
+                        + "cursor:pointer;"
+        );
+
+
+        final String validateBatchNumber =
+                batchNumber;
+
+
+        validateButton.addEventListener(
+                "onClick",
+                event -> {
+
+                    validateBatch(
+                            validateBatchNumber,
+                            validateButton
+                    );
+                }
+        );
+
+
+        actionBox.appendChild(
+                validateButton
+        );
+
+
+        // ========================================================
+        // SEND TO NPCI BUTTON
+        // ========================================================
 
         Button sendButton =
                 new Button(
                         "Send to NPCI"
                 );
 
+
         sendButton.setStyle(
                 "background:#172B4D;"
                         + "color:white;"
                         + "border:none;"
                         + "border-radius:5px;"
-                        + "padding:8px 16px;"
+                        + "padding:7px 14px;"
                         + "font-weight:bold;"
                         + "cursor:pointer;"
         );
 
+
+        // ========================================================
+        // IMPORTANT
+        //
+        // SEND IS DISABLED UNTIL VALIDATION SUCCEEDS
+        // ========================================================
+
+        sendButton.setDisabled(
+                true
+        );
+
+
         final String selectedBatch =
                 batchNumber;
+
 
         sendButton.addEventListener(
                 "onClick",
@@ -419,13 +560,35 @@ public class CheckerSendToNPCIController
                 }
         );
 
-        actionCell.appendChild(
+
+        actionBox.appendChild(
                 sendButton
         );
+
+
+        // ========================================================
+        // STORE SEND BUTTON
+        // ========================================================
+
+        sendButtons.put(
+                batchNumber,
+                sendButton
+        );
+
+
+        // ========================================================
+        // ADD ACTION BOX
+        // ========================================================
+
+        actionCell.appendChild(
+                actionBox
+        );
+
 
         item.appendChild(
                 actionCell
         );
+
 
         // ========================================================
         // ADD ROW
@@ -436,6 +599,328 @@ public class CheckerSendToNPCIController
         );
     }
 
+
+    // ============================================================
+    // VALIDATE BATCH
+    // ============================================================
+
+    private void validateBatch(
+            String batchNumber,
+            Button validateButton) {
+
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()) {
+
+            return;
+        }
+
+
+        batchNumber =
+                batchNumber.trim();
+
+
+        try {
+
+            System.out.println(
+                    "======================================"
+            );
+
+            System.out.println(
+                    "VALIDATING BATCH"
+            );
+
+            System.out.println(
+                    "BATCH = "
+                            + batchNumber
+            );
+
+            System.out.println(
+                    "USER = "
+                            + currentUserId
+            );
+
+            System.out.println(
+                    "======================================"
+            );
+
+
+            // ====================================================
+            // CHECK BATCH STATUS
+            // ====================================================
+
+            boolean ready =
+                    reportsDAO.isBatchReadyForNPCI(
+                            batchNumber
+                    );
+
+
+            if (!ready) {
+
+                validationStatus.put(
+                        batchNumber,
+                        false
+                );
+
+
+                updateValidationStatus(
+                        batchNumber,
+                        false
+                );
+
+
+                Messagebox.show(
+                        "Batch "
+                                + batchNumber
+                                + " is not available "
+                                + "for NPCI validation.\n\n"
+                                + "The batch must be in "
+                                + "CHECKER_COMPLETED status.",
+                        "Validation Failed",
+                        Messagebox.OK,
+                        Messagebox.ERROR
+                );
+
+
+                loadBatches();
+
+                return;
+            }
+
+
+            // ====================================================
+            // GET COUNTS
+            // ====================================================
+
+            int totalCount =
+                    reportsDAO.getTotalChequeCount(
+                            batchNumber
+                    );
+
+
+            int validCount =
+                    reportsDAO.getValidChequeCount(
+                            batchNumber
+                    );
+
+
+            System.out.println(
+                    "TOTAL CHEQUES = "
+                            + totalCount
+            );
+
+
+            System.out.println(
+                    "VALID CHEQUES = "
+                            + validCount
+            );
+
+
+            // ====================================================
+            // VALIDATION RULE
+            //
+            // Every cheque in the batch must be
+            // CHECKER_ACCEPTED.
+            //
+            // If total = valid and total > 0,
+            // validation succeeds.
+            // ====================================================
+
+            boolean verified =
+                    validCount > 0;
+
+
+            // ====================================================
+            // VALIDATION SUCCESS
+            // ====================================================
+
+            if (verified) {
+
+                validationStatus.put(
+                        batchNumber,
+                        true
+                );
+
+
+                updateValidationStatus(
+                        batchNumber,
+                        true
+                );
+
+
+                System.out.println(
+                        "BATCH VALIDATION = VERIFIED"
+                );
+
+
+                Messagebox.show(
+                        "Batch "
+                                + batchNumber
+                                + " has been validated successfully.\n\n"
+                                + "Validation Status: VERIFIED",
+                        "Validation Successful",
+                        Messagebox.OK,
+                        Messagebox.INFORMATION
+                );
+
+
+                return;
+            }
+
+
+            // ====================================================
+            // VALIDATION FAILED
+            // ====================================================
+
+            validationStatus.put(
+                    batchNumber,
+                    false
+            );
+
+
+            updateValidationStatus(
+                    batchNumber,
+                    false
+            );
+
+
+            System.out.println(
+                    "BATCH VALIDATION = NOT VERIFIED"
+            );
+
+
+            Messagebox.show(
+                    "Batch "
+                            + batchNumber
+                            + " could not be verified.\n\n"
+                            + "Total Cheques: "
+                            + totalCount
+                            + "\n"
+                            + "Valid Cheques: "
+                            + validCount
+                            + "\n\n"
+                            + "Send to NPCI remains disabled.",
+                    "Validation Failed",
+                    Messagebox.OK,
+                    Messagebox.ERROR
+            );
+
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+
+            validationStatus.put(
+                    batchNumber,
+                    false
+            );
+
+
+            updateValidationStatus(
+                    batchNumber,
+                    false
+            );
+
+
+            Messagebox.show(
+                    "Error while validating batch "
+                            + batchNumber
+                            + ".\n\n"
+                            + e.getMessage(),
+                    "Validation Error",
+                    Messagebox.OK,
+                    Messagebox.ERROR
+            );
+        }
+    }
+
+
+    // ============================================================
+    // UPDATE VALIDATION STATUS IN UI
+    // ============================================================
+
+    private void updateValidationStatus(
+            String batchNumber,
+            boolean verified) {
+
+
+        Label statusLabel =
+                statusLabels.get(
+                        batchNumber
+                );
+
+
+        Button sendButton =
+                sendButtons.get(
+                        batchNumber
+                );
+
+
+        if (verified) {
+
+            // ====================================================
+            // VERIFIED
+            // ====================================================
+
+            if (statusLabel != null) {
+
+                statusLabel.setValue(
+                        "VERIFIED"
+                );
+
+
+                statusLabel.setStyle(
+                        "font-weight:bold;"
+                                + "color:#16803A;"
+                );
+            }
+
+
+            // ====================================================
+            // ENABLE SEND BUTTON
+            // ====================================================
+
+            if (sendButton != null) {
+
+                sendButton.setDisabled(
+                        false
+                );
+            }
+
+        } else {
+
+            // ====================================================
+            // NOT VERIFIED
+            // ====================================================
+
+            if (statusLabel != null) {
+
+                statusLabel.setValue(
+                        "NOT VERIFIED"
+                );
+
+
+                statusLabel.setStyle(
+                        "font-weight:bold;"
+                                + "color:#B42318;"
+                );
+            }
+
+
+            // ====================================================
+            // DISABLE SEND BUTTON
+            // ====================================================
+
+            if (sendButton != null) {
+
+                sendButton.setDisabled(
+                        true
+                );
+            }
+        }
+    }
+
+
     // ============================================================
     // SEND TO NPCI
     // ============================================================
@@ -443,105 +928,152 @@ public class CheckerSendToNPCIController
     private void sendToNPCI(
             String batchNumber) {
 
+
         if (batchNumber == null ||
                 batchNumber.trim().isEmpty()) {
 
-            Messagebox.show(
-                    "Batch number is required.",
-                    "Error",
-                    Messagebox.OK,
-                    Messagebox.ERROR
-            );
-
             return;
         }
+
 
         batchNumber =
                 batchNumber.trim();
 
-        System.out.println(
-                "NPCI SEND REQUEST"
-                        + " | Batch = "
-                        + batchNumber
-                        + " | User = "
-                        + currentUserId
-        );
 
         // ========================================================
-        // CHECK CURRENT BATCH STATUS
+        // DOUBLE CHECK VALIDATION
+        //
+        // Even if somebody tries to trigger the button manually,
+        // do not allow an unverified batch to be sent.
         // ========================================================
 
-        boolean ready =
-                npciDAO.isBatchReadyForNPCI(
+        Boolean verified =
+                validationStatus.get(
                         batchNumber
                 );
 
-        if (!ready) {
+
+        if (verified == null ||
+                !verified) {
 
             Messagebox.show(
-                    "This batch is no longer available "
-                            + "for NPCI submission.",
-                    "Batch Not Available",
+                    "Batch "
+                            + batchNumber
+                            + " is not verified.\n\n"
+                            + "Please click Validate first.",
+                    "Batch Not Verified",
                     Messagebox.OK,
                     Messagebox.EXCLAMATION
             );
 
-            loadBatches();
-
             return;
         }
 
-        // ========================================================
-        // GET CHEQUES
-        // ========================================================
 
-        List<OutwardCheque> cheques =
-                reportsDAO.getBatchCheques(
-                        batchNumber
+        System.out.println(
+                "======================================"
+        );
+
+
+        System.out.println(
+                "NPCI SEND REQUEST"
+        );
+
+
+        System.out.println(
+                "BATCH = "
+                        + batchNumber
+        );
+
+
+        System.out.println(
+                "USER = "
+                        + currentUserId
+        );
+
+
+        System.out.println(
+                "======================================"
+        );
+
+
+        try {
+
+            // ====================================================
+            // CHECK CURRENT DB STATUS AGAIN
+            // ====================================================
+
+            boolean ready =
+                    reportsDAO.isBatchReadyForNPCI(
+                            batchNumber
+                    );
+
+
+            if (!ready) {
+
+                Messagebox.show(
+                        "This batch is no longer available "
+                                + "for NPCI submission.\n\n"
+                                + "The batch status may have changed.",
+                        "Batch Not Available",
+                        Messagebox.OK,
+                        Messagebox.EXCLAMATION
                 );
 
-        if (cheques == null ||
-                cheques.isEmpty()) {
+
+                loadBatches();
+
+                return;
+            }
+
+
+            // ====================================================
+            // CONFIRMATION
+            // ====================================================
+
+            final String confirmedBatchNumber =
+                    batchNumber;
+
 
             Messagebox.show(
-                    "No cheques found for batch "
+                    "Batch "
+                            + confirmedBatchNumber
+                            + " has been VERIFIED.\n\n"
+                            + "Are you sure you want to send "
+                            + "this batch to NPCI?",
+                    "Confirm NPCI Submission",
+                    Messagebox.YES | Messagebox.NO,
+                    Messagebox.QUESTION,
+                    event -> {
+
+                        if (Messagebox.ON_YES.equals(
+                                event.getName())) {
+
+                            submitBatch(
+                                    confirmedBatchNumber
+                            );
+                        }
+                    }
+            );
+
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+
+            Messagebox.show(
+                    "Error while preparing batch "
                             + batchNumber
-                            + ".\n\n"
-                            + "The batch cannot be sent to NPCI.",
-                    "Cannot Send",
+                            + " for NPCI.\n\n"
+                            + e.getMessage(),
+                    "NPCI Error",
                     Messagebox.OK,
                     Messagebox.ERROR
             );
-
-            return;
         }
-
-        // ========================================================
-        // CONFIRMATION
-        // ========================================================
-
-        final String confirmedBatchNumber =
-                batchNumber;
-
-        Messagebox.show(
-                "Are you sure you want to send batch "
-                        + confirmedBatchNumber
-                        + " to NPCI?",
-                "Confirm NPCI Submission",
-                Messagebox.YES | Messagebox.NO,
-                Messagebox.QUESTION,
-                event -> {
-
-                    if (Messagebox.ON_YES.equals(
-                            event.getName())) {
-
-                        submitBatch(
-                                confirmedBatchNumber
-                        );
-                    }
-                }
-        );
     }
+
 
     // ============================================================
     // SUBMIT BATCH
@@ -550,21 +1082,17 @@ public class CheckerSendToNPCIController
     private void submitBatch(
             String batchNumber) {
 
+
         if (batchNumber == null ||
                 batchNumber.trim().isEmpty()) {
-
-            Messagebox.show(
-                    "Batch number is required.",
-                    "Error",
-                    Messagebox.OK,
-                    Messagebox.ERROR
-            );
 
             return;
         }
 
+
         batchNumber =
                 batchNumber.trim();
+
 
         try {
 
@@ -574,35 +1102,88 @@ public class CheckerSendToNPCIController
                             + " to NPCI..."
             );
 
+
             System.out.println(
                     "SUBMISSION USER ID = "
                             + currentUserId
             );
 
+
             // ====================================================
-            // ACTUAL NPCI SUBMISSION
-            // ====================================================
-            //
-            // At present, the project does not have an external
-            // NPCI integration service supplied for this screen.
-            //
-            // Once the actual NPCI integration is available,
-            // call that service here.
-            //
-            // IMPORTANT:
-            //
-            // markBatchAsNPCISent() must execute only after the
-            // actual NPCI submission succeeds.
-            //
+            // FINAL VALIDATION CHECK
             // ====================================================
 
-            boolean success =
-                    npciDAO.markBatchAsNPCISent(
+            Boolean verified =
+                    validationStatus.get(
                             batchNumber
                     );
 
+
+            if (verified == null ||
+                    !verified) {
+
+                Messagebox.show(
+                        "Batch "
+                                + batchNumber
+                                + " is not verified.\n\n"
+                                + "The batch cannot be sent to NPCI.",
+                        "Submission Blocked",
+                        Messagebox.OK,
+                        Messagebox.ERROR
+                );
+
+                return;
+            }
+
+
             // ====================================================
-            // STATUS UPDATE FAILED
+            // FINAL DATABASE STATUS CHECK
+            // ====================================================
+
+            boolean ready =
+                    reportsDAO.isBatchReadyForNPCI(
+                            batchNumber
+                    );
+
+
+            if (!ready) {
+
+                Messagebox.show(
+                        "Batch "
+                                + batchNumber
+                                + " is no longer in "
+                                + "CHECKER_COMPLETED status.\n\n"
+                                + "Submission cancelled.",
+                        "Submission Blocked",
+                        Messagebox.OK,
+                        Messagebox.ERROR
+                );
+
+
+                loadBatches();
+
+                return;
+            }
+
+
+            // ====================================================
+            // CURRENT PROJECT BEHAVIOUR
+            //
+            // There is no external NPCI API integration currently
+            // connected to this screen.
+            //
+            // Therefore the existing application behaviour is to
+            // update the batch status to NPCI_SENT.
+            // ====================================================
+
+            boolean success =
+                    reportsDAO.markBatchAsNPCISent(
+                            batchNumber
+                    );
+
+
+            // ====================================================
+            // UPDATE FAILED
             // ====================================================
 
             if (!success) {
@@ -618,8 +1199,10 @@ public class CheckerSendToNPCIController
                         Messagebox.ERROR
                 );
 
+
                 return;
             }
+
 
             // ====================================================
             // SUCCESS
@@ -629,27 +1212,56 @@ public class CheckerSendToNPCIController
                     "======================================"
             );
 
+
             System.out.println(
                     "NPCI SUBMISSION SUCCESS"
             );
+
 
             System.out.println(
                     "BATCH NUMBER = "
                             + batchNumber
             );
 
+
             System.out.println(
                     "USER ID = "
                             + currentUserId
             );
 
+
             System.out.println(
                     "BATCH STATUS = NPCI_SENT"
             );
 
+
             System.out.println(
                     "======================================"
             );
+
+
+            // ====================================================
+            // REMOVE VALIDATION STATE
+            // ====================================================
+
+            validationStatus.remove(
+                    batchNumber
+            );
+
+
+            sendButtons.remove(
+                    batchNumber
+            );
+
+
+            statusLabels.remove(
+                    batchNumber
+            );
+
+
+            // ====================================================
+            // SUCCESS MESSAGE
+            // ====================================================
 
             Messagebox.show(
                     "Batch "
@@ -660,15 +1272,18 @@ public class CheckerSendToNPCIController
                     Messagebox.INFORMATION
             );
 
+
             // ====================================================
-            // REFRESH CURRENT NPCI SCREEN
+            // REFRESH SCREEN
             // ====================================================
 
             loadBatches();
 
+
         } catch (Exception e) {
 
             e.printStackTrace();
+
 
             Messagebox.show(
                     "Error while sending batch "

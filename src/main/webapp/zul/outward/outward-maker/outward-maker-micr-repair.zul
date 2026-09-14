@@ -14,7 +14,9 @@
     <!-- =========================================================
          PAGE STYLING
          ========================================================= -->
+
     <style>
+
         <![CDATA[
 
         html, body {
@@ -31,6 +33,7 @@
         }
 
         /* MICR Repair table header */
+
         .micr-repair-listbox .z-listheader {
             background: #0091FF !important;
             color: #FFFFFF !important;
@@ -47,6 +50,7 @@
         }
 
         /* MICR Repair table rows */
+
         .micr-repair-listbox .z-listcell {
             font-size: 13px !important;
             color: #1E293B !important;
@@ -54,22 +58,23 @@
             border-bottom: 1px solid #E2E8F0 !important;
         }
 
-        .micr-repair-listbox .z-listitem:hover > .z-listcell {
+        .micr-repair-listbox .z-listitem\:hover > .z-listcell {
             background: #F8FAFC !important;
         }
 
         ]]>
+
     </style>
 
 
     <!-- =========================================================
          CONTENT
-
          Header + Sidebar are provided by:
 
              /zul/common/layout.zul
 
          ========================================================= -->
+
     <div
         self="@define(content)"
         width="100%"
@@ -83,6 +88,7 @@
         <!-- =====================================================
              MICR REPAIR CONTENT
              ===================================================== -->
+
         <vlayout
             apply="com.iispl.cts.controller.outward.OutwardMakerMicrRepairController"
             spacing="18px"
@@ -97,6 +103,7 @@
             <!-- =================================================
                  PAGE TITLE
                  ================================================= -->
+
             <label
                 value="MICR Repair"
                 style="
@@ -110,6 +117,7 @@
             <!-- =================================================
                  BATCH TABLE CARD
                  ================================================= -->
+
             <div
                 width="100%"
                 style="
@@ -124,6 +132,7 @@
                 <!-- =============================================
                      BATCH LIST
                      ============================================= -->
+
                 <listbox
                     id="batchListbox"
                     width="100%"
@@ -148,7 +157,7 @@
                             width="25%"/>
 
                         <listheader
-                            label="MICR Error"
+                            label="Status"
                             width="25%"/>
 
                         <listheader

@@ -1,5 +1,6 @@
 package com.iispl.cts.controller.outward;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.zkoss.zk.ui.Component;
@@ -8,14 +9,19 @@ import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Wire;
 import org.zkoss.zul.Button;
+import org.zkoss.zul.Label;
 import org.zkoss.zul.ListModelList;
 import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.ListitemRenderer;
 import org.zkoss.zul.Messagebox;
+import org.zkoss.zul.Vlayout;
 
+import com.iispl.cts.model.outward.ChequeProcessing;
 import com.iispl.cts.model.outward.OutwardBatch;
+import com.iispl.cts.model.outward.OutwardCheque;
+import com.iispl.cts.service.outward.OutwardMakerDashboardService;
 import com.iispl.cts.service.outward.OutwardMakerMicrRepairService;
 
 public class OutwardMakerMicrRepairController
@@ -28,6 +34,28 @@ public class OutwardMakerMicrRepairController
 
     private OutwardMakerMicrRepairService service;
 
+    /*
+     * =========================================================
+     * RETURNED CHEQUE / MICR REPAIR STATE
+     * =========================================================
+     */
+    private boolean returnedMode = false;
+
+    private String returnedChequeNumber;
+
+    private String checkerReasonCode;
+
+    private String checkerRemarks;
+
+    @Wire
+    private Vlayout checkerReturnInformationPanel;
+
+    @Wire
+    private Label checkerReasonLabel;
+
+    @Wire
+    private Label checkerRemarksLabel;
+
     @Override
     public void doAfterCompose(Component comp) throws Exception {
 
@@ -35,12 +63,60 @@ public class OutwardMakerMicrRepairController
 
         service = new OutwardMakerMicrRepairService();
 
+        /*
+         * =====================================================
+         * CHECK WHETHER THIS IS RETURNED MODE
+         * =====================================================
+         */
+
+        String returnMode =
+                Executions.getCurrent()
+                        .getParameter("returnMode");
+
+        /*
+         * Support both:
+         *
+         * returnMode=RETURNED
+         *
+         * and:
+         *
+         * amp;returnMode=RETURNED
+         */
+        if (returnMode == null
+                || returnMode.trim().isEmpty()) {
+
+            returnMode =
+                    Executions.getCurrent()
+                            .getParameter("amp;returnMode");
+        }
+
+        returnedMode =
+                "RETURNED".equalsIgnoreCase(
+                        returnMode
+                );
+
+        returnedChequeNumber =
+                Executions.getCurrent()
+                        .getParameter(
+                                "chequeNumber"
+                        );
+
+        /*
+         * =====================================================
+         * NORMAL MICR REPAIR QUEUE
+         * =====================================================
+         */
+
         setListItemRenderer();
 
         loadMicrErrorBatches();
     }
 
     private void setListItemRenderer() {
+
+        if (batchListbox == null) {
+            return;
+        }
 
         batchListbox.setItemRenderer(
                 new ListitemRenderer<OutwardBatch>() {
@@ -85,7 +161,8 @@ public class OutwardMakerMicrRepairController
                                 "onClick",
                                 event -> openBatch(batch));
 
-                        actionCell.appendChild(openButton);
+                        actionCell.appendChild(
+                                openButton);
 
                         item.appendChild(actionCell);
                     }
@@ -196,6 +273,16 @@ public class OutwardMakerMicrRepairController
                 + currentUserId
         );
 
+        System.out.println(
+                "Returned Mode      : "
+                + returnedMode
+        );
+
+        System.out.println(
+                "Returned Cheque    : "
+                + returnedChequeNumber
+        );
+
         // =====================================================
         // LOAD MICR ERROR BATCHES FOR LOGGED-IN USER
         // =====================================================
@@ -222,19 +309,105 @@ public class OutwardMakerMicrRepairController
                 new ListModelList<>(
                         batches);
 
-        batchListbox.setModel(model);
+        if (batchListbox != null) {
+
+            batchListbox.setModel(model);
+        }
     }
 
     private void openBatch(OutwardBatch batch) {
 
-        if (batch == null ||
-            batch.getBatchNumber() == null) {
+        if (batch == null
+                || batch.getBatchNumber() == null) {
 
             return;
         }
 
         String batchNumber =
-                batch.getBatchNumber();
+                batch.getBatchNumber().trim();
+
+        /*
+         * =====================================================
+         * RETURNED MICR CHEQUE
+         * =====================================================
+         *
+         * This is used when Maker Dashboard sends a specific
+         * returned MICR cheque to this module.
+         *
+         * The reason is NOT decided from the batch.
+         *
+         * It will be loaded for the specific cheque in the
+         * MICR Repair Detail Controller.
+         * =====================================================
+         */
+
+        if (returnedMode) {
+
+            StringBuilder url =
+                    new StringBuilder(
+                            "outward-maker-micr-repair-detail.zul"
+                    );
+
+            url.append("?batchNumber=")
+                    .append(batchNumber);
+
+            url.append("&returnMode=RETURNED");
+
+            if (returnedChequeNumber != null
+                    && !returnedChequeNumber.trim().isEmpty()) {
+
+                url.append("&chequeNumber=")
+                        .append(
+                                returnedChequeNumber.trim()
+                        );
+            }
+
+            System.out.println(
+                    "======================================"
+            );
+
+            System.out.println(
+                    "OPENING RETURNED MICR BATCH"
+            );
+
+            System.out.println(
+                    "Batch Number : "
+                    + batchNumber
+            );
+
+            System.out.println(
+                    "Return Mode  : RETURNED"
+            );
+
+            System.out.println(
+                    "Cheque       : "
+                    + returnedChequeNumber
+            );
+
+            System.out.println(
+                    "URL          : "
+                    + url.toString()
+            );
+
+            System.out.println(
+                    "======================================"
+            );
+
+            Executions.sendRedirect(
+                    url.toString()
+            );
+
+            return;
+        }
+
+        /*
+         * =====================================================
+         * NORMAL MICR REPAIR
+         * =====================================================
+         *
+         * EXISTING LOGIC PRESERVED
+         * =====================================================
+         */
 
         Executions.sendRedirect(
                 "outward-maker-micr-repair-detail.zul"

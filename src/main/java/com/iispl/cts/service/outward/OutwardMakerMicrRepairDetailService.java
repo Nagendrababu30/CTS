@@ -8,48 +8,47 @@ import com.iispl.cts.model.outward.OutwardCheque;
 public class OutwardMakerMicrRepairDetailService {
 
 
-private OutwardMakerMicrRepairDetailDAO dao;
+    private OutwardMakerMicrRepairDetailDAO dao;
 
-public OutwardMakerMicrRepairDetailService() {
-    dao = new OutwardMakerMicrRepairDetailDAO();
-}
-
-
-public List<OutwardCheque> getMicrErrorCheques(
-        String batchNumber) {
-
-    return dao.getMicrErrorCheques(batchNumber);
-}
+    public OutwardMakerMicrRepairDetailService() {
+        dao = new OutwardMakerMicrRepairDetailDAO();
+    }
 
 
-public boolean updateCorrectedMicr(
-        String batchNumber,
-        String chequeNumber,
-        String cityCode,
-        String bankCode,
-        String branchCode) {
+    public List<OutwardCheque> getMicrErrorCheques(
+            String batchNumber) {
 
-    return dao.updateCorrectedMicr(
-            batchNumber,
-            chequeNumber,
-            cityCode,
-            bankCode,
-            branchCode);
-}
+        return dao.getMicrErrorCheques(batchNumber);
+    }
 
 
-public boolean hasRemainingMicrErrors(
-        String batchNumber) {
+    public boolean updateCorrectedMicr(
+            String batchNumber,
+            String chequeNumber,
+            String cityCode,
+            String bankCode,
+            String branchCode) {
 
-    return dao.hasRemainingMicrErrors(batchNumber);
-}
+        return dao.updateCorrectedMicr(
+                batchNumber,
+                chequeNumber,
+                cityCode,
+                bankCode,
+                branchCode);
+    }
 
 
-public boolean updateBatchStatus(
-        String batchNumber) {
+    public boolean hasRemainingMicrErrors(
+            String batchNumber) {
 
-    return dao.updateBatchStatus(batchNumber);
-}
+        return dao.hasRemainingMicrErrors(batchNumber);
+    }
 
+
+    public boolean updateBatchStatus(
+            String batchNumber) {
+
+        return dao.updateBatchStatus(batchNumber);
+    }
 
 }

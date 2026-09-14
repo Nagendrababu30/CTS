@@ -1,451 +1,161 @@
 package com.iispl.cts.controller.outward.checker;
 
-import com.iispl.cts.model.outward.OutwardBatch;
-import com.iispl.cts.model.outward.OutwardCheque;
-import com.iispl.cts.service.outward.checker.CheckerReportsService;
-import com.iispl.cts.service.outward.CheckerFileGenerationService;
-import com.iispl.cts.service.outward.checker.CheckerCXFGenerationService;
-import com.iispl.cts.service.outward.checker.CheckerCIBFGenerationService;
-import com.iispl.cts.service.outward.RRFXmlWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.List;
 
 import org.zkoss.zk.ui.Component;
-import org.zkoss.zk.ui.Executions;
-import org.zkoss.zk.ui.Session;
-import org.zkoss.zk.ui.event.Event;
-import org.zkoss.zk.ui.event.EventListener;
-import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.select.SelectorComposer;
+import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.Wire;
-
 import org.zkoss.zul.Button;
-import org.zkoss.zul.Comboitem;
-import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Messagebox;
+import org.zkoss.zul.Filedownload;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import com.iispl.cts.dao.outward.checker.CheckerChequeDAO;
+import com.iispl.cts.data.CTSStaticData;
+import com.iispl.cts.model.outward.OutwardCheque;
 
-/**
- * ============================================================
- * CHECKER REPORTS CONTROLLER
- * ============================================================
- *
- * Flow:
- *
- * 1. Load available batches
- * 2. Select Batch Number
- * 3. Click Load Batch
- * 4. Display batch details
- * 5. Determine rejected cheques from cheque_processing
- * 6. RRF:
- *      - Available when rejected cheque exists
- *      - Not available otherwise
- *      - Never generate empty RRF
- * 7. CFX:
- *      - Available for every batch
- * 8. CIBF:
- *      - Available for every batch
- * 9. Send generated files to NPCI
- *
- * ============================================================
- */
-public class CheckerReportsController
-        extends SelectorComposer<Component> {
+public class CheckerReportsController extends SelectorComposer<Component> {
 
     private static final long serialVersionUID = 1L;
 
-    // ============================================================
-    // ZUL COMPONENTS
-    // ============================================================
-
     @Wire
-    private Combobox batchCombo;
+    private Listbox reportList;
 
-    @Wire
-    private Button loadBatchBtn;
+    private CheckerChequeDAO checkerChequeDAO =
+            new CheckerChequeDAO();
 
-    @Wire
-    private Label selectedBatchNumber;
-
-    @Wire
-    private Label selectedBatchChequeCount;
-
-    @Wire
-    private Label selectedBatchRejectedCount;
-
-    @Wire
-    private Label batchReportStatus;
-
-    @Wire
-    private Listbox rejectedChequeListbox;
-
-    @Wire
-    private Label rrfStatusLabel;
-
-    @Wire
-    private Button generateRrfXmlBtn;
-
-    @Wire
-    private Button generateRrfPdfBtn;
-
-    @Wire
-    private Label cfxStatusLabel;
-
-    @Wire
-    private Button generateCfxXmlBtn;
-
-    @Wire
-    private Button generateCfxPdfBtn;
-
-    @Wire
-    private Label cibfStatusLabel;
-
-    @Wire
-    private Button generateCibfBtn;
-
-    @Wire
-    private Button sendToNpciBtn;
-
-    // ============================================================
-    // SERVICES
-    // ============================================================
-
-    private CheckerReportsService service;
-
-    private CheckerFileGenerationService fileGenerationService;
-
-    private CheckerCXFGenerationService cxfGenerationService;
-
-    private CheckerCIBFGenerationService cibfGenerationService;
-
-    private RRFXmlWriter rrfXmlWriter;
-
-    // ============================================================
-    // CURRENT CHECKER USER
-    // ============================================================
-
-    private long currentCheckerUser;
-
-    // ============================================================
-    // CURRENT SELECTED BATCH
-    // ============================================================
-
-    private OutwardBatch selectedBatch;
-
-    private List<OutwardCheque> selectedBatchCheques =
-            new ArrayList<OutwardCheque>();
-
-    private List<OutwardCheque> rejectedCheques =
-            new ArrayList<OutwardCheque>();
-
-    // ============================================================
-    // GENERATED FILE PATHS
-    // ============================================================
-
-    private String generatedRrfXmlPath;
-
-    private String generatedCfxXmlPath;
-
-    private String generatedCibfPath;
-
-    // ============================================================
-    // PAGE INITIALIZATION
-    // ============================================================
 
     @Override
-    public void doAfterCompose(Component comp)
+    public void doAfterCompose(Component component)
             throws Exception {
 
-        super.doAfterCompose(comp);
+        super.doAfterCompose(component);
 
-        // ========================================================
-        // GET ZK SESSION
-        // ========================================================
-
-        Session session =
-                Executions.getCurrent().getSession();
-
-        // ========================================================
-        // NO SESSION
-        // ========================================================
-
-        if (session == null) {
-
-            Executions.sendRedirect(
-                    "/zul/login.zul"
-            );
-
-            return;
-        }
-
-        // ========================================================
-        // GET USER ID FROM SESSION
-        // ========================================================
-
-        Object sessionUserId =
-                session.getAttribute("userId");
-
-        // ========================================================
-        // USER ID NOT FOUND
-        // ========================================================
-
-        if (sessionUserId == null) {
-
-            Executions.sendRedirect(
-                    "/zul/login.zul"
-            );
-
-            return;
-        }
-
-        // ========================================================
-        // CONVERT USER ID
-        // ========================================================
-
-        if (sessionUserId instanceof Number) {
-
-            currentCheckerUser =
-                    ((Number) sessionUserId)
-                            .longValue();
-
-        } else {
-
-            try {
-
-                currentCheckerUser =
-                        Long.parseLong(
-                                sessionUserId.toString()
-                        );
-
-            } catch (NumberFormatException e) {
-
-                Executions.sendRedirect(
-                        "/zul/login.zul"
-                );
-
-                return;
-            }
-        }
-
-        // ========================================================
-        // LOG CURRENT USER
-        // ========================================================
-
-        System.out.println(
-                "CHECKER REPORTS SESSION: "
-                        + "userId="
-                        + currentCheckerUser
-        );
-
-        // ========================================================
-        // CREATE SERVICES
-        // ========================================================
-
-        service =
-                new CheckerReportsService();
-
-        fileGenerationService =
-                new CheckerFileGenerationService();
-
-        cxfGenerationService =
-                new CheckerCXFGenerationService();
-
-        cibfGenerationService =
-                new CheckerCIBFGenerationService();
-
-        rrfXmlWriter =
-                new RRFXmlWriter();
-
-        // ========================================================
-        // INITIAL UI STATE
-        // ========================================================
-
-        clearSelectedBatch();
-
-        // ========================================================
-        // LOAD BATCHES
-        // ========================================================
-
-        loadCompletedBatches();
-
-        // ========================================================
-        // BUTTON EVENTS
-        // ========================================================
-
-        if (loadBatchBtn != null) {
-
-            loadBatchBtn.addEventListener(
-                    Events.ON_CLICK,
-                    new EventListener<Event>() {
-
-                        @Override
-                        public void onEvent(Event event)
-                                throws Exception {
-
-                            loadSelectedBatch();
-                        }
-                    }
-            );
-        }
-
-        if (generateRrfXmlBtn != null) {
-
-            generateRrfXmlBtn.addEventListener(
-                    Events.ON_CLICK,
-                    new EventListener<Event>() {
-
-                        @Override
-                        public void onEvent(Event event)
-                                throws Exception {
-
-                            generateRrfXml();
-                        }
-                    }
-            );
-        }
-
-        if (generateRrfPdfBtn != null) {
-
-            generateRrfPdfBtn.addEventListener(
-                    Events.ON_CLICK,
-                    new EventListener<Event>() {
-
-                        @Override
-                        public void onEvent(Event event)
-                                throws Exception {
-
-                            generateRrfPdf();
-                        }
-                    }
-            );
-        }
-
-        if (generateCfxXmlBtn != null) {
-
-            generateCfxXmlBtn.addEventListener(
-                    Events.ON_CLICK,
-                    new EventListener<Event>() {
-
-                        @Override
-                        public void onEvent(Event event)
-                                throws Exception {
-
-                            generateCfxXml();
-                        }
-                    }
-            );
-        }
-
-        if (generateCfxPdfBtn != null) {
-
-            generateCfxPdfBtn.addEventListener(
-                    Events.ON_CLICK,
-                    new EventListener<Event>() {
-
-                        @Override
-                        public void onEvent(Event event)
-                                throws Exception {
-
-                            generateCfxPdf();
-                        }
-                    }
-            );
-        }
-
-        if (generateCibfBtn != null) {
-
-            generateCibfBtn.addEventListener(
-                    Events.ON_CLICK,
-                    new EventListener<Event>() {
-
-                        @Override
-                        public void onEvent(Event event)
-                                throws Exception {
-
-                            generateCibf();
-                        }
-                    }
-            );
-        }
-
-        if (sendToNpciBtn != null) {
-
-            sendToNpciBtn.addEventListener(
-                    Events.ON_CLICK,
-                    new EventListener<Event>() {
-
-                        @Override
-                        public void onEvent(Event event)
-                                throws Exception {
-
-                            sendToNpci();
-                        }
-                    }
-            );
-        }
+        loadReportBatches();
     }
 
-    // ============================================================
-    // LOAD AVAILABLE BATCHES
-    // ============================================================
 
-    private void loadCompletedBatches() {
+    private void loadReportBatches() {
 
-        if (batchCombo == null) {
-            return;
-        }
+        String sql =
+                "SELECT ob.batch_number, " +
+                "       COUNT(oc.cheque_number) AS total_cheques, " +
+                "       COUNT(CASE WHEN UPPER(oc.cheque_status) = 'CHECKER_ACCEPTED' " +
+                "                  THEN 1 END) AS valid_cheques, " +
+                "       COUNT(CASE WHEN UPPER(oc.cheque_status) = 'CHECKER_REJECTED' " +
+                "                  THEN 1 END) AS rejected_cheques " +
+                "FROM outward_batch ob " +
+                "LEFT JOIN outward_cheque oc " +
+                "       ON ob.batch_number = oc.batch_number " +
+                "WHERE UPPER(ob.batch_status) = 'CHECKER_COMPLETED' " +
+                "GROUP BY ob.batch_number " +
+                "ORDER BY ob.batch_number DESC";
 
-        batchCombo.getItems().clear();
+        try (Connection connection =
+                     CTSStaticData.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(sql);
+             ResultSet rs =
+                     statement.executeQuery()) {
 
-        try {
+            reportList.getItems().clear();
 
-            List<OutwardBatch> batches =
-                    service.getCheckerCompletedBatches();
-
-            if (batches == null ||
-                    batches.isEmpty()) {
-
-                batchCombo.setPlaceholder(
-                        "No batches available"
-                );
-
-                return;
-            }
-
-            for (OutwardBatch batch : batches) {
-
-                if (batch == null) {
-                    continue;
-                }
+            while (rs.next()) {
 
                 String batchNumber =
-                        batch.getBatchNumber();
+                        rs.getString("batch_number");
 
-                if (batchNumber == null ||
-                        batchNumber.trim().isEmpty()) {
+                int totalCheques =
+                        rs.getInt("total_cheques");
 
-                    continue;
-                }
+                int validCheques =
+                        rs.getInt("valid_cheques");
 
-                Comboitem item =
-                        new Comboitem();
+                int rejectedCheques =
+                        rs.getInt("rejected_cheques");
 
-                item.setLabel(
-                        batchNumber
-                );
+                Listitem item =
+                        new Listitem();
 
-                item.setValue(
-                        batch
-                );
+                Listcell batchCell =
+                        new Listcell();
 
-                batchCombo.appendChild(
-                        item
-                );
+                Label batchLabel =
+                        new Label(batchNumber);
+
+                batchCell.appendChild(batchLabel);
+
+                item.appendChild(batchCell);
+
+
+                Listcell totalCell =
+                        new Listcell(
+                                String.valueOf(
+                                        totalCheques));
+
+                item.appendChild(totalCell);
+
+
+                Listcell validCell =
+                        new Listcell();
+
+                Button validButton =
+                        new Button();
+
+                validButton.setLabel(
+                        "Download XML");
+
+                validButton.setSclass(
+                        "primary-button");
+
+                validButton.setDisabled(
+                        validCheques == 0);
+
+                validButton.addEventListener(
+                        "onClick",
+                        event -> downloadValidXml(
+                                batchNumber));
+
+                validCell.appendChild(
+                        validButton);
+
+                item.appendChild(validCell);
+
+
+                Listcell rejectedCell =
+                        new Listcell();
+
+                Button rejectedButton =
+                        new Button();
+
+                rejectedButton.setLabel(
+                        "Download XML");
+
+                rejectedButton.setSclass(
+                        "secondary-button");
+
+                rejectedButton.setDisabled(
+                        rejectedCheques == 0);
+
+                rejectedButton.addEventListener(
+                        "onClick",
+                        event -> downloadRejectedXml(
+                                batchNumber));
+
+                rejectedCell.appendChild(
+                        rejectedButton);
+
+                item.appendChild(rejectedCell);
+
+
+                reportList.appendChild(item);
             }
 
         } catch (Exception e) {
@@ -453,1156 +163,359 @@ public class CheckerReportsController
             e.printStackTrace();
 
             Messagebox.show(
-                    "Unable to load batches.\n\n"
-                            + safe(e.getMessage()),
-                    "Reports Error",
+                    "Unable to load report batches.\n\n"
+                            + e.getMessage(),
+                    "Checker Reports",
                     Messagebox.OK,
-                    Messagebox.ERROR
-            );
+                    Messagebox.ERROR);
         }
     }
 
-    // ============================================================
-    // LOAD SELECTED BATCH
-    // ============================================================
 
-    private void loadSelectedBatch() {
-
-        if (batchCombo == null ||
-                batchCombo.getSelectedItem() == null) {
-
-            Messagebox.show(
-                    "Please select a Batch Number.",
-                    "Batch Required",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION
-            );
-
-            return;
-        }
+    private void downloadValidXml(
+            String batchNumber) {
 
         try {
 
-            Comboitem selectedItem =
-                    batchCombo.getSelectedItem();
+            List<OutwardCheque> cheques =
+                    checkerChequeDAO.getChequesByBatch(
+                            batchNumber);
 
-            Object value =
-                    selectedItem.getValue();
+            String xml =
+                    buildValidXml(
+                            batchNumber,
+                            cheques);
 
-            String batchNumber =
-                    selectedItem.getLabel();
-
-            // ====================================================
-            // CLEAR PREVIOUS GENERATED FILES
-            // ====================================================
-
-            generatedRrfXmlPath = null;
-            generatedCfxXmlPath = null;
-            generatedCibfPath = null;
-
-            // ====================================================
-            // GET BATCH
-            // ====================================================
-
-            if (value instanceof OutwardBatch) {
-
-                selectedBatch =
-                        (OutwardBatch) value;
-
-            } else {
-
-                selectedBatch =
-                        service.getBatchByNumber(
-                                batchNumber
-                        );
-            }
-
-            if (selectedBatch == null) {
-
-                Messagebox.show(
-                        "Batch not found:\n\n"
-                                + batchNumber,
-                        "Batch Error",
-                        Messagebox.OK,
-                        Messagebox.ERROR
-                );
-
-                clearSelectedBatch();
-
+            if (xml == null) {
                 return;
             }
 
-            // ====================================================
-            // LOAD ALL CHEQUES
-            // ====================================================
+            String fileName =
+                    "Valid_Cheques_"
+                            + batchNumber
+                            + ".xml";
 
-            selectedBatchCheques =
-                    fileGenerationService
-                            .getBatchCheques(
-                                    batchNumber
-                            );
-
-            if (selectedBatchCheques == null) {
-
-                selectedBatchCheques =
-                        new ArrayList<OutwardCheque>();
-            }
-
-            // ====================================================
-            // FIND REJECTED CHEQUES
-            // ====================================================
-            //
-            // IMPORTANT:
-            //
-            // RRF availability is determined from
-            // cheque_processing.checker_action = 'REJECT'.
-            //
-            // Do NOT use outward_cheque.return_reason_id
-            // alone to decide whether RRF exists.
-            //
-            // ====================================================
-
-            rejectedCheques =
-                    service.getRejectedCheques(
-                            batchNumber
-                    );
-
-            if (rejectedCheques == null) {
-
-                rejectedCheques =
-                        new ArrayList<OutwardCheque>();
-            }
-
-            // ====================================================
-            // UPDATE UI
-            // ====================================================
-
-            updateBatchInformation();
-
-            loadRejectedChequeList();
-
-            updateReportAvailability();
+            Filedownload.save(
+                    xml,
+                    "application/xml",
+                    fileName);
 
         } catch (Exception e) {
 
             e.printStackTrace();
 
-            String selectedBatchNumber =
-                    "";
+            Messagebox.show(
+                    "Unable to download Valid XML.\n\n"
+                            + e.getMessage(),
+                    "Checker Reports",
+                    Messagebox.OK,
+                    Messagebox.ERROR);
+        }
+    }
 
-            if (batchCombo.getSelectedItem() != null) {
 
-                selectedBatchNumber =
-                        safe(
-                                batchCombo
-                                        .getSelectedItem()
-                                        .getLabel()
-                        );
+    private void downloadRejectedXml(
+            String batchNumber) {
+
+        try {
+
+            List<OutwardCheque> cheques =
+                    checkerChequeDAO.getChequesByBatch(
+                            batchNumber);
+
+            String xml =
+                    buildRejectedXml(
+                            batchNumber,
+                            cheques);
+
+            if (xml == null) {
+                return;
             }
+
+            String fileName =
+                    "Rejected_Cheques_"
+                            + batchNumber
+                            + ".xml";
+
+            Filedownload.save(
+                    xml,
+                    "application/xml",
+                    fileName);
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
 
             Messagebox.show(
-                    "Unable to load batch details.\n\n"
-                            + "Batch: "
-                            + selectedBatchNumber
-                            + "\n\n"
-                            + safe(e.getMessage()),
-                    "Reports Error",
+                    "Unable to download Rejected XML.\n\n"
+                            + e.getMessage(),
+                    "Checker Reports",
                     Messagebox.OK,
-                    Messagebox.ERROR
-            );
-
-            clearSelectedBatch();
+                    Messagebox.ERROR);
         }
     }
 
-    // ============================================================
-    // UPDATE BATCH INFORMATION
-    // ============================================================
 
-    private void updateBatchInformation() {
+    private String buildValidXml(
+            String batchNumber,
+            List<OutwardCheque> cheques) {
 
-        if (selectedBatch == null) {
-            return;
-        }
+        StringBuilder xml =
+                new StringBuilder();
 
-        String batchNumber =
-                selectedBatch.getBatchNumber();
+        int validCount = 0;
 
-        Integer chequeCount =
-                selectedBatch.getNumberOfCheques();
+        for (OutwardCheque cheque : cheques) {
 
-        int actualChequeCount =
-                selectedBatchCheques == null
-                        ? 0
-                        : selectedBatchCheques.size();
+            if ("CHECKER_ACCEPTED".equalsIgnoreCase(
+                    cheque.getChequeStatus())) {
 
-        int rejectedCount =
-                rejectedCheques == null
-                        ? 0
-                        : rejectedCheques.size();
-
-        if (selectedBatchNumber != null) {
-
-            selectedBatchNumber.setValue(
-                    safe(batchNumber)
-            );
-        }
-
-        if (selectedBatchChequeCount != null) {
-
-            if (chequeCount != null) {
-
-                selectedBatchChequeCount.setValue(
-                        String.valueOf(
-                                chequeCount
-                        )
-                );
-
-            } else {
-
-                selectedBatchChequeCount.setValue(
-                        String.valueOf(
-                                actualChequeCount
-                        )
-                );
+                validCount++;
             }
         }
 
-        if (selectedBatchRejectedCount != null) {
+        if (validCount == 0) {
 
-            selectedBatchRejectedCount.setValue(
-                    String.valueOf(
-                            rejectedCount
-                    )
-            );
+            Messagebox.show(
+                    "Valid XML is not available for batch "
+                            + batchNumber
+                            + ".",
+                    "Checker Reports",
+                    Messagebox.OK,
+                    Messagebox.INFORMATION);
+
+            return null;
         }
 
-        if (batchReportStatus != null) {
+        xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 
-            batchReportStatus.setValue(
-                    "Batch "
-                            + safe(batchNumber)
-                            + " loaded successfully."
-            );
-        }
-    }
+        xml.append("<ValidChequesReport>\n");
 
-    // ============================================================
-    // LOAD REJECTED CHEQUE LIST
-    // ============================================================
+        xml.append("    <BatchNumber>")
+                .append(xmlValue(batchNumber))
+                .append("</BatchNumber>\n");
 
-    private void loadRejectedChequeList() {
+        xml.append("    <TotalValidCheques>")
+                .append(validCount)
+                .append("</TotalValidCheques>\n");
 
-        if (rejectedChequeListbox == null) {
-            return;
-        }
+        xml.append("    <Cheques>\n");
 
-        rejectedChequeListbox
-                .getItems()
-                .clear();
 
-        if (rejectedCheques == null ||
-                rejectedCheques.isEmpty()) {
+        for (OutwardCheque cheque : cheques) {
 
-            return;
-        }
+            if (!"CHECKER_ACCEPTED".equalsIgnoreCase(
+                    cheque.getChequeStatus())) {
 
-        for (OutwardCheque cheque :
-                rejectedCheques) {
-
-            if (cheque == null) {
                 continue;
             }
 
-            Listitem item =
-                    new Listitem();
-
-            // ====================================================
-            // CHEQUE NUMBER
-            // ====================================================
-
-            Listcell chequeNumberCell =
-                    new Listcell();
-
-            chequeNumberCell.appendChild(
-                    new Label(
-                            safe(
-                                    cheque.getChequeNumber()
-                            )
-                    )
-            );
-
-            item.appendChild(
-                    chequeNumberCell
-            );
-
-            // ====================================================
-            // CITY CODE
-            // ====================================================
-
-            Listcell cityCell =
-                    new Listcell();
-
-            cityCell.appendChild(
-                    new Label(
-                            safe(
-                                    cheque.getCityCode()
-                            )
-                    )
-            );
-
-            item.appendChild(
-                    cityCell
-            );
-
-            // ====================================================
-            // BANK CODE
-            // ====================================================
-
-            Listcell bankCell =
-                    new Listcell();
-
-            bankCell.appendChild(
-                    new Label(
-                            safe(
-                                    cheque.getBankCode()
-                            )
-                    )
-            );
-
-            item.appendChild(
-                    bankCell
-            );
-
-            // ====================================================
-            // BRANCH CODE
-            // ====================================================
-
-            Listcell branchCell =
-                    new Listcell();
-
-            branchCell.appendChild(
-                    new Label(
-                            safe(
-                                    cheque.getBranchCode()
-                            )
-                    )
-            );
-
-            item.appendChild(
-                    branchCell
-            );
-
-            // ====================================================
-            // STATUS
-            // ====================================================
-
-            Listcell statusCell =
-                    new Listcell();
-
-            Label statusLabel =
-                    new Label(
-                            "REJECTED"
-                    );
-
-            statusLabel.setSclass(
-                    "status-rejected"
-            );
-
-            statusCell.appendChild(
-                    statusLabel
-            );
-
-            item.appendChild(
-                    statusCell
-            );
-
-            rejectedChequeListbox
-                    .appendChild(
-                            item
-                    );
+            appendChequeXml(
+                    xml,
+                    cheque,
+                    false);
         }
+
+
+        xml.append("    </Cheques>\n");
+
+        xml.append("</ValidChequesReport>\n");
+
+        return xml.toString();
     }
 
-    // ============================================================
-    // UPDATE REPORT AVAILABILITY
-    // ============================================================
 
-    private void updateReportAvailability() {
+    private String buildRejectedXml(
+            String batchNumber,
+            List<OutwardCheque> cheques) {
 
-        boolean hasBatch =
-                selectedBatch != null;
+        StringBuilder xml =
+                new StringBuilder();
 
-        boolean hasRejectedCheques =
-                rejectedCheques != null &&
-                        !rejectedCheques.isEmpty();
+        int rejectedCount = 0;
 
-        // ========================================================
-        // RRF
-        // ========================================================
-        //
-        // RRF is conditional.
-        //
-        // Rejected cheque exists:
-        //      RRF available
-        //
-        // No rejected cheque:
-        //      RRF not available for this batch
-        //
-        // ========================================================
+        for (OutwardCheque cheque : cheques) {
 
-        if (rrfStatusLabel != null) {
+            if ("CHECKER_REJECTED".equalsIgnoreCase(
+                    cheque.getChequeStatus())) {
 
-            if (hasBatch &&
-                    hasRejectedCheques) {
-
-                rrfStatusLabel.setValue(
-                        "RRF available for this batch."
-                );
-
-                rrfStatusLabel.setSclass(
-                        "report-status-success"
-                );
-
-            } else {
-
-                rrfStatusLabel.setValue(
-                        "RRF not available for this batch"
-                );
-
-                rrfStatusLabel.setSclass(
-                        "report-status-warning"
-                );
+                rejectedCount++;
             }
         }
 
-        if (generateRrfXmlBtn != null) {
-
-            generateRrfXmlBtn.setDisabled(
-                    !hasBatch ||
-                            !hasRejectedCheques
-            );
-        }
-
-        if (generateRrfPdfBtn != null) {
-
-            generateRrfPdfBtn.setDisabled(
-                    !hasBatch ||
-                            !hasRejectedCheques
-            );
-        }
-
-        // ========================================================
-        // CFX
-        // ========================================================
-        //
-        // EVERY BATCH HAS CFX.
-        //
-        // ========================================================
-
-        if (cfxStatusLabel != null) {
-
-            if (hasBatch) {
-
-                cfxStatusLabel.setValue(
-                        "CFX available for this batch."
-                );
-
-                cfxStatusLabel.setSclass(
-                        "report-status-success"
-                );
-
-            } else {
-
-                cfxStatusLabel.setValue(
-                        "Select a batch to generate CFX."
-                );
-            }
-        }
-
-        if (generateCfxXmlBtn != null) {
-
-            generateCfxXmlBtn.setDisabled(
-                    !hasBatch
-            );
-        }
-
-        if (generateCfxPdfBtn != null) {
-
-            generateCfxPdfBtn.setDisabled(
-                    !hasBatch
-            );
-        }
-
-        // ========================================================
-        // CIBF
-        // ========================================================
-        //
-        // EVERY BATCH HAS CIBF.
-        //
-        // ========================================================
-
-        if (cibfStatusLabel != null) {
-
-            if (hasBatch) {
-
-                cibfStatusLabel.setValue(
-                        "CIBF available for this batch."
-                );
-
-                cibfStatusLabel.setSclass(
-                        "report-status-success"
-                );
-
-            } else {
-
-                cibfStatusLabel.setValue(
-                        "Select a batch to generate CIBF."
-                );
-            }
-        }
-
-        if (generateCibfBtn != null) {
-
-            generateCibfBtn.setDisabled(
-                    !hasBatch
-            );
-        }
-
-        // ========================================================
-        // NPCI
-        // ========================================================
-
-        if (sendToNpciBtn != null) {
-
-            sendToNpciBtn.setDisabled(
-                    !hasBatch
-            );
-        }
-    }
-
-    // ============================================================
-    // GENERATE RRF XML
-    // ============================================================
-
-    private void generateRrfXml() {
-
-        if (!isBatchLoaded()) {
-
-            showBatchRequired();
-
-            return;
-        }
-
-        // ========================================================
-        // NEVER GENERATE EMPTY RRF
-        // ========================================================
-
-        if (rejectedCheques == null ||
-                rejectedCheques.isEmpty()) {
+        if (rejectedCount == 0) {
 
             Messagebox.show(
-                    "RRF not available for this batch.\n\n"
-                            + "Batch: "
-                            + selectedBatch.getBatchNumber(),
-                    "RRF Not Available",
+                    "Rejected XML is not available for batch "
+                            + batchNumber
+                            + ".",
+                    "Checker Reports",
                     Messagebox.OK,
-                    Messagebox.EXCLAMATION
-            );
+                    Messagebox.INFORMATION);
 
-            return;
+            return null;
         }
 
-        String batchNumber =
-                selectedBatch.getBatchNumber();
+        xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 
-        try {
+        xml.append("<RejectedChequesReport>\n");
 
-            String outputDirectory =
-                    "C:/CTS/OUTWARD/"
-                            + batchNumber;
+        xml.append("    <BatchNumber>")
+                .append(xmlValue(batchNumber))
+                .append("</BatchNumber>\n");
 
-            File file =
-                    rrfXmlWriter.generateRRF(
-                            batchNumber,
-                            rejectedCheques,
-                            outputDirectory
-                    );
+        xml.append("    <TotalRejectedCheques>")
+                .append(rejectedCount)
+                .append("</TotalRejectedCheques>\n");
 
-            if (file == null) {
+        xml.append("    <Cheques>\n");
 
-                throw new Exception(
-                        "RRF writer returned no file."
-                );
+
+        for (OutwardCheque cheque : cheques) {
+
+            if (!"CHECKER_REJECTED".equalsIgnoreCase(
+                    cheque.getChequeStatus())) {
+
+                continue;
             }
 
-            generatedRrfXmlPath =
-                    file.getAbsolutePath();
-
-            Messagebox.show(
-                    "RRF XML generated successfully.\n\n"
-                            + "Batch: "
-                            + batchNumber
-                            + "\n\n"
-                            + "Rejected Cheques: "
-                            + rejectedCheques.size()
-                            + "\n\n"
-                            + "File:\n"
-                            + generatedRrfXmlPath,
-                    "RRF Generation",
-                    Messagebox.OK,
-                    Messagebox.INFORMATION
-            );
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            Messagebox.show(
-                    "RRF XML generation failed.\n\n"
-                            + "Batch: "
-                            + batchNumber
-                            + "\n\n"
-                            + safe(e.getMessage()),
-                    "RRF Generation Error",
-                    Messagebox.OK,
-                    Messagebox.ERROR
-            );
+            appendChequeXml(
+                    xml,
+                    cheque,
+                    true);
         }
+
+
+        xml.append("    </Cheques>\n");
+
+        xml.append("</RejectedChequesReport>\n");
+
+        return xml.toString();
     }
 
-    // ============================================================
-    // GENERATE RRF PDF
-    // ============================================================
 
-    private void generateRrfPdf() {
+    private void appendChequeXml(
+            StringBuilder xml,
+            OutwardCheque cheque,
+            boolean rejected) {
 
-        if (!isBatchLoaded()) {
+        xml.append("        <Cheque>\n");
 
-            showBatchRequired();
+        xml.append("            <ChequeNumber>")
+                .append(xmlValue(
+                        cheque.getChequeNumber()))
+                .append("</ChequeNumber>\n");
 
-            return;
+        xml.append("            <BatchNumber>")
+                .append(xmlValue(
+                        cheque.getBatchNumber()))
+                .append("</BatchNumber>\n");
+
+        xml.append("            <ChequeDate>")
+                .append(xmlValue(
+                        cheque.getChequeDate()))
+                .append("</ChequeDate>\n");
+
+        xml.append("            <CityCode>")
+                .append(xmlValue(
+                        cheque.getCityCode()))
+                .append("</CityCode>\n");
+
+        xml.append("            <BankCode>")
+                .append(xmlValue(
+                        cheque.getBankCode()))
+                .append("</BankCode>\n");
+
+        xml.append("            <BranchCode>")
+                .append(xmlValue(
+                        cheque.getBranchCode()))
+                .append("</BranchCode>\n");
+
+        xml.append("            <DrawerAccountNumber>")
+                .append(xmlValue(
+                        cheque.getDrawerAccountNumber()))
+                .append("</DrawerAccountNumber>\n");
+
+        xml.append("            <DrawerName>")
+                .append(xmlValue(
+                        cheque.getDrawerName()))
+                .append("</DrawerName>\n");
+
+        xml.append("            <DepositorAccountNumber>")
+                .append(xmlValue(
+                        cheque.getDepositorAccountNumber()))
+                .append("</DepositorAccountNumber>\n");
+
+        xml.append("            <DepositorName>")
+                .append(xmlValue(
+                        cheque.getDepositorName()))
+                .append("</DepositorName>\n");
+
+        xml.append("            <PayeeName>")
+                .append(xmlValue(
+                        cheque.getPayeeName()))
+                .append("</PayeeName>\n");
+
+        xml.append("            <PayeeAccountNumber>")
+                .append(xmlValue(
+                        cheque.getPayeeAccountNumber()))
+                .append("</PayeeAccountNumber>\n");
+
+        xml.append("            <Amount>")
+                .append(xmlValue(
+                        cheque.getAmount()))
+                .append("</Amount>\n");
+
+        xml.append("            <AmountInWords>")
+                .append(xmlValue(
+                        cheque.getAmountInWords()))
+                .append("</AmountInWords>\n");
+
+        xml.append("            <ChequeStatus>")
+                .append(xmlValue(
+                        cheque.getChequeStatus()))
+                .append("</ChequeStatus>\n");
+
+
+        if (rejected) {
+
+            xml.append("            <ReturnReasonId>")
+                    .append(xmlValue(
+                            cheque.getReturnReasonId()))
+                    .append("</ReturnReasonId>\n");
+
+            xml.append("            <CheckerRemarks>")
+                    .append(xmlValue(
+                            cheque.getCheckerRemarks()))
+                    .append("</CheckerRemarks>\n");
         }
 
-        if (rejectedCheques == null ||
-                rejectedCheques.isEmpty()) {
 
-            Messagebox.show(
-                    "RRF not available for this batch.",
-                    "RRF Not Available",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION
-            );
-
-            return;
-        }
-
-        /*
-         * No RRF PDF writer was supplied in the existing project.
-         *
-         * Do not create a fake PDF here.
-         *
-         * Once an RRF PDF generation service is added,
-         * this method can call that service.
-         */
-
-        Messagebox.show(
-                "RRF PDF generation service is not configured yet.\n\n"
-                        + "RRF XML is available for this batch.",
-                "RRF PDF",
-                Messagebox.OK,
-                Messagebox.INFORMATION
-        );
+        xml.append("        </Cheque>\n");
     }
 
-    // ============================================================
-    // GENERATE CFX XML
-    // ============================================================
 
-    private void generateCfxXml() {
+    private String xmlValue(Object value) {
 
-        if (!isBatchLoaded()) {
-
-            showBatchRequired();
-
-            return;
+        if (value == null) {
+            return "";
         }
 
-        String batchNumber =
-                selectedBatch.getBatchNumber();
+        String text =
+                String.valueOf(value);
 
-        try {
-
-            if (selectedBatchCheques == null ||
-                    selectedBatchCheques.isEmpty()) {
-
-                Messagebox.show(
-                        "No cheque records found for batch:\n\n"
-                                + batchNumber,
-                        "CFX Generation",
-                        Messagebox.OK,
-                        Messagebox.EXCLAMATION
-                );
-
-                return;
-            }
-
-            generatedCfxXmlPath =
-                    cxfGenerationService.generateCXF(
-                            batchNumber,
-                            selectedBatchCheques
-                    );
-
-            Messagebox.show(
-                    "CFX XML generated successfully.\n\n"
-                            + "Batch: "
-                            + batchNumber
-                            + "\n\n"
-                            + "Total Cheques: "
-                            + selectedBatchCheques.size()
-                            + "\n\n"
-                            + "File:\n"
-                            + generatedCfxXmlPath,
-                    "CFX Generation",
-                    Messagebox.OK,
-                    Messagebox.INFORMATION
-            );
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            Messagebox.show(
-                    "CFX XML generation failed.\n\n"
-                            + "Batch: "
-                            + batchNumber
-                            + "\n\n"
-                            + safe(e.getMessage()),
-                    "CFX Generation Error",
-                    Messagebox.OK,
-                    Messagebox.ERROR
-            );
-        }
+        return text
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&apos;");
     }
 
-    // ============================================================
-    // GENERATE CFX PDF
-    // ============================================================
 
-    private void generateCfxPdf() {
+    @Listen("onClick = #refreshReportBtn")
+    public void refreshReports() {
 
-        if (!isBatchLoaded()) {
-
-            showBatchRequired();
-
-            return;
-        }
-
-        /*
-         * No CFX PDF writer was supplied in the existing project.
-         */
-
-        Messagebox.show(
-                "CFX PDF generation service is not configured yet.\n\n"
-                        + "CFX XML is available for this batch.",
-                "CFX PDF",
-                Messagebox.OK,
-                Messagebox.INFORMATION
-        );
-    }
-
-    // ============================================================
-    // GENERATE CIBF
-    // ============================================================
-
-    private void generateCibf() {
-
-        if (!isBatchLoaded()) {
-
-            showBatchRequired();
-
-            return;
-        }
-
-        String batchNumber =
-                selectedBatch.getBatchNumber();
-
-        try {
-
-            if (selectedBatchCheques == null ||
-                    selectedBatchCheques.isEmpty()) {
-
-                Messagebox.show(
-                        "No cheque records found for batch:\n\n"
-                                + batchNumber,
-                        "CIBF Generation",
-                        Messagebox.OK,
-                        Messagebox.EXCLAMATION
-                );
-
-                return;
-            }
-
-            generatedCibfPath =
-                    cibfGenerationService.generateCIBF(
-                            batchNumber,
-                            selectedBatchCheques
-                    );
-
-            Messagebox.show(
-                    "CIBF generated successfully.\n\n"
-                            + "Batch: "
-                            + batchNumber
-                            + "\n\n"
-                            + "Total Cheques: "
-                            + selectedBatchCheques.size()
-                            + "\n\n"
-                            + "File:\n"
-                            + generatedCibfPath,
-                    "CIBF Generation",
-                    Messagebox.OK,
-                    Messagebox.INFORMATION
-            );
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            Messagebox.show(
-                    "CIBF generation failed.\n\n"
-                            + "Batch: "
-                            + batchNumber
-                            + "\n\n"
-                            + safe(e.getMessage()),
-                    "CIBF Generation Error",
-                    Messagebox.OK,
-                    Messagebox.ERROR
-            );
-        }
-    }
-
-    // ============================================================
-    // SEND TO NPCI
-    // ============================================================
-
-    private void sendToNpci() {
-
-        if (!isBatchLoaded()) {
-
-            showBatchRequired();
-
-            return;
-        }
-
-        String batchNumber =
-                selectedBatch.getBatchNumber();
-
-        // ========================================================
-        // REQUIRED FILES
-        // ========================================================
-
-        boolean cfxGenerated =
-                generatedCfxXmlPath != null &&
-                        !generatedCfxXmlPath.trim().isEmpty();
-
-        boolean cibfGenerated =
-                generatedCibfPath != null &&
-                        !generatedCibfPath.trim().isEmpty();
-
-        boolean rrfRequired =
-                rejectedCheques != null &&
-                        !rejectedCheques.isEmpty();
-
-        boolean rrfGenerated =
-                generatedRrfXmlPath != null &&
-                        !generatedRrfXmlPath.trim().isEmpty();
-
-        // ========================================================
-        // CFX REQUIRED
-        // ========================================================
-
-        if (!cfxGenerated) {
-
-            Messagebox.show(
-                    "Please generate CFX before sending to NPCI.",
-                    "NPCI Submission",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION
-            );
-
-            return;
-        }
-
-        // ========================================================
-        // CIBF REQUIRED
-        // ========================================================
-
-        if (!cibfGenerated) {
-
-            Messagebox.show(
-                    "Please generate CIBF before sending to NPCI.",
-                    "NPCI Submission",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION
-            );
-
-            return;
-        }
-
-        // ========================================================
-        // RRF REQUIRED ONLY IF REJECTED CHEQUES EXIST
-        // ========================================================
-
-        if (rrfRequired &&
-                !rrfGenerated) {
-
-            Messagebox.show(
-                    "This batch contains rejected cheque(s).\n\n"
-                            + "Please generate RRF before sending to NPCI.",
-                    "NPCI Submission",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION
-            );
-
-            return;
-        }
-
-        // ========================================================
-        // CONFIRM
-        // ========================================================
-
-        final boolean finalRrfRequired =
-                rrfRequired;
-
-        Messagebox.show(
-                "Ready to send batch to NPCI.\n\n"
-                        + "Batch: "
-                        + batchNumber
-                        + "\n\n"
-                        + "CFX: Generated\n"
-                        + "CIBF: Generated\n"
-                        + "RRF: "
-                        + (
-                        finalRrfRequired
-                                ? "Generated"
-                                : "Not required"
-                )
-                        + "\n\n"
-                        + "Do you want to continue?",
-
-                "Send to NPCI",
-
-                Messagebox.YES |
-                        Messagebox.NO,
-
-                Messagebox.QUESTION,
-
-                new EventListener<Event>() {
-
-                    @Override
-                    public void onEvent(
-                            Event event)
-                            throws Exception {
-
-                        if (Messagebox.ON_YES.equals(
-                                event.getName())) {
-
-                            performNpciSubmission();
-                        }
-                    }
-                }
-        );
-    }
-
-    // ============================================================
-    // PERFORM NPCI SUBMISSION
-    // ============================================================
-
-    private void performNpciSubmission() {
-
-        String batchNumber =
-                selectedBatch.getBatchNumber();
-
-        /*
-         * Actual NPCI submission API/file-transfer logic
-         * is not present in the supplied project.
-         *
-         * Therefore this method only confirms that the
-         * required files are ready.
-         *
-         * Actual NPCI integration can be connected here later.
-         */
-
-        Messagebox.show(
-                "Batch is ready for NPCI submission.\n\n"
-                        + "Batch: "
-                        + batchNumber
-                        + "\n\n"
-                        + "CFX: "
-                        + safe(generatedCfxXmlPath)
-                        + "\n\n"
-                        + "CIBF: "
-                        + safe(generatedCibfPath)
-                        + "\n\n"
-                        + "RRF: "
-                        + (
-                        generatedRrfXmlPath == null
-                                ? "Not required"
-                                : generatedRrfXmlPath
-                ),
-                "NPCI Submission",
-                Messagebox.OK,
-                Messagebox.INFORMATION
-        );
-    }
-
-    // ============================================================
-    // CHECK BATCH LOADED
-    // ============================================================
-
-    private boolean isBatchLoaded() {
-
-        return selectedBatch != null &&
-                selectedBatch.getBatchNumber() != null &&
-                !selectedBatch
-                        .getBatchNumber()
-                        .trim()
-                        .isEmpty();
-    }
-
-    // ============================================================
-    // SHOW BATCH REQUIRED
-    // ============================================================
-
-    private void showBatchRequired() {
-
-        Messagebox.show(
-                "Please select and load a Batch Number first.",
-                "Batch Required",
-                Messagebox.OK,
-                Messagebox.EXCLAMATION
-        );
-    }
-
-    // ============================================================
-    // CLEAR SELECTED BATCH
-    // ============================================================
-
-    private void clearSelectedBatch() {
-
-        selectedBatch = null;
-
-        selectedBatchCheques =
-                new ArrayList<OutwardCheque>();
-
-        rejectedCheques =
-                new ArrayList<OutwardCheque>();
-
-        generatedRrfXmlPath = null;
-
-        generatedCfxXmlPath = null;
-
-        generatedCibfPath = null;
-
-        if (selectedBatchNumber != null) {
-
-            selectedBatchNumber.setValue(
-                    "—"
-            );
-        }
-
-        if (selectedBatchChequeCount != null) {
-
-            selectedBatchChequeCount.setValue(
-                    "—"
-            );
-        }
-
-        if (selectedBatchRejectedCount != null) {
-
-            selectedBatchRejectedCount.setValue(
-                    "—"
-            );
-        }
-
-        if (batchReportStatus != null) {
-
-            batchReportStatus.setValue(
-                    "Please select a batch."
-            );
-        }
-
-        if (rejectedChequeListbox != null) {
-
-            rejectedChequeListbox
-                    .getItems()
-                    .clear();
-        }
-
-        if (rrfStatusLabel != null) {
-
-            rrfStatusLabel.setValue(
-                    "RRF not available for this batch"
-            );
-
-            rrfStatusLabel.setSclass(
-                    "report-status-warning"
-            );
-        }
-
-        if (cfxStatusLabel != null) {
-
-            cfxStatusLabel.setValue(
-                    "Select a batch to generate CFX."
-            );
-        }
-
-        if (cibfStatusLabel != null) {
-
-            cibfStatusLabel.setValue(
-                    "Select a batch to generate CIBF."
-            );
-        }
-
-        if (generateRrfXmlBtn != null) {
-
-            generateRrfXmlBtn.setDisabled(true);
-        }
-
-        if (generateRrfPdfBtn != null) {
-
-            generateRrfPdfBtn.setDisabled(true);
-        }
-
-        if (generateCfxXmlBtn != null) {
-
-            generateCfxXmlBtn.setDisabled(true);
-        }
-
-        if (generateCfxPdfBtn != null) {
-
-            generateCfxPdfBtn.setDisabled(true);
-        }
-
-        if (generateCibfBtn != null) {
-
-            generateCibfBtn.setDisabled(true);
-        }
-
-        if (sendToNpciBtn != null) {
-
-            sendToNpciBtn.setDisabled(true);
-        }
-    }
-
-    // ============================================================
-    // SAFE STRING
-    // ============================================================
-
-    private String safe(String value) {
-
-        return value == null
-                ? ""
-                : value;
+        loadReportBatches();
     }
 }

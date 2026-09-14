@@ -14,11 +14,6 @@
 
 <zk>
 
-    <!-- ========================================================= -->
-    <!-- COMMON LAYOUT CONTENT                                     -->
-    <!-- Header + Checker Sidebar come from layout.zul             -->
-    <!-- ========================================================= -->
-
     <div
         self="@define(content)"
         width="100%"
@@ -28,10 +23,6 @@
             height:100%;
             background:#F4F7FB;
         ">
-
-        <!-- ===================================================== -->
-        <!-- SEND TO NPCI CONTROLLER                               -->
-        <!-- ===================================================== -->
 
         <vlayout
             apply="com.iispl.cts.controller.outward.checker.CheckerSendToNPCIController"
@@ -44,8 +35,9 @@
                 overflow:auto;
             ">
 
+
             <!-- ================================================= -->
-            <!-- PAGE TITLE                                         -->
+            <!-- PAGE TITLE -->
             <!-- ================================================= -->
 
             <label
@@ -55,12 +47,12 @@
                     font-weight:bold;
                     color:#172B4D;
                     display:block;
-                    margin-bottom:10px;
+                    margin-bottom:5px;
                 "/>
 
 
             <!-- ================================================= -->
-            <!-- INFORMATION                                       -->
+            <!-- INFORMATION CARD -->
             <!-- ================================================= -->
 
             <div
@@ -74,14 +66,14 @@
 
 
             <!-- ================================================= -->
-            <!-- COMPLETED BATCHES                                  -->
+            <!-- BATCH SECTION -->
             <!-- ================================================= -->
 
             <div
                 sclass="section-card">
 
                 <label
-                    value="Completed Batches"
+                    value="Batches Ready for NPCI"
                     sclass="section-title"/>
 
                 <separator
@@ -89,7 +81,7 @@
 
 
                 <!-- ============================================= -->
-                <!-- NPCI BATCH LIST                                -->
+                <!-- NPCI BATCH LIST -->
                 <!-- ============================================= -->
 
                 <listbox
@@ -101,32 +93,25 @@
 
                     <listhead>
 
-                        <!-- Batch Number -->
-
                         <listheader
-                            label="Batch ID"
-                            width="25%"/>
-
-
-                        <!-- Total Cheques -->
+                            label="Batch Number"
+                            width="20%"/>
 
                         <listheader
                             label="Total Cheques"
-                            width="25%"/>
-
-
-                        <!-- Status -->
+                            width="12%"/>
 
                         <listheader
-                            label="Status"
-                            width="25%"/>
+                            label="Valid XML"
+                            width="15%"/>
 
-
-                        <!-- Action -->
+                        <listheader
+                            label="Validation Status"
+                            width="18%"/>
 
                         <listheader
                             label="Action"
-                            width="25%"/>
+                            width="35%"/>
 
                     </listhead>
 

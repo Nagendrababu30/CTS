@@ -581,7 +581,7 @@ public class MicrRepairController
     // =========================================================
 
     private void goToDataEntry() {
-        Executions.sendRedirect("/zul/inward-maker/data-entry.zul?batchId=" + batchId);
+        Executions.sendRedirect("/zul/inward-maker/data-entryform.zul?batchId=" + batchId);
     }
 
     private void goBack() {

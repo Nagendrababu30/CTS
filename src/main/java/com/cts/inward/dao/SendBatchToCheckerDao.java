@@ -8,6 +8,8 @@ public interface SendBatchToCheckerDao {
     // Fetch batches that are ready to be sent to the checker
     List<NpciBatchData> getReadyBatches();
 
+    List<NpciBatchData> getReadyBatches(Long userId);
+
     // Update the batch status
     void updateBatchStatusToChecker(Long batchId);
 }

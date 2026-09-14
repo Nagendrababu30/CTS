@@ -1,0 +1,167 @@
+/* ============================================================
+   Checker Reports – Page Styles
+   ============================================================ */
+
+/* ---------- Page Root ---------- */
+.checker-reports-root {
+    width: 100%;
+    height: 100%;
+    background: #F4F7FB;
+}
+
+/* ---------- Main Container ---------- */
+.checker-reports-container {
+    padding: 35px 55px;
+    box-sizing: border-box;
+    overflow: auto;
+}
+
+/* ---------- Header Row ---------- */
+.checker-reports-header {
+    justify-content: space-between;
+}
+
+/* ---------- Title ---------- */
+.checker-reports-title {
+    font-size: 32px;
+    font-weight: bold;
+    color: #172B4D;
+    letter-spacing: -0.3px;
+}
+
+/* ---------- Subtitle ---------- */
+.checker-reports-subtitle {
+    font-size: 14px;
+    color: #6B778C;
+}
+
+/* ---------- Reports Card ---------- */
+.checker-reports-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+
+/* ============================================================
+   Modern Button Styles
+   ============================================================ */
+
+/* ---------- Base Button ---------- */
+.z-button.secondary-button,
+.secondary-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    color: #172B4D;
+    background: #FFFFFF;
+    border: 1px solid #DFE1E6;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(9, 30, 66, 0.08);
+    transition: all 0.2s ease-in-out;
+    text-decoration: none;
+    min-height: 40px;
+    line-height: 1;
+    outline: none;
+}
+
+/* ---------- Hover ---------- */
+.z-button.secondary-button:hover,
+.secondary-button:hover {
+    background: #F4F5F7;
+    border-color: #C1C7D0;
+    color: #0052CC;
+    box-shadow: 0 4px 8px rgba(9, 30, 66, 0.12);
+    transform: translateY(-1px);
+}
+
+/* ---------- Active / Pressed ---------- */
+.z-button.secondary-button:active,
+.secondary-button:active {
+    background: #EBECF0;
+    border-color: #B3BAC5;
+    box-shadow: 0 1px 2px rgba(9, 30, 66, 0.15) inset;
+    transform: translateY(0);
+}
+
+/* ---------- Focus ---------- */
+.z-button.secondary-button:focus,
+.secondary-button:focus {
+    border-color: #4C9AFF;
+    box-shadow: 0 0 0 3px rgba(76, 154, 255, 0.35);
+}
+
+/* ---------- Refresh Button (accent) ---------- */
+.refresh-report-btn {
+    color: #FFFFFF;
+    background: linear-gradient(135deg, #0052CC 0%, #0747A6 100%);
+    border: 1px solid #0747A6;
+    box-shadow: 0 2px 6px rgba(0, 82, 204, 0.25);
+}
+
+.refresh-report-btn:hover {
+    background: linear-gradient(135deg, #0065FF 0%, #0052CC 100%);
+    border-color: #0052CC;
+    color: #FFFFFF;
+    box-shadow: 0 6px 14px rgba(0, 82, 204, 0.35);
+}
+
+.refresh-report-btn:active {
+    background: linear-gradient(135deg, #0747A6 0%, #0747A6 100%);
+    box-shadow: 0 1px 3px rgba(0, 82, 204, 0.4) inset;
+}
+
+.refresh-report-btn:focus {
+    box-shadow: 0 0 0 3px rgba(76, 154, 255, 0.5);
+}
+
+
+/* ============================================================
+   Listbox Styling (Card-enhanced)
+   ============================================================ */
+
+.checker-reports-card .z-listbox {
+    border: none;
+    background: #FFFFFF;
+    border-radius: 10px;
+}
+
+.checker-reports-card .z-listbox-header {
+    background: #FAFBFC;
+    border-bottom: 1px solid #EBECF0;
+}
+
+.checker-reports-card .z-listheader {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #5E6C84;
+    padding: 14px 16px;
+    border-right: 1px solid #EBECF0;
+    background: #FAFBFC;
+}
+
+.checker-reports-card .z-listheader:last-child {
+    border-right: none;
+}
+
+.checker-reports-card .z-listcell {
+    padding: 14px 16px;
+    font-size: 14px;
+    color: #172B4D;
+    border-bottom: 1px solid #F4F5F7;
+}
+
+.checker-reports-card .z-listitem:hover .z-listcell {
+    background: #F4F7FB;
+}
+
+.checker-reports-card .z-listitem:last-child .z-listcell {
+    border-bottom: none;
+}

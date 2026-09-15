@@ -27,4 +27,10 @@ public interface ChequeService {
 			LocalDate chequeDate, long userId);
 
 	void updateChequeStatus(String chequeNumber, String status, long userId);
+
+	java.util.Map<String, String> getChequeReturnInfo(String chequeNumber);
+
+	List<com.cts.inward.dto.ReturnReasonDto> getDataEntryReturnReasons();
+
+	boolean saveMakerDataEntryReturn(String chequeNumber, List<String> reasonCodes, String remarks, Long userId);
 }

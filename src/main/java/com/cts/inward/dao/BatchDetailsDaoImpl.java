@@ -3,6 +3,8 @@ package com.cts.inward.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -396,16 +398,87 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
     }
 
     @Override
+    public List<Map<String, String>> getCheckerReturnReasons() {
+        List<Map<String, String>> reasons = new ArrayList<>();
+        String sql = """
+                SELECT return_reason_code, description
+                FROM public.inward_cheque_return_reason
+                WHERE applicable_role = 'CHECKER'
+                  AND (return_reason_code LIKE 'CR-%' OR return_reason_code = 'OTHER')
+                ORDER BY return_reason_code
+                """;
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Map<String, String> map = new HashMap<>();
+                String code = rs.getString("return_reason_code");
+                String desc = rs.getString("description");
+                map.put("code", code);
+                map.put("return_reason_code", code);
+                map.put("description", desc);
+                reasons.add(map);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to fetch checker return reasons", e);
+        }
+        return reasons;
+    }
+
+    @Override
+    public List<Map<String, String>> getCheckerRejectionReasons() {
+        List<Map<String, String>> reasons = new ArrayList<>();
+        String sql = """
+                SELECT rejection_reason_code, description
+                FROM public.inward_cheque_rejection_reason
+                ORDER BY rejection_reason_code
+                """;
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Map<String, String> map = new HashMap<>();
+                String code = rs.getString("rejection_reason_code");
+                String desc = rs.getString("description");
+                map.put("code", code);
+                map.put("rejection_reason_code", code);
+                map.put("description", desc);
+                reasons.add(map);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to fetch checker rejection reasons", e);
+        }
+        return reasons;
+    }
+
+    @Override
     public void saveCheckerDecision(
             String chequeNumber,
             String status,
-            String rejectionReasonCode,
-            String returnReasonCode,
+            List<String> rejectionReasonCodes,
+            List<String> returnReasonCodes,
             Integer checkerId,
             String checkerAction,
             String remarks) {
 
-        String sql = """
+        String primaryRejectionCode = (rejectionReasonCodes != null && !rejectionReasonCodes.isEmpty())
+                ? rejectionReasonCodes.get(0) : null;
+        String primaryReturnCode = (returnReasonCodes != null && !returnReasonCodes.isEmpty())
+                ? returnReasonCodes.get(0) : null;
+
+        StringBuilder remarksBuilder = new StringBuilder();
+        if (rejectionReasonCodes != null && rejectionReasonCodes.size() > 1) {
+            remarksBuilder.append("[Rejection Reasons: ").append(String.join(", ", rejectionReasonCodes)).append("] ");
+        }
+        if (returnReasonCodes != null && returnReasonCodes.size() > 1) {
+            remarksBuilder.append("[Return Reasons: ").append(String.join(", ", returnReasonCodes)).append("] ");
+        }
+        if (remarks != null && !remarks.trim().isEmpty()) {
+            remarksBuilder.append(remarks.trim());
+        }
+        String finalRemarks = remarksBuilder.length() > 0 ? remarksBuilder.toString() : null;
+
+        String updateSql = """
                 UPDATE inward_cheque_status_history
                 SET
                     status = ?,
@@ -413,8 +486,7 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
                     return_reason_code = ?,
                     checker_id = ?,
                     checker_action = ?,
-                    checker_action_on =
-                        CURRENT_TIMESTAMP,
+                    checker_action_on = CURRENT_TIMESTAMP,
                     remarks = ?
                 WHERE status_history_id = (
                     SELECT status_history_id
@@ -426,110 +498,100 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
                 )
                 """;
 
-        try (Connection connection =
-                    dataSource.getConnection();
-                PreparedStatement ps =
-                    connection.prepareStatement(sql)) {
+        String insertSql = """
+                INSERT INTO inward_cheque_status_history
+                (cheque_number, status, rejection_reason_code, return_reason_code,
+                 checker_id, checker_action, checker_action_on, remarks)
+                VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?)
+                """;
 
-            // status
-            ps.setString(1, status);
+        try (Connection connection = dataSource.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                int updatedRows = 0;
+                try (PreparedStatement ps = connection.prepareStatement(updateSql)) {
+                    ps.setString(1, status);
+                    if (primaryRejectionCode != null) ps.setString(2, primaryRejectionCode);
+                    else ps.setNull(2, java.sql.Types.VARCHAR);
+                    if (primaryReturnCode != null) ps.setString(3, primaryReturnCode);
+                    else ps.setNull(3, java.sql.Types.VARCHAR);
+                    if (checkerId != null) ps.setInt(4, checkerId);
+                    else ps.setNull(4, java.sql.Types.INTEGER);
+                    if (checkerAction != null) ps.setString(5, checkerAction);
+                    else ps.setNull(5, java.sql.Types.VARCHAR);
+                    if (finalRemarks != null) ps.setString(6, finalRemarks);
+                    else ps.setNull(6, java.sql.Types.VARCHAR);
+                    ps.setString(7, chequeNumber);
+                    updatedRows = ps.executeUpdate();
+                }
 
-            // rejection_reason_code
-            if (rejectionReasonCode == null) {
+                if (updatedRows == 0) {
+                    try (PreparedStatement insertPs = connection.prepareStatement(insertSql)) {
+                        insertPs.setString(1, chequeNumber);
+                        insertPs.setString(2, status);
+                        if (primaryRejectionCode != null) insertPs.setString(3, primaryRejectionCode);
+                        else insertPs.setNull(3, java.sql.Types.VARCHAR);
+                        if (primaryReturnCode != null) insertPs.setString(4, primaryReturnCode);
+                        else insertPs.setNull(4, java.sql.Types.VARCHAR);
+                        if (checkerId != null) insertPs.setInt(5, checkerId);
+                        else insertPs.setNull(5, java.sql.Types.INTEGER);
+                        if (checkerAction != null) insertPs.setString(6, checkerAction);
+                        else insertPs.setNull(6, java.sql.Types.VARCHAR);
+                        if (finalRemarks != null) insertPs.setString(7, finalRemarks);
+                        else insertPs.setNull(7, java.sql.Types.VARCHAR);
+                        insertPs.executeUpdate();
+                    }
+                }
 
-                ps.setNull(
-                        2,
-                        java.sql.Types.VARCHAR);
+                if (rejectionReasonCodes != null && rejectionReasonCodes.size() > 1) {
+                    for (int i = 1; i < rejectionReasonCodes.size(); i++) {
+                        String code = rejectionReasonCodes.get(i);
+                        if (code == null || code.trim().isEmpty()) continue;
+                        try (PreparedStatement insertPs = connection.prepareStatement(insertSql)) {
+                            insertPs.setString(1, chequeNumber);
+                            insertPs.setString(2, status);
+                            insertPs.setString(3, code.trim());
+                            insertPs.setNull(4, java.sql.Types.VARCHAR);
+                            if (checkerId != null) insertPs.setInt(5, checkerId);
+                            else insertPs.setNull(5, java.sql.Types.INTEGER);
+                            if (checkerAction != null) insertPs.setString(6, checkerAction);
+                            else insertPs.setNull(6, java.sql.Types.VARCHAR);
+                            if (finalRemarks != null) insertPs.setString(7, finalRemarks);
+                            else insertPs.setNull(7, java.sql.Types.VARCHAR);
+                            insertPs.executeUpdate();
+                        }
+                    }
+                }
 
-            } else {
+                if (returnReasonCodes != null && returnReasonCodes.size() > 1) {
+                    for (int i = 1; i < returnReasonCodes.size(); i++) {
+                        String code = returnReasonCodes.get(i);
+                        if (code == null || code.trim().isEmpty()) continue;
+                        try (PreparedStatement insertPs = connection.prepareStatement(insertSql)) {
+                            insertPs.setString(1, chequeNumber);
+                            insertPs.setString(2, status);
+                            insertPs.setNull(3, java.sql.Types.VARCHAR);
+                            insertPs.setString(4, code.trim());
+                            if (checkerId != null) insertPs.setInt(5, checkerId);
+                            else insertPs.setNull(5, java.sql.Types.INTEGER);
+                            if (checkerAction != null) insertPs.setString(6, checkerAction);
+                            else insertPs.setNull(6, java.sql.Types.VARCHAR);
+                            if (finalRemarks != null) insertPs.setString(7, finalRemarks);
+                            else insertPs.setNull(7, java.sql.Types.VARCHAR);
+                            insertPs.executeUpdate();
+                        }
+                    }
+                }
 
-                ps.setString(
-                        2,
-                        rejectionReasonCode);
+                connection.commit();
+            } catch (Exception e) {
+                connection.rollback();
+                throw e;
+            } finally {
+                connection.setAutoCommit(true);
             }
-
-            // return_reason_code
-            if (returnReasonCode == null) {
-
-                ps.setNull(
-                        3,
-                        java.sql.Types.VARCHAR);
-
-            } else {
-
-                ps.setString(
-                        3,
-                        returnReasonCode);
-            }
-
-            // checker_id
-            if (checkerId == null) {
-
-                ps.setNull(
-                        4,
-                        java.sql.Types.INTEGER);
-
-            } else {
-
-                ps.setInt(
-                        4,
-                        checkerId);
-            }
-
-            // checker_action
-            if (checkerAction == null) {
-
-                ps.setNull(
-                        5,
-                        java.sql.Types.VARCHAR);
-
-            } else {
-
-                ps.setString(
-                        5,
-                        checkerAction);
-            }
-
-            // remarks
-            if (remarks == null
-                    || remarks.trim().isEmpty()) {
-
-                ps.setNull(
-                        6,
-                        java.sql.Types.VARCHAR);
-
-            } else {
-
-                ps.setString(
-                        6,
-                        remarks.trim());
-            }
-
-            // cheque_number
-            ps.setString(
-                    7,
-                    chequeNumber);
-
-            int updatedRows =
-                    ps.executeUpdate();
-
-            if (updatedRows == 0) {
-
-                throw new RuntimeException(
-                        "No SENT_TO_CHECKER record found "
-                                + "for cheque "
-                                + chequeNumber
-                                + " and checker "
-                                + checkerId);
-            }
-
-        } catch (java.sql.SQLException e) {
-
-            throw new RuntimeException(
-                    "Failed to save checker decision "
-                            + "for cheque "
-                            + chequeNumber,
-                    e);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to save checker decision for cheque " + chequeNumber, e);
         }
     }
 
@@ -547,15 +609,21 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
             connection.setAutoCommit(false);
 
             // =========================================================
-            // 1. Check if ANY cheque in current batch has RETURN_TO_MAKER
+            // 1. Check if ANY cheque in current batch has LATEST status = RETURN_TO_MAKER
             // =========================================================
             String checkReturnedSql = """
                     SELECT EXISTS (
                         SELECT 1
-                        FROM inward_cheque_status_history sh
-                        JOIN inward_cheque c ON c.cheque_number = sh.cheque_number
+                        FROM inward_cheque c
+                        JOIN LATERAL (
+                            SELECT sh.status
+                            FROM inward_cheque_status_history sh
+                            WHERE sh.cheque_number = c.cheque_number
+                            ORDER BY sh.status_history_id DESC
+                            LIMIT 1
+                        ) latest ON TRUE
                         WHERE c.batch_id = ?
-                          AND sh.status = 'RETURN_TO_MAKER'
+                          AND latest.status = 'RETURN_TO_MAKER'
                     )
                     """;
 
@@ -572,9 +640,41 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
 
             // =========================================================
             // CASE A: NO cheques returned to maker
-            // Do not perform return-to-maker transition.
+            // Complete the batch: Unlock Checker & mark batch COMPLETED
             // =========================================================
             if (!hasReturnedCheques) {
+                if (checkerId != null) {
+                    String unlockCheckerSql = """
+                            UPDATE inward_batch_lock
+                            SET lock_status = 'UNLOCKED',
+                                locked_time = CURRENT_TIMESTAMP
+                            WHERE batch_id = ?
+                              AND user_id = ?
+                            """;
+
+                    try (PreparedStatement ps = connection.prepareStatement(unlockCheckerSql)) {
+                        ps.setLong(1, batchId);
+                        ps.setInt(2, checkerId);
+                        ps.executeUpdate();
+                    }
+                }
+
+                String insertCompletedHistorySql = """
+                        INSERT INTO inward_batch_history
+                        (batch_id, batch_status, changed_on, changed_by, reason, remarks)
+                        VALUES (?, 'COMPLETED', CURRENT_TIMESTAMP, ?, 'Verification completed by Checker', 'All cheques verified successfully')
+                        """;
+
+                try (PreparedStatement ps = connection.prepareStatement(insertCompletedHistorySql)) {
+                    ps.setLong(1, batchId);
+                    if (checkerId != null) {
+                        ps.setInt(2, checkerId);
+                    } else {
+                        ps.setNull(2, java.sql.Types.INTEGER);
+                    }
+                    ps.executeUpdate();
+                }
+
                 connection.commit();
                 return false;
             }
@@ -602,6 +702,26 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
                         int id = rs.getInt("changed_by");
                         if (!rs.wasNull()) {
                             makerId = id;
+                        }
+                    }
+                }
+            }
+
+            // Fallback: Check inward_batch_lock for Maker
+            if (makerId == null) {
+                String findMakerFromLockSql = """
+                        SELECT bl.user_id
+                        FROM inward_batch_lock bl
+                        JOIN public."user" u ON u.user_id = bl.user_id AND u.role_id = 1
+                        WHERE bl.batch_id = ?
+                        ORDER BY bl.locked_time DESC, bl.lock_id DESC
+                        LIMIT 1
+                        """;
+                try (PreparedStatement ps = connection.prepareStatement(findMakerFromLockSql)) {
+                    ps.setLong(1, batchId);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            makerId = rs.getInt("user_id");
                         }
                     }
                 }
@@ -650,12 +770,7 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
                 try (PreparedStatement ps = connection.prepareStatement(unlockCheckerSql)) {
                     ps.setLong(1, batchId);
                     ps.setInt(2, checkerId);
-
-                    int checkerLockRows = ps.executeUpdate();
-                    if (checkerLockRows == 0) {
-                        throw new IllegalStateException(
-                                "No lock record found for Checker " + checkerId + " in batch " + batchId);
-                    }
+                    ps.executeUpdate();
                 }
             }
 
@@ -670,14 +785,23 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
                       AND user_id = ?
                     """;
 
+            int makerLockRows = 0;
             try (PreparedStatement ps = connection.prepareStatement(lockMakerSql)) {
                 ps.setLong(1, batchId);
                 ps.setInt(2, makerId);
+                makerLockRows = ps.executeUpdate();
+            }
 
-                int makerLockRows = ps.executeUpdate();
-                if (makerLockRows == 0) {
-                    throw new IllegalStateException(
-                            "No lock record found for Maker " + makerId + " in batch " + batchId);
+            if (makerLockRows == 0) {
+                String insertMakerLockSql = """
+                        INSERT INTO inward_batch_lock
+                        (batch_id, user_id, locked_time, lock_status)
+                        VALUES (?, ?, CURRENT_TIMESTAMP, 'LOCKED')
+                        """;
+                try (PreparedStatement ps = connection.prepareStatement(insertMakerLockSql)) {
+                    ps.setLong(1, batchId);
+                    ps.setInt(2, makerId);
+                    ps.executeUpdate();
                 }
             }
 

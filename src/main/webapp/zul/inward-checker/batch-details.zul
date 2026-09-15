@@ -1361,7 +1361,7 @@
              ===================================================== -->
         <window id="rejectWindow"
                 title="Reject Cheque"
-                width="500px"
+                width="520px"
                 border="normal"
                 closable="false"
                 visible="false">
@@ -1370,41 +1370,17 @@
                      spacing="12px"
                      style="padding:25px;">
 
-                <label value="Rejection Reason"
-                       style="font-weight:bold;"/>
+                <label value="Rejection Reason(s)"
+                       style="font-weight:bold; font-size:14px; color:#1E293B;"/>
 
-                <combobox id="rejectReason"
-                          width="100%"
-                          placeholder="Select rejection reason">
-
-                    <comboitem label="Signature mismatch" value="SIGNATURE_MISMATCH"/>
-                    <comboitem label="Signature not available" value="SIGNATURE_NOT_AVAILABLE"/>
-                    <comboitem label="Amount mismatch" value="AMOUNT_MISMATCH"/>
-                    <comboitem label="Account number mismatch" value="ACCOUNT_NUMBER_MISMATCH"/>
-                    <comboitem label="Cheque date invalid" value="CHEQUE_DATE_INVALID"/>
-                    <comboitem label="Stale cheque" value="STALE_CHEQUE"/>
-                    <comboitem label="Post-dated cheque" value="POST_DATED_CHEQUE"/>
-                    <comboitem label="Payee name mismatch" value="PAYEE_NAME_MISMATCH"/>
-                    <comboitem label="Alteration not authenticated" value="ALTERATION_NOT_AUTHENTICATED"/>
-                    <comboitem label="Material alteration" value="MATERIAL_ALTERATION"/>
-                    <comboitem label="Cheque damaged" value="CHEQUE_DAMAGED"/>
-                    <comboitem label="Duplicate cheque" value="DUPLICATE_CHEQUE"/>
-                    <comboitem label="Stop payment" value="STOP_PAYMENT"/>
-                    <comboitem label="Account closed" value="ACCOUNT_CLOSED"/>
-                    <comboitem label="Account blocked" value="ACCOUNT_BLOCKED"/>
-                    <comboitem label="Account frozen" value="ACCOUNT_FROZEN"/>
-                    <comboitem label="Insufficient funds" value="INSUFFICIENT_FUNDS"/>
-                    <comboitem label="Exceeds available balance" value="EXCEEDS_AVAILABLE_BALANCE"/>
-                    <comboitem label="CBS validation failed" value="CBS_VALIDATION_FAILED"/>
-                    <comboitem label="MICR mismatch" value="MICR_MISMATCH"/>
-                    <comboitem label="Cheque details mismatch" value="CHEQUE_DETAILS_MISMATCH"/>
-                    <comboitem label="Suspected fraud" value="SUSPECTED_FRAUD"/>
-                    <comboitem label="Other" value="OTHER"/>
-
-                </combobox>
+                <div style="max-height:180px; overflow-y:auto; border:1px solid #CBD5E1; border-radius:6px; padding:10px 14px; background:#FFFFFF;">
+                    <vlayout id="rejectReasonsContainer" spacing="8px" width="100%">
+                        <!-- Checkboxes populated dynamically from inward_cheque_rejection_reason -->
+                    </vlayout>
+                </div>
 
                 <label value="Remark"
-                       style="font-weight:bold;"/>
+                       style="font-weight:bold; font-size:14px; color:#1E293B;"/>
 
                 <textbox id="rejectRemark"
                          width="100%"
@@ -1431,7 +1407,7 @@
              ===================================================== -->
         <window id="returnWindow"
                 title="Return to Maker"
-                width="500px"
+                width="520px"
                 border="normal"
                 closable="false"
                 visible="false">
@@ -1440,36 +1416,17 @@
                      spacing="12px"
                      style="padding:25px;">
 
-                <label value="Return Reason"
-                       style="font-weight:bold;"/>
+                <label value="Return Reason(s)"
+                       style="font-weight:bold; font-size:14px; color:#1E293B;"/>
 
-                <combobox id="returnReason"
-                          width="100%"
-                          placeholder="Select return reason">
-
-                    <comboitem label="MICR correction required" value="MICR_CORRECTION_REQUIRED"/>
-                    <comboitem label="MICR code incorrect" value="MICR_CODE_INCORRECT"/>
-                    <comboitem label="MICR code not readable" value="MICR_CODE_NOT_READABLE"/>
-                    <comboitem label="Account number correction required" value="ACCOUNT_NUMBER_CORRECTION_REQUIRED"/>
-                    <comboitem label="Amount correction required" value="AMOUNT_CORRECTION_REQUIRED"/>
-                    <comboitem label="Cheque date correction required" value="CHEQUE_DATE_CORRECTION_REQUIRED"/>
-                    <comboitem label="Payee name correction required" value="PAYEE_NAME_CORRECTION_REQUIRED"/>
-                    <comboitem label="Multiple data entry errors" value="MULTIPLE_DATA_ENTRY_ERRORS"/>
-                    <comboitem label="Data entry correction required" value="DATA_ENTRY_CORRECTION_REQUIRED"/>
-                    <comboitem label="Cheque image not clear" value="CHEQUE_IMAGE_NOT_CLEAR"/>
-                    <comboitem label="Cheque image partially visible" value="CHEQUE_IMAGE_PARTIALLY_VISIBLE"/>
-                    <comboitem label="Cheque details not readable" value="CHEQUE_DETAILS_NOT_READABLE"/>
-                    <comboitem label="Missing cheque details" value="MISSING_CHEQUE_DETAILS"/>
-                    <comboitem label="Incorrect cheque details" value="INCORRECT_CHEQUE_DETAILS"/>
-                    <comboitem label="CBS validation recheck required" value="CBS_VALIDATION_RECHECK_REQUIRED"/>
-                    <comboitem label="Maker correction incomplete" value="MAKER_CORRECTION_INCOMPLETE"/>
-                    <comboitem label="Maker correction incorrect" value="MAKER_CORRECTION_INCORRECT"/>
-                    <comboitem label="Other" value="OTHER"/>
-
-                </combobox>
+                <div style="max-height:180px; overflow-y:auto; border:1px solid #CBD5E1; border-radius:6px; padding:10px 14px; background:#FFFFFF;">
+                    <vlayout id="returnReasonsContainer" spacing="8px" width="100%">
+                        <!-- Checkboxes populated dynamically from inward_cheque_return_reason -->
+                    </vlayout>
+                </div>
 
                 <label value="Remark"
-                       style="font-weight:bold;"/>
+                       style="font-weight:bold; font-size:14px; color:#1E293B;"/>
 
                 <textbox id="returnRemark"
                          width="100%"

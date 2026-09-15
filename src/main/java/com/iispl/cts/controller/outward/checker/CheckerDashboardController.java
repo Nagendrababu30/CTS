@@ -55,6 +55,7 @@ public class CheckerDashboardController
     @Wire
     private Button myBatchesBtn;
 
+    // ==================================================a==========
     @Wire
     private Button reVerifyBatchesBtn;
 
@@ -1099,124 +1100,138 @@ public class CheckerDashboardController
     // UPDATE PAGINATION
     // ============================================================
 
-    private void updatePagination(
-            int totalRecords,
-            int totalPages) {
+ // ============================================================
+ // UPDATE PAGINATION
+ // ============================================================
 
-        // ========================================================
-        // PREVIOUS
-        // ========================================================
+ private void updatePagination(
+         int totalRecords,
+         int totalPages) {
 
-        if (previousPageButton != null) {
+     // ========================================================
+     // NO BATCHES
+     // ========================================================
 
-            boolean disabled =
-                    currentPage <= 1
-                            || totalPages <= 1;
+     if (totalRecords == 0) {
 
-            previousPageButton.setDisabled(
-                    disabled
-            );
+         // Hide Previous
+         if (previousPageButton != null) {
+             previousPageButton.setVisible(false);
+         }
 
-            previousPageButton.setSclass(
-                    disabled
-                            ? "pagination-btn pagination-disabled"
-                            : "pagination-btn"
-            );
-        }
+         // Hide Next
+         if (nextPageButton != null) {
+             nextPageButton.setVisible(false);
+         }
 
-        // ========================================================
-        // NEXT
-        // ========================================================
+         // Hide page buttons
+         if (page1Button != null) {
+             page1Button.setVisible(false);
+         }
 
-        if (nextPageButton != null) {
+         if (page2Button != null) {
+             page2Button.setVisible(false);
+         }
 
-            boolean disabled =
-                    totalPages == 0
-                            || currentPage >= totalPages;
+         if (page3Button != null) {
+             page3Button.setVisible(false);
+         }
 
-            nextPageButton.setDisabled(
-                    disabled
-            );
+         if (page4Button != null) {
+             page4Button.setVisible(false);
+         }
 
-            nextPageButton.setSclass(
-                    disabled
-                            ? "pagination-btn pagination-disabled"
-                            : "pagination-btn"
-            );
-        }
+         if (page5Button != null) {
+             page5Button.setVisible(false);
+         }
 
-        // ========================================================
-        // PAGE BUTTONS
-        // ========================================================
+         // Hide "Showing 0 of 0"
+         if (paginationInfo != null) {
+             paginationInfo.setVisible(false);
+         }
 
-        updatePageButton(
-                page1Button,
-                1,
-                totalPages
-        );
+         return;
+     }
 
-        updatePageButton(
-                page2Button,
-                2,
-                totalPages
-        );
+     // ========================================================
+     // BATCHES EXIST
+     // ========================================================
 
-        updatePageButton(
-                page3Button,
-                3,
-                totalPages
-        );
+     // Show pagination information
+     if (paginationInfo != null) {
+         paginationInfo.setVisible(true);
+     }
 
-        updatePageButton(
-                page4Button,
-                4,
-                totalPages
-        );
+  // Previous button
+     if (previousPageButton != null) {
+         previousPageButton.setVisible(totalPages > 1 && currentPage > 1);
+     }
 
-        updatePageButton(
-                page5Button,
-                5,
-                totalPages
-        );
+     // Next button
+     if (nextPageButton != null) {
+         nextPageButton.setVisible(totalPages > 1 && currentPage < totalPages);
+     }
+     // ========================================================
+     // PAGE BUTTONS
+     // ========================================================
 
-        // ========================================================
-        // PAGINATION INFORMATION
-        // ========================================================
+     updatePageButton(
+             page1Button,
+             1,
+             totalPages
+     );
 
-        if (paginationInfo != null) {
+     updatePageButton(
+             page2Button,
+             2,
+             totalPages
+     );
 
-            if (totalRecords == 0) {
+     updatePageButton(
+             page3Button,
+             3,
+             totalPages
+     );
 
-                paginationInfo.setValue(
-                        "Showing 0 of 0"
-                );
+     updatePageButton(
+             page4Button,
+             4,
+             totalPages
+     );
 
-            } else {
+     updatePageButton(
+             page5Button,
+             5,
+             totalPages
+     );
 
-                int start =
-                        (
-                                (currentPage - 1)
-                                        * PAGE_SIZE
-                        ) + 1;
+     // ========================================================
+     // PAGINATION INFORMATION
+     // ========================================================
 
-                int end =
-                        Math.min(
-                                currentPage * PAGE_SIZE,
-                                totalRecords
-                        );
+     if (paginationInfo != null) {
 
-                paginationInfo.setValue(
-                        "Showing "
-                                + start
-                                + "-"
-                                + end
-                                + " of "
-                                + totalRecords
-                );
-            }
-        }
-    }
+         int start =
+                 ((currentPage - 1)
+                         * PAGE_SIZE)
+                         + 1;
 
+         int end =
+                 Math.min(
+                         currentPage * PAGE_SIZE,
+                         totalRecords
+                 );
+
+         paginationInfo.setValue(
+                 "Showing "
+                         + start
+                         + "-"
+                         + end
+                         + " of "
+                         + totalRecords
+         );
+     }
+ }
     // ============================================================
     // UPDATE PAGE BUTTON
     // ============================================================

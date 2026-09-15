@@ -1,0 +1,978 @@
+/* =========================================================
+   CAPTURE OPERATOR - CAPTURED BATCHES
+   Matches Batch Capture page design
+   ========================================================= */
+
+
+/* =========================================================
+   DESIGN VARIABLES
+   ========================================================= */
+
+:root {
+
+    --bg-app: #EAF0FA;
+
+    --bg-surface: #FFFFFF;
+
+    --border-light: #E4EAF3;
+
+    --border-mid: #D0D5DD;
+
+    --text-primary: #0B1F3F;
+
+    --text-secondary: #2B3A55;
+
+    --text-muted: #667085;
+
+    --text-faint: #98A2B3;
+
+    --brand-blue: #175CD3;
+
+    --brand-blue-dark: #1D4ED8;
+
+    --radius-md: 8px;
+
+    --radius-lg: 12px;
+
+    --shadow-sm:
+        0 1px 3px rgba(16, 24, 40, 0.06),
+        0 1px 2px rgba(16, 24, 40, 0.04);
+
+    --shadow-md:
+        0 2px 8px rgba(16, 24, 40, 0.06);
+}
+
+
+/* =========================================================
+   PAGE CONTENT
+   ========================================================= */
+
+.captured-batches-content {
+
+    width: 100% !important;
+
+    height: 100% !important;
+
+    min-height: 100% !important;
+
+    box-sizing: border-box !important;
+
+    padding: 30px !important;
+
+    overflow-y: auto !important;
+
+    overflow-x: hidden !important;
+
+    background: #EAF0FA !important;
+
+    font-family:
+        'Inter',
+        -apple-system,
+        BlinkMacSystemFont,
+        'Segoe UI',
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+}
+
+
+/* =========================================================
+   MAIN LAYOUT
+   ========================================================= */
+
+.captured-batches-content > .z-vlayout {
+
+    width: 100% !important;
+
+    max-width: 1050px;
+
+    margin: 0 auto;
+
+    box-sizing: border-box !important;
+}
+
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.captured-batches-header {
+
+    width: 100% !important;
+
+    margin-bottom: 18px !important;
+}
+
+
+/* =========================================================
+   PAGE TITLE
+   ========================================================= */
+
+.captured-batches-page-title {
+
+    display: block !important;
+
+    position: relative;
+
+    width: fit-content;
+
+    padding-bottom: 10px !important;
+
+    margin-bottom: 7px !important;
+
+    color: #0B1F3F !important;
+
+    font-family:
+        'Space Grotesk',
+        'Plus Jakarta Sans',
+        'Inter',
+        sans-serif !important;
+
+    font-size: 30px !important;
+
+    font-weight: 700 !important;
+
+    line-height: 1.2 !important;
+
+    letter-spacing: -0.02em !important;
+}
+
+
+/* =========================================================
+   TITLE UNDERLINE
+   ========================================================= */
+
+.captured-batches-page-title::after {
+
+    content: '';
+
+    position: absolute;
+
+    left: 0;
+
+    bottom: 0;
+
+    width: 72px;
+
+    height: 4px;
+
+    border-radius: 3px;
+
+    background: #175CD3 !important;
+}
+
+
+/* =========================================================
+   MAIN CARD
+   ========================================================= */
+
+.captured-batches-groupbox {
+
+    position: relative !important;
+
+    width: 100% !important;
+
+    box-sizing: border-box !important;
+
+    padding:
+        24px
+        28px
+        22px
+        28px !important;
+
+    background: #FFFFFF !important;
+
+    border:
+        1px
+        solid
+        #E4EAF3 !important;
+
+    border-radius: 12px !important;
+
+    box-shadow:
+        0
+        2px
+        8px
+        rgba(16, 24, 40, 0.06) !important;
+
+    overflow: hidden !important;
+}
+
+
+/* =========================================================
+   CARD TOP BORDER
+   ========================================================= */
+
+.captured-batches-groupbox::before {
+
+    content: '';
+
+    position: absolute;
+
+    top: 0;
+
+    left: 0;
+
+    right: 0;
+
+    height: 3px;
+
+    background: #175CD3 !important;
+}
+
+
+/* =========================================================
+   ZK GROUPBOX RESET
+   ========================================================= */
+
+.captured-batches-groupbox .z-groupbox-hl,
+.captured-batches-groupbox .z-groupbox-hr,
+.captured-batches-groupbox .z-groupbox-hm,
+.captured-batches-groupbox .z-groupbox-tl,
+.captured-batches-groupbox .z-groupbox-tr,
+.captured-batches-groupbox .z-groupbox-tm,
+.captured-batches-groupbox .z-groupbox-bl,
+.captured-batches-groupbox .z-groupbox-br,
+.captured-batches-groupbox .z-groupbox-bm,
+.captured-batches-groupbox .z-groupbox-cl,
+.captured-batches-groupbox .z-groupbox-cr,
+.captured-batches-groupbox .z-groupbox-cm,
+.captured-batches-groupbox .z-groupbox-header,
+.captured-batches-groupbox .z-groupbox-title,
+.captured-batches-groupbox .z-groupbox-content {
+
+    background: transparent !important;
+
+    background-image: none !important;
+
+    border: none !important;
+
+    box-shadow: none !important;
+}
+
+
+/* =========================================================
+   CARD TITLE
+   ========================================================= */
+
+.captured-batches-caption {
+
+    display: block !important;
+
+    position: relative !important;
+
+    padding:
+        0
+        0
+        16px
+        17px !important;
+
+    margin:
+        0
+        0
+        4px
+        0 !important;
+
+    color: #2B3A55 !important;
+
+    background: transparent !important;
+
+    border: none !important;
+
+    font-family:
+        'Inter',
+        sans-serif !important;
+
+    font-size: 17px !important;
+
+    font-weight: 700 !important;
+
+    line-height: 1.4 !important;
+}
+
+
+/* =========================================================
+   CARD TITLE BLUE BAR
+   ========================================================= */
+
+.captured-batches-caption::before {
+
+    content: '';
+
+    position: absolute;
+
+    left: 0;
+
+    top: 1px;
+
+    width: 4px;
+
+    height: 20px;
+
+    border-radius: 3px;
+
+    background: #175CD3 !important;
+}
+
+
+/* =========================================================
+   TABLE CONTAINER
+   ========================================================= */
+
+.captured-batches-table-container {
+
+    width: 100% !important;
+
+    box-sizing: border-box !important;
+
+    position: relative;
+
+    border-radius: 8px;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   LISTBOX
+   ========================================================= */
+
+.captured-batches-listbox {
+
+    width: 100% !important;
+
+    box-sizing: border-box !important;
+
+    border:
+        1px
+        solid
+        #E4EAF3 !important;
+
+    border-radius: 8px !important;
+
+    overflow: hidden !important;
+
+    background: #FFFFFF !important;
+
+    font-family:
+        'Inter',
+        sans-serif !important;
+}
+
+
+/* =========================================================
+   LISTBOX BODY
+   ========================================================= */
+
+.captured-batches-listbox .z-listbox-body {
+
+    background: #FFFFFF !important;
+
+    overflow-x: hidden !important;
+}
+
+
+/* =========================================================
+   TABLE HEADER
+   ========================================================= */
+
+.captured-batches-listbox .z-listhead,
+.captured-batches-listhead {
+
+    height: 52px !important;
+
+    background: #175CD3 !important;
+
+    border-bottom: none !important;
+}
+
+
+/* =========================================================
+   HEADER CELLS
+   ========================================================= */
+
+.captured-batches-listbox .z-listheader,
+.captured-batches-listheader {
+
+    height: 52px !important;
+
+    box-sizing: border-box !important;
+
+    padding: 0 16px !important;
+
+    background: #175CD3 !important;
+
+    border-right:
+        1px
+        solid
+        rgba(255, 255, 255, 0.15) !important;
+
+    border-bottom: none !important;
+
+    color: #FFFFFF !important;
+
+    font-family:
+        'Inter',
+        'Plus Jakarta Sans',
+        sans-serif !important;
+
+    font-size: 13px !important;
+
+    font-weight: 700 !important;
+
+    letter-spacing: 0.06em !important;
+
+    text-transform: uppercase !important;
+}
+
+
+/* =========================================================
+   HEADER TEXT
+   ========================================================= */
+
+.captured-batches-listbox
+.z-listheader-content,
+
+.captured-batches-listbox
+.z-listheader label,
+
+.captured-batches-listbox
+.z-listheader .z-label {
+
+    color: #FFFFFF !important;
+
+    font-weight: 700 !important;
+
+    background: transparent !important;
+}
+
+
+/* Last header */
+
+.captured-batches-listbox
+.z-listheader:last-child {
+
+    border-right: none !important;
+}
+
+
+/* =========================================================
+   DATA ROWS
+   ========================================================= */
+
+.captured-batches-listbox
+.z-listitem {
+
+    background: #FFFFFF !important;
+
+    border-bottom:
+        1px
+        solid
+        #EEF2F8 !important;
+}
+
+
+/* Alternate row */
+
+.captured-batches-listbox
+.z-listitem:nth-child(even) {
+
+    background: #FCFDFF !important;
+}
+
+
+/* =========================================================
+   ROW HOVER
+   ========================================================= */
+
+.captured-batches-listbox
+.z-listitem:hover {
+
+    background: #F6F9FF !important;
+}
+
+
+/* =========================================================
+   LAST ROW
+   ========================================================= */
+
+.captured-batches-listbox
+.z-listitem:last-child {
+
+    border-bottom: none !important;
+}
+
+
+/* =========================================================
+   DATA CELLS
+   ========================================================= */
+
+.captured-batches-listbox
+.z-listcell {
+
+    box-sizing: border-box !important;
+
+    border-right:
+        1px
+        solid
+        rgba(228, 234, 243, 0.7) !important;
+}
+
+
+.captured-batches-listbox
+.z-listcell:last-child {
+
+    border-right: none !important;
+}
+
+
+/* =========================================================
+   CELL CONTENT
+   ========================================================= */
+
+.captured-batches-listbox
+.z-listcell-content {
+
+    box-sizing: border-box !important;
+
+    min-height: 58px;
+
+    padding:
+        16px
+        18px !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: flex-start !important;
+
+    font-family:
+        'Inter',
+        sans-serif !important;
+
+    font-size: 14px !important;
+
+    font-weight: 500 !important;
+
+    color: #1D2939 !important;
+
+    line-height: 1.5 !important;
+}
+
+
+/* =========================================================
+   BATCH NUMBER
+   ========================================================= */
+
+.captured-batches-listbox
+.z-listitem
+.z-listcell:nth-child(1)
+.z-listcell-content {
+
+    font-family:
+        'Space Grotesk',
+        'Inter',
+        sans-serif !important;
+
+    font-size: 14.5px !important;
+
+    font-weight: 700 !important;
+
+    color: #0B1F3F !important;
+}
+
+
+/* =========================================================
+   BLUE DOT BEFORE BATCH NUMBER
+   ========================================================= */
+
+.captured-batches-listbox
+.z-listitem
+.z-listcell:nth-child(1)
+.z-listcell-content::before {
+
+    content: '';
+
+    display: inline-block;
+
+    flex-shrink: 0;
+
+    width: 8px;
+
+    height: 8px;
+
+    margin-right: 12px;
+
+    border-radius: 50%;
+
+    background: #175CD3;
+}
+
+
+/* =========================================================
+   TOTAL CHEQUES
+   ========================================================= */
+
+.captured-batches-listbox
+.z-listitem
+.z-listcell:nth-child(2)
+.z-listcell-content {
+
+    font-family:
+        'Space Grotesk',
+        'Inter',
+        sans-serif !important;
+
+    font-weight: 700 !important;
+
+    color: #175CD3 !important;
+
+    font-variant-numeric:
+        tabular-nums !important;
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.captured-batches-listbox
+.z-listitem
+.z-listcell:nth-child(3)
+.z-listcell-content {
+
+    font-weight: 600 !important;
+
+    color: #2B3A55 !important;
+}
+
+
+/* =========================================================
+   EMPTY MESSAGE
+   ========================================================= */
+
+.captured-batches-listbox
+.z-listbox-emptybody,
+
+.captured-batches-listbox
+.z-listbox-emptybody td {
+
+    padding:
+        60px
+        20px !important;
+
+    text-align: center !important;
+
+    background: #FCFDFF !important;
+
+    color: #98A2B3 !important;
+
+    font-family:
+        'Inter',
+        sans-serif !important;
+
+    font-size: 14px !important;
+}
+
+
+/* =========================================================
+   PAGINATION
+   ========================================================= */
+
+.captured-batches-listbox
+.z-paging {
+
+    padding:
+        12px
+        18px !important;
+
+    background: #FCFDFF !important;
+
+    border-top:
+        1px
+        solid
+        #E4EAF3 !important;
+}
+
+
+/* Pagination text */
+
+.captured-batches-listbox
+.z-paging-text,
+
+.captured-batches-listbox
+.z-paging-info {
+
+    font-family:
+        'Space Grotesk',
+        'Inter',
+        sans-serif !important;
+
+    font-size: 13px !important;
+
+    font-weight: 600 !important;
+
+    color: #667085 !important;
+}
+
+
+/* =========================================================
+   PAGINATION BUTTONS
+   ========================================================= */
+
+.captured-batches-listbox
+.z-paging-button {
+
+    min-width: 36px !important;
+
+    height: 34px !important;
+
+    padding:
+        0
+        12px !important;
+
+    margin:
+        0
+        2px !important;
+
+    box-sizing: border-box !important;
+
+    border:
+        1px
+        solid
+        #D0D5DD !important;
+
+    border-radius: 8px !important;
+
+    background: #FFFFFF !important;
+
+    color: #2B3A55 !important;
+
+    font-family:
+        'Inter',
+        sans-serif !important;
+
+    font-size: 13px !important;
+
+    font-weight: 600 !important;
+
+    cursor: pointer !important;
+}
+
+
+/* Pagination hover */
+
+.captured-batches-listbox
+.z-paging-button:hover {
+
+    background: #F5F9FF !important;
+
+    border-color: #175CD3 !important;
+
+    color: #175CD3 !important;
+}
+
+
+/* Disabled */
+
+.captured-batches-listbox
+.z-paging-button[disabled],
+
+.captured-batches-listbox
+.z-paging-button-disabled {
+
+    opacity: 0.4 !important;
+
+    cursor: default !important;
+
+    pointer-events: none !important;
+}
+
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+.captured-batches-content::-webkit-scrollbar {
+
+    width: 7px;
+}
+
+
+.captured-batches-content::-webkit-scrollbar-track {
+
+    background: transparent;
+}
+
+
+.captured-batches-content::-webkit-scrollbar-thumb {
+
+    background: #C8D2E0;
+
+    border-radius: 4px;
+}
+
+
+.captured-batches-content::-webkit-scrollbar-thumb:hover {
+
+    background: #98A2B3;
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1024px) {
+
+    .captured-batches-content {
+
+        padding:
+            24px
+            20px !important;
+    }
+
+    .captured-batches-page-title {
+
+        font-size: 28px !important;
+    }
+
+    .captured-batches-groupbox {
+
+        padding:
+            22px
+            22px
+            20px
+            22px !important;
+    }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+    .captured-batches-content {
+
+        padding:
+            18px
+            12px !important;
+    }
+
+    .captured-batches-page-title {
+
+        font-size: 25px !important;
+    }
+
+    .captured-batches-groupbox {
+
+        padding:
+            20px
+            14px
+            18px
+            14px !important;
+    }
+
+    .captured-batches-listbox
+    .z-listheader {
+
+        font-size: 11px !important;
+
+        padding:
+            0
+            10px !important;
+    }
+
+    .captured-batches-listbox
+    .z-listcell-content {
+
+        min-height: 50px;
+
+        padding:
+            13px
+            10px !important;
+
+        font-size: 12.5px !important;
+    }
+
+}
+.captured-batches-groupbox {
+    position: relative !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+
+    padding: 24px 28px 22px 28px !important;
+
+    background: #FFFFFF !important;
+
+    border: 1px solid #E4EAF3 !important;
+
+    border-radius: 12px !important;
+
+    box-shadow:
+        0 2px 8px rgba(16, 24, 40, 0.06) !important;
+
+    overflow: hidden !important;
+}
+
+
+/* Blue top border */
+.captured-batches-groupbox::before {
+    content: '';
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+    right: 0;
+
+    height: 3px;
+
+    background: #175CD3 !important;
+}
+
+
+/* Batches heading */
+.captured-batches-caption {
+    display: block !important;
+
+    position: relative !important;
+
+    padding: 0 0 16px 17px !important;
+
+    margin: 0 0 4px 0 !important;
+
+    color: #2B3A55 !important;
+
+    font-family:
+        'Inter',
+        sans-serif !important;
+
+    font-size: 17px !important;
+
+    font-weight: 700 !important;
+
+    line-height: 1.4 !important;
+}
+
+
+/* Blue bar beside Batches */
+.captured-batches-caption::before {
+    content: '';
+
+    position: absolute;
+
+    left: 0;
+    top: 1px;
+
+    width: 4px;
+    height: 20px;
+
+    border-radius: 3px;
+
+    background: #175CD3 !important;
+}

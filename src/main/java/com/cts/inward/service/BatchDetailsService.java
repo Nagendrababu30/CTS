@@ -17,14 +17,35 @@ public interface BatchDetailsService {
     Map<String, Object> getCbsValidation(
             String chequeNumber);
 
+    List<Map<String, String>> getCheckerReturnReasons();
+
+    List<Map<String, String>> getCheckerRejectionReasons();
+
     void saveCheckerDecision(
+            String chequeNumber,
+            String status,
+            List<String> rejectionReasonCodes,
+            List<String> returnReasonCodes,
+            Integer checkerId,
+            String checkerAction,
+            String remarks);
+
+    default void saveCheckerDecision(
             String chequeNumber,
             String status,
             String rejectionReasonCode,
             String returnReasonCode,
             Integer checkerId,
             String checkerAction,
-            String remarks);
+            String remarks) {
+        List<String> rejList = rejectionReasonCode != null && !rejectionReasonCode.trim().isEmpty()
+                ? java.util.Collections.singletonList(rejectionReasonCode.trim())
+                : java.util.Collections.emptyList();
+        List<String> retList = returnReasonCode != null && !returnReasonCode.trim().isEmpty()
+                ? java.util.Collections.singletonList(returnReasonCode.trim())
+                : java.util.Collections.emptyList();
+        saveCheckerDecision(chequeNumber, status, rejList, retList, checkerId, checkerAction, remarks);
+    }
 
     boolean completeVerification(
             Long batchId,

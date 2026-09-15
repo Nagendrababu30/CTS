@@ -425,6 +425,11 @@
     color: #B54708;
     border: 1px solid #FEDF89;
 }
+.badge-return-to-maker {
+    background: #FFF4ED;
+    color: #C4320A;
+    border: 1px solid #FECDCA;
+}
 
 /* ---------- Action buttons ---------- */
 .btn {

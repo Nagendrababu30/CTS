@@ -376,6 +376,115 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
     }
 
     // =========================================================
+    // Get Latest Cheque Return Reason
+    // =========================================================
+
+    @Override
+    public String getLatestChequeReturnReason(
+            String chequeNumber) {
+
+        String sql =
+                "SELECT return_reason_code "
+                        + "FROM public.inward_cheque_status_history "
+                        + "WHERE cheque_number = ? "
+                        + "ORDER BY status_history_id DESC "
+                        + "LIMIT 1";
+
+        try (
+                Connection connection =
+                        ConnectionPool
+                                .getDataSource()
+                                .getConnection();
+
+                PreparedStatement statement =
+                        connection.prepareStatement(sql)
+        ) {
+
+            statement.setString(
+                    1,
+                    chequeNumber);
+
+            try (
+                    ResultSet resultSet =
+                            statement.executeQuery()
+            ) {
+
+                if (resultSet.next()) {
+
+                    return resultSet.getString(
+                            "return_reason_code");
+                }
+            }
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Failed to fetch latest cheque return reason for "
+                            + chequeNumber,
+                    e);
+        }
+
+        return null;
+    }
+
+    // =========================================================
+    // Is Batch Returned To Maker
+    // =========================================================
+
+    @Override
+    public boolean isBatchReturnedToMaker(
+            long batchId) {
+
+        String sql =
+                "SELECT batch_status "
+                        + "FROM public.inward_batch_history "
+                        + "WHERE batch_id = ? "
+                        + "ORDER BY batch_history_id DESC "
+                        + "LIMIT 1";
+
+        try (
+                Connection connection =
+                        ConnectionPool
+                                .getDataSource()
+                                .getConnection();
+
+                PreparedStatement statement =
+                        connection.prepareStatement(sql)
+        ) {
+
+            statement.setLong(
+                    1,
+                    batchId);
+
+            try (
+                    ResultSet resultSet =
+                            statement.executeQuery()
+            ) {
+
+                if (resultSet.next()) {
+
+                    String status =
+                            resultSet.getString(
+                                    "batch_status");
+
+                    return "RETURN_TO_MAKER"
+                            .equalsIgnoreCase(
+                                    status);
+                }
+            }
+
+        } catch (SQLException e) {
+
+            throw new RuntimeException(
+                    "Failed to check if batch is returned to maker: "
+                            + batchId,
+                    e);
+        }
+
+        return false;
+    }
+
+    // =========================================================
     // Get Batch ID By Cheque Number
     // =========================================================
 
@@ -641,9 +750,9 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                         + "return_reason_code, "
                         + "description "
                         + "FROM public.inward_cheque_return_reason "
-                        + "WHERE applicable_role IN "
-                        + "('MAKER', 'BOTH') "
-                        + "ORDER BY description";
+                        + "WHERE applicable_role = 'MAKER' "
+                        + "  AND return_reason_code LIKE 'MR-MICR-%' "
+                        + "ORDER BY return_reason_code";
 
         try (
                 Connection connection =

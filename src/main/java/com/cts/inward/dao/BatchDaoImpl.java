@@ -97,10 +97,19 @@ public class BatchDaoImpl implements BatchDao {
 	public int getDataEntryPendingCount(long batchId) {
 
 		String sql = "SELECT COUNT(*) " + "FROM public.inward_cheque c " + "LEFT JOIN LATERAL ( "
-				+ "    SELECT h.status " + "    FROM public.inward_cheque_status_history h "
+				+ "    SELECT h.status, h.return_reason_code " + "    FROM public.inward_cheque_status_history h "
 				+ "    WHERE h.cheque_number = c.cheque_number " + "    ORDER BY h.status_history_id DESC "
 				+ "    LIMIT 1 " + ") latest ON TRUE " + "WHERE c.batch_id = ? "
-				+ "AND COALESCE(latest.status, '') NOT IN " + "('DATA_ENTRY_COMPLETED', 'RETURN_BY_MAKER')";
+				+ "AND COALESCE(latest.status, '') NOT IN ('DATA_ENTRY_COMPLETED', 'RETURN_BY_MAKER', 'ACCEPT', 'REJECT') "
+				+ "AND NOT ( "
+				+ "    latest.status = 'RETURN_TO_MAKER' "
+				+ "    AND ( "
+				+ "        latest.return_reason_code LIKE 'CR-MICR-%' "
+				+ "        OR latest.return_reason_code LIKE 'CR-IMG-%' "
+				+ "        OR latest.return_reason_code LIKE 'MR-MICR-%' "
+				+ "        OR latest.return_reason_code LIKE 'MICR_%' "
+				+ "    ) "
+				+ ") ";
 
 		try (Connection connection = ConnectionPool.getDataSource().getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -139,25 +148,29 @@ public class BatchDaoImpl implements BatchDao {
 			// ---------------------------------------------------------
 
 			String checkSql = """
-					SELECT
-					    COUNT(*) AS eligible_count,
-					    COUNT(*) FILTER (
-					        WHERE latest.status = 'DATA_ENTRY_COMPLETED'
-					    ) AS completed_count
+					SELECT COUNT(*) AS pending_count
 					FROM public.inward_cheque c
 					LEFT JOIN LATERAL (
-					    SELECT h.status
+					    SELECT h.status, h.return_reason_code
 					    FROM public.inward_cheque_status_history h
 					    WHERE h.cheque_number = c.cheque_number
 					    ORDER BY h.status_history_id DESC
 					    LIMIT 1
 					) latest ON TRUE
 					WHERE c.batch_id = ?
-					  AND COALESCE(latest.status, '') <> 'RETURN_BY_MAKER'
+					  AND COALESCE(latest.status, '') NOT IN ('DATA_ENTRY_COMPLETED', 'RETURN_BY_MAKER', 'ACCEPT', 'REJECT')
+					  AND NOT (
+					      latest.status = 'RETURN_TO_MAKER'
+					      AND (
+					          latest.return_reason_code LIKE 'CR-MICR-%'
+					          OR latest.return_reason_code LIKE 'CR-IMG-%'
+					          OR latest.return_reason_code LIKE 'MR-MICR-%'
+					          OR latest.return_reason_code LIKE 'MICR_%'
+					      )
+					  )
 					""";
 
-			int eligibleCount = 0;
-			int completedCount = 0;
+			int pendingCount = 0;
 
 			try (PreparedStatement statement = connection.prepareStatement(checkSql)) {
 
@@ -167,9 +180,7 @@ public class BatchDaoImpl implements BatchDao {
 
 					if (resultSet.next()) {
 
-						eligibleCount = resultSet.getInt("eligible_count");
-
-						completedCount = resultSet.getInt("completed_count");
+						pendingCount = resultSet.getInt("pending_count");
 					}
 				}
 			}
@@ -178,7 +189,7 @@ public class BatchDaoImpl implements BatchDao {
 			// 2. Do not complete batch if any eligible cheque is pending
 			// ---------------------------------------------------------
 
-			if (eligibleCount == 0 || eligibleCount != completedCount) {
+			if (pendingCount != 0) {
 
 				connection.rollback();
 

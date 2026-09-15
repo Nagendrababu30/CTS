@@ -120,9 +120,10 @@ public class CheckerDashboardDAOImpl implements CheckerDashboardDAO {
                 "SELECT "
                 + "    b.batch_id, "
                 + "    b.total_cheques, "
-                + "    l.user_id AS checker_id, "
+                + "    COALESCE(l_chk.user_id, l.user_id) AS checker_id, "
                 + "    l.lock_status, "
-                + "    h.maker_id "
+                + "    COALESCE(h.maker_id, l_mkr.user_id) AS maker_id, "
+                + "    hs.batch_status "
                 + "FROM inward_batch b "
 
                 // Latest lock row per batch by locked_time
@@ -130,15 +131,33 @@ public class CheckerDashboardDAOImpl implements CheckerDashboardDAO {
                 + "    SELECT DISTINCT ON (batch_id) "
                 + "        batch_id, user_id, lock_status, locked_time "
                 + "    FROM inward_batch_lock "
-                + "    ORDER BY batch_id, locked_time DESC "
+                + "    ORDER BY batch_id, locked_time DESC, lock_id DESC "
                 + ") l ON l.batch_id = b.batch_id "
+
+                // Most recent checker lock
+                + "LEFT JOIN ( "
+                + "    SELECT DISTINCT ON (bl.batch_id) "
+                + "        bl.batch_id, bl.user_id "
+                + "    FROM inward_batch_lock bl "
+                + "    JOIN public.\"user\" u ON u.user_id = bl.user_id AND u.role_id = 2 "
+                + "    ORDER BY bl.batch_id, bl.locked_time DESC, bl.lock_id DESC "
+                + ") l_chk ON l_chk.batch_id = b.batch_id "
+
+                // Most recent maker lock
+                + "LEFT JOIN ( "
+                + "    SELECT DISTINCT ON (bl.batch_id) "
+                + "        bl.batch_id, bl.user_id "
+                + "    FROM inward_batch_lock bl "
+                + "    JOIN public.\"user\" u ON u.user_id = bl.user_id AND u.role_id = 1 "
+                + "    ORDER BY bl.batch_id, bl.locked_time DESC, bl.lock_id DESC "
+                + ") l_mkr ON l_mkr.batch_id = b.batch_id "
 
                 // Maker who sent to checker
                 + "LEFT JOIN ( "
                 + "    SELECT bh.batch_id, MAX(bh.changed_by) AS maker_id "
                 + "    FROM inward_batch_history bh "
-                + "    JOIN public.user u ON u.user_id = bh.changed_by AND u.role_id = 1 "
-                + "    WHERE bh.batch_status = 'SENT_TO_CHECKER' "
+                + "    JOIN public.\"user\" u ON u.user_id = bh.changed_by AND u.role_id = 1 "
+                + "    WHERE bh.batch_status IN ('SENT_TO_CHECKER', 'RETURN_TO_MAKER') "
                 + "    GROUP BY bh.batch_id "
                 + ") h ON h.batch_id = b.batch_id "
 
@@ -149,8 +168,8 @@ public class CheckerDashboardDAOImpl implements CheckerDashboardDAO {
                 + "    ORDER BY batch_id, changed_on DESC, batch_history_id DESC "
                 + ") hs ON hs.batch_id = b.batch_id "
 
-                // Only SENT_TO_CHECKER batches
-                + "WHERE hs.batch_status = 'SENT_TO_CHECKER' "
+                // SENT_TO_CHECKER or RETURN_TO_MAKER batches
+                + "WHERE hs.batch_status IN ('SENT_TO_CHECKER', 'RETURN_TO_MAKER', 'ON_HOLD') "
 
                 + "ORDER BY b.batch_id";
 
@@ -175,6 +194,9 @@ public class CheckerDashboardDAOImpl implements CheckerDashboardDAO {
 
                 String lockStatus = resultSet.getString("lock_status");
                 batch.setLockStatus(lockStatus != null ? lockStatus : "UNLOCKED");
+
+                String batchStatus = resultSet.getString("batch_status");
+                batch.setBatchStatus(batchStatus);
 
                 batches.add(batch);
             }

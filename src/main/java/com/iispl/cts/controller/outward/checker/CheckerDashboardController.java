@@ -939,39 +939,78 @@ public class CheckerDashboardController
             int totalRecords,
             int totalPages) {
 
+        // ========================================================
+        // NO BATCHES
+        // ========================================================
+
+        if (totalRecords == 0) {
+
+            if (previousPageButton != null) {
+                previousPageButton.setVisible(false);
+            }
+
+            if (nextPageButton != null) {
+                nextPageButton.setVisible(false);
+            }
+
+            if (page1Button != null) {
+                page1Button.setVisible(false);
+            }
+
+            if (page2Button != null) {
+                page2Button.setVisible(false);
+            }
+
+            if (page3Button != null) {
+                page3Button.setVisible(false);
+            }
+
+            if (page4Button != null) {
+                page4Button.setVisible(false);
+            }
+
+            if (page5Button != null) {
+                page5Button.setVisible(false);
+            }
+
+            if (paginationInfo != null) {
+                paginationInfo.setVisible(false);
+            }
+
+            return;
+        }
+
+        // ========================================================
+        // BATCHES EXIST
+        // ========================================================
+
+        if (paginationInfo != null) {
+            paginationInfo.setVisible(true);
+        }
+
+        // Previous button
+
         if (previousPageButton != null) {
 
-            boolean disabled =
-                    currentPage <= 1
-                            || totalPages <= 1;
-
-            previousPageButton.setDisabled(
-                    disabled
-            );
-
-            previousPageButton.setSclass(
-                    disabled
-                            ? "pagination-btn pagination-disabled"
-                            : "pagination-btn"
+            previousPageButton.setVisible(
+                    totalPages > 1
+                            && currentPage > 1
             );
         }
+
+        // Next button
 
         if (nextPageButton != null) {
 
-            boolean disabled =
-                    totalPages == 0
-                            || currentPage >= totalPages;
-
-            nextPageButton.setDisabled(
-                    disabled
-            );
-
-            nextPageButton.setSclass(
-                    disabled
-                            ? "pagination-btn pagination-disabled"
-                            : "pagination-btn"
+            nextPageButton.setVisible(
+                    totalPages > 1
+                            && currentPage < totalPages
             );
         }
+
+        // ========================================================
+        // PAGE BUTTONS
+        // ========================================================
 
         updatePageButton(
                 page1Button,
@@ -1003,37 +1042,31 @@ public class CheckerDashboardController
                 totalPages
         );
 
+        // ========================================================
+        // PAGINATION INFORMATION
+        // ========================================================
+
         if (paginationInfo != null) {
 
-            if (totalRecords == 0) {
+            int start =
+                    ((currentPage - 1)
+                            * PAGE_SIZE)
+                            + 1;
 
-                paginationInfo.setValue(
-                        "Showing 0 of 0"
-                );
+            int end =
+                    Math.min(
+                            currentPage * PAGE_SIZE,
+                            totalRecords
+                    );
 
-            } else {
-
-                int start =
-                        (
-                                (currentPage - 1)
-                                        * PAGE_SIZE
-                        ) + 1;
-
-                int end =
-                        Math.min(
-                                currentPage * PAGE_SIZE,
-                                totalRecords
-                        );
-
-                paginationInfo.setValue(
-                        "Showing "
-                                + start
-                                + "-"
-                                + end
-                                + " of "
-                                + totalRecords
-                );
-            }
+            paginationInfo.setValue(
+                    "Showing "
+                            + start
+                            + "-"
+                            + end
+                            + " of "
+                            + totalRecords
+            );
         }
     }
 
@@ -1371,8 +1404,6 @@ public class CheckerDashboardController
             // ====================================================
 
             /*
-             * IMPORTANT:
-             *
              * A corrected cheque must be available
              * for re-verification even if another
              * returned cheque is still with Maker.
@@ -1402,7 +1433,7 @@ public class CheckerDashboardController
                  * - call assignBatch()
                  * - change outward_batch.batch_status
                  *
-                 * The same Checker continues with the
+                 * Same Checker continues with the
                  * existing assignment.
                  */
 
@@ -1436,13 +1467,6 @@ public class CheckerDashboardController
                                     currentCheckerUser
                             )
                     );
-
-            /*
-             * No RE_VERIFIED cheque is currently ready.
-             *
-             * If returned cheques are still with Maker,
-             * Checker must wait.
-             */
 
             if (pendingMakerCheques) {
 
@@ -1506,15 +1530,6 @@ public class CheckerDashboardController
             // ====================================================
             // ATOMIC ASSIGNMENT
             // ====================================================
-
-            /*
-             * IMPORTANT:
-             *
-             * assignBatch() expects long checkerUserId.
-             *
-             * Therefore pass currentCheckerUser directly,
-             * not String.valueOf(currentCheckerUser).
-             */
 
             boolean assigned =
                     service.assignBatch(

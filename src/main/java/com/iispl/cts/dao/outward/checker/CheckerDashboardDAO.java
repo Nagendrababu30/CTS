@@ -77,8 +77,7 @@ public class CheckerDashboardDAO {
                 "         'READY_FOR_CHECKER', " +
                 "         'SUBMITTED', " +
                 "         'CHECKER_PENDING', " +
-                "         'PENDING_CHECKER', " +
-                "         'CHECKER_COMPLETED') " +
+                "         'PENDING_CHECKER') " +
 
                 "    OR EXISTS ( " +
 
@@ -1101,16 +1100,10 @@ public class CheckerDashboardDAO {
      */
     public boolean assignBatch(
             String batchNumber,
-            String checkerUserId) {
+            long checkerUserId) {
 
         if (batchNumber == null ||
                 batchNumber.trim().isEmpty()) {
-
-            return false;
-        }
-
-        if (checkerUserId == null ||
-                checkerUserId.trim().isEmpty()) {
 
             return false;
         }
@@ -1156,9 +1149,7 @@ public class CheckerDashboardDAO {
 
             ps.setInt(
                     2,
-                    Integer.parseInt(
-                            checkerUserId
-                    )
+                    (int) checkerUserId
             );
 
             ps.setString(

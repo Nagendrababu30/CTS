@@ -19,6 +19,7 @@ import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Vlayout;
 
 import com.cts.admin.model.User;
+import com.iispl.cts.model.outward.ChequeProcessing;
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.model.outward.OutwardCheque;
 import com.iispl.cts.model.outward.ReturnReason;
@@ -174,6 +175,12 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
     private String batchNumber;
 
+    /*
+     * Re-Verify mode is enabled only when the Checker Dashboard
+     * opens this screen with mode=RE_VERIFY.
+     */
+    private boolean reVerifyMode = false;
+
     private long checkerUserId;
 
     private OutwardBatch currentBatch;
@@ -219,6 +226,13 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         batchNumber =
                 Executions.getCurrent()
                         .getParameter("batchNumber");
+
+        String mode =
+                Executions.getCurrent()
+                        .getParameter("mode");
+
+        reVerifyMode =
+                "RE_VERIFY".equalsIgnoreCase(mode);
 
         if (batchNumber == null
                 || batchNumber.trim().isEmpty()) {
@@ -663,6 +677,21 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
     private void loadFirstCheque() {
 
+        // ========================================================
+        // RE-VERIFY MODE
+        // ========================================================
+
+        if (reVerifyMode) {
+
+            loadReVerifyCheques();
+
+            return;
+        }
+
+        // ========================================================
+        // NORMAL CHECKER MODE
+        // ========================================================
+
         cheques =
                 batchService.getChequesByBatchNumber(
                         batchNumber);
@@ -674,6 +703,134 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         }
 
         currentChequeIndex = 0;
+
+        loadCurrentCheque();
+    }
+
+    // ============================================================
+    // LOAD RE-VERIFY CHEQUES
+    // ============================================================
+    //
+    // Re-Verify eligibility is based ONLY on the individual cheque:
+    //
+    // 1. cheque_processing.checker_id = current Checker
+    // 2. cheque_processing.checker_action = SEND_BACK
+    // 3. outward_cheque.cheque_status = RE_VERIFIED
+    //
+    // outward_batch.batch_status is deliberately NOT used here.
+    // ============================================================
+
+    private void loadReVerifyCheques() {
+
+        List<OutwardCheque> allCheques =
+                batchService.getChequesByBatchNumber(
+                        batchNumber);
+
+        if (allCheques == null
+                || allCheques.isEmpty()) {
+
+            cheques =
+                    new java.util.ArrayList<>();
+
+            Messagebox.show(
+                    "No re-verified cheques are available for this batch.",
+                    "Re-Verify",
+                    Messagebox.OK,
+                    Messagebox.EXCLAMATION);
+
+            return;
+        }
+
+        List<OutwardCheque> reVerifiedCheques =
+                new java.util.ArrayList<>();
+
+        boolean pendingMakerCheque = false;
+
+        for (OutwardCheque cheque : allCheques) {
+
+            if (cheque == null
+                    || cheque.getChequeNumber() == null
+                    || cheque.getChequeNumber()
+                            .trim()
+                            .isEmpty()) {
+
+                continue;
+            }
+
+            ChequeProcessing processing =
+                    processingService.getChequeProcessing(
+                            batchNumber,
+                            cheque.getChequeNumber());
+
+            if (processing == null) {
+
+                continue;
+            }
+
+            boolean sentBackByCurrentChecker =
+                    processing.getCheckerId() == checkerUserId
+                    && "SEND_BACK".equalsIgnoreCase(
+                            processing.getCheckerAction());
+
+            if (!sentBackByCurrentChecker) {
+
+                continue;
+            }
+
+            String chequeStatus =
+                    cheque.getChequeStatus();
+
+            if ("RE_VERIFIED".equalsIgnoreCase(
+                    chequeStatus)) {
+
+                reVerifiedCheques.add(cheque);
+
+            } else {
+
+                pendingMakerCheque = true;
+            }
+        }
+
+        // ========================================================
+        // ANY RETURNED CHEQUE STILL WITH MAKER
+        // ========================================================
+
+        if (pendingMakerCheque) {
+
+            cheques =
+                    new java.util.ArrayList<>();
+
+            Messagebox.show(
+                    "Still in process by Maker.",
+                    "Re-Verify",
+                    Messagebox.OK,
+                    Messagebox.EXCLAMATION);
+
+            return;
+        }
+
+        // ========================================================
+        // ONLY RE-VERIFIED CHEQUES
+        // ========================================================
+
+        cheques = reVerifiedCheques;
+
+        if (cheques.isEmpty()) {
+
+            Messagebox.show(
+                    "No re-verified cheques are available for this batch.",
+                    "Re-Verify",
+                    Messagebox.OK,
+                    Messagebox.EXCLAMATION);
+
+            return;
+        }
+
+        currentChequeIndex = 0;
+
+        chequeSequence.setValue(
+                "Cheque 1 of "
+                        + cheques.size());
 
         loadCurrentCheque();
     }

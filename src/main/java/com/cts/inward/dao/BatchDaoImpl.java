@@ -259,7 +259,7 @@ public class BatchDaoImpl implements BatchDao {
 		String sql = "SELECT " + "b.batch_id, " + "b.file_id, " + "b.presenting_bank_name, " + "b.total_cheques "
 				+ "FROM public.inward_batch b " + "INNER JOIN LATERAL ( " + "    SELECT h.batch_status "
 				+ "    FROM public.inward_batch_history h " + "    WHERE h.batch_id = b.batch_id "
-				+ "    ORDER BY h.changed_on DESC " + "    LIMIT 1 " + ") latest ON TRUE "
+				+ "    ORDER BY h.changed_on DESC NULLS LAST, h.batch_history_id DESC " + "    LIMIT 1 " + ") latest ON TRUE "
 				+ "WHERE latest.batch_status = ? " + "ORDER BY b.batch_id";
 
 		List<NpciBatchData> batches = new ArrayList<>();
@@ -506,7 +506,7 @@ public class BatchDaoImpl implements BatchDao {
 				    SELECT h.batch_status
 				    FROM public.inward_batch_history h
 				    WHERE h.batch_id = b.batch_id
-				    ORDER BY h.changed_on DESC, h.batch_history_id DESC
+				    ORDER BY h.changed_on DESC NULLS LAST, h.batch_history_id DESC
 				    LIMIT 1
 				) latest ON TRUE
 				LEFT JOIN LATERAL (

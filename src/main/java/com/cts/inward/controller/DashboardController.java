@@ -970,7 +970,7 @@ public class DashboardController
 
         String url =
                 "/zul/inward-maker/"
-                        + "data-entry.zul"
+                        + "data-entryform.zul"
                         + "?batchId="
                         + batchId
                         + "&source=dashboard";

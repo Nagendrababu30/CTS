@@ -1,5 +1,6 @@
 package com.iispl.cts.service.outward.checker;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ public class CheckerProcessingService {
 
         this.assignmentDao =
                 new CheckerAssignmentDAO();
+
     }
 
 
@@ -56,6 +58,53 @@ public class CheckerProcessingService {
 
 
     // ============================================================
+    // GET RE-VERIFIED CHEQUES
+    // ============================================================
+    /*
+     * Returns only the cheques which are eligible for
+     * Checker Re-Verify.
+     *
+     * Conditions:
+     *
+     * 1. Same batch number
+     *
+     * 2. cheque_processing.checker_id must belong to
+     *    the original Checker
+     *
+     * 3. cheque_processing.checker_action must be SEND_BACK
+     *
+     * 4. outward_cheque.cheque_status must be RE_VERIFIED
+     *
+     * IMPORTANT:
+     *
+     * outward_batch.batch_status is NOT checked here.
+     *
+     * Re-Verify is based only on the individual cheque
+     * processing/status information.
+     */
+
+    public List<OutwardCheque> getReVerifiedCheques(
+            String batchNumber,
+            long checkerUserId) {
+
+        if (batchNumber == null
+                || batchNumber.trim().isEmpty()) {
+
+            return Collections.emptyList();
+        }
+
+        if (checkerUserId <= 0) {
+
+            return Collections.emptyList();
+        }
+
+        return chequeDao.getReVerifiedCheques(
+                batchNumber.trim(),
+                checkerUserId);
+    }
+
+
+    // ============================================================
     // MAKER REJECTION INFORMATION
     // ============================================================
 
@@ -69,6 +118,7 @@ public class CheckerProcessingService {
                         chequeNumber);
 
         if (processing == null) {
+
             return false;
         }
 
@@ -87,6 +137,7 @@ public class CheckerProcessingService {
                         chequeNumber);
 
         if (processing == null) {
+
             return null;
         }
 
@@ -146,6 +197,53 @@ public class CheckerProcessingService {
 
 
     // ============================================================
+    // CHEQUE DATE VALIDATION
+    // ============================================================
+
+    /*
+     * Validate cheque date.
+     *
+     * Cheque date must:
+     *
+     * 1. Not be older than 3 months from today.
+     * 2. Not be a future/post-dated cheque.
+     *
+     * Possible results:
+     *
+     * CHEQUE_DATE_EXPIRED
+     * CHEQUE_DATE_POST_DATED
+     * PASS
+     */
+
+    public String validateChequeDate(
+            LocalDate chequeDate) {
+
+        if (chequeDate == null) {
+
+            return "CHEQUE_DATE_EXPIRED";
+        }
+
+        LocalDate today =
+                LocalDate.now();
+
+        LocalDate minimumDate =
+                today.minusMonths(3);
+
+        if (chequeDate.isBefore(minimumDate)) {
+
+            return "CHEQUE_DATE_EXPIRED";
+        }
+
+        if (chequeDate.isAfter(today)) {
+
+            return "CHEQUE_DATE_POST_DATED";
+        }
+
+        return "PASS";
+    }
+
+
+    // ============================================================
     // CBS UI MESSAGE
     // ============================================================
 
@@ -162,6 +260,18 @@ public class CheckerProcessingService {
                 cbsResult)) {
 
             return "Drawer account is inactive.";
+        }
+
+        if ("CHEQUE_DATE_EXPIRED".equals(
+                cbsResult)) {
+
+            return "Cheque date is older than 3 months.";
+        }
+
+        if ("CHEQUE_DATE_POST_DATED".equals(
+                cbsResult)) {
+
+            return "Post-dated cheque is not allowed.";
         }
 
         if ("PASS".equals(cbsResult)) {
@@ -394,6 +504,15 @@ public class CheckerProcessingService {
 
                 return false;
             }
+
+            String chequeDateResult =
+                    validateChequeDate(
+                            cheque.getChequeDate());
+
+            if (!"PASS".equals(chequeDateResult)) {
+
+                return false;
+            }
         }
 
 
@@ -455,13 +574,16 @@ public class CheckerProcessingService {
     }
 
 
-	public String getMakerReasonName(String reasonCode) {
+    public String getMakerReasonName(String reasonCode) {
 
         if (reasonCode == null
                 || reasonCode.trim().isEmpty()) {
+
             return null;
         }
 
-        return chequeDao.getReasonName(reasonCode.trim());
+        return chequeDao.getReasonName(
+                reasonCode.trim());
     }
+
 }

@@ -18,6 +18,9 @@ public interface ChequeDao {
 	void saveDataEntryCorrections(String chequeNumber, long batchId, String accountNumber, BigDecimal amount,
 			LocalDate chequeDate, long userId);
 
+	void saveDataEntryCorrections(String chequeNumber, long batchId, String correctedChequeNumber, String accountNumber,
+			BigDecimal amount, LocalDate chequeDate, long userId);
+
 	void updateChequeStatus(String chequeNumber, String status, long userId);
 
 	java.util.Map<String, String> getChequeReturnInfo(String chequeNumber);

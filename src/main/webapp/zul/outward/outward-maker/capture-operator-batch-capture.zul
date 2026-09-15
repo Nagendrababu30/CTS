@@ -13,1116 +13,244 @@
 <zk>
 
     <!-- ===================================================== -->
-    <!-- CSS – MODERN REALTIME PREMIUM DESIGN                  -->
+    <!-- PAGE CSS                                              -->
     <!-- ===================================================== -->
 
-    <style><![CDATA[
-
-        @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
-
-        /* ---------- Design tokens ---------- */
-        :root {
-            --bg-app:            #EAF0FA;
-            --bg-app-2:          #E4ECF8;
-            --bg-surface:        #FFFFFF;
-            --bg-surface-2:      #FCFDFF;
-            --border-light:      #E4EAF3;
-            --border-mid:        #D0D5DD;
-            --border-dark:       #98A2B3;
-            --text-primary:      #0B1F3F;
-            --text-secondary:    #2B3A55;
-            --text-muted:        #667085;
-            --text-faint:        #98A2B3;
-
-            --brand-blue:        #175CD3;
-            --brand-blue-dark:   #1D4ED8;
-            --brand-indigo:      #4F46E5;
-            --brand-purple:      #7A5AF8;
-            --brand-pink:        #C026D3;
-            --brand-orange:      #F97316;
-            --brand-green:       #12B76A;
-            --brand-cyan:        #06B6D4;
-
-            --radius-sm:         6px;
-            --radius-md:         10px;
-            --radius-lg:         16px;
-            --radius-xl:         24px;
-            --radius-pill:       999px;
-
-            --shadow-xs:         0 1px 2px rgba(16, 24, 40, 0.04);
-            --shadow-sm:         0 1px 3px rgba(16, 24, 40, 0.06), 0 1px 2px rgba(16, 24, 40, 0.04);
-            --shadow-md:         0 6px 18px rgba(16, 24, 40, 0.07), 0 2px 6px rgba(16, 24, 40, 0.03);
-            --shadow-lg:         0 18px 40px rgba(16, 24, 40, 0.10), 0 6px 14px rgba(16, 24, 40, 0.05);
-            --shadow-xl:         0 32px 70px rgba(16, 24, 40, 0.16), 0 12px 28px rgba(16, 24, 40, 0.07);
-            --shadow-2xl:        0 40px 90px rgba(16, 24, 40, 0.20), 0 16px 36px rgba(16, 24, 40, 0.09);
-
-            --shadow-glow-blue:  0 6px 22px rgba(23, 92, 211, 0.35);
-            --shadow-glow-green: 0 6px 22px rgba(18, 183, 106, 0.35);
-            --shadow-glow-purple:0 6px 22px rgba(122, 90, 248, 0.35);
-
-            --ease:              cubic-bezier(0.4, 0, 0.2, 1);
-            --ease-spring:       cubic-bezier(0.34, 1.56, 0.64, 1);
-            --ease-out-expo:     cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        /* =============================================================
-           GLOBAL RESET / BASE
-           ============================================================= */
-
-        html, body {
-            margin: 0 !important;
-            padding: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            overflow: hidden !important;
-            background: var(--bg-app);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
-            color: var(--text-secondary);
-        }
-
-        /* =============================================================
-           ANIMATIONS
-           ============================================================= */
-
-        @keyframes auroraFloat1 {
-            0%   { transform: translate(0, 0) scale(1); }
-            50%  { transform: translate(40px, -35px) scale(1.08); }
-            100% { transform: translate(0, 0) scale(1); }
-        }
-
-        @keyframes auroraFloat2 {
-            0%   { transform: translate(0, 0) scale(1); }
-            50%  { transform: translate(-45px, 40px) scale(1.1); }
-            100% { transform: translate(0, 0) scale(1); }
-        }
-
-        @keyframes auroraFloat3 {
-            0%   { transform: translate(0, 0) scale(1); }
-            50%  { transform: translate(25px, 25px) scale(1.05); }
-            100% { transform: translate(0, 0) scale(1); }
-        }
-
-        @keyframes gradientShift {
-            0%   { background-position: 0% 50%; }
-            50%  { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        @keyframes shimmerSweep {
-            0%   { transform: translateX(-100%) skewX(-15deg); }
-            100% { transform: translateX(200%) skewX(-15deg); }
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(18px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes fadeInScale {
-            from { opacity: 0; transform: scale(0.96); }
-            to   { opacity: 1; transform: scale(1); }
-        }
-
-        @keyframes liveDot {
-            0%   { box-shadow: 0 0 0 0 rgba(18, 183, 106, 0.6), 0 0 12px rgba(18, 183, 106, 0.8); }
-            70%  { box-shadow: 0 0 0 12px rgba(18, 183, 106, 0), 0 0 12px rgba(18, 183, 106, 0.3); }
-            100% { box-shadow: 0 0 0 0 rgba(18, 183, 106, 0), 0 0 12px rgba(18, 183, 106, 0.8); }
-        }
-
-        @keyframes borderGlow {
-            0%, 100% { border-color: rgba(23, 92, 211, 0.3); box-shadow: 0 0 0 0 rgba(23, 92, 211, 0.1); }
-            50%      { border-color: rgba(122, 90, 248, 0.5); box-shadow: 0 0 20px 0 rgba(122, 90, 248, 0.15); }
-        }
-
-        /* =============================================================
-           MAIN CONTENT AREA - CENTERED & DYNAMIC
-           ============================================================= */
-
-        .batch-capture-content {
-            position: relative;
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: center !important;
-            justify-content: flex-start !important;
-            min-height: 100% !important;
-            width: 100% !important;
-            padding: 40px 20px !important;
-            box-sizing: border-box !important;
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
-            background:
-                radial-gradient(1200px 600px at 0% 0%, rgba(23, 92, 211, 0.10), transparent 60%),
-                radial-gradient(1000px 600px at 100% 0%, rgba(122, 90, 248, 0.10), transparent 60%),
-                radial-gradient(900px 700px at 100% 100%, rgba(18, 183, 106, 0.06), transparent 60%),
-                linear-gradient(180deg, var(--bg-app) 0%, var(--bg-app-2) 100%);
-        }
-
-        /* Subtle grid pattern overlay */
-        .batch-capture-content::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(23, 92, 211, 0.025) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(23, 92, 211, 0.025) 1px, transparent 1px);
-            background-size: 40px 40px;
-            pointer-events: none;
-            z-index: 0;
-            mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
-            -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
-        }
-
-        /* Ambient Aurora Orbs */
-        .batch-capture-content::before {
-            content: '';
-            position: absolute;
-            top: -180px;
-            left: -120px;
-            width: 560px;
-            height: 560px;
-            background: radial-gradient(circle, rgba(23, 92, 211, 0.16) 0%, rgba(23, 92, 211, 0) 70%);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-            filter: blur(20px);
-            animation: auroraFloat1 16s ease-in-out infinite;
-        }
-
-        /* Third orb via a wrapper pseudo-element */
-        .batch-capture-content > .z-vlayout::before {
-            content: '';
-            position: absolute;
-            top: 40%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(192, 38, 211, 0.08) 0%, rgba(192, 38, 211, 0) 70%);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-            filter: blur(30px);
-            animation: auroraFloat3 20s ease-in-out infinite;
-        }
-
-        .batch-capture-content > .z-vlayout {
-            position: relative;
-            z-index: 1;
-            width: 100%;
-            max-width: 880px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* Second orb - bottom right */
-        .batch-capture-content > .z-vlayout::after {
-            content: '';
-            position: absolute;
-            bottom: -200px;
-            right: -140px;
-            width: 620px;
-            height: 620px;
-            background: radial-gradient(circle, rgba(122, 90, 248, 0.16) 0%, rgba(122, 90, 248, 0) 70%);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-            filter: blur(20px);
-            animation: auroraFloat2 18s ease-in-out infinite;
-        }
-
-        /* =============================================================
-           PAGE TITLE
-           ============================================================= */
-
-        .batch-capture-page-title {
-            font-family: 'Space Grotesk', 'Plus Jakarta Sans', 'Inter', sans-serif !important;
-            font-size: 34px !important;
-            font-weight: 800 !important;
-            letter-spacing: -0.04em !important;
-            background: linear-gradient(135deg, #0B1F3F 0%, #175CD3 40%, #7A5AF8 70%, #C026D3 100%);
-            background-size: 250% 250%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            position: relative;
-            display: inline-block;
-            padding-bottom: 16px;
-            margin-bottom: 12px;
-            text-align: center;
-            animation: gradientShift 7s ease infinite, fadeInUp 0.6s var(--ease-out-expo) both;
-            -webkit-text-stroke: 0.3px transparent;
-            filter: drop-shadow(0 4px 12px rgba(23, 92, 211, 0.15));
-        }
-
-        .batch-capture-page-title::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90px;
-            height: 5px;
-            background: linear-gradient(90deg, var(--brand-blue), var(--brand-purple), var(--brand-pink), var(--brand-orange), var(--brand-green));
-            background-size: 300% 100%;
-            border-radius: 3px;
-            box-shadow: 0 0 24px rgba(23, 92, 211, 0.6), 0 0 12px rgba(122, 90, 248, 0.4);
-            animation: gradientShift 5s ease infinite;
-        }
-
-        /* =============================================================
-           GROUPBOX – MAIN CARD (GLASSMORPHISM 2.0)
-           ============================================================= */
-
-        .batch-capture-groupbox {
-            background: rgba(255, 255, 255, 0.72) !important;
-            backdrop-filter: blur(24px) saturate(190%) !important;
-            -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
-            border: 1px solid rgba(255, 255, 255, 0.7) !important;
-            border-radius: var(--radius-xl) !important;
-            padding: 44px 48px !important;
-            box-sizing: border-box !important;
-            box-shadow:
-                var(--shadow-xl),
-                inset 0 1px 0 rgba(255, 255, 255, 0.9),
-                inset 0 -1px 0 rgba(255, 255, 255, 0.3) !important;
-            position: relative !important;
-            overflow: hidden !important;
-            width: 100% !important;
-            animation: fadeInScale 0.6s var(--ease-out-expo) 0.15s both;
-            transition: box-shadow 0.4s var(--ease), border-color 0.4s var(--ease) !important;
-        }
-
-        .batch-capture-groupbox:hover {
-            box-shadow:
-                var(--shadow-2xl),
-                inset 0 1px 0 rgba(255, 255, 255, 1),
-                inset 0 -1px 0 rgba(255, 255, 255, 0.4) !important;
-            border-color: rgba(255, 255, 255, 0.9) !important;
-        }
-
-        /* Animated top accent bar */
-        .batch-capture-groupbox::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background: linear-gradient(90deg,
-                var(--brand-blue), var(--brand-indigo), var(--brand-purple),
-                var(--brand-pink), var(--brand-orange), var(--brand-green),
-                var(--brand-cyan), var(--brand-blue));
-            background-size: 400% 100%;
-            animation: gradientShift 8s ease infinite;
-            z-index: 3;
-        }
-
-        /* Inner soft glow */
-        .batch-capture-groupbox::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle at 30% 20%, rgba(23, 92, 211, 0.04), transparent 50%),
-                        radial-gradient(circle at 70% 80%, rgba(122, 90, 248, 0.04), transparent 50%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        /* Reset ZK groupbox 3d mold inner wrappers */
-        .batch-capture-groupbox .z-groupbox-hl,
-        .batch-capture-groupbox .z-groupbox-hr,
-        .batch-capture-groupbox .z-groupbox-hm,
-        .batch-capture-groupbox .z-groupbox-tl,
-        .batch-capture-groupbox .z-groupbox-tr,
-        .batch-capture-groupbox .z-groupbox-tm,
-        .batch-capture-groupbox .z-groupbox-bl,
-        .batch-capture-groupbox .z-groupbox-br,
-        .batch-capture-groupbox .z-groupbox-bm,
-        .batch-capture-groupbox .z-groupbox-cl,
-        .batch-capture-groupbox .z-groupbox-cr,
-        .batch-capture-groupbox .z-groupbox-cm,
-        .batch-capture-groupbox .z-groupbox-header,
-        .batch-capture-groupbox .z-groupbox-title,
-        .batch-capture-groupbox .z-groupbox-content {
-            background: transparent !important;
-            background-image: none !important;
-            border: none !important;
-            box-shadow: none !important;
-            padding: 0 !important;
-            margin: 0 !important;
-        }
-
-        .batch-capture-groupbox .z-groupbox-content {
-            padding: 0 !important;
-            overflow: visible !important;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* =============================================================
-           CAPTION – "Batch Details"
-           ============================================================= */
-
-        .batch-capture-caption {
-            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif !important;
-            font-size: 21px !important;
-            font-weight: 800 !important;
-            color: var(--text-primary) !important;
-            letter-spacing: -0.02em !important;
-            position: relative !important;
-            padding: 0 0 22px 20px !important;
-            margin: 0 !important;
-            display: block !important;
-            background: transparent !important;
-            border: none !important;
-            text-shadow: none !important;
-        }
-
-        /* Accent bar before caption */
-        .batch-capture-caption::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 3px;
-            width: 5px;
-            height: 26px;
-            background: linear-gradient(180deg, var(--brand-blue), var(--brand-purple), var(--brand-pink));
-            border-radius: 3px;
-            box-shadow: 0 0 16px rgba(23, 92, 211, 0.6), 0 0 8px rgba(122, 90, 248, 0.4);
-        }
-
-        /* Live indicator dot after caption */
-        .batch-capture-caption::after {
-            content: '';
-            display: inline-block;
-            width: 9px;
-            height: 9px;
-            margin-left: 14px;
-            background: var(--brand-green);
-            border-radius: 50%;
-            animation: liveDot 2s infinite;
-            vertical-align: middle;
-            box-shadow: 0 0 8px rgba(18, 183, 106, 0.6);
-        }
-
-        /* =============================================================
-           GRID – PERFECTLY ALIGNED
-           ============================================================= */
-
-        .batch-capture-grid {
-            width: 100% !important;
-            border: none !important;
-            background: transparent !important;
-            border-collapse: separate !important;
-            border-spacing: 0 !important;
-            table-layout: fixed !important;
-        }
-
-        .batch-capture-grid .z-grid-header,
-        .batch-capture-grid .z-grid-body,
-        .batch-capture-grid .z-grid-content,
-        .batch-capture-grid .z-columns,
-        .batch-capture-grid .z-rows,
-        .batch-capture-grid .z-row,
-        .batch-capture-grid .z-cell,
-        .batch-capture-grid .z-column {
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-        }
-
-        .batch-capture-grid .z-columns {
-            display: none !important;
-        }
-
-        /* =============================================================
-           ROWS – MODERN CARD-LIKE ROWS
-           ============================================================= */
-
-        .batch-capture-row {
-            background: transparent !important;
-            border: none !important;
-            position: relative;
-            transition: background 0.3s var(--ease) !important;
-        }
-
-        .batch-capture-row .z-cell {
-            padding: 18px 12px !important;
-            vertical-align: middle !important;
-            border: none !important;
-            background: transparent !important;
-            position: relative;
-        }
-
-        /* Column 1 – labels (Right aligned for perfect vertical line) */
-        .batch-capture-row .z-cell:first-child {
-            width: 210px !important;
-            text-align: right !important;
-            padding-right: 28px !important;
-        }
-
-        /* Column 2 – inputs (Left aligned) */
-        .batch-capture-row .z-cell:last-child {
-            text-align: left !important;
-        }
-
-        /* Row hover – subtle highlight */
-        .batch-capture-row:hover {
-            background: linear-gradient(90deg, rgba(23, 92, 211, 0.04) 0%, rgba(122, 90, 248, 0.02) 50%, transparent 100%) !important;
-            border-radius: var(--radius-md) !important;
-        }
-
-        /* Row divider – slim, elegant */
-        .batch-capture-row + .batch-capture-row .z-cell {
-            border-top: 1px solid rgba(228, 234, 243, 0.5) !important;
-        }
-
-        /* =============================================================
-           FIELD LABELS
-           ============================================================= */
-
-        .batch-capture-field-label {
-            font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
-            font-size: 14px !important;
-            font-weight: 600 !important;
-            color: var(--text-secondary) !important;
-            letter-spacing: 0.015em !important;
-            line-height: 1.5 !important;
-            vertical-align: middle !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            text-transform: none !important;
-            transition: color 0.25s var(--ease), transform 0.25s var(--ease) !important;
-        }
-
-        .batch-capture-row:hover .batch-capture-field-label {
-            color: var(--brand-blue) !important;
-        }
-
-        /* =============================================================
-           INPUTS – COMBOBOX / TEXTBOX / INTBOX
-           ============================================================= */
-
-        .batch-capture-input,
-        .batch-capture-input .z-input,
-        .batch-capture-input input,
-        .batch-capture-input textarea {
-            font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
-            font-size: 14px !important;
-            font-weight: 500 !important;
-            color: var(--text-primary) !important;
-            background: rgba(255, 255, 255, 0.95) !important;
-            border: 1.5px solid var(--border-mid) !important;
-            border-radius: var(--radius-md) !important;
-            padding: 10px 16px !important;
-            box-sizing: border-box !important;
-            transition: border-color 0.25s var(--ease),
-                        box-shadow 0.25s var(--ease),
-                        background-color 0.25s var(--ease),
-                        transform 0.25s var(--ease) !important;
-            box-shadow: var(--shadow-xs) !important;
-            outline: none !important;
-            line-height: 1.5 !important;
-            height: auto !important;
-            min-height: 44px !important;
-            width: 100% !important;
-        }
-
-        .batch-capture-input:hover .z-input,
-        .batch-capture-input:hover input,
-        .batch-capture-input:hover textarea {
-            border-color: var(--border-dark) !important;
-            box-shadow: 0 6px 16px rgba(16, 24, 40, 0.08) !important;
-            transform: translateY(-1px);
-        }
-
-        .batch-capture-input:focus-within .z-input,
-        .batch-capture-input:focus-within input:focus,
-        .batch-capture-input:focus-within textarea:focus {
-            border-color: var(--brand-blue) !important;
-            box-shadow: 0 0 0 4px rgba(23, 92, 211, 0.15),
-                        0 6px 18px rgba(23, 92, 211, 0.12) !important;
-            background: #FFFFFF !important;
-            transform: translateY(-1px);
-        }
-
-        /* Read-only / disabled inputs */
-        .batch-capture-input[readonly] .z-input,
-        .batch-capture-input[readonly] input,
-        .batch-capture-input .z-input[readonly],
-        .batch-capture-input input[readonly] {
-            background: rgba(244, 247, 252, 0.9) !important;
-            color: var(--text-muted) !important;
-            cursor: default !important;
-            border-color: var(--border-light) !important;
-            box-shadow: inset 0 1px 2px rgba(16, 24, 40, 0.03) !important;
-        }
-
-        .batch-capture-input[readonly]:hover .z-input,
-        .batch-capture-input[readonly]:hover input {
-            transform: none;
-            border-color: var(--border-light) !important;
-            box-shadow: inset 0 1px 2px rgba(16, 24, 40, 0.03) !important;
-        }
-
-        /* Combobox specific */
-        .batch-capture-input.z-combobox .z-combobox-input {
-            border: 1.5px solid var(--border-mid) !important;
-            border-radius: var(--radius-md) 0 0 var(--radius-md) !important;
-            background: rgba(255, 255, 255, 0.95) !important;
-            padding: 10px 16px !important;
-            font-size: 14px !important;
-            font-weight: 500 !important;
-            color: var(--text-primary) !important;
-            min-height: 44px !important;
-            box-sizing: border-box !important;
-            transition: all 0.25s var(--ease) !important;
-            box-shadow: var(--shadow-xs) !important;
-        }
-
-        .batch-capture-input.z-combobox .z-combobox-btn {
-            background: rgba(249, 250, 251, 0.95) !important;
-            border: 1.5px solid var(--border-mid) !important;
-            border-left: none !important;
-            border-radius: 0 var(--radius-md) var(--radius-md) 0 !important;
-            min-height: 44px !important;
-            min-width: 44px !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            cursor: pointer !important;
-            transition: all 0.25s var(--ease) !important;
-            color: var(--brand-blue) !important;
-        }
-
-        .batch-capture-input.z-combobox:hover .z-combobox-input {
-            border-color: var(--border-dark) !important;
-            box-shadow: 0 6px 16px rgba(16, 24, 40, 0.08) !important;
-        }
-
-        .batch-capture-input.z-combobox:hover .z-combobox-btn {
-            background: #EEF3FA !important;
-            border-color: var(--border-dark) !important;
-        }
-
-        .batch-capture-input.z-combobox:focus-within .z-combobox-input {
-            border-color: var(--brand-blue) !important;
-            box-shadow: 0 0 0 4px rgba(23, 92, 211, 0.15) !important;
-            background: #FFFFFF !important;
-        }
-
-        .batch-capture-input.z-combobox:focus-within .z-combobox-btn {
-            border-color: var(--brand-blue) !important;
-            background: #E0EEFF !important;
-            color: var(--brand-blue-dark) !important;
-        }
-
-        /* Placeholder styling */
-        .batch-capture-input input::placeholder,
-        .batch-capture-input .z-input::placeholder,
-        .batch-capture-input.z-combobox .z-combobox-input::placeholder {
-            color: var(--text-faint) !important;
-            font-weight: 400 !important;
-            opacity: 1 !important;
-            font-style: normal !important;
-        }
-
-        /* Combobox popup dropdown */
-        .batch-capture-input.z-combobox .z-combobox-popup,
-        .z-combobox-popup {
-            background: rgba(255, 255, 255, 0.98) !important;
-            backdrop-filter: blur(20px) !important;
-            -webkit-backdrop-filter: blur(20px) !important;
-            border: 1px solid var(--border-light) !important;
-            border-radius: var(--radius-md) !important;
-            box-shadow: var(--shadow-xl) !important;
-            overflow: hidden !important;
-            padding: 6px !important;
-            font-family: 'Inter', sans-serif !important;
-            animation: fadeInScale 0.2s var(--ease-out-expo) both;
-        }
-
-        .z-combobox-popup .z-comboitem {
-            padding: 10px 14px !important;
-            font-size: 13.5px !important;
-            font-weight: 500 !important;
-            color: var(--text-secondary) !important;
-            border-radius: var(--radius-sm) !important;
-            transition: all 0.18s var(--ease) !important;
-            cursor: pointer !important;
-        }
-
-        .z-combobox-popup .z-comboitem:hover,
-        .z-combobox-popup .z-comboitem-over {
-            background: rgba(23, 92, 211, 0.10) !important;
-            color: var(--brand-blue) !important;
-            font-weight: 600 !important;
-        }
-
-        .z-combobox-popup .z-comboitem-seld,
-        .z-combobox-popup .z-comboitem-selected {
-            background: linear-gradient(135deg, #175CD3 0%, #4F46E5 100%) !important;
-            color: #FFFFFF !important;
-            font-weight: 600 !important;
-        }
-
-        /* =============================================================
-           FILE UPLOAD ZONE
-           ============================================================= */
-
-        .batch-capture-upload-zone {
-            border: 2px dashed rgba(23, 92, 211, 0.25) !important;
-            border-radius: var(--radius-lg) !important;
-            padding: 24px !important;
-            background: rgba(23, 92, 211, 0.02) !important;
-            transition: all 0.3s var(--ease) !important;
-            width: 100% !important;
-            box-sizing: border-box !important;
-            animation: borderGlow 4s ease-in-out infinite;
-        }
-
-        .batch-capture-upload-zone:hover {
-            border-color: rgba(23, 92, 211, 0.5) !important;
-            background: rgba(23, 92, 211, 0.04) !important;
-            box-shadow: 0 0 30px rgba(23, 92, 211, 0.08) !important;
-        }
-
-        /* =============================================================
-           BUTTONS
-           ============================================================= */
-
-        .batch-capture-button,
-        .batch-capture-button .z-button,
-        .batch-capture-button .z-button-cm {
-            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif !important;
-            font-size: 14px !important;
-            font-weight: 700 !important;
-            letter-spacing: 0.03em !important;
-            color: #FFFFFF !important;
-            background: linear-gradient(135deg, #175CD3 0%, #4F46E5 50%, #7A5AF8 100%) !important;
-            background-size: 200% 200% !important;
-            border: none !important;
-            border-radius: var(--radius-md) !important;
-            padding: 12px 28px !important;
-            cursor: pointer !important;
-            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.42),
-                        0 0 0 1px rgba(255, 255, 255, 0.18) inset !important;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.22) !important;
-            transition: box-shadow 0.3s var(--ease-out-expo),
-                        background-position 0.4s var(--ease),
-                        transform 0.2s var(--ease) !important;
-            min-height: 44px !important;
-            position: relative !important;
-            overflow: hidden !important;
-            animation: gradientShift 5s ease infinite !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-        }
-
-        /* Shimmer sweep effect */
-        .batch-capture-button::after,
-        .batch-capture-button .z-button::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 60%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
-            transform: skewX(-15deg);
-            pointer-events: none;
-        }
-
-        .batch-capture-button:hover::after,
-        .batch-capture-button:hover .z-button::after {
-            animation: shimmerSweep 0.8s var(--ease-out-expo);
-        }
-
-        .batch-capture-button:hover,
-        .batch-capture-button:hover .z-button,
-        .batch-capture-button:hover .z-button-cm {
-            background: linear-gradient(135deg, #1D4ED8 0%, #4338CA 50%, #6D28D9 100%) !important;
-            background-size: 200% 200% !important;
-            box-shadow: 0 12px 32px rgba(79, 70, 229, 0.55),
-                        0 0 0 1px rgba(255, 255, 255, 0.28) inset !important;
-            transform: translateY(-2px) scale(1.02);
-        }
-
-        .batch-capture-button:active,
-        .batch-capture-button:active .z-button,
-        .batch-capture-button:active .z-button-cm {
-            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4) !important;
-            transform: translateY(0) scale(0.98);
-        }
-
-        /* Focus visible */
-        .batch-capture-button:focus-visible,
-        .batch-capture-button .z-button:focus-visible {
-            outline: 2px solid var(--brand-blue) !important;
-            outline-offset: 3px !important;
-        }
-
-        /* =============================================================
-           XML / INFO LABELS
-           ============================================================= */
-
-        .batch-capture-xml-info {
-            font-family: 'Inter', 'Space Grotesk', sans-serif !important;
-            font-size: 13px !important;
-            font-weight: 500 !important;
-            color: var(--text-muted) !important;
-            letter-spacing: 0.01em !important;
-            line-height: 1.6 !important;
-            padding: 8px 0 !important;
-            display: inline-block !important;
-        }
-
-        /* Highlight the selected files label subtly */
-        #selectedFilesLabel {
-            color: var(--brand-blue) !important;
-            font-weight: 600 !important;
-            padding: 8px 18px !important;
-            background: rgba(23, 92, 211, 0.06) !important;
-            border-radius: var(--radius-pill) !important;
-            border: 1px solid rgba(23, 92, 211, 0.14) !important;
-            transition: all 0.25s var(--ease) !important;
-            display: inline-block !important;
-            margin-top: 4px;
-        }
-
-        #selectedFilesLabel:hover {
-            background: rgba(23, 92, 211, 0.10) !important;
-            box-shadow: 0 4px 12px rgba(23, 92, 211, 0.10) !important;
-        }
-
-        /* =============================================================
-           HINT ROW (helper text) – slimmer, softer
-           ============================================================= */
-
-        .batch-capture-row .batch-capture-xml-info {
-            color: var(--text-faint) !important;
-            font-style: italic !important;
-            font-size: 12.5px !important;
-            font-weight: 400 !important;
-        }
-
-        /* =============================================================
-           SCROLLBAR POLISH
-           ============================================================= */
-
-        .batch-capture-content::-webkit-scrollbar { width: 8px; }
-        .batch-capture-content::-webkit-scrollbar-track { background: transparent; }
-        .batch-capture-content::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, #C8D2E0, #B0BCCE);
-            border-radius: 4px;
-            border: 2px solid transparent;
-            background-clip: padding-box;
-        }
-        .batch-capture-content::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, #98A2B3, #7A879C);
-            background-clip: padding-box;
-        }
-
-        /* =============================================================
-           RESPONSIVE
-           ============================================================= */
-
-        @media (max-width: 1024px) {
-            .batch-capture-content {
-                padding: 24px 16px !important;
-            }
-            .batch-capture-groupbox {
-                padding: 32px 28px !important;
-            }
-            .batch-capture-page-title {
-                font-size: 28px !important;
-            }
-            .batch-capture-caption {
-                font-size: 19px !important;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .batch-capture-content {
-                padding: 16px 12px !important;
-            }
-            .batch-capture-groupbox {
-                padding: 24px 16px !important;
-            }
-            .batch-capture-page-title {
-                font-size: 23px !important;
-            }
-            .batch-capture-row .z-cell:first-child {
-                width: 130px !important;
-                padding-right: 12px !important;
-            }
-            .batch-capture-field-label {
-                font-size: 13px !important;
-            }
-            .batch-capture-input,
-            .batch-capture-input .z-input,
-            .batch-capture-input input {
-                font-size: 13px !important;
-                min-height: 40px !important;
-            }
-            .batch-capture-upload-zone {
-                padding: 16px !important;
-            }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            *,
-            *::before,
-            *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-                scroll-behavior: auto !important;
-            }
-        }
-
-        /* =============================================================
-           SELECTION
-           ============================================================= */
-
-        ::selection {
-            background: rgba(23, 92, 211, 0.22);
-            color: var(--text-primary);
-        }
-
-    ]]></style>
+    <style src="/zul/outward/capture-operator-CSS/capture_operator_batch_capture.css"/>
 
 
     <!-- ===================================================== -->
-    <!-- PAGE                                                  -->
+    <!-- PAGE CONTENT                                          -->
     <!-- ===================================================== -->
 
     <div
         self="@define(content)"
         width="100%"
-        height="100%"
-        style="
-            width:100%;
-            height:100%;
-            background:#F4F7FB;
-        ">
-
-
-        <!-- ================================================= -->
-        <!-- MAIN CONTENT                                      -->
-        <!-- ================================================= -->
+        height="100%">
 
         <vlayout
             apply="com.iispl.cts.controller.outward.CaptureOperatorBatchCaptureController"
             width="100%"
             height="100%"
             spacing="0px"
-            sclass="batch-capture-content"
-            style="
-                padding:24px 30px;
-                box-sizing:border-box;
-                overflow:auto;
-            ">
+            sclass="batch-capture-content">
 
 
-            <!-- ============================================= -->
-            <!-- PAGE TITLE                                    -->
-            <!-- ============================================= -->
+            <!-- ================================================= -->
+            <!-- MAIN LAYOUT                                      -->
+            <!-- ================================================= -->
 
-            <label
-                value="Batch Capture"
-                sclass="batch-capture-page-title"/>
-
-
-            <!-- ============================================= -->
-            <!-- BATCH DETAILS                                 -->
-            <!-- ============================================= -->
-
-            <groupbox
+            <vlayout
                 width="100%"
-                mold="3d"
-                sclass="batch-capture-groupbox">
+                spacing="0px"
+                sclass="batch-capture-layout">
 
 
-                <caption
-                    label="Batch Details"
-                    sclass="batch-capture-caption"/>
+                <!-- ================================================= -->
+                <!-- PAGE HEADER                                      -->
+                <!-- ================================================= -->
 
-
-                <grid
+                <div
                     width="100%"
-                    sclass="batch-capture-grid">
+                    sclass="batch-capture-header">
+
+                    <label
+                        value="Batch Capture"
+                        sclass="batch-capture-page-title"/>
+
+                </div>
 
 
-                    <!-- ===================================== -->
-                    <!-- COLUMNS                               -->
-                    <!-- ===================================== -->
+                <!-- ================================================= -->
+                <!-- BATCH DETAILS CARD                              -->
+                <!-- IMPORTANT: NORMAL DIV - NOT GROUPBOX            -->
+                <!-- THEREFORE IT CANNOT COLLAPSE                  -->
+                <!-- ================================================= -->
 
-                    <columns>
-
-                        <column width="210px"/>
-
-                        <column/>
-
-                    </columns>
+                <div
+                    width="100%"
+                    sclass="batch-capture-groupbox">
 
 
-                    <!-- ===================================== -->
-                    <!-- ROWS                                  -->
-                    <!-- ===================================== -->
+                    <!-- ================================================= -->
+                    <!-- CARD TITLE                                      -->
+                    <!-- ================================================= -->
 
-                    <rows>
+                    <div
+                        width="100%"
+                        sclass="batch-capture-caption">
 
+                        <label
+                            value="Batch Details"/>
 
-                        <!-- ================================= -->
-                        <!-- BRANCH CODE                       -->
-                        <!-- ================================= -->
-
-                        <row
-                            sclass="batch-capture-row">
-
-                            <label
-                                value="Branch Code"
-                                sclass="batch-capture-field-label"/>
-
-                            <combobox
-                                id="branchCodeCombo"
-                                width="100%"
-                                placeholder="Select Branch Code"
-                                autodrop="true"
-                                sclass="batch-capture-input"/>
-
-                        </row>
+                    </div>
 
 
-                        <!-- ================================= -->
-                        <!-- BRANCH NAME                       -->
-                        <!-- ================================= -->
+                    <!-- ================================================= -->
+                    <!-- BATCH DETAILS GRID                              -->
+                    <!-- ================================================= -->
 
-                        <row
-                            sclass="batch-capture-row">
+                    <grid
+                        width="100%"
+                        sclass="batch-capture-grid">
 
-                            <label
-                                value="Branch Name"
-                                sclass="batch-capture-field-label"/>
+                        <columns>
 
-                            <textbox
-                                id="branchNameTextbox"
-                                width="100%"
-                                readonly="true"
-                                sclass="batch-capture-input"/>
+                            <column width="210px"/>
 
-                        </row>
+                            <column/>
+
+                        </columns>
 
 
-                        <!-- ================================= -->
-                        <!-- NUMBER OF CHEQUES                 -->
-                        <!-- ================================= -->
-
-                        <row
-                            sclass="batch-capture-row">
-
-                            <label
-                                value="Number of Cheques"
-                                sclass="batch-capture-field-label"/>
-
-                            <intbox
-                                id="numberOfCheques"
-                                width="100%"
-                                placeholder="Enter number of cheques"
-                                constraint="no negative"
-                                sclass="batch-capture-input"/>
-
-                        </row>
+                        <rows>
 
 
-                        <!-- ================================= -->
-                        <!-- FILE UPLOAD                       -->
-                        <!-- ================================= -->
+                            <!-- ========================================= -->
+                            <!-- BRANCH CODE                              -->
+                            <!-- NORMAL TEXTBOX - NO DROPDOWN             -->
+                            <!-- ========================================= -->
 
-                        <row
-                            sclass="batch-capture-row">
+                            <row
+                                sclass="batch-capture-row">
 
-                            <label
-                                value="Batch Files"
-                                sclass="batch-capture-field-label"
-                                style="padding-top: 16px;"/>
+                                <label
+                                    value="Branch Code"
+                                    sclass="batch-capture-field-label"/>
 
-                            <vlayout
-                                spacing="0px"
-                                width="100%">
+                              <combobox
+									    id="branchCodeCombo"
+									    width="100%"
+									    placeholder="Select Branch Code"
+									    autodrop="true"
+									    sclass="batch-capture-input"/>
 
-                                <!-- Upload Zone Wrapper -->
-                                <div sclass="batch-capture-upload-zone"
-                                     style="display: flex; flex-direction: column; gap: 12px; align-items: flex-start;">
-
-                                    <fileupload
-                                        id="batchFilesUpload"
-                                        label="Select XML / Image"
-                                        width="220px"
-                                        sclass="batch-capture-button"/>
-
-                                    <label
-                                        id="selectedFilesLabel"
-                                        value="No files selected."
-                                        sclass="batch-capture-xml-info"/>
-
-                                </div>
-
-                            </vlayout>
-
-                        </row>
+                            </row>
 
 
-                     
+                            <!-- ========================================= -->
+                            <!-- BRANCH NAME                              -->
+                            <!-- ========================================= -->
 
-                        <row
-                            sclass="batch-capture-row">
+                            <row
+                                sclass="batch-capture-row">
 
-                            <label
-                                value=""/>
+                                <label
+                                    value="Branch Name"
+                                    sclass="batch-capture-field-label"/>
 
-                            <label
-                                value="Select the existing XML file and cheque images. Click the upload button once for each file."
-                                sclass="batch-capture-xml-info"/>
+                                <textbox
+                                    id="branchNameTextbox"
+                                    width="100%"
+                                    readonly="true"
+                                    sclass="batch-capture-input"/>
 
-                        </row>
-
-
-                        <!-- ================================= -->
-                        <!-- CAPTURE BUTTON                    -->
-                        <!-- ================================= -->
-
-                        <row
-                            sclass="batch-capture-row">
-
-                            <label
-                                value=""/>
-
-                            <button
-                                id="capturedBatchButton"
-                                label="Capture Batch"
-                                width="200px"
-                                height="44px"
-                                sclass="batch-capture-button"/>
-
-                        </row>
+                            </row>
 
 
-                    </rows>
+                            <!-- ========================================= -->
+                            <!-- NUMBER OF CHEQUES                        -->
+                            <!-- ========================================= -->
 
-                </grid>
+                            <row
+                                sclass="batch-capture-row">
 
-            </groupbox>
+                                <label
+                                    value="Number of Cheques"
+                                    sclass="batch-capture-field-label"/>
 
+                                <intbox
+                                    id="numberOfCheques"
+                                    width="100%"
+                                    placeholder="Enter number of cheques"
+                                    constraint="no negative"
+                                    sclass="batch-capture-input"/>
+
+                            </row>
+
+
+                            <!-- ========================================= -->
+                            <!-- BATCH FILES                              -->
+                            <!-- ========================================= -->
+
+                            <row
+                                sclass="batch-capture-row">
+
+                                <label
+                                    value="Batch Files"
+                                    sclass="batch-capture-field-label"/>
+
+                                <vlayout
+                                    spacing="0px"
+                                    width="100%"
+                                    sclass="batch-capture-upload-wrapper">
+
+                                    <div
+                                        width="100%"
+                                        sclass="batch-capture-upload-zone">
+
+                                        <fileupload
+                                            id="batchFilesUpload"
+                                            label="Select XML / Image"
+                                            width="220px"
+                                            sclass="batch-capture-upload-button"/>
+
+                                        <label
+                                            id="selectedFilesLabel"
+                                            value="No files selected."
+                                            sclass="batch-capture-selected-files"/>
+
+                                    </div>
+
+                                </vlayout>
+
+                            </row>
+
+
+                            <!-- ========================================= -->
+                            <!-- INFORMATION                              -->
+                            <!-- ========================================= -->
+
+                            <row
+                                sclass="batch-capture-row batch-capture-info-row">
+
+                                <label
+                                    value=""/>
+
+                                <label
+                                    value="Select the existing XML file and cheque images. Click the upload button once for each file."
+                                    sclass="batch-capture-xml-info"/>
+
+                            </row>
+
+
+                            <!-- ========================================= -->
+                            <!-- CAPTURE BUTTON                           -->
+                            <!-- ========================================= -->
+
+                            <row
+                                sclass="batch-capture-row batch-capture-action-row">
+
+                                <label
+                                    value=""/>
+
+                                <button
+                                    id="capturedBatchButton"
+                                    label="Capture Batch"
+                                    width="200px"
+                                    height="44px"
+                                    sclass="batch-capture-submit-button"/>
+
+                            </row>
+
+
+                        </rows>
+
+                    </grid>
+
+                </div>
+
+            </vlayout>
 
         </vlayout>
 

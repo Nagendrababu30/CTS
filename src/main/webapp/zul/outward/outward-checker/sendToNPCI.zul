@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?page title="Send to NPCI"
-    contentType="text/html;charset=UTF-8"?>
-
-<?style src="/css/checker.css"?>
+        contentType="text/html;charset=UTF-8"?>
 
 <?init class="com.cts.admin.controller.LayoutInit"
         pageTitle="Send to NPCI"
@@ -14,110 +12,113 @@
 
 <zk>
 
-    <div
-        self="@define(content)"
-        width="100%"
-        height="100%"
-        style="
-            width:100%;
-            height:100%;
-            background:#F4F7FB;
-        ">
+    <!-- =========================================================
+         SEND TO NPCI CSS
+         ========================================================= -->
 
-        <vlayout
-            apply="com.iispl.cts.controller.outward.checker.CheckerSendToNPCIController"
-            width="100%"
-            height="100%"
-            spacing="20px"
-            style="
-                padding:35px 55px;
-                box-sizing:border-box;
-                overflow:auto;
-            ">
+    <style src="/zul/outward/outward-checker-CSS/send_to_npci.css"/>
 
 
-            <!-- ================================================= -->
-            <!-- PAGE TITLE -->
-            <!-- ================================================= -->
+    <!-- =========================================================
+         PAGE CONTENT
+         ========================================================= -->
 
-            <label
-                value="Send to NPCI"
-                style="
-                    font-size:32px;
-                    font-weight:bold;
-                    color:#172B4D;
-                    display:block;
-                    margin-bottom:5px;
-                "/>
+    <div self="@define(content)"
+         width="100%"
+         height="100%"
+         sclass="send-npci-content">
 
 
-            <!-- ================================================= -->
-            <!-- INFORMATION CARD -->
-            <!-- ================================================= -->
+        <!-- =====================================================
+             MAIN LAYOUT
+             ===================================================== -->
 
-            <div
-                sclass="info-card">
-
-                <label
-                    value="Only batches with completed Checker verification can be sent to NPCI."
-                    sclass="info-text"/>
-
-            </div>
+        <vlayout id="sendToNPCILayout"
+                 width="100%"
+                 height="100%"
+                 spacing="20px"
+                 sclass="send-npci-layout"
+                 apply="com.iispl.cts.controller.outward.checker.CheckerSendToNPCIController">
 
 
-            <!-- ================================================= -->
-            <!-- BATCH SECTION -->
-            <!-- ================================================= -->
+            <!-- =================================================
+                 PAGE HEADER
+                 ================================================= -->
 
-            <div
-                sclass="section-card">
+            <vlayout spacing="5px"
+                     sclass="npci-header">
 
-                <label
-                    value="Batches Ready for NPCI"
-                    sclass="section-title"/>
+                <label value="Send to NPCI"
+                       sclass="npci-title"/>
 
-                <separator
-                    height="15px"/>
+                <label value="Only batches with completed Checker verification can be sent to NPCI."
+                       sclass="npci-subtitle"/>
+
+            </vlayout>
 
 
-                <!-- ============================================= -->
-                <!-- NPCI BATCH LIST -->
-                <!-- ============================================= -->
+            <!-- =================================================
+                 BATCH SECTION
+                 ================================================= -->
 
-                <listbox
-                    id="npciBatchListbox"
-                    width="100%"
-                    mold="paging"
-                    pageSize="10"
-                    emptyMessage="No batches ready to send to NPCI">
+            <vlayout width="100%"
+                     spacing="0"
+                     sclass="npci-section">
+
+
+                <!-- =================================================
+                     SECTION HEADER
+                     ================================================= -->
+
+                <hlayout width="100%"
+                         valign="middle"
+                         sclass="npci-section-header">
+
+                    <label value="Batches Ready for NPCI"
+                           sclass="npci-section-title"/>
+
+                </hlayout>
+
+
+                <!-- =================================================
+                     NPCI BATCH TABLE
+                     ================================================= -->
+
+                <listbox id="npciBatchListbox"
+                         width="100%"
+                         mold="paging"
+                         pageSize="10"
+                         emptyMessage="No batches ready to send to NPCI"
+                         sclass="send-npci-table">
 
                     <listhead>
 
-                        <listheader
-                            label="Batch Number"
-                            width="20%"/>
+                        <listheader label="Batch Number"
+                                    width="20%"/>
 
-                        <listheader
-                            label="Total Cheques"
-                            width="12%"/>
+                        <listheader label="Total Cheques"
+                                    width="15%"
+                                    align="center"/>
 
-                        <listheader
-                            label="Valid XML"
-                            width="15%"/>
+                        <listheader label="Valid XML"
+                                    width="15%"
+                                    align="center"/>
 
-                        <listheader
-                            label="Validation Status"
-                            width="18%"/>
+                        <listheader label="Validation Status"
+                                    width="20%"
+                                    align="center"/>
 
-                        <listheader
-                            label="Action"
-                            width="35%"/>
+                        <listheader label="Action"
+                                    width="30%"
+                                    align="center"/>
 
                     </listhead>
 
                 </listbox>
 
-            </div>
+
+            </vlayout>
+
 
         </vlayout>
 

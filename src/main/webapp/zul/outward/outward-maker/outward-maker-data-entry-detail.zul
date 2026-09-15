@@ -256,6 +256,194 @@
 
         }
 
+        /* ============================================================
+
+   CHECKER RETURN INFORMATION PANEL
+
+   Modern card style consistent with Data Entry screen
+
+   ============================================================ */
+
+/* ---------- Card Container ---------- */
+
+.checker-return-card {
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 12px;
+
+    padding: 18px 20px;
+
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04),
+
+                0 4px 12px rgba(15, 23, 42, 0.06);
+
+    box-sizing: border-box;
+
+    overflow: hidden;
+
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+
+}
+
+.checker-return-card:hover {
+
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05),
+
+                0 8px 24px rgba(15, 23, 42, 0.08);
+
+}
+
+/* ---------- Header ---------- */
+
+.checker-return-card .checker-return-title {
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.6px;
+
+    color: #1f2937;
+
+    text-transform: uppercase;
+
+}
+
+/* ---------- Field Labels ---------- */
+
+.checker-return-card .checker-return-label {
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    letter-spacing: 0.6px;
+
+    color: #6b7280;
+
+    text-transform: uppercase;
+
+}
+
+/* ---------- Field Values ---------- */
+
+.checker-return-card .checker-return-value {
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+    color: #111827;
+
+    line-height: 1.45;
+
+    padding: 8px 12px;
+
+    background: #f9fafb;
+
+    border: 1px solid #eef0f3;
+
+    border-radius: 8px;
+
+    box-sizing: border-box;
+
+    word-break: break-word;
+
+    white-space: pre-wrap;
+
+}
+
+/* Highlighted accent for reason (left orange bar) */
+
+#checkerReasonLabel {
+
+    border-left: 3px solid #C2410C;
+
+    background: #fff7ed;
+
+    color: #7c2d12;
+
+    font-weight: 600;
+
+}
+
+/* Remarks keeps a soft neutral look */
+
+#checkerRemarksLabel {
+
+    background: #f9fafb;
+
+    color: #374151;
+
+    min-height: 48px;
+
+}
+
+/* ---------- Header Icon accent ---------- */
+
+.checker-return-card .z-label[style*="C2410C"] {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 22px;
+
+    height: 22px;
+
+    border-radius: 6px;
+
+    background: #fff1e6;
+
+    line-height: 1;
+
+}
+
+/* ---------- Layout helpers ---------- */
+
+.checker-return-card .z-vlayout,
+
+.checker-return-card .z-hlayout {
+
+    box-sizing: border-box;
+
+}
+
+/* Slightly tighter spacing for inner field groups */
+
+.checker-return-card .z-vlayout > .z-vlayout {
+
+    margin-top: 2px;
+
+}
+
+/* ---------- Responsive tweak ---------- */
+
+@media (max-width: 480px) {
+
+    .checker-return-card {
+
+        padding: 14px 14px;
+
+        border-radius: 10px;
+
+    }
+
+    .checker-return-card .checker-return-value {
+
+        font-size: 12px;
+
+        padding: 7px 10px;
+
+    }
+
+}
+
         .z-combobox.single-field-box > a.z-combobox-button {
 
             border: none !important;
@@ -608,11 +796,107 @@
             </div>
 
 
+                    <!-- =================================================
+
+                         CHECKER RETURN INFORMATION
+
+                         IMPORTANT:
+
+                         - No hflex + width combination
+
+                         - Hidden for normal Data Entry
+
+                         - Existing controller shows it for returned mode
+
+                         ================================================= -->
+
+           <vlayout
+
+    id="checkerReturnInformationPanel"
+
+    visible="false"
+
+    width="100%"
+
+    spacing="6px"
+
+    sclass="checker-return-card">
+
+    <label
+
+        value="CHECKER RETURN INFORMATION"
+
+        sclass="checker-return-title" />
+
+    <hlayout
+
+        width="100%"
+
+        spacing="12px"
+
+        valign="top">
+
+        <vlayout
+
+            hflex="1"
+
+            spacing="4px">
+
+            <label
+
+                value="CHECKER RETURN REASON"
+
+                sclass="checker-return-label" />
+
+            <label
+
+                id="checkerReasonLabel"
+
+                value=""
+
+                width="100%"
+
+                sclass="checker-return-value" />
+
+        </vlayout>
+
+        <vlayout
+
+            hflex="2"
+
+            spacing="4px">
+
+            <label
+
+                value="CHECKER REMARKS"
+
+                sclass="checker-return-label" />
+
+            <label
+
+                id="checkerRemarksLabel"
+
+                value=""
+
+                width="100%"
+
+                multiline="true"
+
+                sclass="checker-return-value" />
+
+        </vlayout>
+
+    </hlayout>
+
+</vlayout>
+
             <!-- =================================================
 
                  MAIN SPLIT ROW
 
                  ================================================= -->
+
+
 
             <hlayout
 
@@ -1313,129 +1597,15 @@
                         </vlayout>
 
                     </vlayout>
+
                     </groupbox>
 
 
-                    <!-- =================================================
 
-                         CHECKER RETURN INFORMATION
-
-                         IMPORTANT:
-
-                         - No hflex + width combination
-
-                         - Hidden for normal Data Entry
-
-                         - Existing controller shows it for returned mode
-
-                         ================================================= -->
-
-                    <vlayout
-
-                        id="checkerReturnInformationPanel"
-
-                        hflex="1"
-
-                        height="465px"
-
-                        spacing="6px"
-
-                        visible="false"
-
-                        sclass="checker-return-card">
-
-
-                        <!-- Header -->
-
-                        <hlayout
-
-                            width="100%"
-
-                            valign="middle"
-
-                            spacing="6px">
-
-                            <label
-
-                                value="↩"
-
-                                style="font-size:14px; font-weight:700; color:#C2410C;"/>
-
-                            <label
-
-                                value="CHECKER RETURN INFORMATION"
-
-                                sclass="checker-return-title"/>
-
-                        </hlayout>
-
-
-                        <!-- Return Reason -->
-
-                        <vlayout
-
-                            width="100%"
-
-                            spacing="3px">
-
-                            <label
-
-                                value="CHECKER RETURN REASON"
-
-                                sclass="checker-return-label"/>
-
-                            <label
-
-                                id="checkerReasonLabel"
-
-                                value=""
-
-                                width="100%"
-
-                                sclass="checker-return-value"/>
-
-                        </vlayout>
-
-
-                        <!-- Checker Remarks -->
-
-                        <vlayout
-
-                            width="100%"
-
-                            spacing="3px">
-
-                            <label
-
-                                value="CHECKER REMARKS"
-
-                                sclass="checker-return-label"/>
-
-                            <label
-
-                                id="checkerRemarksLabel"
-
-                                value=""
-
-                                width="100%"
-
-                                multiline="true"
-
-                                sclass="checker-return-value"/>
-
-                        </vlayout>
-
-
-                        <!-- Empty space so the card remains clean -->
-
-                        <space vflex="1"/>
-
-                    </vlayout>
 
                 </hlayout>
 
             </hlayout>
-
 
             <!-- =========================================================
 

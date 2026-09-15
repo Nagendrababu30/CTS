@@ -34,7 +34,7 @@ public class CheckerBatchQueueController extends SelectorComposer<Vlayout> {
      *
      * src/main/webapp is the web application root.
      */
-   
+
     @Wire
     private Textbox batchSearchTextbox;
 
@@ -53,6 +53,24 @@ public class CheckerBatchQueueController extends SelectorComposer<Vlayout> {
     private CheckerBatchService batchService;
 
     private long checkerUserId;
+
+    /*
+     * ============================================================
+     * RE-VERIFY MODE
+     * ============================================================
+     *
+     * The Checker Dashboard sends:
+     *
+     *     mode=RE_VERIFY
+     *
+     * when the user opens a Re-Verify batch.
+     *
+     * We preserve this mode and pass it to processing.zul.
+     *
+     * Normal batches do NOT use this mode.
+     */
+
+    private boolean reVerifyMode = false;
 
     @Override
     public void doAfterCompose(Vlayout comp) throws Exception {
@@ -84,6 +102,35 @@ public class CheckerBatchQueueController extends SelectorComposer<Vlayout> {
 
         System.out.println(
                 "Checker User ID : " + checkerUserId);
+
+        /*
+         * ========================================================
+         * CHECK RE-VERIFY MODE
+         * ========================================================
+         *
+         * Dashboard sends:
+         *
+         *     ?batchNumber=XXXX&mode=RE_VERIFY
+         *
+         * We only need to remember the mode here.
+         *
+         * The selected batch is still opened using the existing
+         * Open button flow below.
+         */
+
+        String mode =
+                Executions.getCurrent()
+                        .getParameter("mode");
+
+        if (mode != null
+                && "RE_VERIFY".equalsIgnoreCase(
+                        mode.trim())) {
+
+            reVerifyMode = true;
+
+            System.out.println(
+                    "CHECKER BATCH QUEUE: RE_VERIFY mode detected.");
+        }
 
         /*
          * Load initial batches.
@@ -181,6 +228,7 @@ public class CheckerBatchQueueController extends SelectorComposer<Vlayout> {
         String searchText = batchSearchTextbox.getValue();
 
         if (searchText == null) {
+
             searchText = "";
         }
 
@@ -195,6 +243,7 @@ public class CheckerBatchQueueController extends SelectorComposer<Vlayout> {
         System.out.println("Search     : " + searchText);
         System.out.println("Page No    : " + pageNo);
         System.out.println("Page Size  : " + pageSize);
+        System.out.println("Re-Verify  : " + reVerifyMode);
         System.out.println("----------------------------------------");
 
         List<OutwardBatch> batches =
@@ -308,22 +357,27 @@ public class CheckerBatchQueueController extends SelectorComposer<Vlayout> {
     private void openBatch(OutwardBatch batch) {
 
         if (batch == null) {
+
             System.out.println(
                     "OPEN BATCH ERROR: Batch object is null.");
+
             return;
         }
 
-        String batchNumber = batch.getBatchNumber();
+        String batchNumber =
+                batch.getBatchNumber();
 
         if (batchNumber == null
                 || batchNumber.trim().isEmpty()) {
 
             System.out.println(
                     "OPEN BATCH ERROR: Batch number is empty.");
+
             return;
         }
 
-        batchNumber = batchNumber.trim();
+        batchNumber =
+                batchNumber.trim();
 
         try {
 
@@ -334,15 +388,49 @@ public class CheckerBatchQueueController extends SelectorComposer<Vlayout> {
                             batchNumber,
                             StandardCharsets.UTF_8);
 
-            System.out.println(
-                    "Opening processing page: " + url);
+            /*
+             * ====================================================
+             * RE-VERIFY MODE
+             * ====================================================
+             *
+             * Normal batch:
+             *
+             *     processing.zul?batchNumber=XXXX
+             *
+             * Re-Verify batch:
+             *
+             *     processing.zul?batchNumber=XXXX&mode=RE_VERIFY
+             *
+             * CheckerProcessingController will then call:
+             *
+             *     getReVerifiedCheques(...)
+             *
+             * and only RE_VERIFIED cheques will be loaded.
+             */
+
+            if (reVerifyMode) {
+
+                url +=
+                        "&mode=RE_VERIFY";
+
+                System.out.println(
+                        "Opening RE-VERIFY processing page: "
+                                + url);
+
+            } else {
+
+                System.out.println(
+                        "Opening processing page: "
+                                + url);
+            }
 
             Executions.sendRedirect(url);
 
         } catch (Exception e) {
 
             System.out.println(
-                    "OPEN BATCH ERROR: Unable to open processing page.");
+                    "OPEN BATCH ERROR: "
+                    + "Unable to open processing page.");
 
             e.printStackTrace();
         }

@@ -349,57 +349,7 @@
                  Visible only when this cheque was returned by
                  Checker with SEND_BACK.
                  ================================================= -->
-
-            <vlayout
-                id="checkerReturnInformationPanel"
-                visible="false"
-                width="100%"
-                spacing="6px"
-                sclass="checker-return-card">
-
-                <label
-                    value="CHECKER RETURN INFORMATION"
-                    sclass="checker-return-title" />
-
-                <hlayout
-                    width="100%"
-                    spacing="12px"
-                    valign="top">
-
-                    <vlayout
-                        hflex="1"
-                        spacing="4px">
-
-                        <label
-                            value="RETURN REASON"
-                            sclass="checker-return-label" />
-
-                        <label
-                            id="checkerReasonLabel"
-                            value=""
-                            sclass="checker-return-value" />
-
-                    </vlayout>
-
-                    <vlayout
-                        hflex="2"
-                        spacing="4px">
-
-                        <label
-                            value="CHECKER REMARKS"
-                            sclass="checker-return-label" />
-
-                        <label
-                            id="checkerRemarksLabel"
-                            value=""
-                            sclass="checker-return-value" />
-
-                    </vlayout>
-
-                </hlayout>
-
-            </vlayout>
-
+<vlayout id="checkerReturnInformationPanel" visible="false" width="100%" spacing="6px" sclass="checker-return-card"> <label value="CHECKER RETURN INFORMATION" sclass="checker-return-title" /> <hlayout width="100%" spacing="12px" valign="top"> <vlayout hflex="1" spacing="4px"> <label value="RETURN REASON" sclass="checker-return-label" /> <label id="checkerReasonLabel" value="" sclass="checker-return-value" /> </vlayout> <vlayout hflex="2" spacing="4px"> <label value="CHECKER REMARKS" sclass="checker-return-label" /> <label id="checkerRemarksLabel" value="" sclass="checker-return-value" /> </vlayout> </hlayout> </vlayout>
 
             <!-- =================================================
                  MAIN SPLIT ROW

@@ -8,16 +8,21 @@ import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.event.Event;
+import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.event.InputEvent;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
+import org.zkoss.zul.Checkbox;
 import org.zkoss.zul.Datebox;
 import org.zkoss.zul.Decimalbox;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
+import org.zkoss.zul.Vlayout;
+import org.zkoss.zul.Window;
+
 import com.cts.admin.model.User;
 import com.cts.inward.dao.BatchDaoImpl;
 import com.cts.inward.dao.ChequeDaoImpl;
@@ -41,7 +46,14 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	private Button btnBackQueue;
 	private Button btnPrev;
 	private Button btnNext;
+	private Button btnReturn;
 	private Button btnSaveNext;
+
+	private Window returnWindow;
+	private Vlayout returnReasonsContainer;
+	private Textbox txtReturnRemarks;
+	private Button btnCancelReturn;
+	private Button btnConfirmReturn;
 
 	private Button btnSideToggle;
 	private Button btnSideFront;
@@ -57,6 +69,11 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	private Label lblPendingCheques;
 	private Label lblChequeInfo;
 	private Label lblMicrBand;
+
+	private org.zkoss.zul.Div returnReasonBanner;
+	private Label lblReturnReason;
+	private Label lblReturnRemarks;
+	private org.zkoss.zul.Hlayout rowReturnRemarks;
 
 	private Image imgCheque;
 
@@ -129,6 +146,21 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 			return;
 		}
 
+		if (returnWindow != null) {
+			returnReasonsContainer = (Vlayout) returnWindow.getFellowIfAny("returnReasonsContainer");
+			txtReturnRemarks = (Textbox) returnWindow.getFellowIfAny("txtReturnRemarks");
+			btnCancelReturn = (Button) returnWindow.getFellowIfAny("btnCancelReturn");
+			btnConfirmReturn = (Button) returnWindow.getFellowIfAny("btnConfirmReturn");
+
+			if (btnCancelReturn != null) {
+				btnCancelReturn.addEventListener(Events.ON_CLICK, event -> handleCancelReturn());
+			}
+			if (btnConfirmReturn != null) {
+				btnConfirmReturn.addEventListener(Events.ON_CLICK, event -> handleConfirmReturn());
+			}
+			returnWindow.setVisible(false);
+		}
+
 		loadCheques();
 		updateBatchSummaryCounts();
 
@@ -153,7 +185,7 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 
 		try {
 			InwardBatch batch = batchService.getBatch(String.valueOf(batchId));
-			int total = batch != null ? batch.getTotalCheques() : (cheques != null ? cheques.size() : 0);
+			int total = (cheques != null) ? cheques.size() : (batch != null ? batch.getTotalCheques() : 0);
 			int pending = batchService.getDataEntryPendingCount(batchId);
 			int completed = Math.max(0, total - pending);
 
@@ -270,12 +302,49 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		loadChequeImages(cheque.getChequeNumber());
 
 		// -----------------------------------------------------
+		// RETURN REASON BANNER (IF RETURNED FROM CHECKER)
+		// -----------------------------------------------------
+		updateReturnBanner(cheque.getChequeNumber());
+
+		// -----------------------------------------------------
 		// NAVIGATION
 		// -----------------------------------------------------
 		updateNavigationButtons();
 
 		// Refresh amount in words on client side
 		Clients.evalJavaScript("if (typeof updateAmountWordsFromInput === 'function') { var dec = zk.Widget.$('$decAmount'); if (dec) updateAmountWordsFromInput(dec.getInputNode ? dec.getInputNode() : dec.$n()); }");
+	}
+
+	private void updateReturnBanner(String chqNo) {
+		if (returnReasonBanner == null) {
+			return;
+		}
+
+		if (chqNo == null || chqNo.trim().isEmpty() || chequeService == null) {
+			returnReasonBanner.setVisible(false);
+			return;
+		}
+
+		java.util.Map<String, String> returnInfo = chequeService.getChequeReturnInfo(chqNo);
+		if (returnInfo != null && ("RETURN_TO_MAKER".equalsIgnoreCase(returnInfo.get("status"))
+				|| "RETURN_BY_MAKER".equalsIgnoreCase(returnInfo.get("status")))) {
+			returnReasonBanner.setVisible(true);
+
+			String desc = returnInfo.get("description");
+			if (desc == null || desc.trim().isEmpty()) {
+				desc = returnInfo.get("returnReasonCode");
+			}
+			if (lblReturnReason != null) {
+				lblReturnReason.setValue(desc != null ? desc : "Returned");
+			}
+
+			String remarks = returnInfo.get("remarks");
+			if (lblReturnRemarks != null) {
+				lblReturnRemarks.setValue(remarks != null && !remarks.trim().isEmpty() ? remarks : "No remarks provided");
+			}
+		} else {
+			returnReasonBanner.setVisible(false);
+		}
 	}
 
 	// =========================================================
@@ -420,8 +489,10 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 						chequeDate, loggedInUserId);
 			}
 
-			// 3. CHANGE CHEQUE STATUS
-			chequeService.updateChequeStatus(currentCheque.getChequeNumber(), "DATA_ENTRY_COMPLETED", loggedInUserId);
+			// 3. CHANGE CHEQUE STATUS ONLY IF NOT ALREADY RETURN_BY_MAKER
+			if (!isChequeReturnedByMaker(currentCheque.getChequeNumber())) {
+				chequeService.updateChequeStatus(currentCheque.getChequeNumber(), "DATA_ENTRY_COMPLETED", loggedInUserId);
+			}
 			updateBatchSummaryCounts();
 
 			// 4. UPDATE IN-MEMORY CHEQUE SO NAVIGATING BACK REFLECTS SAVED VALUES
@@ -459,6 +530,128 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 			Messagebox.show("Unable to save Data Entry for cheque " + currentCheque.getChequeNumber() + ".",
 					"Data Entry", Messagebox.OK, Messagebox.ERROR);
 		}
+	}
+
+	// =========================================================
+	// RETURN BY MAKER (DATA ENTRY)
+	// =========================================================
+
+	public void onClick$btnReturn() {
+		openReturnWindow();
+	}
+
+	private void openReturnWindow() {
+		if (returnWindow == null) {
+			Messagebox.show("Return dialog unavailable.", "Return", Messagebox.OK, Messagebox.ERROR);
+			return;
+		}
+
+		if (returnReasonsContainer != null) {
+			returnReasonsContainer.getChildren().clear();
+		}
+
+		if (txtReturnRemarks != null) {
+			txtReturnRemarks.setValue("");
+		}
+
+		List<com.cts.inward.dto.ReturnReasonDto> reasons = chequeService.getDataEntryReturnReasons();
+		if (reasons != null && returnReasonsContainer != null) {
+			for (com.cts.inward.dto.ReturnReasonDto r : reasons) {
+				Checkbox cb = new Checkbox();
+				cb.setLabel(r.getReturnReasonCode() + " - " + r.getDescription());
+				cb.setAttribute("reasonCode", r.getReturnReasonCode());
+				cb.setStyle("display:block; margin-bottom:6px; font-size:13.5px; color:#1E293B; cursor:pointer;");
+				returnReasonsContainer.appendChild(cb);
+			}
+		}
+
+		returnWindow.doModal();
+	}
+
+	private void handleCancelReturn() {
+		if (returnWindow != null) {
+			returnWindow.setVisible(false);
+		}
+	}
+
+	private void handleConfirmReturn() {
+		List<String> selectedCodes = new java.util.ArrayList<>();
+		if (returnReasonsContainer != null) {
+			for (Component comp : returnReasonsContainer.getChildren()) {
+				if (comp instanceof Checkbox) {
+					Checkbox cb = (Checkbox) comp;
+					if (cb.isChecked()) {
+						String code = (String) cb.getAttribute("reasonCode");
+						if (code != null && !code.trim().isEmpty()) {
+							selectedCodes.add(code.trim());
+						}
+					}
+				}
+			}
+		}
+
+		if (selectedCodes.isEmpty()) {
+			Messagebox.show("Please select at least one return reason.", "Validation", Messagebox.OK, Messagebox.EXCLAMATION);
+			return;
+		}
+
+		if (cheques == null || currentIndex < 0 || currentIndex >= cheques.size()) {
+			Messagebox.show("No cheque selected.", "Validation", Messagebox.OK, Messagebox.EXCLAMATION);
+			return;
+		}
+
+		InwardCheque currentCheque = cheques.get(currentIndex);
+		String remarks = txtReturnRemarks != null ? txtReturnRemarks.getValue() : "";
+
+		try {
+			boolean ok = chequeService.saveMakerDataEntryReturn(currentCheque.getChequeNumber(), selectedCodes, remarks, loggedInUserId);
+			if (!ok) {
+				Messagebox.show("Unable to save return for cheque " + currentCheque.getChequeNumber() + ".", "Error", Messagebox.OK, Messagebox.ERROR);
+				return;
+			}
+
+			if (returnWindow != null) {
+				returnWindow.setVisible(false);
+			}
+
+			Clients.showNotification("Cheque " + currentCheque.getChequeNumber() + " marked as RETURN_BY_MAKER.",
+					Clients.NOTIFICATION_TYPE_INFO, null, "top_right", 2000);
+
+			updateBatchSummaryCounts();
+
+			if (currentIndex == cheques.size() - 1) {
+				batchService.completeDataEntry(batchId, loggedInUserId);
+				int pending = batchService.getDataEntryPendingCount(batchId);
+				if (pending == 0) {
+					String redirectUrl = Executions.encodeURL("/zul/inward-maker/send-to-checker.zul");
+					Clients.evalJavaScript("setTimeout(function() { window.location.href = '" + redirectUrl + "'; }, 2000);");
+				} else {
+					// Navigate to first pending cheque
+					for (int i = 0; i < cheques.size(); i++) {
+						if (!isChequeReturnedByMaker(cheques.get(i).getChequeNumber())) {
+							currentIndex = i;
+							displayCurrentCheque();
+							break;
+						}
+					}
+				}
+			} else {
+				currentIndex++;
+				displayCurrentCheque();
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			Messagebox.show("Failed to return cheque: " + e.getMessage(), "Error", Messagebox.OK, Messagebox.ERROR);
+		}
+	}
+
+	private boolean isChequeReturnedByMaker(String chequeNumber) {
+		if (chequeNumber == null || chequeNumber.trim().isEmpty() || chequeService == null) {
+			return false;
+		}
+		java.util.Map<String, String> returnInfo = chequeService.getChequeReturnInfo(chequeNumber);
+		return returnInfo != null && "RETURN_BY_MAKER".equalsIgnoreCase(returnInfo.get("status"));
 	}
 
 	// =========================================================

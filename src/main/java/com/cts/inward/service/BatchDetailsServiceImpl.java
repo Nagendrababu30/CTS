@@ -48,6 +48,36 @@ public class BatchDetailsServiceImpl implements BatchDetailsService {
     }
 
     @Override
+    public List<Map<String, String>> getCheckerReturnReasons() {
+        return batchDetailsDao.getCheckerReturnReasons();
+    }
+
+    @Override
+    public List<Map<String, String>> getCheckerRejectionReasons() {
+        return batchDetailsDao.getCheckerRejectionReasons();
+    }
+
+    @Override
+    public void saveCheckerDecision(
+            String chequeNumber,
+            String status,
+            List<String> rejectionReasonCodes,
+            List<String> returnReasonCodes,
+            Integer checkerId,
+            String checkerAction,
+            String remarks) {
+
+        batchDetailsDao.saveCheckerDecision(
+                chequeNumber,
+                status,
+                rejectionReasonCodes,
+                returnReasonCodes,
+                checkerId,
+                checkerAction,
+                remarks);
+    }
+
+    @Override
     public void saveCheckerDecision(
             String chequeNumber,
             String status,

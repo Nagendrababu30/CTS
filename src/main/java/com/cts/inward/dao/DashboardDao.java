@@ -14,5 +14,6 @@ public interface DashboardDao {
             Long batchId,
             String batchStatus,
             Long userId);
-    
+
+    List<String> getReturnedChequeReasons(Long batchId);
 }

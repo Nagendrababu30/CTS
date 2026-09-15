@@ -85,4 +85,19 @@ public class ChequeServiceImpl implements ChequeService {
 
 		chequeDao.updateChequeStatus(chequeNumber, status, userId);
 	}
+
+	@Override
+	public java.util.Map<String, String> getChequeReturnInfo(String chequeNumber) {
+		return chequeDao.getChequeReturnInfo(chequeNumber);
+	}
+
+	@Override
+	public List<com.cts.inward.dto.ReturnReasonDto> getDataEntryReturnReasons() {
+		return chequeDao.getDataEntryReturnReasons();
+	}
+
+	@Override
+	public boolean saveMakerDataEntryReturn(String chequeNumber, List<String> reasonCodes, String remarks, Long userId) {
+		return chequeDao.saveMakerDataEntryReturn(chequeNumber, reasonCodes, remarks, userId);
+	}
 }

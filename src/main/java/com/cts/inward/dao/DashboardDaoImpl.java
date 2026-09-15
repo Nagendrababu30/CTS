@@ -603,4 +603,47 @@ public class DashboardDaoImpl
             }
         }
     }
+
+    @Override
+    public List<String> getReturnedChequeReasons(Long batchId) {
+        if (batchId == null) {
+            return new ArrayList<>();
+        }
+
+        String sql = """
+                SELECT DISTINCT latest.return_reason_code
+                FROM public.inward_cheque c
+                JOIN LATERAL (
+                    SELECT sh.status, sh.return_reason_code
+                    FROM public.inward_cheque_status_history sh
+                    WHERE sh.cheque_number = c.cheque_number
+                    ORDER BY sh.status_history_id DESC
+                    LIMIT 1
+                ) latest ON TRUE
+                WHERE c.batch_id = ?
+                  AND latest.status = 'RETURN_TO_MAKER'
+                """;
+
+        List<String> reasons = new ArrayList<>();
+
+        try (Connection connection = ConnectionPool.getDataSource().getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            ps.setLong(1, batchId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String reasonCode = rs.getString("return_reason_code");
+                    if (reasonCode != null && !reasonCode.trim().isEmpty()) {
+                        reasons.add(reasonCode.trim());
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return reasons;
+    }
 }

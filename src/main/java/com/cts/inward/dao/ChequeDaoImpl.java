@@ -12,6 +12,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import com.cts.inward.config.ConnectionPool;
+import com.cts.inward.dto.ReturnReasonDto;
 import com.cts.inward.model.InwardCheque;
 import com.cts.inward.model.NpciChequeData;
 
@@ -84,14 +85,23 @@ public class ChequeDaoImpl implements ChequeDao {
     	        + "    ORDER BY history_id DESC LIMIT 1 "
     	        + ") dt ON TRUE "
     	        + "LEFT JOIN LATERAL ( "
-    	        + "    SELECT h.status "
+    	        + "    SELECT h.status, h.return_reason_code "
     	        + "    FROM public.inward_cheque_status_history h "
     	        + "    WHERE h.cheque_number = c.cheque_number "
     	        + "    ORDER BY h.status_history_id DESC "
     	        + "    LIMIT 1 "
     	        + ") latest ON TRUE "
     	        + "WHERE c.batch_id = ? "
-    	        + "AND COALESCE(latest.status, '') <> 'RETURN_BY_MAKER' "
+    	        + "AND COALESCE(latest.status, '') NOT IN ('ACCEPT', 'REJECT', 'RETURN_BY_MAKER') "
+    	        + "AND NOT ( "
+    	        + "    latest.status = 'RETURN_TO_MAKER' "
+    	        + "    AND ( "
+    	        + "        latest.return_reason_code LIKE 'CR-MICR-%' "
+    	        + "        OR latest.return_reason_code LIKE 'CR-IMG-%' "
+    	        + "        OR latest.return_reason_code LIKE 'MR-MICR-%' "
+    	        + "        OR latest.return_reason_code LIKE 'MICR_%' "
+    	        + "    ) "
+    	        + ") "
     	        + "ORDER BY c.cheque_number";
 
         List<InwardCheque> cheques = new ArrayList<>();
@@ -337,6 +347,147 @@ public class ChequeDaoImpl implements ChequeDao {
         } catch (SQLException e) {
             throw new IllegalStateException(
                     "Failed to update cheque status for cheque: " + chequeNumber, e);
+        }
+    }
+
+    @Override
+    public java.util.Map<String, String> getChequeReturnInfo(String chequeNumber) {
+        String sql = """
+                SELECT sh.status, sh.return_reason_code, sh.remarks, r.description
+                FROM public.inward_cheque_status_history sh
+                LEFT JOIN public.inward_cheque_return_reason r
+                  ON r.return_reason_code = sh.return_reason_code
+                WHERE sh.cheque_number = ?
+                ORDER BY sh.status_history_id DESC
+                LIMIT 1
+                """;
+        java.util.Map<String, String> info = new java.util.HashMap<>();
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, chequeNumber);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    info.put("status", rs.getString("status"));
+                    info.put("returnReasonCode", rs.getString("return_reason_code"));
+                    info.put("remarks", rs.getString("remarks"));
+                    info.put("description", rs.getString("description"));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return info;
+    }
+
+    @Override
+    public List<ReturnReasonDto> getDataEntryReturnReasons() {
+        List<ReturnReasonDto> reasons = new ArrayList<>();
+        String sql = """
+                SELECT return_reason_code, description
+                FROM public.inward_cheque_return_reason
+                WHERE applicable_role = 'MAKER'
+                  AND return_reason_code LIKE 'MR-DATA-%'
+                ORDER BY return_reason_code
+                """;
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet rs = statement.executeQuery()) {
+            while (rs.next()) {
+                reasons.add(new ReturnReasonDto(
+                        rs.getString("return_reason_code"),
+                        rs.getString("description")));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to fetch data entry return reasons", e);
+        }
+        return reasons;
+    }
+
+    @Override
+    public boolean saveMakerDataEntryReturn(String chequeNumber, List<String> reasonCodes, String remarks, Long userId) {
+        if (chequeNumber == null || chequeNumber.trim().isEmpty()) {
+            throw new IllegalArgumentException("Cheque number is required");
+        }
+        if (reasonCodes == null || reasonCodes.isEmpty()) {
+            throw new IllegalArgumentException("At least one return reason is required");
+        }
+
+        Connection connection = null;
+        try {
+            connection = dataSource.getConnection();
+            connection.setAutoCommit(false);
+
+            String returnSql = """
+                    INSERT INTO public.inward_cheque_return
+                    (cheque_number, return_reason_code, maker_remarks, requested_by, return_status)
+                    VALUES (?, ?, ?, ?, 'RETURN_BY_MAKER')
+                    """;
+
+            String historySql = """
+                    INSERT INTO public.inward_cheque_status_history
+                    (cheque_number, status, rejection_reason_code, return_reason_code, maker_id, maker_action, maker_action_on, remarks)
+                    VALUES (?, 'RETURN_BY_MAKER', NULL, ?, ?, 'RETURN_BY_MAKER', CURRENT_TIMESTAMP, ?)
+                    """;
+
+            String formattedRemarks = remarks != null ? remarks.trim() : null;
+
+            for (String code : reasonCodes) {
+                if (code == null || code.trim().isEmpty()) continue;
+                String cleanCode = code.trim();
+
+                try (PreparedStatement returnStmt = connection.prepareStatement(returnSql)) {
+                    returnStmt.setString(1, chequeNumber.trim());
+                    returnStmt.setString(2, cleanCode);
+                    if (formattedRemarks != null && !formattedRemarks.isEmpty()) {
+                        returnStmt.setString(3, formattedRemarks);
+                    } else {
+                        returnStmt.setNull(3, java.sql.Types.VARCHAR);
+                    }
+                    if (userId != null) {
+                        returnStmt.setLong(4, userId);
+                    } else {
+                        returnStmt.setNull(4, java.sql.Types.BIGINT);
+                    }
+                    returnStmt.executeUpdate();
+                }
+
+                try (PreparedStatement histStmt = connection.prepareStatement(historySql)) {
+                    histStmt.setString(1, chequeNumber.trim());
+                    histStmt.setString(2, cleanCode);
+                    if (userId != null) {
+                        histStmt.setLong(3, userId);
+                    } else {
+                        histStmt.setNull(3, java.sql.Types.BIGINT);
+                    }
+                    if (formattedRemarks != null && !formattedRemarks.isEmpty()) {
+                        histStmt.setString(4, formattedRemarks);
+                    } else {
+                        histStmt.setNull(4, java.sql.Types.VARCHAR);
+                    }
+                    histStmt.executeUpdate();
+                }
+            }
+
+            connection.commit();
+            return true;
+        } catch (Exception e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException rollbackEx) {
+                    rollbackEx.printStackTrace();
+                }
+            }
+            throw new RuntimeException("Failed to save Data Entry return for cheque " + chequeNumber, e);
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.setAutoCommit(true);
+                    connection.close();
+                } catch (SQLException closeEx) {
+                    closeEx.printStackTrace();
+                }
+            }
         }
     }
 }

@@ -42,13 +42,11 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
         Map<String, Object> micrDetails = new HashMap<>();
 
         try (Connection connection = dataSource.getConnection();
-                PreparedStatement statement =
-                        connection.prepareStatement(sql)) {
+                PreparedStatement statement = connection.prepareStatement(sql)) {
 
             statement.setString(1, chequeNumber);
 
-            try (ResultSet resultSet =
-                    statement.executeQuery()) {
+            try (ResultSet resultSet = statement.executeQuery()) {
 
                 if (resultSet.next()) {
 
@@ -99,23 +97,18 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
                 ORDER BY cheque_number
                 """;
 
-        List<Map<String, Object>> cheques =
-                new java.util.ArrayList<>();
+        List<Map<String, Object>> cheques = new java.util.ArrayList<>();
 
-        try (Connection connection =
-                    dataSource.getConnection();
-                PreparedStatement statement =
-                    connection.prepareStatement(sql)) {
+        try (Connection connection = dataSource.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
 
             statement.setLong(1, batchId);
 
-            try (ResultSet resultSet =
-                    statement.executeQuery()) {
+            try (ResultSet resultSet = statement.executeQuery()) {
 
                 while (resultSet.next()) {
 
-                    Map<String, Object> cheque =
-                            new HashMap<>();
+                    Map<String, Object> cheque = new HashMap<>();
 
                     cheque.put(
                             "chequeNumber",
@@ -176,8 +169,7 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
     public Map<String, Object> getDataEntryDetails(
             String chequeNumber) {
 
-        Map<String, Object> details =
-                new HashMap<>();
+        Map<String, Object> details = new HashMap<>();
 
         String chequeSql = """
                 SELECT
@@ -199,25 +191,27 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
                 ORDER BY history_id
                 """;
 
-        try (Connection connection =
-                    dataSource.getConnection()) {
+        try (Connection connection = dataSource.getConnection()) {
 
             // =====================================================
             // 1. GET OLD VALUES FROM inward_cheque
             // =====================================================
 
-            try (PreparedStatement statement =
-                    connection.prepareStatement(chequeSql)) {
+            try (PreparedStatement statement = connection.prepareStatement(chequeSql)) {
 
                 statement.setString(1, chequeNumber);
 
-                try (ResultSet rs =
-                        statement.executeQuery()) {
+                try (ResultSet rs = statement.executeQuery()) {
 
                     if (rs.next()) {
 
                         details.put(
                                 "chequeNumber",
+                                rs.getString(
+                                        "cheque_number"));
+
+                        details.put(
+                                "oldChequeNumber",
                                 rs.getString(
                                         "cheque_number"));
 
@@ -248,21 +242,17 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
             // 2. GET NEW VALUES FROM DATA ENTRY HISTORY
             // =====================================================
 
-            try (PreparedStatement statement =
-                    connection.prepareStatement(historySql)) {
+            try (PreparedStatement statement = connection.prepareStatement(historySql)) {
 
                 statement.setString(1, chequeNumber);
 
-                try (ResultSet rs =
-                        statement.executeQuery()) {
+                try (ResultSet rs = statement.executeQuery()) {
 
                     while (rs.next()) {
 
-                        String fieldName =
-                                rs.getString("field_name");
+                        String fieldName = rs.getString("field_name");
 
-                        String newValue =
-                                rs.getString("new_value");
+                        String newValue = rs.getString("new_value");
 
                         if ("ACCOUNT_NUMBER".equals(
                                 fieldName)) {
@@ -283,6 +273,13 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
 
                             details.put(
                                     "newChequeDate",
+                                    newValue);
+
+                        } else if ("CHEQUE_NUMBER".equals(
+                                fieldName)) {
+
+                            details.put(
+                                    "newChequeNumber",
                                     newValue);
                         }
                     }
@@ -325,7 +322,13 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
 
                     a.account_number AS master_account_number,
                     a.account_status,
-                    a.available_balance
+                    a.available_balance,
+
+                    (
+                        SELECT COUNT(*)
+                        FROM inward_cheque ic2
+                        WHERE ic2.cheque_number = c.cheque_number
+                    ) AS dup_count
 
                 FROM inward_cheque c
 
@@ -336,18 +339,14 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
                 WHERE c.cheque_number = ?
                 """;
 
-        Map<String, Object> cbsDetails =
-                new HashMap<>();
+        Map<String, Object> cbsDetails = new HashMap<>();
 
-        try (Connection connection =
-                    dataSource.getConnection();
-                PreparedStatement statement =
-                    connection.prepareStatement(sql)) {
+        try (Connection connection = dataSource.getConnection();
+                PreparedStatement statement = connection.prepareStatement(sql)) {
 
             statement.setString(1, chequeNumber);
 
-            try (ResultSet resultSet =
-                    statement.executeQuery()) {
+            try (ResultSet resultSet = statement.executeQuery()) {
 
                 if (resultSet.next()) {
 
@@ -380,6 +379,10 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
                             "availableBalance",
                             resultSet.getBigDecimal(
                                     "available_balance"));
+
+                    int dupCount = resultSet.getInt("dup_count");
+                    cbsDetails.put("isDuplicate", dupCount > 1);
+                    cbsDetails.put("duplicateCount", dupCount);
                 }
             }
 
@@ -426,10 +429,8 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
                 )
                 """;
 
-        try (Connection connection =
-                    dataSource.getConnection();
-                PreparedStatement ps =
-                    connection.prepareStatement(sql)) {
+        try (Connection connection = dataSource.getConnection();
+                PreparedStatement ps = connection.prepareStatement(sql)) {
 
             // status
             ps.setString(1, status);
@@ -510,8 +511,7 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
                     7,
                     chequeNumber);
 
-            int updatedRows =
-                    ps.executeUpdate();
+            int updatedRows = ps.executeUpdate();
 
             if (updatedRows == 0) {
 

@@ -18,7 +18,6 @@ import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
-
 import com.cts.admin.model.User;
 import com.cts.inward.dao.BatchDaoImpl;
 import com.cts.inward.dao.ChequeDaoImpl;
@@ -365,6 +364,7 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 
 		try {
 			// 1. READ VALUES FROM SCREEN
+			String enteredChequeNo = txtChequeNo != null ? txtChequeNo.getValue() : null;
 			String accountNumber = txtAccountNo != null ? txtAccountNo.getValue() : null;
 			BigDecimal amount = decAmount != null ? decAmount.getValue() : null;
 			java.util.Date selectedDate = dtChequeDate != null ? dtChequeDate.getValue() : null;
@@ -375,6 +375,12 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 			}
 
 			// Validation
+			if (enteredChequeNo == null || enteredChequeNo.trim().isEmpty()) {
+				Messagebox.show("Please enter Cheque Number.", "Validation", Messagebox.OK, Messagebox.EXCLAMATION);
+				if (txtChequeNo != null) txtChequeNo.setFocus(true);
+				return;
+			}
+
 			if (accountNumber == null || accountNumber.trim().isEmpty()) {
 				Messagebox.show("Please enter Account Number.", "Validation", Messagebox.OK, Messagebox.EXCLAMATION);
 				if (txtAccountNo != null) txtAccountNo.setFocus(true);
@@ -394,19 +400,24 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 			}
 
 			// 2. SAVE ONLY CHANGED DATA ENTRY FIELDS
+			if (!sameString(currentCheque.getChequeNumber(), enteredChequeNo)) {
+				chequeService.saveDataEntryCorrections(currentCheque.getChequeNumber(), batchId, enteredChequeNo.trim(),
+						null, null, null, loggedInUserId);
+			}
+
 			if (!sameString(currentCheque.getAccountNumber(), accountNumber)) {
-				chequeService.saveDataEntryCorrections(currentCheque.getChequeNumber(), batchId, accountNumber, null,
-						null, loggedInUserId);
+				chequeService.saveDataEntryCorrections(currentCheque.getChequeNumber(), batchId, null, accountNumber,
+						null, null, loggedInUserId);
 			}
 
 			if (!sameBigDecimal(currentCheque.getAmount(), amount)) {
-				chequeService.saveDataEntryCorrections(currentCheque.getChequeNumber(), batchId, null, amount, null,
-						loggedInUserId);
+				chequeService.saveDataEntryCorrections(currentCheque.getChequeNumber(), batchId, null, null, amount,
+						null, loggedInUserId);
 			}
 
 			if (!sameLocalDate(currentCheque.getChequeDate(), chequeDate)) {
-				chequeService.saveDataEntryCorrections(currentCheque.getChequeNumber(), batchId, null, null, chequeDate,
-						loggedInUserId);
+				chequeService.saveDataEntryCorrections(currentCheque.getChequeNumber(), batchId, null, null, null,
+						chequeDate, loggedInUserId);
 			}
 
 			// 3. CHANGE CHEQUE STATUS
@@ -415,7 +426,7 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 
 			// 4. UPDATE IN-MEMORY CHEQUE SO NAVIGATING BACK REFLECTS SAVED VALUES
 			InwardCheque updatedCheque = InwardCheque.of(
-					currentCheque.getChequeNumber(),
+					(enteredChequeNo != null && !enteredChequeNo.trim().isEmpty()) ? enteredChequeNo.trim() : currentCheque.getChequeNumber(),
 					currentCheque.getBatchId(),
 					accountNumber,
 					currentCheque.getDrawerName(),

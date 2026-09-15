@@ -192,6 +192,9 @@ public class MicrRepairServiceImpl implements MicrRepairService {
             );
         }
 
+        boolean isBatchReturned =
+                micrRepairDao.isBatchReturnedToMaker(batchId);
+
         for (NpciChequeData npci : npciCheques) {
 
             if (npci == null) {
@@ -203,10 +206,23 @@ public class MicrRepairServiceImpl implements MicrRepairService {
                             npci.getChequeNumber()
                     );
 
-            if (STATUS_RETURN_BY_MAKER.equalsIgnoreCase(
-                    latestStatus)) {
+            if (STATUS_RETURN_BY_MAKER.equalsIgnoreCase(latestStatus)
+                    || "ACCEPT".equalsIgnoreCase(latestStatus)
+                    || "REJECT".equalsIgnoreCase(latestStatus)) {
 
                 continue;
+            }
+
+            if (isBatchReturned) {
+                if (!"RETURN_TO_MAKER".equalsIgnoreCase(latestStatus)) {
+                    continue;
+                }
+                String returnReason =
+                        micrRepairDao.getLatestChequeReturnReason(
+                                npci.getChequeNumber());
+                if (!isMicrReturnReason(returnReason)) {
+                    continue;
+                }
             }
 
             boolean micrRepaired =
@@ -625,6 +641,17 @@ public class MicrRepairServiceImpl implements MicrRepairService {
         }
 
         return count;
+    }
+
+    private boolean isMicrReturnReason(String code) {
+        if (code == null) {
+            return false;
+        }
+        String upper = code.trim().toUpperCase();
+        return upper.startsWith("CR-MICR-")
+                || upper.startsWith("CR-IMG-")
+                || upper.startsWith("MR-MICR-")
+                || upper.startsWith("MICR_");
     }
 
     @Override

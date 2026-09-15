@@ -76,9 +76,10 @@
 
                     <label value="Filter Status:" sclass="filter-label"/>
 
-                    <button id="allBtn"       label="All"        sclass="filter-btn active-filter"/>
-                    <button id="availableBtn" label="Available"  sclass="filter-btn"/>
-                    <button id="myBatchesBtn" label="My Batches" sclass="filter-btn"/>
+                    <button id="allBtn"           label="All"             sclass="filter-btn active-filter"/>
+                    <button id="availableBtn"     label="Available"       sclass="filter-btn"/>
+                    <button id="myBatchesBtn"     label="My Batches"      sclass="filter-btn"/>
+                    <button id="returnToMakerBtn" label="Return to Maker" sclass="filter-btn"/>
 
                 </hlayout>
 

@@ -15,6 +15,7 @@ import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
+import org.zkoss.zul.Checkbox;
 import org.zkoss.zul.Window;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Messagebox;
@@ -303,13 +304,13 @@ public class BatchDetailsController
     private Button acceptConfirmButton;
 
     private Window rejectWindow;
-    private Combobox rejectReason;
+    private Vlayout rejectReasonsContainer;
     private Textbox rejectRemark;
     private Button rejectCancelButton;
     private Button rejectConfirmButton;
 
     private Window returnWindow;
-    private Combobox returnReason;
+    private Vlayout returnReasonsContainer;
     private Textbox returnRemark;
     private Button returnCancelButton;
     private Button returnConfirmButton;
@@ -349,8 +350,9 @@ public class BatchDetailsController
         }
 
         if (rejectWindow != null) {
-            rejectReason = (Combobox) rejectWindow.getFellow(
-                    "rejectReason");
+            rejectReasonsContainer =
+                    (Vlayout) rejectWindow.getFellowIfAny(
+                            "rejectReasonsContainer");
 
             rejectRemark = (Textbox) rejectWindow.getFellow(
                     "rejectRemark");
@@ -371,8 +373,9 @@ public class BatchDetailsController
         }
 
         if (returnWindow != null) {
-            returnReason = (Combobox) returnWindow.getFellow(
-                    "returnReason");
+            returnReasonsContainer =
+                    (Vlayout) returnWindow.getFellowIfAny(
+                            "returnReasonsContainer");
 
             returnRemark = (Textbox) returnWindow.getFellow(
                     "returnRemark");
@@ -404,16 +407,20 @@ public class BatchDetailsController
             returnWindow.setVisible(false);
         }
 
-        Object sessionUserId = Executions.getCurrent().getAttribute("userId");
-
-        if (sessionUserId instanceof Number) {
-            userId = ((Number) sessionUserId).intValue();
-        } else if (sessionUserId != null) {
-            try {
-                userId = Integer.valueOf(
-                        String.valueOf(sessionUserId));
-            } catch (NumberFormatException e) {
-                userId = null;
+        org.zkoss.zk.ui.Session session = Executions.getCurrent().getSession();
+        com.cts.admin.model.User user = (com.cts.admin.model.User) session.getAttribute("loggedInUser");
+        if (user != null && user.getUserId() != null) {
+            userId = user.getUserId().intValue();
+        } else {
+            Object sessionUserId = Executions.getCurrent().getAttribute("userId");
+            if (sessionUserId instanceof Number) {
+                userId = ((Number) sessionUserId).intValue();
+            } else if (sessionUserId != null) {
+                try {
+                    userId = Integer.valueOf(String.valueOf(sessionUserId));
+                } catch (NumberFormatException e) {
+                    userId = null;
+                }
             }
         }
 
@@ -1945,9 +1952,24 @@ public class BatchDetailsController
     // =========================================================
 
     public void onClick$rejectButton() {
-        if (rejectReason != null) {
-            rejectReason.setSelectedItem(null);
-            rejectReason.setValue("");
+        if (rejectReasonsContainer != null) {
+            rejectReasonsContainer.getChildren().clear();
+            List<Map<String, String>> reasons =
+                    batchDetailsService.getCheckerRejectionReasons();
+            if (reasons != null) {
+                for (Map<String, String> r : reasons) {
+                    Checkbox cb = new Checkbox();
+                    String code = r.get("rejection_reason_code");
+                    if (code == null) {
+                        code = r.get("code");
+                    }
+                    String desc = r.get("description");
+                    cb.setLabel((code != null ? code : "") + " - " + (desc != null ? desc : ""));
+                    cb.setAttribute("reasonCode", code);
+                    cb.setStyle("display:block; margin-bottom:6px; font-size:13px; color:#1E293B; cursor:pointer;");
+                    rejectReasonsContainer.appendChild(cb);
+                }
+            }
         }
         if (rejectRemark != null) {
             rejectRemark.setValue("");
@@ -1965,26 +1987,28 @@ public class BatchDetailsController
 
     private void handleRejectConfirmButton() {
 
-        String reasonCode = null;
-
-        if (rejectReason != null
-                && rejectReason.getSelectedItem() != null) {
-
-            Object selectedValue = rejectReason.getSelectedItem().getValue();
-
-            if (selectedValue != null) {
-                reasonCode = String.valueOf(selectedValue);
+        List<String> selectedCodes = new ArrayList<>();
+        if (rejectReasonsContainer != null) {
+            for (Component comp : rejectReasonsContainer.getChildren()) {
+                if (comp instanceof Checkbox) {
+                    Checkbox cb = (Checkbox) comp;
+                    if (cb.isChecked()) {
+                        String code = (String) cb.getAttribute("reasonCode");
+                        if (code != null && !code.trim().isEmpty()) {
+                            selectedCodes.add(code.trim());
+                        }
+                    }
+                }
             }
         }
 
-        if (reasonCode == null || reasonCode.trim().isEmpty()) {
-
+        if (selectedCodes.isEmpty()) {
             Messagebox.show(
-                    "Please select a rejection reason.",
+                    "Please select at least one rejection reason.",
                     "Validation",
                     Messagebox.OK,
-                    Messagebox.EXCLAMATION);
-
+                    Messagebox.EXCLAMATION
+            );
             return;
         }
 
@@ -1993,14 +2017,15 @@ public class BatchDetailsController
                 : rejectRemark.getValue();
 
         System.out.println(
-                "REJECT REASON CODE = " + reasonCode);
+                "REJECT REASON CODES = " + selectedCodes
+        );
 
         System.out.println(
                 "REJECT REMARKS = " + remarks);
 
         saveDecision(
                 "REJECT",
-                reasonCode.trim(),
+                selectedCodes,
                 null,
                 "Rejected",
                 remarks,
@@ -2012,9 +2037,24 @@ public class BatchDetailsController
     // =========================================================
 
     public void onClick$returnButton() {
-        if (returnReason != null) {
-            returnReason.setSelectedItem(null);
-            returnReason.setValue("");
+        if (returnReasonsContainer != null) {
+            returnReasonsContainer.getChildren().clear();
+            List<Map<String, String>> reasons =
+                    batchDetailsService.getCheckerReturnReasons();
+            if (reasons != null) {
+                for (Map<String, String> r : reasons) {
+                    Checkbox cb = new Checkbox();
+                    String code = r.get("return_reason_code");
+                    if (code == null) {
+                        code = r.get("code");
+                    }
+                    String desc = r.get("description");
+                    cb.setLabel((code != null ? code : "") + " - " + (desc != null ? desc : ""));
+                    cb.setAttribute("reasonCode", code);
+                    cb.setStyle("display:block; margin-bottom:6px; font-size:13px; color:#1E293B; cursor:pointer;");
+                    returnReasonsContainer.appendChild(cb);
+                }
+            }
         }
         if (returnRemark != null) {
             returnRemark.setValue("");
@@ -2032,26 +2072,28 @@ public class BatchDetailsController
 
     private void handleReturnConfirmButton() {
 
-        String reasonCode = null;
-
-        if (returnReason != null
-                && returnReason.getSelectedItem() != null) {
-
-            Object selectedValue = returnReason.getSelectedItem().getValue();
-
-            if (selectedValue != null) {
-                reasonCode = String.valueOf(selectedValue);
+        List<String> selectedCodes = new ArrayList<>();
+        if (returnReasonsContainer != null) {
+            for (Component comp : returnReasonsContainer.getChildren()) {
+                if (comp instanceof Checkbox) {
+                    Checkbox cb = (Checkbox) comp;
+                    if (cb.isChecked()) {
+                        String code = (String) cb.getAttribute("reasonCode");
+                        if (code != null && !code.trim().isEmpty()) {
+                            selectedCodes.add(code.trim());
+                        }
+                    }
+                }
             }
         }
 
-        if (reasonCode == null || reasonCode.trim().isEmpty()) {
-
+        if (selectedCodes.isEmpty()) {
             Messagebox.show(
-                    "Please select a return reason.",
+                    "Please select at least one return reason.",
                     "Validation",
                     Messagebox.OK,
-                    Messagebox.EXCLAMATION);
-
+                    Messagebox.EXCLAMATION
+            );
             return;
         }
 
@@ -2060,7 +2102,8 @@ public class BatchDetailsController
                 : returnRemark.getValue();
 
         System.out.println(
-                "RETURN REASON CODE = " + reasonCode);
+                "RETURN REASON CODES = " + selectedCodes
+        );
 
         System.out.println(
                 "RETURN REMARKS = " + remarks);
@@ -2068,7 +2111,7 @@ public class BatchDetailsController
         saveDecision(
                 "RETURN_TO_MAKER",
                 null,
-                reasonCode.trim(),
+                selectedCodes,
                 "Returned",
                 remarks,
                 returnWindow);
@@ -2079,8 +2122,8 @@ public class BatchDetailsController
     // =========================================================
 
     private void saveDecision(String status,
-            String rejectionReasonCode,
-            String returnReasonCode,
+            List<String> rejectionReasonCodes,
+            List<String> returnReasonCodes,
             String checkerAction,
             String remarks,
             Window popupWindow) {
@@ -2103,8 +2146,8 @@ public class BatchDetailsController
             batchDetailsService.saveCheckerDecision(
                     chequeNumber,
                     status,
-                    rejectionReasonCode,
-                    returnReasonCode,
+                    rejectionReasonCodes,
+                    returnReasonCodes,
                     userId,
                     checkerAction,
                     remarks);
@@ -2158,10 +2201,15 @@ public class BatchDetailsController
             updateChequeNavigation();
             updateBatchHeaderCounts();
             Messagebox.show(
-                    "This is the last cheque in the batch. The decision has been saved.",
-                    "Batch Completed",
-                    Messagebox.OK,
-                    Messagebox.INFORMATION);
+                    "Decision saved for the last cheque. Do you want to complete batch verification now?",
+                    "Batch Verification",
+                    Messagebox.YES | Messagebox.NO,
+                    Messagebox.QUESTION,
+                    event -> {
+                        if (Messagebox.ON_YES.equals(event.getName())) {
+                            onClick$completeVerification();
+                        }
+                    });
         }
     }
 

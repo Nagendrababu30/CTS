@@ -87,73 +87,127 @@ public class SendBatchToCheckerDaoImpl implements SendBatchToCheckerDao {
 
     @Override
     public void updateBatchStatusToChecker(Long batchId) {
-        // Query 1: Update the history status
-        String updateHistorySql = """
-                UPDATE inward_batch_history 
-                SET batch_status = 'SENT_TO_CHECKER',
-                    changed_on = CURRENT_TIMESTAMP,
-                    reason = 'Forwarded to Inward Checker',
-                    remarks = 'Actioned from UI'
-                WHERE batch_id = ? 
-                  AND batch_status = 'DATA_ENTRY_COMPLETED'
-                """;
-
-        // Query 2: Release the lock in inward_batch_lock
-        String unlockBatchSql = """
-                UPDATE inward_batch_lock 
-                SET lock_status = 'UNLOCKED'
-                WHERE batch_id = ?
-                """;
-
-        // Query 3: Insert SENT_TO_CHECKER status for all cheques in the batch
-        String insertChequeSql = """
-                INSERT INTO inward_cheque_status_history
-                (cheque_number, status)
-                SELECT cheque_number, 'SENT_TO_CHECKER'
-                FROM inward_cheque
-                WHERE batch_id = ?
-                """;
-
         try (Connection connection = dataSource.getConnection()) {
-            
-            // 1. Start Transaction
-            connection.setAutoCommit(false); 
+            connection.setAutoCommit(false);
 
-            try (
-                PreparedStatement historyStmt = connection.prepareStatement(updateHistorySql);
-                PreparedStatement lockStmt = connection.prepareStatement(unlockBatchSql);
-                PreparedStatement chequeStmt = connection.prepareStatement(insertChequeSql)
-            ) {
-                // 2. Execute History Update
-                historyStmt.setLong(1, batchId);
-                int rowsAffected = historyStmt.executeUpdate();
-                
-                if (rowsAffected == 0) {
-                    throw new RuntimeException("Update failed. No 'DATA_ENTRY_COMPLETED' status found for Batch ID: " + batchId);
+            try {
+                // 1. Check if this batch has a previous Checker (i.e. was returned to maker)
+                Integer previousCheckerId = null;
+                String findCheckerSql = """
+                        SELECT bl.user_id
+                        FROM inward_batch_lock bl
+                        JOIN public."user" u ON u.user_id = bl.user_id
+                        JOIN public."role" r ON r.role_id = u.role_id
+                        WHERE bl.batch_id = ?
+                          AND r.role_name = 'INWARD_CHECKER'
+                        ORDER BY bl.locked_time DESC, bl.lock_id DESC
+                        LIMIT 1
+                        """;
+
+                try (PreparedStatement checkStmt = connection.prepareStatement(findCheckerSql)) {
+                    checkStmt.setLong(1, batchId);
+                    try (ResultSet rs = checkStmt.executeQuery()) {
+                        if (rs.next()) {
+                            previousCheckerId = rs.getInt("user_id");
+                        }
+                    }
                 }
-                
-                // 3. Execute Unlock Update
-                lockStmt.setLong(1, batchId);
-                lockStmt.executeUpdate();
 
-                // 4. Insert SENT_TO_CHECKER status for all cheques in the batch
-                chequeStmt.setLong(1, batchId);
-                chequeStmt.executeUpdate();
-                
-                // 5. Commit all three queries
-                connection.commit(); 
-                
+                // 2. Unlock Maker's current lock
+                String unlockMakerSql = """
+                        UPDATE inward_batch_lock
+                        SET lock_status = 'UNLOCKED',
+                            locked_time = CURRENT_TIMESTAMP
+                        WHERE batch_id = ?
+                          AND lock_status = 'LOCKED'
+                        """;
+                try (PreparedStatement unlockStmt = connection.prepareStatement(unlockMakerSql)) {
+                    unlockStmt.setLong(1, batchId);
+                    unlockStmt.executeUpdate();
+                }
+
+                // 3. If this batch had a previous Checker, re-lock for that Checker
+                if (previousCheckerId != null) {
+                    String relockCheckerSql = """
+                            UPDATE inward_batch_lock
+                            SET lock_status = 'LOCKED',
+                                locked_time = CURRENT_TIMESTAMP
+                            WHERE batch_id = ?
+                              AND user_id = ?
+                            """;
+                    int relockedRows = 0;
+                    try (PreparedStatement relockStmt = connection.prepareStatement(relockCheckerSql)) {
+                        relockStmt.setLong(1, batchId);
+                        relockStmt.setInt(2, previousCheckerId);
+                        relockedRows = relockStmt.executeUpdate();
+                    }
+
+                    if (relockedRows == 0) {
+                        String insertCheckerLockSql = """
+                                INSERT INTO inward_batch_lock
+                                (batch_id, user_id, locked_time, lock_status)
+                                VALUES (?, ?, CURRENT_TIMESTAMP, 'LOCKED')
+                                """;
+                        try (PreparedStatement insertLockStmt = connection.prepareStatement(insertCheckerLockSql)) {
+                            insertLockStmt.setLong(1, batchId);
+                            insertLockStmt.setInt(2, previousCheckerId);
+                            insertLockStmt.executeUpdate();
+                        }
+                    }
+                }
+
+                // 4. Update batch history status
+                String updateHistorySql = """
+                        UPDATE inward_batch_history
+                        SET batch_status = 'SENT_TO_CHECKER',
+                            changed_on = CURRENT_TIMESTAMP,
+                            reason = 'Forwarded to Inward Checker',
+                            remarks = 'Actioned from UI'
+                        WHERE batch_id = ?
+                          AND batch_status IN ('DATA_ENTRY_COMPLETED', 'RETURN_TO_MAKER')
+                        """;
+                int rowsAffected = 0;
+                try (PreparedStatement historyStmt = connection.prepareStatement(updateHistorySql)) {
+                    historyStmt.setLong(1, batchId);
+                    rowsAffected = historyStmt.executeUpdate();
+                }
+
+                if (rowsAffected == 0) {
+                    String insertHistorySql = """
+                            INSERT INTO inward_batch_history
+                            (batch_id, batch_status, changed_on, changed_by, reason, remarks)
+                            VALUES (?, 'SENT_TO_CHECKER', CURRENT_TIMESTAMP, NULL, 'Forwarded to Inward Checker', 'Actioned from UI')
+                            """;
+                    try (PreparedStatement insertHistStmt = connection.prepareStatement(insertHistorySql)) {
+                        insertHistStmt.setLong(1, batchId);
+                        insertHistStmt.executeUpdate();
+                    }
+                }
+
+                // 5. Insert SENT_TO_CHECKER status for all cheques in the batch
+                String insertChequeSql = """
+                        INSERT INTO inward_cheque_status_history
+                        (cheque_number, status)
+                        SELECT cheque_number, 'SENT_TO_CHECKER'
+                        FROM inward_cheque
+                        WHERE batch_id = ?
+                        """;
+                try (PreparedStatement chequeStmt = connection.prepareStatement(insertChequeSql)) {
+                    chequeStmt.setLong(1, batchId);
+                    chequeStmt.executeUpdate();
+                }
+
+                connection.commit();
+
             } catch (Exception e) {
-                // If anything fails, rollback BOTH queries
-                connection.rollback(); 
+                connection.rollback();
                 throw e;
             } finally {
-                // Always reset auto-commit back to true to safely return the connection to the pool
-                connection.setAutoCommit(true); 
+                connection.setAutoCommit(true);
             }
-            
+
         } catch (Exception e) {
-            throw new RuntimeException("Error updating batch status and unlocking batch", e);
+            throw new RuntimeException("Error updating batch status and forwarding to checker", e);
         }
     }
 }

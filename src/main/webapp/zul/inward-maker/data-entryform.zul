@@ -317,6 +317,28 @@
 				</hlayout>
 			</hlayout>
 
+			<!-- ============================================================
+			     RETURN REASON & REMARKS ALERT BANNER (Displayed when returned by Checker)
+			     ============================================================ -->
+			<div id="returnReasonBanner"
+			     visible="false"
+			     width="100%"
+			     style="background:#FFF4ED; border:1px solid #FECDCA; border-radius:8px; padding:10px 16px; box-sizing:border-box; display:flex; align-items:center;">
+				<hlayout spacing="12px" valign="middle" width="100%">
+					<label sclass="z-icon-exclamation-triangle" style="font-size:18px; color:#C4320A;"/>
+					<vlayout spacing="3px" hflex="1">
+						<hlayout spacing="8px" valign="middle">
+							<label value="Checker Return Reason:" style="font-size:12px; font-weight:700; color:#B42318; text-transform:uppercase; letter-spacing:0.5px;"/>
+							<label id="lblReturnReason" value="—" style="font-size:13px; font-weight:700; color:#7A271A;"/>
+						</hlayout>
+						<hlayout spacing="8px" valign="middle" id="rowReturnRemarks">
+							<label value="Checker Remarks:" style="font-size:12px; font-weight:600; color:#B42318;"/>
+							<label id="lblReturnRemarks" value="—" style="font-size:12.5px; color:#344054;"/>
+						</hlayout>
+					</vlayout>
+				</hlayout>
+			</div>
+
 			<!-- =====================================================
 			     MAIN SPLIT ROW (CHEQUE IMAGE + DATA VERIFICATION)
 			     ===================================================== -->
@@ -449,7 +471,7 @@
 						<!-- Push action buttons to bottom -->
 						<space height="6px"/>
 
-						<!-- Action Buttons: Prev, Next, Save & Next (Matches MICR Repair) -->
+						<!-- Action Buttons: Prev, Next, Return, Save & Next (Matches MICR Repair) -->
 						<vlayout width="100%" spacing="8px" style="margin-top:auto;">
 							<hlayout spacing="10px" valign="middle" width="100%">
 								<button id="btnPrev"
@@ -460,9 +482,14 @@
 									label="Next"
 									sclass="micr-next-btn"/>
 
+								<space hflex="1"/>
+
+								<button id="btnReturn"
+									label="Return"
+									sclass="micr-return-btn"/>
+
 								<button id="btnSaveNext"
 									label="Save &amp; Next →"
-									hflex="1"
 									sclass="micr-save-btn"/>
 							</hlayout>
 						</vlayout>
@@ -473,6 +500,57 @@
 			</hlayout>
 
 		</vlayout>
+
+		<!-- ================================================================
+		     Return Window (Modal Dialog) - Multi-Select Reasons for Maker Data Entry
+		     ================================================================ -->
+		<window id="returnWindow"
+			title="Return Cheque"
+			border="normal"
+			width="540px"
+			closable="false"
+			visible="false"
+			position="center"
+			sclass="return-window">
+
+			<vlayout width="100%" spacing="18px" sclass="return-form">
+				<label value="Select return reason(s) to send this cheque back to Maker queue:"
+					sclass="return-description"/>
+
+				<vlayout width="100%" spacing="6px">
+					<hlayout spacing="4px" valign="middle">
+						<label value="Return Reason(s)" sclass="return-field-label"/>
+						<label value=" *" sclass="micr-star"/>
+					</hlayout>
+
+					<div style="max-height: 180px; overflow-y: auto; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 10px 14px; background: #FFFFFF;">
+						<vlayout id="returnReasonsContainer" spacing="8px" width="100%">
+							<!-- Checkboxes populated dynamically from inward_cheque_return_reason where applicable_role='MAKER' AND return_reason_code LIKE 'MR-DATA-%' -->
+						</vlayout>
+					</div>
+				</vlayout>
+
+				<vlayout width="100%" spacing="6px">
+					<label value="Remarks (Optional)" sclass="return-field-label"/>
+					<textbox id="txtReturnRemarks"
+						width="100%"
+						rows="3"
+						multiline="true"
+						maxlength="500"
+						placeholder="Enter maker return remarks..."
+						sclass="return-textbox"/>
+				</vlayout>
+
+				<hlayout width="100%" spacing="14px" sclass="return-window-buttons">
+					<button id="btnCancelReturn"
+						label="Cancel"
+						sclass="secondary-button"/>
+					<button id="btnConfirmReturn"
+						label="Confirm Return"
+						sclass="return-button"/>
+				</hlayout>
+			</vlayout>
+		</window>
 
 	</div>
 

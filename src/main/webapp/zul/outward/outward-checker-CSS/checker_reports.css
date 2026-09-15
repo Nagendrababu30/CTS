@@ -1,0 +1,598 @@
+/* =========================================================
+   CHECKER REPORTS
+   ========================================================= */
+
+
+/* =========================================================
+   PAGE
+   ========================================================= */
+
+.checker-reports-content {
+
+    width: 100%;
+    height: 100%;
+
+    box-sizing: border-box;
+
+    background: #EAF0FA;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   MAIN CONTENT
+   ========================================================= */
+
+.checker-reports-layout {
+
+    width: 100%;
+    height: 100%;
+
+    box-sizing: border-box;
+
+    padding: 22px 22px 28px 22px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+
+/* =========================================================
+   HEADER ROW
+   ========================================================= */
+
+.reports-header-row {
+
+    width: 100%;
+}
+
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.reports-header {
+
+    width: 100%;
+}
+
+
+/* =========================================================
+   PAGE TITLE
+   ========================================================= */
+
+.reports-title {
+
+    font-family:
+        'Inter',
+        'Segoe UI',
+        Arial,
+        sans-serif !important;
+
+    font-size: 30px !important;
+
+    font-weight: 700 !important;
+
+    color: #0B1F3F !important;
+
+    letter-spacing: -0.03em;
+
+    position: relative;
+
+    display: inline-block;
+}
+
+
+/* =========================================================
+   BLUE UNDERLINE
+   ========================================================= */
+
+.reports-title::after {
+
+    content: '';
+
+    display: block;
+
+    width: 50px;
+
+    height: 3px;
+
+    margin-top: 7px;
+
+    background: #175CD3;
+
+    border-radius: 3px;
+}
+
+
+/* =========================================================
+   SUBTITLE
+   ========================================================= */
+
+.reports-subtitle {
+
+    font-family:
+        'Inter',
+        'Segoe UI',
+        Arial,
+        sans-serif !important;
+
+    font-size: 13px !important;
+
+    font-weight: 500 !important;
+
+    color: #667085 !important;
+}
+
+
+/* =========================================================
+   REFRESH BUTTON
+   ========================================================= */
+
+.reports-refresh-btn {
+
+    min-height: 40px !important;
+
+    padding: 8px 20px !important;
+
+    border: 1px solid #175CD3 !important;
+
+    border-radius: 6px !important;
+
+    background: #175CD3 !important;
+
+    color: #FFFFFF !important;
+
+    font-family:
+        'Inter',
+        'Segoe UI',
+        Arial,
+        sans-serif !important;
+
+    font-size: 13px !important;
+
+    font-weight: 600 !important;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease !important;
+}
+
+
+/* =========================================================
+   REFRESH BUTTON HOVER
+   ========================================================= */
+
+.reports-refresh-btn:hover {
+
+    background: #164EB6 !important;
+
+    border-color: #164EB6 !important;
+
+    box-shadow:
+        0 3px 8px
+        rgba(23, 92, 211, 0.25) !important;
+}
+
+
+/* =========================================================
+   REPORT SECTION
+   ========================================================= */
+
+.reports-section {
+
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 20px 20px 14px 20px;
+
+    background: #FFFFFF !important;
+
+    border: 1px solid #E4EAF3 !important;
+
+    border-radius: 10px !important;
+
+    box-shadow:
+        0 4px 12px
+        rgba(16, 24, 40, 0.06) !important;
+
+    position: relative;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   TOP BLUE LINE
+   ========================================================= */
+
+.reports-section::before {
+
+    content: '';
+
+    position: absolute;
+
+    top: 0;
+
+    left: 0;
+
+    right: 0;
+
+    height: 4px;
+
+    background: #175CD3;
+
+    border-radius: 10px 10px 0 0;
+}
+
+
+/* =========================================================
+   SECTION HEADER
+   ========================================================= */
+
+.reports-section-header {
+
+    width: 100%;
+
+    padding-bottom: 16px;
+}
+
+
+/* =========================================================
+   SECTION TITLE
+   ========================================================= */
+
+.reports-section-title {
+
+    font-family:
+        'Inter',
+        'Segoe UI',
+        Arial,
+        sans-serif !important;
+
+    font-size: 18px !important;
+
+    font-weight: 700 !important;
+
+    color: #0B1F3F !important;
+
+    padding-left: 14px;
+
+    position: relative;
+}
+
+
+/* =========================================================
+   SECTION TITLE BLUE BAR
+   ========================================================= */
+
+.reports-section-title::before {
+
+    content: '';
+
+    position: absolute;
+
+    left: 0;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    width: 4px;
+
+    height: 20px;
+
+    background: #175CD3;
+
+    border-radius: 3px;
+}
+
+
+/* =========================================================
+   REPORT TABLE
+   ========================================================= */
+
+.checker-reports-table {
+
+    width: 100% !important;
+
+    box-sizing: border-box;
+
+    border: 1px solid #E4E7EC !important;
+
+    border-radius: 6px !important;
+
+    background: #FFFFFF !important;
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+   TABLE HEADER
+   ========================================================= */
+
+.checker-reports-table .z-listhead {
+
+    background: #175CD3 !important;
+
+    border: none !important;
+}
+
+
+/* =========================================================
+   TABLE HEADER CELLS
+   ========================================================= */
+
+.checker-reports-table .z-listheader {
+
+    background: #175CD3 !important;
+
+    border-right:
+        1px solid
+        rgba(255, 255, 255, 0.12) !important;
+
+    border-bottom: none !important;
+}
+
+
+/* =========================================================
+   LAST HEADER CELL
+   ========================================================= */
+
+.checker-reports-table .z-listheader:last-child {
+
+    border-right: none !important;
+}
+
+
+/* =========================================================
+   HEADER CONTENT
+   ========================================================= */
+
+.checker-reports-table .z-listheader-content {
+
+    padding: 16px 12px !important;
+
+    background: #175CD3 !important;
+
+    color: #FFFFFF !important;
+
+    font-family:
+        'Inter',
+        'Segoe UI',
+        Arial,
+        sans-serif !important;
+
+    font-size: 12px !important;
+
+    font-weight: 700 !important;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.04em;
+
+    text-align: center !important;
+}
+
+
+/* =========================================================
+   TABLE ROW
+   ========================================================= */
+
+.checker-reports-table .z-listitem {
+
+    background: #FFFFFF !important;
+
+    border-bottom:
+        1px solid
+        #EEF2F6 !important;
+
+    transition:
+        background 0.2s ease,
+        box-shadow 0.2s ease !important;
+}
+
+
+/* =========================================================
+   ALTERNATE ROW
+   ========================================================= */
+
+.checker-reports-table .z-listitem:nth-child(even) {
+
+    background: #FCFDFF !important;
+}
+
+
+/* =========================================================
+   ROW HOVER
+   ========================================================= */
+
+.checker-reports-table .z-listitem:hover {
+
+    background: #F5F9FF !important;
+
+    box-shadow:
+        inset 4px 0 0 #175CD3 !important;
+}
+
+
+/* =========================================================
+   TABLE CELLS
+   ========================================================= */
+
+.checker-reports-table .z-listcell {
+
+    border-right:
+        1px solid
+        #F0F2F5 !important;
+
+    border-bottom: none !important;
+}
+
+
+/* =========================================================
+   LAST CELL
+   ========================================================= */
+
+.checker-reports-table .z-listcell:last-child {
+
+    border-right: none !important;
+}
+
+
+/* =========================================================
+   CELL CONTENT
+   ========================================================= */
+
+.checker-reports-table .z-listcell-content {
+
+    padding: 14px 12px !important;
+
+    color: #344054 !important;
+
+    font-family:
+        'Inter',
+        'Segoe UI',
+        Arial,
+        sans-serif !important;
+
+    font-size: 13px !important;
+
+    font-weight: 500 !important;
+
+    text-align: center !important;
+
+    line-height: 1.4 !important;
+}
+
+
+/* =========================================================
+   BATCH NUMBER
+   ========================================================= */
+
+.checker-reports-table
+.z-listitem
+.z-listcell:nth-child(1)
+.z-listcell-content {
+
+    color: #0B1F3F !important;
+
+    font-weight: 600 !important;
+
+    text-align: left !important;
+}
+
+
+/* =========================================================
+   TOTAL CHEQUES
+   ========================================================= */
+
+.checker-reports-table
+.z-listitem
+.z-listcell:nth-child(2)
+.z-listcell-content {
+
+    color: #344054 !important;
+
+    font-weight: 600 !important;
+}
+
+
+/* =========================================================
+   VALID XML
+   ========================================================= */
+
+.checker-reports-table
+.z-listitem
+.z-listcell:nth-child(3)
+.z-listcell-content {
+
+    color: #12B76A !important;
+
+    font-weight: 600 !important;
+}
+
+
+/* =========================================================
+   REJECTED XML
+   ========================================================= */
+
+.checker-reports-table
+.z-listitem
+.z-listcell:nth-child(4)
+.z-listcell-content {
+
+    color: #D92D20 !important;
+
+    font-weight: 600 !important;
+}
+
+
+/* =========================================================
+   PAGINATION
+   ========================================================= */
+
+.checker-reports-table
+.z-paging {
+
+    background: #FFFFFF !important;
+
+    border-top:
+        1px solid
+        #E4E7EC !important;
+
+    padding: 10px !important;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1024px) {
+
+    .checker-reports-layout {
+
+        padding: 20px;
+    }
+
+    .reports-title {
+
+        font-size: 26px !important;
+    }
+}
+
+
+@media (max-width: 768px) {
+
+    .checker-reports-layout {
+
+        padding: 16px 12px;
+    }
+
+    .reports-title {
+
+        font-size: 23px !important;
+    }
+
+    .reports-subtitle {
+
+        font-size: 12px !important;
+    }
+
+    .reports-refresh-btn {
+
+        padding: 7px 14px !important;
+    }
+
+    .reports-section {
+
+        padding: 16px 12px 12px 12px;
+    }
+}

@@ -1,7 +1,10 @@
 package com.cts.inward.controller;
 
 import java.math.BigDecimal;
+import java.sql.Connection;
 import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +25,7 @@ import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Vlayout;
 
+import com.cts.inward.config.ConnectionPool;
 import com.cts.inward.dao.BatchDetailsDaoImpl;
 import com.cts.inward.dao.ChequeImageDaoImpl;
 import com.cts.inward.model.ChequeImage;
@@ -33,22 +37,20 @@ public class BatchDetailsController
 
     private static final long serialVersionUID = 1L;
 
-
     // =========================================================
     // BATCH
     // =========================================================
 
     private Long batchId;
 
-    private List<Map<String, Object>> cheques =
-            new ArrayList<>();
+    private List<Map<String, Object>> cheques = new ArrayList<>();
 
     private int currentChequeIndex = 0;
 
     private BatchDetailsService batchDetailsService;
 
     // =========================================================
-    // CHEQUE IMAGE
+    // CHEQUE IMAGE & CONTROLS (Image 2)
     // =========================================================
 
     private Image chequeImage;
@@ -56,6 +58,16 @@ public class BatchDetailsController
     private Component chequeImageContainer;
 
     private Component chequePreview;
+
+    private Button toggleImageButton;
+
+    private Button zoomInButton;
+
+    private Button zoomOutButton;
+
+    private Button rotateButton;
+
+    private Button resetViewButton;
 
     private Button btnFront;
 
@@ -65,19 +77,33 @@ public class BatchDetailsController
 
     private String currentBackImagePath;
 
+    private boolean showingFront = true;
+
+    private double currentScale = 1.0;
+
+    private int currentRotation = 0;
+
     private ChequeImageDaoImpl chequeImageDao;
 
-
     // =========================================================
-    // HEADER
+    // HEADER & METRICS (Image 4)
     // =========================================================
 
     private Label pageTitle;
 
     private Button backToList;
 
-    private Label makerId;
+    private Label batchLabel;
 
+    private Label totalCountLabel;
+
+    private Label completedCountLabel;
+
+    private Label pendingCountLabel;
+
+    private Label chequeCounter;
+
+    private Label makerId;
 
     // =========================================================
     // LEFT CHEQUE PREVIEW
@@ -103,7 +129,6 @@ public class BatchDetailsController
 
     private Label leftCbsStatus;
 
-
     // =========================================================
     // RIGHT VERIFICATION HEADER
     // =========================================================
@@ -113,7 +138,6 @@ public class BatchDetailsController
     private Label chequePosition;
 
     private Label rightBankName;
-
 
     // =========================================================
     // MICR SECTION
@@ -131,7 +155,6 @@ public class BatchDetailsController
 
     private Label micrStatus;
 
-
     // =========================================================
     // DATA ENTRY - ACCOUNT NUMBER
     // =========================================================
@@ -147,7 +170,6 @@ public class BatchDetailsController
     private Hlayout accountUnchanged;
 
     private Label accountNumber;
-
 
     // =========================================================
     // DATA ENTRY - AMOUNT
@@ -165,7 +187,6 @@ public class BatchDetailsController
 
     private Label amount;
 
-
     // =========================================================
     // DATA ENTRY - CHEQUE DATE
     // =========================================================
@@ -182,24 +203,24 @@ public class BatchDetailsController
 
     private Label chequeDate;
 
+    private Label dataEntrySummary;
 
     // =========================================================
-    // DATA ENTRY - PAYEE NAME
-    // DB FIELD = payee_name
+    // DATA ENTRY - CHEQUE NUMBER
+    // DB FIELD = cheque_number
     // =========================================================
 
-    private Label payeeStatus;
+    private Label chequeNoStatus;
 
-    private Hlayout payeeCorrection;
+    private Hlayout chequeNoCorrection;
 
-    private Label oldPayeeName;
+    private Label oldChequeNumber;
 
-    private Label correctedPayeeName;
+    private Label correctedChequeNumber;
 
-    private Hlayout payeeUnchanged;
+    private Hlayout chequeNoUnchanged;
 
-    private Label payeeName;
-
+    private Label chequeNumberVal;
 
     // =========================================================
     // CBS VALIDATION
@@ -218,7 +239,6 @@ public class BatchDetailsController
     private Label cbsDateResult;
 
     private Label cbsAccountResult;
-
 
     // =========================================================
     // CHEQUE NAVIGATION
@@ -262,7 +282,6 @@ public class BatchDetailsController
 
     private Button completeVerification;
 
-
     // =========================================================
     // INIT
     // =========================================================
@@ -298,7 +317,6 @@ public class BatchDetailsController
 
     private boolean cbsPassed = false;
 
-
     @Override
     public void doAfterCompose(Component component)
             throws Exception {
@@ -316,23 +334,19 @@ public class BatchDetailsController
         // =========================================================
 
         if (acceptConfirmWindow != null) {
-            acceptCancelButton =
-                    (Button) acceptConfirmWindow.getFellow(
-                            "acceptCancelButton");
+            acceptCancelButton = (Button) acceptConfirmWindow.getFellow(
+                    "acceptCancelButton");
 
-            acceptConfirmButton =
-                    (Button) acceptConfirmWindow.getFellow(
-                            "acceptConfirmButton");
+            acceptConfirmButton = (Button) acceptConfirmWindow.getFellow(
+                    "acceptConfirmButton");
 
             acceptCancelButton.addEventListener(
                     Events.ON_CLICK,
-                    event -> handleAcceptCancelButton()
-            );
+                    event -> handleAcceptCancelButton());
 
             acceptConfirmButton.addEventListener(
                     Events.ON_CLICK,
-                    event -> handleAcceptConfirmButton()
-            );
+                    event -> handleAcceptConfirmButton());
         }
 
         if (rejectWindow != null) {
@@ -340,27 +354,22 @@ public class BatchDetailsController
                     (Vlayout) rejectWindow.getFellowIfAny(
                             "rejectReasonsContainer");
 
-            rejectRemark =
-                    (Textbox) rejectWindow.getFellow(
-                            "rejectRemark");
+            rejectRemark = (Textbox) rejectWindow.getFellow(
+                    "rejectRemark");
 
-            rejectCancelButton =
-                    (Button) rejectWindow.getFellow(
-                            "rejectCancelButton");
+            rejectCancelButton = (Button) rejectWindow.getFellow(
+                    "rejectCancelButton");
 
-            rejectConfirmButton =
-                    (Button) rejectWindow.getFellow(
-                            "rejectConfirmButton");
+            rejectConfirmButton = (Button) rejectWindow.getFellow(
+                    "rejectConfirmButton");
 
             rejectCancelButton.addEventListener(
                     Events.ON_CLICK,
-                    event -> handleRejectCancelButton()
-            );
+                    event -> handleRejectCancelButton());
 
             rejectConfirmButton.addEventListener(
                     Events.ON_CLICK,
-                    event -> handleRejectConfirmButton()
-            );
+                    event -> handleRejectConfirmButton());
         }
 
         if (returnWindow != null) {
@@ -368,27 +377,22 @@ public class BatchDetailsController
                     (Vlayout) returnWindow.getFellowIfAny(
                             "returnReasonsContainer");
 
-            returnRemark =
-                    (Textbox) returnWindow.getFellow(
-                            "returnRemark");
+            returnRemark = (Textbox) returnWindow.getFellow(
+                    "returnRemark");
 
-            returnCancelButton =
-                    (Button) returnWindow.getFellow(
-                            "returnCancelButton");
+            returnCancelButton = (Button) returnWindow.getFellow(
+                    "returnCancelButton");
 
-            returnConfirmButton =
-                    (Button) returnWindow.getFellow(
-                            "returnConfirmButton");
+            returnConfirmButton = (Button) returnWindow.getFellow(
+                    "returnConfirmButton");
 
             returnCancelButton.addEventListener(
                     Events.ON_CLICK,
-                    event -> handleReturnCancelButton()
-            );
+                    event -> handleReturnCancelButton());
 
             returnConfirmButton.addEventListener(
                     Events.ON_CLICK,
-                    event -> handleReturnConfirmButton()
-            );
+                    event -> handleReturnConfirmButton());
         }
 
         // Keep all decision popups hidden when the page is first created.
@@ -426,14 +430,59 @@ public class BatchDetailsController
         // Existing DAO + Service
         // -----------------------------------------------------
 
-        batchDetailsService =
-                BatchDetailsServiceImpl.of(
-                        BatchDetailsDaoImpl.of()
-                );
+        batchDetailsService = BatchDetailsServiceImpl.of(
+                BatchDetailsDaoImpl.of());
 
         chequeImageDao = ChequeImageDaoImpl.of();
 
-        // Wire front/back button events
+        // Wire Image 2 toolbar events
+        if (toggleImageButton != null) {
+            toggleImageButton.addEventListener(Events.ON_CLICK, event -> {
+                showingFront = !showingFront;
+                toggleImageButton.setLabel(showingFront ? "View Back" : "View Front");
+                if (showingFront) {
+                    showFrontImage();
+                } else {
+                    showBackImage();
+                }
+                applyImageStyle();
+            });
+        }
+
+        if (zoomInButton != null) {
+            zoomInButton.addEventListener(Events.ON_CLICK, event -> {
+                if (currentScale < 3.0) {
+                    currentScale += 0.2;
+                    applyImageStyle();
+                }
+            });
+        }
+
+        if (zoomOutButton != null) {
+            zoomOutButton.addEventListener(Events.ON_CLICK, event -> {
+                if (currentScale > 0.4) {
+                    currentScale -= 0.2;
+                    applyImageStyle();
+                }
+            });
+        }
+
+        if (rotateButton != null) {
+            rotateButton.addEventListener(Events.ON_CLICK, event -> {
+                currentRotation = (currentRotation + 90) % 360;
+                applyImageStyle();
+            });
+        }
+
+        if (resetViewButton != null) {
+            resetViewButton.addEventListener(Events.ON_CLICK, event -> {
+                currentScale = 1.0;
+                currentRotation = 0;
+                applyImageStyle();
+            });
+        }
+
+        // Backwards compatibility if legacy btnFront/btnBack exist
         if (btnFront != null) {
             btnFront.addEventListener(Events.ON_CLICK, event -> showFrontImage());
         }
@@ -441,14 +490,12 @@ public class BatchDetailsController
             btnBack.addEventListener(Events.ON_CLICK, event -> showBackImage());
         }
 
-
         // -----------------------------------------------------
         // Get batch ID from URL
         // -----------------------------------------------------
 
-        String batchIdParameter =
-                Executions.getCurrent()
-                        .getParameter("batchId");
+        String batchIdParameter = Executions.getCurrent()
+                .getParameter("batchId");
 
         if (batchIdParameter != null
                 && !batchIdParameter.trim().isEmpty()) {
@@ -462,41 +509,30 @@ public class BatchDetailsController
             batchId = null;
         }
 
-
         System.out.println();
         System.out.println(
-                "======================================"
-        );
+                "======================================");
 
         System.out.println(
                 "BATCH DETAILS - Batch ID = "
-                        + batchId
-        );
+                        + batchId);
 
         System.out.println(
-                "======================================"
-        );
-
+                "======================================");
 
         if (batchId == null) {
 
             System.out.println(
-                    "BATCH DETAILS - Batch ID NOT FOUND"
-            );
+                    "BATCH DETAILS - Batch ID NOT FOUND");
 
             return;
         }
-
-
-
-
 
         // -----------------------------------------------------
         // Load cheques
         // -----------------------------------------------------
 
         loadCheques();
-
 
         // -----------------------------------------------------
         // Load first cheque
@@ -515,13 +551,11 @@ public class BatchDetailsController
 
             System.out.println(
                     "NO CHEQUES FOUND FOR BATCH ID = "
-                            + batchId
-            );
+                            + batchId);
 
             updateCompleteVerificationButtonState();
         }
     }
-
 
     // =========================================================
     // LOAD CHEQUES
@@ -529,38 +563,29 @@ public class BatchDetailsController
 
     private void loadCheques() {
 
-        cheques =
-                batchDetailsService
-                        .getChequesByBatchId(batchId);
-
+        cheques = batchDetailsService
+                .getChequesByBatchId(batchId);
 
         if (cheques == null) {
 
-            cheques =
-                    new ArrayList<>();
+            cheques = new ArrayList<>();
         }
-
 
         System.out.println();
 
         System.out.println(
-                "======================================"
-        );
+                "======================================");
 
         System.out.println(
-                "BATCH ID = " + batchId
-        );
+                "BATCH ID = " + batchId);
 
         System.out.println(
                 "TOTAL CHEQUES FOUND = "
-                        + cheques.size()
-        );
+                        + cheques.size());
 
         System.out.println(
-                "======================================"
-        );
+                "======================================");
     }
-
 
     // =========================================================
     // LOAD CURRENT CHEQUE
@@ -574,7 +599,6 @@ public class BatchDetailsController
             return;
         }
 
-
         // -----------------------------------------------------
         // Protect index
         // -----------------------------------------------------
@@ -584,62 +608,44 @@ public class BatchDetailsController
             currentChequeIndex = 0;
         }
 
-
         if (currentChequeIndex >= cheques.size()) {
 
-            currentChequeIndex =
-                    cheques.size() - 1;
+            currentChequeIndex = cheques.size() - 1;
         }
-
 
         // -----------------------------------------------------
         // Get current cheque
         // -----------------------------------------------------
 
-        Map<String, Object> cheque =
-                cheques.get(currentChequeIndex);
-
+        Map<String, Object> cheque = cheques.get(currentChequeIndex);
 
         // =====================================================
         // GET VALUES FROM inward_cheque
         // =====================================================
 
-        String chequeNumber =
-                getString(
-                        cheque,
-                        "chequeNumber"
-                );
+        String chequeNumber = getString(
+                cheque,
+                "chequeNumber");
 
-        String accountNumber =
-                getString(
-                        cheque,
-                        "accountNumber"
-                );
+        String accountNumber = getString(
+                cheque,
+                "accountNumber");
 
-        String drawerName =
-                getString(
-                        cheque,
-                        "drawerName"
-                );
+        String drawerName = getString(
+                cheque,
+                "drawerName");
 
-        String micrCode =
-                getString(
-                        cheque,
-                        "micrCode"
-                );
+        String micrCode = getString(
+                cheque,
+                "micrCode");
 
-        String chequeDate =
-                getString(
-                        cheque,
-                        "chequeDate"
-                );
+        String chequeDate = getString(
+                cheque,
+                "chequeDate");
 
-        String amount =
-                getString(
-                        cheque,
-                        "amount"
-                );
-
+        String amount = getString(
+                cheque,
+                "amount");
 
         // =====================================================
         // CONSOLE
@@ -648,54 +654,43 @@ public class BatchDetailsController
         System.out.println();
 
         System.out.println(
-                "========== CURRENT CHEQUE =========="
-        );
+                "========== CURRENT CHEQUE ==========");
 
         System.out.println(
-                "Batch ID = " + batchId
-        );
+                "Batch ID = " + batchId);
 
         System.out.println(
                 "Cheque Number = "
-                        + chequeNumber
-        );
+                        + chequeNumber);
 
         System.out.println(
                 "Account Number = "
-                        + accountNumber
-        );
+                        + accountNumber);
 
         System.out.println(
                 "Drawer Name = "
-                        + drawerName
-        );
+                        + drawerName);
 
         System.out.println(
                 "Amount = "
-                        + amount
-        );
+                        + amount);
 
         System.out.println(
                 "MICR = "
-                        + micrCode
-        );
+                        + micrCode);
 
         System.out.println(
                 "Cheque Date = "
-                        + chequeDate
-        );
+                        + chequeDate);
 
         System.out.println(
                 "Cheque Position = "
                         + (currentChequeIndex + 1)
                         + " of "
-                        + cheques.size()
-        );
+                        + cheques.size());
 
         System.out.println(
-                "===================================="
-        );
-
+                "====================================");
 
         // =====================================================
         // UPDATE HEADER
@@ -705,30 +700,19 @@ public class BatchDetailsController
 
             pageTitle.setValue(
                     "Verify Inward Batch - BATCH"
-                            + batchId
-            );
+                            + batchId);
         }
-
 
         if (rightChequeNumber != null) {
 
             rightChequeNumber.setValue(
-                    nullToEmpty(chequeNumber)
-            );
+                    nullToEmpty(chequeNumber));
         }
-
 
         if (chequePosition != null) {
 
-            chequePosition.setValue(
-                    " ("
-                            + (currentChequeIndex + 1)
-                            + " of "
-                            + cheques.size()
-                            + ") | Bank:"
-            );
+            chequePosition.setValue(" | Bank:");
         }
-
 
         // =====================================================
         // UPDATE LEFT CHEQUE INFORMATION
@@ -737,75 +721,57 @@ public class BatchDetailsController
         if (imageChequeNumber != null) {
 
             imageChequeNumber.setValue(
-                    nullToEmpty(chequeNumber)
-            );
+                    nullToEmpty(chequeNumber));
         }
-
 
         if (chequeNumberLabel != null) {
 
             chequeNumberLabel.setValue(
                     "Cheque Number : "
                             + nullToEmpty(
-                                    chequeNumber
-                            )
-            );
+                                    chequeNumber));
         }
-
 
         if (payeeImage != null) {
 
             payeeImage.setValue(
-                    nullToEmpty(drawerName)
-            );
+                    nullToEmpty(drawerName));
         }
-
 
         if (amountImage != null) {
 
             amountImage.setValue(
                     "₹ "
-                            + nullToEmpty(amount)
-            );
+                            + nullToEmpty(amount));
         }
-
 
         if (imageChequeDate != null) {
 
             imageChequeDate.setValue(
                     "DATE: "
                             + formatDate(
-                                    chequeDate
-                            )
-            );
+                                    chequeDate));
         }
-
 
         if (micrImage != null) {
 
             micrImage.setValue(
-                    nullToEmpty(micrCode)
-            );
+                    nullToEmpty(micrCode));
         }
-
 
         // =====================================================
         // MICR
         // =====================================================
 
         loadMicrDetails(
-                chequeNumber
-        );
-
+                chequeNumber);
 
         // =====================================================
         // DATA ENTRY
         // =====================================================
 
         loadDataEntryDetails(
-                chequeNumber
-        );
-
+                chequeNumber);
 
         // =====================================================
         // CBS VALIDATION
@@ -817,9 +783,7 @@ public class BatchDetailsController
         // =====================================================
 
         loadCbsValidation(
-                chequeNumber
-        );
-
+                chequeNumber);
 
         // =====================================================
         // NAVIGATION
@@ -827,13 +791,13 @@ public class BatchDetailsController
 
         updateChequeNavigation();
 
-        // =====================================================
-        // CHEQUE IMAGE
-        // =====================================================
-
         loadChequeImages(chequeNumber);
-    }
 
+        // =====================================================
+        // BATCH HEADER COUNTS (Image 4)
+        // =====================================================
+        updateBatchHeaderCounts();
+    }
 
     // =========================================================
     // MICR DETAILS
@@ -846,39 +810,29 @@ public class BatchDetailsController
                 || chequeNumber.trim().isEmpty()) {
 
             System.out.println(
-                    "MICR DETAILS - CHEQUE NUMBER IS EMPTY"
-            );
+                    "MICR DETAILS - CHEQUE NUMBER IS EMPTY");
 
             return;
         }
 
-
-        Map<String, Object> micrDetails =
-                batchDetailsService
-                        .getMicrDetails(
-                                chequeNumber
-                        );
-
+        Map<String, Object> micrDetails = batchDetailsService
+                .getMicrDetails(
+                        chequeNumber);
 
         System.out.println();
 
         System.out.println(
-                "========== MICR DETAILS =========="
-        );
+                "========== MICR DETAILS ==========");
 
         System.out.println(
                 "Cheque Number = "
-                        + chequeNumber
-        );
-
+                        + chequeNumber);
 
         if (micrDetails == null
                 || micrDetails.isEmpty()) {
 
             System.out.println(
-                    "MICR DETAILS NOT FOUND"
-            );
-
+                    "MICR DETAILS NOT FOUND");
 
             if (micrCorrection != null) {
 
@@ -886,71 +840,53 @@ public class BatchDetailsController
                         .setVisible(false);
             }
 
-
             if (micrUnchanged != null) {
 
                 micrUnchanged
                         .setVisible(true);
             }
 
-
             if (micrStatus != null) {
 
                 micrStatus.setValue(
-                        "• No MICR Correction"
-                );
+                        "• No MICR Correction");
 
                 micrStatus.setSclass(
-                        "unchanged-status"
-                );
+                        "unchanged-status");
             }
 
             return;
         }
 
+        String currentMicr = getString(
+                micrDetails,
+                "currentMicr");
 
-        String currentMicr =
-                getString(
-                        micrDetails,
-                        "currentMicr"
-                );
+        String oldMicr = getString(
+                micrDetails,
+                "oldMicr");
 
-        String oldMicr =
-                getString(
-                        micrDetails,
-                        "oldMicr"
-                );
-
-        String correctedMicr =
-                getString(
-                        micrDetails,
-                        "correctedMicr"
-                );
-
+        String correctedMicr = getString(
+                micrDetails,
+                "correctedMicr");
 
         System.out.println(
                 "Current MICR = "
-                        + currentMicr
-        );
+                        + currentMicr);
 
         System.out.println(
                 "Old MICR = "
-                        + oldMicr
-        );
+                        + oldMicr);
 
         System.out.println(
                 "Corrected MICR = "
-                        + correctedMicr
-        );
+                        + correctedMicr);
 
-
-        boolean hasCorrection =
-                oldMicr != null
+        boolean hasCorrection = oldMicr != null
                 && !oldMicr.trim().isEmpty()
                 && correctedMicr != null
                 && !correctedMicr.trim().isEmpty()
                 && !oldMicr.equals(correctedMicr);
-
 
         // =====================================================
         // MICR CORRECTED
@@ -959,9 +895,7 @@ public class BatchDetailsController
         if (hasCorrection) {
 
             System.out.println(
-                    "MICR CORRECTION = YES"
-            );
-
+                    "MICR CORRECTION = YES");
 
             if (micrUnchanged != null) {
 
@@ -969,39 +903,31 @@ public class BatchDetailsController
                         .setVisible(false);
             }
 
-
             if (micrCorrection != null) {
 
                 micrCorrection
                         .setVisible(true);
             }
 
-
             if (micrStatus != null) {
 
                 micrStatus.setValue(
-                        "• MICR Correction"
-                );
+                        "• MICR Correction");
 
                 micrStatus.setSclass(
-                        "green-status"
-                );
+                        "green-status");
             }
-
 
             if (oldMicrValue != null) {
 
                 oldMicrValue.setValue(
-                        oldMicr
-                );
+                        oldMicr);
             }
-
 
             if (correctedMicrValue != null) {
 
                 correctedMicrValue.setValue(
-                        correctedMicr
-                );
+                        correctedMicr);
             }
 
         }
@@ -1013,9 +939,7 @@ public class BatchDetailsController
         else {
 
             System.out.println(
-                    "MICR CORRECTION = NO"
-            );
-
+                    "MICR CORRECTION = NO");
 
             if (micrCorrection != null) {
 
@@ -1023,42 +947,32 @@ public class BatchDetailsController
                         .setVisible(false);
             }
 
-
             if (micrUnchanged != null) {
 
                 micrUnchanged
                         .setVisible(true);
             }
 
-
             if (micrStatus != null) {
 
                 micrStatus.setValue(
-                        "• No MICR Correction"
-                );
+                        "• No MICR Correction");
 
                 micrStatus.setSclass(
-                        "unchanged-status"
-                );
+                        "unchanged-status");
             }
-
 
             if (micrValue != null) {
 
                 micrValue.setValue(
                         nullToEmpty(
-                                currentMicr
-                        )
-                );
+                                currentMicr));
             }
         }
 
-
         System.out.println(
-                "=================================="
-        );
+                "==================================");
     }
-
 
     // =========================================================
     // DATA ENTRY DETAILS
@@ -1071,80 +985,60 @@ public class BatchDetailsController
                 || chequeNumber.trim().isEmpty()) {
 
             System.out.println(
-                    "DATA ENTRY - CHEQUE NUMBER IS EMPTY"
-            );
+                    "DATA ENTRY - CHEQUE NUMBER IS EMPTY");
 
             return;
         }
 
-
-        Map<String, Object> details =
-                batchDetailsService
-                        .getDataEntryDetails(
-                                chequeNumber
-                        );
-
+        Map<String, Object> details = batchDetailsService
+                .getDataEntryDetails(
+                        chequeNumber);
 
         System.out.println();
 
         System.out.println(
-                "========== DATA ENTRY DETAILS =========="
-        );
+                "========== DATA ENTRY DETAILS ==========");
 
         System.out.println(
                 "Cheque Number = "
-                        + chequeNumber
-        );
-
+                        + chequeNumber);
 
         if (details == null
                 || details.isEmpty()) {
 
             System.out.println(
-                    "DATA ENTRY DETAILS NOT FOUND"
-            );
+                    "DATA ENTRY DETAILS NOT FOUND");
 
             resetDataEntryUI();
 
             return;
         }
 
-
         // =====================================================
         // ACCOUNT NUMBER
         // =====================================================
 
-        String oldAccount =
-                getString(
-                        details,
-                        "oldAccountNumber"
-                );
+        String oldAccount = getString(
+                details,
+                "oldAccountNumber");
 
-        String newAccount =
-                getString(
-                        details,
-                        "newAccountNumber"
-                );
+        String newAccount = getString(
+                details,
+                "newAccountNumber");
 
-
-        boolean accountCorrected =
-                newAccount != null
+        boolean accountCorrected = newAccount != null
                 && !newAccount.trim().isEmpty();
-
 
         if (accountCorrected) {
 
             if (accountStatus != null) {
 
                 accountStatus.setValue(
-                        "Corrected"
-                );
+                        "Corrected");
 
                 accountStatus.setSclass(
-                        "green-status"
-                );
+                        "green-status");
             }
-
 
             if (accountCorrection != null) {
 
@@ -1152,30 +1046,24 @@ public class BatchDetailsController
                         .setVisible(true);
             }
 
-
             if (accountUnchanged != null) {
 
                 accountUnchanged
                         .setVisible(false);
             }
 
-
             if (oldAccountNumber != null) {
 
                 oldAccountNumber.setValue(
                         nullToEmpty(
-                                oldAccount
-                        )
-                );
+                                oldAccount));
             }
-
 
             if (correctedAccountNumber != null) {
 
                 correctedAccountNumber
                         .setValue(
-                                newAccount
-                        );
+                                newAccount);
             }
 
         } else {
@@ -1183,14 +1071,11 @@ public class BatchDetailsController
             if (accountStatus != null) {
 
                 accountStatus.setValue(
-                        "Unchanged"
-                );
+                        "Unchanged");
 
                 accountStatus.setSclass(
-                        "unchanged-status"
-                );
+                        "unchanged-status");
             }
-
 
             if (accountCorrection != null) {
 
@@ -1198,60 +1083,45 @@ public class BatchDetailsController
                         .setVisible(false);
             }
 
-
             if (accountUnchanged != null) {
 
                 accountUnchanged
                         .setVisible(true);
             }
 
-
             if (accountNumber != null) {
 
                 accountNumber.setValue(
                         nullToEmpty(
-                                oldAccount
-                        )
-                );
+                                oldAccount));
             }
         }
-
 
         // =====================================================
         // AMOUNT
         // =====================================================
 
-        String oldAmountValue =
-                getString(
-                        details,
-                        "oldAmount"
-                );
+        String oldAmountValue = getString(
+                details,
+                "oldAmount");
 
-        String newAmountValue =
-                getString(
-                        details,
-                        "newAmount"
-                );
+        String newAmountValue = getString(
+                details,
+                "newAmount");
 
-
-        boolean amountCorrected =
-                newAmountValue != null
+        boolean amountCorrected = newAmountValue != null
                 && !newAmountValue.trim().isEmpty();
-
 
         if (amountCorrected) {
 
             if (amountStatus != null) {
 
                 amountStatus.setValue(
-                        "Corrected"
-                );
+                        "Corrected");
 
                 amountStatus.setSclass(
-                        "green-status"
-                );
+                        "green-status");
             }
-
 
             if (amountCorrection != null) {
 
@@ -1259,31 +1129,24 @@ public class BatchDetailsController
                         .setVisible(true);
             }
 
-
             if (amountUnchanged != null) {
 
                 amountUnchanged
                         .setVisible(false);
             }
 
-
             if (oldAmount != null) {
 
                 oldAmount.setValue(
                         formatAmount(
-                                oldAmountValue
-                        )
-                );
+                                oldAmountValue));
             }
-
 
             if (correctedAmount != null) {
 
                 correctedAmount.setValue(
                         formatAmount(
-                                newAmountValue
-                        )
-                );
+                                newAmountValue));
             }
 
         } else {
@@ -1291,14 +1154,11 @@ public class BatchDetailsController
             if (amountStatus != null) {
 
                 amountStatus.setValue(
-                        "Unchanged"
-                );
+                        "Unchanged");
 
                 amountStatus.setSclass(
-                        "unchanged-status"
-                );
+                        "unchanged-status");
             }
-
 
             if (amountCorrection != null) {
 
@@ -1306,60 +1166,45 @@ public class BatchDetailsController
                         .setVisible(false);
             }
 
-
             if (amountUnchanged != null) {
 
                 amountUnchanged
                         .setVisible(true);
             }
 
-
             if (amount != null) {
 
                 amount.setValue(
                         formatAmount(
-                                oldAmountValue
-                        )
-                );
+                                oldAmountValue));
             }
         }
-
 
         // =====================================================
         // CHEQUE DATE
         // =====================================================
 
-        String oldDate =
-                getString(
-                        details,
-                        "oldChequeDate"
-                );
+        String oldDate = getString(
+                details,
+                "oldChequeDate");
 
-        String newDate =
-                getString(
-                        details,
-                        "newChequeDate"
-                );
+        String newDate = getString(
+                details,
+                "newChequeDate");
 
-
-        boolean dateCorrected =
-                newDate != null
+        boolean dateCorrected = newDate != null
                 && !newDate.trim().isEmpty();
-
 
         if (dateCorrected) {
 
             if (dateStatus != null) {
 
                 dateStatus.setValue(
-                        "Corrected"
-                );
+                        "Corrected");
 
                 dateStatus.setSclass(
-                        "green-status"
-                );
+                        "green-status");
             }
-
 
             if (dateCorrection != null) {
 
@@ -1367,27 +1212,22 @@ public class BatchDetailsController
                         .setVisible(true);
             }
 
-
             if (dateUnchanged != null) {
 
                 dateUnchanged
                         .setVisible(false);
             }
 
-
             if (oldChequeDate != null) {
 
                 oldChequeDate.setValue(
-                        formatDate(oldDate)
-                );
+                        formatDate(oldDate));
             }
-
 
             if (correctedChequeDate != null) {
 
                 correctedChequeDate.setValue(
-                        formatDate(newDate)
-                );
+                        formatDate(newDate));
             }
 
         } else {
@@ -1395,14 +1235,11 @@ public class BatchDetailsController
             if (dateStatus != null) {
 
                 dateStatus.setValue(
-                        "Unchanged"
-                );
+                        "Unchanged");
 
                 dateStatus.setSclass(
-                        "unchanged-status"
-                );
+                        "unchanged-status");
             }
-
 
             if (dateCorrection != null) {
 
@@ -1410,155 +1247,144 @@ public class BatchDetailsController
                         .setVisible(false);
             }
 
-
             if (dateUnchanged != null) {
 
                 dateUnchanged
                         .setVisible(true);
             }
 
-
             if (chequeDate != null) {
 
                 chequeDate.setValue(
-                        formatDate(oldDate)
-                );
+                        formatDate(oldDate));
             }
         }
 
-
         // =====================================================
-        // PAYEE NAME
-        // DB FIELD = payee_name
+        // CHEQUE NUMBER
+        // DB FIELD = cheque_number
         // =====================================================
 
-        String oldPayee =
-                getString(
-                        details,
-                        "oldDrawerName"
-                );
+        String oldChqNo = getString(
+                details,
+                "oldChequeNumber");
+        if (oldChqNo == null || oldChqNo.trim().isEmpty()) {
+            oldChqNo = getString(details, "chequeNumber");
+        }
 
-        String newPayee =
-                getString(
-                        details,
-                        "newDrawerName"
-                );
+        String newChqNo = getString(
+                details,
+                "newChequeNumber");
 
+        boolean chequeNoCorrected = newChqNo != null
+                && !newChqNo.trim().isEmpty()
+                && !newChqNo.trim().equals(oldChqNo != null ? oldChqNo.trim() : "");
 
-        boolean payeeCorrected =
-                newPayee != null
-                && !newPayee.trim().isEmpty();
+        if (chequeNoCorrected) {
 
+            if (chequeNoStatus != null) {
 
-        if (payeeCorrected) {
+                chequeNoStatus.setValue(
+                        "Corrected");
 
-            if (payeeStatus != null) {
-
-                payeeStatus.setValue(
-                        "Corrected"
-                );
-
-                payeeStatus.setSclass(
-                        "green-status"
-                );
+                chequeNoStatus.setSclass(
+                        "green-status");
             }
 
+            if (chequeNoCorrection != null) {
 
-            if (payeeCorrection != null) {
-
-                payeeCorrection
+                chequeNoCorrection
                         .setVisible(true);
             }
 
+            if (chequeNoUnchanged != null) {
 
-            if (payeeUnchanged != null) {
-
-                payeeUnchanged
+                chequeNoUnchanged
                         .setVisible(false);
             }
 
+            if (oldChequeNumber != null) {
 
-            if (oldPayeeName != null) {
-
-                oldPayeeName.setValue(
+                oldChequeNumber.setValue(
                         nullToEmpty(
-                                oldPayee
-                        )
-                );
+                                oldChqNo));
             }
 
+            if (correctedChequeNumber != null) {
 
-            if (correctedPayeeName != null) {
-
-                correctedPayeeName.setValue(
-                        newPayee
-                );
+                correctedChequeNumber.setValue(
+                        newChqNo.trim());
             }
 
         } else {
 
-            if (payeeStatus != null) {
+            if (chequeNoStatus != null) {
 
-                payeeStatus.setValue(
-                        "Unchanged"
-                );
+                chequeNoStatus.setValue(
+                        "Unchanged");
 
-                payeeStatus.setSclass(
-                        "unchanged-status"
-                );
+                chequeNoStatus.setSclass(
+                        "unchanged-status");
             }
 
+            if (chequeNoCorrection != null) {
 
-            if (payeeCorrection != null) {
-
-                payeeCorrection
+                chequeNoCorrection
                         .setVisible(false);
             }
 
+            if (chequeNoUnchanged != null) {
 
-            if (payeeUnchanged != null) {
-
-                payeeUnchanged
+                chequeNoUnchanged
                         .setVisible(true);
             }
 
+            if (chequeNumberVal != null) {
 
-            if (payeeName != null) {
-
-                payeeName.setValue(
+                chequeNumberVal.setValue(
                         nullToEmpty(
-                                oldPayee
-                        )
-                );
+                                oldChqNo));
             }
         }
 
+        // =====================================================
+        // DATA ENTRY SUMMARY BADGE (e.g. • 2 Fields Corrected)
+        // =====================================================
+        int correctedFieldsCount = (accountCorrected ? 1 : 0)
+                + (amountCorrected ? 1 : 0)
+                + (dateCorrected ? 1 : 0)
+                + (chequeNoCorrected ? 1 : 0);
+
+        if (dataEntrySummary != null) {
+            if (correctedFieldsCount > 0) {
+                dataEntrySummary.setValue("• " + correctedFieldsCount
+                        + (correctedFieldsCount == 1 ? " Field Corrected" : " Fields Corrected"));
+                dataEntrySummary.setSclass("green-status");
+            } else {
+                dataEntrySummary.setValue("• No Corrections");
+                dataEntrySummary.setSclass("unchanged-status");
+            }
+        }
 
         System.out.println(
                 "Account Corrected = "
-                        + accountCorrected
-        );
+                        + accountCorrected);
 
         System.out.println(
                 "Amount Corrected = "
-                        + amountCorrected
-        );
+                        + amountCorrected);
 
         System.out.println(
                 "Date Corrected = "
-                        + dateCorrected
-        );
+                        + dateCorrected);
 
         System.out.println(
-                "Payee Corrected = "
-                        + payeeCorrected
-        );
+                "Cheque Number Corrected = "
+                        + chequeNoCorrected);
 
         System.out.println(
-                "=========================================="
-        );
+                "==========================================");
     }
-
 
     // =========================================================
     // CBS VALIDATION
@@ -1576,14 +1402,11 @@ public class BatchDetailsController
         System.out.println();
 
         System.out.println(
-                "========== CBS VALIDATION =========="
-        );
+                "========== CBS VALIDATION ==========");
 
         System.out.println(
                 "Cheque Number = "
-                        + chequeNumber
-        );
-
+                        + chequeNumber);
 
         // -----------------------------------------------------
         // Invalid cheque number
@@ -1593,82 +1416,59 @@ public class BatchDetailsController
                 || chequeNumber.trim().isEmpty()) {
 
             showCbsFailure(
-                    "CBS validation failed: cheque details not found."
-            );
+                    "CBS validation failed: cheque details not found.");
 
             return;
         }
-
 
         // -----------------------------------------------------
         // Get CBS data
         // -----------------------------------------------------
 
-        Map<String, Object> cbsDetails =
-                batchDetailsService
-                        .getCbsValidation(
-                                chequeNumber
-                        );
-
+        Map<String, Object> cbsDetails = batchDetailsService
+                .getCbsValidation(
+                        chequeNumber);
 
         if (cbsDetails == null
                 || cbsDetails.isEmpty()) {
 
             showCbsFailure(
-                    "CBS validation failed: cheque details not found."
-            );
+                    "CBS validation failed: cheque details not found.");
 
             return;
         }
-
 
         // =====================================================
         // VALUES FROM DATABASE
         // =====================================================
 
-        BigDecimal chequeAmount =
-                getBigDecimal(
-                        cbsDetails,
-                        "chequeAmount"
-                );
+        BigDecimal chequeAmount = getBigDecimal(
+                cbsDetails,
+                "chequeAmount");
 
-        BigDecimal availableBalance =
-                getBigDecimal(
-                        cbsDetails,
-                        "availableBalance"
-                );
+        BigDecimal availableBalance = getBigDecimal(
+                cbsDetails,
+                "availableBalance");
 
-        Date chequeSqlDate =
-                getSqlDate(
-                        cbsDetails,
-                        "chequeDate"
-                );
+        Date chequeSqlDate = getSqlDate(
+                cbsDetails,
+                "chequeDate");
 
-        String accountStatus =
-                getString(
-                        cbsDetails,
-                        "accountStatus"
-                );
-
+        String accountStatus = getString(
+                cbsDetails,
+                "accountStatus");
 
         // =====================================================
         // 1. AMOUNT / FUNDS VALIDATION
         //
         // available balance MUST be greater than
         // cheque amount.
-        //
-        // Strictly:
-        //
-        // availableBalance > chequeAmount
         // =====================================================
 
-        boolean amountPassed =
-                chequeAmount != null
+        boolean amountPassed = chequeAmount != null
                 && availableBalance != null
                 && availableBalance.compareTo(
-                        chequeAmount
-                ) > 0;
-
+                        chequeAmount) > 0;
 
         // =====================================================
         // 2. CHEQUE DATE VALIDATION
@@ -1680,19 +1480,14 @@ public class BatchDetailsController
 
         if (chequeSqlDate != null) {
 
-            LocalDate chequeDate =
-                    chequeSqlDate.toLocalDate();
+            LocalDate chequeDate = chequeSqlDate.toLocalDate();
 
-            LocalDate minimumValidDate =
-                    LocalDate.now()
-                            .minusMonths(3);
+            LocalDate minimumValidDate = LocalDate.now()
+                    .minusMonths(3);
 
-            datePassed =
-                    !chequeDate.isBefore(
-                            minimumValidDate
-                    );
+            datePassed = !chequeDate.isBefore(
+                    minimumValidDate);
         }
-
 
         // =====================================================
         // 3. ACCOUNT STATUS VALIDATION
@@ -1700,11 +1495,17 @@ public class BatchDetailsController
         // Account must be ACTIVE.
         // =====================================================
 
-        boolean accountPassed =
-                "ACTIVE".equalsIgnoreCase(
-                        accountStatus
-                );
+        boolean accountPassed = "ACTIVE".equalsIgnoreCase(
+                accountStatus);
 
+        // =====================================================
+        // 4. DUPLICATE CHEQUE VALIDATION
+        // =====================================================
+
+        boolean isDuplicate = Boolean.TRUE.equals(
+                cbsDetails.get("isDuplicate"));
+
+        boolean duplicatePassed = !isDuplicate;
 
         // =====================================================
         // PRINT VALUES
@@ -1712,81 +1513,50 @@ public class BatchDetailsController
 
         System.out.println(
                 "CBS Cheque Amount = "
-                        + chequeAmount
-        );
+                        + chequeAmount);
 
         System.out.println(
                 "CBS Available Balance = "
-                        + availableBalance
-        );
+                        + availableBalance);
 
         System.out.println(
                 "CBS Cheque Date = "
-                        + chequeSqlDate
-        );
+                        + chequeSqlDate);
 
         System.out.println(
                 "CBS Account Status = "
-                        + accountStatus
-        );
+                        + accountStatus);
+
+        System.out.println(
+                "CBS Duplicate Cheque = "
+                        + isDuplicate);
 
         System.out.println(
                 "Amount / Funds = "
-                        + amountPassed
-        );
+                        + amountPassed);
 
         System.out.println(
                 "Cheque Date = "
-                        + datePassed
-        );
+                        + datePassed);
 
         System.out.println(
                 "Account Status = "
-                        + accountPassed
-        );
+                        + accountPassed);
 
-
-        // =====================================================
-        // UPDATE AMOUNT UI
-        // =====================================================
-
-        updateCbsResult(
-                cbsAmountResult,
-                amountPassed
-        );
-
-
-        // =====================================================
-        // UPDATE DATE UI
-        // =====================================================
-
-        updateCbsResult(
-                cbsDateResult,
-                datePassed
-        );
-
-
-        // =====================================================
-        // UPDATE ACCOUNT UI
-        // =====================================================
-
-        updateCbsResult(
-                cbsAccountResult,
-                accountPassed
-        );
-
+        System.out.println(
+                "Duplicate Cheque = "
+                        + duplicatePassed);
 
         // =====================================================
         // FINAL RESULT
         // =====================================================
 
-        boolean allPassed =
-                amountPassed
+        boolean allPassed = amountPassed
                 && datePassed
-                && accountPassed;
+                && accountPassed
+                && duplicatePassed;
 
         cbsPassed = allPassed;
-
 
         if (allPassed) {
 
@@ -1794,58 +1564,52 @@ public class BatchDetailsController
 
         } else {
 
-            StringBuilder failure =
-                    new StringBuilder();
-
+            StringBuilder failure = new StringBuilder();
 
             if (!amountPassed) {
 
                 failure.append(
-                        "Amount / Funds validation failed."
-                );
+                        "Amount / Funds validation failed.");
             }
-
 
             if (!datePassed) {
 
                 appendFailureSeparator(
-                        failure
-                );
+                        failure);
 
                 failure.append(
-                        "Cheque date is older than 3 months."
-                );
+                        "Cheque date is older than 3 months.");
             }
-
 
             if (!accountPassed) {
 
                 appendFailureSeparator(
-                        failure
-                );
+                        failure);
 
                 failure.append(
-                        "Account status is not ACTIVE."
-                );
+                        "Account status is not ACTIVE.");
             }
 
+            if (!duplicatePassed) {
+
+                appendFailureSeparator(
+                        failure);
+
+                failure.append(
+                        "Duplicate cheque detected in system.");
+            }
 
             showCbsFailure(
-                    failure.toString()
-            );
+                    failure.toString());
         }
-
 
         System.out.println(
                 "CBS FINAL RESULT = "
-                        + allPassed
-        );
+                        + allPassed);
 
         System.out.println(
-                "===================================="
-        );
+                "====================================");
     }
-
 
     // =========================================================
     // CBS RESULT UI
@@ -1859,29 +1623,23 @@ public class BatchDetailsController
             return;
         }
 
-
         if (passed) {
 
             resultLabel.setValue(
-                    "Passed"
-            );
+                    "Passed");
 
             resultLabel.setSclass(
-                    "cbs-check-value"
-            );
+                    "cbs-check-value");
 
         } else {
 
             resultLabel.setValue(
-                    "Failed"
-            );
+                    "Failed");
 
             resultLabel.setSclass(
-                    "cbs-fail-value"
-            );
+                    "cbs-fail-value");
         }
     }
-
 
     // =========================================================
     // CBS PASSED
@@ -1892,49 +1650,39 @@ public class BatchDetailsController
         if (cbsTitle != null) {
 
             cbsTitle.setValue(
-                    "CBS Validation: PASSED"
-            );
+                    "CBS Validation: PASSED");
 
             cbsTitle.setSclass(
-                    "cbs-title"
-            );
+                    "cbs-title");
         }
-
 
         if (cbsActionStatus != null) {
 
-            cbsActionStatus.setValue(
-                    "✓ All core banking checks passed"
-            );
+            cbsActionStatus.setValue("");
 
-            cbsActionStatus.setSclass(
-                    "green-status"
-            );
+            cbsActionStatus.setVisible(false);
         }
-
 
         if (cbsFailure != null) {
 
             cbsFailure.setVisible(false);
         }
 
-
         if (leftCbsStatus != null) {
 
             leftCbsStatus.setValue(
-                    "● CBS: PASSED"
-            );
+                    "● CBS: PASSED");
 
             leftCbsStatus.setSclass(
-                    "cbs-pass-badge"
-            );
+                    "cbs-pass-badge");
         }
 
         if (acceptButton != null) {
             acceptButton.setDisabled(false);
+            acceptButton.setSclass(
+                    "decision-button accept-button");
         }
     }
-
 
     // =========================================================
     // CBS FAILED
@@ -1946,59 +1694,47 @@ public class BatchDetailsController
         if (cbsTitle != null) {
 
             cbsTitle.setValue(
-                    "CBS Validation: FAILED"
-            );
+                    "CBS Validation: FAILED");
 
             cbsTitle.setSclass(
-                    "cbs-title"
-            );
+                    "cbs-title cbs-title-failed");
         }
-
 
         if (cbsActionStatus != null) {
 
-            cbsActionStatus.setValue(
-                    "✗ CBS validation failed"
-            );
+            cbsActionStatus.setValue("");
 
-            cbsActionStatus.setSclass(
-                    "red-status"
-            );
+            cbsActionStatus.setVisible(false);
         }
-
 
         if (cbsFailure != null) {
 
             cbsFailure.setVisible(true);
         }
 
-
         if (cbsFailureText != null) {
 
             cbsFailureText.setValue(
-                    message
-            );
+                    message);
         }
-
 
         if (leftCbsStatus != null) {
 
             leftCbsStatus.setValue(
-                    "● CBS: FAILED"
-            );
+                    "● CBS: FAILED");
 
             leftCbsStatus.setSclass(
-                    "cbs-fail-badge"
-            );
+                    "cbs-fail-badge");
         }
 
         cbsPassed = false;
 
         if (acceptButton != null) {
             acceptButton.setDisabled(true);
+            acceptButton.setSclass(
+                    "decision-button accept-button accept-button-dull");
         }
     }
-
 
     // =========================================================
     // RESET DATA ENTRY UI
@@ -2013,14 +1749,11 @@ public class BatchDetailsController
         if (accountStatus != null) {
 
             accountStatus.setValue(
-                    "Unchanged"
-            );
+                    "Unchanged");
 
             accountStatus.setSclass(
-                    "unchanged-status"
-            );
+                    "unchanged-status");
         }
-
 
         if (accountCorrection != null) {
 
@@ -2028,31 +1761,26 @@ public class BatchDetailsController
                     .setVisible(false);
         }
 
-
         if (accountUnchanged != null) {
 
             accountUnchanged
                     .setVisible(true);
         }
 
-
         if (accountNumber != null) {
 
             accountNumber.setValue("");
         }
-
 
         if (oldAccountNumber != null) {
 
             oldAccountNumber.setValue("");
         }
 
-
         if (correctedAccountNumber != null) {
 
             correctedAccountNumber.setValue("");
         }
-
 
         // -----------------------------------------------------
         // AMOUNT
@@ -2061,14 +1789,11 @@ public class BatchDetailsController
         if (amountStatus != null) {
 
             amountStatus.setValue(
-                    "Unchanged"
-            );
+                    "Unchanged");
 
             amountStatus.setSclass(
-                    "unchanged-status"
-            );
+                    "unchanged-status");
         }
-
 
         if (amountCorrection != null) {
 
@@ -2076,31 +1801,26 @@ public class BatchDetailsController
                     .setVisible(false);
         }
 
-
         if (amountUnchanged != null) {
 
             amountUnchanged
                     .setVisible(true);
         }
 
-
         if (amount != null) {
 
             amount.setValue("");
         }
-
 
         if (oldAmount != null) {
 
             oldAmount.setValue("");
         }
 
-
         if (correctedAmount != null) {
 
             correctedAmount.setValue("");
         }
-
 
         // -----------------------------------------------------
         // DATE
@@ -2109,14 +1829,11 @@ public class BatchDetailsController
         if (dateStatus != null) {
 
             dateStatus.setValue(
-                    "Unchanged"
-            );
+                    "Unchanged");
 
             dateStatus.setSclass(
-                    "unchanged-status"
-            );
+                    "unchanged-status");
         }
-
 
         if (dateCorrection != null) {
 
@@ -2124,80 +1841,74 @@ public class BatchDetailsController
                     .setVisible(false);
         }
 
-
         if (dateUnchanged != null) {
 
             dateUnchanged
                     .setVisible(true);
         }
 
-
         if (chequeDate != null) {
 
             chequeDate.setValue("");
         }
-
 
         if (oldChequeDate != null) {
 
             oldChequeDate.setValue("");
         }
 
-
         if (correctedChequeDate != null) {
 
             correctedChequeDate.setValue("");
         }
 
-
         // -----------------------------------------------------
-        // PAYEE
+        // CHEQUE NUMBER
         // -----------------------------------------------------
 
-        if (payeeStatus != null) {
+        if (chequeNoStatus != null) {
 
-            payeeStatus.setValue(
-                    "Unchanged"
-            );
+            chequeNoStatus.setValue(
+                    "Unchanged");
 
-            payeeStatus.setSclass(
-                    "unchanged-status"
-            );
+            chequeNoStatus.setSclass(
+                    "unchanged-status");
         }
 
+        if (chequeNoCorrection != null) {
 
-        if (payeeCorrection != null) {
-
-            payeeCorrection
+            chequeNoCorrection
                     .setVisible(false);
         }
 
+        if (chequeNoUnchanged != null) {
 
-        if (payeeUnchanged != null) {
-
-            payeeUnchanged
+            chequeNoUnchanged
                     .setVisible(true);
         }
 
+        if (chequeNumberVal != null) {
 
-        if (payeeName != null) {
-
-            payeeName.setValue("");
+            chequeNumberVal.setValue("");
         }
 
+        if (oldChequeNumber != null) {
 
-        if (oldPayeeName != null) {
-
-            oldPayeeName.setValue("");
+            oldChequeNumber.setValue("");
         }
 
+        if (correctedChequeNumber != null) {
 
-        if (correctedPayeeName != null) {
+            correctedChequeNumber.setValue("");
+        }
 
-            correctedPayeeName.setValue("");
+        if (dataEntrySummary != null) {
+
+            dataEntrySummary.setValue("• No Corrections");
+
+            dataEntrySummary.setSclass("unchanged-status");
         }
     }
-
 
     // =========================================================
     // CHEQUE NAVIGATION
@@ -2301,18 +2012,16 @@ public class BatchDetailsController
             return;
         }
 
-        String remarks =
-                rejectRemark == null
-                        ? null
-                        : rejectRemark.getValue();
+        String remarks = rejectRemark == null
+                ? null
+                : rejectRemark.getValue();
 
         System.out.println(
                 "REJECT REASON CODES = " + selectedCodes
         );
 
         System.out.println(
-                "REJECT REMARKS = " + remarks
-        );
+                "REJECT REMARKS = " + remarks);
 
         saveDecision(
                 "REJECT",
@@ -2320,8 +2029,7 @@ public class BatchDetailsController
                 null,
                 "Rejected",
                 remarks,
-                rejectWindow
-        );
+                rejectWindow);
     }
 
     // =========================================================
@@ -2389,18 +2097,16 @@ public class BatchDetailsController
             return;
         }
 
-        String remarks =
-                returnRemark == null
-                        ? null
-                        : returnRemark.getValue();
+        String remarks = returnRemark == null
+                ? null
+                : returnRemark.getValue();
 
         System.out.println(
                 "RETURN REASON CODES = " + selectedCodes
         );
 
         System.out.println(
-                "RETURN REMARKS = " + remarks
-        );
+                "RETURN REMARKS = " + remarks);
 
         saveDecision(
                 "RETURN_TO_MAKER",
@@ -2408,8 +2114,7 @@ public class BatchDetailsController
                 selectedCodes,
                 "Returned",
                 remarks,
-                returnWindow
-        );
+                returnWindow);
     }
 
     // =========================================================
@@ -2494,6 +2199,7 @@ public class BatchDetailsController
             loadCurrentCheque();
         } else {
             updateChequeNavigation();
+            updateBatchHeaderCounts();
             Messagebox.show(
                     "Decision saved for the last cheque. Do you want to complete batch verification now?",
                     "Batch Verification",
@@ -2508,7 +2214,7 @@ public class BatchDetailsController
     }
 
     // =========================================================
-    // CHEQUE IMAGE LOADING
+    // CHEQUE IMAGE LOADING & TRANSFORMS (Image 2)
     // =========================================================
 
     private void loadChequeImages(String chequeNumber) {
@@ -2517,8 +2223,7 @@ public class BatchDetailsController
         currentBackImagePath = null;
 
         try {
-            ChequeImage image =
-                    chequeImageDao.findByChequeNumber(chequeNumber);
+            ChequeImage image = chequeImageDao.findByChequeNumber(chequeNumber);
             if (image != null) {
                 currentFrontImagePath = image.getFrontPath();
                 currentBackImagePath = image.getBackPath();
@@ -2527,10 +2232,19 @@ public class BatchDetailsController
             e.printStackTrace();
         }
 
+        showingFront = true;
+        currentScale = 1.0;
+        currentRotation = 0;
+
+        if (toggleImageButton != null) {
+            toggleImageButton.setLabel("View Back");
+        }
+
         // Default to front image
         showFrontImage();
+        applyImageStyle();
 
-        // Reset button styles
+        // Reset legacy button styles if present
         if (btnFront != null) {
             btnFront.setSclass("image-button image-button-active");
         }
@@ -2541,13 +2255,17 @@ public class BatchDetailsController
 
     private void showFrontImage() {
 
-        if (chequeImage == null) return;
+        if (chequeImage == null)
+            return;
 
         if (btnFront != null) {
             btnFront.setSclass("image-button image-button-active");
         }
         if (btnBack != null) {
             btnBack.setSclass("image-button");
+        }
+        if (toggleImageButton != null) {
+            toggleImageButton.setLabel("View Back");
         }
 
         boolean imageLoaded = false;
@@ -2568,33 +2286,33 @@ public class BatchDetailsController
 
         if (imageLoaded) {
             chequeImage.setVisible(true);
-            if (chequeImageContainer != null) {
-                chequeImageContainer.setVisible(true);
-            }
             if (chequePreview != null) {
                 chequePreview.setVisible(false);
             }
         } else {
             chequeImage.setContent((org.zkoss.image.AImage) null);
             chequeImage.setVisible(false);
-            if (chequeImageContainer != null) {
-                chequeImageContainer.setVisible(false);
-            }
             if (chequePreview != null) {
                 chequePreview.setVisible(true);
             }
         }
+
+        applyImageStyle();
     }
 
     private void showBackImage() {
 
-        if (chequeImage == null) return;
+        if (chequeImage == null)
+            return;
 
         if (btnFront != null) {
             btnFront.setSclass("image-button");
         }
         if (btnBack != null) {
             btnBack.setSclass("image-button image-button-active");
+        }
+        if (toggleImageButton != null) {
+            toggleImageButton.setLabel("View Front");
         }
 
         boolean imageLoaded = false;
@@ -2615,21 +2333,74 @@ public class BatchDetailsController
 
         if (imageLoaded) {
             chequeImage.setVisible(true);
-            if (chequeImageContainer != null) {
-                chequeImageContainer.setVisible(true);
-            }
             if (chequePreview != null) {
                 chequePreview.setVisible(false);
             }
         } else {
             chequeImage.setContent((org.zkoss.image.AImage) null);
             chequeImage.setVisible(false);
-            if (chequeImageContainer != null) {
-                chequeImageContainer.setVisible(false);
-            }
             if (chequePreview != null) {
                 chequePreview.setVisible(true);
             }
+        }
+
+        applyImageStyle();
+    }
+
+    private void applyImageStyle() {
+        if (chequeImage != null) {
+            chequeImage.setStyle(String.format(
+                    java.util.Locale.US,
+                    "object-fit:contain; width:100%%; height:100%%; max-width:100%%; max-height:100%%; display:block; margin:auto; transform: scale(%.2f) rotate(%ddeg); transform-origin: center; transition: transform 0.2s;",
+                    currentScale,
+                    currentRotation));
+        }
+    }
+
+    // =========================================================
+    // BATCH HEADER METRICS (Image 4)
+    // =========================================================
+
+    private void updateBatchHeaderCounts() {
+        if (batchLabel != null) {
+            batchLabel.setValue("Batch No : " + (batchId != null ? batchId : "—"));
+        }
+
+        int total = (cheques != null) ? cheques.size() : 0;
+        int completed = 0;
+
+        if (batchId != null) {
+            try (Connection conn = ConnectionPool.getDataSource().getConnection();
+                    PreparedStatement ps = conn.prepareStatement(
+                            "SELECT COUNT(DISTINCT c.cheque_number) " +
+                                    "FROM inward_cheque c " +
+                                    "JOIN inward_cheque_status_history sh ON c.cheque_number = sh.cheque_number " +
+                                    "WHERE c.batch_id = ? AND sh.checker_action IS NOT NULL")) {
+                ps.setLong(1, batchId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        completed = rs.getInt(1);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        int pending = Math.max(0, total - completed);
+
+        if (totalCountLabel != null) {
+            totalCountLabel.setValue("Total: " + total);
+        }
+        if (completedCountLabel != null) {
+            completedCountLabel.setValue("Completed: " + completed);
+        }
+        if (pendingCountLabel != null) {
+            pendingCountLabel.setValue("Pending: " + pending);
+        }
+        if (chequeCounter != null) {
+            int current = (cheques != null && !cheques.isEmpty()) ? (currentChequeIndex + 1) : 0;
+            chequeCounter.setValue("Cheque " + current + " of " + total);
         }
     }
 
@@ -2654,7 +2425,6 @@ public class BatchDetailsController
                 cheque15
         };
 
-
         // -----------------------------------------------------
         // Hide all buttons
         // -----------------------------------------------------
@@ -2666,37 +2436,28 @@ public class BatchDetailsController
                 button.setVisible(false);
 
                 button.setSclass(
-                        "cheque-button"
-                );
+                        "cheque-button");
             }
         }
-
 
         // -----------------------------------------------------
         // Show required buttons
         // -----------------------------------------------------
 
-        int visibleCount =
-                Math.min(
-                        cheques.size(),
-                        chequeButtons.length
-                );
+        int visibleCount = Math.min(
+                cheques.size(),
+                chequeButtons.length);
 
-
-        for (int i = 0;
-                i < visibleCount;
-                i++) {
+        for (int i = 0; i < visibleCount; i++) {
 
             if (chequeButtons[i] != null) {
 
                 chequeButtons[i].setVisible(true);
 
                 chequeButtons[i].setLabel(
-                        String.valueOf(i + 1)
-                );
+                        String.valueOf(i + 1));
             }
         }
-
 
         // -----------------------------------------------------
         // Highlight current cheque
@@ -2704,16 +2465,13 @@ public class BatchDetailsController
 
         if (currentChequeIndex >= 0
                 && currentChequeIndex < visibleCount
-                && chequeButtons[currentChequeIndex]
-                        != null) {
+                && chequeButtons[currentChequeIndex] != null) {
 
             chequeButtons[currentChequeIndex]
                     .setSclass(
                             "cheque-button "
-                            + "cheque-button-selected"
-                    );
+                                    + "cheque-button-selected");
         }
-
 
         // -----------------------------------------------------
         // Previous
@@ -2722,10 +2480,8 @@ public class BatchDetailsController
         if (previousCheque != null) {
 
             previousCheque.setDisabled(
-                    currentChequeIndex <= 0
-            );
+                    currentChequeIndex <= 0);
         }
-
 
         // -----------------------------------------------------
         // Next
@@ -2734,11 +2490,8 @@ public class BatchDetailsController
         if (nextCheque != null) {
 
             nextCheque.setDisabled(
-                    currentChequeIndex
-                            >= cheques.size() - 1
-            );
+                    currentChequeIndex >= cheques.size() - 1);
         }
-
 
         // -----------------------------------------------------
         // Next arrow
@@ -2747,14 +2500,11 @@ public class BatchDetailsController
         if (nextChequeArrow != null) {
 
             nextChequeArrow.setDisabled(
-                    currentChequeIndex
-                            >= cheques.size() - 1
-            );
+                    currentChequeIndex >= cheques.size() - 1);
         }
 
         updateCompleteVerificationButtonState();
     }
-
 
     // =========================================================
     // NEXT CHEQUE
@@ -2762,15 +2512,13 @@ public class BatchDetailsController
 
     public void onClick$nextCheque() {
 
-        if (currentChequeIndex
-                < cheques.size() - 1) {
+        if (currentChequeIndex < cheques.size() - 1) {
 
             currentChequeIndex++;
 
             loadCurrentCheque();
         }
     }
-
 
     // =========================================================
     // PREVIOUS CHEQUE
@@ -2786,22 +2534,19 @@ public class BatchDetailsController
         }
     }
 
-
     // =========================================================
     // NEXT ARROW
     // =========================================================
 
     public void onClick$nextChequeArrow() {
 
-        if (currentChequeIndex
-                < cheques.size() - 1) {
+        if (currentChequeIndex < cheques.size() - 1) {
 
             currentChequeIndex++;
 
             loadCurrentCheque();
         }
     }
-
 
     // =========================================================
     // CHEQUE 1
@@ -2811,7 +2556,6 @@ public class BatchDetailsController
         selectCheque(0);
     }
 
-
     // =========================================================
     // CHEQUE 2
     // =========================================================
@@ -2819,7 +2563,6 @@ public class BatchDetailsController
     public void onClick$cheque2() {
         selectCheque(1);
     }
-
 
     // =========================================================
     // CHEQUE 3
@@ -2829,7 +2572,6 @@ public class BatchDetailsController
         selectCheque(2);
     }
 
-
     // =========================================================
     // CHEQUE 4
     // =========================================================
@@ -2837,7 +2579,6 @@ public class BatchDetailsController
     public void onClick$cheque4() {
         selectCheque(3);
     }
-
 
     // =========================================================
     // CHEQUE 5
@@ -2847,7 +2588,6 @@ public class BatchDetailsController
         selectCheque(4);
     }
 
-
     // =========================================================
     // CHEQUE 6
     // =========================================================
@@ -2855,7 +2595,6 @@ public class BatchDetailsController
     public void onClick$cheque6() {
         selectCheque(5);
     }
-
 
     // =========================================================
     // CHEQUE 7
@@ -2865,7 +2604,6 @@ public class BatchDetailsController
         selectCheque(6);
     }
 
-
     // =========================================================
     // CHEQUE 8
     // =========================================================
@@ -2873,7 +2611,6 @@ public class BatchDetailsController
     public void onClick$cheque8() {
         selectCheque(7);
     }
-
 
     // =========================================================
     // CHEQUE 9
@@ -2883,7 +2620,6 @@ public class BatchDetailsController
         selectCheque(8);
     }
 
-
     // =========================================================
     // CHEQUE 10
     // =========================================================
@@ -2891,7 +2627,6 @@ public class BatchDetailsController
     public void onClick$cheque10() {
         selectCheque(9);
     }
-
 
     // =========================================================
     // CHEQUE 11
@@ -2901,7 +2636,6 @@ public class BatchDetailsController
         selectCheque(10);
     }
 
-
     // =========================================================
     // CHEQUE 12
     // =========================================================
@@ -2909,7 +2643,6 @@ public class BatchDetailsController
     public void onClick$cheque12() {
         selectCheque(11);
     }
-
 
     // =========================================================
     // CHEQUE 13
@@ -2919,7 +2652,6 @@ public class BatchDetailsController
         selectCheque(12);
     }
 
-
     // =========================================================
     // CHEQUE 14
     // =========================================================
@@ -2928,7 +2660,6 @@ public class BatchDetailsController
         selectCheque(13);
     }
 
-
     // =========================================================
     // CHEQUE 15
     // =========================================================
@@ -2936,7 +2667,6 @@ public class BatchDetailsController
     public void onClick$cheque15() {
         selectCheque(14);
     }
-
 
     // =========================================================
     // SELECT CHEQUE
@@ -2950,12 +2680,10 @@ public class BatchDetailsController
             return;
         }
 
-
         currentChequeIndex = index;
 
         loadCurrentCheque();
     }
-
 
     // =========================================================
     // BACK TO LIST
@@ -2964,10 +2692,8 @@ public class BatchDetailsController
     public void onClick$backToList() {
 
         Executions.sendRedirect(
-                "/zul/inward-checker/verification.zul"
-        );
+                "/zul/inward-checker/verification.zul");
     }
-
 
     // =========================================================
     // COMPLETE VERIFICATION - BUTTON STATE & CLICK
@@ -3015,8 +2741,7 @@ public class BatchDetailsController
         }
 
         try {
-            boolean returnedToMaker =
-                    batchDetailsService.completeVerification(batchId, userId);
+            boolean returnedToMaker = batchDetailsService.completeVerification(batchId, userId);
 
             if (returnedToMaker) {
                 Messagebox.show(
@@ -3044,7 +2769,6 @@ public class BatchDetailsController
         }
     }
 
-
     // =========================================================
     // GET STRING
     // =========================================================
@@ -3057,19 +2781,14 @@ public class BatchDetailsController
             return null;
         }
 
-
-        Object value =
-                map.get(key);
-
+        Object value = map.get(key);
 
         if (value == null) {
             return null;
         }
 
-
         return String.valueOf(value);
     }
-
 
     // =========================================================
     // GET BIG DECIMAL
@@ -3083,34 +2802,27 @@ public class BatchDetailsController
             return null;
         }
 
-
-        Object value =
-                map.get(key);
-
+        Object value = map.get(key);
 
         if (value == null) {
             return null;
         }
-
 
         if (value instanceof BigDecimal) {
 
             return (BigDecimal) value;
         }
 
-
         try {
 
             return new BigDecimal(
-                    String.valueOf(value)
-            );
+                    String.valueOf(value));
 
         } catch (NumberFormatException e) {
 
             return null;
         }
     }
-
 
     // =========================================================
     // GET SQL DATE
@@ -3124,43 +2836,34 @@ public class BatchDetailsController
             return null;
         }
 
-
-        Object value =
-                map.get(key);
-
+        Object value = map.get(key);
 
         if (value == null) {
             return null;
         }
-
 
         if (value instanceof Date) {
 
             return (Date) value;
         }
 
-
         if (value instanceof java.util.Date) {
 
             return new Date(
                     ((java.util.Date) value)
-                            .getTime()
-            );
+                            .getTime());
         }
-
 
         try {
 
             return Date.valueOf(
-                    String.valueOf(value)
-            );
+                    String.valueOf(value));
 
         } catch (IllegalArgumentException e) {
 
             return null;
         }
     }
-
 
     // =========================================================
     // APPEND FAILURE SEPARATOR
@@ -3175,7 +2878,6 @@ public class BatchDetailsController
         }
     }
 
-
     // =========================================================
     // NULL TO EMPTY
     // =========================================================
@@ -3187,7 +2889,6 @@ public class BatchDetailsController
                 ? ""
                 : value;
     }
-
 
     // =========================================================
     // FORMAT AMOUNT

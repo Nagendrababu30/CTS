@@ -2,8 +2,6 @@
 
 <?page title="Checker Reports" contentType="text/html;charset=UTF-8"?>
 
-<?style src="/css/checker.css"?>
-
 <?init class="com.cts.admin.controller.LayoutInit"
         pageTitle="Checker Reports"
         active="reports"?>
@@ -13,95 +11,123 @@
 
 <zk>
 
+    <!-- =========================================================
+         CHECKER REPORTS CSS
+         ========================================================= -->
+
+    <style src="/zul/outward/outward-checker-CSS/checker_reports.css"/>
+
+
+    <!-- =========================================================
+         PAGE CONTENT
+         ========================================================= -->
+
     <div self="@define(content)"
          width="100%"
          height="100%"
-         style="
-             width:100%;
-             height:100%;
-             background:#F4F7FB;
-         ">
+         sclass="checker-reports-content">
 
-        <vlayout
-            apply="com.iispl.cts.controller.outward.checker.CheckerReportsController"
-            width="100%"
-            height="100%"
-            spacing="20px"
-            style="
-                padding:35px 55px;
-                box-sizing:border-box;
-                overflow:auto;
-            ">
+
+        <!-- =====================================================
+             MAIN LAYOUT
+             ===================================================== -->
+
+        <vlayout id="checkerReportsLayout"
+                 width="100%"
+                 height="100%"
+                 spacing="20px"
+                 sclass="checker-reports-layout"
+                 apply="com.iispl.cts.controller.outward.checker.CheckerReportsController">
+
+
+            <!-- =================================================
+                 PAGE HEADER
+                 ================================================= -->
 
             <hlayout width="100%"
-                     valign="center"
-                     style="justify-content:space-between;">
+                     valign="middle"
+                     sclass="reports-header-row">
 
-                <vlayout spacing="5px">
+                <vlayout spacing="5px"
+                         sclass="reports-header">
 
-                    <label
-                        value="Checker Reports"
-                        style="
-                            font-size:32px;
-                            font-weight:bold;
-                            color:#172B4D;
-                        "/>
+                    <label value="Checker Reports"
+                           sclass="reports-title"/>
 
-                    <label
-                        value="Download Valid and Rejected Cheque XML Reports"
-                        style="
-                            font-size:14px;
-                            color:#6B778C;
-                        "/>
+                    <label value="Download Valid and Rejected Cheque XML Reports"
+                           sclass="reports-subtitle"/>
 
                 </vlayout>
 
-                <button
-                    id="refreshReportBtn"
-                    label="Refresh"
-                    sclass="secondary-button"/>
+
+                <!-- =================================================
+                     REFRESH BUTTON
+                     ================================================= -->
+
+                <space hflex="1"/>
+
 
             </hlayout>
 
 
-            <div
-                sclass="section-card"
-                width="100%"
-                style="
-                    padding:0;
-                    overflow:hidden;
-                ">
+            <!-- =================================================
+                 REPORT SECTION
+                 ================================================= -->
 
-                <listbox
-                    id="reportList"
-                    width="100%"
-                    emptyMessage="No completed batches available for reports."
-                    mold="paging"
-                    pageSize="10">
+            <vlayout width="100%"
+                     spacing="0"
+                     sclass="reports-section">
+
+
+                <!-- =================================================
+                     SECTION HEADER
+                     ================================================= -->
+
+                <hlayout width="100%"
+                         valign="middle"
+                         sclass="reports-section-header">
+
+                    <label value="Reports"
+                           sclass="reports-section-title"/>
+
+                </hlayout>
+
+
+                <!-- =================================================
+                     REPORT TABLE
+                     ================================================= -->
+
+                <listbox id="reportList"
+                         width="100%"
+                         emptyMessage="No completed batches available for reports."
+                         sclass="checker-reports-table"
+                         mold="paging"
+                         pageSize="10">
 
                     <listhead>
 
-                        <listheader
-                            label="Batch Number"
-                            width="35%"/>
+                        <listheader label="Batch Number"
+                                    width="35%"/>
 
-                        <listheader
-                            label="Total Cheques"
-                            width="20%"/>
+                        <listheader label="Total Cheques"
+                                    width="20%"
+                                    align="center"/>
 
-                        <listheader
-                            label="Valid XML"
-                            width="22.5%"/>
+                        <listheader label="Valid XML"
+                                    width="22.5%"
+                                    align="center"/>
 
-                        <listheader
-                            label="Rejected XML"
-                            width="22.5%"/>
+                        <listheader label="Rejected XML"
+                                    width="22.5%"
+                                    align="center"/>
 
                     </listhead>
 
                 </listbox>
 
-            </div>
+
+            </vlayout>
+
 
         </vlayout>
 

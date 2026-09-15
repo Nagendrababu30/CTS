@@ -199,8 +199,19 @@ public class ChequeDaoImpl implements ChequeDao {
     @Override
     public void saveDataEntryCorrections(String chequeNumber, long batchId,
             String accountNumber, BigDecimal amount, LocalDate chequeDate, long userId) {
+        saveDataEntryCorrections(chequeNumber, batchId, null, accountNumber, amount, chequeDate, userId);
+    }
+
+    @Override
+    public void saveDataEntryCorrections(String chequeNumber, long batchId,
+            String correctedChequeNumber, String accountNumber, BigDecimal amount, LocalDate chequeDate, long userId) {
 
         try (Connection connection = dataSource.getConnection()) {
+
+            if (correctedChequeNumber != null && !correctedChequeNumber.trim().isEmpty()
+                    && !correctedChequeNumber.trim().equalsIgnoreCase(chequeNumber != null ? chequeNumber.trim() : "")) {
+                upsertDataEntryHistory(connection, chequeNumber, "CHEQUE_NUMBER", correctedChequeNumber.trim(), userId);
+            }
 
             if (accountNumber != null && !accountNumber.trim().isEmpty()) {
                 upsertDataEntryHistory(connection, chequeNumber, "ACCOUNT_NUMBER", accountNumber.trim(), userId);

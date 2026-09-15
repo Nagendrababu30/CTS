@@ -2,7 +2,6 @@ package com.iispl.cts.service.outward.checker;
 
 import java.time.LocalDate;
 import java.util.Collections;
-
 import java.util.List;
 import java.util.Map;
 
@@ -55,6 +54,53 @@ public class CheckerProcessingService {
         return chequeDao.getChequeProcessing(
                 batchNumber,
                 chequeNumber);
+    }
+
+
+    // ============================================================
+    // GET RE-VERIFIED CHEQUES
+    // ============================================================
+    /*
+     * Returns only the cheques which are eligible for
+     * Checker Re-Verify.
+     *
+     * Conditions:
+     *
+     * 1. Same batch number
+     *
+     * 2. cheque_processing.checker_id must belong to
+     *    the original Checker
+     *
+     * 3. cheque_processing.checker_action must be SEND_BACK
+     *
+     * 4. outward_cheque.cheque_status must be RE_VERIFIED
+     *
+     * IMPORTANT:
+     *
+     * outward_batch.batch_status is NOT checked here.
+     *
+     * Re-Verify is based only on the individual cheque
+     * processing/status information.
+     */
+
+    public List<OutwardCheque> getReVerifiedCheques(
+            String batchNumber,
+            long checkerUserId) {
+
+        if (batchNumber == null
+                || batchNumber.trim().isEmpty()) {
+
+            return Collections.emptyList();
+        }
+
+        if (checkerUserId <= 0) {
+
+            return Collections.emptyList();
+        }
+
+        return chequeDao.getReVerifiedCheques(
+                batchNumber.trim(),
+                checkerUserId);
     }
 
 
@@ -195,7 +241,7 @@ public class CheckerProcessingService {
 
         return "PASS";
     }
-    
+
 
     // ============================================================
     // CBS UI MESSAGE

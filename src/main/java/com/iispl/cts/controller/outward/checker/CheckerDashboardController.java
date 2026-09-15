@@ -55,6 +55,9 @@ public class CheckerDashboardController
     @Wire
     private Button myBatchesBtn;
 
+    @Wire
+    private Button reVerifyBatchesBtn;
+
     // ============================================================
     // PAGINATION COMPONENTS
     // ============================================================
@@ -166,8 +169,7 @@ public class CheckerDashboardController
         if (sessionUserId instanceof Number) {
 
             currentCheckerUser =
-                    ((Number) sessionUserId)
-                            .longValue();
+                    ((Number) sessionUserId).longValue();
 
         } else {
 
@@ -279,7 +281,6 @@ public class CheckerDashboardController
                         );
 
                         currentFilter = "ALL";
-
                         currentPage = 1;
 
                         updateFilterButtonStyles();
@@ -304,7 +305,6 @@ public class CheckerDashboardController
                         );
 
                         currentFilter = "AVAILABLE";
-
                         currentPage = 1;
 
                         updateFilterButtonStyles();
@@ -329,6 +329,31 @@ public class CheckerDashboardController
                         );
 
                         currentFilter = "MY_BATCHES";
+                        currentPage = 1;
+
+                        updateFilterButtonStyles();
+
+                        loadDashboard();
+                    }
+            );
+        }
+
+        // ========================================================
+        // RE-VERIFY BATCHES
+        // ========================================================
+
+        if (reVerifyBatchesBtn != null) {
+
+            reVerifyBatchesBtn.addEventListener(
+                    Events.ON_CLICK,
+                    event -> {
+
+                        System.out.println(
+                                "CHECKER RE-VERIFY BATCHES BUTTON CLICKED"
+                        );
+
+                        currentFilter =
+                                "RE_VERIFY_BATCHES";
 
                         currentPage = 1;
 
@@ -428,6 +453,7 @@ public class CheckerDashboardController
             int pageNumber) {
 
         if (button == null) {
+
             return;
         }
 
@@ -499,6 +525,21 @@ public class CheckerDashboardController
                             )
             );
         }
+
+        if (reVerifyBatchesBtn != null) {
+
+            reVerifyBatchesBtn.setSclass(
+                    "filter-btn"
+                            +
+                            (
+                                    "RE_VERIFY_BATCHES".equals(
+                                            currentFilter
+                                    )
+                                            ? " active-filter"
+                                            : ""
+                            )
+            );
+        }
     }
 
     // ============================================================
@@ -510,17 +551,9 @@ public class CheckerDashboardController
         try {
 
             List<OutwardBatch> batches =
-                    service.getBatches();
-
-            // ----------------------------------------------------
-            // KPI COUNTS
-            // ----------------------------------------------------
+                    getDashboardBatches();
 
             loadCounts(batches);
-
-            // ----------------------------------------------------
-            // BATCH TABLE
-            // ----------------------------------------------------
 
             loadBatchList(batches);
 
@@ -539,6 +572,71 @@ public class CheckerDashboardController
     }
 
     // ============================================================
+    // GET DASHBOARD BATCHES
+    // ============================================================
+
+    private List<OutwardBatch> getDashboardBatches() {
+
+        List<OutwardBatch> batches =
+                service.getBatches(
+                        String.valueOf(
+                                currentCheckerUser
+                        )
+                );
+
+        if (batches == null) {
+
+            batches =
+                    new ArrayList<>();
+        }
+
+        /*
+         * Re-Verify eligibility is based ONLY on:
+         *
+         * 1. cheque_processing.checker_id
+         * 2. cheque_processing.checker_action = SEND_BACK
+         * 3. outward_cheque.cheque_status = RE_VERIFIED
+         *
+         * outward_batch.batch_status is NOT used.
+         *
+         * RE_VERIFY is only an in-memory UI marker.
+         */
+
+        for (OutwardBatch batch : batches) {
+
+            if (batch == null ||
+                    batch.getBatchNumber() == null) {
+
+                continue;
+            }
+
+            boolean reVerified =
+                    service.hasReVerifiedCheques(
+                            batch.getBatchNumber(),
+                            String.valueOf(
+                                    currentCheckerUser
+                            )
+                    );
+
+            if (reVerified) {
+
+                /*
+                 * UI-only marker.
+                 *
+                 * This does NOT update
+                 * outward_batch.batch_status.
+                 */
+
+                batch.setLockStatus(
+                        "RE_VERIFY"
+                );
+            }
+        }
+
+        return batches;
+    }
+
+    // ============================================================
     // SUMMARY COUNTS
     // ============================================================
 
@@ -546,9 +644,7 @@ public class CheckerDashboardController
             List<OutwardBatch> batches) {
 
         int pending = 0;
-
         int cbsValidation = 0;
-
         int readyToSend = 0;
 
         if (batches != null) {
@@ -556,6 +652,7 @@ public class CheckerDashboardController
             for (OutwardBatch batch : batches) {
 
                 if (batch == null) {
+
                     continue;
                 }
 
@@ -563,6 +660,7 @@ public class CheckerDashboardController
                         batch.getBatchStatus();
 
                 if (status == null) {
+
                     continue;
                 }
 
@@ -607,17 +705,26 @@ public class CheckerDashboardController
         // DISPLAY COUNTS
         // ========================================================
 
-        pendingVerificationCount.setValue(
-                String.valueOf(pending)
-        );
+        if (pendingVerificationCount != null) {
 
-        cbsValidationCount.setValue(
-                String.valueOf(cbsValidation)
-        );
+            pendingVerificationCount.setValue(
+                    String.valueOf(pending)
+            );
+        }
 
-        readyToSendCount.setValue(
-                String.valueOf(readyToSend)
-        );
+        if (cbsValidationCount != null) {
+
+            cbsValidationCount.setValue(
+                    String.valueOf(cbsValidation)
+            );
+        }
+
+        if (readyToSendCount != null) {
+
+            readyToSendCount.setValue(
+                    String.valueOf(readyToSend)
+            );
+        }
     }
 
     // ============================================================
@@ -639,6 +746,7 @@ public class CheckerDashboardController
             for (OutwardBatch batch : batches) {
 
                 if (batch == null) {
+
                     continue;
                 }
 
@@ -664,9 +772,11 @@ public class CheckerDashboardController
 
         System.out.println(
                 "Total Batches : "
-                        + (batches == null
-                                ? 0
-                                : batches.size())
+                        + (
+                                batches == null
+                                        ? 0
+                                        : batches.size()
+                        )
         );
 
         System.out.println(
@@ -761,6 +871,7 @@ public class CheckerDashboardController
             OutwardBatch batch) {
 
         if (batch == null) {
+
             return false;
         }
 
@@ -775,8 +886,6 @@ public class CheckerDashboardController
 
         // ========================================================
         // AVAILABLE
-        //
-        // Checker available logic is based on lock status.
         // ========================================================
 
         if ("AVAILABLE".equals(currentFilter)) {
@@ -793,6 +902,15 @@ public class CheckerDashboardController
             return isMyBatch(batch);
         }
 
+        // ========================================================
+        // RE-VERIFY BATCHES
+        // ========================================================
+
+        if ("RE_VERIFY_BATCHES".equals(currentFilter)) {
+
+            return isReVerifyBatch(batch);
+        }
+
         return true;
     }
 
@@ -804,6 +922,7 @@ public class CheckerDashboardController
             OutwardBatch batch) {
 
         if (batch == null) {
+
             return false;
         }
 
@@ -823,6 +942,7 @@ public class CheckerDashboardController
             OutwardBatch batch) {
 
         if (batch == null) {
+
             return false;
         }
 
@@ -839,6 +959,35 @@ public class CheckerDashboardController
                 currentCheckerUser
         ).equalsIgnoreCase(
                 checkerUser.trim()
+        );
+    }
+
+    // ============================================================
+    // CHECK RE-VERIFY BATCH
+    // ============================================================
+
+    private boolean isReVerifyBatch(
+            OutwardBatch batch) {
+
+        if (batch == null) {
+
+            return false;
+        }
+
+        /*
+         * The DAO/service already verified:
+         *
+         * 1. cheque_processing.checker_id
+         * 2. checker_action = SEND_BACK
+         * 3. outward_cheque.cheque_status = RE_VERIFIED
+         *
+         * This method only checks the UI marker.
+         *
+         * outward_batch.batch_status is NOT checked.
+         */
+
+        return "RE_VERIFY".equalsIgnoreCase(
+                safe(batch.getLockStatus())
         );
     }
 
@@ -909,15 +1058,17 @@ public class CheckerDashboardController
     private int getTotalPages() {
 
         if (service == null) {
+
             return 0;
         }
 
         try {
 
             List<OutwardBatch> batches =
-                    service.getBatches();
+                    getDashboardBatches();
 
             if (batches == null) {
+
                 return 0;
             }
 
@@ -926,8 +1077,7 @@ public class CheckerDashboardController
             for (OutwardBatch batch : batches) {
 
                 if (batch != null
-                        &&
-                        matchesCurrentFilter(batch)) {
+                        && matchesCurrentFilter(batch)) {
 
                     filteredCount++;
                 }
@@ -1077,6 +1227,7 @@ public class CheckerDashboardController
             int totalPages) {
 
         if (button == null) {
+
             return;
         }
 
@@ -1088,6 +1239,7 @@ public class CheckerDashboardController
         );
 
         if (!visible) {
+
             return;
         }
 
@@ -1145,9 +1297,36 @@ public class CheckerDashboardController
             Listcell chequeCell =
                     new Listcell();
 
+            int chequeCount =
+                    batch.getNumberOfCheques();
+
+            /*
+             * IMPORTANT:
+             *
+             * ALL:
+             *     Original batch count is displayed.
+             *
+             * RE_VERIFY_BATCHES:
+             *     Only RE_VERIFIED cheque count is displayed.
+             */
+
+            if ("RE_VERIFY_BATCHES".equals(currentFilter)
+                    && "RE_VERIFY".equalsIgnoreCase(
+                            batch.getLockStatus()
+                    )) {
+
+                chequeCount =
+                        service.getReVerifiedChequeCount(
+                                batch.getBatchNumber(),
+                                String.valueOf(
+                                        currentCheckerUser
+                                )
+                        );
+            }
+
             chequeCell.setLabel(
                     String.valueOf(
-                            batch.getNumberOfCheques()
+                            chequeCount
                     )
             );
 
@@ -1162,11 +1341,26 @@ public class CheckerDashboardController
             Listcell statusCell =
                     new Listcell();
 
-            statusCell.setLabel(
-                    safe(
-                            batch.getBatchStatus()
-                    )
-            );
+            boolean reVerifyStatus =
+                    "RE_VERIFY_BATCHES".equals(currentFilter)
+                    && "RE_VERIFY".equalsIgnoreCase(
+                            batch.getLockStatus()
+                    );
+
+            if (reVerifyStatus) {
+
+                statusCell.setLabel(
+                        "RE-VERIFIED"
+                );
+
+            } else {
+
+                statusCell.setLabel(
+                        safe(
+                                batch.getBatchStatus()
+                        )
+                );
+            }
 
             item.appendChild(
                     statusCell
@@ -1195,6 +1389,18 @@ public class CheckerDashboardController
 
                 assignmentCell.setLabel(
                         "Available"
+                );
+
+            } else if (
+                    "RE_VERIFY".equalsIgnoreCase(
+                            lockStatus
+                    )
+                    && "RE_VERIFY_BATCHES".equals(
+                            currentFilter
+                    )) {
+
+                assignmentCell.setLabel(
+                        "Re-Verify"
                 );
 
             } else {
@@ -1234,7 +1440,47 @@ public class CheckerDashboardController
                             batch.getLockStatus()
                     );
 
-            if (available) {
+            boolean reVerify =
+                    "RE_VERIFY_BATCHES".equals(
+                            currentFilter
+                    )
+                    && "RE_VERIFY".equalsIgnoreCase(
+                            batch.getLockStatus()
+                    );
+
+            /*
+             * ADDITION:
+             *
+             * Original Checker must be able to open
+             * his own batch again after Maker has
+             * re-verified the returned cheques.
+             *
+             * This is determined from cheque_processing
+             * and outward_cheque by the Service.
+             *
+             * outward_batch.batch_status is NOT used.
+             */
+
+            boolean assignedToCurrentChecker =
+                    service.isAssignedToChecker(
+                            batch.getBatchNumber(),
+                            String.valueOf(
+                                    currentCheckerUser
+                            )
+                    );
+
+            boolean originalCheckerCanReVerify =
+                    service.hasReVerifiedCheques(
+                            batch.getBatchNumber(),
+                            String.valueOf(
+                                    currentCheckerUser
+                            )
+                    );
+
+            if (available
+                    || reVerify
+                    || assignedToCurrentChecker
+                    || originalCheckerCanReVerify) {
 
                 Button openButton =
                         new Button("Open");
@@ -1324,6 +1570,89 @@ public class CheckerDashboardController
             }
 
             // ====================================================
+            // CHECK IF ANY SENT-BACK CHEQUE IS STILL WITH MAKER
+            // ====================================================
+
+            boolean pendingMakerCheques =
+                    service.hasPendingMakerCheques(
+                            batchNumber,
+                            String.valueOf(
+                                    currentCheckerUser
+                            )
+                    );
+
+            /*
+             * IMPORTANT:
+             *
+             * If even ONE cheque sent back by this
+             * Checker is still not RE_VERIFIED,
+             * do not open the batch.
+             *
+             * outward_batch.batch_status is NOT used.
+             */
+
+            if (pendingMakerCheques) {
+
+                Clients.showNotification(
+                        "Still in process by Maker.",
+                        Clients.NOTIFICATION_TYPE_WARNING,
+                        null,
+                        "top_center",
+                        4000
+                );
+
+                return;
+            }
+
+            // ====================================================
+            // CHECK RE-VERIFY ELIGIBILITY
+            // ====================================================
+
+            boolean reVerifyAllowed =
+                    service.hasReVerifiedCheques(
+                            batchNumber,
+                            String.valueOf(
+                                    currentCheckerUser
+                            )
+                    );
+
+            // ====================================================
+            // RE-VERIFY BATCH
+            // ====================================================
+
+            if (reVerifyAllowed) {
+
+                System.out.println(
+                        "CHECKER RE-VERIFY OPEN: "
+                                + batchNumber
+                                + " | checker="
+                                + currentCheckerUser
+                );
+
+                /*
+                 * IMPORTANT:
+                 *
+                 * Do NOT call assignBatch().
+                 *
+                 * Re-Verify must not create another
+                 * Checker assignment/lock.
+                 *
+                 * Do NOT update outward_batch.batch_status.
+                 */
+
+                Executions.sendRedirect(
+                        "/zul/outward/outward-checker/processing.zul"
+                                + "?batchNumber="
+                                + Executions.encodeURL(
+                                        batchNumber
+                                )
+                                + "&mode=RE_VERIFY"
+                );
+
+                return;
+            }
+
+            // ====================================================
             // ALREADY LOCKED
             // ====================================================
 
@@ -1388,7 +1717,7 @@ public class CheckerDashboardController
             // ====================================================
 
             Executions.sendRedirect(
-                    "/outward/checker/batchesQueue.zul"
+                    "/zul/outward/outward-checker/batchesQueue.zul"
                             + "?batchNumber="
                             + Executions.encodeURL(
                                     batchNumber

@@ -45,11 +45,15 @@ public class DashboardController
     private static final String STATUS_SENT_TO_CHECKER =
             "SENT_TO_CHECKER";
 
+    private static final String STATUS_RETURN_TO_MAKER =
+            "RETURN_TO_MAKER";
+
     private Grid batchesGrid;
 
     private Button allBtn;
     private Button availableBtn;
     private Button myBatchesBtn;
+    private Button returnToMakerBtn;
 
     private Label receivedCountLabel;
     private Label pendingCountLabel;
@@ -115,6 +119,21 @@ public class DashboardController
                     loadBatches();
                 });
 
+        /*
+         * -----------------------------------------------------------------
+         * RETURN TO MAKER
+         * -----------------------------------------------------------------
+         */
+        if (returnToMakerBtn != null) {
+            returnToMakerBtn.addEventListener(
+                    Events.ON_CLICK,
+                    event -> {
+                        selectedStatus = "Return to Maker";
+                        updateFilterButtons();
+                        loadBatches();
+                    });
+        }
+
         loadBatches();
     }
 
@@ -151,6 +170,11 @@ public class DashboardController
         myBatchesBtn.setSclass(
                 "filter-btn");
 
+        if (returnToMakerBtn != null) {
+            returnToMakerBtn.setSclass(
+                    "filter-btn");
+        }
+
         if ("All".equals(selectedStatus)) {
 
             allBtn.setSclass(
@@ -166,6 +190,12 @@ public class DashboardController
         if ("My Batches".equals(selectedStatus)) {
 
             myBatchesBtn.setSclass(
+                    "filter-btn active-filter");
+        }
+
+        if ("Return to Maker".equals(selectedStatus) && returnToMakerBtn != null) {
+
+            returnToMakerBtn.setSclass(
                     "filter-btn active-filter");
         }
     }
@@ -361,6 +391,21 @@ public class DashboardController
                 statusLayout.appendChild(icon);
                 statusLayout.appendChild(statusLabel);
 
+            } else if ("Return to Maker".equalsIgnoreCase(
+                    displayStatus)) {
+
+                statusLayout.setSclass(
+                        "status-badge badge-return-to-maker");
+
+                Label icon =
+                        new Label();
+
+                icon.setSclass(
+                        "z-icon-reply");
+
+                statusLayout.appendChild(icon);
+                statusLayout.appendChild(statusLabel);
+
             } else {
 
                 statusLayout.setSclass(
@@ -456,6 +501,15 @@ public class DashboardController
         }
 
         /*
+         * RETURN TO MAKER
+         */
+        if (STATUS_RETURN_TO_MAKER.equalsIgnoreCase(
+                batchStatus)) {
+
+            return "Return to Maker";
+        }
+
+        /*
          * DATA ENTRY COMPLETED
          */
         if (STATUS_DATA_ENTRY_COMPLETED.equalsIgnoreCase(
@@ -526,6 +580,13 @@ public class DashboardController
                     batch);
         }
 
+        if ("Return to Maker".equalsIgnoreCase(
+                filter)) {
+
+            return "Return to Maker".equalsIgnoreCase(
+                    displayStatus);
+        }
+
         return false;
     }
 
@@ -569,6 +630,43 @@ public class DashboardController
                     Events.ON_CLICK,
                     event ->
                             lockAndValidate(
+                                    batchId));
+
+            return;
+        }
+
+        /*
+         * -----------------------------------------------------------------
+         * RETURN TO MAKER
+         * -----------------------------------------------------------------
+         */
+        if (STATUS_RETURN_TO_MAKER.equalsIgnoreCase(
+                batchStatus)) {
+
+            if (!isOwnedByCurrentUser(batch)) {
+
+                setLockedButton(
+                        actionButton);
+
+                return;
+            }
+
+            actionButton.setLabel(
+                    "Re-verify");
+
+            actionButton.setIconSclass(
+                    "z-icon-repeat");
+
+            actionButton.setSclass(
+                    "btn btn-action");
+
+            actionButton.setDisabled(
+                    false);
+
+            actionButton.addEventListener(
+                    Events.ON_CLICK,
+                    event ->
+                            openReturnToMakerBatch(
                                     batchId));
 
             return;
@@ -1013,6 +1111,63 @@ public class DashboardController
 
     /*
      * -------------------------------------------------------------------------
+     * Open Return to Maker batch (Routes according to return reasons)
+     * -------------------------------------------------------------------------
+     */
+    private void openReturnToMakerBatch(
+            long batchId) {
+
+        List<String> reasons =
+                dashboardService
+                        .getReturnedChequeReasons(
+                                batchId);
+
+        boolean needsMicrRepair = false;
+        boolean needsDataEntry = false;
+
+        for (String reason : reasons) {
+            if (reason == null) continue;
+            String upper = reason.toUpperCase().trim();
+            if (upper.startsWith("CR-MICR-") || upper.startsWith("CR-IMG-") || upper.startsWith("MR-MICR-") || upper.startsWith("MICR_")) {
+                needsMicrRepair = true;
+            } else if (upper.startsWith("CR-DATA-") || upper.startsWith("MR-DATA-")
+                    || upper.startsWith("ACCOUNT_")
+                    || upper.startsWith("AMOUNT_")
+                    || upper.startsWith("CHEQUE_DATE_")
+                    || upper.startsWith("PAYEE_NAME_")
+                    || upper.startsWith("DATA_ENTRY_")
+                    || upper.startsWith("MULTIPLE_")
+                    || upper.startsWith("CBS_")
+                    || upper.startsWith("MISSING_")
+                    || upper.startsWith("INCORRECT_")) {
+                needsDataEntry = true;
+            } else {
+                needsMicrRepair = true;
+                needsDataEntry = true;
+            }
+        }
+
+        // If reasons require MICR repair (or if empty, check if MICR repair needed)
+        if (needsMicrRepair || (!needsMicrRepair && !needsDataEntry)) {
+            int nextRepairIndex =
+                    micrRepairService
+                            .getNextRepairIndex(
+                                    batchId);
+
+            if (nextRepairIndex >= 0) {
+                openMicrRepair(
+                        batchId,
+                        nextRepairIndex);
+                return;
+            }
+        }
+
+        openDataEntry(
+                batchId);
+    }
+
+    /*
+     * -------------------------------------------------------------------------
      * Safe string
      * -------------------------------------------------------------------------
      */
@@ -1023,4 +1178,4 @@ public class DashboardController
                 ? ""
                 : value.trim();
     }
-}
+}

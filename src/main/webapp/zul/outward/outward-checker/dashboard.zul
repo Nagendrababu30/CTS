@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?page title="Checker Dashboard"
-    contentType="text/html;charset=UTF-8"?>
+        contentType="text/html;charset=UTF-8"?>
 
 <?init class="com.cts.admin.controller.LayoutInit"
     pageTitle="Checker Dashboard"
@@ -12,6 +12,7 @@
 
 <zk>
 
+    <style src="/zul/outward/outward-checker-CSS/checker_dashboard.css"/>
     <style><![CDATA[
 
         /* =============================================================
@@ -2069,175 +2070,99 @@
                     value="Monitor and verify outward batches"
                     sclass="checker-page-subtitle"/>
 
+    <div self="@define(content)"
+         width="100%"
+         height="100%"
+         sclass="checker-dashboard-content">
+
+        <vlayout id="checkerDashboardLayout"
+                 width="100%"
+                 height="100%"
+                 spacing="20px"
+                 sclass="checker-dashboard-layout"
+                 apply="com.iispl.cts.controller.outward.checker.CheckerDashboardController">
+
+            <!-- PAGE HEADER -->
+
+            <vlayout spacing="5px"
+                     sclass="dashboard-header">
+
+                <label value="Checker Dashboard"
+                       sclass="dashboard-title"/>
+
+                <label value="Monitor and verify outward batches"
+                       sclass="dashboard-subtitle"/>
+
             </vlayout>
 
 
-            <!-- =================================================
-                 SUMMARY CARDS
-                 ================================================= -->
+            <!-- SUMMARY CARDS -->
 
-            <hlayout
-                width="100%"
-                spacing="20px"
-                style="margin-bottom:5px;">
+            <hlayout width="100%"
+                     spacing="20px"
+                     sclass="summary-cards">
 
+                <!-- PENDING VERIFICATION -->
 
-                <!-- =============================================
-                     PENDING VERIFICATION
-                     ============================================= -->
+                <vlayout hflex="1"
+                         spacing="8px"
+                         sclass="summary-card">
 
-                <hlayout
-                    hflex="1"
-                    sclass="checker-dashboard-card"
-                    valign="middle">
+                    <label value="PENDING VERIFICATION"
+                           sclass="summary-card-label"/>
 
-                    <vlayout
-                        width="55px"
-                        height="55px"
-                        style="
-                            background:#EAF2FF;
-                            border-radius:8px;
-                            align-items:center;
-                            justify-content:center;
-                        ">
+                    <label id="pendingVerificationCount"
+                           value="0"
+                           sclass="summary-card-value summary-value-blue"/>
 
-                        <label
-                            sclass="z-icon-folder-o"
-                            style="
-                                font-size:22px;
-                                color:#175CD3;
-                            "/>
-
-                    </vlayout>
-
-                    <vlayout
-                        spacing="2px"
-                        style="padding-left:14px;">
-
-                        <label
-                            value="Pending Verification"
-                            sclass="checker-dashboard-card-label"/>
-
-                        <label
-                            id="pendingVerificationCount"
-                            value="0"
-                            sclass="checker-dashboard-card-value"
-                            style="color:#175CD3;"/>
-
-                    </vlayout>
-
-                </hlayout>
+                </vlayout>
 
 
-                <!-- =============================================
-                     CBS VALIDATION
-                     ============================================= -->
+                <!-- CBS VALIDATION -->
 
-                <hlayout
-                    hflex="1"
-                    sclass="checker-dashboard-card"
-                    valign="middle">
+                <vlayout hflex="1"
+                         spacing="8px"
+                         sclass="summary-card">
 
-                    <vlayout
-                        width="55px"
-                        height="55px"
-                        style="
-                            background:#F4F0FF;
-                            border-radius:8px;
-                            align-items:center;
-                            justify-content:center;
-                        ">
+                    <label value="CBS VALIDATION"
+                           sclass="summary-card-label"/>
 
-                        <label
-                            sclass="z-icon-cog"
-                            style="
-                                font-size:22px;
-                                color:#7A5AF8;
-                            "/>
+                    <label id="cbsValidationCount"
+                           value="0"
+                           sclass="summary-card-value summary-value-purple"/>
 
-                    </vlayout>
-
-                    <vlayout
-                        spacing="2px"
-                        style="padding-left:14px;">
-
-                        <label
-                            value="CBS Validation"
-                            sclass="checker-dashboard-card-label"/>
-
-                        <label
-                            id="cbsValidationCount"
-                            value="0"
-                            sclass="checker-dashboard-card-value"
-                            style="color:#7A5AF8;"/>
-
-                    </vlayout>
-
-                </hlayout>
+                </vlayout>
 
 
-                <!-- =============================================
-                     READY TO SEND
-                     ============================================= -->
+                <!-- READY TO SEND -->
 
-                <hlayout
-                    hflex="1"
-                    sclass="checker-dashboard-card"
-                    valign="middle">
+                <vlayout hflex="1"
+                         spacing="8px"
+                         sclass="summary-card">
 
-                    <vlayout
-                        width="55px"
-                        height="55px"
-                        style="
-                            background:#ECFDF3;
-                            border-radius:8px;
-                            align-items:center;
-                            justify-content:center;
-                        ">
+                    <label value="READY TO SEND"
+                           sclass="summary-card-label"/>
 
-                        <label
-                            sclass="z-icon-check"
-                            style="
-                                font-size:22px;
-                                color:#12B76A;
-                            "/>
+                    <label id="readyToSendCount"
+                           value="0"
+                           sclass="summary-card-value summary-value-green"/>
 
-                    </vlayout>
-
-                    <vlayout
-                        spacing="2px"
-                        style="padding-left:14px;">
-
-                        <label
-                            value="Ready To Send"
-                            sclass="checker-dashboard-card-label"/>
-
-                        <label
-                            id="readyToSendCount"
-                            value="0"
-                            sclass="checker-dashboard-card-value"
-                            style="color:#12B76A;"/>
-
-                    </vlayout>
-
-                </hlayout>
+                </vlayout>
 
             </hlayout>
 
 
-            <!-- =================================================
-                 CHECKER BATCH TABLE PANEL
-                 ================================================= -->
+            <!-- BATCH SECTION -->
 
-            <vlayout
-                sclass="checker-dashboard-section"
-                spacing="0"
-                width="100%">
+            <vlayout width="100%"
+                     spacing="0"
+                     sclass="batch-section">
 
+                <!-- SECTION HEADER -->
 
-                <!-- =============================================
-                     TABLE HEADER
-                     ============================================= -->
+                <hlayout width="100%"
+                         valign="middle"
+                         sclass="batch-section-header">
 
 
        <hlayout
@@ -2276,52 +2201,39 @@
         sclass="filter-btn"/>
 </hlayout>
 
-                <!-- =============================================
-                     BATCH LIST
-                     ============================================= -->
+                <!-- BATCH TABLE -->
 
-                <listbox
-                    id="batchListbox"
-                    width="100%"
-                    height="450px"
-                    sclass="checker-batch-grid"
-                    emptyMessage="No batches available for verification."
-                    nonselectableTags="button"
-                    style="
-                        border:1px solid #E4E7EC;
-                        border-radius:6px;
-                    ">
+                <!-- IMPORTANT:
+                     No fixed height here.
+                     The table will shrink when there are no batches.
+                -->
 
-
-                    <!-- =========================================
-                         COLUMNS
-                         ========================================= -->
+                <listbox id="batchListbox"
+                         width="100%"
+                         sclass="checker-batch-table"
+                         emptyMessage="No batches available for verification."
+                         nonselectableTags="button">
 
                     <listhead>
 
-                        <listheader
-                            label="Batch Number"
-                            width="20%"/>
+                        <listheader label="Batch Number"
+                                    width="20%"/>
 
-                        <listheader
-                            label="Total Cheques"
-                            width="15%"
-                            align="center"/>
+                        <listheader label="Total Cheques"
+                                    width="15%"
+                                    align="center"/>
 
-                        <listheader
-                            label="Status"
-                            width="20%"
-                            align="center"/>
+                        <listheader label="Status"
+                                    width="20%"
+                                    align="center"/>
 
-                        <listheader
-                            label="Assignment"
-                            width="20%"
-                            align="center"/>
+                        <listheader label="Assignment"
+                                    width="20%"
+                                    align="center"/>
 
-                        <listheader
-                            label="Action"
-                            width="25%"
-                            align="center"/>
+                        <listheader label="Action"
+                                    width="25%"
+                                    align="center"/>
 
                     </listhead>
 
@@ -2393,46 +2305,45 @@
                              PAGE 4
                              ===================================== -->
 
-                        <button
-                            id="page4Button"
-                            label="4"
-                            sclass="pagination-btn"/>
+                <div width="100%"
+                     sclass="pagination-wrapper">
 
+                    <hlayout id="paginationLayout"
+                             spacing="6px"
+                             valign="middle"
+                             sclass="pagination-layout">
 
-                        <!-- =====================================
-                             PAGE 5
-                             ===================================== -->
+                        <button id="previousPageButton"
+                                label="Previous"
+                                sclass="pagination-btn"/>
 
-                        <button
-                            id="page5Button"
-                            label="5"
-                            sclass="pagination-btn"/>
+                        <button id="page1Button"
+                                label="1"
+                                sclass="pagination-btn pagination-active"/>
 
+                        <button id="page2Button"
+                                label="2"
+                                sclass="pagination-btn"/>
 
-                        <!-- =====================================
-                             NEXT
-                             ===================================== -->
+                        <button id="page3Button"
+                                label="3"
+                                sclass="pagination-btn"/>
 
-                        <button
-                            id="nextPageButton"
-                            label="Next"
-                            sclass="pagination-btn"/>
+                        <button id="page4Button"
+                                label="4"
+                                sclass="pagination-btn"/>
 
+                        <button id="page5Button"
+                                label="5"
+                                sclass="pagination-btn"/>
 
-                        <!-- =====================================
-                             PAGINATION INFORMATION
-                             ===================================== -->
+                        <button id="nextPageButton"
+                                label="Next"
+                                sclass="pagination-btn"/>
 
-                        <label
-                            id="paginationInfo"
-                            value=""
-                            style="
-                                margin-left:15px;
-                                font-size:13px;
-                                color:#667085;
-                                font-weight:600;
-                                white-space:nowrap;
-                            "/>
+                        <label id="paginationInfo"
+                               value=""
+                               sclass="pagination-info"/>
 
                     </hlayout>
 

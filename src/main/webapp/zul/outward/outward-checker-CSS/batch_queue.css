@@ -1,0 +1,634 @@
+/* =============================================================
+   CHECKER BATCH QUEUE
+   Based on Inward Maker Dashboard visual style
+   ============================================================= */
+
+
+/* =============================================================
+   FONTS
+   ============================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+
+/* =============================================================
+   PAGE ROOT
+   ============================================================= */
+
+.checker-page-content {
+    width: 100%;
+    height: 100%;
+
+    box-sizing: border-box;
+
+    padding: 20px 24px 24px 24px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    background:
+        radial-gradient(
+            1200px 600px at 0% 0%,
+            rgba(23, 92, 211, 0.10),
+            transparent 60%
+        ),
+        radial-gradient(
+            1000px 600px at 100% 0%,
+            rgba(122, 90, 248, 0.10),
+            transparent 60%
+        ),
+        radial-gradient(
+            900px 700px at 100% 100%,
+            rgba(18, 183, 106, 0.07),
+            transparent 60%
+        ),
+        radial-gradient(
+            800px 500px at 0% 100%,
+            rgba(192, 38, 211, 0.06),
+            transparent 60%
+        ),
+        linear-gradient(
+            180deg,
+            #EAF0FA 0%,
+            #E4ECF8 100%
+        );
+}
+
+
+/* =============================================================
+   PAGE HEADER
+   ============================================================= */
+
+.page-header {
+    width: 100%;
+}
+
+
+/* =============================================================
+   PAGE TITLE
+   ============================================================= */
+
+.page-title {
+    font-family:
+        'Space Grotesk',
+        'Plus Jakarta Sans',
+        sans-serif;
+
+    font-size: 30px;
+
+    font-weight: 700;
+
+    letter-spacing: -0.035em;
+
+    color: #0B1F3F !important;
+
+    position: relative;
+
+    display: inline-block;
+
+    margin-bottom: 4px;
+}
+
+
+.page-title::after {
+    content: '';
+
+    position: absolute;
+
+    left: 0;
+
+    bottom: -10px;
+
+    width: 56px;
+
+    height: 3px;
+
+    background: #175CD3;
+
+    border-radius: 2px;
+}
+
+
+/* =============================================================
+   SUBTITLE
+   ============================================================= */
+
+.page-subtitle {
+    font-family: 'Inter', sans-serif;
+
+    font-size: 14px;
+
+    font-weight: 500;
+
+    color: #667085 !important;
+}
+
+
+/* =============================================================
+   SEARCH PANEL
+   ============================================================= */
+
+.search-panel {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 14px 16px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #FFFFFF 0%,
+            #FCFDFF 100%
+        );
+
+    border: 1px solid #E4EAF3;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 1px 3px rgba(16, 24, 40, 0.05);
+}
+
+
+/* =============================================================
+   SEARCH BOX
+   ============================================================= */
+
+.search-box {
+    height: 40px;
+
+    border: 1.5px solid #D0D5DD !important;
+
+    border-radius: 8px !important;
+
+    background: #FFFFFF !important;
+
+    color: #344054 !important;
+
+    font-family: 'Inter', sans-serif;
+
+    font-size: 14px;
+
+    box-shadow:
+        0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+
+/* =============================================================
+   PRIMARY BUTTON
+   ============================================================= */
+
+.primary-button {
+    height: 40px;
+
+    padding: 0 18px !important;
+
+    border: none !important;
+
+    border-radius: 5px !important;
+
+    background: #175CD3 !important;
+
+    color: #FFFFFF !important;
+
+    font-family:
+        'Plus Jakarta Sans',
+        sans-serif !important;
+
+    font-size: 13px !important;
+
+    font-weight: 700 !important;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 2px 6px rgba(23, 92, 211, 0.18) !important;
+}
+
+
+.primary-button:hover {
+    background: #164EB6 !important;
+
+    box-shadow:
+        0 3px 8px rgba(23, 92, 211, 0.22) !important;
+}
+
+
+/* =============================================================
+   SECONDARY BUTTON
+   ============================================================= */
+
+.secondary-button {
+    height: 40px;
+
+    padding: 0 18px !important;
+
+    border: 1.5px solid #D0D5DD !important;
+
+    border-radius: 5px !important;
+
+    background: #FFFFFF !important;
+
+    color: #344054 !important;
+
+    font-family:
+        'Plus Jakarta Sans',
+        sans-serif !important;
+
+    font-size: 13px !important;
+
+    font-weight: 700 !important;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 1px 2px rgba(16, 24, 40, 0.04) !important;
+}
+
+
+.secondary-button:hover {
+    background: #F9FAFB !important;
+
+    border-color: #175CD3 !important;
+
+    color: #175CD3 !important;
+}
+
+
+/* =============================================================
+   BATCH PANEL
+   ============================================================= */
+
+.batch-panel {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 16px 20px 14px 20px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #FFFFFF 0%,
+            #FCFDFF 100%
+        );
+
+    border: 1px solid #E4EAF3;
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 4px 12px rgba(16, 24, 40, 0.06);
+
+    position: relative;
+
+    overflow: hidden;
+}
+
+
+.batch-panel::before {
+    content: '';
+
+    position: absolute;
+
+    top: 0;
+
+    left: 0;
+
+    right: 0;
+
+    height: 4px;
+
+    background: #175CD3;
+
+    border-radius: 10px 10px 0 0;
+}
+
+
+/* =============================================================
+   BATCH PANEL HEADER
+   ============================================================= */
+
+.batch-panel-header {
+    width: 100%;
+
+    min-height: 32px;
+
+    margin-bottom: 12px;
+}
+
+
+/* =============================================================
+   SECTION TITLE
+   ============================================================= */
+
+.section-title {
+    font-family:
+        'Plus Jakarta Sans',
+        'Inter',
+        sans-serif;
+
+    font-size: 18px;
+
+    font-weight: 800;
+
+    color: #0B1F3F !important;
+
+    letter-spacing: -0.02em;
+
+    position: relative;
+
+    padding-left: 18px;
+}
+
+
+.section-title::before {
+    content: '';
+
+    position: absolute;
+
+    left: 0;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    width: 4px;
+
+    height: 20px;
+
+    background: #175CD3;
+
+    border-radius: 3px;
+}
+
+
+/* =============================================================
+   BATCH TABLE
+   ============================================================= */
+
+.checker-batch-listbox {
+    width: 100% !important;
+
+    box-sizing: border-box;
+
+    border: 1px solid #E4EAF3 !important;
+
+    border-radius: 8px !important;
+
+    background: #FFFFFF !important;
+
+    overflow: hidden;
+
+    box-shadow:
+        inset 0 1px 3px rgba(16, 24, 40, 0.03);
+}
+
+
+/* =============================================================
+   TABLE HEADER
+   ============================================================= */
+
+.checker-batch-listbox .z-listhead {
+    background: #175CD3 !important;
+
+    border: none !important;
+}
+
+
+.checker-batch-listbox .z-listheader {
+    background: #175CD3 !important;
+
+    border: none !important;
+
+    padding: 0 !important;
+}
+
+
+.checker-batch-listbox .z-listheader-content {
+    background: transparent !important;
+
+    color: #FFFFFF !important;
+
+    font-family:
+        'Inter',
+        'Plus Jakarta Sans',
+        sans-serif !important;
+
+    font-size: 13px !important;
+
+    font-weight: 700 !important;
+
+    letter-spacing: 0.06em;
+
+    text-transform: uppercase;
+
+    text-align: center !important;
+
+    padding: 18px 16px !important;
+}
+
+
+/* =============================================================
+   TABLE ROWS
+   ============================================================= */
+
+.checker-batch-listbox .z-listitem {
+    background: #FFFFFF !important;
+
+    border-bottom:
+        1px solid #EEF2F8 !important;
+}
+
+
+.checker-batch-listbox .z-listitem:nth-child(even) {
+    background:
+        linear-gradient(
+            90deg,
+            #FCFDFF 0%,
+            #F9FBFF 100%
+        ) !important;
+}
+
+
+.checker-batch-listbox .z-listitem:hover {
+    background: #F6F9FF !important;
+
+    box-shadow:
+        inset 4px 0 0 #175CD3,
+        0 2px 10px rgba(23, 92, 211, 0.08);
+}
+
+
+/* =============================================================
+   TABLE CELLS
+   ============================================================= */
+
+.checker-batch-listbox .z-listcell {
+    border: none !important;
+}
+
+
+.checker-batch-listbox .z-listcell-content {
+    font-family: 'Inter', sans-serif !important;
+
+    font-size: 14px !important;
+
+    font-weight: 500 !important;
+
+    color: #1D2939 !important;
+
+    padding: 12px 14px !important;
+
+    line-height: 1.4;
+
+    text-align: center !important;
+
+    vertical-align: middle !important;
+}
+
+
+/* =============================================================
+   BATCH NUMBER
+   ============================================================= */
+
+.checker-batch-listbox
+.z-listitem
+.z-listcell:first-child
+.z-listcell-content {
+
+    font-family:
+        'Space Grotesk',
+        sans-serif !important;
+
+    font-weight: 700 !important;
+
+    color: #344054 !important;
+
+    font-variant-numeric: tabular-nums;
+}
+
+
+/* =============================================================
+   PAGINATION
+   ============================================================= */
+
+.pagination-container {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding-top: 12px;
+}
+
+
+.pagination-container .z-paging {
+    background: transparent !important;
+
+    border: none !important;
+}
+
+
+.pagination-container .z-paging-button {
+    min-width: 42px;
+
+    height: 40px;
+
+    border: 1.5px solid #D0D5DD !important;
+
+    border-radius: 8px !important;
+
+    background: #FFFFFF !important;
+
+    color: #344054 !important;
+
+    font-family:
+        'Plus Jakarta Sans',
+        'Inter',
+        sans-serif !important;
+
+    font-size: 13px !important;
+
+    font-weight: 700 !important;
+
+    box-shadow:
+        0 1px 2px rgba(16, 24, 40, 0.04) !important;
+}
+
+
+.pagination-container .z-paging-button:hover {
+    background: #F9FAFB !important;
+
+    border-color: #175CD3 !important;
+
+    color: #175CD3 !important;
+}
+
+
+/* =============================================================
+   RESPONSIVE
+   ============================================================= */
+
+@media (max-width: 1024px) {
+
+    .checker-page-content {
+        padding: 20px;
+    }
+
+    .page-title {
+        font-size: 28px;
+    }
+
+    .batch-panel {
+        padding: 16px;
+    }
+}
+
+
+@media (max-width: 768px) {
+
+    .checker-page-content {
+        padding: 16px 12px;
+    }
+
+    .page-title {
+        font-size: 24px;
+    }
+
+    .search-panel {
+        padding: 12px;
+    }
+
+    .batch-panel {
+        padding: 14px 12px 12px 12px;
+    }
+
+    .section-title {
+        font-size: 16px;
+    }
+
+    .checker-batch-listbox .z-listheader-content {
+        font-size: 12px !important;
+
+        padding: 16px 10px !important;
+    }
+}
+
+
+/* =============================================================
+   REDUCED MOTION
+   ============================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+
+        animation-iteration-count: 1 !important;
+
+        transition-duration: 0.01ms !important;
+    }
+}

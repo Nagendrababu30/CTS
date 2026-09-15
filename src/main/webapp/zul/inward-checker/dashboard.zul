@@ -184,6 +184,11 @@
                             label="My Batches 0"
                             sclass="filter-btn"/>
 
+                        <button
+                            id="onHoldFilter"
+                            label="On Hold 0"
+                            sclass="filter-btn"/>
+
                     </hbox>
 
                 </hlayout>

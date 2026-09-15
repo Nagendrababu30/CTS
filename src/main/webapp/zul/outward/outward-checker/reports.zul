@@ -66,9 +66,6 @@
 
                 <space hflex="1"/>
 
-                <button id="refreshReportBtn"
-                        label="Refresh"
-                        sclass="reports-refresh-btn"/>
 
             </hlayout>
 

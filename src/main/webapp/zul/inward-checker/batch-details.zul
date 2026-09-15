@@ -16,24 +16,33 @@
             height: 100% !important;
             max-height: 100% !important;
             box-sizing: border-box !important;
-            padding: 12px 18px 12px 18px !important;
-            background: #f4f7fd !important;
+            padding: 14px 20px 14px 20px !important;
+            background:
+                radial-gradient(1200px 600px at 0% 0%, rgba(23, 92, 211, 0.10), transparent 60%),
+                radial-gradient(1000px 600px at 100% 0%, rgba(122, 90, 248, 0.10), transparent 60%),
+                radial-gradient(900px 700px at 100% 100%, rgba(18, 183, 106, 0.07), transparent 60%),
+                radial-gradient(800px 500px at 0% 100%, rgba(192, 38, 211, 0.06), transparent 60%),
+                linear-gradient(180deg, #EAF0FA 0%, #E4ECF8 100%) !important;
             overflow: hidden !important;
             display: flex !important;
             flex-direction: column !important;
         }
 
+        .z-center-cnt {
+            background: transparent !important;
+        }
+
         .details-header {
             width: 100% !important;
-            margin-bottom: 8px !important;
+            margin-bottom: 10px !important;
             flex-shrink: 0 !important;
         }
 
         .main-layout {
             width: 100% !important;
             flex: 1 1 auto !important;
-            height: calc(100% - 48px) !important;
-            max-height: calc(100% - 48px) !important;
+            height: calc(100% - 52px) !important;
+            max-height: calc(100% - 52px) !important;
             min-height: 0 !important;
             box-sizing: border-box !important;
             display: flex !important;
@@ -56,11 +65,18 @@
             min-width: 0 !important;
             box-sizing: border-box !important;
             background: #ffffff !important;
-            border: 1px solid #dce3ed !important;
-            border-radius: 6px !important;
+            border: 1.5px solid #D0DCF0 !important;
+            border-radius: 14px !important;
+            box-shadow: 0 6px 20px rgba(23, 92, 211, 0.08), 0 2px 6px rgba(0, 0, 0, 0.03) !important;
             height: 100% !important;
             max-height: 100% !important;
             min-height: 0 !important;
+            transition: box-shadow 0.3s ease !important;
+        }
+
+        .left-card:hover,
+        .right-card:hover {
+            box-shadow: 0 10px 28px rgba(23, 92, 211, 0.12), 0 3px 8px rgba(0, 0, 0, 0.04) !important;
         }
 
         .left-card {
@@ -82,19 +98,19 @@
             width: 100% !important;
             height: auto !important;
             margin-top: 10px !important;
-            padding: 8px 10px !important;
+            padding: 10px 12px !important;
             box-sizing: border-box !important;
-            border: 1px solid #d9e1eb !important;
-            border-radius: 5px !important;
-            background: #f7faff !important;
+            border: 1px solid #E2E8F0 !important;
+            border-radius: 10px !important;
+            background: #F8FAFC !important;
         }
 
         .cheque-image-container {
             width: 100% !important;
             height: 200px !important;
             box-sizing: border-box !important;
-            border: 1px solid #bcd2e4 !important;
-            border-radius: 3px !important;
+            border: 1.5px solid #CBD5E1 !important;
+            border-radius: 8px !important;
             background: #ffffff !important;
             display: flex !important;
             justify-content: center !important;
@@ -113,24 +129,24 @@
             width: 100% !important;
             height: 200px !important;
             box-sizing: border-box !important;
-            padding: 12px 14px !important;
-            border: 1px solid #bcd2e4 !important;
-            border-radius: 3px !important;
-            background: #dff1fc !important;
+            padding: 14px 16px !important;
+            border: 1.5px solid #BAE6FD !important;
+            border-radius: 8px !important;
+            background: #F0F7FF !important;
             overflow: hidden !important;
         }
 
         .cheque-info-row {
-            margin-top: 10px !important;
+            margin-top: 12px !important;
         }
 
         .cheque-nav {
-            margin-top: 8px !important;
+            margin-top: 10px !important;
         }
 
         .decision-area {
-            margin-top: 12px !important;
-            padding-top: 10px !important;
+            margin-top: 14px !important;
+            padding-top: 12px !important;
         }
 
         .z-west,
@@ -140,6 +156,64 @@
             background-color: #071422 !important;
             height: 100% !important;
             min-height: 100% !important;
+        }
+
+        .value-box {
+            width: 100% !important;
+            height: 36px !important;
+            min-height: 36px !important;
+            box-sizing: border-box !important;
+            padding: 0 12px !important;
+            border: 1.5px solid #CBD5E1 !important;
+            border-radius: 6px !important;
+            background: #FFFFFF !important;
+            display: flex !important;
+            align-items: center !important;
+            overflow: hidden !important;
+        }
+
+        .value-box > .z-hlayout-inner {
+            display: flex !important;
+            align-items: center !important;
+            height: 100% !important;
+            width: 100% !important;
+            vertical-align: middle !important;
+        }
+
+        .value-box label,
+        .value-box .z-label {
+            display: inline-flex !important;
+            align-items: center !important;
+            font-size: 13.5px !important;
+            font-weight: 600 !important;
+            color: #0F172A !important;
+            line-height: normal !important;
+            white-space: nowrap !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            vertical-align: middle !important;
+        }
+
+        .old-value {
+            border: 1.5px solid #FCA5A5 !important;
+            background: #FEF2F2 !important;
+        }
+
+        .old-value label,
+        .old-value .z-label {
+            color: #DC2626 !important;
+            font-weight: 700 !important;
+        }
+
+        .new-value {
+            border: 1.5px solid #86EFAC !important;
+            background: #F0FDF4 !important;
+        }
+
+        .new-value label,
+        .new-value .z-label {
+            color: #15803D !important;
+            font-weight: 700 !important;
         }
     </style>
 
@@ -153,59 +227,68 @@
         height="100%"
         sclass="batch-details-content">
 
-        <!-- =====================================================
-             PAGE HEADER
-             ===================================================== -->
+        <!-- ============================================================
+             BATCH HEADER STRIP (Floating Card - Image 4)
+             ============================================================ -->
         <hlayout
             width="100%"
-            spacing="0"
             valign="middle"
-            sclass="details-header">
+            sclass="micr-header-card">
 
-            <vlayout
-                hflex="1"
-                spacing="0">
+            <!-- Left: Back Button & Batch Title -->
+            <hlayout
+                spacing="12px"
+                valign="middle"
+                sclass="micr-header-left">
 
-                <!-- BREADCRUMB -->
-                <hlayout
-                    spacing="3px"
-                    valign="middle">
+                <button
+                    id="backToList"
+                    label="←"
+                    tooltiptext="Back to Batch List"
+                    sclass="micr-back-btn"/>
 
-                    <label
-                        value="Dashboard"
-                        sclass="breadcrumb"/>
-
-                    <label
-                        value=">"
-                        sclass="breadcrumb"/>
-
-                    <label
-                        value="Verify Batch"
-                        sclass="breadcrumb"/>
-
-                    <label
-                        value=">"
-                        sclass="breadcrumb"/>
-
-                    <label
-                        value="Batch Details"
-                        sclass="breadcrumb-current"/>
-
-                </hlayout>
-
-                <!-- TITLE -->
                 <label
-                    id="pageTitle"
-                    value="Verify Inward Batch - BATCH001"
-                    sclass="details-title"/>
+                    id="batchLabel"
+                    value="Batch No : —"
+                    sclass="micr-batch-title"/>
 
-            </vlayout>
+            </hlayout>
 
-            <!-- BACK BUTTON -->
-            <button
-                id="backToList"
-                label="← Back to List"
-                sclass="back-button"/>
+            <!-- Center/Right: Badges Spread Horizontally in the Box -->
+            <hlayout
+                hflex="1"
+                valign="middle"
+                sclass="micr-header-badges">
+
+                <div sclass="micr-count-badge micr-count-total">
+                    <label
+                        id="totalCountLabel"
+                        value="Total: 0"
+                        sclass="micr-count-text"/>
+                </div>
+
+                <div sclass="micr-count-badge micr-count-completed">
+                    <label
+                        id="completedCountLabel"
+                        value="Completed: 0"
+                        sclass="micr-count-text"/>
+                </div>
+
+                <div sclass="micr-count-badge micr-count-pending">
+                    <label
+                        id="pendingCountLabel"
+                        value="Pending: 0"
+                        sclass="micr-count-text"/>
+                </div>
+
+                <div sclass="micr-counter-pill">
+                    <label
+                        id="chequeCounter"
+                        value="Cheque 1 of 0"
+                        sclass="micr-counter-text"/>
+                </div>
+
+            </hlayout>
 
         </hlayout>
 
@@ -224,6 +307,7 @@
                  ================================================= -->
             <vlayout
                 hflex="53"
+                vflex="1"
                 spacing="0"
                 sclass="left-card">
 
@@ -236,172 +320,169 @@
                      ================================================= -->
                 <vlayout
                     width="100%"
-                    spacing="6px"
+                    vflex="1"
+                    spacing="8px"
                     sclass="image-wrapper">
 
-                    <!-- CONTROLS TOOLBAR (FRONT/BACK + ZOOM) -->
-                    <hlayout
-                        width="100%"
-                        spacing="8px"
-                        valign="middle"
-                        sclass="zoom-row">
-
-                        <button
-                            id="btnFront"
-                            label="Front"
-                            sclass="image-button image-button-active"/>
-
-                        <button
-                            id="btnBack"
-                            label="Back"
-                            sclass="image-button"/>
-
-                        <hlayout
-                            hflex="1"
-                            spacing="0"/>
-
-                        <button
-                            id="zoomOut"
-                            label="-"
-                            sclass="zoom-button"/>
-
-                        <hlayout
-                            width="48px"
-                            height="24px"
-                            spacing="0"
-                            valign="middle"
-                            sclass="zoom-value">
-
-                            <label
-                                id="zoomValue"
-                                value="100%"
-                                sclass="zoom-label"/>
-
-                        </hlayout>
-
-                        <button
-                            id="zoomIn"
-                            label="+"
-                            sclass="zoom-button"/>
-
-                    </hlayout>
-
-                    <!-- ACTUAL CHEQUE IMAGE (Displayed when scanned image file exists) -->
+                    <!-- Image display area (Matches MICR Repair) -->
                     <div
-                        id="chequeImageContainer"
-                        visible="false"
-                        width="100%"
-                        height="200px"
-                        sclass="cheque-image-container"
-                        style="display:none; justify-content:center; align-items:center; border:1px solid #bcd2e4; background:#ffffff; overflow:hidden; border-radius:3px;">
+                        sclass="micr-image-area"
+                        vflex="1"
+                        style="width:100%; height:100%; flex:1 1 auto; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#FFFFFF; border:1.5px solid #CBD5E1; border-radius:8px; position:relative;">
 
+                        <!-- ACTUAL CHEQUE IMAGE -->
                         <image
                             id="chequeImage"
-                            style="max-width:100%; max-height:195px; object-fit:contain;"/>
+                            sclass="micr-image-display"
+                            style="width:100%; height:100%; max-width:100%; max-height:100%; object-fit:contain; display:block;"/>
 
-                    </div>
-
-                    <!-- CHEQUE PREVIEW (Mock Cheque, displayed when no image file exists) -->
-                    <div
-                        id="chequePreview"
-                        width="100%"
-                        height="200px"
-                        sclass="cheque-preview">
-
-                        <!-- TOP -->
-                        <hlayout
+                        <!-- CHEQUE PREVIEW (Mock Cheque, displayed when no image file exists) -->
+                        <div
+                            id="chequePreview"
                             width="100%"
-                            spacing="0">
+                            height="100%"
+                            sclass="cheque-preview"
+                            style="display:none;">
 
-                            <vlayout
-                                hflex="1"
+                            <!-- TOP -->
+                            <hlayout
+                                width="100%"
                                 spacing="0">
 
-                                <label
-                                    id="bankName"
-                                    value="STATE BANK OF INDIA"
-                                    sclass="cheque-bank"/>
+                                <vlayout
+                                    hflex="1"
+                                    spacing="0">
 
-                                <label
-                                    id="branchName"
-                                    value="HYDERABAD MAIN BRANCH"
-                                    sclass="cheque-branch"/>
+                                    <label
+                                        id="bankName"
+                                        value="STATE BANK OF INDIA"
+                                        sclass="cheque-bank"/>
 
-                            </vlayout>
+                                    <label
+                                        id="branchName"
+                                        value="HYDERABAD MAIN BRANCH"
+                                        sclass="cheque-branch"/>
 
-                            <vlayout
-                                spacing="5px"
-                                sclass="cheque-top-right">
+                                </vlayout>
 
-                                <label
-                                    id="imageChequeNumber"
-                                    value="000125"
-                                    sclass="cheque-number"/>
+                                <vlayout
+                                    spacing="5px"
+                                    sclass="cheque-top-right">
 
-                                <label
-                                    id="imageChequeDate"
-                                    value="DATE: 21-06-2025"
-                                    sclass="cheque-date"/>
+                                    <label
+                                        id="imageChequeNumber"
+                                        value="000125"
+                                        sclass="cheque-number"/>
 
-                            </vlayout>
+                                    <label
+                                        id="imageChequeDate"
+                                        value="DATE: 21-06-2025"
+                                        sclass="cheque-date"/>
 
-                        </hlayout>
-
-                        <!-- PAYEE -->
-                        <hlayout
-                            width="100%"
-                            spacing="0"
-                            valign="middle"
-                            sclass="cheque-line">
-
-                            <label
-                                value="PAY"
-                                sclass="cheque-label"/>
-
-                            <label
-                                id="payeeImage"
-                                value="Ravi Kumar"
-                                sclass="cheque-value"/>
-
-                        </hlayout>
-
-                        <!-- AMOUNT -->
-                        <hlayout
-                            width="100%"
-                            spacing="0"
-                            valign="middle"
-                            sclass="cheque-line">
-
-                            <label
-                                value="RUPEES"
-                                sclass="cheque-label"/>
-
-                            <label
-                                id="amountWordsImage"
-                                value="Five Thousand Only"
-                                sclass="cheque-value"
-                                hflex="1"/>
-
-                            <hlayout
-                                spacing="0"
-                                valign="middle">
-
-                                <label
-                                    id="amountImage"
-                                    value="₹ 2500.00"
-                                    sclass="amount-box"/>
+                                </vlayout>
 
                             </hlayout>
 
-                        </hlayout>
+                            <!-- PAYEE -->
+                            <hlayout
+                                width="100%"
+                                spacing="0"
+                                valign="middle"
+                                sclass="cheque-line">
 
-                        <!-- MICR -->
-                        <label
-                            id="micrImage"
-                            value="|| 000125 || 500002001 |: 9876543210 || 29"
-                            sclass="micr-image"/>
+                                <label
+                                    value="PAY"
+                                    sclass="cheque-label"/>
+
+                                <label
+                                    id="payeeImage"
+                                    value="Ravi Kumar"
+                                    sclass="cheque-value"/>
+
+                            </hlayout>
+
+                            <!-- AMOUNT -->
+                            <hlayout
+                                width="100%"
+                                spacing="0"
+                                valign="middle"
+                                sclass="cheque-line">
+
+                                <label
+                                    value="RUPEES"
+                                    sclass="cheque-label"/>
+
+                                <label
+                                    id="amountWordsImage"
+                                    value="Five Thousand Only"
+                                    sclass="cheque-value"
+                                    hflex="1"/>
+
+                                <hlayout
+                                    spacing="0"
+                                    valign="middle">
+
+                                    <label
+                                        id="amountImage"
+                                        value="₹ 2500.00"
+                                        sclass="amount-box"/>
+
+                                </hlayout>
+
+                            </hlayout>
+
+                            <!-- MICR -->
+                            <label
+                                id="micrImage"
+                                value="|| 000125 || 500002001 |: 9876543210 || 29"
+                                sclass="micr-image"/>
+
+                        </div>
 
                     </div>
+
+                    <!-- Image toolbar (Image 2) -->
+                    <hlayout
+                        width="100%"
+                        spacing="6px"
+                        valign="middle"
+                        sclass="micr-image-toolbar">
+
+                        <button
+                            id="toggleImageButton"
+                            label="View Back"
+                            hflex="2"
+                            sclass="micr-toggle-btn"/>
+
+                        <button
+                            id="zoomInButton"
+                            label="+"
+                            tooltiptext="Zoom In"
+                            hflex="1"
+                            sclass="micr-zoom-btn"/>
+
+                        <button
+                            id="zoomOutButton"
+                            label="−"
+                            tooltiptext="Zoom Out"
+                            hflex="1"
+                            sclass="micr-zoom-btn"/>
+
+                        <button
+                            id="rotateButton"
+                            label="↻"
+                            tooltiptext="Rotate 90°"
+                            hflex="1"
+                            sclass="micr-zoom-btn"/>
+
+                        <button
+                            id="resetViewButton"
+                            label="⟲"
+                            tooltiptext="Reset View"
+                            hflex="1"
+                            sclass="micr-zoom-btn"/>
+
+                    </hlayout>
 
                 </vlayout>
 
@@ -424,71 +505,6 @@
                         id="leftCbsStatus"
                         value="● CBS: PASSED"
                         sclass="cbs-pass-badge"/>
-
-                </hlayout>
-
-                <!-- =================================================
-                     CHEQUE NAVIGATION
-                     ================================================= -->
-                <hlayout
-                    width="100%"
-                    spacing="3px"
-                    valign="middle"
-                    sclass="cheque-nav">
-
-                    <label
-                        value="CHEQUE"
-                        sclass="cheque-nav-label"/>
-
-                    <button id="cheque1" label="1"
-                            sclass="cheque-button cheque-button-selected"/>
-
-                    <button id="cheque2" label="2"
-                            sclass="cheque-button"/>
-
-                    <button id="cheque3" label="3"
-                            sclass="cheque-button"/>
-
-                    <button id="cheque4" label="4"
-                            sclass="cheque-button"/>
-
-                    <button id="cheque5" label="5"
-                            sclass="cheque-button"/>
-
-                    <button id="cheque6" label="6"
-                            sclass="cheque-button"/>
-
-                    <button id="cheque7" label="7"
-                            sclass="cheque-button"/>
-
-                    <button id="cheque8" label="8"
-                            sclass="cheque-button"/>
-
-                    <button id="cheque9" label="9"
-                            sclass="cheque-button"/>
-
-                    <button id="cheque10" label="10"
-                            sclass="cheque-button"/>
-
-                    <button id="cheque11" label="11"
-                            sclass="cheque-button"/>
-
-                    <button id="cheque12" label="12"
-                            sclass="cheque-button"/>
-
-                    <button id="cheque13" label="13"
-                            sclass="cheque-button"/>
-
-                    <button id="cheque14" label="14"
-                            sclass="cheque-button"/>
-
-                    <button id="cheque15" label="15"
-                            sclass="cheque-button"/>
-
-                    <button
-                        id="nextChequeArrow"
-                        label="›"
-                        sclass="cheque-arrow"/>
 
                 </hlayout>
 
@@ -521,19 +537,6 @@
                             label="⚠ Reject"
                             hflex="1"
                             sclass="decision-button reject-button"/>
-
-                    </hlayout>
-
-                    <hlayout
-                        id="selectedDecision"
-                        width="100%"
-                        spacing="0"
-                        valign="middle"
-                        sclass="selected-decision">
-
-                        <label
-                            id="selectedDecisionText"
-                            value=""/>
 
                     </hlayout>
 
@@ -581,7 +584,7 @@
 
                             <label
                                 id="chequePosition"
-                                value=" (1 of 15) | Bank:"
+                                value=" | Bank:"
                                 sclass="verification-subtitle"/>
 
                             <label
@@ -678,11 +681,7 @@
                     <vlayout
                         id="micrUnchanged"
                         width="100%"
-                        spacing="3px">
-
-                        <label
-                            value="MICR"
-                            sclass="field-label"/>
+                        spacing="0">
 
                         <hlayout
                             width="100%"
@@ -1065,9 +1064,9 @@
 
                     </vlayout>
 
-                    <!-- PAYEE NAME -->
+                    <!-- CHEQUE NUMBER -->
                     <vlayout
-                        id="payeeField"
+                        id="chequeNoField"
                         width="100%"
                         spacing="3px"
                         sclass="data-field">
@@ -1075,22 +1074,23 @@
                         <hlayout
                             width="100%"
                             spacing="0"
-                            valign="middle">
+                            valign="middle"
+                            sclass="field-header">
 
                             <label
-                                value="Payee Name"
+                                value="Cheque Number"
                                 hflex="1"
                                 sclass="field-label"/>
 
                             <label
-                                id="payeeStatus"
+                                id="chequeNoStatus"
                                 value="Unchanged"
                                 sclass="unchanged-status"/>
 
                         </hlayout>
 
                         <hlayout
-                            id="payeeUnchanged"
+                            id="chequeNoUnchanged"
                             width="100%"
                             height="29px"
                             spacing="0"
@@ -1098,13 +1098,13 @@
                             sclass="value-box">
 
                             <label
-                                id="payeeName"
-                                value="Ravi Kumar"/>
+                                id="chequeNumberVal"
+                                value=""/>
 
                         </hlayout>
 
                         <hlayout
-                            id="payeeCorrection"
+                            id="chequeNoCorrection"
                             width="100%"
                             spacing="8px"
                             visible="false">
@@ -1125,8 +1125,8 @@
                                     sclass="value-box old-value">
 
                                     <label
-                                        id="oldPayeeName"
-                                        value="Ravi Kumar"/>
+                                        id="oldChequeNumber"
+                                        value=""/>
 
                                 </hlayout>
 
@@ -1148,8 +1148,8 @@
                                     sclass="value-box new-value">
 
                                     <label
-                                        id="correctedPayeeName"
-                                        value="Ravi Kumar"/>
+                                        id="correctedChequeNumber"
+                                        value=""/>
 
                                 </hlayout>
 
@@ -1181,11 +1181,6 @@
                             hflex="1"
                             sclass="cbs-title"/>
 
-                        <label
-                            id="cbsActionStatus"
-                            value="✓ All core banking checks passed"
-                            sclass="green-status"/>
-
                     </hlayout>
 
                     <!-- CBS FAILURE -->
@@ -1203,88 +1198,9 @@
 
                     </hlayout>
 
-                    <!-- CBS CHECKS -->
-                    <hlayout
-                        width="100%"
-                        spacing="6px"
-                        sclass="cbs-checks">
-
-                        <vlayout
-                            id="cbsAmountFunds"
-                            hflex="1"
-                            spacing="2px"
-                            sclass="cbs-check">
-
-                            <label
-                                value="Amount / Funds"
-                                sclass="cbs-check-name"/>
-
-                            <label
-                                id="cbsAmountResult"
-                                value="Passed"
-                                sclass="cbs-check-value"/>
-
-                        </vlayout>
-
-                        <vlayout
-                            id="cbsChequeDate"
-                            hflex="1"
-                            spacing="2px"
-                            sclass="cbs-check">
-
-                            <label
-                                value="Cheque Date"
-                                sclass="cbs-check-name"/>
-
-                            <label
-                                id="cbsDateResult"
-                                value="Passed"
-                                sclass="cbs-check-value"/>
-
-                        </vlayout>
-
-                        <vlayout
-                            id="cbsAccountStatus"
-                            hflex="1"
-                            spacing="2px"
-                            sclass="cbs-check">
-
-                            <label
-                                value="Account Status"
-                                sclass="cbs-check-name"/>
-
-                            <label
-                                id="cbsAccountResult"
-                                value="Passed"
-                                sclass="cbs-check-value"/>
-
-                        </vlayout>
-
-                    </hlayout>
-
                 </vlayout>
 
-                <!-- =================================================
-                     CHECKER REMARKS
-                     ================================================= -->
-                <vlayout
-                    width="100%"
-                    spacing="3px"
-                    sclass="section">
 
-                    <label
-                        value="Checker Remarks"
-                        sclass="remarks-label"/>
-
-                    <textbox
-                        id="checkerRemarks"
-                        width="100%"
-                        height="45px"
-                        multiline="true"
-                        placeholder="Enter remarks (optional)..."
-                        sclass="remarks-box"/>
-
-                </vlayout>
 
                 <!-- =================================================
                      BOTTOM ACTIONS

@@ -12,7 +12,9 @@ body {
 }
 
 
-/* Full Login Page */
+/* =================================
+   FULL LOGIN PAGE
+   ================================= */
 
 .login-page {
     position: fixed;
@@ -32,7 +34,7 @@ body {
 }
 
 
-/* Remove ZK Window Content Background */
+/* ZK Window Content */
 
 .login-page .z-window-content {
     background: #071827;
@@ -51,8 +53,8 @@ body {
 .login-card {
     position: fixed;
 
-    left: 50%;
     top: 50%;
+    left: 50%;
 
     transform: translate(-50%, -50%);
 
@@ -67,17 +69,6 @@ body {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.30);
 
     overflow: hidden;
-}
-
-
-/* Remove Default ZK Window Styling */
-
-.login-card .z-window-content {
-    background: #ffffff;
-
-    border: none;
-
-    padding: 0;
 }
 
 
@@ -97,17 +88,18 @@ body {
 .login-title {
     display: block;
 
+    width: 100%;
+
     text-align: center;
 
     font-size: 25px;
+
     font-weight: bold;
 
     color: #071827;
 
     margin-bottom: 5px;
 }
-
-
 
 
 /* =================================
@@ -127,7 +119,6 @@ body {
 
     margin-bottom: 5px;
 }
-
 
 
 /* =================================
@@ -151,11 +142,11 @@ body {
 }
 
 
-
 /* Input Focus */
 
 .login-input:focus {
     border-color: #2161d1;
+
     box-shadow: 0 0 0 2px rgba(33, 97, 209, 0.12);
 }
 
@@ -183,7 +174,7 @@ body {
 }
 
 
-/* Hover */
+/* Button Hover */
 
 .login-button:hover {
     background: #1956c2;
@@ -198,6 +189,8 @@ body {
 
 .login-message {
     display: block;
+
+    width: 100%;
 
     color: #d32f2f;
 

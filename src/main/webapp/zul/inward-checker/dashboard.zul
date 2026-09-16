@@ -7,249 +7,251 @@
 
 <zk>
 
-    <style src="/css/inward/checker/checkerDashboard.css"/>
+    <style src="/css/inward/maker/dashboard.css"/>
 
     <div
         self="@define(content)"
         width="100%"
         height="100%"
-        sclass="content checker-dashboard"
-        apply="com.cts.inward.controller.CheckerDashboardController">
+        sclass="inward-dashboard-content">
 
         <vlayout
+            apply="com.cts.inward.controller.CheckerDashboardController"
             width="100%"
-            spacing="20px"
-            sclass="content-layout">
+            height="100%"
+            spacing="0"
+            sclass="inward-dashboard-layout">
+
+            <!-- ==================== PAGE HEADER ==================== -->
+
+            <vlayout
+                width="100%"
+                spacing="0"
+                sclass="page-header">
+
+                <label
+                    value="Inward Checker Dashboard"
+                    sclass="page-title"/>
+
+ 
+                <separator height="18px"/>
+
+            </vlayout>
 
 
-            <!-- Dashboard Title -->
-
-            <label
-                value="Inward Checker Dashboard"
-                sclass="dashboard-title"/>
-
-
-            <!-- Summary Cards -->
+            <!-- ==================== SUMMARY CARDS ==================== -->
 
             <hlayout
                 width="100%"
                 spacing="20px"
                 sclass="summary-container">
 
+                <!-- ALL BATCHES -->
 
-                <!-- Received Batches -->
-
-                <hlayout
+                <vlayout
                     hflex="1"
-                    valign="middle"
-                    sclass="summary-card">
+                    spacing="0"
+                    sclass="summary-card"
+                    style="align-items:center; justify-content:center; text-align:center;">
 
-                    <vlayout
-                        sclass="card-icon-container icon-blue">
+                    <label
+                        value="ALL BATCHES"
+                        sclass="card-label"/>
 
-                        <label
-                            sclass="z-icon-folder-o"/>
+                    <label
+                        id="receivedCount"
+                        value="0"
+                        sclass="card-value text-blue"/>
 
-                    </vlayout>
-
-                    <vlayout
-                        spacing="2px">
-
-                        <label
-                            value="Received Batches"
-                            sclass="card-label"/>
-
-                        <label
-                            id="receivedCount"
-                            value="0"
-                            sclass="card-value text-blue"/>
-
-                    </vlayout>
-
-                </hlayout>
+                </vlayout>
 
 
-                <!-- Available Batches -->
+                <!-- AVAILABLE BATCHES -->
 
-                <hlayout
+                <vlayout
                     hflex="1"
-                    valign="middle"
-                    sclass="summary-card">
+                    spacing="0"
+                    sclass="summary-card"
+                    style="align-items:center; justify-content:center; text-align:center;">
 
-                    <vlayout
-                        sclass="card-icon-container icon-purple">
+                    <label
+                        value="AVAILABLE BATCHES"
+                        sclass="card-label"/>
 
-                        <label
-                            sclass="z-icon-cog"/>
+                    <label
+                        id="availableCount"
+                        value="0"
+                        sclass="card-value text-purple"/>
 
-                    </vlayout>
-
-                    <vlayout
-                        spacing="2px">
-
-                        <label
-                            value="Available Batches"
-                            sclass="card-label"/>
-
-                        <label
-                            id="availableCount"
-                            value="0"
-                            sclass="card-value text-purple"/>
-
-                    </vlayout>
-
-                </hlayout>
+                </vlayout>
 
 
-                <!-- My Batches -->
+                <!-- MY BATCHES -->
 
-                <hlayout
+                <vlayout
                     hflex="1"
-                    valign="middle"
-                    sclass="summary-card">
+                    spacing="0"
+                    sclass="summary-card"
+                    style="align-items:center; justify-content:center; text-align:center;">
 
-                    <vlayout
-                        sclass="card-icon-container icon-green">
+                    <label
+                        value="MY BATCHES"
+                        sclass="card-label"/>
 
-                        <label
-                            sclass="z-icon-folder-open"/>
+                    <label
+                        id="myBatchCount"
+                        value="0"
+                        sclass="card-value text-green"/>
 
-                    </vlayout>
-
-                    <vlayout
-                        spacing="2px">
-
-                        <label
-                            value="My Batches"
-                            sclass="card-label"/>
-
-                        <label
-                            id="myBatchCount"
-                            value="0"
-                            sclass="card-value text-green"/>
-
-                    </vlayout>
-
-                </hlayout>
+                </vlayout>
 
             </hlayout>
 
 
-            <!-- Batches -->
+            <!-- Space between cards and table -->
+
+            <separator height="20px"/>
+
+
+            <!-- ==================== TABLE PANEL ==================== -->
 
             <vlayout
                 width="100%"
-                sclass="table-panel"
-                spacing="0">
+                vflex="1"
+                spacing="0"
+                sclass="table-panel">
 
 
-                <!-- Table Header -->
+                <!-- ==================== TABLE HEADER ==================== -->
 
                 <hlayout
                     width="100%"
+                    height="56px"
+                    spacing="0"
                     valign="middle"
                     sclass="table-header">
-
-                    <!-- Batches Title -->
 
                     <label
                         value="Batches"
                         sclass="table-title"/>
 
+                    <space hflex="1"/>
 
-                    <!-- Filters -->
+                    <label
+                        value="Filter Status:"
+                        sclass="filter-label"/>
 
-                    <hbox
-                        hflex="1"
-                        align="center"
-                        pack="end"
-                        spacing="8px">
+                    <button
+                        id="allFilter"
+                        label="All"
+                        sclass="filter-btn active-filter"/>
 
-                        <label
-                            value="Filter Status:"
-                            sclass="filter-label"/>
+                    <button
+                        id="availableFilter"
+                        label="Available"
+                        sclass="filter-btn"/>
 
-                        <button
-                            id="allFilter"
-                            label="All 0"
-                            sclass="filter-btn active-filter"/>
-
-                        <button
-                            id="availableFilter"
-                            label="Available 0"
-                            sclass="filter-btn"/>
-
-                        <button
-                            id="myBatchesFilter"
-                            label="My Batches 0"
-                            sclass="filter-btn"/>
-
-                        <button
-                            id="onHoldFilter"
-                            label="On Hold 0"
-                            sclass="filter-btn"/>
-
-                    </hbox>
+                    <button
+                        id="myBatchesFilter"
+                        label="My Batches"
+                        sclass="filter-btn"/>
 
                 </hlayout>
 
 
-                <!-- Horizontal Scroll Area -->
+                <!-- ==================== BATCH SCROLL AREA ==================== -->
+
+                <!--
+                    ONLY THIS AREA IS SCROLLABLE.
+                    Header, filters and pagination remain fixed.
+                -->
 
                 <div
                     width="100%"
-                    sclass="table-scroll">
+                    vflex="1"
+                    sclass="batch-scroll-area">
 
-                    <listbox
+
+                    <!-- ==================== BATCH GRID ==================== -->
+
+                    <grid
                         id="batchList"
-                        width="1100px"
-                        sclass="batch-list"
-                        mold="paging"
-                        pageSize="5">
+                        width="100%"
+                        sclass="custom-grid"
+                        emptyMessage="No batches found.">
 
-                        <listhead>
+                        <columns>
 
-                            <listheader
-                                label="Batch ID"
-                                width="150px"/>
+                            <column
+                                label="Batch ID"/>
 
-                            <listheader
-                                label="Total Checks"
-                                width="150px"/>
+                            <column
+                                label="Total Cheques"
+                                align="center"/>
 
-                            <listheader
+                            <column
                                 label="Maker"
-                                width="200px"/>
+                                align="center"/>
 
-                            <listheader
+                            <column
                                 label="Status"
-                                width="200px"/>
+                                align="center"/>
 
-                            <listheader
-                                label="User ID (Checker)"
-                                width="200px"/>
+                            <column
+                                label="Locked By"
+                                align="center"/>
 
-                            <listheader
+                            <column
                                 label="Action"
-                                width="200px"/>
+                                align="center"/>
 
-                        </listhead>
+                        </columns>
 
-                    </listbox>
+                        <rows/>
+
+                    </grid>
 
                 </div>
 
 
-                <!-- Footer -->
+                <!-- ==================== BOTTOM / PAGINATION ==================== -->
 
                 <hlayout
                     width="100%"
-                    sclass="batch-footer">
+                    height="48px"
+                    spacing="0"
+                    valign="middle"
+                    sclass="bottom-row">
 
-                    <label
-                        id="showingText"
-                        value="Showing 0 batches"
-                        sclass="showing-text"/>
+                  
+                    <space hflex="1"/>
+
+
+                    <!-- ==================== PAGINATION ==================== -->
+
+                    <hlayout
+                        id="pagination"
+                        height="32px"
+                        spacing="6px"
+                        valign="middle"
+                        sclass="pagination">
+
+                        <button
+                            id="previousPage"
+                            label="← Previous"
+                            sclass="page-button"/>
+
+                        <button
+                            id="currentPage"
+                            label="1/1"
+                            sclass="page-button-active"/>
+
+                        <button
+                            id="nextPage"
+                            label="Next →"
+                            sclass="page-button"/>
+
+                    </hlayout>
 
                 </hlayout>
 

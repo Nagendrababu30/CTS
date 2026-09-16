@@ -27,12 +27,10 @@ public class OutwardMakerDataEntryController
     private final OutwardMakerDataEntryDAO dataEntryDAO =
             new OutwardMakerDataEntryDAO();
 
-
     @Override
     public void doAfterCompose(Component comp) throws Exception {
 
         super.doAfterCompose(comp);
-
 
         // =====================================================
         // GET LOGGED-IN USER FROM SESSION
@@ -55,6 +53,119 @@ public class OutwardMakerDataEntryController
             return;
         }
 
+        // =====================================================
+        // DASHBOARD RETURNED-REPAIR ROUTING
+        //
+        // The dashboard can open this ZUL with:
+        //
+        // batchNumber=...
+        // returnMode=HOLD
+        // repairType=DATA_ENTRY
+        // chequeNumber=...
+        //
+        // In that case, DO NOT load the normal queue.
+        // Forward directly to the filtered detail screen.
+        //
+        // Existing normal queue behaviour remains unchanged.
+        // =====================================================
+
+        String requestBatchNumber =
+                Executions.getCurrent()
+                        .getParameter("batchNumber");
+
+        String returnMode =
+                Executions.getCurrent()
+                        .getParameter("returnMode");
+
+        String repairType =
+                Executions.getCurrent()
+                        .getParameter("repairType");
+
+        String chequeNumber =
+                Executions.getCurrent()
+                        .getParameter("chequeNumber");
+
+        // Some servlet/container combinations may expose
+        // amp;returnMode instead of returnMode.
+        if (returnMode == null || returnMode.trim().isEmpty()) {
+            returnMode =
+                    Executions.getCurrent()
+                            .getParameter("amp;returnMode");
+        }
+
+        if (requestBatchNumber != null
+                && !requestBatchNumber.trim().isEmpty()
+                && "HOLD".equalsIgnoreCase(
+                        returnMode != null
+                                ? returnMode.trim()
+                                : ""
+                )
+                && "DATA_ENTRY".equalsIgnoreCase(
+                        repairType != null
+                                ? repairType.trim()
+                                : ""
+                )) {
+
+            StringBuilder url =
+                    new StringBuilder(
+                            "outward-maker-data-entry-detail.zul"
+                    );
+
+            url.append("?batchId=")
+                    .append(requestBatchNumber.trim());
+
+            url.append("&returnMode=HOLD");
+
+            url.append("&repairType=DATA_ENTRY");
+
+            if (chequeNumber != null
+                    && !chequeNumber.trim().isEmpty()) {
+
+                url.append("&chequeNumber=")
+                        .append(chequeNumber.trim());
+            }
+
+            System.out.println(
+                    "======================================"
+            );
+
+            System.out.println(
+                    "OPENING FILTERED RETURNED DATA ENTRY"
+            );
+
+            System.out.println(
+                    "Batch Number : "
+                    + requestBatchNumber
+            );
+
+            System.out.println(
+                    "Return Mode  : HOLD"
+            );
+
+            System.out.println(
+                    "Repair Type  : DATA_ENTRY"
+            );
+
+            System.out.println(
+                    "Cheque Number: "
+                    + chequeNumber
+            );
+
+            System.out.println(
+                    "URL          : "
+                    + url
+            );
+
+            System.out.println(
+                    "======================================"
+            );
+
+            Executions.sendRedirect(
+                    url.toString()
+            );
+
+            return;
+        }
 
         // =====================================================
         // GET LOGGED-IN USER ID FROM SESSION
@@ -80,7 +191,6 @@ public class OutwardMakerDataEntryController
 
             return;
         }
-
 
         // =====================================================
         // CONVERT SESSION USER ID TO LONG
@@ -118,7 +228,6 @@ public class OutwardMakerDataEntryController
             }
         }
 
-
         // =====================================================
         // DYNAMIC LOGGED-IN USER ID
         // =====================================================
@@ -140,14 +249,12 @@ public class OutwardMakerDataEntryController
                 + userId
         );
 
-
         // =====================================================
         // LOAD USER-SPECIFIC BATCHES
         // =====================================================
 
         loadBatches(userId);
     }
-
 
     // =========================================================
     // LOAD BATCHES
@@ -159,9 +266,7 @@ public class OutwardMakerDataEntryController
             return;
         }
 
-
         batchListbox.getItems().clear();
-
 
         // =====================================================
         // FETCH USER-SPECIFIC DATA ENTRY BATCHES
@@ -172,11 +277,9 @@ public class OutwardMakerDataEntryController
                         userId
                 );
 
-
         if (batches == null) {
             return;
         }
-
 
         for (OutwardBatch batch : batches) {
 
@@ -184,10 +287,8 @@ public class OutwardMakerDataEntryController
                 continue;
             }
 
-
             Listitem item =
                     new Listitem();
-
 
             // =================================================
             // 1. BATCH ID
@@ -195,7 +296,6 @@ public class OutwardMakerDataEntryController
 
             String batchNumber =
                     batch.getBatchNumber();
-
 
             Listcell cellBatchId =
                     new Listcell(
@@ -206,11 +306,9 @@ public class OutwardMakerDataEntryController
                     "font-weight: 600; color: #1E293B;"
             );
 
-
             item.appendChild(
                     cellBatchId
             );
-
 
             // =================================================
             // 2. TOTAL CHEQUES
@@ -221,7 +319,6 @@ public class OutwardMakerDataEntryController
                             ? batch.getNumberOfCheques()
                             : 0;
 
-
             item.appendChild(
                     new Listcell(
                             String.valueOf(
@@ -230,7 +327,6 @@ public class OutwardMakerDataEntryController
                     )
             );
 
-
             // =================================================
             // 3. BATCH STATUS
             // =================================================
@@ -238,16 +334,13 @@ public class OutwardMakerDataEntryController
             Listcell cellStatus =
                     new Listcell();
 
-
             String status =
                     batch.getBatchStatus() != null
                             ? batch.getBatchStatus().trim()
                             : "UNKNOWN";
 
-
             Label lblStatus =
                     new Label(status);
-
 
             lblStatus.setSclass(
                     "status-badge "
@@ -258,16 +351,13 @@ public class OutwardMakerDataEntryController
                     )
             );
 
-
             cellStatus.appendChild(
                     lblStatus
             );
 
-
             item.appendChild(
                     cellStatus
             );
-
 
             // =================================================
             // 4. ACTION BUTTON
@@ -276,15 +366,12 @@ public class OutwardMakerDataEntryController
             Listcell cellAction =
                     new Listcell();
 
-
             Button btn =
                     new Button();
-
 
             btn.setSclass(
                     "action-btn"
             );
-
 
             // =================================================
             // RETURNED FROM CHECKER
@@ -307,7 +394,6 @@ public class OutwardMakerDataEntryController
 
             if ("SENT_TO_MAKER".equalsIgnoreCase(status)) {
 
-
                 // =================================================
                 // RETURNED BATCH
                 // =================================================
@@ -315,7 +401,6 @@ public class OutwardMakerDataEntryController
                 btn.setLabel(
                         "Open"
                 );
-
 
                 btn.addEventListener(
                         "onClick",
@@ -342,13 +427,11 @@ public class OutwardMakerDataEntryController
                                     "Return Mode  : RETURNED"
                             );
 
-
                             String url =
                                     "outward-maker-data-entry-detail.zul"
                                     + "?batchId="
                                     + batchNumber
                                     + "&returnMode=RETURNED";
-
 
                             System.out.println(
                                     "URL          : "
@@ -359,16 +442,13 @@ public class OutwardMakerDataEntryController
                                     "======================================"
                             );
 
-
                             Executions.sendRedirect(
                                     url
                             );
                         }
                 );
 
-
             } else {
-
 
                 // =================================================
                 // NORMAL DATA ENTRY
@@ -378,7 +458,6 @@ public class OutwardMakerDataEntryController
                         "Process"
                 );
 
-
                 btn.addEventListener(
                         "onClick",
                         e -> {
@@ -387,7 +466,6 @@ public class OutwardMakerDataEntryController
                                     "outward-maker-data-entry-detail.zul"
                                     + "?batchId="
                                     + batchNumber;
-
 
                             System.out.println(
                                     "======================================"
@@ -416,14 +494,12 @@ public class OutwardMakerDataEntryController
                                     "======================================"
                             );
 
-
                             Executions.sendRedirect(
                                     url
                             );
                         }
                 );
             }
-
 
             // =================================================
             // ADD ACTION BUTTON
@@ -433,11 +509,9 @@ public class OutwardMakerDataEntryController
                     btn
             );
 
-
             item.appendChild(
                     cellAction
             );
-
 
             // =================================================
             // ADD ROW TO LIST

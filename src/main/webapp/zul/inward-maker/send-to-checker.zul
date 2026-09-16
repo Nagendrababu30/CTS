@@ -15,17 +15,11 @@
         height="100%"
         sclass="content">
 
-
     <style src="/css/inward/maker/sendtochecker.css"/>
-    <window apply="com.cts.inward.controller.SendToCheckerController" height="100%" sclass="main-window">
+    <window apply="com.cts.inward.controller.SendToCheckerController" 
+    				height="100%" sclass="main-window">
         
         <vlayout sclass="content-container">
-            
-            <!-- Top Alert Message -->
-            <hlayout sclass="alert-box" spacing="0">
-                <label sclass="z-icon-info-circle alert-icon" />
-                <label value="The following batches are verified by Inward Maker and ready to be submitted to Inward Checker." sclass="alert-text"/>
-            </hlayout>
 
             <!-- Main Grid -->
             <grid id="batchesGrid" emptyMessage="No batches ready to be submitted." sclass="custom-grid">
@@ -37,12 +31,6 @@
                 </columns>
                 <rows id="batchRows" />
             </grid>
-
-            <!-- Bottom Note -->
-            <hlayout sclass="note-box" spacing="0">
-                <label sclass="z-icon-info-circle note-icon" />
-                <label value="Submitting a batch forwards it immediately to the Inward Checker queue." sclass="note-text"/>
-            </hlayout>
 
         </vlayout>
         

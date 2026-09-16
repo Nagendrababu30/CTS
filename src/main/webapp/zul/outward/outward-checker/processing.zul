@@ -210,18 +210,25 @@
 
 
                             <hlayout width="100%"
-                                     valign="top"
-                                     sclass="detail-row">
-
-                                <label value="Cheque Date"
-                                       sclass="detail-label"/>
-
-                                <label id="chequeDateLabel"
-                                       value="-"
-                                       hflex="1"
-                                       sclass="detail-value"/>
-
-                            </hlayout>
+							         valign="top"
+							         sclass="detail-row">
+							    <label value="Cheque Date"
+							           sclass="detail-label"/>
+							    <vlayout hflex="1"
+							             spacing="3px">
+							
+							        <label id="chequeDateLabel"
+							               value="-"
+							               sclass="detail-value"/>
+							
+							        <label id="chequeDateValidationMessage"
+							               value=""
+							               visible="false"
+							               multiline="true"
+							               sclass="cheque-date-validation-message"/>
+							
+							    </vlayout>
+							</hlayout>
 
 
                             <hlayout width="100%"
@@ -489,6 +496,7 @@
                          valign="middle">
 
                     <space hflex="1"/>
+
 
                     <button id="saveNextButton"
                             label="Save &amp; Next"

@@ -288,26 +288,15 @@ public class CaptureOperatorXMLParser {
         }
 
         // -----------------------------------------------------
-        // DEPOSITOR ACCOUNT
+        // PAYEE ACCOUNT
         // -----------------------------------------------------
 
         else if (equalsIgnoreCase(
                 field,
-                "DepositorAccountNumber",
-                "DepositorAccountNo")) {
+                "PayeeAccountNumber",
+                "PayeeAccountNo")) {
 
-            cheque.setDepositorAccountNumber(value);
-        }
-
-        // -----------------------------------------------------
-        // DEPOSITOR NAME
-        // -----------------------------------------------------
-
-        else if (equalsIgnoreCase(
-                field,
-                "DepositorName")) {
-
-            cheque.setDepositorName(value);
+            cheque.setPayeeAccountNumber(value);
         }
 
         // -----------------------------------------------------

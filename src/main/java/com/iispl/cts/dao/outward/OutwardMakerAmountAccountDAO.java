@@ -296,7 +296,7 @@ public class OutwardMakerAmountAccountDAO {
                      * the account field available in your
                      * existing OutwardCheque model.
                      */
-                    cheque.setDepositorAccountNumber(
+                    cheque.setPayeeAccountNumber(
                             rs.getString(
                                     "payee_account_number"
                             )
@@ -390,7 +390,7 @@ public class OutwardMakerAmountAccountDAO {
          */
 
         String accountNumber =
-                cheque.getDepositorAccountNumber();
+                cheque.getPayeeAccountNumber();
 
         if (accountNumber == null
                 || accountNumber.trim().isEmpty()) {
@@ -719,7 +719,7 @@ public class OutwardMakerAmountAccountDAO {
                      * into the existing depositorAccountNumber field.
                      */
 
-                    cheque.setDepositorAccountNumber(
+                    cheque.setPayeeAccountNumber(
                             rs.getString("payee_account_number")
                     );
 

@@ -14,20 +14,13 @@ import com.iispl.cts.model.outward.ReturnReason;
 public class CheckerProcessingService {
 
     private final CheckerChequeDAO chequeDao;
-
     private final CheckerAssignmentDAO assignmentDao;
-
 
     public CheckerProcessingService() {
 
-        this.chequeDao =
-                new CheckerChequeDAO();
-
-        this.assignmentDao =
-                new CheckerAssignmentDAO();
-
+        this.chequeDao = new CheckerChequeDAO();
+        this.assignmentDao = new CheckerAssignmentDAO();
     }
-
 
     // ============================================================
     // GET CURRENT CHEQUE
@@ -37,11 +30,18 @@ public class CheckerProcessingService {
             String batchNumber,
             String chequeNumber) {
 
-        return chequeDao.getCheque(
-                batchNumber,
-                chequeNumber);
-    }
+        if (batchNumber == null
+                || batchNumber.trim().isEmpty()
+                || chequeNumber == null
+                || chequeNumber.trim().isEmpty()) {
 
+            return null;
+        }
+
+        return chequeDao.getCheque(
+                batchNumber.trim(),
+                chequeNumber.trim());
+    }
 
     // ============================================================
     // GET PROCESSING DETAILS
@@ -51,36 +51,31 @@ public class CheckerProcessingService {
             String batchNumber,
             String chequeNumber) {
 
-        return chequeDao.getChequeProcessing(
-                batchNumber,
-                chequeNumber);
-    }
+        if (batchNumber == null
+                || batchNumber.trim().isEmpty()
+                || chequeNumber == null
+                || chequeNumber.trim().isEmpty()) {
 
+            return null;
+        }
+
+        return chequeDao.getChequeProcessing(
+                batchNumber.trim(),
+                chequeNumber.trim());
+    }
 
     // ============================================================
     // GET RE-VERIFIED CHEQUES
     // ============================================================
     /*
-     * Returns only the cheques which are eligible for
-     * Checker Re-Verify.
+     * Re-Verify is based ONLY on:
      *
-     * Conditions:
+     * 1. Same batch
+     * 2. Same/original Checker
+     * 3. Previous Checker action = SEND_BACK
+     * 4. Cheque status = RE_VERIFIED
      *
-     * 1. Same batch number
-     *
-     * 2. cheque_processing.checker_id must belong to
-     *    the original Checker
-     *
-     * 3. cheque_processing.checker_action must be SEND_BACK
-     *
-     * 4. outward_cheque.cheque_status must be RE_VERIFIED
-     *
-     * IMPORTANT:
-     *
-     * outward_batch.batch_status is NOT checked here.
-     *
-     * Re-Verify is based only on the individual cheque
-     * processing/status information.
+     * Batch status is deliberately NOT checked.
      */
 
     public List<OutwardCheque> getReVerifiedCheques(
@@ -103,7 +98,6 @@ public class CheckerProcessingService {
                 checkerUserId);
     }
 
-
     // ============================================================
     // MAKER REJECTION INFORMATION
     // ============================================================
@@ -113,7 +107,7 @@ public class CheckerProcessingService {
             String chequeNumber) {
 
         ChequeProcessing processing =
-                chequeDao.getChequeProcessing(
+                getChequeProcessing(
                         batchNumber,
                         chequeNumber);
 
@@ -125,21 +119,10 @@ public class CheckerProcessingService {
         return "REJECT_REQUEST".equalsIgnoreCase(
                 processing.getMakerAction());
     }
-    
+
     // ============================================================
     // START CHECKER PROCESSING
     // ============================================================
-
-    /*
-     * Moves a Maker re-verified cheque into
-     * Checker processing.
-     *
-     * Only a cheque with status RE_VERIFIED can
-     * be moved to CHECKER_PROCESSING.
-     *
-     * This prevents already processed cheques from
-     * being moved back into Checker processing.
-     */
 
     public boolean startCheckerProcessing(
             String batchNumber,
@@ -162,15 +145,16 @@ public class CheckerProcessingService {
                 chequeNumber.trim());
     }
 
-
-
+    // ============================================================
+    // GET MAKER REASON CODE
+    // ============================================================
 
     public String getMakerReasonCode(
             String batchNumber,
             String chequeNumber) {
 
         ChequeProcessing processing =
-                chequeDao.getChequeProcessing(
+                getChequeProcessing(
                         batchNumber,
                         chequeNumber);
 
@@ -188,14 +172,11 @@ public class CheckerProcessingService {
         return processing.getMakerReasonCode();
     }
 
-
     // ============================================================
-    // CBS VALIDATION
+    // CBS ACCOUNT VALIDATION
     // ============================================================
 
     /*
-     * Validate drawer account in CBS.
-     *
      * Possible results:
      *
      * ACCOUNT_NOT_FOUND
@@ -233,24 +214,15 @@ public class CheckerProcessingService {
         return "PASS";
     }
 
-
     // ============================================================
     // CHEQUE DATE VALIDATION
     // ============================================================
 
     /*
-     * Validate cheque date.
+     * Cheque date:
      *
-     * Cheque date must:
-     *
-     * 1. Not be older than 3 months from today.
-     * 2. Not be a future/post-dated cheque.
-     *
-     * Possible results:
-     *
-     * CHEQUE_DATE_EXPIRED
-     * CHEQUE_DATE_POST_DATED
-     * PASS
+     * - Must not be older than 3 months
+     * - Must not be future/post-dated
      */
 
     public String validateChequeDate(
@@ -280,61 +252,65 @@ public class CheckerProcessingService {
         return "PASS";
     }
 
-
     // ============================================================
-    // CBS UI MESSAGE
+    // CBS / CHEQUE VALIDATION MESSAGE
     // ============================================================
 
     public String getCbsValidationMessage(
-            String cbsResult) {
+            String validationResult) {
 
         if ("ACCOUNT_NOT_FOUND".equals(
-                cbsResult)) {
+                validationResult)) {
 
             return "Drawer account does not exist in CBS records.";
         }
 
         if ("ACCOUNT_INACTIVE".equals(
-                cbsResult)) {
+                validationResult)) {
 
             return "Drawer account is inactive.";
         }
 
         if ("CHEQUE_DATE_EXPIRED".equals(
-                cbsResult)) {
+                validationResult)) {
 
             return "Cheque date is older than 3 months.";
         }
 
         if ("CHEQUE_DATE_POST_DATED".equals(
-                cbsResult)) {
+                validationResult)) {
 
             return "Post-dated cheque is not allowed.";
         }
 
-        if ("PASS".equals(cbsResult)) {
+        if ("PASS".equals(validationResult)) {
 
-            return "Drawer account exists and is active.";
+            return "Validation successful.";
         }
 
-        return "CBS validation failed.";
+        return "Validation failed.";
     }
-
 
     // ============================================================
     // ACCEPT ALLOWED
     // ============================================================
 
     public boolean isAcceptAllowed(
-            String cbsResult) {
+            String validationResult) {
 
-        return "PASS".equals(cbsResult);
+        return "PASS".equals(validationResult);
     }
 
+    // ============================================================
+    // GET CHECKER RETURN / REJECTION REASONS
+    // ============================================================
 
-    // ============================================================
-    // RETURN REASONS
-    // ============================================================
+    /*
+     * reasonType must be:
+     *
+     * SEND_BACK
+     * REJECT
+     */
 
     public List<ReturnReason> getReturnReasons(
             String reasonType) {
@@ -349,36 +325,33 @@ public class CheckerProcessingService {
                 reasonType.trim().toUpperCase());
     }
 
-
     // ============================================================
     // SAVE CHECKER DECISION
     // ============================================================
 
     /*
      * ACCEPT:
-     *
-     *     CBS must PASS.
-     *     No reason.
-     *     Final decision.
+     * - CBS must PASS
+     * - Cheque date must PASS
+     * - No reason
      *
      * REJECT:
-     *
-     *     Reason mandatory.
-     *     Final decision.
+     * - Reason mandatory
+     * - Final decision
+     * - CBS does not have to PASS
      *
      * SEND_BACK:
+     * - CBS must PASS
+     * - Cheque date must PASS
+     * - Reason mandatory
+     * - Not final
      *
-     *     CBS must PASS.
-     *     Reason mandatory.
-     *     Not a final Checker decision.
-     *
-     * Important:
-     *
-     *     ACCEPT / REJECT cannot be performed again on
-     *     an already-final cheque.
-     *
-     *     SEND_BACK can be followed by another Checker
-     *     decision after Maker rework and resubmission.
+     * Re-verification:
+     * - Same Checker
+     * - Same batch
+     * - Previous action SEND_BACK
+     * - Maker corrected cheque
+     * - Cheque status RE_VERIFIED
      */
 
     public boolean saveCheckerDecision(
@@ -389,9 +362,9 @@ public class CheckerProcessingService {
             String checkerReasonCode,
             String checkerRemarks) {
 
-        // ========================================================
+        // --------------------------------------------------------
         // BASIC VALIDATION
-        // ========================================================
+        // --------------------------------------------------------
 
         if (batchNumber == null
                 || batchNumber.trim().isEmpty()) {
@@ -425,10 +398,9 @@ public class CheckerProcessingService {
         checkerAction =
                 checkerAction.trim().toUpperCase();
 
-
-        // ========================================================
+        // --------------------------------------------------------
         // VALID ACTION
-        // ========================================================
+        // --------------------------------------------------------
 
         if (!"ACCEPT".equals(checkerAction)
                 && !"REJECT".equals(checkerAction)
@@ -437,15 +409,9 @@ public class CheckerProcessingService {
             return false;
         }
 
-
-        // ========================================================
-        // VERIFY BATCH ASSIGNMENT
-        // ========================================================
-
-        /*
-         * Only the Checker who currently owns
-         * the batch can make a decision.
-         */
+        // --------------------------------------------------------
+        // CHECK CURRENT BATCH ASSIGNMENT
+        // --------------------------------------------------------
 
         if (!assignmentDao.isBatchAssignedToChecker(
                 batchNumber,
@@ -454,10 +420,9 @@ public class CheckerProcessingService {
             return false;
         }
 
-
-        // ========================================================
-        // GET CURRENT CHEQUE
-        // ========================================================
+        // --------------------------------------------------------
+        // GET CHEQUE
+        // --------------------------------------------------------
 
         OutwardCheque cheque =
                 chequeDao.getCheque(
@@ -469,10 +434,9 @@ public class CheckerProcessingService {
             return false;
         }
 
-
-        // ========================================================
-        // GET CURRENT PROCESSING STATE
-        // ========================================================
+        // --------------------------------------------------------
+        // GET PROCESSING RECORD
+        // --------------------------------------------------------
 
         ChequeProcessing processing =
                 chequeDao.getChequeProcessing(
@@ -484,20 +448,9 @@ public class CheckerProcessingService {
             return false;
         }
 
-
-        // ========================================================
+        // --------------------------------------------------------
         // PREVENT DUPLICATE FINAL DECISION
-        // ========================================================
-
-        /*
-         * ACCEPT and REJECT are final Checker decisions.
-         *
-         * Once either has been saved, the same cheque must
-         * not be processed again.
-         *
-         * SEND_BACK is intentionally not treated as final,
-         * because Maker can rework and submit the cheque again.
-         */
+        // --------------------------------------------------------
 
         String existingCheckerAction =
                 processing.getCheckerAction();
@@ -505,38 +458,27 @@ public class CheckerProcessingService {
         if (existingCheckerAction != null) {
 
             existingCheckerAction =
-                    existingCheckerAction.trim().toUpperCase();
+                    existingCheckerAction
+                            .trim()
+                            .toUpperCase();
 
-            if (("ACCEPT".equals(existingCheckerAction)
-                    || "REJECT".equals(existingCheckerAction))) {
+            if ("ACCEPT".equals(existingCheckerAction)
+                    || "REJECT".equals(existingCheckerAction)) {
 
                 return false;
             }
         }
 
-
-        // ========================================================
-        // CBS VALIDATION
-        // ========================================================
-
-        /*
-         * ACCEPT and SEND_BACK require successful CBS
-         * validation.
-         *
-         * REJECT does not require CBS PASS because the
-         * Checker may reject the cheque for a valid reason
-         * even when CBS validation fails.
-         */
+        // --------------------------------------------------------
+        // ACCEPT / SEND_BACK VALIDATION
+        // --------------------------------------------------------
 
         if ("ACCEPT".equals(checkerAction)
                 || "SEND_BACK".equals(checkerAction)) {
 
-            String accountNumber =
-                    cheque.getDrawerAccountNumber();
-
             String cbsResult =
                     validateCbsAccount(
-                            accountNumber);
+                            cheque.getDrawerAccountNumber());
 
             if (!"PASS".equals(cbsResult)) {
 
@@ -553,10 +495,9 @@ public class CheckerProcessingService {
             }
         }
 
-
-        // ========================================================
+        // --------------------------------------------------------
         // REASON VALIDATION
-        // ========================================================
+        // --------------------------------------------------------
 
         if ("REJECT".equals(checkerAction)
                 || "SEND_BACK".equals(checkerAction)) {
@@ -571,20 +512,18 @@ public class CheckerProcessingService {
                     checkerReasonCode.trim();
         }
 
-
-        // ========================================================
-        // ACCEPT MUST NOT HAVE A REASON
-        // ========================================================
+        // --------------------------------------------------------
+        // ACCEPT HAS NO REASON
+        // --------------------------------------------------------
 
         if ("ACCEPT".equals(checkerAction)) {
 
             checkerReasonCode = null;
         }
 
-
-        // ========================================================
+        // --------------------------------------------------------
         // NORMALIZE REMARKS
-        // ========================================================
+        // --------------------------------------------------------
 
         if (checkerRemarks != null) {
 
@@ -597,10 +536,9 @@ public class CheckerProcessingService {
             }
         }
 
-
-        // ========================================================
-        // SAVE TO DATABASE
-        // ========================================================
+        // --------------------------------------------------------
+        // SAVE
+        // --------------------------------------------------------
 
         return chequeDao.saveCheckerDecision(
                 batchNumber,
@@ -611,8 +549,12 @@ public class CheckerProcessingService {
                 checkerRemarks);
     }
 
+    // ============================================================
+    // GET MAKER REASON NAME
+    // ============================================================
 
-    public String getMakerReasonName(String reasonCode) {
+    public String getMakerReasonName(
+            String reasonCode) {
 
         if (reasonCode == null
                 || reasonCode.trim().isEmpty()) {
@@ -623,5 +565,4 @@ public class CheckerProcessingService {
         return chequeDao.getReasonName(
                 reasonCode.trim());
     }
-
 }

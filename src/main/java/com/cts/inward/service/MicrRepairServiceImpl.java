@@ -44,6 +44,10 @@ public class MicrRepairServiceImpl implements MicrRepairService {
         List<MicrRepairBatchDto> result =
                 new ArrayList<>();
 
+        if (userId == null) {
+            return result;
+        }
+
         List<NpciBatchData> batches =
                 batchDao.getBatchesForMaker(userId);
 
@@ -206,22 +210,25 @@ public class MicrRepairServiceImpl implements MicrRepairService {
                             npci.getChequeNumber()
                     );
 
-            if (STATUS_RETURN_BY_MAKER.equalsIgnoreCase(latestStatus)
-                    || "ACCEPT".equalsIgnoreCase(latestStatus)
+            boolean returnByMaker =
+                    STATUS_RETURN_BY_MAKER.equalsIgnoreCase(
+                            latestStatus
+                    );
+
+            if ("ACCEPT".equalsIgnoreCase(latestStatus)
                     || "REJECT".equalsIgnoreCase(latestStatus)) {
 
                 continue;
             }
 
             if (isBatchReturned) {
-                if (!"RETURN_TO_MAKER".equalsIgnoreCase(latestStatus)) {
+                if (!"RETURN_TO_MAKER".equalsIgnoreCase(latestStatus) && !returnByMaker) {
                     continue;
                 }
-                String returnReason =
-                        micrRepairDao.getLatestChequeReturnReason(
-                                npci.getChequeNumber());
-                if (!isMicrReturnReason(returnReason)) {
-                    continue;
+                if ("RETURN_TO_MAKER".equalsIgnoreCase(latestStatus)) {
+                    if (!micrRepairDao.chequeNeedsMicrRepair(npci.getChequeNumber())) {
+                        continue;
+                    }
                 }
             }
 
@@ -392,6 +399,16 @@ public class MicrRepairServiceImpl implements MicrRepairService {
             }
 
 
+            if (returnByMaker) {
+                needsRepair = false;
+                comparison.setReturnByMaker(true);
+                String returnReason =
+                        micrRepairDao.getLatestChequeReturnReason(
+                                npci.getChequeNumber()
+                        );
+                comparison.setReturnReasonCode(returnReason);
+            }
+
             comparison.setNeedsMicrRepair(
                     needsRepair
             );
@@ -468,12 +485,21 @@ public class MicrRepairServiceImpl implements MicrRepairService {
             );
         }
 
-        return micrRepairDao.saveMakerReturn(
+        boolean saved = micrRepairDao.saveMakerReturn(
             chequeNumber.trim(),
             returnReasonCode.trim(),
             makerRemarks,
             userId
         );
+
+        if (saved) {
+            updateBatchStatusIfMicrStageComplete(
+                chequeNumber.trim(),
+                userId
+            );
+        }
+
+        return saved;
     }
 
     @Override

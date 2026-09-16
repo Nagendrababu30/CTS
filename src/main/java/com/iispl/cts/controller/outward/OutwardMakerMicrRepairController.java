@@ -1,13 +1,11 @@
 package com.iispl.cts.controller.outward;
-
-import java.util.ArrayList;
 import java.util.List;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Session;
-import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Wire;
+import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.ListModelList;
@@ -15,17 +13,12 @@ import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.ListitemRenderer;
-import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Vlayout;
 
-import com.iispl.cts.model.outward.ChequeProcessing;
 import com.iispl.cts.model.outward.OutwardBatch;
-import com.iispl.cts.model.outward.OutwardCheque;
-import com.iispl.cts.service.outward.OutwardMakerDashboardService;
 import com.iispl.cts.service.outward.OutwardMakerMicrRepairService;
 
-public class OutwardMakerMicrRepairController
-        extends SelectorComposer<Component> {
+public class OutwardMakerMicrRepairController extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
 
@@ -34,24 +27,18 @@ public class OutwardMakerMicrRepairController
 
     private OutwardMakerMicrRepairService service;
 
-    /*
-     * =========================================================
-     * RETURNED CHEQUE / MICR REPAIR STATE
-     * =========================================================
-     */
+    
+     //=========================================================
+     // RETURNED CHEQUE / MICR REPAIR STATE
+     //=========================================================
+     
     private boolean returnedMode = false;
-
     private String returnedChequeNumber;
 
-    /*
-     * Dashboard repair type.
-     * For returned batches this is normally MICR.
-     */
+     // Dashboard repair type.
+     //For returned batches this is normally MICR.
+     
     private String repairType;
-
-    private String checkerReasonCode;
-
-    private String checkerRemarks;
 
     @Wire
     private Vlayout checkerReturnInformationPanel;
@@ -69,27 +56,14 @@ public class OutwardMakerMicrRepairController
 
         service = new OutwardMakerMicrRepairService();
 
-        /*
-         * =====================================================
-         * CHECK WHETHER THIS IS RETURNED MODE
-         * =====================================================
-         */
+         // =====================================================
+         // CHECK WHETHER THIS IS RETURNED MODE
+         // =====================================================
 
-        String returnMode =
-                Executions.getCurrent()
-                        .getParameter("returnMode");
-
-        /*
-         * Support both:
-         *
-         * returnMode=RETURNED
-         *
-         * and:
-         *
-         * amp;returnMode=RETURNED
-         */
-        if (returnMode == null
-                || returnMode.trim().isEmpty()) {
+        String returnMode = Executions.getCurrent().getParameter("returnMode");
+ 
+        // Support both: returnMode=RETURNED and: amp;returnMode=RETURNED
+        if (returnMode == null || returnMode.trim().isEmpty()) {
 
             returnMode =
                     Executions.getCurrent()
@@ -174,7 +148,19 @@ public class OutwardMakerMicrRepairController
                                 new Listcell(
                                         String.valueOf(
                                                 micrErrorCount)));
+                        
 
+                        // Status
+                        Listcell statusCell = new Listcell();
+
+                        Label statusLabel = new Label("MICR REPAIR");
+
+                        statusLabel.setSclass("micr-repair-status");
+
+                        statusCell.appendChild(statusLabel);
+                        item.appendChild(statusCell);
+                        
+                        
                         // Action
                         Listcell actionCell =
                                 new Listcell();

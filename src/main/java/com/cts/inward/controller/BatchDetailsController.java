@@ -314,8 +314,24 @@ public class BatchDetailsController
     private Textbox returnRemark;
     private Button returnCancelButton;
     private Button returnConfirmButton;
-
     private boolean cbsPassed = false;
+
+    // =========================================================
+    // MAKER RETURN PANEL (RETURN_BY_MAKER)
+    // =========================================================
+    private Vlayout makerReturnPanel;
+    private Vlayout verificationFormContainer;
+    private Vlayout makerReturnReasonsList;
+    private Label lblMakerReturnRemarks;
+    private Component boxMakerRemarks;
+    private Component boxMicrMasterVerification;
+    private Label badgeMicrMasterStatus;
+    private Label lblNpciMicrValue;
+    private Label lblNpciMicrCheck;
+    private Label lblOcrMicrValue;
+    private Label lblOcrMicrCheck;
+    private Component micrMasterSummaryBox;
+    private Label lblMicrMasterSummary;
 
     @Override
     public void doAfterCompose(Component component)
@@ -760,30 +776,180 @@ public class BatchDetailsController
         }
 
         // =====================================================
-        // MICR
+        // CHECK IF CHEQUE WAS RETURNED BY MAKER
         // =====================================================
 
-        loadMicrDetails(
-                chequeNumber);
+        String status = getString(cheque, "status");
+        boolean isReturnByMaker = "RETURN_BY_MAKER".equalsIgnoreCase(status);
 
-        // =====================================================
-        // DATA ENTRY
-        // =====================================================
+        if (isReturnByMaker) {
+            // Show Maker Return Panel, hide verification form
+            if (makerReturnPanel != null) {
+                makerReturnPanel.setVisible(true);
+            }
+            if (verificationFormContainer != null) {
+                verificationFormContainer.setVisible(false);
+            }
 
-        loadDataEntryDetails(
-                chequeNumber);
+            // Populate Maker Return info
+            String returnReasonCode = getString(cheque, "returnReasonCode");
+            String returnReasonDesc = getString(cheque, "returnReasonDescription");
+            String makerRemarks = getString(cheque, "makerRemarks");
+            String ocrMicrCode = getString(cheque, "ocrMicrCode");
 
-        // =====================================================
-        // CBS VALIDATION
-        //
-        // NO BUTTON.
-        //
-        // CBS automatically executes whenever the
-        // current cheque is loaded.
-        // =====================================================
+            if (makerReturnReasonsList != null) {
+                makerReturnReasonsList.getChildren().clear();
+                List<Map<String, String>> returnReasons = batchDetailsService.getMakerReturnReasons(chequeNumber);
+                if (returnReasons != null && !returnReasons.isEmpty()) {
+                    for (Map<String, String> r : returnReasons) {
+                        Hlayout row = new Hlayout();
+                        row.setSpacing("10px");
+                        row.setValign("middle");
+                        row.setWidth("100%");
+                        row.setStyle("background:#FFF5F5; border:1.5px solid #FECDCA; border-radius:6px; padding:8px 12px;");
 
-        loadCbsValidation(
-                chequeNumber);
+                        String code = r.get("returnReasonCode");
+                        String desc = r.get("description");
+                        if (desc == null || desc.trim().isEmpty()) {
+                            desc = "Return requested by maker";
+                        }
+
+                        Label badge = new Label(code != null ? code : "—");
+                        badge.setStyle("font-size:12px; font-weight:700; background:#FEE4E2; color:#B42318; border:1px solid #FECDCA; border-radius:4px; padding:2px 8px; flex-shrink:0;");
+
+                        Label lblDesc = new Label(desc);
+                        lblDesc.setStyle("font-size:13px; font-weight:600; color:#1E293B; word-break:break-word;");
+                        lblDesc.setHflex("1");
+
+                        row.appendChild(badge);
+                        row.appendChild(lblDesc);
+                        makerReturnReasonsList.appendChild(row);
+                    }
+                } else {
+                    String singleCode = getString(cheque, "returnReasonCode");
+                    String singleDesc = getString(cheque, "returnReasonDescription");
+                    Hlayout row = new Hlayout();
+                    row.setSpacing("10px");
+                    row.setValign("middle");
+                    row.setWidth("100%");
+                    row.setStyle("background:#FFF5F5; border:1.5px solid #FECDCA; border-radius:6px; padding:8px 12px;");
+
+                    Label badge = new Label(singleCode != null && !singleCode.trim().isEmpty() ? singleCode : "RETURN");
+                    badge.setStyle("font-size:12px; font-weight:700; background:#FEE4E2; color:#B42318; border:1px solid #FECDCA; border-radius:4px; padding:2px 8px; flex-shrink:0;");
+
+                    Label lblDesc = new Label(singleDesc != null && !singleDesc.trim().isEmpty() ? singleDesc : "Returned by Maker");
+                    lblDesc.setStyle("font-size:13px; font-weight:600; color:#1E293B;");
+                    lblDesc.setHflex("1");
+
+                    row.appendChild(badge);
+                    row.appendChild(lblDesc);
+                    makerReturnReasonsList.appendChild(row);
+                }
+            }
+
+            if (lblMakerReturnRemarks != null) {
+                if (makerRemarks != null && !makerRemarks.trim().isEmpty()) {
+                    lblMakerReturnRemarks.setValue(makerRemarks);
+                    if (boxMakerRemarks != null) {
+                        boxMakerRemarks.setVisible(true);
+                    }
+                } else {
+                    lblMakerReturnRemarks.setValue("No remarks provided by Maker");
+                    if (boxMakerRemarks != null) {
+                        boxMakerRemarks.setVisible(false);
+                    }
+                }
+            }
+
+            // Verify MICR with MicrMaster
+            boolean npciExists = false;
+            if (micrCode != null && !micrCode.trim().isEmpty()) {
+                npciExists = com.cts.inward.dao.MicrMasterDaoImpl.of().exists(micrCode.trim());
+            }
+
+            boolean ocrExists = false;
+            if (ocrMicrCode != null && !ocrMicrCode.trim().isEmpty()) {
+                ocrExists = com.cts.inward.dao.MicrMasterDaoImpl.of().exists(ocrMicrCode.trim());
+            }
+
+            if (lblNpciMicrValue != null) {
+                lblNpciMicrValue.setValue(micrCode != null && !micrCode.trim().isEmpty() ? micrCode : "Not Present");
+            }
+            if (lblNpciMicrCheck != null) {
+                if (npciExists) {
+                    lblNpciMicrCheck.setValue("✓ Found in Master");
+                    lblNpciMicrCheck.setStyle("color:#027A48; background:#ECFDF3; border:1px solid #A6F4C5; font-weight:700; padding:4px 10px; border-radius:6px;");
+                } else {
+                    lblNpciMicrCheck.setValue("✗ NOT Found in Master");
+                    lblNpciMicrCheck.setStyle("color:#B42318; background:#FEF3F2; border:1px solid #FECDCA; font-weight:700; padding:4px 10px; border-radius:6px;");
+                }
+            }
+
+            if (lblOcrMicrValue != null) {
+                lblOcrMicrValue.setValue(ocrMicrCode != null && !ocrMicrCode.trim().isEmpty() ? ocrMicrCode : "Not Present");
+            }
+            if (lblOcrMicrCheck != null) {
+                if (ocrMicrCode != null && !ocrMicrCode.trim().isEmpty()) {
+                    if (ocrExists) {
+                        lblOcrMicrCheck.setValue("✓ Found in Master");
+                        lblOcrMicrCheck.setStyle("color:#027A48; background:#ECFDF3; border:1px solid #A6F4C5; font-weight:700; padding:4px 10px; border-radius:6px;");
+                    } else {
+                        lblOcrMicrCheck.setValue("✗ NOT Found in Master");
+                        lblOcrMicrCheck.setStyle("color:#B42318; background:#FEF3F2; border:1px solid #FECDCA; font-weight:700; padding:4px 10px; border-radius:6px;");
+                    }
+                } else {
+                    lblOcrMicrCheck.setValue("— N/A");
+                    lblOcrMicrCheck.setStyle("color:#64748B; background:#F1F5F9; border:1px solid #E2E8F0; font-weight:700; padding:4px 10px; border-radius:6px;");
+                }
+            }
+
+            if (lblMicrMasterSummary != null) {
+                if (ocrExists) {
+                    lblMicrMasterSummary.setValue("System Verification: MICR code (" + ocrMicrCode + ") was found in Master directory.");
+                } else {
+                    lblMicrMasterSummary.setValue("System Verification: MICR code is absent from the MICR Master Directory. Maker return is verified by system.");
+                }
+            }
+
+            if (leftCbsStatus != null) {
+                leftCbsStatus.setValue("● RETURNED BY MAKER");
+                leftCbsStatus.setSclass("cbs-fail-badge");
+            }
+
+            // Action buttons: Accept is disabled, Return & Reject are enabled
+            if (acceptButton != null) {
+                acceptButton.setDisabled(true);
+                acceptButton.setSclass("decision-button accept-button accept-button-dull");
+                acceptButton.setTooltiptext("Cannot accept cheque returned by Maker. Please reject or return to Maker.");
+            }
+            if (returnButton != null) {
+                returnButton.setDisabled(false);
+            }
+            if (rejectButton != null) {
+                rejectButton.setDisabled(false);
+            }
+
+        } else {
+            // Normal cheque: show verification form, hide maker return panel
+            if (makerReturnPanel != null) {
+                makerReturnPanel.setVisible(false);
+            }
+            if (verificationFormContainer != null) {
+                verificationFormContainer.setVisible(true);
+            }
+            if (acceptButton != null) {
+                acceptButton.setTooltiptext(null);
+            }
+
+            // MICR
+            loadMicrDetails(chequeNumber);
+
+            // DATA ENTRY
+            loadDataEntryDetails(chequeNumber);
+
+            // CBS VALIDATION
+            loadCbsValidation(chequeNumber);
+        }
 
         // =====================================================
         // NAVIGATION
@@ -1919,6 +2085,13 @@ public class BatchDetailsController
     // =========================================================
 
     public void onClick$acceptButton() {
+        Map<String, Object> currentCheque = (cheques != null && currentChequeIndex >= 0 && currentChequeIndex < cheques.size())
+                ? cheques.get(currentChequeIndex) : null;
+        if (currentCheque != null && "RETURN_BY_MAKER".equalsIgnoreCase(getString(currentCheque, "status"))) {
+            Messagebox.show("This cheque was returned by the Maker and cannot be accepted. Please select Reject or Return to Maker.",
+                    "Action Restricted", Messagebox.OK, Messagebox.EXCLAMATION);
+            return;
+        }
         if (!cbsPassed) {
             Messagebox.show("CBS validation has failed. This cheque cannot be accepted.",
                     "CBS Validation", Messagebox.OK, Messagebox.ERROR);
@@ -1936,6 +2109,16 @@ public class BatchDetailsController
     }
 
     private void handleAcceptConfirmButton() {
+        Map<String, Object> currentCheque = (cheques != null && currentChequeIndex >= 0 && currentChequeIndex < cheques.size())
+                ? cheques.get(currentChequeIndex) : null;
+        if (currentCheque != null && "RETURN_BY_MAKER".equalsIgnoreCase(getString(currentCheque, "status"))) {
+            if (acceptConfirmWindow != null) {
+                acceptConfirmWindow.setVisible(false);
+            }
+            Messagebox.show("This cheque was returned by the Maker and cannot be accepted. Please select Reject or Return to Maker.",
+                    "Action Restricted", Messagebox.OK, Messagebox.EXCLAMATION);
+            return;
+        }
         if (!cbsPassed) {
             if (acceptConfirmWindow != null) {
                 acceptConfirmWindow.setVisible(false);
@@ -2152,6 +2335,11 @@ public class BatchDetailsController
                     checkerAction,
                     remarks);
 
+            if (cheques != null && currentChequeIndex >= 0 && currentChequeIndex < cheques.size()) {
+                cheques.get(currentChequeIndex).put("status", status);
+                cheques.get(currentChequeIndex).put("cheque_status", status);
+            }
+
             if (popupWindow != null) {
                 popupWindow.setVisible(false);
             }
@@ -2222,15 +2410,28 @@ public class BatchDetailsController
         currentFrontImagePath = null;
         currentBackImagePath = null;
 
+        if (chequeNumber != null) {
+            chequeNumber = chequeNumber.trim();
+        }
+
         try {
             ChequeImage image = chequeImageDao.findByChequeNumber(chequeNumber);
             if (image != null) {
                 currentFrontImagePath = image.getFrontPath();
                 currentBackImagePath = image.getBackPath();
             }
+            if (currentFrontImagePath == null || currentFrontImagePath.trim().isEmpty()) {
+                com.cts.inward.dao.MicrRepairDao repairDao = new com.cts.inward.dao.MicrRepairDaoImpl();
+                currentFrontImagePath = repairDao.getFrontImagePath(chequeNumber);
+                currentBackImagePath = repairDao.getBackImagePath(chequeNumber);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        System.out.println("LOAD CHEQUE IMAGES: cheque=" + chequeNumber + 
+                ", front=" + currentFrontImagePath + 
+                ", back=" + currentBackImagePath);
 
         showingFront = true;
         currentScale = 1.0;
@@ -2253,6 +2454,44 @@ public class BatchDetailsController
         }
     }
 
+    private byte[] resolveImageBytes(String imagePath) {
+        if (imagePath == null || imagePath.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            java.io.File file = new java.io.File(imagePath);
+            if (file.exists() && file.isFile()) {
+                return java.nio.file.Files.readAllBytes(file.toPath());
+            }
+
+            java.nio.file.Path path = java.nio.file.Path.of(imagePath);
+            if (java.nio.file.Files.exists(path) && java.nio.file.Files.isRegularFile(path)) {
+                return java.nio.file.Files.readAllBytes(path);
+            }
+
+            try {
+                String root = com.cts.inward.config.ApplicationConfiguration.of().getInwardRootPath();
+                if (root != null && !root.trim().isEmpty()) {
+                    java.nio.file.Path resolved = java.nio.file.Path.of(root).resolve(imagePath);
+                    if (java.nio.file.Files.exists(resolved) && java.nio.file.Files.isRegularFile(resolved)) {
+                        return java.nio.file.Files.readAllBytes(resolved);
+                    }
+                }
+            } catch (Exception ignored) {}
+
+            if (imagePath.contains("inward-files")) {
+                String sub = imagePath.substring(imagePath.indexOf("inward-files"));
+                java.io.File wsFile = new java.io.File("C:/JavaPrograms/eclipse workspace iispl/CTS/" + sub);
+                if (wsFile.exists() && wsFile.isFile()) {
+                    return java.nio.file.Files.readAllBytes(wsFile.toPath());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     private void showFrontImage() {
 
         if (chequeImage == null)
@@ -2268,26 +2507,21 @@ public class BatchDetailsController
             toggleImageButton.setLabel("View Back");
         }
 
-        boolean imageLoaded = false;
-        if (currentFrontImagePath != null
-                && !currentFrontImagePath.trim().isEmpty()) {
+        byte[] bytes = resolveImageBytes(currentFrontImagePath);
+        if (bytes != null && bytes.length > 0) {
             try {
-                java.io.File file = new java.io.File(currentFrontImagePath);
-                if (file.exists() && file.isFile()) {
-                    byte[] bytes = java.nio.file.Files.readAllBytes(file.toPath());
-                    chequeImage.setContent(
-                            new org.zkoss.image.AImage("front.jpg", bytes));
-                    imageLoaded = true;
+                chequeImage.setContent(new org.zkoss.image.AImage("front.jpg", bytes));
+                chequeImage.setVisible(true);
+                if (chequePreview != null) {
+                    chequePreview.setVisible(false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-            }
-        }
-
-        if (imageLoaded) {
-            chequeImage.setVisible(true);
-            if (chequePreview != null) {
-                chequePreview.setVisible(false);
+                chequeImage.setContent((org.zkoss.image.AImage) null);
+                chequeImage.setVisible(false);
+                if (chequePreview != null) {
+                    chequePreview.setVisible(true);
+                }
             }
         } else {
             chequeImage.setContent((org.zkoss.image.AImage) null);
@@ -2315,26 +2549,21 @@ public class BatchDetailsController
             toggleImageButton.setLabel("View Front");
         }
 
-        boolean imageLoaded = false;
-        if (currentBackImagePath != null
-                && !currentBackImagePath.trim().isEmpty()) {
+        byte[] bytes = resolveImageBytes(currentBackImagePath);
+        if (bytes != null && bytes.length > 0) {
             try {
-                java.io.File file = new java.io.File(currentBackImagePath);
-                if (file.exists() && file.isFile()) {
-                    byte[] bytes = java.nio.file.Files.readAllBytes(file.toPath());
-                    chequeImage.setContent(
-                            new org.zkoss.image.AImage("back.jpg", bytes));
-                    imageLoaded = true;
+                chequeImage.setContent(new org.zkoss.image.AImage("back.jpg", bytes));
+                chequeImage.setVisible(true);
+                if (chequePreview != null) {
+                    chequePreview.setVisible(false);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-            }
-        }
-
-        if (imageLoaded) {
-            chequeImage.setVisible(true);
-            if (chequePreview != null) {
-                chequePreview.setVisible(false);
+                chequeImage.setContent((org.zkoss.image.AImage) null);
+                chequeImage.setVisible(false);
+                if (chequePreview != null) {
+                    chequePreview.setVisible(true);
+                }
             }
         } else {
             chequeImage.setContent((org.zkoss.image.AImage) null);
@@ -2351,7 +2580,7 @@ public class BatchDetailsController
         if (chequeImage != null) {
             chequeImage.setStyle(String.format(
                     java.util.Locale.US,
-                    "object-fit:contain; width:100%%; height:100%%; max-width:100%%; max-height:100%%; display:block; margin:auto; transform: scale(%.2f) rotate(%ddeg); transform-origin: center; transition: transform 0.2s;",
+                    "object-fit:contain; max-width:100%%; max-height:100%%; display:block; margin:auto; transform: scale(%.2f) rotate(%ddeg); transform-origin: center; transition: transform 0.2s;",
                     currentScale,
                     currentRotation));
         }

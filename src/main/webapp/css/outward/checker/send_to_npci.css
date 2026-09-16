@@ -1,0 +1,816 @@
+@charset "UTF-8";
+
+/* =========================================================
+   SEND TO NPCI
+   Same design language as Inward Maker Dashboard
+   ========================================================= */
+
+
+/* =========================================================
+   GLOBAL TOKENS
+   ========================================================= */
+
+:root {
+
+    --bg-app-1: #EBF2FD;
+    --bg-app-2: #E4ECF8;
+
+    --bg-surface: #FFFFFF;
+    --bg-subtle: #F9FAFB;
+
+    --border-light: #E4EAF3;
+    --border-mid: #D0D5DD;
+
+    --text-primary: #0B1F3F;
+    --text-secondary: #2B3A55;
+    --text-muted: #667085;
+
+    --brand-blue: #175CD3;
+    --brand-blue-hover: #154EB5;
+
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+
+    --shadow-card:
+        0 2px 8px rgba(16, 24, 40, 0.05);
+}
+
+
+/* =========================================================
+   PAGE BACKGROUND
+   ========================================================= */
+
+.send-npci-content {
+
+    width: 100% !important;
+
+    height: 100% !important;
+
+    box-sizing: border-box !important;
+
+    background:
+        linear-gradient(
+            180deg,
+            var(--bg-app-1) 0%,
+            var(--bg-app-2) 100%
+        ) !important;
+
+    position: relative !important;
+
+    overflow: hidden !important;
+}
+
+
+/* =========================================================
+   MAIN CONTENT
+   ========================================================= */
+
+.send-npci-layout {
+
+    width: 100% !important;
+
+    height: 100% !important;
+
+    box-sizing: border-box !important;
+
+    padding: 24px 30px !important;
+
+    overflow-y: auto !important;
+
+    overflow-x: hidden !important;
+
+    background: transparent !important;
+}
+
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.npci-header {
+
+    width: 100% !important;
+
+    padding-left: 0 !important;
+
+    background: transparent !important;
+}
+
+
+/* =========================================================
+   PAGE TITLE
+   ========================================================= */
+
+.npci-title {
+
+    font-family:
+        'Inter',
+        'Plus Jakarta Sans',
+        sans-serif !important;
+
+    font-size: 26px !important;
+
+    font-weight: 700 !important;
+
+    letter-spacing: -0.02em !important;
+
+    color:
+        var(--text-primary) !important;
+
+    position: relative !important;
+
+    display: inline-block !important;
+
+    margin-bottom: 6px !important;
+}
+
+
+/* =========================================================
+   BLUE UNDERLINE
+   ========================================================= */
+
+.npci-title::after {
+
+    content: '' !important;
+
+    position: absolute !important;
+
+    bottom: -6px !important;
+
+    left: 0 !important;
+
+    width: 50px !important;
+
+    height: 3px !important;
+
+    background:
+        var(--brand-blue) !important;
+
+    border-radius: 2px !important;
+}
+
+
+/* =========================================================
+   SUBTITLE
+   ========================================================= */
+
+.npci-subtitle {
+
+    font-family:
+        'Inter',
+        sans-serif !important;
+
+    font-size: 13px !important;
+
+    font-weight: 500 !important;
+
+    color:
+        var(--text-muted) !important;
+
+    line-height: 1.4 !important;
+}
+
+
+/* =========================================================
+   NPCI TABLE PANEL
+   Same structure as reference .table-panel
+   ========================================================= */
+
+.npci-section {
+
+    width: 100% !important;
+
+    box-sizing: border-box !important;
+
+    background:
+        var(--bg-surface) !important;
+
+    border:
+        1px solid
+        var(--border-light) !important;
+
+    border-radius:
+        var(--radius-lg) !important;
+
+    padding:
+        20px 24px !important;
+
+    box-shadow:
+        var(--shadow-card) !important;
+
+    position: relative !important;
+
+    overflow: hidden !important;
+}
+
+
+/* =========================================================
+   BLUE TOP LINE
+   ========================================================= */
+
+.npci-section::before {
+
+    content: '' !important;
+
+    position: absolute !important;
+
+    top: 0 !important;
+
+    left: 0 !important;
+
+    right: 0 !important;
+
+    height: 3.5px !important;
+
+    background:
+        var(--brand-blue) !important;
+
+    display: block !important;
+}
+
+
+/* =========================================================
+   SECTION HEADER
+   ========================================================= */
+
+.npci-section-header {
+
+    width: 100% !important;
+
+    padding-bottom:
+        14px !important;
+
+    background:
+        transparent !important;
+}
+
+
+/* =========================================================
+   SECTION TITLE
+   ========================================================= */
+
+.npci-section-title {
+
+    font-family:
+        'Inter',
+        sans-serif !important;
+
+    font-size:
+        18px !important;
+
+    font-weight:
+        800 !important;
+
+    color:
+        var(--text-primary) !important;
+
+    position:
+        relative !important;
+
+    padding-left:
+        14px !important;
+}
+
+
+/* =========================================================
+   BLUE VERTICAL LINE
+   ========================================================= */
+
+.npci-section-title::before {
+
+    content: '' !important;
+
+    position: absolute !important;
+
+    left: 0 !important;
+
+    top: 50% !important;
+
+    transform:
+        translateY(-50%) !important;
+
+    width: 4px !important;
+
+    height: 18px !important;
+
+    background:
+        var(--brand-blue) !important;
+
+    border-radius:
+        2px !important;
+
+    display:
+        block !important;
+}
+
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
+.send-npci-table {
+
+    width:
+        100% !important;
+
+    box-sizing:
+        border-box !important;
+
+    border:
+        1px solid
+        var(--border-light) !important;
+
+    border-radius:
+        var(--radius-md) !important;
+
+    background:
+        var(--bg-surface) !important;
+
+    box-shadow:
+        none !important;
+
+    overflow:
+        hidden !important;
+}
+
+
+/* =========================================================
+   TABLE HEADER
+   ========================================================= */
+
+.send-npci-table .z-listhead {
+
+    background:
+        var(--brand-blue) !important;
+
+    border-bottom:
+        none !important;
+
+    box-shadow:
+        none !important;
+}
+
+
+/* =========================================================
+   TABLE HEADER CELLS
+   ========================================================= */
+
+.send-npci-table .z-listhead th,
+.send-npci-table .z-listheader {
+
+    background:
+        var(--brand-blue) !important;
+
+    border-right:
+        none !important;
+
+    border-bottom:
+        none !important;
+
+    padding:
+        0 !important;
+
+    margin:
+        0 !important;
+
+    vertical-align:
+        middle !important;
+}
+
+
+/* =========================================================
+   LAST HEADER CELL
+   ========================================================= */
+
+.send-npci-table
+.z-listheader:last-child {
+
+    border-right:
+        none !important;
+}
+
+
+/* =========================================================
+   TABLE HEADER TEXT
+   Matches reference
+   ========================================================= */
+
+.send-npci-table
+.z-listheader-content {
+
+    background:
+        transparent !important;
+
+    font-family:
+        'Inter',
+        'Plus Jakarta Sans',
+        sans-serif !important;
+
+    font-weight:
+        700 !important;
+
+    font-size:
+        13px !important;
+
+    letter-spacing:
+        0.06em !important;
+
+    text-transform:
+        uppercase !important;
+
+    color:
+        #FFFFFF !important;
+
+    padding:
+        22px 20px !important;
+
+    line-height:
+        1.4 !important;
+
+    text-align:
+        center !important;
+
+    vertical-align:
+        middle !important;
+
+    box-sizing:
+        border-box !important;
+
+    white-space:
+        nowrap !important;
+}
+
+
+/* Make everything inside header white */
+
+.send-npci-table
+.z-listheader * {
+
+    color:
+        #FFFFFF !important;
+
+    font-weight:
+        700 !important;
+
+    font-size:
+        13px !important;
+
+    background:
+        transparent !important;
+}
+
+
+/* Remove unwanted header decoration */
+
+.send-npci-table
+.z-listheader::after {
+
+    content:
+        none !important;
+
+    display:
+        none !important;
+}
+
+
+/* =========================================================
+   EMPTY TABLE
+   ========================================================= */
+
+.send-npci-table
+.z-listbox-emptybody {
+
+    padding:
+        20px !important;
+
+    color:
+        var(--text-muted) !important;
+
+    font-size:
+        13.5px !important;
+
+    font-style:
+        normal !important;
+
+    background:
+        var(--bg-surface) !important;
+
+    text-align:
+        left !important;
+}
+
+
+/* =========================================================
+   DATA ROWS
+   ========================================================= */
+
+.send-npci-table
+.z-listbox-body tr,
+.send-npci-table
+.z-listitem {
+
+    border-bottom:
+        1px solid
+        #EEF2F8 !important;
+
+    background:
+        #FFFFFF !important;
+}
+
+
+/* =========================================================
+   ALTERNATE ROW
+   ========================================================= */
+
+.send-npci-table
+.z-listitem:nth-child(even) {
+
+    background:
+        #FAFCFF !important;
+}
+
+
+/* =========================================================
+   TABLE CELLS
+   ========================================================= */
+
+.send-npci-table
+.z-listcell {
+
+    border-right:
+        none !important;
+
+    border-bottom:
+        none !important;
+
+    vertical-align:
+        middle !important;
+}
+
+
+/* =========================================================
+   CELL CONTENT
+   Matches reference
+   ========================================================= */
+
+.send-npci-table
+.z-listcell-content {
+
+    font-family:
+        'Inter',
+        sans-serif !important;
+
+    font-size:
+        12px !important;
+
+    color:
+        var(--text-secondary) !important;
+
+    padding:
+        12px 14px !important;
+
+    line-height:
+        1.4 !important;
+
+    text-align:
+        center !important;
+
+    justify-content:
+        center !important;
+}
+
+
+/* =========================================================
+   BATCH NUMBER
+   ========================================================= */
+
+.send-npci-table
+.z-listbox-body tr
+.z-listcell:nth-child(1)
+.z-listcell-content {
+
+    color:
+        var(--text-primary) !important;
+
+    font-weight:
+        600 !important;
+
+    text-align:
+        left !important;
+}
+
+
+/* =========================================================
+   TOTAL CHEQUES
+   ========================================================= */
+
+.send-npci-table
+.z-listbox-body tr
+.z-listcell:nth-child(2)
+.z-listcell-content {
+
+    color:
+        var(--text-secondary) !important;
+
+    font-weight:
+        600 !important;
+
+    text-align:
+        center !important;
+}
+
+
+/* =========================================================
+   VALID XML
+   ========================================================= */
+
+.send-npci-table
+.z-listbox-body tr
+.z-listcell:nth-child(3)
+.z-listcell-content {
+
+    color:
+        #12B76A !important;
+
+    font-weight:
+        600 !important;
+
+    text-align:
+        center !important;
+}
+
+
+/* =========================================================
+   VALIDATION STATUS
+   ========================================================= */
+
+.send-npci-table
+.z-listbox-body tr
+.z-listcell:nth-child(4)
+.z-listcell-content {
+
+    color:
+        #475467 !important;
+
+    font-weight:
+        600 !important;
+
+    text-align:
+        center !important;
+}
+
+
+/* =========================================================
+   ACTION
+   ========================================================= */
+
+.send-npci-table
+.z-listbox-body tr
+.z-listcell:nth-child(5)
+.z-listcell-content {
+
+    text-align:
+        center !important;
+}
+
+
+/* =========================================================
+   ACTION BUTTON
+   ========================================================= */
+
+.send-npci-table
+.btn-action {
+
+    min-height:
+        34px !important;
+
+    padding:
+        7px 18px !important;
+
+    border:
+        1px solid
+        var(--brand-blue) !important;
+
+    border-radius:
+        var(--radius-sm) !important;
+
+    background:
+        var(--brand-blue) !important;
+
+    color:
+        #FFFFFF !important;
+
+    font-family:
+        'Inter',
+        sans-serif !important;
+
+    font-size:
+        12px !important;
+
+    font-weight:
+        600 !important;
+
+    cursor:
+        pointer !important;
+}
+
+
+.send-npci-table
+.btn-action:hover {
+
+    background:
+        var(--brand-blue-hover) !important;
+
+    border-color:
+        var(--brand-blue-hover) !important;
+}
+
+
+/* =========================================================
+   ROW HOVER
+   ========================================================= */
+
+.send-npci-table
+.z-listitem:hover {
+
+    background:
+        #F5F9FF !important;
+}
+
+
+/* =========================================================
+   PAGINATION
+   ========================================================= */
+
+.send-npci-table
+.z-paging {
+
+    background:
+        #FFFFFF !important;
+
+    border-top:
+        1px solid
+        #E4E7EC !important;
+
+    padding:
+        10px !important;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1024px) {
+
+    .send-npci-layout {
+
+        padding:
+            20px !important;
+    }
+
+    .npci-title {
+
+        font-size:
+            26px !important;
+    }
+}
+
+
+@media (max-width: 768px) {
+
+    .send-npci-layout {
+
+        padding:
+            16px 12px !important;
+    }
+
+    .npci-title {
+
+        font-size:
+            23px !important;
+    }
+
+    .npci-subtitle {
+
+        font-size:
+            12px !important;
+    }
+
+    .npci-section {
+
+        padding:
+            16px 12px 12px 12px !important;
+    }
+
+    .send-npci-table
+    .z-listheader-content {
+
+        padding:
+            16px 10px !important;
+
+        font-size:
+            11px !important;
+    }
+}

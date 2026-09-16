@@ -660,7 +660,7 @@ public class CaptureOperatorBatchService {
                     cheque.getDrawerName())
                 + "|"
                 + normalize(
-                    cheque.getDepositorAccountNumber())
+                    cheque.getPayeeAccountNumber())
                 + "|"
                 + normalize(
                     cheque.getPayeeName())
@@ -736,7 +736,7 @@ public class CaptureOperatorBatchService {
                 "\nPayee Account: ")
                 .append(
                         safeValue(
-                                cheque.getDepositorAccountNumber()));
+                                cheque.getPayeeAccountNumber()));
 
         builder.append(
                 "\nPayee Name: ")

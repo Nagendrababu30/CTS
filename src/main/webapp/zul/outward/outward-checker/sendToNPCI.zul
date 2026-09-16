@@ -16,7 +16,7 @@
          SEND TO NPCI CSS
          ========================================================= -->
 
-    <style src="/zul/outward/outward-checker-CSS/send_to_npci.css"/>
+    <style src="/css/outward/checker/send_to_npci.css"/>
 
 
     <!-- =========================================================

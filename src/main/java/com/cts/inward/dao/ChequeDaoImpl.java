@@ -67,7 +67,8 @@ public class ChequeDaoImpl implements ChequeDao {
     	        "SELECT c.cheque_number, c.batch_id, c.drawer_name, c.micr_code, c.presenting_date, "
     	        + "COALESCE(acc.new_value, c.account_number) AS account_number, "
     	        + "COALESCE(amt.new_value, CAST(c.amount AS VARCHAR)) AS amount_str, "
-    	        + "COALESCE(dt.new_value, CAST(c.cheque_date AS VARCHAR)) AS cheque_date_str "
+    	        + "COALESCE(dt.new_value, CAST(c.cheque_date AS VARCHAR)) AS cheque_date_str, "
+    	        + "latest.status AS latest_status "
     	        + "FROM public.inward_cheque c "
     	        + "LEFT JOIN LATERAL ( "
     	        + "    SELECT new_value FROM inward_cheque_dataentry_history "
@@ -85,7 +86,7 @@ public class ChequeDaoImpl implements ChequeDao {
     	        + "    ORDER BY history_id DESC LIMIT 1 "
     	        + ") dt ON TRUE "
     	        + "LEFT JOIN LATERAL ( "
-    	        + "    SELECT h.status, h.return_reason_code "
+    	        + "    SELECT h.status "
     	        + "    FROM public.inward_cheque_status_history h "
     	        + "    WHERE h.cheque_number = c.cheque_number "
     	        + "    ORDER BY h.status_history_id DESC "
@@ -93,18 +94,10 @@ public class ChequeDaoImpl implements ChequeDao {
     	        + ") latest ON TRUE "
     	        + "WHERE c.batch_id = ? "
     	        + "AND COALESCE(latest.status, '') NOT IN ('ACCEPT', 'REJECT', 'RETURN_BY_MAKER') "
-    	        + "AND NOT ( "
-    	        + "    latest.status = 'RETURN_TO_MAKER' "
-    	        + "    AND ( "
-    	        + "        latest.return_reason_code LIKE 'CR-MICR-%' "
-    	        + "        OR latest.return_reason_code LIKE 'CR-IMG-%' "
-    	        + "        OR latest.return_reason_code LIKE 'MR-MICR-%' "
-    	        + "        OR latest.return_reason_code LIKE 'MICR_%' "
-    	        + "    ) "
-    	        + ") "
     	        + "ORDER BY c.cheque_number";
 
         List<InwardCheque> cheques = new ArrayList<>();
+        boolean batchReturned = isBatchReturned(Long.parseLong(batchId));
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -114,6 +107,24 @@ public class ChequeDaoImpl implements ChequeDao {
             try (ResultSet resultSet = statement.executeQuery()) {
 
                 while (resultSet.next()) {
+                    String chqNo = resultSet.getString("cheque_number");
+                    String latestStatus = resultSet.getString("latest_status");
+
+                    if ("RETURN_TO_MAKER".equalsIgnoreCase(latestStatus)) {
+                        if (chequeNeedsMicrRepair(chqNo)) {
+                            // Needs MICR repair first, not ready for Data Entry
+                            continue;
+                        }
+                        if (!chequeNeedsDataEntry(chqNo)) {
+                            // Only needed MICR repair, not Data Entry
+                            continue;
+                        }
+                    } else if ("MICR_REPAIRED".equalsIgnoreCase(latestStatus)) {
+                        if (batchReturned && !chequeNeedsDataEntry(chqNo)) {
+                            // Cheque was returned only for MICR repair and is now repaired
+                            continue;
+                        }
+                    }
 
                     String amtStr = resultSet.getString("amount_str");
                     BigDecimal amount = null;
@@ -136,7 +147,7 @@ public class ChequeDaoImpl implements ChequeDao {
                     }
 
                     InwardCheque cheque = InwardCheque.of(
-                            resultSet.getString("cheque_number"),
+                            chqNo,
                             resultSet.getString("batch_id"),
                             resultSet.getString("account_number"),
                             resultSet.getString("drawer_name"),
@@ -304,12 +315,10 @@ public class ChequeDaoImpl implements ChequeDao {
     @Override
     public void updateChequeStatus(String chequeNumber, String status, long userId) {
 
-        String checkSql =
-                "SELECT status "
-                + "FROM public.inward_cheque_status_history "
-                + "WHERE cheque_number = ? "
-                + "ORDER BY status_history_id DESC "
-                + "LIMIT 1";
+        String updateSql =
+                "UPDATE public.inward_cheque_status_history "
+                + "SET status = ?, maker_id = ?, maker_action = ?, maker_action_on = CURRENT_TIMESTAMP "
+                + "WHERE cheque_number = ? AND status != 'RETURN_BY_MAKER'";
 
         String insertSql =
                 "INSERT INTO public.inward_cheque_status_history "
@@ -321,27 +330,23 @@ public class ChequeDaoImpl implements ChequeDao {
 
         try (Connection connection = dataSource.getConnection()) {
 
-            String latestStatus = null;
+            int updated = 0;
+            try (PreparedStatement statement = connection.prepareStatement(updateSql)) {
+                statement.setString(1, status);
+                statement.setLong(2, userId);
+                statement.setString(3, status);
+                statement.setString(4, chequeNumber);
+                updated = statement.executeUpdate();
+            }
 
-            try (PreparedStatement statement = connection.prepareStatement(checkSql)) {
-                statement.setString(1, chequeNumber);
-                try (ResultSet resultSet = statement.executeQuery()) {
-                    if (resultSet.next()) {
-                        latestStatus = resultSet.getString("status");
-                    }
+            if (updated == 0) {
+                try (PreparedStatement statement = connection.prepareStatement(insertSql)) {
+                    statement.setString(1, chequeNumber);
+                    statement.setString(2, status);
+                    statement.setLong(3, userId);
+                    statement.setString(4, status);
+                    statement.executeUpdate();
                 }
-            }
-
-            if (status.equals(latestStatus)) {
-                return;
-            }
-
-            try (PreparedStatement statement = connection.prepareStatement(insertSql)) {
-                statement.setString(1, chequeNumber);
-                statement.setString(2, status);
-                statement.setLong(3, userId);
-                statement.setString(4, "DATA_ENTRY");
-                statement.executeUpdate();
             }
 
         } catch (SQLException e) {
@@ -359,24 +364,56 @@ public class ChequeDaoImpl implements ChequeDao {
                   ON r.return_reason_code = sh.return_reason_code
                 WHERE sh.cheque_number = ?
                 ORDER BY sh.status_history_id DESC
-                LIMIT 1
                 """;
-        java.util.Map<String, String> info = new java.util.HashMap<>();
+
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, chequeNumber);
-            try (ResultSet rs = statement.executeQuery()) {
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, chequeNumber);
+            try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    info.put("status", rs.getString("status"));
-                    info.put("returnReasonCode", rs.getString("return_reason_code"));
-                    info.put("remarks", rs.getString("remarks"));
-                    info.put("description", rs.getString("description"));
+                    String latestStatus = rs.getString("status");
+                    String remarks = rs.getString("remarks");
+
+                    if ("RETURN_TO_MAKER".equalsIgnoreCase(latestStatus)) {
+                        List<String> codes = new ArrayList<>();
+                        List<String> descs = new ArrayList<>();
+
+                        do {
+                            String currentStatus = rs.getString("status");
+                            if (!"RETURN_TO_MAKER".equalsIgnoreCase(currentStatus)) {
+                                break;
+                            }
+                            String code = rs.getString("return_reason_code");
+                            String desc = rs.getString("description");
+                            if (code != null && !code.trim().isEmpty() && !codes.contains(code.trim())) {
+                                codes.add(code.trim());
+                                descs.add(desc != null && !desc.trim().isEmpty() ? desc.trim() : code.trim());
+                            }
+                            if ((remarks == null || remarks.trim().isEmpty()) && rs.getString("remarks") != null) {
+                                remarks = rs.getString("remarks");
+                            }
+                        } while (rs.next());
+
+                        java.util.Map<String, String> map = new java.util.HashMap<>();
+                        map.put("status", "RETURN_TO_MAKER");
+                        map.put("returnReasonCode", String.join(", ", codes));
+                        map.put("returnReasonDescription", String.join("; ", descs));
+                        map.put("remarks", remarks != null ? remarks : "");
+                        return map;
+                    } else {
+                        java.util.Map<String, String> map = new java.util.HashMap<>();
+                        map.put("status", latestStatus);
+                        map.put("returnReasonCode", rs.getString("return_reason_code"));
+                        map.put("returnReasonDescription", rs.getString("description"));
+                        map.put("remarks", remarks != null ? remarks : "");
+                        return map;
+                    }
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return info;
+        return java.util.Collections.emptyMap();
     }
 
     @Override
@@ -406,7 +443,7 @@ public class ChequeDaoImpl implements ChequeDao {
     @Override
     public boolean saveMakerDataEntryReturn(String chequeNumber, List<String> reasonCodes, String remarks, Long userId) {
         if (chequeNumber == null || chequeNumber.trim().isEmpty()) {
-            throw new IllegalArgumentException("Cheque number is required");
+            throw new IllegalArgumentException("Cheque number cannot be empty");
         }
         if (reasonCodes == null || reasonCodes.isEmpty()) {
             throw new IllegalArgumentException("At least one return reason is required");
@@ -416,6 +453,13 @@ public class ChequeDaoImpl implements ChequeDao {
         try {
             connection = dataSource.getConnection();
             connection.setAutoCommit(false);
+
+            // Clean up any non-return rows (e.g. initial DATA_ENTRY row) so only RETURN_BY_MAKER rows exist
+            String cleanOldHistorySql = "DELETE FROM public.inward_cheque_status_history WHERE cheque_number = ? AND status != 'RETURN_BY_MAKER'";
+            try (PreparedStatement cleanStmt = connection.prepareStatement(cleanOldHistorySql)) {
+                cleanStmt.setString(1, chequeNumber.trim());
+                cleanStmt.executeUpdate();
+            }
 
             String returnSql = """
                     INSERT INTO public.inward_cheque_return
@@ -489,5 +533,151 @@ public class ChequeDaoImpl implements ChequeDao {
                 }
             }
         }
+    }
+
+    private boolean isBatchReturned(long batchId) {
+        String sql = "SELECT batch_status FROM public.inward_batch_history WHERE batch_id = ? ORDER BY batch_history_id DESC LIMIT 1";
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setLong(1, batchId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return "RETURN_TO_MAKER".equalsIgnoreCase(rs.getString("batch_status"));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean chequeNeedsDataEntry(String chequeNumber) {
+        if (chequeNumber == null || chequeNumber.trim().isEmpty()) {
+            return false;
+        }
+
+        String checkerReasonsSql = """
+                SELECT sh.return_reason_code
+                FROM public.inward_cheque_status_history sh
+                WHERE sh.cheque_number = ?
+                  AND sh.status = 'RETURN_TO_MAKER'
+                ORDER BY sh.status_history_id DESC
+                """;
+
+        List<String> checkerCodes = new ArrayList<>();
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(checkerReasonsSql)) {
+            ps.setString(1, chequeNumber.trim());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String code = rs.getString("return_reason_code");
+                    if (code != null && !code.trim().isEmpty()) {
+                        checkerCodes.add(code.trim().toUpperCase());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (checkerCodes.isEmpty()) {
+            return true;
+        }
+
+        for (String code : checkerCodes) {
+            if (code.startsWith("CR-DATA-") || code.startsWith("MR-DATA-") || code.equals("OTHER")) {
+                return true;
+            }
+            if (code.startsWith("CR-IMG-")) {
+                String makerSql = """
+                        SELECT return_reason_code
+                        FROM public.inward_cheque_status_history
+                        WHERE cheque_number = ?
+                          AND status = 'RETURN_BY_MAKER'
+                        ORDER BY status_history_id DESC
+                        """;
+                try (Connection conn = dataSource.getConnection();
+                     PreparedStatement mPs = conn.prepareStatement(makerSql)) {
+                    mPs.setString(1, chequeNumber.trim());
+                    try (ResultSet mRs = mPs.executeQuery()) {
+                        while (mRs.next()) {
+                            String mCode = mRs.getString("return_reason_code");
+                            if (mCode != null && mCode.trim().toUpperCase().startsWith("MR-DATA-")) {
+                                return true;
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean chequeNeedsMicrRepair(String chequeNumber) {
+        if (chequeNumber == null || chequeNumber.trim().isEmpty()) {
+            return false;
+        }
+
+        String checkerReasonsSql = """
+                SELECT sh.return_reason_code
+                FROM public.inward_cheque_status_history sh
+                WHERE sh.cheque_number = ?
+                  AND sh.status = 'RETURN_TO_MAKER'
+                ORDER BY sh.status_history_id DESC
+                """;
+
+        List<String> checkerCodes = new ArrayList<>();
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(checkerReasonsSql)) {
+            ps.setString(1, chequeNumber.trim());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String code = rs.getString("return_reason_code");
+                    if (code != null && !code.trim().isEmpty()) {
+                        checkerCodes.add(code.trim().toUpperCase());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (checkerCodes.isEmpty()) {
+            return false;
+        }
+
+        for (String code : checkerCodes) {
+            if (code.startsWith("CR-MICR-") || code.startsWith("MR-MICR-") || code.startsWith("MICR_")) {
+                return true;
+            }
+            if (code.startsWith("CR-IMG-")) {
+                String makerSql = """
+                        SELECT return_reason_code
+                        FROM public.inward_cheque_status_history
+                        WHERE cheque_number = ?
+                          AND status = 'RETURN_BY_MAKER'
+                        ORDER BY status_history_id DESC
+                        """;
+                try (Connection conn = dataSource.getConnection();
+                     PreparedStatement mPs = conn.prepareStatement(makerSql)) {
+                    mPs.setString(1, chequeNumber.trim());
+                    try (ResultSet mRs = mPs.executeQuery()) {
+                        while (mRs.next()) {
+                            String mCode = mRs.getString("return_reason_code");
+                            if (mCode != null && mCode.trim().toUpperCase().startsWith("MR-MICR-")) {
+                                return true;
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return false;
     }
 }

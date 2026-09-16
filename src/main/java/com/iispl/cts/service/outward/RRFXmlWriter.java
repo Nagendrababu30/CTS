@@ -140,11 +140,11 @@ public class RRFXmlWriter {
                 );
                 writer.write("</DrawerName>\n");
 
-                writer.write("            <DepositorAccountNumber>");
+                writer.write("            <PayeeAccountNumber>");
                 writer.write(
-                        escapeXml(cheque.getDepositorAccountNumber())
+                        escapeXml(cheque.getPayeeAccountNumber())
                 );
-                writer.write("</DepositorAccountNumber>\n");
+                writer.write("</PayeeAccountNumber>\n");
 
                 writer.write("            <Amount>");
                 writer.write(

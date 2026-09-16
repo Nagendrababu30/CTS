@@ -1,607 +1,378 @@
 /* =============================================================
-   INWARD SEND TO CHECKER
-   Same visual language as Inward Maker Dashboard — shares its
-   CSS custom properties, page-title, table-panel and grid
-   treatment exactly.
+   INWARD SEND TO CHECKER QUEUE
+   CSS exactly matches Inward Data Entry styling
    ============================================================= */
-@import
-	url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap')
-	;
 
-/* =============================================================
-   CSS CUSTOM PROPERTIES
-   Same values as dashboard.css
-   ============================================================= */
 :root {
-	--bg-app: #EAF0FA;
-	--bg-app-2: #E4ECF8;
-	--bg-surface: #FFFFFF;
-	--bg-surface-2: #FCFDFF;
-	--bg-subtle: #F9FAFB;
-	--bg-hover: #F6F9FF;
-	--border-light: #E4EAF3;
-	--border-mid: #D0D5DD;
-	--text-primary: #0B1F3F;
-	--text-secondary: #2B3A55;
-	--text-muted: #667085;
-	--text-faint: #98A2B3;
-	--brand-blue: #175CD3;
-	--brand-indigo: #4F46E5;
-	--brand-purple: #7A5AF8;
-	--brand-pink: #C026D3;
-	--brand-orange: #F97316;
-	--brand-amber: #F59E0B;
-	--brand-green: #12B76A;
-	--brand-teal: #14B8A6;
-	--brand-cyan: #06B6D4;
-	--radius-sm: 5px;
-	--radius-md: 8px;
-	--radius-lg: 10px;
-	--radius-pill: 999px;
-	--shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.04);
-	--shadow-sm: 0 1px 3px rgba(16, 24, 40, 0.05);
-	--shadow-md: 0 4px 12px rgba(16, 24, 40, 0.06);
-	--shadow-lg: 0 6px 16px rgba(16, 24, 40, 0.08);
-	--shadow-xl: 0 8px 20px rgba(16, 24, 40, 0.08);
-	--ease: cubic-bezier(0.4, 0, 0.2, 1);
-	--ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-	--ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --bg-app:          #EAF0FA;
+    --bg-app-2:        #E4ECF8;
+    --bg-surface:      #FFFFFF;
+    --bg-surface-2:    #FCFDFF;
+    --bg-hover:        #F6F9FF;
+    --border-light:    #E4EAF3;
+    --border-mid:      #D0D5DD;
+    --text-primary:    #0B1F3F;
+    --text-secondary:  #2B3A55;
+    --text-muted:      #667085;
+    --brand-blue:      #175CD3;
+    --radius-sm:       5px;
+    --radius-md:       8px;
+    --radius-lg:       10px;
+    --radius-pill:     999px;
+    --shadow-sm:       0 1px 3px rgba(16,24,40,0.05);
+    --shadow-md:       0 4px 12px rgba(16,24,40,0.06);
+    --ease:            cubic-bezier(0.4,0,0.2,1);
+    --ease-out-expo:   cubic-bezier(0.16,1,0.3,1);
 }
 
-/* =============================================================
-   PAGE WRAPPER
-   Same background as dashboard .inward-dashboard-content
-   ============================================================= */
-.send-to-checker-content {
-	width: 100%;
-	height: 100%;
-	box-sizing: border-box;
-	background: radial-gradient(1200px 600px at 0% 0%, rgba(23, 92, 211, 0.10),
-		transparent 60%),
-		radial-gradient(1000px 600px at 100% 0%, rgba(122, 90, 248, 0.10),
-		transparent 60%),
-		radial-gradient(900px 700px at 100% 100%, rgba(18, 183, 106, 0.07),
-		transparent 60%),
-		radial-gradient(800px 500px at 0% 100%, rgba(192, 38, 211, 0.06),
-		transparent 60%), linear-gradient(180deg, var(--bg-app) 0%,
-		var(--bg-app-2) 100%);
-	position: relative;
-	overflow: hidden;
+/* ---------- Page wrapper — same as .inward-dashboard-content ---------- */
+.content {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    background:
+        radial-gradient(1200px 600px at 0% 0%, rgba(23, 92, 211, 0.12), transparent 60%),
+        radial-gradient(1000px 600px at 100% 0%, rgba(122, 90, 248, 0.10), transparent 60%),
+        radial-gradient(900px 700px at 100% 100%, rgba(18, 183, 106, 0.07), transparent 60%),
+        linear-gradient(180deg, #EAF0FA 0%, #E4ECF8 100%);
+    position: relative;
+    overflow: hidden;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
-.send-to-checker-content::before {
-	content: '';
-	position: absolute;
-	top: -180px;
-	left: -120px;
-	width: 620px;
-	height: 620px;
-	background: radial-gradient(circle, rgba(23, 92, 211, 0.16) 0%,
-		transparent 70%);
-	border-radius: 50%;
-	pointer-events: none;
-	z-index: 0;
-	filter: blur(10px);
+/* ---------- Layout wrapper — same as .inward-dashboard-layout ---------- */
+.content-layout {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 20px 24px 24px 24px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: transparent !important;
+    position: relative;
+    z-index: 1;
 }
 
-.send-to-checker-content::after {
-	content: '';
-	position: absolute;
-	bottom: -200px;
-	right: -140px;
-	width: 680px;
-	height: 680px;
-	background: radial-gradient(circle, rgba(122, 90, 248, 0.16) 0%,
-		transparent 70%);
-	border-radius: 50%;
-	pointer-events: none;
-	z-index: 0;
-	filter: blur(10px);
+/* Force zero spacing on the main vlayout */
+.content-layout.z-vlayout {
+    padding: 20px 24px 24px 24px !important;
+    margin: 0 !important;
+    background: transparent !important;
 }
 
-/* Keep page content above the background */
-.send-to-checker-content>* {
-	position: relative;
-	z-index: 1;
+.content-layout.z-vlayout > * {
+    margin: 0 !important;
 }
 
-/* =============================================================
-   MAIN WINDOW
-   Same padding/scroll behavior as dashboard .inward-dashboard-layout
-   ============================================================= */
-.main-window {
-	width: 100%;
-	height: 100%;
-	box-sizing: border-box;
-	padding: 20px 24px 24px 24px;
-	overflow-y: auto;
-	overflow-x: hidden;
-	background: transparent;
-}
-
-.main-window-inner {
-	width: 100%;
-}
-
-/* =============================================================
-   PAGE TITLE / DESCRIPTION
-   Same as dashboard
-   ============================================================= */
+/* ---------- Page title — same as dashboard .page-title ---------- */
 .page-title {
-	font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
-	font-size: 30px;
-	font-weight: 700;
-	letter-spacing: -0.035em;
-	position: relative;
-	display: inline-block;
-	background: transparent !important;
-	color: var(--text-primary) !important;
-	-webkit-text-fill-color: var(--text-primary) !important;
-	-webkit-background-clip: initial;
-	background-clip: initial;
-	margin-bottom: 4px;
+    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    color: var(--text-primary) !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
+    background: transparent !important;
+    -webkit-background-clip: initial;
+    background-clip: initial;
+    position: relative;
+    display: inline-block;
+    margin-bottom: 4px;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.1;
 }
 
 .page-title::after {
-	content: '';
-	position: absolute;
-	bottom: -10px;
-	left: 0;
-	width: 56px;
-	height: 3px;
-	background: #175CD3;
-	border-radius: 2px;
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 56px;
+    height: 3px;
+    background: #175CD3;
+    border-radius: 2px;
 }
 
-.page-description {
-	display: block;
-	margin-top: 10px;
-	margin-bottom: 4px;
-	color: #526784;
-	font-family: 'Inter', sans-serif;
-	font-size: 13px;
+/* ---------- Table title — same as dashboard .table-title ---------- */
+.table-title {
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    position: relative;
+    padding-left: 18px;
+    display: block;
+    margin: 0 !important;
+    line-height: 1.2;
 }
 
-/* =============================================================
-   MAIN CARD
-   Same visual treatment as dashboard .table-panel
-   ============================================================= */
-.content-container {
-	width: 100%;
-	box-sizing: border-box;
-	background: linear-gradient(180deg, var(--bg-surface) 0%,
-		var(--bg-surface-2) 100%);
-	border: 1px solid var(--border-light);
-	border-radius: var(--radius-lg);
-	padding: 16px 20px 14px 20px;
-	box-shadow: var(--shadow-md);
-	position: relative;
-	overflow: hidden;
+.table-title::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 20px;
+    background: #175CD3;
+    border-radius: 3px;
+    box-shadow: none;
 }
 
-.content-container::before {
-	content: '';
-	position: absolute;
-	left: 0;
-	right: 0;
-	top: 0;
-	height: 4px;
-	background: var(--brand-blue);
+/* Table header layout wrapper */
+.table-panel > .z-hlayout {
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box;
 }
 
-/* =============================================================
-   ALERT
-   ============================================================= */
-.alert-box {
-	background: #EFF6FF;
-	border: 1px solid #D6E4FF;
-	padding: 11px 12px;
-	border-radius: var(--radius-md);
-	align-items: center;
-	box-sizing: border-box;
+.page-title + .table-panel {
+    margin-top: 32px !important;
 }
 
-.alert-icon {
-	color: var(--brand-blue);
-	font-size: 15px;
-	margin-right: 10px;
+/* ---------- Table panel wrapper — same as dashboard .table-panel ---------- */
+.table-panel {
+    background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-surface-2) 100%);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: 16px 20px 14px 20px;
+    box-sizing: border-box;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+    margin-top: 32px !important;
 }
 
-.alert-text {
-	color: var(--text-primary);
-	font-family: 'Inter', sans-serif;
-	font-size: 13px;
-	font-weight: 600;
+.table-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #175CD3;
+    animation: none;
 }
 
-/* =============================================================
-   NOTE
-   ============================================================= */
-.note-box {
-	align-items: center;
-}
-
-.note-icon {
-	color: var(--text-muted);
-	margin-right: 5px;
-}
-
-.note-text {
-	color: var(--text-muted);
-	font-family: 'Inter', sans-serif;
-	font-size: 12px;
-}
-
-/* =============================================================
-   GRID
-   Same as dashboard .custom-grid
-   ============================================================= */
+/* ---------- Grid styling — same as listbox styling ---------- */
 .custom-grid {
-	width: 100%;
-	border-radius: var(--radius-md) !important;
-	overflow: hidden;
-	border: 1px solid var(--border-light) !important;
-	background: var(--bg-surface);
-	box-shadow: inset 0 1px 3px rgba(16, 24, 40, 0.03);
+    width: 100% !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg) !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+    position: relative !important;
 }
 
-.custom-grid .z-grid-header, .custom-grid .z-columns, .custom-columns {
-	background: #175CD3 !important;
-	border-bottom: none !important;
-	box-shadow: none;
+/* ---------- Grid header — same as listbox header ---------- */
+.custom-grid .z-grid-header,
+.custom-grid .z-columns {
+    background: #175CD3 !important;
+    border: none !important;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
+    overflow: hidden !important;
 }
 
-.custom-column, .custom-grid .z-column, .custom-grid .z-column-content {
-	background: transparent !important;
-	font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
-	font-weight: 700 !important;
-	font-size: 13px !important;
-	letter-spacing: 0.06em !important;
-	text-transform: uppercase !important;
-	color: #FFFFFF !important;
-	padding: 12px 12px !important;
-	border-right: none !important;
-	border-bottom: none !important;
-	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
-	white-space: nowrap !important;
+/* Grid columns with separators */
+.custom-grid .z-column {
+    background: transparent !important;
+    font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    letter-spacing: 0.06em !important;
+    color: #FFFFFF !important;
+    padding: 12px 12px !important;
+    border: none !important;
+    border-right: 1px solid rgba(255,255,255,0.25) !important;
+    box-shadow: none !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.22);
+    white-space: nowrap !important;
+    text-align: center !important;
+    vertical-align: middle !important;
 }
 
-.custom-grid .z-column:last-child {
-	border-right: none !important;
+.custom-grid .z-column-content {
+    background: transparent !important;
+    color: #FFFFFF !important;
+    font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    letter-spacing: 0.06em !important;
+    padding: 12px 12px !important;
+    border: none !important;
+    box-shadow: none !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.22);
+    white-space: nowrap !important;
+    text-align: center !important;
+    vertical-align: middle !important;
 }
 
-.custom-grid .z-column * {
-	color: #FFFFFF !important;
-	font-weight: 700 !important;
-	background: transparent !important;
+.custom-grid .z-column:last-child,
+.custom-grid .z-column:last-child .z-column-content {
+    border-right: none !important;
 }
 
-.custom-grid .z-column::after {
-	content: none !important;
-	display: none !important;
-}
-
-/* =============================================================
-   DATA ROWS
-   Same as dashboard
-   ============================================================= */
+/* ---------- Grid rows — same as listbox rows ---------- */
 .custom-grid .z-row {
-	background: #FFFFFF;
-	border-bottom: 1px solid #EEF2F8 !important;
+    background: #FFFFFF !important;
+    border-bottom: 1px solid var(--border-light) !important;
 }
 
 .custom-grid .z-row:nth-child(even) {
-	background: linear-gradient(90deg, #FCFDFF 0%, #F9FBFF 100%);
+    background: linear-gradient(90deg, #FCFDFF 0%, #F9FBFF 100%) !important;
 }
 
 .custom-grid .z-row:hover {
-	background: #F6F9FF !important;
-	box-shadow: inset 4px 0 0 var(--brand-blue), 0 2px 10px
-		rgba(23, 92, 211, 0.08);
+    background: var(--bg-hover) !important;
+    box-shadow: inset 4px 0 0 var(--brand-blue) !important;
 }
 
-.custom-grid .z-row-content, .custom-grid .z-cell {
-	font-family: 'Inter', sans-serif;
-	font-size: 14px;
-	color: #1D2939;
-	font-weight: 500;
-	padding: 12px 14px !important;
-	line-height: 1.4;
-	border-right: none !important;
-	-webkit-font-smoothing: antialiased;
+/* ---------- Grid cells — same as listbox cells ---------- */
+.custom-grid .z-cell {
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
 }
 
-.custom-grid .z-cell:last-child {
-	border-right: none !important;
+.custom-grid .z-cell-content {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px !important;
+    color: #1D2939 !important;
+    font-weight: 500 !important;
+    padding: 12px 14px !important;
+    line-height: 1.4;
+    text-align: center !important;
+    vertical-align: middle !important;
+    -webkit-font-smoothing: antialiased;
 }
 
-/* Center every header and data cell */
-.custom-grid .z-cell, .custom-grid .z-cell-cnt, .custom-grid .z-row-content,
-	.custom-grid .z-column, .custom-grid .z-column-content {
-	text-align: center !important;
-	vertical-align: middle !important;
+/* ---------- Action buttons — same as dashboard .btn-action ---------- */
+.custom-grid .z-button {
+    background: #175CD3 !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 7px 18px !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 6px rgba(23,92,211,0.18) !important;
+    cursor: pointer;
 }
 
-.custom-grid .z-cell-cnt {
-	width: 100%;
+.custom-grid .z-button:hover {
+    background: #164EB6 !important;
+    box-shadow: 0 3px 8px rgba(23,92,211,0.22) !important;
 }
 
-/* Total Cheques column — same numeric treatment as dashboard */
-.custom-grid
-.z-row
-.z-cell:nth-child(2)
-.z-cell-cnt {
-	font-family: 'Space Grotesk', sans-serif;
-	font-weight: 700;
-	color: #344054;
-	font-variant-numeric: tabular-nums;
+/* ---------- Empty state ---------- */
+.custom-grid .z-listbox-emptybody,
+.custom-grid .z-listbox-emptybody-content {
+    color: var(--text-muted);
+    background: #FFFFFF;
+    padding: 32px 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    text-align: center;
 }
 
-/* =============================================================
-   STATUS BADGES
-   Same as dashboard — apply to whichever label the controller
-   marks with the matching class in the Status column
-   ============================================================= */
-.status-badge {
-	display: inline-flex !important;
-	align-items: center;
-	gap: 6px;
-	padding: 4px 12px;
-	border-radius: var(--radius-pill);
-	font-size: 12px;
-	font-weight: 700;
-	font-family: 'Plus Jakarta Sans', sans-serif;
+/* ---------- Paging ---------- */
+.custom-grid .z-paging {
+    background: #FFFFFF;
+    border-top: 1px solid var(--border-light);
+    padding: 10px;
 }
 
-.badge-available {
-	background: #ECFDF3;
-	color: #027A48;
-	border: 1px solid #ABEFC6;
+/* Confirmation Modal Styling (unchanged) */
+.main-window {
+    background: transparent !important;
+    border: none !important;
 }
 
-.badge-locked {
-	background: #FEF3F2;
-	color: #B42318;
-	border: 1px solid #FECDCA;
+.main-window .z-window-content {
+    background: transparent !important;
 }
 
-/* =============================================================
-   BUTTONS
-   Same as dashboard .btn / .btn-action
-   ============================================================= */
-.btn-cancel {
-	background: var(--bg-surface) !important;
-	color: var(--text-secondary) !important;
-	border: 1.5px solid var(--border-mid) !important;
-	padding: 7px 18px !important;
-	border-radius: var(--radius-sm) !important;
-	font-family: 'Plus Jakarta Sans', sans-serif !important;
-	font-size: 13px !important;
-	font-weight: 700 !important;
-	cursor: pointer;
-	box-shadow: var(--shadow-xs) !important;
-}
-
-.btn-cancel:hover {
-	background: var(--bg-subtle) !important;
-	border-color: var(--brand-blue) !important;
-	color: var(--brand-blue) !important;
-}
-
-.btn-submit, .btn-ok, .btn-action-send {
-	background: var(--brand-blue) !important;
-	color: #FFFFFF !important;
-	border: none !important;
-	padding: 7px 18px !important;
-	border-radius: var(--radius-sm) !important;
-	font-family: 'Plus Jakarta Sans', sans-serif !important;
-	font-size: 13px !important;
-	font-weight: 700 !important;
-	cursor: pointer;
-	box-shadow: 0 2px 6px rgba(23, 92, 211, 0.18) !important;
-}
-
-.btn-submit:hover, .btn-ok:hover, .btn-action-send:hover {
-	background: #164EB6 !important;
-	box-shadow: 0 3px 8px rgba(23, 92, 211, 0.22) !important;
-}
-
-.btn-ok {
-	margin-top: 25px;
-	width: 120px;
-	padding: 8px !important;
-}
-
-/* =============================================================
-   CONFIRMATION MODAL (PROFESSIONAL BANKING STYLE)
-   ============================================================= */
 .confirm-modal-window {
-	border-radius: 16px !important;
-	border: 1px solid #E2E8F0 !important;
-	box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.15), 0 10px 10px -5px rgba(15, 23, 42, 0.08) !important;
-	background: #FFFFFF !important;
-	overflow: hidden !important;
-}
-
-.confirm-modal-window.z-window-modal {
-	border-radius: 16px !important;
-	border: 1px solid #E2E8F0 !important;
-	overflow: hidden !important;
-	box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25) !important;
-	background: #FFFFFF !important;
-}
-
-.confirm-modal-window .z-window-header {
-	display: none !important;
-}
-
-.confirm-modal-window .z-window-content {
-	padding: 0 !important;
-	background: #FFFFFF !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15) !important;
 }
 
 .confirm-modal-vlayout {
-	padding: 32px 28px 28px 28px;
-	text-align: center;
-	align-items: center;
-	box-sizing: border-box;
-	background: #FFFFFF;
+    padding: 32px 24px 24px 24px !important;
 }
 
 .confirm-icon-wrapper {
-	margin-bottom: 18px;
-	display: flex;
-	justify-content: center;
-	align-items: center;
+    text-align: center !important;
+    margin-bottom: 20px !important;
 }
 
 .confirm-icon-circle {
-	width: 56px;
-	height: 56px;
-	border-radius: 50%;
-	background: #EFF6FF;
-	border: 1px solid #DBEAFE;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	margin: 0 auto;
-	box-shadow: 0 2px 8px rgba(23, 92, 211, 0.12);
+    width: 56px !important;
+    height: 56px !important;
+    background: #F0F3FF !important;
+    border-radius: 50% !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 .confirm-icon {
-	color: #175CD3;
-	font-size: 22px;
-	line-height: 56px;
+    color: #175CD3 !important;
+    font-size: 24px !important;
 }
 
 .confirm-title {
-	font-family: 'Plus Jakarta Sans', sans-serif;
-	font-size: 18px;
-	font-weight: 700;
-	color: #0F172A;
-	margin-bottom: 8px;
-	letter-spacing: -0.02em;
-	display: block;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    color: #1D2939 !important;
+    text-align: center !important;
+    display: block !important;
+    margin-bottom: 12px !important;
 }
 
 .confirm-desc {
-	font-family: 'Inter', sans-serif;
-	font-size: 13.5px;
-	color: #64748B;
-	line-height: 1.55;
-	max-width: 380px;
-	margin: 0 auto 24px auto;
-	display: block;
-	font-weight: 500;
+    font-size: 14px !important;
+    color: #667085 !important;
+    text-align: center !important;
+    display: block !important;
+    margin-bottom: 24px !important;
+    line-height: 1.5;
 }
 
 .confirm-btn-bar {
-	width: 100%;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	box-sizing: border-box;
+    width: 100% !important;
+    justify-content: center !important;
+}
+
+.btn-modal-cancel,
+.btn-modal-confirm {
+    min-width: 140px !important;
+    padding: 9px 16px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
 }
 
 .btn-modal-cancel {
-	flex: 1;
-	height: 40px;
-	background: #FFFFFF !important;
-	color: #475569 !important;
-	border: 1px solid #CBD5E1 !important;
-	border-radius: 8px !important;
-	font-family: 'Plus Jakarta Sans', sans-serif !important;
-	font-size: 13px !important;
-	font-weight: 600 !important;
-	cursor: pointer !important;
-	transition: all 0.15s ease-in-out !important;
-	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+    background: #F3F4F6 !important;
+    color: #374151 !important;
 }
 
 .btn-modal-cancel:hover {
-	background: #F8FAFC !important;
-	border-color: #94A3B8 !important;
-	color: #1E293B !important;
+    background: #E5E7EB !important;
 }
 
 .btn-modal-confirm {
-	flex: 1;
-	height: 40px;
-	background: linear-gradient(135deg, #175CD3 0%, #4F46E5 100%) !important;
-	color: #FFFFFF !important;
-	border: none !important;
-	border-radius: 8px !important;
-	font-family: 'Plus Jakarta Sans', sans-serif !important;
-	font-size: 13px !important;
-	font-weight: 600 !important;
-	cursor: pointer !important;
-	box-shadow: 0 4px 12px rgba(23, 92, 211, 0.25) !important;
-	transition: all 0.15s ease-in-out !important;
+    background: #175CD3 !important;
+    color: #FFFFFF !important;
 }
 
 .btn-modal-confirm:hover {
-	background: linear-gradient(135deg, #144eb3 0%, #4338ca 100%) !important;
-	box-shadow: 0 6px 16px rgba(23, 92, 211, 0.35) !important;
-	transform: translateY(-1px);
-}
-
-/* =============================================================
-   NOTIFICATION TOAST (SENT TO CHECKER)
-   ============================================================= */
-.z-notification-info .z-notification-content {
-	background: #0F172A !important;
-	color: #FFFFFF !important;
-	border-radius: 8px !important;
-	font-family: 'Plus Jakarta Sans', sans-serif !important;
-	font-size: 13.5px !important;
-	font-weight: 600 !important;
-	padding: 12px 24px !important;
-	box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25) !important;
-	border: 1px solid rgba(255, 255, 255, 0.1) !important;
-}
-
-/* =============================================================
-   READY STATUS (used inside success modal / status badges)
-   ============================================================= */
-.status-badge-ready {
-	border: 1px solid #86EFAC;
-	background: #F0FDF4;
-	border-radius: var(--radius-pill);
-	padding: 4px 10px;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.status-icon-ready, .status-text-ready {
-	color: #15803D;
-	font-weight: 700;
-}
-
-/* =============================================================
-   RESPONSIVE
-   Same breakpoints as dashboard
-   ============================================================= */
-@media ( max-width : 1024px) {
-	.main-window {
-		padding: 22px 20px;
-	}
-	.custom-grid .z-column {
-		font-size: 12px !important;
-		padding: 12px 12px !important;
-	}
-}
-
-@media ( max-width : 768px) {
-	.main-window {
-		padding: 16px 12px;
-	}
-}
-
-@media ( prefers-reduced-motion : reduce) {
-	*, *::before, *::after {
-		animation-duration: 0.01ms !important;
-		animation-iteration-count: 1 !important;
-		transition-duration: 0.01ms !important;
-	}
+    background: #164EB6 !important;
 }

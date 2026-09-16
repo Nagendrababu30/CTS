@@ -476,11 +476,11 @@ public class OutwardMakerAmountAccountDetailController
          * a separate payeeAccountNumber field.
          */
 
-        if (cheque.getDepositorAccountNumber() != null
-                && !cheque.getDepositorAccountNumber()
+        if (cheque.getPayeeAccountNumber() != null
+                && !cheque.getPayeeAccountNumber()
                         .trim().isEmpty()) {
 
-            return cheque.getDepositorAccountNumber();
+            return cheque.getPayeeAccountNumber();
         }
 
         if (cheque.getDrawerAccountNumber() != null

@@ -16,21 +16,37 @@
         sclass="content">
 
     <style src="/css/inward/maker/sendtochecker.css"/>
+    
     <window apply="com.cts.inward.controller.SendToCheckerController" 
-    				height="100%" sclass="main-window">
+        height="100%" sclass="main-window">
         
-        <vlayout sclass="content-container">
+        <vlayout width="100%" spacing="0px" sclass="content-layout">
 
-            <!-- Main Grid -->
-            <grid id="batchesGrid" emptyMessage="No batches ready to be submitted." sclass="custom-grid">
-                <columns sclass="custom-columns">
-                    <column label="Batch ID" sclass="custom-column" />
-                    <column label="Total Cheques" sclass="custom-column" />
-                    <column label="Status" sclass="custom-column" />
-                    <column label="Action" sclass="custom-column" />
-                </columns>
-                <rows id="batchRows" />
-            </grid>
+            <!-- PAGE HEADER -->
+            <label value="Send to Checker Queue"
+                sclass="page-title" />
+
+            <!-- BATCH TABLE PANEL — wraps grid like dashboard wraps grid -->
+            <vlayout sclass="table-panel" spacing="0" width="100%">
+
+                <!-- Table Header -->
+                <hlayout valign="middle" width="100%" style="padding-bottom:16px;">
+                    <label value="Batches" sclass="table-title"/>
+                </hlayout>
+
+                <!-- Main Grid -->
+                <grid id="batchesGrid" emptyMessage="No batches ready to be submitted." 
+                    sclass="custom-grid" mold="paging" pageSize="10">
+                    <columns sclass="custom-columns">
+                        <column label="Batch ID" sclass="custom-column" />
+                        <column label="Total Cheques" sclass="custom-column" />
+                        <column label="Status" sclass="custom-column" />
+                        <column label="Action" sclass="custom-column" />
+                    </columns>
+                    <rows id="batchRows" />
+                </grid>
+
+            </vlayout>
 
         </vlayout>
         
@@ -58,6 +74,7 @@
                 </hlayout>
             </vlayout>
         </window>
+        
     </window>
         
     </div>

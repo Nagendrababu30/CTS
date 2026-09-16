@@ -197,39 +197,53 @@ public class BatchDaoImpl implements BatchDao {
 			}
 
 			// ---------------------------------------------------------
-			// 3. Add DATA_ENTRY_COMPLETED to batch history
+			// 3. Update DATA_ENTRY_COMPLETED in batch history
 			// ---------------------------------------------------------
 
-			String historySql = """
-					INSERT INTO public.inward_batch_history
-					(
-					    batch_id,
-					    batch_status,
-					    changed_on,
-					    changed_by,
-					    reason,
-					    remarks
-					)
-					VALUES
-					(
-					    ?,
-					    ?,
-					    CURRENT_TIMESTAMP,
-					    ?,
-					    ?,
-					    ?
-					)
+			String updateHistorySql = """
+					UPDATE public.inward_batch_history
+					SET batch_status = 'DATA_ENTRY_COMPLETED',
+					    changed_on = CURRENT_TIMESTAMP,
+					    changed_by = ?,
+					    reason = 'DATA_ENTRY_COMPLETED',
+					    remarks = 'All eligible cheques completed Data Entry'
+					WHERE batch_id = ?
 					""";
 
-			try (PreparedStatement statement = connection.prepareStatement(historySql)) {
+			int updatedBatchHist = 0;
+			try (PreparedStatement statement = connection.prepareStatement(updateHistorySql)) {
+				statement.setLong(1, userId);
+				statement.setLong(2, batchId);
+				updatedBatchHist = statement.executeUpdate();
+			}
 
-				statement.setLong(1, batchId);
-				statement.setString(2, "DATA_ENTRY_COMPLETED");
-				statement.setLong(3, userId);
-				statement.setString(4, "DATA_ENTRY_COMPLETED");
-				statement.setString(5, "All eligible cheques completed Data Entry");
+			if (updatedBatchHist == 0) {
+				String historySql = """
+						INSERT INTO public.inward_batch_history
+						(
+						    batch_id,
+						    batch_status,
+						    changed_on,
+						    changed_by,
+						    reason,
+						    remarks
+						)
+						VALUES
+						(
+						    ?,
+						    'DATA_ENTRY_COMPLETED',
+						    CURRENT_TIMESTAMP,
+						    ?,
+						    'DATA_ENTRY_COMPLETED',
+						    'All eligible cheques completed Data Entry'
+						)
+						""";
 
-				statement.executeUpdate();
+				try (PreparedStatement statement = connection.prepareStatement(historySql)) {
+					statement.setLong(1, batchId);
+					statement.setLong(2, userId);
+					statement.executeUpdate();
+				}
 			}
 
 			connection.commit();
@@ -492,6 +506,9 @@ public class BatchDaoImpl implements BatchDao {
 
 	@Override
 	public List<NpciBatchData> getBatchesForMaker(Long userId) {
+		if (userId == null) {
+			return new ArrayList<>();
+		}
 		String sql = """
 				SELECT
 				    b.batch_id,
@@ -499,26 +516,33 @@ public class BatchDaoImpl implements BatchDao {
 				    b.presenting_bank_name,
 				    b.total_cheques
 				FROM inward_batch b
-				LEFT JOIN LATERAL (
+				INNER JOIN LATERAL (
 				    SELECT bl.user_id, bl.lock_status
 				    FROM inward_batch_lock bl
+				    INNER JOIN public."user" u ON u.user_id = bl.user_id
+				    INNER JOIN public."role" r ON r.role_id = u.role_id
 				    WHERE bl.batch_id = b.batch_id
+				      AND u.status = 'ACTIVE'
+				      AND r.role_name = 'INWARD_MAKER'
 				    ORDER BY bl.locked_time DESC, bl.lock_id DESC
 				    LIMIT 1
 				) l ON TRUE
-				WHERE (l.lock_status IS NULL OR l.lock_status <> 'LOCKED' OR (? IS NOT NULL AND l.user_id = ?))
+				INNER JOIN LATERAL (
+				    SELECT h.batch_status
+				    FROM inward_batch_history h
+				    WHERE h.batch_id = b.batch_id
+				    ORDER BY h.changed_on DESC NULLS LAST, h.batch_history_id DESC
+				    LIMIT 1
+				) latest ON TRUE
+				WHERE l.lock_status = 'LOCKED'
+				  AND l.user_id = ?
+				  AND latest.batch_status IN ('LOCKED', 'MICR_REPAIR', 'RETURN_TO_MAKER')
 				ORDER BY b.batch_id
 				""";
 		List<NpciBatchData> batches = new ArrayList<>();
 		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {
-			if (userId != null) {
-				statement.setLong(1, userId);
-				statement.setLong(2, userId);
-			} else {
-				statement.setNull(1, java.sql.Types.BIGINT);
-				statement.setNull(2, java.sql.Types.BIGINT);
-			}
+			statement.setLong(1, userId);
 			try (ResultSet resultSet = statement.executeQuery()) {
 				while (resultSet.next()) {
 					batches.add(new NpciBatchData(resultSet.getLong("batch_id"), resultSet.getLong("file_id"),
@@ -533,6 +557,9 @@ public class BatchDaoImpl implements BatchDao {
 
 	@Override
 	public List<NpciBatchData> getBatchesByStatusAndMaker(String batchStatus, Long userId) {
+		if (userId == null) {
+			return new ArrayList<>();
+		}
 		String sql = """
 				SELECT
 				    b.batch_id,
@@ -547,28 +574,28 @@ public class BatchDaoImpl implements BatchDao {
 				    ORDER BY h.changed_on DESC NULLS LAST, h.batch_history_id DESC
 				    LIMIT 1
 				) latest ON TRUE
-				LEFT JOIN LATERAL (
+				INNER JOIN LATERAL (
 				    SELECT bl.user_id, bl.lock_status
 				    FROM public.inward_batch_lock bl
+				    INNER JOIN public."user" u ON u.user_id = bl.user_id
+				    INNER JOIN public."role" r ON r.role_id = u.role_id
 				    WHERE bl.batch_id = b.batch_id
+				      AND u.status = 'ACTIVE'
+				      AND r.role_name = 'INWARD_MAKER'
 				    ORDER BY bl.locked_time DESC, bl.lock_id DESC
 				    LIMIT 1
 				) l ON TRUE
-				WHERE latest.batch_status = ?
-				  AND (l.lock_status IS NULL OR l.lock_status <> 'LOCKED' OR (? IS NOT NULL AND l.user_id = ?))
+				WHERE (latest.batch_status = ? OR (latest.batch_status = 'RETURN_TO_MAKER' AND ? = 'DATA_ENTRY'))
+				  AND l.lock_status = 'LOCKED'
+				  AND l.user_id = ?
 				ORDER BY b.batch_id
 				""";
 		List<NpciBatchData> batches = new ArrayList<>();
 		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 			statement.setString(1, batchStatus);
-			if (userId != null) {
-				statement.setLong(2, userId);
-				statement.setLong(3, userId);
-			} else {
-				statement.setNull(2, java.sql.Types.BIGINT);
-				statement.setNull(3, java.sql.Types.BIGINT);
-			}
+			statement.setString(2, batchStatus);
+			statement.setLong(3, userId);
 			try (ResultSet resultSet = statement.executeQuery()) {
 				while (resultSet.next()) {
 					batches.add(new NpciBatchData(resultSet.getLong("batch_id"), resultSet.getLong("file_id"),
@@ -587,6 +614,7 @@ public class BatchDaoImpl implements BatchDao {
 				SELECT bl.user_id, bl.lock_status
 				FROM public.inward_batch_lock bl
 				WHERE bl.batch_id = ?
+				  AND bl.lock_status = 'LOCKED'
 				ORDER BY bl.locked_time DESC, bl.lock_id DESC
 				LIMIT 1
 				""";
@@ -595,9 +623,27 @@ public class BatchDaoImpl implements BatchDao {
 			statement.setLong(1, batchId);
 			try (ResultSet resultSet = statement.executeQuery()) {
 				if (resultSet.next()) {
-					String status = resultSet.getString("lock_status");
-					if ("LOCKED".equalsIgnoreCase(status)) {
-						return resultSet.getLong("user_id");
+					return resultSet.getLong("user_id");
+				}
+			}
+
+			// Fallback: If batch is RETURN_TO_MAKER, verify maker from inward_batch_history
+			String fallbackSql = """
+					SELECT changed_by
+					FROM public.inward_batch_history
+					WHERE batch_id = ?
+					  AND batch_status = 'RETURN_TO_MAKER'
+					ORDER BY batch_history_id DESC
+					LIMIT 1
+					""";
+			try (PreparedStatement fallbackPs = connection.prepareStatement(fallbackSql)) {
+				fallbackPs.setLong(1, batchId);
+				try (ResultSet rs = fallbackPs.executeQuery()) {
+					if (rs.next()) {
+						long makerId = rs.getLong("changed_by");
+						if (!rs.wasNull()) {
+							return makerId;
+						}
 					}
 				}
 			}

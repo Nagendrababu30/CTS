@@ -136,13 +136,16 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		}
 
 		Long lockOwner = BatchDaoImpl.of().getBatchLockOwner(batchId);
-		if (lockOwner != null && (loggedInUserId == null || !lockOwner.equals(loggedInUserId))) {
+		if (lockOwner == null || loggedInUserId == null || !lockOwner.equals(loggedInUserId)) {
+			String msg = (lockOwner == null)
+					? "This batch is not locked. Please lock the batch from the dashboard first."
+					: "This batch is locked by another user.";
 			Messagebox.show(
-					"This batch is locked by another user.",
+					msg,
 					"Access Denied",
 					Messagebox.OK,
 					Messagebox.EXCLAMATION,
-					e -> Executions.sendRedirect("/zul/inward-maker/data-entry.zul"));
+					e -> Executions.sendRedirect("/zul/inward-maker/dashboard.zul"));
 			return;
 		}
 
@@ -248,12 +251,15 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 			lblChequeInfo.setValue("Cheque " + (currentIndex + 1) + " of " + cheques.size());
 		}
 
+		boolean isReturned = isChequeReturnedByMaker(cheque.getChequeNumber());
+
 		// -----------------------------------------------------
 		// CHEQUE NUMBER
 		// -----------------------------------------------------
 
 		if (txtChequeNo != null) {
 			txtChequeNo.setValue(safeString(cheque.getChequeNumber()));
+			txtChequeNo.setReadonly(isReturned);
 		}
 
 		// -----------------------------------------------------
@@ -262,6 +268,7 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 
 		if (txtAccountNo != null) {
 			txtAccountNo.setValue(safeString(cheque.getAccountNumber()));
+			txtAccountNo.setReadonly(isReturned);
 		}
 
 		// -----------------------------------------------------
@@ -274,6 +281,7 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 			} else {
 				decAmount.setRawValue("");
 			}
+			decAmount.setReadonly(isReturned);
 		}
 
 		// -----------------------------------------------------
@@ -286,6 +294,7 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 			} else {
 				dtChequeDate.setValue(null);
 			}
+			dtChequeDate.setDisabled(isReturned);
 		}
 
 		// -----------------------------------------------------
@@ -326,16 +335,15 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		}
 
 		java.util.Map<String, String> returnInfo = chequeService.getChequeReturnInfo(chqNo);
-		if (returnInfo != null && ("RETURN_TO_MAKER".equalsIgnoreCase(returnInfo.get("status"))
-				|| "RETURN_BY_MAKER".equalsIgnoreCase(returnInfo.get("status")))) {
+		if (returnInfo != null && "RETURN_TO_MAKER".equalsIgnoreCase(returnInfo.get("status"))) {
 			returnReasonBanner.setVisible(true);
 
-			String desc = returnInfo.get("description");
+			String desc = returnInfo.get("returnReasonDescription");
 			if (desc == null || desc.trim().isEmpty()) {
 				desc = returnInfo.get("returnReasonCode");
 			}
 			if (lblReturnReason != null) {
-				lblReturnReason.setValue(desc != null ? desc : "Returned");
+				lblReturnReason.setValue(desc != null ? desc : "Returned to Maker by Checker");
 			}
 
 			String remarks = returnInfo.get("remarks");
@@ -619,26 +627,18 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 
 			updateBatchSummaryCounts();
 
-			if (currentIndex == cheques.size() - 1) {
-				batchService.completeDataEntry(batchId, loggedInUserId);
-				int pending = batchService.getDataEntryPendingCount(batchId);
-				if (pending == 0) {
-					String redirectUrl = Executions.encodeURL("/zul/inward-maker/send-to-checker.zul");
-					Clients.evalJavaScript("setTimeout(function() { window.location.href = '" + redirectUrl + "'; }, 2000);");
-				} else {
-					// Navigate to first pending cheque
-					for (int i = 0; i < cheques.size(); i++) {
-						if (!isChequeReturnedByMaker(cheques.get(i).getChequeNumber())) {
-							currentIndex = i;
-							displayCurrentCheque();
-							break;
-						}
-					}
-				}
-			} else {
-				currentIndex++;
-				displayCurrentCheque();
+			batchService.completeDataEntry(batchId, loggedInUserId);
+			int pending = batchService.getDataEntryPendingCount(batchId);
+			if (pending == 0) {
+				String redirectUrl = Executions.encodeURL("/zul/inward-maker/send-to-checker.zul");
+				Clients.evalJavaScript("setTimeout(function() { window.location.href = '" + redirectUrl + "'; }, 2000);");
 			}
+
+			if (currentIndex < cheques.size() - 1) {
+				currentIndex++;
+			}
+
+			displayCurrentCheque();
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -805,8 +805,14 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		if (cheques == null || cheques.isEmpty()) {
 			if (btnPrev != null) btnPrev.setDisabled(true);
 			if (btnNext != null) btnNext.setDisabled(true);
+			if (btnReturn != null) btnReturn.setDisabled(true);
 			if (btnSaveNext != null) btnSaveNext.setDisabled(true);
 			return;
+		}
+
+		boolean isReturned = false;
+		if (currentIndex >= 0 && currentIndex < cheques.size()) {
+			isReturned = isChequeReturnedByMaker(cheques.get(currentIndex).getChequeNumber());
 		}
 
 		// PREVIOUS
@@ -819,8 +825,14 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 			btnNext.setDisabled(currentIndex >= cheques.size() - 1);
 		}
 
+		// RETURN
+		if (btnReturn != null) {
+			btnReturn.setDisabled(isReturned);
+		}
+
 		// SAVE / SAVE & NEXT
 		if (btnSaveNext != null) {
+			btnSaveNext.setDisabled(isReturned);
 			if (currentIndex == cheques.size() - 1) {
 				btnSaveNext.setLabel("Save & Send to Checker");
 			} else {

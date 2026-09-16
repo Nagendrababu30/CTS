@@ -238,24 +238,13 @@ public class CheckerCXFGenerationService {
                 );
 
                 // ------------------------------------------------
-                // DEPOSITOR ACCOUNT NUMBER
+                // PAYEE ACCOUNT NUMBER
                 // ------------------------------------------------
 
                 writeElement(
                         writer,
                         "DepositorAccountNumber",
-                        cheque.getDepositorAccountNumber(),
-                        12
-                );
-
-                // ------------------------------------------------
-                // DEPOSITOR NAME
-                // ------------------------------------------------
-
-                writeElement(
-                        writer,
-                        "DepositorName",
-                        cheque.getDepositorName(),
+                        cheque.getPayeeAccountNumber(),
                         12
                 );
 

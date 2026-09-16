@@ -2307,6 +2307,20 @@ private Button reVerifyBatchesBtn;
 
             int amountAccount =
                     result.getAmountAccountErrors();
+            
+            // =================================================
+            // MICR REPAIR
+            // =================================================
+
+            if (micr > 0) {
+
+                openMicrRepair(
+                        cleanBatchNumber
+                );
+
+                return;
+            }
+
 
             // =================================================
             // DATA ENTRY
@@ -2315,19 +2329,6 @@ private Button reVerifyBatchesBtn;
             if (dataEntry > 0) {
 
                 openDataEntry(
-                        cleanBatchNumber
-                );
-
-                return;
-            }
-
-            // =================================================
-            // MICR REPAIR
-            // =================================================
-
-            if (micr > 0) {
-
-                openMicrRepair(
                         cleanBatchNumber
                 );
 
@@ -3823,21 +3824,11 @@ private Button reVerifyBatchesBtn;
 
                         + "\n\n"
 
-                        + "Data Entry Errors: "
-
-                        + dataEntry
-
-                        + "\n"
-
                         + "MICR Errors: "
 
-                        + micr
+                        + micr;
 
-                        + "\n"
-
-                        + "Amount / Account Errors: "
-
-                        + amountAccount;
+                       
 
         Messagebox.show(
 

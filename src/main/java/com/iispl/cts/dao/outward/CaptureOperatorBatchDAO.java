@@ -343,7 +343,7 @@ public class CaptureOperatorBatchDAO {
         ps.setString(
                 4,
                 safeValue(
-                        cheque.getDepositorAccountNumber()));
+                        cheque.getPayeeAccountNumber()));
 
         // -----------------------------------------------------
         // 5. payee_name
@@ -461,7 +461,7 @@ public class CaptureOperatorBatchDAO {
                 "\nPayee Account: ")
                 .append(
                         safeValue(
-                                cheque.getDepositorAccountNumber()));
+                                cheque.getPayeeAccountNumber()));
 
         message.append(
                 "\nPayee Name: ")
@@ -824,7 +824,7 @@ public class CaptureOperatorBatchDAO {
 
                     ps.setString(
                             5,
-                            cheque.getDepositorAccountNumber());
+                            cheque.getPayeeAccountNumber());
 
                     // =================================================
                     // 6. payee_name

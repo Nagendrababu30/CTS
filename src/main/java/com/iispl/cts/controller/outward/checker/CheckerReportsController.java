@@ -441,16 +441,6 @@ public class CheckerReportsController extends SelectorComposer<Component> {
                         cheque.getDrawerName()))
                 .append("</DrawerName>\n");
 
-        xml.append("            <DepositorAccountNumber>")
-                .append(xmlValue(
-                        cheque.getDepositorAccountNumber()))
-                .append("</DepositorAccountNumber>\n");
-
-        xml.append("            <DepositorName>")
-                .append(xmlValue(
-                        cheque.getDepositorName()))
-                .append("</DepositorName>\n");
-
         xml.append("            <PayeeName>")
                 .append(xmlValue(
                         cheque.getPayeeName()))

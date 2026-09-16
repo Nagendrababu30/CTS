@@ -100,7 +100,7 @@ public class OutwardMakerDataEntryDetailDAO {
                     );
 
 
-                    cheque.setDepositorAccountNumber(
+                    cheque.setPayeeAccountNumber(
                             rs.getString(
                                     "payee_account_number"
                             )
@@ -366,7 +366,7 @@ public class OutwardMakerDataEntryDetailDAO {
                     // PAYEE ACCOUNT NUMBER
                     // =============================================
 
-                    cheque.setDepositorAccountNumber(
+                    cheque.setPayeeAccountNumber(
                             rs.getString(
                                     "payee_account_number"
                             )

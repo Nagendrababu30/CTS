@@ -161,7 +161,7 @@ public class OutwardMakerDashboardDAO {
                 "               'COMPLETED', " +
                 "               'REJECTED', " +
                 "               'HOLD', " +
-                "               'ON_HOLD','NPCI_SENT') " +
+                "               'ON_HOLD','NPCI_SENT','CHECKER_PROCESSING') " +
                 "          AND " +
                 "          ( " +
 
@@ -1062,19 +1062,11 @@ public class OutwardMakerDashboardDAO {
                             )
                     );
 
-                    // DEPOSITOR ACCOUNT NUMBER
+                    // PAYEE ACCOUNT NUMBER
 
-                    cheque.setDepositorAccountNumber(
+                    cheque.setPayeeAccountNumber(
                             rs.getString(
                                     "payee_account_number"
-                            )
-                    );
-
-                    // DEPOSITOR NAME
-
-                    cheque.setDepositorName(
-                            rs.getString(
-                                    "payee_name"
                             )
                     );
 

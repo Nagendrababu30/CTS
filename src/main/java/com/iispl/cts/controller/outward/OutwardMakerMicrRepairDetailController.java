@@ -8,9 +8,9 @@ import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.InputEvent;
-import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.Wire;
+import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
@@ -25,1848 +25,1280 @@ import com.iispl.cts.service.outward.OutwardMakerDashboardService;
 import com.iispl.cts.service.outward.OutwardValidationService;
 
 
-public class OutwardMakerMicrRepairDetailController
-        extends SelectorComposer<Component> {
+public class OutwardMakerMicrRepairDetailController extends GenericForwardComposer<Component> {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
 
-    // =========================================================
-    // UI Components - Header & Progress
-    // =========================================================
+	// =========================================================
+	// UI Components - Header & Progress
+	// =========================================================
 
-    @Wire
-    private Label batchIdLabel;
+	@Wire
+	private Label batchIdLabel;
 
-    @Wire
-    private Label chequeProgressLabel;
+	@Wire
+	private Label chequeProgressLabel;
 
-    @Wire
-    private Label currentStatusLabel;
+	@Wire
+	private Label currentStatusLabel;
 
 
-    // =========================================================
-    // UI Components - Metric Pills
-    // =========================================================
+	// =========================================================
+	// UI Components - Metric Pills
+	// =========================================================
 
-    @Wire
-    private Label totalPillLabel;
+	@Wire
+	private Label totalPillLabel;
 
-    @Wire
-    private Label completedPillLabel;
+	@Wire
+	private Label completedPillLabel;
 
-    @Wire
-    private Label rejectedPillLabel;
+	@Wire
+	private Label rejectedPillLabel;
 
-    @Wire
-    private Label pendingPillLabel;
+	@Wire
+	private Label pendingPillLabel;
 
 
-    // =========================================================
-    // UI Components - Cheque Viewer
-    // =========================================================
+	// =========================================================
+	// UI Components - Cheque Viewer
+	// =========================================================
 
-    @Wire
-    private Image frontImage;
+	@Wire
+	private Image frontImage;
 
-    @Wire
-    private Image backImage;
+	@Wire
+	private Image backImage;
 
-    @Wire
-    private Button frontImageButton;
+	@Wire
+	private Button frontImageButton;
 
-    @Wire
-    private Button backImageButton;
+	@Wire
+	private Button backImageButton;
 
-    @Wire
-    private Button zoomInButton;
+	@Wire
+	private Button zoomInButton;
 
-    @Wire
-    private Button zoomOutButton;
+	@Wire
+	private Button zoomOutButton;
 
-    @Wire
-    private Button rotateButton;
+	@Wire
+	private Button rotateButton;
 
 
-    // =========================================================
-    // UI Components - Form Inputs
-    // =========================================================
+	// =========================================================
+	// UI Components - Form Inputs
+	// =========================================================
 
-    @Wire
-    private Textbox chequeNumberTextbox;
+	@Wire
+	private Textbox chequeNumberTextbox;
 
-    @Wire
-    private Textbox cityCodeTextbox;
+	@Wire
+	private Textbox cityCodeTextbox;
 
-    @Wire
-    private Textbox bankCodeTextbox;
+	@Wire
+	private Textbox bankCodeTextbox;
 
-    @Wire
-    private Textbox branchCodeTextbox;
+	@Wire
+	private Textbox branchCodeTextbox;
 
 
-    // =========================================================
-    // UI Components - Navigation & Action Controls
-    // =========================================================
+	// =========================================================
+	// UI Components - Navigation & Action Controls
+	// =========================================================
 
-    @Wire
-    private Button prevButton;
+	@Wire
+	private Button prevButton;
 
-    @Wire
-    private Button saveNextButton;
+	@Wire
+	private Button saveNextButton;
 
-    @Wire
-    private Button btnBackToQueue;
+	@Wire
+	private Button btnBackToQueue;
 
 
-    // =========================================================
-    // CHECKER RETURN INFORMATION
-    //
-    // These components are shown ONLY when the cheque was
-    // returned from Checker to Maker.
-    // =========================================================
+	// =========================================================
+	// CHECKER RETURN INFORMATION
+	//
+	// These components are shown ONLY when the cheque was
+	// returned from Checker to Maker.
+	// =========================================================
 
-    @Wire
-    private Vlayout checkerReturnInformationPanel;
+	@Wire
+	private Vlayout checkerReturnInformationPanel;
 
-    @Wire
-    private Label checkerReasonLabel;
+	@Wire
+	private Label checkerReasonLabel;
 
-    @Wire
-    private Label checkerRemarksLabel;
+	@Wire
+	private Label checkerRemarksLabel;
 
 
-    // =========================================================
-    // State Variables
-    // =========================================================
+	// =========================================================
+	// State Variables
+	// =========================================================
 
-    private List<OutwardCheque> cheques;
+	private List<OutwardCheque> cheques;
 
-    private int currentIndex = 0;
+	private int currentIndex = 0;
 
-    private int totalChequesCount = 0;
+	private int totalChequesCount = 0;
 
-    private String batchNumber;
+	private String batchNumber;
 
-    private double currentScale = 1.0;
+	private double currentScale = 1.0;
 
-    private int currentRotation = 0;
+	private int currentRotation = 0;
 
 
-    // =========================================================
-    // RETURNED CHEQUE / MICR REPAIR STATE
-    // =========================================================
+	// =========================================================
+	// RETURNED CHEQUE / MICR REPAIR STATE
+	// =========================================================
 
-    private boolean returnedMode = false;
+	private boolean returnedMode = false;
 
-    private String returnedChequeNumber;
+	private String returnedChequeNumber;
 
-    /*
-     * Dashboard repair type.
-     * For the returned MICR queue this is MICR.
-     */
-    private String repairType;
+	/*
+	 * Dashboard repair type.
+	 * For the returned MICR queue this is MICR.
+	 */
+	private String repairType;
 
-    private String checkerReasonCode;
+	private String checkerReasonCode;
 
-    private String checkerRemarks;
+	private String checkerRemarks;
 
 
-    // =========================================================
-    // SERVICE DEPENDENCIES
-    // =========================================================
+	// =========================================================
+	// SERVICE DEPENDENCIES
+	// =========================================================
 
-    private OutwardMakerMicrRepairDetailService service;
+	private OutwardMakerMicrRepairDetailService service;
 
-    private OutwardValidationService validationService;
+	private OutwardValidationService validationService;
 
 
-    // =========================================================
-    // AFTER COMPOSE
-    // =========================================================
+	// =========================================================
+	// AFTER COMPOSE
+	// =========================================================
 
-    @Override
-    public void doAfterCompose(Component comp)
-            throws Exception {
+	@Override
+	public void doAfterCompose(Component comp) throws Exception {
 
-        super.doAfterCompose(comp);
+		super.doAfterCompose(comp);
 
+		service = new OutwardMakerMicrRepairDetailService();
+		validationService = new OutwardValidationService();
 
-        service =
-                new OutwardMakerMicrRepairDetailService();
 
-        validationService =
-                new OutwardValidationService();
+		// =====================================================
+		// GET BATCH NUMBER
+		// =====================================================
 
+		batchNumber = Executions.getCurrent().getParameter("batchNumber");
 
-        // =====================================================
-        // GET BATCH NUMBER
-        // =====================================================
+		if (batchNumber == null || batchNumber.trim().isEmpty()) {
+			Messagebox.show("Batch number is missing.","Error",Messagebox.OK,
+					Messagebox.ERROR);
+			return;
+		}
 
-        batchNumber =
-                Executions.getCurrent()
-                        .getParameter("batchNumber");
+		batchNumber = batchNumber.trim();
 
-        if (batchNumber == null
-                || batchNumber.trim().isEmpty()) {
+		if (batchIdLabel != null) {
+			batchIdLabel.setValue(batchNumber);
+		}
 
-            Messagebox.show(
-                    "Batch number is missing.",
-                    "Error",
-                    Messagebox.OK,
-                    Messagebox.ERROR
-            );
 
-            return;
-        }
+		// =====================================================
+		// CHECK RETURNED MODE
+		//
+		// Dashboard sends:
+		//
+		// returnMode=HOLD
+		//
+		// and:
+		//
+		// chequeNumber=XXXXXX
+		//
+		// Also support RETURNED because the Data Entry
+		// implementation uses RETURNED.
+		// =====================================================
 
+		String returnMode = Executions.getCurrent().getParameter("returnMode");
 
-        batchNumber =
-                batchNumber.trim();
 
+		// -----------------------------------------------------
+		// Support malformed browser parameter: amp;returnMode
+		// -----------------------------------------------------
 
-        if (batchIdLabel != null) {
+		if (returnMode == null || returnMode.trim().isEmpty()) {
+			returnMode = Executions.getCurrent().getParameter("amp;returnMode");
+		}
 
-            batchIdLabel.setValue(
-                    batchNumber
-            );
-        }
+		returnedMode = "HOLD".equalsIgnoreCase(returnMode) || "RETURNED".equalsIgnoreCase(returnMode);
 
+		// =====================================================
+		// GET SPECIFIC RETURNED CHEQUE NUMBER
+		// =====================================================
 
-        // =====================================================
-        // CHECK RETURNED MODE
-        //
-        // Dashboard sends:
-        //
-        // returnMode=HOLD
-        //
-        // and:
-        //
-        // chequeNumber=XXXXXX
-        //
-        // Also support RETURNED because the Data Entry
-        // implementation uses RETURNED.
-        // =====================================================
+		returnedChequeNumber = Executions.getCurrent().getParameter("chequeNumber");
 
-        String returnMode =
-                Executions.getCurrent()
-                        .getParameter("returnMode");
+		if (returnedChequeNumber == null || returnedChequeNumber.trim().isEmpty()) {
+			returnedChequeNumber = Executions.getCurrent().getParameter("amp;chequeNumber");
+		}
 
+		// =====================================================
+		//GET REPAIR TYPE
+		//=====================================================
+		/*
+		 * Dashboard sends repairType=MICR for the
+		 * returned MICR queue.
+		 */
+		repairType = Executions.getCurrent().getParameter("repairType");
 
-        // -----------------------------------------------------
-        // Support malformed browser parameter:
-        //
-        // amp;returnMode
-        // -----------------------------------------------------
+		if (repairType == null || repairType.trim().isEmpty()) {
+			repairType = Executions.getCurrent().getParameter("amp;repairType");
+		}
 
-        if (returnMode == null
-                || returnMode.trim().isEmpty()) {
 
-            returnMode =
-                    Executions.getCurrent()
-                            .getParameter(
-                                    "amp;returnMode"
-                            );
-        }
+		System.out.println("======================================");
+		System.out.println("OUTWARD MAKER MICR REPAIR DETAIL");
+		System.out.println("Batch Number : " + batchNumber);
+		System.out.println("Return Mode : " + returnMode);
+		System.out.println("Returned Mode : " + returnedMode);
+		System.out.println("Returned Cheque : " + returnedChequeNumber);
+		System.out.println("======================================");
 
+		// =====================================================
+		// LOAD CHEQUES
+		// =====================================================
 
-        returnedMode =
-                "HOLD".equalsIgnoreCase(
-                        returnMode
-                )
-                || "RETURNED".equalsIgnoreCase(
-                        returnMode
-                );
+		loadCheques();
+	}
 
+	// =========================================================
+	// LOAD CHEQUES
+	// =========================================================
 
-        // =====================================================
-        // GET SPECIFIC RETURNED CHEQUE NUMBER
-        // =====================================================
+	private void loadCheques() throws SQLException {
 
-        returnedChequeNumber =
-                Executions.getCurrent()
-                        .getParameter(
-                                "chequeNumber"
-                        );
+		// =====================================================
+		// NORMAL MICR REPAIR FLOW
+		// EXISTING LOGIC PRESERVED
+		// =====================================================
 
+		if (!returnedMode) {
+			cheques = service.getMicrErrorCheques(batchNumber);
 
-        if (returnedChequeNumber == null
-                || returnedChequeNumber.trim().isEmpty()) {
+			if (cheques == null || cheques.isEmpty()) {
+				Messagebox.show("No MICR error cheques found for this batch.",
+						"Information",Messagebox.OK,Messagebox.INFORMATION);
+				return;
+			}
 
-            returnedChequeNumber =
-                    Executions.getCurrent()
-                            .getParameter(
-                                    "amp;chequeNumber"
-                            );
-        }
+			totalChequesCount = cheques.size();
+			currentIndex = 0;
 
-        /*
-         * =====================================================
-         * GET REPAIR TYPE
-         * =====================================================
-         *
-         * Dashboard sends repairType=MICR for the
-         * returned MICR queue.
-         */
-        repairType =
-                Executions.getCurrent()
-                        .getParameter("repairType");
+			updateHeaderPillMetrics();
+			loadCurrentCheque();
 
-        if (repairType == null
-                || repairType.trim().isEmpty()) {
+			return;
+		}
 
-            repairType =
-                    Executions.getCurrent()
-                            .getParameter("amp;repairType");
-        }
+		// =====================================================
+		// RETURNED MICR CHEQUE FLOW
+		// =====================================================
 
+		List<OutwardCheque> loadedCheques = new OutwardMakerDashboardService().getCheques(batchNumber);
 
-        System.out.println(
-                "======================================"
-        );
+		if (loadedCheques == null || loadedCheques.isEmpty()) {
+			Messagebox.show("No cheque data available for batch "+ batchNumber+ ".",
+					"Information",Messagebox.OK,Messagebox.INFORMATION);
+			return;
+		}
 
-        System.out.println(
-                "OUTWARD MAKER MICR REPAIR DETAIL"
-        );
+		List<OutwardCheque> returnedCheques = new ArrayList<>();
 
-        System.out.println(
-                "Batch Number : "
-                        + batchNumber
-        );
+		OutwardMakerDashboardService dashboardService = new OutwardMakerDashboardService();
 
-        System.out.println(
-                "Return Mode : "
-                        + returnMode
-        );
+		// =====================================================
+		// KEEP ONLY SENT_BACK_TO_MAKER + SEND_BACK + MICR
+		// =====================================================
 
-        System.out.println(
-                "Returned Mode : "
-                        + returnedMode
-        );
+		for (OutwardCheque cheque : loadedCheques) {
+			if (cheque == null) {
+				continue;
+			}
 
-        System.out.println(
-                "Returned Cheque : "
-                        + returnedChequeNumber
-        );
+			String status = cheque.getChequeStatus();
 
-        System.out.println(
-                "======================================"
-        );
+			if (status == null || !"SENT_BACK_TO_MAKER".equalsIgnoreCase(status.trim())) {
+				continue;
+			}
 
+			String chequeNumber = cheque.getChequeNumber();
 
-        // =====================================================
-        // LOAD CHEQUES
-        // =====================================================
+			if (chequeNumber == null || chequeNumber.trim().isEmpty()) {
+				continue;
+			}
 
-        loadCheques();
-    }
+			ChequeProcessing processing = dashboardService.getChequeProcessing(batchNumber,chequeNumber.trim());
 
+			if (processing == null) {
+				continue;
+			}
 
-    // =========================================================
-    // LOAD CHEQUES
-    // =========================================================
+			String checkerAction = processing.getCheckerAction();
+			String checkerReason = processing.getCheckerReasonCode();
 
-    private void loadCheques() throws SQLException {
+			if (checkerAction == null || !"SEND_BACK".equalsIgnoreCase(checkerAction.trim())) {
+				continue;
+			}
 
-        // =====================================================
-        // NORMAL MICR REPAIR FLOW
-        //
-        // EXISTING LOGIC PRESERVED
-        // =====================================================
+			//Strict MICR filtering:
 
-        if (!returnedMode) {
+			if (!isMicrRepairReason(checkerReason)) {
+				continue;
+			}
 
-            cheques =
-                    service.getMicrErrorCheques(
-                            batchNumber
-                    );
+			returnedCheques.add(cheque);
+		}
 
+		// =====================================================
+		// OPTIONAL INITIAL CHEQUE SELECTION
+		// =====================================================
 
-            if (cheques == null
-                    || cheques.isEmpty()) {
+		if (returnedChequeNumber != null && !returnedChequeNumber.trim().isEmpty()) {
+			String requestedCheque = returnedChequeNumber.trim();
 
-                Messagebox.show(
-                        "No MICR error cheques found for this batch.",
-                        "Information",
-                        Messagebox.OK,
-                        Messagebox.INFORMATION
-                );
+			for (int i = 0; i < returnedCheques.size();i++) {
+				OutwardCheque cheque = returnedCheques.get(i);
 
-                return;
-            }
+				if (cheque != null && cheque.getChequeNumber() != null && requestedCheque
+						.equalsIgnoreCase(cheque.getChequeNumber().trim())) {
 
+					currentIndex = i;
+					break;
+				}
+			}
+		}
 
-            totalChequesCount =
-                    cheques.size();
 
-            currentIndex = 0;
+		// =====================================================
+		// NO RETURNED MICR CHEQUE
+		// =====================================================
 
+		if (returnedCheques.isEmpty()) {
 
-            updateHeaderPillMetrics();
+			Messagebox.show("No returned MICR cheque is available "+ "for batch "+ batchNumber
+					+ ".","Checker Return",Messagebox.OK,Messagebox.ERROR);
+			return;
+		}
 
-            loadCurrentCheque();
+		// =====================================================
+		// ONLY RETURNED MICR CHEQUES ARE USED
+		// =====================================================
 
-            return;
-        }
+		cheques = returnedCheques;   
+		totalChequesCount = cheques.size();
 
+		// cheque in the filtered queue.
+		if (currentIndex < 0 || currentIndex >= cheques.size()) {
+			currentIndex = 0;
+		}
 
-        // =====================================================
-        // RETURNED MICR CHEQUE FLOW
-        //
-        // IMPORTANT:
-        //
-        // For Dashboard -> MICR repair, filter at CHEQUE level
-        // using this cheque's checker_reason_code.
-        //
-        // The batch number alone must NEVER cause all returned
-        // cheques in the batch to enter the MICR queue.
-        // =====================================================
+		updateHeaderPillMetrics();
+		loadCurrentCheque();
 
-        List<OutwardCheque> loadedCheques =
-                new OutwardMakerDashboardService()
-                        .getCheques(batchNumber);
+		/*
+		 * Returned MICR mode can contain multiple MICR cheques.
+		 * Therefore Prev/Next navigation is allowed inside the
+		 * filtered MICR subset.
+		 */
+		if (prevButton != null) {
+			prevButton.setDisabled(currentIndex == 0);
+		}
+	}
 
+	// =========================================================
+	// MICR REPAIR REASON CHECK
+	// =========================================================
 
-        if (loadedCheques == null
-                || loadedCheques.isEmpty()) {
+	private boolean isMicrRepairReason(String reasonCode) {
 
-            Messagebox.show(
-                    "No cheque data available for batch "
-                            + batchNumber
-                            + ".",
-                    "Information",
-                    Messagebox.OK,
-                    Messagebox.INFORMATION
-            );
+		if (reasonCode == null || reasonCode.trim().isEmpty()) {
+			return false;
+		}
 
-            return;
-        }
+		String cleanReason = reasonCode.trim().toUpperCase().replace("-", "_")
+				.replace(" ", "_");
 
+		return "MICR".equals(cleanReason) || "MICR_CORRECTION".equals(cleanReason)
+				|| "MICR_MISMATCH".equals(cleanReason);
+	}
 
-        List<OutwardCheque> returnedCheques =
-                new ArrayList<>();
 
+	// =========================================================
+	// HEADER METRICS
+	// =========================================================
 
-        OutwardMakerDashboardService dashboardService =
-                new OutwardMakerDashboardService();
+	private void updateHeaderPillMetrics() {
 
+		if (totalPillLabel != null) {
+			totalPillLabel.setValue(String.valueOf(totalChequesCount));
+		}
 
-        // =====================================================
-        // KEEP ONLY SENT_BACK_TO_MAKER + SEND_BACK + MICR
-        // =====================================================
+		if (completedPillLabel != null) {
+			completedPillLabel.setValue(String.valueOf(currentIndex));
+		}
 
-        for (OutwardCheque cheque
-                : loadedCheques) {
+		if (pendingPillLabel != null) {
+			pendingPillLabel.setValue(String.valueOf(totalChequesCount - currentIndex));
+		}
+	}
 
-            if (cheque == null) {
-                continue;
-            }
+	// =========================================================
+	// LOAD CURRENT CHEQUE
+	// =========================================================
 
-            String status =
-                    cheque.getChequeStatus();
+	private void loadCurrentCheque() {
 
-            if (status == null
-                    || !"SENT_BACK_TO_MAKER"
-                            .equalsIgnoreCase(
-                                    status.trim()
-                            )) {
-                continue;
-            }
+		if (cheques == null || cheques.isEmpty()) {
+			return;
+		}
 
-            String chequeNumber =
-                    cheque.getChequeNumber();
+		// =====================================================
+		// STRICTLY ENFORCE BOUNDS
+		// =====================================================
 
-            if (chequeNumber == null
-                    || chequeNumber.trim().isEmpty()) {
-                continue;
-            }
+		if (currentIndex < 0) {
+			currentIndex = 0;
+		}
 
-            ChequeProcessing processing =
-                    dashboardService
-                            .getChequeProcessing(
-                                    batchNumber,
-                                    chequeNumber.trim()
-                            );
+		if (currentIndex >= cheques.size()) {
+			currentIndex = cheques.size() - 1;
+		}
 
-            if (processing == null) {
-                continue;
-            }
+		// =====================================================
+		// UPDATE HEADER METRICS
+		// =====================================================
 
-            String checkerAction =
-                    processing.getCheckerAction();
+		updateHeaderPillMetrics();
 
-            String checkerReason =
-                    processing.getCheckerReasonCode();
+		if (chequeProgressLabel != null) {
+			chequeProgressLabel.setValue("Cheque " + (currentIndex + 1) + " of "+ totalChequesCount);
+		}
 
-            if (checkerAction == null
-                    || !"SEND_BACK"
-                            .equalsIgnoreCase(
-                                    checkerAction.trim()
-                            )) {
-                continue;
-            }
 
-            /*
-             * Strict MICR filtering:
-             * only the actual cheque reason decides whether
-             * this cheque belongs to the MICR repair queue.
-             */
-            if (!isMicrRepairReason(checkerReason)) {
-                continue;
-            }
+		// =====================================================
+		// PREV BUTTON
+		// =====================================================
 
-            returnedCheques.add(cheque);
-        }
+		if (prevButton != null) {
+			prevButton.setDisabled(currentIndex == 0);
+		}
 
+		OutwardCheque cheque = cheques.get(currentIndex);
 
-        // =====================================================
-        // OPTIONAL INITIAL CHEQUE SELECTION
-        //
-        // Dashboard may send chequeNumber so the first screen
-        // opens on the clicked cheque. It does NOT reduce the
-        // queue to one cheque.
-        // =====================================================
+		// =====================================================
+		// SET CHEQUE NUMBER
+		// =====================================================
 
-        if (returnedChequeNumber != null
-                && !returnedChequeNumber
-                        .trim()
-                        .isEmpty()) {
+		if (chequeNumberTextbox != null) {
+			chequeNumberTextbox.setValue(safe(cheque.getChequeNumber()));
+		}
 
-            String requestedCheque =
-                    returnedChequeNumber.trim();
 
-            for (int i = 0;
-                    i < returnedCheques.size();
-                    i++) {
+		// =====================================================
+		// VALIDATE MICR COMPONENTS
+		// =====================================================
 
-                OutwardCheque cheque =
-                        returnedCheques.get(i);
+		boolean cityValid = validationService.isValidMicrCode(cheque.getCityCode());
+		boolean bankValid = validationService.isValidMicrCode(cheque.getBankCode());
+		boolean branchValid = validationService.isValidMicrCode(cheque.getBranchCode());
 
-                if (cheque != null
-                        && cheque.getChequeNumber() != null
-                        && requestedCheque
-                                .equalsIgnoreCase(
-                                        cheque.getChequeNumber()
-                                                .trim()
-                                )) {
+		// =====================================================
+		// CITY CODE
+		// =====================================================
 
-                    currentIndex = i;
-                    break;
-                }
-            }
-        }
+		if (cityCodeTextbox != null) {
+			cityCodeTextbox.setSclass(cityValid ? "micr-component-corrected": "micr-component-error");
+			cityCodeTextbox.setValue(safe(cheque.getCityCode()));
+		}
 
 
-        // =====================================================
-        // NO RETURNED MICR CHEQUE
-        // =====================================================
+		// =====================================================
+		// BANK CODE
+		// =====================================================
 
-        if (returnedCheques.isEmpty()) {
+		if (bankCodeTextbox != null) {
+			bankCodeTextbox.setSclass(bankValid? "micr-component-corrected": "micr-component-error");
+			bankCodeTextbox.setValue(safe(cheque.getBankCode()));
+		}
 
-            Messagebox.show(
-                    "No returned MICR cheque is available "
-                            + "for batch "
-                            + batchNumber
-                            + ".",
-                    "Checker Return",
-                    Messagebox.OK,
-                    Messagebox.ERROR
-            );
+		// =====================================================
+		// BRANCH CODE
+		// =====================================================
 
-            return;
-        }
+		if (branchCodeTextbox != null) {
+			branchCodeTextbox.setSclass(branchValid? "micr-component-corrected": "micr-component-error");
+			branchCodeTextbox.setValue(safe(cheque.getBranchCode()));
+		}
 
+		// =====================================================
+		// IMAGES
+		// =====================================================
 
-        // =====================================================
-        // ONLY RETURNED MICR CHEQUES ARE USED
-        // =====================================================
+		loadImages(cheque);
+		resetImageTransformations();
 
-        cheques =
-                returnedCheques;
+		// =====================================================
+		// STATUS
+		// =====================================================
 
+		updateStatusLabel(cityValid && bankValid && branchValid);
 
-        totalChequesCount =
-                cheques.size();
+		if (saveNextButton != null) {
+			saveNextButton.setDisabled(false);
+		}
 
+		// =====================================================
+		// CHECKER RETURN INFORMATION
+		// ONLY FOR SENT_TO_MAKER / RETURNED MODE
+		// =====================================================
 
-        // Make sure the requested cheque is used as the
-        // starting cheque, otherwise start from the first MICR
-        // cheque in the filtered queue.
-        if (currentIndex < 0
-                || currentIndex >= cheques.size()) {
+		if (returnedMode) {
+			loadCheckerReturnInformation(cheque);
+		} 
+		else {
+			hideCheckerReturnInformation();
+		}
+	}
 
-            currentIndex = 0;
-        }
 
+	// =========================================================
+	// LOAD CHECKER RETURN INFORMATION
+	// =========================================================
 
-        updateHeaderPillMetrics();
+	private void loadCheckerReturnInformation(OutwardCheque cheque) {
 
-        loadCurrentCheque();
+		checkerReasonCode = null;
+		checkerRemarks = null;
 
+		if (cheque == null) {
+			hideCheckerReturnInformation();
+			return;
+		}
 
-        /*
-         * Returned MICR mode can contain multiple MICR cheques.
-         * Therefore Prev/Next navigation is allowed inside the
-         * filtered MICR subset.
-         */
-        if (prevButton != null) {
+		String chequeNumber = cheque.getChequeNumber();
 
-            prevButton.setDisabled(
-                    currentIndex == 0
-            );
-        }
-    }
+		if (chequeNumber == null || chequeNumber.trim().isEmpty()) {
+			hideCheckerReturnInformation();
+			return;
+		}
 
+		try {
 
-    // =========================================================
-    // MICR REPAIR REASON CHECK
-    // =========================================================
-    //
-    // This check is intentionally cheque-level. The batch number
-    // is not enough to decide whether a returned cheque belongs
-    // to the MICR repair queue.
-    // =========================================================
+			// =================================================
+			// GET CHECKER PROCESSING
+			// Reason belongs to THIS cheque.
+			// =================================================
 
-    private boolean isMicrRepairReason(
-            String reasonCode) {
+			OutwardMakerDashboardService dashboardService = new OutwardMakerDashboardService();
+			ChequeProcessing processing =dashboardService.getChequeProcessing(batchNumber,chequeNumber.trim());
 
-        if (reasonCode == null
-                || reasonCode.trim().isEmpty()) {
+			if (processing != null) {
+				checkerReasonCode = processing.getCheckerReasonCode();
+				String checkerAction = processing.getCheckerAction();
 
-            return false;
-        }
+				// -------------------------------------------------
+				// Returned cheque must have SEND_BACK action.
+				// -------------------------------------------------
 
-        String cleanReason =
-                reasonCode.trim()
-                        .toUpperCase()
-                        .replace("-", "_")
-                        .replace(" ", "_");
+				if (checkerAction != null && !"SEND_BACK".equalsIgnoreCase(checkerAction.trim())) {
+					System.out.println("WARNING: Checker action for " + chequeNumber + " is " + checkerAction);
+				}
+			}
 
-        return "MICR".equals(cleanReason)
-                || "MICR_CORRECTION".equals(cleanReason)
-                || "MICR_MISMATCH".equals(cleanReason);
-    }
 
+			// =====================================================
+			// CHECKER REMARKS
+			// =====================================================
 
-    // =========================================================
-    // HEADER METRICS
-    // =========================================================
+			checkerRemarks = cheque.getCheckerRemarks();
+			System.out.println("======================================");
+			System.out.println("MICR CHECKER RETURN INFORMATION");
+			System.out.println("Batch Number : " + batchNumber);
+			System.out.println("Cheque Number : " + chequeNumber);
+			System.out.println("Checker Reason Code : " + checkerReasonCode);
+			System.out.println("Checker Remarks : " + checkerRemarks);
+			System.out.println("======================================");
 
-    private void updateHeaderPillMetrics() {
+			updateCheckerReturnPanel();
 
-        if (totalPillLabel != null) {
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("Unable to load Checker return " + "information for cheque " + chequeNumber);
+			
+			hideCheckerReturnInformation();
+		}
+	}
 
-            totalPillLabel.setValue(
-                    String.valueOf(
-                            totalChequesCount
-                    )
-            );
-        }
 
+	// =========================================================
+	// UPDATE CHECKER RETURN PANEL
+	// =========================================================
 
-        if (completedPillLabel != null) {
+	private void updateCheckerReturnPanel() {
 
-            completedPillLabel.setValue(
-                    String.valueOf(
-                            currentIndex
-                    )
-            );
-        }
+		if (checkerReturnInformationPanel == null) {
+			return;
+		}
 
+		if (!returnedMode) {
+			checkerReturnInformationPanel.setVisible(false);
+			return;
+		}
 
-        if (pendingPillLabel != null) {
+		checkerReturnInformationPanel.setVisible(true);
 
-            pendingPillLabel.setValue(
-                    String.valueOf(
-                            totalChequesCount
-                                    - currentIndex
-                    )
-            );
-        }
-    }
+		// =====================================================
+		// REASON
+		// =====================================================
 
+		if (checkerReasonLabel != null) {
 
-    // =========================================================
-    // LOAD CURRENT CHEQUE
-    // =========================================================
+			String reason = getDisplayReason(checkerReasonCode);
 
-    private void loadCurrentCheque() {
+			if (reason == null || reason.trim().isEmpty()) {
+				reason = "Not specified";
+			}
 
-        if (cheques == null
-                || cheques.isEmpty()) {
+			checkerReasonLabel.setValue(reason.trim());
+		}
 
-            return;
-        }
 
+		// =====================================================
+		// REMARKS
+		// =====================================================
 
-        // =====================================================
-        // STRICTLY ENFORCE BOUNDS
-        // =====================================================
+		if (checkerRemarksLabel != null) {
+			String remarks = checkerRemarks;
 
-        if (currentIndex < 0) {
+			if (remarks == null || remarks.trim().isEmpty()) {
+				remarks = "No remarks provided";
+			}
 
-            currentIndex = 0;
-        }
+			checkerRemarksLabel.setValue(remarks.trim());
+		}
+	}
 
 
-        if (currentIndex >= cheques.size()) {
+	// =========================================================
+	// DISPLAY REASON
+	// Converts DB reason code into the same type of readable
+	// text shown by the Checker screen.
+	// =========================================================
 
-            currentIndex =
-                    cheques.size() - 1;
-        }
+	private String getDisplayReason(String reasonCode) {
 
+		if (reasonCode == null || reasonCode.trim().isEmpty()) {
+			return "Not specified";
+		}
 
-        // =====================================================
-        // UPDATE HEADER METRICS
-        // =====================================================
+		String cleanReason = reasonCode.trim().toUpperCase().replace("-", "_").replace(" ", "_");
 
-        updateHeaderPillMetrics();
+		if ("MICR".equals(cleanReason) || "MICR_CORRECTION".equals(cleanReason) || "MICR_MISMATCH".equals(cleanReason)) {
+			return "MICR correction required";
+		}
 
 
-        if (chequeProgressLabel != null) {
+		if ("ACCOUNT_DETAILS_CORRECTION"
+				.equals(cleanReason)
+				|| "ACCOUNT_DETAILS_MISMATCH"
+				.equals(cleanReason)
+				|| "ACCOUNT_MISMATCH"
+				.equals(cleanReason)) {
 
-            chequeProgressLabel.setValue(
-                    "Cheque "
-                            + (currentIndex + 1)
-                            + " of "
-                            + totalChequesCount
-            );
-        }
+			return "Account details correction required";
+		}
 
 
-        // =====================================================
-        // PREV BUTTON
-        // =====================================================
+		if ("AMOUNT_CORRECTION"
+				.equals(cleanReason)
+				|| "AMOUNT_MISMATCH"
+				.equals(cleanReason)) {
 
-        if (prevButton != null) {
+			return "Amount correction required";
+		}
 
-            prevButton.setDisabled(
-                    currentIndex == 0
-            );
-        }
 
+		if ("DATE_CORRECTION"
+				.equals(cleanReason)
+				|| "DATE_MISMATCH"
+				.equals(cleanReason)
+				|| "CHEQUE_DATE_INVALID"
+				.equals(cleanReason)) {
 
-        OutwardCheque cheque =
-                cheques.get(currentIndex);
+			return "Date correction required";
+		}
 
 
-        // =====================================================
-        // SET CHEQUE NUMBER
-        // =====================================================
+		if ("IMAGE_CORRECTION"
+				.equals(cleanReason)) {
 
-        if (chequeNumberTextbox != null) {
+			return "Image correction required";
+		}
 
-            chequeNumberTextbox.setValue(
-                    safe(
-                            cheque.getChequeNumber()
-                    )
-            );
-        }
 
+		if ("CHEQUE_DETAILS_INVALID"
+				.equals(cleanReason)) {
 
-        // =====================================================
-        // VALIDATE MICR COMPONENTS
-        // =====================================================
+			return "Cheque details correction required";
+		}
 
-        boolean cityValid =
-                validationService.isValidMicrCode(
-                        cheque.getCityCode()
-                );
 
+		if ("DUPLICATE_CHEQUE"
+				.equals(cleanReason)) {
 
-        boolean bankValid =
-                validationService.isValidMicrCode(
-                        cheque.getBankCode()
-                );
+			return "Duplicate cheque";
+		}
 
 
-        boolean branchValid =
-                validationService.isValidMicrCode(
-                        cheque.getBranchCode()
-                );
+		if ("PAYEE_DETAILS_CORRECTION"
+				.equals(cleanReason)
+				|| "PAYEE_DETAILS_MISMATCH"
+				.equals(cleanReason)) {
 
+			return "Payee details correction required";
+		}
 
-        // =====================================================
-        // CITY CODE
-        // =====================================================
 
-        if (cityCodeTextbox != null) {
+		return reasonCode.trim();
+	}
 
-            cityCodeTextbox.setSclass(
-                    cityValid
-                            ? "micr-component-corrected"
-                            : "micr-component-error"
-            );
 
-            cityCodeTextbox.setValue(
-                    safe(
-                            cheque.getCityCode()
-                    )
-            );
-        }
+	// =========================================================
+	// HIDE CHECKER RETURN PANEL
+	// =========================================================
 
+	private void hideCheckerReturnInformation() {
 
-        // =====================================================
-        // BANK CODE
-        // =====================================================
+		if (checkerReturnInformationPanel != null) {
 
-        if (bankCodeTextbox != null) {
+			checkerReturnInformationPanel
+			.setVisible(false);
+		}
 
-            bankCodeTextbox.setSclass(
-                    bankValid
-                            ? "micr-component-corrected"
-                            : "micr-component-error"
-            );
 
-            bankCodeTextbox.setValue(
-                    safe(
-                            cheque.getBankCode()
-                    )
-            );
-        }
+		if (checkerReasonLabel != null) {
 
+			checkerReasonLabel.setValue(
+					""
+					);
+		}
 
-        // =====================================================
-        // BRANCH CODE
-        // =====================================================
 
-        if (branchCodeTextbox != null) {
+		if (checkerRemarksLabel != null) {
 
-            branchCodeTextbox.setSclass(
-                    branchValid
-                            ? "micr-component-corrected"
-                            : "micr-component-error"
-            );
+			checkerRemarksLabel.setValue(
+					""
+					);
+		}
+	}
 
-            branchCodeTextbox.setValue(
-                    safe(
-                            cheque.getBranchCode()
-                    )
-            );
-        }
 
+	// =========================================================
+	// LOAD IMAGES
+	// =========================================================
 
-        // =====================================================
-        // IMAGES
-        // =====================================================
+	private void loadImages(
+			OutwardCheque cheque) {
 
-        loadImages(cheque);
+		if (cheque == null) {
 
-        resetImageTransformations();
+			return;
+		}
 
 
-        // =====================================================
-        // STATUS
-        // =====================================================
+		String frontPath =
+				cheque.getFrontImagePath();
 
-        updateStatusLabel(
-                cityValid
-                        && bankValid
-                        && branchValid
-        );
 
+		String backPath =
+				cheque.getBackImagePath();
 
-        if (saveNextButton != null) {
 
-            saveNextButton.setDisabled(
-                    false
-            );
-        }
+		if (frontImage != null) {
 
+			if (frontPath != null
+					&& !frontPath.trim().isEmpty()) {
 
-        // =====================================================
-        // CHECKER RETURN INFORMATION
-        //
-        // ONLY FOR SENT_TO_MAKER / RETURNED MODE
-        // =====================================================
+				frontImage.setSrc(
+						frontPath.trim()
+						);
 
-        if (returnedMode) {
+			} else {
 
-            loadCheckerReturnInformation(
-                    cheque
-            );
+				frontImage.setSrc(
+						null
+						);
+			}
+		}
 
-        } else {
 
-            hideCheckerReturnInformation();
-        }
-    }
+		if (backImage != null) {
 
+			if (backPath != null
+					&& !backPath.trim().isEmpty()) {
 
-    // =========================================================
-    // LOAD CHECKER RETURN INFORMATION
-    // =========================================================
+				backImage.setSrc(
+						backPath.trim()
+						);
 
-    private void loadCheckerReturnInformation(
-            OutwardCheque cheque) {
+			} else {
 
-        checkerReasonCode = null;
+				backImage.setSrc(
+						null
+						);
+			}
+		}
 
-        checkerRemarks = null;
 
+		showFrontImage();
+	}
 
-        if (cheque == null) {
 
-            hideCheckerReturnInformation();
+	// =========================================================
+	// FRONT IMAGE
+	// =========================================================
 
-            return;
-        }
+	@Listen("onClick = #frontImageButton")
+	public void showFrontImage() {
 
+		if (frontImage != null) {
 
-        String chequeNumber =
-                cheque.getChequeNumber();
+			frontImage.setVisible(
+					true
+					);
+		}
 
 
-        if (chequeNumber == null
-                || chequeNumber.trim().isEmpty()) {
+		if (backImage != null) {
 
-            hideCheckerReturnInformation();
+			backImage.setVisible(
+					false
+					);
+		}
+	}
 
-            return;
-        }
 
+	// =========================================================
+	// BACK IMAGE
+	// =========================================================
 
-        try {
+	@Listen("onClick = #backImageButton")
+	public void showBackImage() {
 
-            // =================================================
-            // GET CHECKER PROCESSING
-            //
-            // IMPORTANT:
-            // Reason belongs to THIS cheque.
-            // =================================================
+		if (frontImage != null) {
 
-            OutwardMakerDashboardService
-                    dashboardService =
-                    new OutwardMakerDashboardService();
+			frontImage.setVisible(
+					false
+					);
+		}
 
 
-            ChequeProcessing processing =
-                    dashboardService
-                            .getChequeProcessing(
-                                    batchNumber,
-                                    chequeNumber.trim()
-                            );
+		if (backImage != null) {
 
+			backImage.setVisible(
+					true
+					);
+		}
+	}
 
-            if (processing != null) {
 
-                checkerReasonCode =
-                        processing
-                                .getCheckerReasonCode();
+	// =========================================================
+	// ZOOM IN
+	// =========================================================
 
+	@Listen("onClick = #zoomInButton")
+	public void zoomIn() {
 
-                String checkerAction =
-                        processing
-                                .getCheckerAction();
+		currentScale += 0.2;
 
+		applyImageStyle();
+	}
 
-                // -------------------------------------------------
-                // Returned cheque must have SEND_BACK action.
-                // -------------------------------------------------
 
-                if (checkerAction != null
-                        && !"SEND_BACK"
-                                .equalsIgnoreCase(
-                                        checkerAction.trim()
-                                )) {
+	// =========================================================
+	// ZOOM OUT
+	// =========================================================
 
-                    System.out.println(
-                            "WARNING: Checker action for "
-                                    + chequeNumber
-                                    + " is "
-                                    + checkerAction
-                    );
-                }
-            }
+	@Listen("onClick = #zoomOutButton")
+	public void zoomOut() {
 
+		if (currentScale > 0.4) {
 
-            // =====================================================
-            // CHECKER REMARKS
-            // =====================================================
+			currentScale -= 0.2;
 
-            checkerRemarks =
-                    cheque.getCheckerRemarks();
+			applyImageStyle();
+		}
+	}
 
 
-            System.out.println(
-                    "======================================"
-            );
+	// =========================================================
+	// ROTATE IMAGE
+	// =========================================================
 
-            System.out.println(
-                    "MICR CHECKER RETURN INFORMATION"
-            );
+	@Listen("onClick = #rotateButton")
+	public void rotateImage() {
 
-            System.out.println(
-                    "Batch Number : "
-                            + batchNumber
-            );
+		currentRotation =
+				(currentRotation + 90)
+				% 360;
 
-            System.out.println(
-                    "Cheque Number : "
-                            + chequeNumber
-            );
+		applyImageStyle();
+	}
 
-            System.out.println(
-                    "Checker Reason Code : "
-                            + checkerReasonCode
-            );
 
-            System.out.println(
-                    "Checker Remarks : "
-                            + checkerRemarks
-            );
+	// =========================================================
+	// RESET IMAGE TRANSFORMATIONS
+	// =========================================================
 
-            System.out.println(
-                    "======================================"
-            );
+	private void resetImageTransformations() {
 
+		currentScale = 1.0;
 
-            updateCheckerReturnPanel();
+		currentRotation = 0;
 
+		applyImageStyle();
+	}
 
-        } catch (Exception e) {
 
-            e.printStackTrace();
+	// =========================================================
+	// APPLY IMAGE STYLE
+	// =========================================================
 
+	private void applyImageStyle() {
 
-            System.err.println(
-                    "Unable to load Checker return "
-                            + "information for cheque "
-                            + chequeNumber
-            );
+		String transformStyle =
+				String.format(
+						"transform: scale(%.2f) rotate(%ddeg);",
+						currentScale,
+						currentRotation
+						);
 
 
-            hideCheckerReturnInformation();
-        }
-    }
+		if (frontImage != null) {
 
+			frontImage.setStyle(
+					transformStyle
+					);
+		}
 
-    // =========================================================
-    // UPDATE CHECKER RETURN PANEL
-    // =========================================================
 
-    private void updateCheckerReturnPanel() {
+		if (backImage != null) {
 
-        if (checkerReturnInformationPanel == null) {
+			backImage.setStyle(
+					transformStyle
+					);
+		}
+	}
 
-            return;
-        }
 
+	// =========================================================
+	// MICR FIELD VALIDATION
+	// =========================================================
 
-        if (!returnedMode) {
+	@Listen(
+			"onChange = #cityCodeTextbox, "
+					+ "#bankCodeTextbox, "
+					+ "#branchCodeTextbox; "
+					+ "onChanging = #cityCodeTextbox, "
+					+ "#bankCodeTextbox, "
+					+ "#branchCodeTextbox"
+			)
+	public void checkMicrFields(
+			Event event) {
 
-            checkerReturnInformationPanel
-                    .setVisible(false);
+		String cityCode =
+				cityCodeTextbox != null
+				? cityCodeTextbox.getValue()
+						: "";
 
-            return;
-        }
 
+		String bankCode =
+				bankCodeTextbox != null
+				? bankCodeTextbox.getValue()
+						: "";
 
-        checkerReturnInformationPanel
-                .setVisible(true);
 
+		String branchCode =
+				branchCodeTextbox != null
+				? branchCodeTextbox.getValue()
+						: "";
 
-        // =====================================================
-        // REASON
-        // =====================================================
 
-        if (checkerReasonLabel != null) {
+		// =====================================================
+		// EXTRACT LIVE VALUE DURING onChanging
+		// =====================================================
 
-            String reason =
-                    getDisplayReason(
-                            checkerReasonCode
-                    );
+		if (event instanceof InputEvent) {
 
+			InputEvent inputEvent =
+					(InputEvent) event;
 
-            if (reason == null
-                    || reason.trim().isEmpty()) {
 
-                reason =
-                        "Not specified";
-            }
+			Component target =
+					event.getTarget();
 
 
-            checkerReasonLabel.setValue(
-                    reason.trim()
-            );
-        }
+			if (target == cityCodeTextbox) {
 
+				cityCode =
+						inputEvent.getValue();
 
-        // =====================================================
-        // REMARKS
-        // =====================================================
+			} else if (target == bankCodeTextbox) {
 
-        if (checkerRemarksLabel != null) {
+				bankCode =
+						inputEvent.getValue();
 
-            String remarks =
-                    checkerRemarks;
+			} else if (target == branchCodeTextbox) {
 
+				branchCode =
+						inputEvent.getValue();
+			}
+		}
 
-            if (remarks == null
-                    || remarks.trim().isEmpty()) {
 
-                remarks =
-                        "No remarks provided";
-            }
+		boolean isCityValid =
+				validationService.isValidMicrCode(
+						cityCode
+						);
 
 
-            checkerRemarksLabel.setValue(
-                    remarks.trim()
-            );
-        }
-    }
+		boolean isBankValid =
+				validationService.isValidMicrCode(
+						bankCode
+						);
 
 
-    // =========================================================
-    // DISPLAY REASON
-    //
-    // Converts DB reason code into the same type of readable
-    // text shown by the Checker screen.
-    // =========================================================
+		boolean isBranchValid =
+				validationService.isValidMicrCode(
+						branchCode
+						);
 
-    private String getDisplayReason(
-            String reasonCode) {
 
-        if (reasonCode == null
-                || reasonCode.trim().isEmpty()) {
+		// =====================================================
+		// APPLY TEXTBOX COLORS
+		// =====================================================
 
-            return "Not specified";
-        }
+		if (cityCodeTextbox != null) {
 
+			cityCodeTextbox.setSclass(
+					isCityValid
+					? "micr-component-corrected"
+							: "micr-component-error"
+					);
+		}
 
-        String cleanReason =
-                reasonCode.trim()
-                        .toUpperCase()
-                        .replace("-", "_")
-                        .replace(" ", "_");
 
+		if (bankCodeTextbox != null) {
 
-        if ("MICR".equals(cleanReason)
-                || "MICR_CORRECTION".equals(cleanReason)
-                || "MICR_MISMATCH".equals(cleanReason)) {
+			bankCodeTextbox.setSclass(
+					isBankValid
+					? "micr-component-corrected"
+							: "micr-component-error"
+					);
+		}
 
-            return "MICR correction required";
-        }
 
+		if (branchCodeTextbox != null) {
 
-        if ("ACCOUNT_DETAILS_CORRECTION"
-                .equals(cleanReason)
-                || "ACCOUNT_DETAILS_MISMATCH"
-                        .equals(cleanReason)
-                || "ACCOUNT_MISMATCH"
-                        .equals(cleanReason)) {
+			branchCodeTextbox.setSclass(
+					isBranchValid
+					? "micr-component-corrected"
+							: "micr-component-error"
+					);
+		}
 
-            return "Account details correction required";
-        }
 
+		// =====================================================
+		// UPDATE STATUS LABEL
+		// =====================================================
 
-        if ("AMOUNT_CORRECTION"
-                .equals(cleanReason)
-                || "AMOUNT_MISMATCH"
-                        .equals(cleanReason)) {
+		boolean isAllValid = isCityValid && isBankValid && isBranchValid;
+		
+		updateStatusLabel(isAllValid);
+	}
 
-            return "Amount correction required";
-        }
 
+	// =========================================================
+	// UPDATE STATUS LABEL
+	// =========================================================
 
-        if ("DATE_CORRECTION"
-                .equals(cleanReason)
-                || "DATE_MISMATCH"
-                        .equals(cleanReason)
-                || "CHEQUE_DATE_INVALID"
-                        .equals(cleanReason)) {
+	private void updateStatusLabel(boolean isAllValid) {
+		if (currentStatusLabel != null) {
 
-            return "Date correction required";
-        }
+			if (isAllValid) {
+				currentStatusLabel.setValue("MICR_REPAIRED");
+				currentStatusLabel.setSclass("status-label status-repaired");
+			} 
+			else {
+				currentStatusLabel.setValue("MICR_ERROR");
+				currentStatusLabel.setSclass("status-label status-error");
+			}
+		}
+	}
 
 
-        if ("IMAGE_CORRECTION"
-                .equals(cleanReason)) {
+	// =========================================================
+	// SAFE STRING
+	// =========================================================
 
-            return "Image correction required";
-        }
+	private String safe(String value) {
+		return value == null ? "" : value;
+	}
 
+	// =========================================================
+	// SAVE & NEXT
+	// EXISTING LOGIC PRESERVED
+	// =========================================================
 
-        if ("CHEQUE_DETAILS_INVALID"
-                .equals(cleanReason)) {
+	@Listen("onClick = #saveNextButton")
+	public void saveAndNext() {
+		if (cheques == null || cheques.isEmpty()) {
+			return;
+		}
+		
+		OutwardCheque cheque = cheques.get(currentIndex);
+		String cityCode = cityCodeTextbox != null ? cityCodeTextbox.getValue().trim(): "";
+		String bankCode = bankCodeTextbox != null ? bankCodeTextbox.getValue().trim(): "";
+		String branchCode = branchCodeTextbox != null ? branchCodeTextbox.getValue().trim(): "";
 
-            return "Cheque details correction required";
-        }
+		// =====================================================
+		// CHECK IF USER MADE CHANGES
+		// =====================================================
 
+		boolean isModified = !cityCode.equals(cheque.getCityCode())
+				|| !bankCode.equals(cheque.getBankCode())
+				|| !branchCode.equals(cheque.getBranchCode());
+		
+		// =====================================================
+		// ONLY SAVE IF MODIFIED
+		// =====================================================
 
-        if ("DUPLICATE_CHEQUE"
-                .equals(cleanReason)) {
+		if (isModified) {
 
-            return "Duplicate cheque";
-        }
+			// =================================================
+			// VALIDATION
+			// =================================================
 
+			if (!validationService.isValidMicrCode(cityCode)
+					|| !validationService.isValidMicrCode(bankCode)
+					|| !validationService.isValidMicrCode(branchCode)) {
 
-        if ("PAYEE_DETAILS_CORRECTION"
-                .equals(cleanReason)
-                || "PAYEE_DETAILS_MISMATCH"
-                        .equals(cleanReason)) {
+				Messagebox.show("Please enter valid 3-digit MICR codes for City, Bank, and Branch.", "MICR Validation Error", 
+						Messagebox.OK,Messagebox.EXCLAMATION);
+				return;
+			}
 
-            return "Payee details correction required";
-        }
 
+			// =================================================
+			// DATABASE UPDATE
+			// =================================================
 
-        return reasonCode.trim();
-    }
+			boolean updated = service.updateCorrectedMicr(batchNumber,cheque.getChequeNumber(),cityCode,bankCode,branchCode);
 
+			// =================================================
+			// DATABASE ERROR
+			// =================================================
 
-    // =========================================================
-    // HIDE CHECKER RETURN PANEL
-    // =========================================================
+			if (!updated) {
+				Messagebox.show("Database Alert: MICR repair could not be saved to the database. Please check DB connection or logs.","Database Error Alert",Messagebox.OK,Messagebox.ERROR);
+				return;
+			}
 
-    private void hideCheckerReturnInformation() {
+			// =================================================
+			// UPDATE IN-MEMORY STATE
+			// =================================================
+			cheque.setCityCode(cityCode);
+			cheque.setBankCode(bankCode);
+			cheque.setBranchCode(branchCode);
 
-        if (checkerReturnInformationPanel != null) {
+			if (returnedMode) {
+				cheque.setChequeStatus("RE_VERIFIED");
+			} else {
+				cheque.setChequeStatus("MICR_REPAIRED");
+			}
+		}
 
-            checkerReturnInformationPanel
-                    .setVisible(false);
-        }
 
+		// =====================================================
+		// NAVIGATE TO NEXT CHEQUE
+		// =====================================================
 
-        if (checkerReasonLabel != null) {
+		if (currentIndex < cheques.size() - 1) {
+			currentIndex++;
+			loadCurrentCheque();
 
-            checkerReasonLabel.setValue(
-                    ""
-            );
-        }
+		} 
+		else {
 
+			//=====================================================
+			// COMPLETION
+			// =====================================================
 
-        if (checkerRemarksLabel != null) {
+			if (!returnedMode) {
+				boolean remaining = service.hasRemainingMicrErrors(batchNumber);
+				if (!remaining) {
+					service.updateBatchStatus(batchNumber);
+				}
+			}
 
-            checkerRemarksLabel.setValue(
-                    ""
-            );
-        }
-    }
+			Messagebox.show(returnedMode ? 
+					"MICR repair completed for all returned MICR cheques in this queue."
+					: "MICR Repair Completed for all cheques in this batch.", "Success",
+					Messagebox.OK, Messagebox.INFORMATION,
+					e -> Executions.getCurrent().sendRedirect(returnedMode
+							? "/zul/outward/outward-maker/outward-maker-dashboard.zul"
+									: "/zul/outward/outward-maker/outward-maker-data-entry.zul"
+							)
+					);
+		}
+	}
 
 
-    // =========================================================
-    // LOAD IMAGES
-    // =========================================================
+	// =========================================================
+	// PREVIOUS CHEQUE
+	// =========================================================
 
-    private void loadImages(
-            OutwardCheque cheque) {
+	@Listen("onClick = #prevButton")
+	public void previousCheque() {
 
-        if (cheque == null) {
+		if (cheques == null || cheques.isEmpty()) {
+			return;
+		}
 
-            return;
-        }
+		if (currentIndex > 0) {
+			currentIndex--;
+			loadCurrentCheque();
+		} 
+		else {
+			Messagebox.show("This is the first cheque.","Information",Messagebox.OK,Messagebox.INFORMATION);
+		}
+	}
 
 
-        String frontPath =
-                cheque.getFrontImagePath();
+	// =========================================================
+	// BACK TO MICR QUEUE
+	// =========================================================
 
-
-        String backPath =
-                cheque.getBackImagePath();
-
-
-        if (frontImage != null) {
-
-            if (frontPath != null
-                    && !frontPath.trim().isEmpty()) {
-
-                frontImage.setSrc(
-                        frontPath.trim()
-                );
-
-            } else {
-
-                frontImage.setSrc(
-                        null
-                );
-            }
-        }
-
-
-        if (backImage != null) {
-
-            if (backPath != null
-                    && !backPath.trim().isEmpty()) {
-
-                backImage.setSrc(
-                        backPath.trim()
-                );
-
-            } else {
-
-                backImage.setSrc(
-                        null
-                );
-            }
-        }
-
-
-        showFrontImage();
-    }
-
-
-    // =========================================================
-    // FRONT IMAGE
-    // =========================================================
-
-    @Listen("onClick = #frontImageButton")
-    public void showFrontImage() {
-
-        if (frontImage != null) {
-
-            frontImage.setVisible(
-                    true
-            );
-        }
-
-
-        if (backImage != null) {
-
-            backImage.setVisible(
-                    false
-            );
-        }
-    }
-
-
-    // =========================================================
-    // BACK IMAGE
-    // =========================================================
-
-    @Listen("onClick = #backImageButton")
-    public void showBackImage() {
-
-        if (frontImage != null) {
-
-            frontImage.setVisible(
-                    false
-            );
-        }
-
-
-        if (backImage != null) {
-
-            backImage.setVisible(
-                    true
-            );
-        }
-    }
-
-
-    // =========================================================
-    // ZOOM IN
-    // =========================================================
-
-    @Listen("onClick = #zoomInButton")
-    public void zoomIn() {
-
-        currentScale += 0.2;
-
-        applyImageStyle();
-    }
-
-
-    // =========================================================
-    // ZOOM OUT
-    // =========================================================
-
-    @Listen("onClick = #zoomOutButton")
-    public void zoomOut() {
-
-        if (currentScale > 0.4) {
-
-            currentScale -= 0.2;
-
-            applyImageStyle();
-        }
-    }
-
-
-    // =========================================================
-    // ROTATE IMAGE
-    // =========================================================
-
-    @Listen("onClick = #rotateButton")
-    public void rotateImage() {
-
-        currentRotation =
-                (currentRotation + 90)
-                        % 360;
-
-        applyImageStyle();
-    }
-
-
-    // =========================================================
-    // RESET IMAGE TRANSFORMATIONS
-    // =========================================================
-
-    private void resetImageTransformations() {
-
-        currentScale = 1.0;
-
-        currentRotation = 0;
-
-        applyImageStyle();
-    }
-
-
-    // =========================================================
-    // APPLY IMAGE STYLE
-    // =========================================================
-
-    private void applyImageStyle() {
-
-        String transformStyle =
-                String.format(
-                        "transform: scale(%.2f) rotate(%ddeg);",
-                        currentScale,
-                        currentRotation
-                );
-
-
-        if (frontImage != null) {
-
-            frontImage.setStyle(
-                    transformStyle
-            );
-        }
-
-
-        if (backImage != null) {
-
-            backImage.setStyle(
-                    transformStyle
-            );
-        }
-    }
-
-
-    // =========================================================
-    // MICR FIELD VALIDATION
-    // =========================================================
-
-    @Listen(
-            "onChange = #cityCodeTextbox, "
-                    + "#bankCodeTextbox, "
-                    + "#branchCodeTextbox; "
-                    + "onChanging = #cityCodeTextbox, "
-                    + "#bankCodeTextbox, "
-                    + "#branchCodeTextbox"
-    )
-    public void checkMicrFields(
-            Event event) {
-
-        String cityCode =
-                cityCodeTextbox != null
-                        ? cityCodeTextbox.getValue()
-                        : "";
-
-
-        String bankCode =
-                bankCodeTextbox != null
-                        ? bankCodeTextbox.getValue()
-                        : "";
-
-
-        String branchCode =
-                branchCodeTextbox != null
-                        ? branchCodeTextbox.getValue()
-                        : "";
-
-
-        // =====================================================
-        // EXTRACT LIVE VALUE DURING onChanging
-        // =====================================================
-
-        if (event instanceof InputEvent) {
-
-            InputEvent inputEvent =
-                    (InputEvent) event;
-
-
-            Component target =
-                    event.getTarget();
-
-
-            if (target == cityCodeTextbox) {
-
-                cityCode =
-                        inputEvent.getValue();
-
-            } else if (target == bankCodeTextbox) {
-
-                bankCode =
-                        inputEvent.getValue();
-
-            } else if (target == branchCodeTextbox) {
-
-                branchCode =
-                        inputEvent.getValue();
-            }
-        }
-
-
-        boolean isCityValid =
-                validationService.isValidMicrCode(
-                        cityCode
-                );
-
-
-        boolean isBankValid =
-                validationService.isValidMicrCode(
-                        bankCode
-                );
-
-
-        boolean isBranchValid =
-                validationService.isValidMicrCode(
-                        branchCode
-                );
-
-
-        // =====================================================
-        // APPLY TEXTBOX COLORS
-        // =====================================================
-
-        if (cityCodeTextbox != null) {
-
-            cityCodeTextbox.setSclass(
-                    isCityValid
-                            ? "micr-component-corrected"
-                            : "micr-component-error"
-            );
-        }
-
-
-        if (bankCodeTextbox != null) {
-
-            bankCodeTextbox.setSclass(
-                    isBankValid
-                            ? "micr-component-corrected"
-                            : "micr-component-error"
-            );
-        }
-
-
-        if (branchCodeTextbox != null) {
-
-            branchCodeTextbox.setSclass(
-                    isBranchValid
-                            ? "micr-component-corrected"
-                            : "micr-component-error"
-            );
-        }
-
-
-        // =====================================================
-        // UPDATE STATUS LABEL
-        // =====================================================
-
-        boolean isAllValid =
-                isCityValid
-                        && isBankValid
-                        && isBranchValid;
-
-
-        updateStatusLabel(
-                isAllValid
-        );
-    }
-
-
-    // =========================================================
-    // UPDATE STATUS LABEL
-    // =========================================================
-
-    private void updateStatusLabel(
-            boolean isAllValid) {
-
-        if (currentStatusLabel != null) {
-
-            if (isAllValid) {
-
-                currentStatusLabel.setValue(
-                        "MICR_REPAIRED"
-                );
-
-                currentStatusLabel.setSclass(
-                        "status-label status-repaired"
-                );
-
-            } else {
-
-                currentStatusLabel.setValue(
-                        "MICR_ERROR"
-                );
-
-                currentStatusLabel.setSclass(
-                        "status-label status-error"
-                );
-            }
-        }
-    }
-
-
-    // =========================================================
-    // SAFE STRING
-    // =========================================================
-
-    private String safe(
-            String value) {
-
-        return value == null
-                ? ""
-                : value;
-    }
-
-
-    // =========================================================
-    // SAVE & NEXT
-    //
-    // EXISTING LOGIC PRESERVED
-    // =========================================================
-
-    @Listen("onClick = #saveNextButton")
-    public void saveAndNext() {
-
-        if (cheques == null
-                || cheques.isEmpty()) {
-
-            return;
-        }
-
-
-        OutwardCheque cheque =
-                cheques.get(currentIndex);
-
-
-        String cityCode =
-                cityCodeTextbox != null
-                        ? cityCodeTextbox
-                                .getValue()
-                                .trim()
-                        : "";
-
-
-        String bankCode =
-                bankCodeTextbox != null
-                        ? bankCodeTextbox
-                                .getValue()
-                                .trim()
-                        : "";
-
-
-        String branchCode =
-                branchCodeTextbox != null
-                        ? branchCodeTextbox
-                                .getValue()
-                                .trim()
-                        : "";
-
-
-        // =====================================================
-        // CHECK IF USER MADE CHANGES
-        // =====================================================
-
-        boolean isModified =
-                !cityCode.equals(
-                        cheque.getCityCode()
-                )
-                || !bankCode.equals(
-                        cheque.getBankCode()
-                )
-                || !branchCode.equals(
-                        cheque.getBranchCode()
-                );
-
-
-        // =====================================================
-        // ONLY SAVE IF MODIFIED
-        // =====================================================
-
-        if (isModified) {
-
-            // =================================================
-            // VALIDATION
-            // =================================================
-
-            if (!validationService.isValidMicrCode(cityCode)
-                    || !validationService.isValidMicrCode(bankCode)
-                    || !validationService.isValidMicrCode(branchCode)) {
-
-                Messagebox.show(
-                        "Please enter valid 3-digit MICR codes for City, Bank, and Branch.",
-                        "MICR Validation Error",
-                        Messagebox.OK,
-                        Messagebox.EXCLAMATION
-                );
-
-                return;
-            }
-
-
-            // =================================================
-            // DATABASE UPDATE
-            // =================================================
-
-            boolean updated =
-                    service.updateCorrectedMicr(
-                            batchNumber,
-                            cheque.getChequeNumber(),
-                            cityCode,
-                            bankCode,
-                            branchCode
-                    );
-
-
-            // =================================================
-            // DATABASE ERROR
-            // =================================================
-
-            if (!updated) {
-
-                Messagebox.show(
-                        "Database Alert: MICR repair could not be saved to the database. Please check DB connection or logs.",
-                        "Database Error Alert",
-                        Messagebox.OK,
-                        Messagebox.ERROR
-                );
-
-                return;
-            }
-
-
-            // =================================================
-            // UPDATE IN-MEMORY STATE
-            // =================================================
-
-            cheque.setCityCode(
-                    cityCode
-            );
-
-            cheque.setBankCode(
-                    bankCode
-            );
-
-            cheque.setBranchCode(
-                    branchCode
-            );
-
-            if (returnedMode) {
-                cheque.setChequeStatus("RE_VERIFIED");
-            } else {
-                cheque.setChequeStatus("MICR_REPAIRED");
-            }
-        }
-
-
-        // =====================================================
-        // NAVIGATE TO NEXT CHEQUE
-        // =====================================================
-
-        if (currentIndex < cheques.size() - 1) {
-
-            currentIndex++;
-
-            loadCurrentCheque();
-
-        } else {
-
-            /*
-             * =====================================================
-             * COMPLETION
-             * =====================================================
-             *
-             * NORMAL MODE:
-             * Keep the existing MICR batch-status logic exactly
-             * as before.
-             *
-             * RETURNED MODE:
-             * Do NOT complete the whole batch here. A returned
-             * batch may still contain Data Entry repairs (or other
-             * returned reasons). The dashboard will naturally
-             * remove this MICR action once these MICR cheques are
-             * no longer SENT_BACK_TO_MAKER.
-             */
-            if (!returnedMode) {
-
-                boolean remaining =
-                        service.hasRemainingMicrErrors(
-                                batchNumber
-                        );
-
-                if (!remaining) {
-
-                    service.updateBatchStatus(
-                            batchNumber
-                    );
-                }
-            }
-
-
-            Messagebox.show(
-                    returnedMode
-                            ? "MICR repair completed for all returned MICR cheques in this queue."
-                            : "MICR Repair Completed for all cheques in this batch.",
-                    "Success",
-                    Messagebox.OK,
-                    Messagebox.INFORMATION,
-                    e -> Executions
-                            .getCurrent()
-                            .sendRedirect(
-                                    returnedMode
-                                            ? "/zul/outward/outward-maker/outward-maker-dashboard.zul"
-                                            : "/zul/outward/outward-maker/outward-maker-data-entry.zul"
-                            )
-            );
-        }
-    }
-
-
-    // =========================================================
-    // PREVIOUS CHEQUE
-    // =========================================================
-
-    @Listen("onClick = #prevButton")
-    public void previousCheque() {
-
-        if (cheques == null
-                || cheques.isEmpty()) {
-
-            return;
-        }
-
-
-        if (currentIndex > 0) {
-
-            currentIndex--;
-
-            loadCurrentCheque();
-
-        } else {
-
-            Messagebox.show(
-                    "This is the first cheque.",
-                    "Information",
-                    Messagebox.OK,
-                    Messagebox.INFORMATION
-            );
-        }
-    }
-
-
-    // =========================================================
-    // BACK TO MICR QUEUE
-    // =========================================================
-
-    @Listen("onClick = #btnBackToQueue")
-    public void backToMicrQueue() {
-
-        Executions
-                .getCurrent()
-                .sendRedirect(
-                        "outward-maker-micr-repair.zul"
-                );
-    }
+	@Listen("onClick = #btnBackToQueue")
+	public void backToMicrQueue() {
+		Executions.getCurrent().sendRedirect("outward-maker-micr-repair.zul");
+	}
 }

@@ -11,48 +11,7 @@
 
 <zk>
 
-    <style>
-        <![CDATA[
-        html, body {
-            margin: 0 !important;
-            padding: 0 !important;
-            height: 100% !important;
-            overflow: hidden !important;
-            background: #F4F7FB;
-        }
-
-        .z-window-embedded-cnt,
-        .z-window-content {
-            padding: 0 !important;
-        }
-
-        .data-entry-listbox .z-listheader {
-            background: #0091FF !important;
-            color: #FFFFFF !important;
-            font-weight: 700 !important;
-            font-size: 13px !important;
-            border-right: 1px solid rgba(255, 255, 255, 0.2) !important;
-            height: 38px !important;
-        }
-
-        .data-entry-listbox .z-listheader-content {
-            color: #FFFFFF !important;
-            font-weight: 700 !important;
-            padding: 8px 12px !important;
-        }
-
-        .data-entry-listbox .z-listcell {
-            font-size: 13px !important;
-            color: #1E293B !important;
-            padding: 10px 12px !important;
-            border-bottom: 1px solid #E2E8F0 !important;
-        }
-
-        .data-entry-listbox .z-listitem:hover > .z-listcell {
-            background: #F8FAFC !important;
-        }
-        ]]>
-    </style>
+ <style src="/css/outward/maker/dataentry.css"/>
 
 
     <!-- ========================================================= -->

@@ -21,6 +21,8 @@ public interface BatchDetailsService {
 
     List<Map<String, String>> getCheckerRejectionReasons();
 
+    List<Map<String, String>> getMakerReturnReasons(String chequeNumber);
+
     void saveCheckerDecision(
             String chequeNumber,
             String status,

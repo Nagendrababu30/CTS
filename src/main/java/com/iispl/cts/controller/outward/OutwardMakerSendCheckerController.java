@@ -409,7 +409,11 @@ public class OutwardMakerSendCheckerController
                                 + " has been successfully sent to Checker.",
                         "Success",
                         Messagebox.OK,
-                        Messagebox.INFORMATION
+                        Messagebox.INFORMATION,
+                        event -> Executions.sendRedirect(
+                                "/zul/outward/outward-maker/"
+                                        + "outward-maker-dashboard.zul"
+                        )
                 );
 
             } else {

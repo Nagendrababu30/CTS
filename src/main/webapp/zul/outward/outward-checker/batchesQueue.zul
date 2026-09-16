@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?page title="Batch Queue" contentType="text/html;charset=UTF-8"?>
+<?page title="Batch Queue"
+        contentType="text/html;charset=UTF-8"?>
+
+<?init class="com.cts.admin.controller.LayoutInit"
+        pageTitle="Batch Queue"
+        active="batchesQueue"?>
 
 <?init class="org.zkoss.zk.ui.util.Composition"
         arg0="/zul/common/layout.zul"?>
@@ -8,7 +13,7 @@
 <zk>
 
     <!-- =========================================================
-         PAGE CSS
+         BATCH QUEUE CSS
          ========================================================= -->
 
     <style src="/css/outward/checker/batch_queue.css"/>
@@ -18,80 +23,100 @@
          PAGE CONTENT
          ========================================================= -->
 
-    <div self="@define(content)"
-         width="100%"
-         height="100%"
-         sclass="checker-page-content">
+    <div
+        self="@define(content)"
+        width="100%"
+        height="100%"
+        sclass="checker-page-content">
 
-        <vlayout id="batchQueueContent"
-                 width="100%"
-                 height="100%"
-                 spacing="16px"
-                 apply="com.iispl.cts.controller.outward.checker.CheckerBatchQueueController">
+        <vlayout
+            id="batchQueueContent"
+            width="100%"
+            height="100%"
+            spacing="20px"
+            sclass="checker-batch-layout"
+            apply="com.iispl.cts.controller.outward.checker.CheckerBatchQueueController">
 
 
             <!-- =================================================
                  PAGE HEADER
                  ================================================= -->
 
-            <vlayout width="100%"
-                     spacing="4px"
-                     sclass="page-header">
+            <hlayout
+                width="100%"
+                valign="middle"
+                sclass="batch-header-row">
 
-                <label value="Batch Queue"
-                       sclass="page-title"/>
+                <vlayout
+                    spacing="5px"
+                    sclass="batch-header">
 
-                <label value="Batches assigned to you for Checker verification"
-                       sclass="page-subtitle"/>
+                    <label
+                        value="Batch Queue"
+                        sclass="batch-title"/>
 
-            </vlayout>
+                    <label
+                        value="Batches assigned to you for Checker verification"
+                        sclass="batch-subtitle"/>
+
+                </vlayout>
+
+            </hlayout>
 
 
             <!-- =================================================
                  SEARCH PANEL
                  ================================================= -->
 
-            <hlayout width="100%"
-                     valign="middle"
-                     spacing="10px"
-                     sclass="search-panel">
+            <hlayout
+                width="100%"
+                valign="middle"
+                spacing="10px"
+                sclass="batch-search-panel">
 
-                <textbox id="batchSearchTextbox"
-                         placeholder="Search batch number..."
-                         hflex="1"
-                         sclass="search-box"/>
+                <textbox
+                    id="batchSearchTextbox"
+                    placeholder="Search batch number..."
+                    hflex="1"
+                    sclass="batch-search-box"/>
 
-                <button id="searchButton"
-                        label="Search"
-                        iconSclass="z-icon-search"
-                        sclass="primary-button"/>
+                <button
+                    id="searchButton"
+                    label="Search"
+                    iconSclass="z-icon-search"
+                    sclass="batch-search-button"/>
 
-                <button id="refreshButton"
-                        label="Refresh"
-                        iconSclass="z-icon-refresh"
-                        sclass="secondary-button"/>
+                <button
+                    id="refreshButton"
+                    label="Refresh"
+                    iconSclass="z-icon-refresh"
+                    sclass="batch-refresh-button"/>
 
             </hlayout>
 
 
             <!-- =================================================
-                 BATCH PANEL
+                 BATCH SECTION
                  ================================================= -->
 
-            <div width="100%"
-                 sclass="batch-panel">
+            <vlayout
+                width="100%"
+                spacing="0"
+                sclass="batch-section">
 
 
                 <!-- =================================================
-                     PANEL HEADER
+                     SECTION HEADER
                      ================================================= -->
 
-                <hlayout width="100%"
-                         valign="middle"
-                         sclass="batch-panel-header">
+                <hlayout
+                    width="100%"
+                    valign="middle"
+                    sclass="batch-section-header">
 
-                    <label value="My Batches"
-                           sclass="section-title"/>
+                    <label
+                        value="My Batches"
+                        sclass="batch-section-title"/>
 
                 </hlayout>
 
@@ -100,28 +125,33 @@
                      BATCH TABLE
                      ================================================= -->
 
-                <listbox id="batchListbox"
-                         width="100%"
-                         emptyMessage="No batches assigned to you."
-                         sclass="checker-batch-listbox">
+                <listbox
+                    id="batchListbox"
+                    width="100%"
+                    emptyMessage="No batches assigned to you."
+                    sclass="checker-batch-table">
 
-                    <listhead sizable="true">
+                    <listhead>
 
-                        <listheader label="Batch No"
-                                    width="30%"
-                                    align="center"/>
+                        <listheader
+                            label="Batch No"
+                            width="30%"
+                            align="center"/>
 
-                        <listheader label="Total Cheques"
-                                    width="25%"
-                                    align="center"/>
+                        <listheader
+                            label="Total Cheques"
+                            width="25%"
+                            align="center"/>
 
-                        <listheader label="Status"
-                                    width="25%"
-                                    align="center"/>
+                        <listheader
+                            label="Status"
+                            width="25%"
+                            align="center"/>
 
-                        <listheader label="Action"
-                                    width="20%"
-                                    align="center"/>
+                        <listheader
+                            label="Action"
+                            width="20%"
+                            align="center"/>
 
                     </listhead>
 
@@ -132,18 +162,23 @@
                      PAGINATION
                      ================================================= -->
 
-                <hlayout width="100%"
-                         valign="middle"
-                         sclass="pagination-container">
+             <hlayout
+    width="100%"
+    valign="middle"
+    sclass="batch-pagination">
 
-                    <paging id="batchPaging"
-                            pageSize="10"
-                            totalSize="0"/>
+    <paging
+        id="batchPaging"
+        pageSize="10"
+        totalSize="0"
+         mold="default"
+        autohide="false"/>
 
-                </hlayout>
+</hlayout>
 
+           
 
-            </div>
+            </vlayout>
 
         </vlayout>
 

@@ -1117,38 +1117,12 @@ public class DashboardController
     private void openReturnToMakerBatch(
             long batchId) {
 
-        List<String> reasons =
-                dashboardService
-                        .getReturnedChequeReasons(
+        boolean needsMicrRepair =
+                micrRepairService
+                        .needsMicrRepair(
                                 batchId);
 
-        boolean needsMicrRepair = false;
-        boolean needsDataEntry = false;
-
-        for (String reason : reasons) {
-            if (reason == null) continue;
-            String upper = reason.toUpperCase().trim();
-            if (upper.startsWith("CR-MICR-") || upper.startsWith("CR-IMG-") || upper.startsWith("MR-MICR-") || upper.startsWith("MICR_")) {
-                needsMicrRepair = true;
-            } else if (upper.startsWith("CR-DATA-") || upper.startsWith("MR-DATA-")
-                    || upper.startsWith("ACCOUNT_")
-                    || upper.startsWith("AMOUNT_")
-                    || upper.startsWith("CHEQUE_DATE_")
-                    || upper.startsWith("PAYEE_NAME_")
-                    || upper.startsWith("DATA_ENTRY_")
-                    || upper.startsWith("MULTIPLE_")
-                    || upper.startsWith("CBS_")
-                    || upper.startsWith("MISSING_")
-                    || upper.startsWith("INCORRECT_")) {
-                needsDataEntry = true;
-            } else {
-                needsMicrRepair = true;
-                needsDataEntry = true;
-            }
-        }
-
-        // If reasons require MICR repair (or if empty, check if MICR repair needed)
-        if (needsMicrRepair || (!needsMicrRepair && !needsDataEntry)) {
+        if (needsMicrRepair) {
             int nextRepairIndex =
                     micrRepairService
                             .getNextRepairIndex(

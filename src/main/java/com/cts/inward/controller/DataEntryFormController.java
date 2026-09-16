@@ -684,39 +684,42 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		applyImageStyle();
 	}
 
-	private void showFrontImage() {
+	private void renderChequeImage(String imagePath) {
 		if (imgCheque == null) return;
-
-		if (currentFrontImagePath != null && !currentFrontImagePath.trim().isEmpty()) {
-			try {
-				byte[] bytes = java.nio.file.Files.readAllBytes(java.nio.file.Path.of(currentFrontImagePath));
-				imgCheque.setContent(new org.zkoss.image.AImage("front.jpg", bytes));
-			} catch (Exception e) {
-				e.printStackTrace();
-				imgCheque.setContent((org.zkoss.image.AImage) null);
-			}
-		} else {
+		if (imagePath == null || imagePath.trim().isEmpty()) {
 			imgCheque.setContent((org.zkoss.image.AImage) null);
+			imgCheque.setSrc("");
+			return;
 		}
 
+		try {
+			String realPath = (org.zkoss.zk.ui.Executions.getCurrent() != null && org.zkoss.zk.ui.Executions.getCurrent().getDesktop() != null)
+					? org.zkoss.zk.ui.Executions.getCurrent().getDesktop().getWebApp().getRealPath(imagePath)
+					: null;
+			java.io.File file = (realPath != null) ? new java.io.File(realPath) : new java.io.File(imagePath);
+			if (file.exists() && file.isFile()) {
+				imgCheque.setContent(new org.zkoss.image.AImage(file));
+			} else {
+				String webSrc = imagePath.startsWith("/") ? imagePath : "/" + imagePath;
+				imgCheque.setContent((org.zkoss.image.AImage) null);
+				imgCheque.setSrc(webSrc.replace("\\", "/"));
+			}
+		} catch (Exception e) {
+			String webSrc = imagePath.startsWith("/") ? imagePath : "/" + imagePath;
+			imgCheque.setContent((org.zkoss.image.AImage) null);
+			imgCheque.setSrc(webSrc.replace("\\", "/"));
+		}
+	}
+
+	private void showFrontImage() {
+		if (imgCheque == null) return;
+		renderChequeImage(currentFrontImagePath);
 		applyImageStyle();
 	}
 
 	private void showBackImage() {
 		if (imgCheque == null) return;
-
-		if (currentBackImagePath != null && !currentBackImagePath.trim().isEmpty()) {
-			try {
-				byte[] bytes = java.nio.file.Files.readAllBytes(java.nio.file.Path.of(currentBackImagePath));
-				imgCheque.setContent(new org.zkoss.image.AImage("back.jpg", bytes));
-			} catch (Exception e) {
-				e.printStackTrace();
-				imgCheque.setContent((org.zkoss.image.AImage) null);
-			}
-		} else {
-			imgCheque.setContent((org.zkoss.image.AImage) null);
-		}
-
+		renderChequeImage(currentBackImagePath);
 		applyImageStyle();
 	}
 

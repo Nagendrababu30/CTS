@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -70,6 +72,72 @@ public class MicrMasterDaoImpl
                             + micrCode,
                     e);
         }
+    }
+
+    @Override
+    public Set<String> findExistingMicrCodes(
+            Set<String> micrCodes) {
+
+        Set<String> existing = new HashSet<>();
+
+        if (micrCodes == null || micrCodes.isEmpty()) {
+            return existing;
+        }
+
+        StringBuilder sql =
+                new StringBuilder("SELECT micr_code FROM public.micr_master WHERE micr_code IN (");
+        int count = 0;
+        for (String code : micrCodes) {
+            if (code != null && !code.trim().isEmpty()) {
+                if (count > 0) {
+                    sql.append(",");
+                }
+                sql.append("?");
+                count++;
+            }
+        }
+        sql.append(")");
+
+        if (count == 0) {
+            return existing;
+        }
+
+        try (
+                Connection connection =
+                        dataSource.getConnection();
+
+                PreparedStatement statement =
+                        connection.prepareStatement(sql.toString())
+        ) {
+
+            int idx = 1;
+            for (String code : micrCodes) {
+                if (code != null && !code.trim().isEmpty()) {
+                    statement.setString(idx++, code.trim());
+                }
+            }
+
+            try (
+                    ResultSet resultSet =
+                            statement.executeQuery()
+            ) {
+
+                while (resultSet.next()) {
+                    String code = resultSet.getString("micr_code");
+                    if (code != null) {
+                        existing.add(code.trim());
+                    }
+                }
+            }
+
+        } catch (SQLException e) {
+
+            throw new IllegalStateException(
+                    "Failed to check MICR master codes in bulk",
+                    e);
+        }
+
+        return existing;
     }
 
 

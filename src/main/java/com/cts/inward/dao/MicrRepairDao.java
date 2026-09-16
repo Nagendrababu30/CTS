@@ -30,11 +30,20 @@ public interface MicrRepairDao {
     String getCompletedRepairedMicr(
             String chequeNumber);
 
+    java.util.Map<String, String> getCompletedRepairedMicrs(
+            java.util.List<String> chequeNumbers);
+
     String getLatestChequeStatus(
             String chequeNumber);
 
+    java.util.Map<String, String> getLatestChequeStatuses(
+            java.util.List<String> chequeNumbers);
+
     String getLatestChequeReturnReason(
             String chequeNumber);
+
+    java.util.Map<String, String> getLatestChequeReturnReasons(
+            java.util.List<String> chequeNumbers);
 
     boolean isBatchReturnedToMaker(
             long batchId);

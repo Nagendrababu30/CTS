@@ -56,6 +56,12 @@ public class InwardSessionFileServiceImpl
         try {
 
             Path sourceFile = Path.of(file.getFilePath());
+            if (!sourceFile.isAbsolute() && fileConfiguration.getInwardRootPath() != null) {
+                Path webAppRoot = fileConfiguration.getInwardRootPath().getParent();
+                if (webAppRoot != null) {
+                    sourceFile = webAppRoot.resolve(file.getFilePath());
+                }
+            }
 
             Path targetDirectory =
                     fileConfiguration

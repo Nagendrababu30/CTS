@@ -9,8 +9,7 @@ public class FileConfiguration {
     private FileConfiguration(
             Path inwardRootPath) {
 
-        this.inwardRootPath =
-                inwardRootPath;
+        this.inwardRootPath = inwardRootPath;
     }
 
     public static FileConfiguration of(
@@ -18,6 +17,13 @@ public class FileConfiguration {
 
         return new FileConfiguration(
                 inwardRootPath);
+    }
+
+    public static FileConfiguration of(
+            String inwardRootPathStr) {
+
+        return new FileConfiguration(
+                Path.of(inwardRootPathStr));
     }
 
     public Path getInwardRootPath() {

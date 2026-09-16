@@ -1,56 +1,180 @@
 /* =============================================================
    INWARD SEND TO CHECKER
-   Same visual language as Inward Maker Dashboard
-   Static CSS — no RGB / animated effects
+   Same visual language as Inward Maker Dashboard — shares its
+   CSS custom properties, page-title, table-panel and grid
+   treatment exactly.
    ============================================================= */
 @import
-	url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap')
+	url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap')
 	;
 
+/* =============================================================
+   CSS CUSTOM PROPERTIES
+   Same values as dashboard.css
+   ============================================================= */
 :root {
 	--bg-app: #EAF0FA;
 	--bg-app-2: #E4ECF8;
-	--surface: #FFFFFF;
-	--surface-2: #FCFDFF;
-	--border: #E4EAF3;
+	--bg-surface: #FFFFFF;
+	--bg-surface-2: #FCFDFF;
+	--bg-subtle: #F9FAFB;
+	--bg-hover: #F6F9FF;
+	--border-light: #E4EAF3;
 	--border-mid: #D0D5DD;
 	--text-primary: #0B1F3F;
 	--text-secondary: #2B3A55;
 	--text-muted: #667085;
+	--text-faint: #98A2B3;
 	--brand-blue: #175CD3;
 	--brand-indigo: #4F46E5;
+	--brand-purple: #7A5AF8;
+	--brand-pink: #C026D3;
+	--brand-orange: #F97316;
+	--brand-amber: #F59E0B;
 	--brand-green: #12B76A;
+	--brand-teal: #14B8A6;
+	--brand-cyan: #06B6D4;
+	--radius-sm: 5px;
+	--radius-md: 8px;
+	--radius-lg: 10px;
+	--radius-pill: 999px;
+	--shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.04);
+	--shadow-sm: 0 1px 3px rgba(16, 24, 40, 0.05);
+	--shadow-md: 0 4px 12px rgba(16, 24, 40, 0.06);
+	--shadow-lg: 0 6px 16px rgba(16, 24, 40, 0.08);
+	--shadow-xl: 0 8px 20px rgba(16, 24, 40, 0.08);
+	--ease: cubic-bezier(0.4, 0, 0.2, 1);
+	--ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+	--ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* =============================================================
-   PAGE
+   PAGE WRAPPER
+   Same background as dashboard .inward-dashboard-content
    ============================================================= */
-.main-window {
+.send-to-checker-content {
 	width: 100%;
 	height: 100%;
-	padding: 28px 32px 32px;
 	box-sizing: border-box;
 	background: radial-gradient(1200px 600px at 0% 0%, rgba(23, 92, 211, 0.10),
 		transparent 60%),
 		radial-gradient(1000px 600px at 100% 0%, rgba(122, 90, 248, 0.10),
+		transparent 60%),
+		radial-gradient(900px 700px at 100% 100%, rgba(18, 183, 106, 0.07),
+		transparent 60%),
+		radial-gradient(800px 500px at 0% 100%, rgba(192, 38, 211, 0.06),
 		transparent 60%), linear-gradient(180deg, var(--bg-app) 0%,
 		var(--bg-app-2) 100%);
-	overflow: auto;
+	position: relative;
+	overflow: hidden;
+}
+
+.send-to-checker-content::before {
+	content: '';
+	position: absolute;
+	top: -180px;
+	left: -120px;
+	width: 620px;
+	height: 620px;
+	background: radial-gradient(circle, rgba(23, 92, 211, 0.16) 0%,
+		transparent 70%);
+	border-radius: 50%;
+	pointer-events: none;
+	z-index: 0;
+	filter: blur(10px);
+}
+
+.send-to-checker-content::after {
+	content: '';
+	position: absolute;
+	bottom: -200px;
+	right: -140px;
+	width: 680px;
+	height: 680px;
+	background: radial-gradient(circle, rgba(122, 90, 248, 0.16) 0%,
+		transparent 70%);
+	border-radius: 50%;
+	pointer-events: none;
+	z-index: 0;
+	filter: blur(10px);
+}
+
+/* Keep page content above the background */
+.send-to-checker-content>* {
+	position: relative;
+	z-index: 1;
+}
+
+/* =============================================================
+   MAIN WINDOW
+   Same padding/scroll behavior as dashboard .inward-dashboard-layout
+   ============================================================= */
+.main-window {
+	width: 100%;
+	height: 100%;
+	box-sizing: border-box;
+	padding: 20px 24px 24px 24px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	background: transparent;
+}
+
+.main-window-inner {
+	width: 100%;
+}
+
+/* =============================================================
+   PAGE TITLE / DESCRIPTION
+   Same as dashboard
+   ============================================================= */
+.page-title {
+	font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+	font-size: 30px;
+	font-weight: 700;
+	letter-spacing: -0.035em;
+	position: relative;
+	display: inline-block;
+	background: transparent !important;
+	color: var(--text-primary) !important;
+	-webkit-text-fill-color: var(--text-primary) !important;
+	-webkit-background-clip: initial;
+	background-clip: initial;
+	margin-bottom: 4px;
+}
+
+.page-title::after {
+	content: '';
+	position: absolute;
+	bottom: -10px;
+	left: 0;
+	width: 56px;
+	height: 3px;
+	background: #175CD3;
+	border-radius: 2px;
+}
+
+.page-description {
+	display: block;
+	margin-top: 10px;
+	margin-bottom: 4px;
+	color: #526784;
+	font-family: 'Inter', sans-serif;
+	font-size: 13px;
 }
 
 /* =============================================================
    MAIN CARD
+   Same visual treatment as dashboard .table-panel
    ============================================================= */
 .content-container {
 	width: 100%;
 	box-sizing: border-box;
-	background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2)
-		100%);
-	padding: 22px 20px 18px;
-	border: 1px solid var(--border);
-	border-radius: 16px;
-	box-shadow: 0 6px 18px rgba(16, 24, 40, 0.07), 0 2px 6px
-		rgba(16, 24, 40, 0.03);
+	background: linear-gradient(180deg, var(--bg-surface) 0%,
+		var(--bg-surface-2) 100%);
+	border: 1px solid var(--border-light);
+	border-radius: var(--radius-lg);
+	padding: 16px 20px 14px 20px;
+	box-shadow: var(--shadow-md);
 	position: relative;
 	overflow: hidden;
 }
@@ -72,9 +196,8 @@
 	background: #EFF6FF;
 	border: 1px solid #D6E4FF;
 	padding: 11px 12px;
-	border-radius: 8px;
+	border-radius: var(--radius-md);
 	align-items: center;
-	margin-bottom: 15px;
 	box-sizing: border-box;
 }
 
@@ -95,7 +218,6 @@
    NOTE
    ============================================================= */
 .note-box {
-	margin-top: 15px;
 	align-items: center;
 }
 
@@ -112,39 +234,56 @@
 
 /* =============================================================
    GRID
+   Same as dashboard .custom-grid
    ============================================================= */
 .custom-grid {
 	width: 100%;
-	border: 1px solid var(--border) !important;
-	border-radius: 10px !important;
+	border-radius: var(--radius-md) !important;
 	overflow: hidden;
-	background: #FFFFFF;
+	border: 1px solid var(--border-light) !important;
+	background: var(--bg-surface);
+	box-shadow: inset 0 1px 3px rgba(16, 24, 40, 0.03);
 }
 
 .custom-grid .z-grid-header, .custom-grid .z-columns, .custom-columns {
-	background: var(--brand-blue) !important;
+	background: #175CD3 !important;
 	border-bottom: none !important;
+	box-shadow: none;
 }
 
 .custom-column, .custom-grid .z-column, .custom-grid .z-column-content {
-	color: #FFFFFF !important;
 	background: transparent !important;
-	font-family: 'Inter', sans-serif !important;
-	font-size: 12px !important;
+	font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
 	font-weight: 700 !important;
-	letter-spacing: 0.04em;
-	text-transform: uppercase;
-	padding: 15px 12px !important;
-	border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+	font-size: 13px !important;
+	letter-spacing: 0.06em !important;
+	text-transform: uppercase !important;
+	color: #FFFFFF !important;
+	padding: 12px 12px !important;
+	border-right: none !important;
+	border-bottom: none !important;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+	white-space: nowrap !important;
+}
+
+.custom-grid .z-column:last-child {
+	border-right: none !important;
 }
 
 .custom-grid .z-column * {
 	color: #FFFFFF !important;
+	font-weight: 700 !important;
 	background: transparent !important;
+}
+
+.custom-grid .z-column::after {
+	content: none !important;
+	display: none !important;
 }
 
 /* =============================================================
    DATA ROWS
+   Same as dashboard
    ============================================================= */
 .custom-grid .z-row {
 	background: #FFFFFF;
@@ -152,53 +291,125 @@
 }
 
 .custom-grid .z-row:nth-child(even) {
-	background: #FCFDFF;
+	background: linear-gradient(90deg, #FCFDFF 0%, #F9FBFF 100%);
 }
 
 .custom-grid .z-row:hover {
 	background: #F6F9FF !important;
-	box-shadow: inset 4px 0 0 var(--brand-blue);
+	box-shadow: inset 4px 0 0 var(--brand-blue), 0 2px 10px
+		rgba(23, 92, 211, 0.08);
 }
 
 .custom-grid .z-row-content, .custom-grid .z-cell {
-	color: #1D2939;
 	font-family: 'Inter', sans-serif;
-	font-size: 13px;
+	font-size: 14px;
+	color: #1D2939;
 	font-weight: 500;
-	padding: 15px 12px !important;
-	border-right: 1px solid rgba(228, 234, 243, 0.7) !important;
+	padding: 12px 14px !important;
+	line-height: 1.4;
+	border-right: none !important;
+	-webkit-font-smoothing: antialiased;
+}
+
+.custom-grid .z-cell:last-child {
+	border-right: none !important;
+}
+
+/* Center every header and data cell */
+.custom-grid .z-cell, .custom-grid .z-cell-cnt, .custom-grid .z-row-content,
+	.custom-grid .z-column, .custom-grid .z-column-content {
+	text-align: center !important;
+	vertical-align: middle !important;
+}
+
+.custom-grid .z-cell-cnt {
+	width: 100%;
+}
+
+/* Total Cheques column — same numeric treatment as dashboard */
+.custom-grid
+.z-row
+.z-cell:nth-child(2)
+.z-cell-cnt {
+	font-family: 'Space Grotesk', sans-serif;
+	font-weight: 700;
+	color: #344054;
+	font-variant-numeric: tabular-nums;
+}
+
+/* =============================================================
+   STATUS BADGES
+   Same as dashboard — apply to whichever label the controller
+   marks with the matching class in the Status column
+   ============================================================= */
+.status-badge {
+	display: inline-flex !important;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 12px;
+	border-radius: var(--radius-pill);
+	font-size: 12px;
+	font-weight: 700;
+	font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.badge-available {
+	background: #ECFDF3;
+	color: #027A48;
+	border: 1px solid #ABEFC6;
+}
+
+.badge-locked {
+	background: #FEF3F2;
+	color: #B42318;
+	border: 1px solid #FECDCA;
 }
 
 /* =============================================================
    BUTTONS
+   Same as dashboard .btn / .btn-action
    ============================================================= */
 .btn-cancel {
-	background: #FFFFFF !important;
+	background: var(--bg-surface) !important;
 	color: var(--text-secondary) !important;
-	border: 1px solid var(--border-mid) !important;
-	padding: 7px 20px;
-	border-radius: 6px;
-	font-family: 'Plus Jakarta Sans', sans-serif;
-	font-weight: 700;
+	border: 1.5px solid var(--border-mid) !important;
+	padding: 7px 18px !important;
+	border-radius: var(--radius-sm) !important;
+	font-family: 'Plus Jakarta Sans', sans-serif !important;
+	font-size: 13px !important;
+	font-weight: 700 !important;
 	cursor: pointer;
+	box-shadow: var(--shadow-xs) !important;
+}
+
+.btn-cancel:hover {
+	background: var(--bg-subtle) !important;
+	border-color: var(--brand-blue) !important;
+	color: var(--brand-blue) !important;
 }
 
 .btn-submit, .btn-ok, .btn-action-send {
-	background: linear-gradient(135deg, #175CD3 0%, #4F46E5 100%) !important;
+	background: var(--brand-blue) !important;
 	color: #FFFFFF !important;
 	border: none !important;
-	padding: 7px 20px;
-	border-radius: 6px;
-	font-family: 'Plus Jakarta Sans', sans-serif;
-	font-weight: 700;
+	padding: 7px 18px !important;
+	border-radius: var(--radius-sm) !important;
+	font-family: 'Plus Jakarta Sans', sans-serif !important;
+	font-size: 13px !important;
+	font-weight: 700 !important;
 	cursor: pointer;
-	box-shadow: 0 4px 14px rgba(23, 92, 211, 0.22);
+	box-shadow: 0 2px 6px rgba(23, 92, 211, 0.18) !important;
+}
+
+.btn-submit:hover, .btn-ok:hover, .btn-action-send:hover {
+	background: #164EB6 !important;
+	box-shadow: 0 3px 8px rgba(23, 92, 211, 0.22) !important;
 }
 
 .btn-ok {
 	margin-top: 25px;
 	width: 120px;
-	padding: 8px;
+	padding: 8px !important;
 }
 
 /* =============================================================
@@ -350,12 +561,12 @@
 }
 
 /* =============================================================
-   READY STATUS
+   READY STATUS (used inside success modal / status badges)
    ============================================================= */
 .status-badge-ready {
 	border: 1px solid #86EFAC;
 	background: #F0FDF4;
-	border-radius: 999px;
+	border-radius: var(--radius-pill);
 	padding: 4px 10px;
 	display: inline-flex;
 	align-items: center;
@@ -369,9 +580,28 @@
 
 /* =============================================================
    RESPONSIVE
+   Same breakpoints as dashboard
    ============================================================= */
 @media ( max-width : 1024px) {
 	.main-window {
 		padding: 22px 20px;
+	}
+	.custom-grid .z-column {
+		font-size: 12px !important;
+		padding: 12px 12px !important;
+	}
+}
+
+@media ( max-width : 768px) {
+	.main-window {
+		padding: 16px 12px;
+	}
+}
+
+@media ( prefers-reduced-motion : reduce) {
+	*, *::before, *::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
 	}
 }

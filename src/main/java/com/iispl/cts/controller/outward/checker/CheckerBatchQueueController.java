@@ -376,10 +376,68 @@ public class CheckerBatchQueueController extends SelectorComposer<Vlayout> {
             return;
         }
 
-        batchNumber =
-                batchNumber.trim();
+        batchNumber = batchNumber.trim();
 
         try {
+
+            /*
+             * ========================================================
+             * DETERMINE RE-VERIFY MODE
+             * ========================================================
+             *
+             * Normally the Dashboard sends:
+             *
+             *     mode=RE_VERIFY
+             *
+             * But we also verify the actual cheque status here.
+             *
+             * This prevents an ON_HOLD batch from accidentally
+             * opening in normal Checker mode.
+             *
+             * If any cheque is RE_VERIFIED, this batch must open
+             * in Re-Verify mode.
+             */
+
+            boolean openInReVerifyMode =
+                    reVerifyMode;
+
+            if (!openInReVerifyMode) {
+
+                List<com.iispl.cts.model.outward.OutwardCheque> cheques =
+                        batchService.getChequesByBatchNumber(
+                                batchNumber);
+
+                if (cheques != null
+                        && !cheques.isEmpty()) {
+
+                    for (com.iispl.cts.model.outward.OutwardCheque cheque
+                            : cheques) {
+
+                        if (cheque == null) {
+                            continue;
+                        }
+
+                        String chequeStatus =
+                                cheque.getChequeStatus();
+
+                        if ("RE_VERIFIED".equalsIgnoreCase(
+                                chequeStatus)) {
+
+                            openInReVerifyMode = true;
+
+                            System.out.println(
+                                    "OPEN BATCH: RE_VERIFIED cheque found.");
+                            break;
+                        }
+                    }
+                }
+            }
+
+            /*
+             * ========================================================
+             * BUILD PROCESSING URL
+             * ========================================================
+             */
 
             String url =
                     "/zul/outward/outward-checker/processing.zul"
@@ -389,29 +447,14 @@ public class CheckerBatchQueueController extends SelectorComposer<Vlayout> {
                             StandardCharsets.UTF_8);
 
             /*
-             * ====================================================
-             * RE-VERIFY MODE
-             * ====================================================
-             *
-             * Normal batch:
-             *
-             *     processing.zul?batchNumber=XXXX
-             *
-             * Re-Verify batch:
-             *
-             *     processing.zul?batchNumber=XXXX&mode=RE_VERIFY
-             *
-             * CheckerProcessingController will then call:
-             *
-             *     getReVerifiedCheques(...)
-             *
-             * and only RE_VERIFIED cheques will be loaded.
+             * ========================================================
+             * RE-VERIFY
+             * ========================================================
              */
 
-            if (reVerifyMode) {
+            if (openInReVerifyMode) {
 
-                url +=
-                        "&mode=RE_VERIFY";
+                url += "&mode=RE_VERIFY";
 
                 System.out.println(
                         "Opening RE-VERIFY processing page: "
@@ -420,9 +463,15 @@ public class CheckerBatchQueueController extends SelectorComposer<Vlayout> {
             } else {
 
                 System.out.println(
-                        "Opening processing page: "
+                        "Opening normal processing page: "
                                 + url);
             }
+
+            /*
+             * ========================================================
+             * OPEN PROCESSING PAGE
+             * ========================================================
+             */
 
             Executions.sendRedirect(url);
 
@@ -430,7 +479,7 @@ public class CheckerBatchQueueController extends SelectorComposer<Vlayout> {
 
             System.out.println(
                     "OPEN BATCH ERROR: "
-                    + "Unable to open processing page.");
+                            + "Unable to open processing page.");
 
             e.printStackTrace();
         }

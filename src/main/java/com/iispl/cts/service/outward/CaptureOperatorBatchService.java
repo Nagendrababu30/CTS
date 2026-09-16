@@ -518,37 +518,47 @@ public class CaptureOperatorBatchService {
             // =================================================
             // UPDATE CHEQUES
             // =================================================
+         // UPDATE CHEQUES
+         // =================================================
 
-            for (OutwardCheque cheque :
-                    cheques) {
+         for (OutwardCheque cheque :
+                 cheques) {
 
-                // Same generated batch number
-                cheque.setBatchNumber(
-                        batchNumber);
+             // Same generated batch number
+             cheque.setBatchNumber(
+                     batchNumber);
 
-                // Selected branch
-                cheque.setBranchCode(
-                        branchCode.trim());
+             // =================================================
+             // DO NOT OVERWRITE MICR BRANCH CODE
+             // =================================================
+             //
+             // cheque.getBranchCode() already contains
+             // the MICR BranchCode parsed from XML.
+             //
+             // The selected branchCode is the batch branch
+             // and is stored in outward_batch.
+             //
+             // =================================================
 
-                // Created user
-                cheque.setCreatedBy(
-                        String.valueOf(
-                                createdBy));
+             // Created user
+             cheque.setCreatedBy(
+                     String.valueOf(
+                             createdBy));
 
-                // Created time
-                cheque.setCreatedAt(
-                        now);
+             // Created time
+             cheque.setCreatedAt(
+                     now);
 
-                // Default status
-                if (cheque.getChequeStatus() == null ||
-                        cheque.getChequeStatus()
-                                .trim()
-                                .isEmpty()) {
+             // Default status
+             if (cheque.getChequeStatus() == null ||
+                     cheque.getChequeStatus()
+                             .trim()
+                             .isEmpty()) {
 
-                    cheque.setChequeStatus(
-                            "CAPTURED");
-                }
-            }
+                 cheque.setChequeStatus(
+                         "CAPTURED");
+             }
+         }
 
             // =================================================
             // SAVE BATCH + CHEQUES

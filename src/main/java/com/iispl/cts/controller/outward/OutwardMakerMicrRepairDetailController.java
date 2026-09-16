@@ -161,6 +161,12 @@ public class OutwardMakerMicrRepairDetailController
 
     private String returnedChequeNumber;
 
+    /*
+     * Dashboard repair type.
+     * For the returned MICR queue this is MICR.
+     */
+    private String repairType;
+
     private String checkerReasonCode;
 
     private String checkerRemarks;
@@ -294,6 +300,26 @@ public class OutwardMakerMicrRepairDetailController
                             );
         }
 
+        /*
+         * =====================================================
+         * GET REPAIR TYPE
+         * =====================================================
+         *
+         * Dashboard sends repairType=MICR for the
+         * returned MICR queue.
+         */
+        repairType =
+                Executions.getCurrent()
+                        .getParameter("repairType");
+
+        if (repairType == null
+                || repairType.trim().isEmpty()) {
+
+            repairType =
+                    Executions.getCurrent()
+                            .getParameter("amp;repairType");
+        }
+
 
         System.out.println(
                 "======================================"
@@ -389,13 +415,16 @@ public class OutwardMakerMicrRepairDetailController
         //
         // IMPORTANT:
         //
-        // The returned cheque must be identified from the
-        // specific chequeNumber sent by the Maker Dashboard.
+        // For Dashboard -> MICR repair, filter at CHEQUE level
+        // using this cheque's checker_reason_code.
         //
-        // Only SENT_BACK_TO_MAKER is allowed here.
+        // The batch number alone must NEVER cause all returned
+        // cheques in the batch to enter the MICR queue.
         // =====================================================
 
-        List<OutwardCheque> loadedCheques =new OutwardMakerDashboardService().getCheques(batchNumber);
+        List<OutwardCheque> loadedCheques =
+                new OutwardMakerDashboardService()
+                        .getCheques(batchNumber);
 
 
         if (loadedCheques == null
@@ -418,8 +447,12 @@ public class OutwardMakerMicrRepairDetailController
                 new ArrayList<>();
 
 
+        OutwardMakerDashboardService dashboardService =
+                new OutwardMakerDashboardService();
+
+
         // =====================================================
-        // KEEP ONLY SENT_BACK_TO_MAKER CHEQUES
+        // KEEP ONLY SENT_BACK_TO_MAKER + SEND_BACK + MICR
         // =====================================================
 
         for (OutwardCheque cheque
@@ -429,27 +462,69 @@ public class OutwardMakerMicrRepairDetailController
                 continue;
             }
 
-
             String status =
                     cheque.getChequeStatus();
 
-
-            if (status != null
-                    && "SENT_BACK_TO_MAKER"
+            if (status == null
+                    || !"SENT_BACK_TO_MAKER"
                             .equalsIgnoreCase(
                                     status.trim()
                             )) {
-
-                returnedCheques.add(
-                        cheque
-                );
+                continue;
             }
+
+            String chequeNumber =
+                    cheque.getChequeNumber();
+
+            if (chequeNumber == null
+                    || chequeNumber.trim().isEmpty()) {
+                continue;
+            }
+
+            ChequeProcessing processing =
+                    dashboardService
+                            .getChequeProcessing(
+                                    batchNumber,
+                                    chequeNumber.trim()
+                            );
+
+            if (processing == null) {
+                continue;
+            }
+
+            String checkerAction =
+                    processing.getCheckerAction();
+
+            String checkerReason =
+                    processing.getCheckerReasonCode();
+
+            if (checkerAction == null
+                    || !"SEND_BACK"
+                            .equalsIgnoreCase(
+                                    checkerAction.trim()
+                            )) {
+                continue;
+            }
+
+            /*
+             * Strict MICR filtering:
+             * only the actual cheque reason decides whether
+             * this cheque belongs to the MICR repair queue.
+             */
+            if (!isMicrRepairReason(checkerReason)) {
+                continue;
+            }
+
+            returnedCheques.add(cheque);
         }
 
 
         // =====================================================
-        // IF SPECIFIC CHEQUE NUMBER WAS SENT,
-        // KEEP ONLY THAT CHEQUE
+        // OPTIONAL INITIAL CHEQUE SELECTION
+        //
+        // Dashboard may send chequeNumber so the first screen
+        // opens on the clicked cheque. It does NOT reduce the
+        // queue to one cheque.
         // =====================================================
 
         if (returnedChequeNumber != null
@@ -458,42 +533,32 @@ public class OutwardMakerMicrRepairDetailController
                         .isEmpty()) {
 
             String requestedCheque =
-                    returnedChequeNumber
-                            .trim();
+                    returnedChequeNumber.trim();
 
+            for (int i = 0;
+                    i < returnedCheques.size();
+                    i++) {
 
-            List<OutwardCheque>
-                    specificReturnedCheque =
-                            new ArrayList<>();
+                OutwardCheque cheque =
+                        returnedCheques.get(i);
 
-
-            for (OutwardCheque cheque
-                    : returnedCheques) {
-
-                if (cheque.getChequeNumber()
-                        != null
+                if (cheque != null
+                        && cheque.getChequeNumber() != null
                         && requestedCheque
                                 .equalsIgnoreCase(
                                         cheque.getChequeNumber()
                                                 .trim()
                                 )) {
 
-                    specificReturnedCheque.add(
-                            cheque
-                    );
-
+                    currentIndex = i;
                     break;
                 }
             }
-
-
-            returnedCheques =
-                    specificReturnedCheque;
         }
 
 
         // =====================================================
-        // NO RETURNED CHEQUE
+        // NO RETURNED MICR CHEQUE
         // =====================================================
 
         if (returnedCheques.isEmpty()) {
@@ -513,17 +578,25 @@ public class OutwardMakerMicrRepairDetailController
 
 
         // =====================================================
-        // ONLY RETURNED CHEQUES ARE USED
+        // ONLY RETURNED MICR CHEQUES ARE USED
         // =====================================================
 
         cheques =
                 returnedCheques;
 
-        currentIndex = 0;
-
 
         totalChequesCount =
                 cheques.size();
+
+
+        // Make sure the requested cheque is used as the
+        // starting cheque, otherwise start from the first MICR
+        // cheque in the filtered queue.
+        if (currentIndex < 0
+                || currentIndex >= cheques.size()) {
+
+            currentIndex = 0;
+        }
 
 
         updateHeaderPillMetrics();
@@ -531,30 +604,47 @@ public class OutwardMakerMicrRepairDetailController
         loadCurrentCheque();
 
 
-        // =====================================================
-        // RETURNED MODE NAVIGATION
-        //
-        // Dashboard opens the specific returned cheque.
-        // Therefore Prev is disabled exactly like Data Entry
-        // returned mode.
-        // =====================================================
-
+        /*
+         * Returned MICR mode can contain multiple MICR cheques.
+         * Therefore Prev/Next navigation is allowed inside the
+         * filtered MICR subset.
+         */
         if (prevButton != null) {
 
             prevButton.setDisabled(
-                    true
-            );
-
-            prevButton.setStyle(
-                    "background:#CBD5E1 !important; "
-                    + "color:#94A3B8 !important; "
-                    + "border:none !important; "
-                    + "font-size:12px !important; "
-                    + "font-weight:600 !important; "
-                    + "border-radius:6px !important; "
-                    + "cursor:not-allowed !important;"
+                    currentIndex == 0
             );
         }
+    }
+
+
+    // =========================================================
+    // MICR REPAIR REASON CHECK
+    // =========================================================
+    //
+    // This check is intentionally cheque-level. The batch number
+    // is not enough to decide whether a returned cheque belongs
+    // to the MICR repair queue.
+    // =========================================================
+
+    private boolean isMicrRepairReason(
+            String reasonCode) {
+
+        if (reasonCode == null
+                || reasonCode.trim().isEmpty()) {
+
+            return false;
+        }
+
+        String cleanReason =
+                reasonCode.trim()
+                        .toUpperCase()
+                        .replace("-", "_")
+                        .replace(" ", "_");
+
+        return "MICR".equals(cleanReason)
+                || "MICR_CORRECTION".equals(cleanReason)
+                || "MICR_MISMATCH".equals(cleanReason);
     }
 
 
@@ -1683,29 +1773,51 @@ public class OutwardMakerMicrRepairDetailController
 
         } else {
 
-            boolean remaining =
-                    service.hasRemainingMicrErrors(
+            /*
+             * =====================================================
+             * COMPLETION
+             * =====================================================
+             *
+             * NORMAL MODE:
+             * Keep the existing MICR batch-status logic exactly
+             * as before.
+             *
+             * RETURNED MODE:
+             * Do NOT complete the whole batch here. A returned
+             * batch may still contain Data Entry repairs (or other
+             * returned reasons). The dashboard will naturally
+             * remove this MICR action once these MICR cheques are
+             * no longer SENT_BACK_TO_MAKER.
+             */
+            if (!returnedMode) {
+
+                boolean remaining =
+                        service.hasRemainingMicrErrors(
+                                batchNumber
+                        );
+
+                if (!remaining) {
+
+                    service.updateBatchStatus(
                             batchNumber
                     );
-
-
-            if (!remaining) {
-
-                service.updateBatchStatus(
-                        batchNumber
-                );
+                }
             }
 
 
             Messagebox.show(
-                    "MICR Repair Completed for all cheques in this batch.",
+                    returnedMode
+                            ? "MICR repair completed for all returned MICR cheques in this queue."
+                            : "MICR Repair Completed for all cheques in this batch.",
                     "Success",
                     Messagebox.OK,
                     Messagebox.INFORMATION,
                     e -> Executions
                             .getCurrent()
                             .sendRedirect(
-                                    "/zul/outward/outward-maker/outward-maker-data-entry.zul"
+                                    returnedMode
+                                            ? "/zul/outward/outward-maker/outward-maker-dashboard.zul"
+                                            : "/zul/outward/outward-maker/outward-maker-data-entry.zul"
                             )
             );
         }

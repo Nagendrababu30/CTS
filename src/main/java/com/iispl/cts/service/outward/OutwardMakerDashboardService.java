@@ -11,23 +11,8 @@ import com.iispl.cts.model.outward.OutwardCheque;
 import com.iispl.cts.model.outward.OutwardValidationResult;
 
 public class OutwardMakerDashboardService {
-
-    // =========================================================
-    // DAO
-    // =========================================================
-
     private final OutwardMakerDashboardDAO dao;
-
-    // =========================================================
-    // VALIDATION SERVICE
-    // =========================================================
-
     private final OutwardValidationService validationService;
-
-    // =========================================================
-    // CONSTRUCTOR
-    // =========================================================
-
     public OutwardMakerDashboardService() {
 
         this.dao =
@@ -37,19 +22,11 @@ public class OutwardMakerDashboardService {
                 new OutwardValidationService();
     }
 
-    // =========================================================
-    // GET ALL BATCHES
-    // =========================================================
-
     public List<OutwardBatch> getBatches()
             throws SQLException {
 
         return dao.getBatches();
     }
-
-    // =========================================================
-    // FIND BATCH
-    // =========================================================
 
     public OutwardBatch findBatch(
             String batchNumber)
@@ -89,17 +66,7 @@ public class OutwardMakerDashboardService {
         return null;
     }
 
-    // =========================================================
-    // CHECK HOLD BATCH
-    //
-    // HOLD means Checker has returned one or more cheques
-    // back to the original Maker.
-    //
-    // IMPORTANT:
-    // This method ONLY checks the batch status.
-    // It does not modify the batch.
-    // =========================================================
-
+   
     public boolean isHoldBatch(
             String batchNumber)
             throws SQLException {
@@ -125,29 +92,6 @@ public class OutwardMakerDashboardService {
                         batchStatus.trim()
                 );
     }
-
-    // =========================================================
-    // GET RETURNED CHEQUES
-    //
-    // Only cheques having:
-    //
-    //     SENT_TO_MAKER
-    //
-    // are returned.
-    //
-    // Example:
-    //
-    // Original batch:
-    //     10 cheques
-    //
-    // Checker returns:
-    //     2 cheques
-    //
-    // This method returns only those 2 returned cheques.
-    //
-    // IMPORTANT:
-    // outward_batch.cheque_count is NOT changed.
-    // =========================================================
 
     public List<OutwardCheque> getReturnedCheques(
             String batchNumber)
@@ -180,10 +124,6 @@ public class OutwardMakerDashboardService {
             String chequeStatus =
                     cheque.getChequeStatus();
 
-            // =================================================
-            // CHECKER -> MAKER RETURN
-            // =================================================
-
             if (chequeStatus != null
                     && "SENT_BACK_TO_MAKER".equalsIgnoreCase(
                             chequeStatus.trim()
@@ -197,22 +137,6 @@ public class OutwardMakerDashboardService {
 
         return returnedCheques;
     }
-
-    // =========================================================
-    // GET CHEQUE PROCESSING
-    //
-    // Used by Maker when opening a returned batch.
-    //
-    // This gives the Controller the Checker reason for the
-    // particular returned cheque.
-    //
-    // Example:
-    //
-    // Cheque 1 -> MICR
-    // Cheque 2 -> DATA_ENTRY
-    //
-    // Each cheque can therefore be routed independently.
-    // =========================================================
 
     public ChequeProcessing getChequeProcessing(
             String batchNumber,
@@ -231,36 +155,11 @@ public class OutwardMakerDashboardService {
         );
     }
 
-    // =========================================================
-    // ASSIGN + VALIDATE
-    //
-    // FLOW:
-    //
-    // Maker clicks Open
-    //        ↓
-    // Assign batch
-    //        ↓
-    // Get cheques
-    //        ↓
-    // Validate MICR
-    //        ↓
-    // Update cheque status
-    //        ↓
-    // Update batch status
-    //        ↓
-    // Return validation result
-    //        ↓
-    // Controller opens required module
-    // =========================================================
-
+   
     public OutwardValidationResult assignAndValidate(
             String batchNumber,
             String userId)
             throws SQLException {
-
-        // =====================================================
-        // VALIDATE INPUT
-        // =====================================================
 
         if (isEmpty(batchNumber)
                 || isEmpty(userId)) {
@@ -274,47 +173,30 @@ public class OutwardMakerDashboardService {
         String cleanUserId =
                 userId.trim();
 
-        // =====================================================
-        // STEP 1: ASSIGN BATCH
-        // =====================================================
-
+       
         boolean assigned =
                 dao.assignBatch(
                         cleanBatchNumber,
                         cleanUserId
                 );
 
-        /*
-         * If assignment failed,
-         * controller treats it as locked/unavailable.
-         */
-
+      
         if (!assigned) {
             return null;
         }
 
-        // =====================================================
-        // STEP 2: GET CHEQUES
-        // =====================================================
-
+     
         List<OutwardCheque> cheques =
                 dao.getCheques(
                         cleanBatchNumber
                 );
-
-        // =====================================================
-        // STEP 3: VALIDATE BATCH
-        // =====================================================
 
         OutwardValidationResult result =
                 validationService.validate(
                         cheques
                 );
 
-        // =====================================================
-        // STEP 4: UPDATE INDIVIDUAL CHEQUE STATUS
-        // =====================================================
-
+      
         if (cheques != null) {
 
             for (OutwardCheque cheque : cheques) {
@@ -328,9 +210,7 @@ public class OutwardMakerDashboardService {
                                 cheque
                         );
 
-                // -------------------------------------------------
-                // MICR ERROR
-                // -------------------------------------------------
+              
 
                 if (errorType != null) {
 
@@ -340,10 +220,6 @@ public class OutwardMakerDashboardService {
                             "MICR_ERROR"
                     );
                 }
-
-                // -------------------------------------------------
-                // MICR VALID
-                // -------------------------------------------------
 
                 else {
 
@@ -356,10 +232,7 @@ public class OutwardMakerDashboardService {
             }
         }
 
-        // =====================================================
-        // STEP 5: UPDATE BATCH STATUS
-        // =====================================================
-
+     
         if (result.getMicrErrors() > 0) {
 
             dao.updateBatchStatus(
@@ -375,18 +248,9 @@ public class OutwardMakerDashboardService {
             );
         }
 
-        // =====================================================
-        // STEP 6: RETURN VALIDATION RESULT
-        // =====================================================
-
         return result;
     }
-
-    // =========================================================
-    // GET CHEQUES
-    // =========================================================
-
-    public List<OutwardCheque> getCheques(
+public List<OutwardCheque> getCheques(
             String batchNumber)
             throws SQLException {
 
@@ -398,10 +262,6 @@ public class OutwardMakerDashboardService {
                 batchNumber.trim()
         );
     }
-
-    // =========================================================
-    // CHECK BATCH EXISTS
-    // =========================================================
 
     public boolean isBatchValid(
             String batchNumber)
@@ -416,10 +276,6 @@ public class OutwardMakerDashboardService {
         );
     }
 
-    // =========================================================
-    // COMPLETE BATCH
-    // =========================================================
-
     public void completeBatch(
             String batchNumber)
             throws SQLException {
@@ -428,24 +284,13 @@ public class OutwardMakerDashboardService {
             return;
         }
 
-        /*
-         * DAO method is void,
-         * therefore this service method is also void.
-         */
-
         dao.updateBatchIfCompleted(
                 batchNumber.trim()
         );
     }
-
-    // =========================================================
-    // EMPTY CHECK
-    // =========================================================
-
     private boolean isEmpty(
             String value) {
 
-        return value == null
-                || value.trim().isEmpty();
+        return value == null || value.trim().isEmpty();
     }
 }

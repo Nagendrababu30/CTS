@@ -8,14 +8,13 @@ import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Wire;
+import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
-import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
-import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Vlayout;
 
@@ -29,1449 +28,1037 @@ import com.iispl.cts.service.outward.checker.CheckerProcessingService;
 
 public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    // ============================================================
-    // WIRED COMPONENTS
-    // ============================================================
+	@Wire
+	private Label verificationBatchId;
 
-    @Wire
-    private Label verificationBatchId;
+	@Wire
+	private Label chequeSequence;
 
-    @Wire
-    private Label chequeSequence;
+	@Wire
+	private Button backButton;
 
-    @Wire
-    private Button backButton;
+	@Wire
+	private Image chequeImage;
 
-    // ============================================================
-    // CHEQUE IMAGE
-    // ============================================================
+	@Wire
+	private Button frontButton;
 
-    @Wire
-    private Image chequeImage;
+	@Wire
+	private Button backSideButton;
 
-    @Wire
-    private Button frontButton;
+	@Wire
+	private Button rotateButton;
 
-    @Wire
-    private Button backSideButton;
+	@Wire
+	private Button zoomOutButton;
 
-    @Wire
-    private Button rotateButton;
+	@Wire
+	private Button zoomInButton;
 
-    @Wire
-    private Button zoomOutButton;
+	@Wire
+	private Label zoomLevelLabel;
 
-    @Wire
-    private Button zoomInButton;
+	@Wire
+	private Label chequeNumberLabel;
 
-    @Wire
-    private Label zoomLevelLabel;
+	@Wire
+	private Label accountNumberLabel;
 
-    // ============================================================
-    // CHEQUE DETAILS
-    // ============================================================
+	@Wire
+	private Label drawerNameLabel;
 
-    @Wire
-    private Label chequeNumberLabel;
+	@Wire
+	private Label payeeNameLabel;
 
-    @Wire
-    private Label accountNumberLabel;
+	@Wire
+	private Label amountLabel;
 
-    @Wire
-    private Label drawerNameLabel;
+	@Wire
+	private Label amountInWordsLabel;
 
-    @Wire
-    private Label payeeNameLabel;
+	@Wire
+	private Label chequeDateLabel;
 
-    @Wire
-    private Label amountLabel;
+	@Wire
+	private Label chequeDateValidationMessage;
 
-    @Wire
-    private Label amountInWordsLabel;
+	@Wire
+	private Label micrLabel;
 
-    @Wire
-    private Label chequeDateLabel;
+	@Wire
+	private Label accountVerificationIcon;
 
-    @Wire
-    private Label micrLabel;
+	@Wire
+	private Label accountVerificationMessage;
 
-    // ============================================================
-    // CBS VALIDATION
-    // ============================================================
+	@Wire
+	private Label accountVerificationReason;
 
-    @Wire
-    private Label accountVerificationIcon;
+	@Wire
+	private Div makerRejectionBlock;
 
-    @Wire
-    private Label accountVerificationMessage;
+	@Wire
+	private Label makerRejectionReason;
 
-    @Wire
-    private Label accountVerificationReason;
+	@Wire
+	private Button acceptButton;
 
-    // ============================================================
-    // MAKER REJECTION
-    // ============================================================
+	@Wire
+	private Button rejectButton;
 
-    @Wire
-    private Div makerRejectionBlock;
+	@Wire
+	private Button sendBackButton;
 
-    @Wire
-    private Label makerRejectionReason;
+	@Wire
+	private Hlayout reasonRow;
 
-    // ============================================================
-    // CHECKER ACTIONS
-    // ============================================================
+	@Wire
+	private Combobox reasonCombobox;
 
-    @Wire
-    private Button acceptButton;
+	@Wire
+	private Textbox checkerRemarksTextbox;
 
-    @Wire
-    private Button rejectButton;
+	@Wire
+	private Button saveNextButton;
 
-    @Wire
-    private Button sendBackButton;
+	private String cbsResult;
+	private String chequeDateResult;
+	private String selectedAction;
+	private int currentChequeIndex = 0;
+	private double imageScale = 1.0;
+	private int imageRotation = 0;
 
-    @Wire
-    private Hlayout reasonRow;
+	private CheckerBatchService batchService;
+	private CheckerProcessingService processingService;
 
-    @Wire
-    private Combobox reasonCombobox;
+	private String batchNumber;
+	private boolean reVerifyMode = false;
+	private long checkerUserId;
 
-    @Wire
-    private Textbox checkerRemarksTextbox;
+	private OutwardBatch currentBatch;
+	private List<OutwardCheque> cheques;
 
-    @Wire
-    private Button saveNextButton;
+	// ============================================================
+	// INIT
+	// ============================================================
 
-    // ============================================================
-    // STATE
-    // ============================================================
+	@Override
+	public void doAfterCompose(Vlayout component) throws Exception {
 
-    private String cbsResult;
+		super.doAfterCompose(component);
 
-    private String selectedAction;
+		batchService = new CheckerBatchService();
+		processingService = new CheckerProcessingService();
 
-    private int currentChequeIndex = 0;
+		/*
+		 * Use the same session attribute as Batch Queue.
+		 */
+		User currentUser =
+				(User) Sessions.getCurrent()
+						.getAttribute("loggedInUser");
 
-    /*
-     * Image display state.
-     *
-     * 1.0 = 100%
-     * 1.25 = 125%
-     * 1.50 = 150%
-     *
-     * Rotation:
-     * 0 -> 90 -> 180 -> 270 -> 0
-     */
-    private double imageScale = 1.0;
+		if (currentUser == null) {
 
-    private int imageRotation = 0;
+			Executions.sendRedirect(
+					Executions.getCurrent().getContextPath()
+							+ "/login.zul");
 
-    private CheckerBatchService batchService;
+			return;
+		}
 
-    private CheckerProcessingService processingService;
+		checkerUserId = currentUser.getUserId();
 
-    private String batchNumber;
+		batchNumber = Executions.getCurrent()
+				.getParameter("batchNumber");
 
-    /*
-     * Re-Verify mode is enabled only when the Checker
-     * opens this screen with mode=RE_VERIFY.
-     */
-    private boolean reVerifyMode = false;
+		String mode = Executions.getCurrent()
+				.getParameter("mode");
 
-    private long checkerUserId;
+		reVerifyMode = "RE_VERIFY".equalsIgnoreCase(mode);
 
-    private OutwardBatch currentBatch;
+		if (batchNumber == null || batchNumber.trim().isEmpty()) {
 
-    private List<OutwardCheque> cheques;
+			showError("Batch number is missing.");
 
-    // ============================================================
-    // INIT
-    // ============================================================
+			return;
+		}
 
-    @Override
-    public void doAfterCompose(Vlayout comp) throws Exception {
+		batchNumber = batchNumber.trim();
 
-        super.doAfterCompose(comp);
+		currentBatch = batchService.findBatch(batchNumber);
 
-        batchService = new CheckerBatchService();
+		if (currentBatch == null) {
 
-        processingService = new CheckerProcessingService();
+			showError("Batch not found.");
 
-        // ========================================================
-        // CURRENT USER
-        // ========================================================
+			return;
+		}
 
-        User currentUser =
-                (User) Sessions.getCurrent()
-                        .getAttribute("loggedInUser");
+		verificationBatchId.setValue(batchNumber);
 
-        if (currentUser == null) {
+		wireEvents();
 
-            Executions.sendRedirect(
-                    Executions.getCurrent().getContextPath()
-                            + "/login.zul");
+		loadFirstCheque();
+	}
 
-            return;
-        }
+	// ============================================================
+	// EVENTS
+	// ============================================================
 
-        checkerUserId = currentUser.getUserId();
+	private void wireEvents() {
 
-        // ========================================================
-        // BATCH NUMBER
-        // ========================================================
+		if (backButton != null) {
+			backButton.addEventListener(Events.ON_CLICK,
+					event -> goBackToQueue());
+		}
 
-        batchNumber =
-                Executions.getCurrent()
-                        .getParameter("batchNumber");
+		if (frontButton != null) {
+			frontButton.addEventListener(Events.ON_CLICK,
+					event -> showFrontImage());
+		}
 
-        String mode = Executions.getCurrent().getParameter("mode");
+		if (backSideButton != null) {
+			backSideButton.addEventListener(Events.ON_CLICK,
+					event -> showBackImage());
+		}
 
-        System.out.println("========== CHECKER PROCESSING ==========");
-        System.out.println("Batch Number : " + batchNumber);
-        System.out.println("Mode Parameter : [" + mode + "]");
+		if (rotateButton != null) {
+			rotateButton.addEventListener(Events.ON_CLICK,
+					event -> rotateImage());
+		}
 
-        reVerifyMode = "RE_VERIFY".equalsIgnoreCase(
-                mode != null ? mode.trim() : ""
-        );
+		if (zoomInButton != null) {
+			zoomInButton.addEventListener(Events.ON_CLICK,
+					event -> zoomIn());
+		}
 
-        System.out.println("Re-Verify Mode : " + reVerifyMode);
+		if (zoomOutButton != null) {
+			zoomOutButton.addEventListener(Events.ON_CLICK,
+					event -> zoomOut());
+		}
 
-        if (batchNumber == null
-                || batchNumber.trim().isEmpty()) {
+		if (acceptButton != null) {
+			acceptButton.addEventListener(Events.ON_CLICK,
+					event -> selectAction("ACCEPT"));
+		}
 
-            Messagebox.show(
-                    "Batch number is missing.",
-                    "Processing",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
+		if (rejectButton != null) {
+			rejectButton.addEventListener(Events.ON_CLICK,
+					event -> selectAction("REJECT"));
+		}
 
-            return;
-        }
+		if (sendBackButton != null) {
+			sendBackButton.addEventListener(Events.ON_CLICK,
+					event -> selectAction("SEND_BACK"));
+		}
 
-        batchNumber = batchNumber.trim();
+		if (saveNextButton != null) {
+			saveNextButton.addEventListener(Events.ON_CLICK,
+					event -> saveAndNext());
+		}
 
-        // ========================================================
-        // LOAD DATA
-        // ========================================================
+		if (reasonCombobox != null) {
+			reasonCombobox.addEventListener(Events.ON_CHANGE,
+					event -> updateSaveNextButton());
+		}
 
-        loadBatch();
+		if (checkerRemarksTextbox != null) {
+			checkerRemarksTextbox.addEventListener(Events.ON_CHANGE,
+					event -> updateSaveNextButton());
+		}
+	}
 
-        if (currentBatch == null) {
+	// ============================================================
+	// LOAD FIRST CHEQUE
+	// ============================================================
 
-            Messagebox.show(
-                    "Batch could not be found.",
-                    "Processing",
-                    Messagebox.OK,
-                    Messagebox.ERROR);
+	private void loadFirstCheque() {
 
-            return;
-        }
+		currentChequeIndex = 0;
 
-        /*
-         * The same Checker must own the batch.
-         *
-         * No new assignment is created here.
-         * This is especially important for RE_VERIFY mode.
-         */
-        if (!batchService.isAssignedToChecker(
-                batchNumber,
-                checkerUserId)) {
+		if (reVerifyMode) {
 
-            Messagebox.show(
-                    "This batch is not assigned to the current Checker.",
-                    "Access Denied",
-                    Messagebox.OK,
-                    Messagebox.ERROR);
+			loadReVerifyCheques();
 
-            return;
-        }
+			return;
+		}
 
-        loadFirstCheque();
+		cheques =
+				batchService.getChequesByBatchNumber(batchNumber);
 
-        // ========================================================
-        // BUTTON EVENTS
-        // ========================================================
+		if (cheques == null || cheques.isEmpty()) {
 
-        backButton.addEventListener(
-                Events.ON_CLICK,
-                event -> goBackToQueue());
+			showError("No cheques found for this batch.");
 
-        // ========================================================
-        // FRONT / BACK IMAGE BUTTONS
-        // ========================================================
+			return;
+		}
 
-        frontButton.addEventListener(
-                Events.ON_CLICK,
-                event -> showFrontImage());
+		displayCheque();
+	}
 
-        backSideButton.addEventListener(
-                Events.ON_CLICK,
-                event -> showBackImage());
+	// ============================================================
+	// LOAD RE-VERIFY CHEQUES
+	// ============================================================
 
-        // ========================================================
-        // IMAGE CONTROLS
-        // ========================================================
+	private void loadReVerifyCheques() {
 
-        rotateButton.addEventListener(
-                Events.ON_CLICK,
-                event -> rotateImage());
+		List<OutwardCheque> allCheques =
+				batchService.getChequesByBatchNumber(batchNumber);
 
-        zoomOutButton.addEventListener(
-                Events.ON_CLICK,
-                event -> zoomOut());
+		List<OutwardCheque> reVerifiedCheques =
+				new ArrayList<>();
 
-        zoomInButton.addEventListener(
-                Events.ON_CLICK,
-                event -> zoomIn());
+		if (allCheques != null) {
 
-        // ========================================================
-        // CHECKER ACTION BUTTONS
-        // ========================================================
+			for (OutwardCheque cheque : allCheques) {
 
-        acceptButton.addEventListener(
-                Events.ON_CLICK,
-                event -> confirmAction("ACCEPT"));
+				ChequeProcessing processing =
+						processingService.getChequeProcessing(
+								batchNumber,
+								cheque.getChequeNumber());
 
-        rejectButton.addEventListener(
-                Events.ON_CLICK,
-                event -> confirmAction("REJECT"));
+				if (processing == null) {
+					continue;
+				}
 
-        sendBackButton.addEventListener(
-                Events.ON_CLICK,
-                event -> confirmAction("SEND_BACK"));
+				boolean sameChecker =
+						processing.getCheckerId() != null
+								&& processing.getCheckerId().longValue()
+										== checkerUserId;
 
-        // ========================================================
-        // SAVE & NEXT
-        // ========================================================
+				boolean wasSentBack =
+						"SEND_BACK".equalsIgnoreCase(
+								processing.getCheckerAction());
 
-        saveNextButton.addEventListener(
-                Events.ON_CLICK,
-                event -> saveAndNext());
+				boolean corrected =
+						"RE_VERIFIED".equalsIgnoreCase(
+								cheque.getChequeStatus());
 
-        saveNextButton.setDisabled(true);
+				if (sameChecker && wasSentBack && corrected) {
+					reVerifiedCheques.add(cheque);
+				}
+			}
+		}
 
-        // ========================================================
-        // REASON
-        // ========================================================
+		cheques = reVerifiedCheques;
 
-        reasonCombobox.addEventListener(
-                Events.ON_SELECT,
-                event -> updateSaveNextButton());
-    }
+		if (cheques.isEmpty()) {
 
-    // ============================================================
-    // SHOW FRONT IMAGE
-    // ============================================================
+			Clients.showNotification(
+					"No corrected cheques are ready for re-verification.",
+					Clients.NOTIFICATION_TYPE_INFO,
+					null,
+					"top_center",
+					4000);
 
-    private void showFrontImage() {
+			return;
+		}
 
-        if (cheques == null
-                || cheques.isEmpty()
-                || currentChequeIndex >= cheques.size()) {
+		currentChequeIndex = 0;
 
-            return;
-        }
+		displayCheque();
+	}
 
-        OutwardCheque currentCheque =
-                cheques.get(currentChequeIndex);
+	// ============================================================
+	// DISPLAY CHEQUE
+	// ============================================================
 
-        String frontImagePath =
-                currentCheque.getFrontImagePath();
+	private void displayCheque() {
 
-        if (frontImagePath != null
-                && !frontImagePath.trim().isEmpty()) {
+		if (cheques == null
+				|| cheques.isEmpty()
+				|| currentChequeIndex < 0
+				|| currentChequeIndex >= cheques.size()) {
+			return;
+		}
 
-            chequeImage.setSrc(
-                    frontImagePath.trim());
+		OutwardCheque cheque =
+				cheques.get(currentChequeIndex);
 
-            applyImageTransform();
+		chequeSequence.setValue(
+				"Cheque : "
+						+ String.format(
+								"%02d",
+								currentChequeIndex + 1)
+						+ " / "
+						+ cheques.size());
 
-        } else {
+		chequeNumberLabel.setValue(
+				safe(cheque.getChequeNumber()));
 
-            chequeImage.setSrc("");
+		accountNumberLabel.setValue(
+				safe(cheque.getDrawerAccountNumber()));
 
-            Messagebox.show(
-                    "Front image is not available.",
-                    "Image",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
-        }
-    }
+		drawerNameLabel.setValue(
+				safe(cheque.getDrawerName()));
 
-    // ============================================================
-    // SHOW BACK IMAGE
-    // ============================================================
+		payeeNameLabel.setValue(
+				safe(cheque.getPayeeName()));
 
-    private void showBackImage() {
+		amountLabel.setValue(
+				cheque.getAmount() == null
+						? ""
+						: cheque.getAmount().toString());
 
-        if (cheques == null
-                || cheques.isEmpty()
-                || currentChequeIndex >= cheques.size()) {
+		amountInWordsLabel.setValue(
+				safe(cheque.getAmountInWords()));
 
-            return;
-        }
+		chequeDateLabel.setValue(
+				cheque.getChequeDate() == null
+						? ""
+						: cheque.getChequeDate().toString());
 
-        OutwardCheque currentCheque =
-                cheques.get(currentChequeIndex);
+		String micr = "";
 
-        String backImagePath =
-                currentCheque.getBackImagePath();
+		if (cheque.getBankCode() != null) {
+			micr += cheque.getBankCode();
+		}
 
-        if (backImagePath != null
-                && !backImagePath.trim().isEmpty()) {
+		if (cheque.getBranchCode() != null) {
 
-            chequeImage.setSrc(
-                    backImagePath.trim());
+			if (!micr.isEmpty()) {
+				micr += " ";
+			}
 
-            applyImageTransform();
+			micr += cheque.getBranchCode();
+		}
 
-        } else {
+		micrLabel.setValue(micr);
 
-            chequeImage.setSrc("");
+		resetImageState();
 
-            Messagebox.show(
-                    "Back image is not available.",
-                    "Image",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
-        }
-    }
+		showFrontImage();
 
-    // ============================================================
-    // ZOOM IN
-    // ============================================================
+		loadMakerRejection(cheque);
 
-    private void zoomIn() {
+		validateCbs(cheque);
 
-        if (imageScale < 3.0) {
+		selectedAction = null;
 
-            imageScale += 0.25;
-        }
+		if (reasonRow != null) {
+			reasonRow.setVisible(false);
+		}
 
-        applyImageTransform();
-    }
+		if (reasonCombobox != null) {
+			reasonCombobox.getItems().clear();
+			reasonCombobox.setValue("");
+		}
 
-    // ============================================================
-    // ZOOM OUT
-    // ============================================================
+		if (checkerRemarksTextbox != null) {
+			checkerRemarksTextbox.setValue("");
+		}
 
-    private void zoomOut() {
+		updateSaveNextButton();
+	}
 
-        if (imageScale > 0.50) {
+	// ============================================================
+	// MAKER REJECTION
+	// ============================================================
 
-            imageScale -= 0.25;
-        }
+	private void loadMakerRejection(OutwardCheque cheque) {
 
-        applyImageTransform();
-    }
+		if (makerRejectionBlock == null) {
+			return;
+		}
 
-    // ============================================================
-    // ROTATE IMAGE
-    // ============================================================
+		ChequeProcessing processing =
+				processingService.getChequeProcessing(
+						batchNumber,
+						cheque.getChequeNumber());
 
-    private void rotateImage() {
+		if (processing == null) {
 
-        imageRotation += 90;
+			makerRejectionBlock.setVisible(false);
 
-        if (imageRotation >= 360) {
+			return;
+		}
 
-            imageRotation = 0;
-        }
+		boolean makerRejected =
+				"REJECT_REQUEST".equalsIgnoreCase(
+						processing.getMakerAction());
 
-        applyImageTransform();
-    }
+		if (!makerRejected) {
 
-    // ============================================================
-    // APPLY IMAGE TRANSFORM
-    // ============================================================
+			makerRejectionBlock.setVisible(false);
 
-    private void applyImageTransform() {
+			return;
+		}
 
-        String transform =
-                "transform: scale("
-                        + imageScale
-                        + ") rotate("
-                        + imageRotation
-                        + "deg);"
-                        + " transform-origin: center center;";
+		makerRejectionBlock.setVisible(true);
 
-        chequeImage.setStyle(transform);
+		String reason =
+				processing.getMakerReasonCode();
 
-        zoomLevelLabel.setValue(
-                String.format(
-                        "%.0f%%",
-                        imageScale * 100));
-    }
+		if (reason == null || reason.trim().isEmpty()) {
 
-    // ============================================================
-    // SAVE & NEXT
-    // ============================================================
+			makerRejectionReason.setValue(
+					"Reason not specified");
 
-    private void saveAndNext() {
+			return;
+		}
 
-        if (cheques == null
-                || cheques.isEmpty()
-                || currentChequeIndex >= cheques.size()) {
+		String reasonName =
+				processingService.getMakerReasonName(reason);
 
-            return;
-        }
+		if (reasonName != null
+				&& !reasonName.trim().isEmpty()) {
 
-        // ========================================================
-        // ACTION VALIDATION
-        // ========================================================
+			makerRejectionReason.setValue(reasonName);
 
-        if (selectedAction == null
-                || selectedAction.trim().isEmpty()) {
+		} else {
 
-            Messagebox.show(
-                    "Please select an action.",
-                    "Validation",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
+			makerRejectionReason.setValue(reason);
+		}
+	}
 
-            return;
-        }
+	// ============================================================
+	// CBS + CHEQUE DATE VALIDATION
+	// ============================================================
 
-        // ========================================================
-        // REASON CODE
-        // ========================================================
+	private void validateCbs(OutwardCheque cheque) {
 
-        String reasonCode = null;
+		// --------------------------------------------------------
+		// CBS ACCOUNT VALIDATION
+		// --------------------------------------------------------
 
-        if ("REJECT".equalsIgnoreCase(selectedAction)
-                || "SEND_BACK".equalsIgnoreCase(selectedAction)) {
+		cbsResult =
+				processingService.validateCbsAccount(
+						cheque.getDrawerAccountNumber());
 
-            Comboitem selectedItem =
-                    reasonCombobox.getSelectedItem();
+		boolean cbsPassed =
+				"PASS".equalsIgnoreCase(cbsResult);
 
-            if (selectedItem == null) {
+		if (cbsPassed) {
 
-                Messagebox.show(
-                        "Please select a reason.",
-                        "Validation",
-                        Messagebox.OK,
-                        Messagebox.EXCLAMATION);
+			accountVerificationIcon.setValue("✓");
 
-                return;
-            }
+			accountVerificationMessage.setValue(
+					"CBS Verified");
 
-            reasonCode = selectedItem.getValue();
+			accountVerificationReason.setValue("");
 
-            if (reasonCode == null
-                    || reasonCode.trim().isEmpty()) {
+			accountVerificationReason.setVisible(false);
 
-                Messagebox.show(
-                        "Please select a valid reason.",
-                        "Validation",
-                        Messagebox.OK,
-                        Messagebox.EXCLAMATION);
+		} else {
 
-                return;
-            }
+			accountVerificationIcon.setValue("✕");
 
-            reasonCode = reasonCode.trim();
-        }
+			accountVerificationMessage.setValue(
+					"CBS Validation Failed");
 
-        // ========================================================
-        // CURRENT CHEQUE
-        // ========================================================
+			accountVerificationReason.setValue(
+					processingService.getCbsValidationMessage(
+							cbsResult));
 
-        OutwardCheque currentCheque =
-                cheques.get(currentChequeIndex);
+			accountVerificationReason.setVisible(true);
+		}
 
-        if (currentCheque == null
-                || currentCheque.getChequeNumber() == null
-                || currentCheque.getChequeNumber()
-                        .trim()
-                        .isEmpty()) {
+		// --------------------------------------------------------
+		// CHEQUE DATE VALIDATION
+		// --------------------------------------------------------
 
-            Messagebox.show(
-                    "Invalid cheque information.",
-                    "Error",
-                    Messagebox.OK,
-                    Messagebox.ERROR);
+		chequeDateResult =
+				processingService.validateChequeDate(
+						cheque.getChequeDate());
 
-            return;
-        }
+		boolean datePassed =
+				"PASS".equalsIgnoreCase(
+						chequeDateResult);
 
-        // ========================================================
-        // SAVE
-        // ========================================================
+		if (datePassed) {
 
-        boolean saved =
-                processingService.saveCheckerDecision(
-                        batchNumber,
-                        currentCheque.getChequeNumber(),
-                        checkerUserId,
-                        selectedAction,
-                        reasonCode,
-                        checkerRemarksTextbox.getValue());
+			chequeDateValidationMessage.setValue("");
 
-        // ========================================================
-        // SAVE FAILED
-        // ========================================================
+			chequeDateValidationMessage.setVisible(false);
 
-        if (!saved) {
+		} else {
 
-            Messagebox.show(
-                    "Unable to save Checker decision.",
-                    "Error",
-                    Messagebox.OK,
-                    Messagebox.ERROR);
+			chequeDateValidationMessage.setValue(
+					"✕ "
+							+ processingService
+									.getCbsValidationMessage(
+											chequeDateResult));
 
-            return;
-        }
+			chequeDateValidationMessage.setVisible(true);
+		}
 
-        // ========================================================
-        // SAVE SUCCESSFUL
-        // ========================================================
+		boolean validationPassed =
+				cbsPassed && datePassed;
 
-        currentChequeIndex++;
+		if (acceptButton != null) {
+			acceptButton.setDisabled(!validationPassed);
+		}
 
-        // ========================================================
-        // ALL CHEQUES COMPLETED
-        // ========================================================
+		if (rejectButton != null) {
+			rejectButton.setDisabled(false);
+		}
 
-        if (currentChequeIndex >= cheques.size()) {
+		if (sendBackButton != null) {
+			sendBackButton.setDisabled(!validationPassed);
+		}
+	}
 
-            /*
-             * For the normal Checker cycle, mark the current
-             * Checker assignment as completed.
-             *
-             * The DAO has already decided the correct batch
-             * status:
-             *
-             *   SEND_BACK exists -> ON_HOLD
-             *   no SEND_BACK    -> CHECKER_VERIFIED
-             *
-             * We only complete the assignment here.
-             */
-            if (!reVerifyMode) {
+	// ============================================================
+	// SELECT ACTION
+	// ============================================================
 
-                boolean completed =
-                        batchService.completeBatch(
-                                batchNumber,
-                                checkerUserId);
+	private void selectAction(String action) {
 
-                if (!completed) {
+		selectedAction = action;
 
-                    Messagebox.show(
-                            "Checker decision was saved, but the Checker assignment could not be completed.",
-                            "Warning",
-                            Messagebox.OK,
-                            Messagebox.EXCLAMATION);
+		if ("REJECT".equalsIgnoreCase(action)
+				|| "SEND_BACK".equalsIgnoreCase(action)) {
 
-                    return;
-                }
-            }
+			if (reasonRow != null) {
+				reasonRow.setVisible(true);
+			}
 
-            Executions.sendRedirect(
-                    "/zul/outward/outward-checker/batchesQueue.zul");
+			loadReturnReasons(action);
 
-            return;
-        }
+		} else {
 
-        // ========================================================
-        // LOAD NEXT CHEQUE
-        // ========================================================
+			if (reasonRow != null) {
+				reasonRow.setVisible(false);
+			}
 
-        loadCurrentCheque();
-    }
+			if (reasonCombobox != null) {
 
-    // ============================================================
-    // LOAD CURRENT CHEQUE
-    // ============================================================
+				reasonCombobox.getItems().clear();
 
-    private void loadCurrentCheque() {
+				reasonCombobox.setValue("");
+			}
+		}
 
-        if (cheques == null
-                || cheques.isEmpty()
-                || currentChequeIndex >= cheques.size()) {
+		updateSaveNextButton();
+	}
 
-            return;
-        }
+	// ============================================================
+	// LOAD CHECKER REASONS
+	// ============================================================
 
-        // ========================================================
-        // CURRENT CHEQUE
-        // ========================================================
+	private void loadReturnReasons(String action) {
 
-        OutwardCheque cheque =
-                cheques.get(currentChequeIndex);
+		if (reasonCombobox == null) {
+			return;
+		}
 
-        if (cheque == null) {
+		reasonCombobox.getItems().clear();
 
-            return;
-        }
+		List<ReturnReason> reasons =
+				processingService.getReturnReasons(action);
 
-        // ========================================================
-        // RE-VERIFY MODE
-        // ========================================================
+		if (reasons == null || reasons.isEmpty()) {
+			return;
+		}
 
-        /*
-         * A corrected cheque comes from Maker with:
-         *
-         * RE_VERIFIED
-         *
-         * When the same Checker opens it for verification:
-         *
-         * RE_VERIFIED
-         *      ↓
-         * CHECKER_PROCESSING
-         *
-         * Only this individual cheque is changed.
-         */
+		for (ReturnReason reason : reasons) {
 
-        if (reVerifyMode
-                && "RE_VERIFIED".equalsIgnoreCase(
-                        cheque.getChequeStatus())) {
+			org.zkoss.zul.Comboitem item =
+					reasonCombobox.appendItem(
+							reason.getReasonName());
 
-            boolean started =
-                    processingService.startCheckerProcessing(
-                            batchNumber,
-                            cheque.getChequeNumber());
+			item.setValue(
+					reason.getReasonCode());
+		}
+	}
 
-            if (!started) {
+	// ============================================================
+	// SAVE BUTTON STATE
+	// ============================================================
 
-                Messagebox.show(
-                        "Unable to start Checker processing for this cheque.",
-                        "Re-Verify",
-                        Messagebox.OK,
-                        Messagebox.ERROR);
+	private void updateSaveNextButton() {
 
-                return;
-            }
+		if (saveNextButton == null) {
+			return;
+		}
 
-            /*
-             * Keep the in-memory object synchronized
-             * with the database.
-             */
-            cheque.setChequeStatus(
-                    "CHECKER_PROCESSING");
-        }
+		if (selectedAction == null) {
 
-        // ========================================================
-        // RESET IMAGE
-        // ========================================================
+			saveNextButton.setDisabled(true);
 
-        imageScale = 1.0;
+			return;
+		}
 
-        imageRotation = 0;
+		boolean validationPassed =
+				"PASS".equalsIgnoreCase(cbsResult)
+						&& "PASS".equalsIgnoreCase(
+								chequeDateResult);
 
-        applyImageTransform();
+		if ("ACCEPT".equalsIgnoreCase(selectedAction)) {
 
-        // ========================================================
-        // LOAD CHEQUE
-        // ========================================================
+			saveNextButton.setDisabled(
+					!validationPassed);
 
-        displayCheque(cheque);
+			return;
+		}
 
-        chequeSequence.setValue(
-                String.format(
-                        "%02d / %02d",
-                        currentChequeIndex + 1,
-                        cheques.size()));
+		if ("SEND_BACK".equalsIgnoreCase(selectedAction)) {
 
-        // ========================================================
-        // RESET ACTION STATE
-        // ========================================================
+			boolean reasonSelected =
+					reasonCombobox != null
+							&& reasonCombobox
+									.getSelectedItem() != null;
 
-        selectedAction = null;
+			saveNextButton.setDisabled(
+					!validationPassed
+							|| !reasonSelected);
 
-        reasonRow.setVisible(false);
+			return;
+		}
 
-        reasonCombobox.getItems().clear();
+		if ("REJECT".equalsIgnoreCase(selectedAction)) {
 
-        reasonCombobox.setSelectedItem(null);
+			boolean reasonSelected =
+					reasonCombobox != null
+							&& reasonCombobox
+									.getSelectedItem() != null;
 
-        checkerRemarksTextbox.setValue("");
+			saveNextButton.setDisabled(
+					!reasonSelected);
 
-        saveNextButton.setDisabled(true);
-    }
+			return;
+		}
 
-    // ============================================================
-    // LOAD BATCH
-    // ============================================================
+		saveNextButton.setDisabled(true);
+	}
 
-    private void loadBatch() {
+	// ============================================================
+	// SAVE & NEXT
+	// ============================================================
 
-        currentBatch =
-                batchService.findBatch(batchNumber);
+	private void saveAndNext() {
 
-        if (currentBatch == null) {
+		if (selectedAction == null) {
 
-            return;
-        }
+			Clients.showNotification(
+					"Please select an action.",
+					Clients.NOTIFICATION_TYPE_WARNING,
+					null,
+					"top_center",
+					2500);
 
-        verificationBatchId.setValue(
-                "Batch: "
-                        + currentBatch.getBatchNumber());
+			return;
+		}
 
-        chequeSequence.setValue(
-                "Cheque 1 of "
-                        + currentBatch.getNumberOfCheques());
-    }
+		boolean validationPassed =
+				"PASS".equalsIgnoreCase(cbsResult)
+						&& "PASS".equalsIgnoreCase(
+								chequeDateResult);
 
-    // ============================================================
-    // LOAD FIRST CHEQUE
-    // ============================================================
+		if (("ACCEPT".equalsIgnoreCase(selectedAction)
+				|| "SEND_BACK".equalsIgnoreCase(
+						selectedAction))
+				&& !validationPassed) {
 
-    private void loadFirstCheque() {
+			StringBuilder message =
+					new StringBuilder();
 
-        // ========================================================
-        // RE-VERIFY MODE
-        // ========================================================
+			if (!"PASS".equalsIgnoreCase(cbsResult)) {
 
-        if (reVerifyMode) {
+				message.append(
+						processingService
+								.getCbsValidationMessage(
+										cbsResult));
+			}
 
-            loadReVerifyCheques();
+			if (!"PASS".equalsIgnoreCase(
+					chequeDateResult)) {
 
-            return;
-        }
+				if (message.length() > 0) {
+					message.append(" | ");
+				}
 
-        // ========================================================
-        // NORMAL CHECKER MODE
-        // ========================================================
+				message.append(
+						processingService
+								.getCbsValidationMessage(
+										chequeDateResult));
+			}
 
-        cheques =
-                batchService.getChequesByBatchNumber(
-                        batchNumber);
+			Clients.showNotification(
+					message.toString(),
+					Clients.NOTIFICATION_TYPE_ERROR,
+					null,
+					"top_center",
+					4000);
 
-        if (cheques == null
-                || cheques.isEmpty()) {
+			return;
+		}
 
-            Messagebox.show(
-                    "No cheques are available for this batch.",
-                    "Processing",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
+		String reasonCode = null;
 
-            return;
-        }
+		if (("REJECT".equalsIgnoreCase(selectedAction)
+				|| "SEND_BACK".equalsIgnoreCase(
+						selectedAction))
+				&& reasonCombobox != null
+				&& reasonCombobox.getSelectedItem() != null) {
 
-        currentChequeIndex = 0;
+			Object value =
+					reasonCombobox
+							.getSelectedItem()
+							.getValue();
 
-        loadCurrentCheque();
-    }
+			if (value != null) {
+				reasonCode = value.toString();
+			}
+		}
 
-    // ============================================================
-    // LOAD RE-VERIFY CHEQUES
-    // ============================================================
-    /*
-     * Re-Verify eligibility is based only on the individual
-     * cheque.
-     *
-     * Conditions:
-     *
-     * 1. checker_id = current Checker
-     * 2. checker_action = SEND_BACK
-     * 3. cheque_status = RE_VERIFIED
-     *
-     * IMPORTANT:
-     *
-     * A cheque which is still with Maker does NOT block
-     * other corrected cheques from being re-verified.
-     */
+		String remarks = null;
 
-    private void loadReVerifyCheques() {
+		if (checkerRemarksTextbox != null) {
+			remarks = checkerRemarksTextbox.getValue();
+		}
 
-        List<OutwardCheque> allCheques =
-                batchService.getChequesByBatchNumber(
-                        batchNumber);
+		if (cheques == null
+				|| cheques.isEmpty()
+				|| currentChequeIndex < 0
+				|| currentChequeIndex >= cheques.size()) {
+			return;
+		}
 
-        if (allCheques == null
-                || allCheques.isEmpty()) {
+		OutwardCheque cheque =
+				cheques.get(currentChequeIndex);
 
-            cheques =
-                    new ArrayList<>();
+		boolean saved =
+				processingService.saveCheckerDecision(
+						batchNumber,
+						cheque.getChequeNumber(),
+						checkerUserId,
+						selectedAction,
+						reasonCode,
+						remarks);
 
-            Messagebox.show(
-                    "No cheques are available for re-verification.",
-                    "Re-Verify",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
+		if (!saved) {
 
-            return;
-        }
+			Clients.showNotification(
+					"Unable to save checker decision.",
+					Clients.NOTIFICATION_TYPE_ERROR,
+					null,
+					"top_center",
+					3500);
 
-        List<OutwardCheque> reVerifiedCheques =
-                new ArrayList<>();
+			return;
+		}
 
-        for (OutwardCheque cheque : allCheques) {
+		boolean lastCheque =
+				currentChequeIndex >= cheques.size() - 1;
 
-            if (cheque == null
-                    || cheque.getChequeNumber() == null
-                    || cheque.getChequeNumber()
-                            .trim()
-                            .isEmpty()) {
+		if (!lastCheque) {
 
-                continue;
-            }
+			currentChequeIndex++;
 
-            ChequeProcessing processing =
-                    processingService.getChequeProcessing(
-                            batchNumber,
-                            cheque.getChequeNumber());
+			displayCheque();
 
-            if (processing == null) {
+			return;
+		}
 
-                continue;
-            }
+		finishProcessing();
+	}
 
-            // ====================================================
-            // SAME CHECKER
-            // ====================================================
+	// ============================================================
+	// FINISH PROCESSING
+	// ============================================================
 
-            Integer processingCheckerId =
-                    processing.getCheckerId();
+	private void finishProcessing() {
 
-            if (processingCheckerId == null
-                    || processingCheckerId.longValue()
-                            != checkerUserId) {
+		Clients.showNotification(
+				reVerifyMode
+						? "Re-verification completed."
+						: "Checker processing completed.",
+				Clients.NOTIFICATION_TYPE_INFO,
+				null,
+				"top_center",
+				2500);
 
-                continue;
-            }
+		goBackToQueue();
+	}
 
-            // ====================================================
-            // PREVIOUS CHECKER DECISION WAS SEND_BACK
-            // ====================================================
+	// ============================================================
+	// BACK TO QUEUE
+	// ============================================================
 
-            if (!"SEND_BACK".equalsIgnoreCase(
-                    processing.getCheckerAction())) {
+	private void goBackToQueue() {
 
-                continue;
-            }
+		Executions.sendRedirect(
+				"/zul/outward/outward-checker/batchesQueue.zul");
+	}
 
-            // ====================================================
-            // MAKER HAS COMPLETED REWORK
-            // ====================================================
+	// ============================================================
+	// FRONT IMAGE
+	// ============================================================
 
-            if ("RE_VERIFIED".equalsIgnoreCase(
-                    cheque.getChequeStatus())) {
+	private void showFrontImage() {
 
-                reVerifiedCheques.add(cheque);
-            }
+		if (cheques == null || cheques.isEmpty()) {
+			return;
+		}
 
-            /*
-             * If status is not RE_VERIFIED, the cheque is still
-             * with Maker.
-             *
-             * Do NOT block the other re-verified cheques.
-             */
-        }
+		OutwardCheque cheque =
+				cheques.get(currentChequeIndex);
 
-        // ========================================================
-        // ONLY READY CHEQUES
-        // ========================================================
+		if (cheque.getFrontImagePath() == null
+				|| cheque.getFrontImagePath().trim().isEmpty()) {
 
-        cheques = reVerifiedCheques;
+			chequeImage.setSrc("");
 
-        if (cheques.isEmpty()) {
+			return;
+		}
 
-            Messagebox.show(
-                    "No re-verified cheques are currently available.",
-                    "Re-Verify",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
+		chequeImage.setSrc(
+				cheque.getFrontImagePath());
 
-            return;
-        }
+		resetImageState();
 
-        currentChequeIndex = 0;
+		if (frontButton != null) {
+			frontButton.setSclass(
+					"image-side-button selected");
+		}
 
-        chequeSequence.setValue(
-                "Cheque 1 of "
-                        + cheques.size());
+		if (backSideButton != null) {
+			backSideButton.setSclass(
+					"image-side-button");
+		}
+	}
 
-        loadCurrentCheque();
-    }
+	// ============================================================
+	// BACK IMAGE
+	// ============================================================
 
-    // ============================================================
-    // DISPLAY CHEQUE
-    // ============================================================
+	private void showBackImage() {
 
-    private void displayCheque(
-            OutwardCheque cheque) {
+		if (cheques == null || cheques.isEmpty()) {
+			return;
+		}
 
-        if (cheque == null) {
+		OutwardCheque cheque =
+				cheques.get(currentChequeIndex);
 
-            return;
-        }
+		if (cheque.getBackImagePath() == null
+				|| cheque.getBackImagePath().trim().isEmpty()) {
 
-        chequeNumberLabel.setValue(
-                valueOrDash(
-                        cheque.getChequeNumber()));
+			chequeImage.setSrc("");
 
-        /*
-         * Drawer Account is the account from which
-         * the cheque is drawn.
-         *
-         * This account is used for CBS validation.
-         */
+			return;
+		}
 
-        accountNumberLabel.setValue(
-                valueOrDash(
-                        cheque.getDrawerAccountNumber()));
+		chequeImage.setSrc(
+				cheque.getBackImagePath());
 
-        drawerNameLabel.setValue(
-                valueOrDash(
-                        cheque.getDrawerName()));
+		resetImageState();
 
-        payeeNameLabel.setValue(
-                valueOrDash(
-                        cheque.getPayeeName()));
+		if (frontButton != null) {
+			frontButton.setSclass(
+					"image-side-button");
+		}
 
-        amountLabel.setValue(
-                cheque.getAmount() != null
-                        ? cheque.getAmount().toString()
-                        : "-");
+		if (backSideButton != null) {
+			backSideButton.setSclass(
+					"image-side-button selected");
+		}
+	}
 
-        amountInWordsLabel.setValue(
-                valueOrDash(
-                        cheque.getAmountInWords()));
+	// ============================================================
+	// ROTATE
+	// ============================================================
 
-        chequeDateLabel.setValue(
-                cheque.getChequeDate() != null
-                        ? cheque.getChequeDate().toString()
-                        : "-");
+	private void rotateImage() {
 
-        // ========================================================
-        // MICR
-        // ========================================================
+		imageRotation += 90;
 
-        micrLabel.setValue(
-                buildMicr(cheque));
+		if (imageRotation >= 360) {
+			imageRotation = 0;
+		}
 
-        // ========================================================
-        // CHEQUE IMAGE
-        // ========================================================
+		updateImageTransform();
+	}
 
-        String frontImagePath =
-                cheque.getFrontImagePath();
+	// ============================================================
+	// ZOOM IN
+	// ============================================================
 
-        if (frontImagePath != null
-                && !frontImagePath.trim().isEmpty()) {
+	private void zoomIn() {
 
-            chequeImage.setSrc(
-                    frontImagePath.trim());
+		imageScale += 0.1;
 
-            applyImageTransform();
+		if (imageScale > 3.0) {
+			imageScale = 3.0;
+		}
 
-        } else {
+		updateImageTransform();
+	}
 
-            chequeImage.setSrc("");
-        }
+	// ============================================================
+	// ZOOM OUT
+	// ============================================================
 
-        // ========================================================
-        // MAKER REJECTION
-        // ========================================================
+	private void zoomOut() {
 
-        displayMakerRejection(cheque);
+		imageScale -= 0.1;
 
-        // ========================================================
-        // CBS VALIDATION
-        // ========================================================
+		if (imageScale < 0.5) {
+			imageScale = 0.5;
+		}
 
-        validateCbs(cheque);
-    }
+		updateImageTransform();
+	}
 
-    // ============================================================
-    // DISPLAY MAKER REJECTION
-    // ============================================================
+	// ============================================================
+	// IMAGE TRANSFORM
+	// ============================================================
 
-    private void displayMakerRejection(
-            OutwardCheque cheque) {
+	private void updateImageTransform() {
 
-        /*
-         * Always reset the Maker rejection block first.
-         *
-         * This is important because the next cheque may not
-         * have been rejected/requested for rework by Maker.
-         */
+		if (chequeImage != null) {
 
-        makerRejectionBlock.setVisible(false);
+			chequeImage.setStyle(
+					"transform: rotate("
+							+ imageRotation
+							+ "deg) scale("
+							+ imageScale
+							+ ");");
+		}
 
-        makerRejectionReason.setValue("");
+		if (zoomLevelLabel != null) {
 
-        if (cheque == null) {
+			zoomLevelLabel.setValue(
+					Math.round(imageScale * 100)
+							+ "%");
+		}
+	}
 
-            return;
-        }
+	// ============================================================
+	// RESET IMAGE
+	// ============================================================
 
-        String chequeNumber =
-                cheque.getChequeNumber();
+	private void resetImageState() {
 
-        if (chequeNumber == null
-                || chequeNumber.trim().isEmpty()) {
+		imageScale = 1.0;
+		imageRotation = 0;
 
-            return;
-        }
+		updateImageTransform();
+	}
 
-        // ========================================================
-        // GET MAKER REJECTION STATUS
-        // ========================================================
+	// ============================================================
+	// SAFE STRING
+	// ============================================================
 
-        boolean makerRejected =
-                processingService.isMakerRejected(
-                        batchNumber,
-                        chequeNumber);
+	private String safe(String value) {
 
-        if (!makerRejected) {
+		return value == null ? "" : value;
+	}
 
-            return;
-        }
+	// ============================================================
+	// ERROR MESSAGE
+	// ============================================================
 
-        // ========================================================
-        // GET MAKER REASON CODE
-        // ========================================================
+	private void showError(String message) {
 
-        String reasonCode =
-                processingService.getMakerReasonCode(
-                        batchNumber,
-                        chequeNumber);
-
-        if (reasonCode == null
-                || reasonCode.trim().isEmpty()) {
-
-            makerRejectionReason.setValue(
-                    "Reason: Not specified");
-
-            makerRejectionBlock.setVisible(true);
-
-            return;
-        }
-
-        reasonCode = reasonCode.trim();
-
-        // ========================================================
-        // GET REASON DESCRIPTION
-        // ========================================================
-
-        String reasonName =
-                processingService.getMakerReasonName(
-                        reasonCode);
-
-        // ========================================================
-        // DISPLAY
-        // ========================================================
-
-        if (reasonName == null
-                || reasonName.trim().isEmpty()) {
-
-            makerRejectionReason.setValue(
-                    "Reason: "
-                            + reasonCode);
-
-        } else {
-
-            makerRejectionReason.setValue(
-                    "Reason: "
-                            + reasonName.trim());
-        }
-
-        makerRejectionBlock.setVisible(true);
-    }
-
-    // ============================================================
-    // BUILD MICR
-    // ============================================================
-
-    private String buildMicr(
-            OutwardCheque cheque) {
-
-        if (cheque == null) {
-
-            return "-";
-        }
-
-        String cityCode =
-                cheque.getCityCode();
-
-        String bankCode =
-                cheque.getBankCode();
-
-        String branchCode =
-                cheque.getBranchCode();
-
-        if (cityCode == null
-                || cityCode.trim().isEmpty()
-                || bankCode == null
-                || bankCode.trim().isEmpty()
-                || branchCode == null
-                || branchCode.trim().isEmpty()) {
-
-            return "-";
-        }
-
-        return cityCode.trim()
-                + bankCode.trim()
-                + branchCode.trim();
-    }
-
-    // ============================================================
-    // CBS VALIDATION
-    // ============================================================
-
-    private void validateCbs(
-            OutwardCheque cheque) {
-
-        if (cheque == null) {
-
-            return;
-        }
-
-        cbsResult =
-                processingService.validateCbsAccount(
-                        cheque.getDrawerAccountNumber());
-
-        // ========================================================
-        // CBS PASS
-        // ========================================================
-
-        if ("PASS".equals(cbsResult)) {
-
-            acceptButton.setDisabled(false);
-
-            rejectButton.setDisabled(false);
-
-            sendBackButton.setDisabled(false);
-
-            accountVerificationIcon.setValue("✓");
-
-            accountVerificationMessage.setValue(
-                    "CBS Verified");
-
-            accountVerificationReason.setVisible(false);
-
-            return;
-        }
-
-        // ========================================================
-        // CBS FAILURE
-        // ========================================================
-
-        acceptButton.setDisabled(true);
-
-        rejectButton.setDisabled(false);
-
-        sendBackButton.setDisabled(true);
-
-        accountVerificationIcon.setValue("✕");
-
-        accountVerificationMessage.setValue(
-                "CBS Validation Failed");
-
-        accountVerificationReason.setValue(
-                processingService
-                        .getCbsValidationMessage(
-                                cbsResult));
-
-        accountVerificationReason.setVisible(true);
-    }
-
-    // ============================================================
-    // VALUE OR DASH
-    // ============================================================
-
-    private String valueOrDash(
-            String value) {
-
-        if (value == null
-                || value.trim().isEmpty()) {
-
-            return "-";
-        }
-
-        return value;
-    }
-
-    // ============================================================
-    // SELECT ACTION
-    // ============================================================
-
-    private void selectAction(
-            String action) {
-
-        selectedAction = action;
-
-        // ========================================================
-        // ACCEPT
-        // ========================================================
-
-        if ("ACCEPT".equalsIgnoreCase(action)) {
-
-            reasonRow.setVisible(false);
-
-            reasonCombobox.getItems().clear();
-
-            reasonCombobox.setSelectedItem(null);
-
-            saveNextButton.setDisabled(
-                    !"PASS".equalsIgnoreCase(
-                            cbsResult));
-
-            return;
-        }
-
-        // ========================================================
-        // REJECT / SEND BACK
-        // ========================================================
-
-        reasonRow.setVisible(true);
-
-        loadReasonsForAction(action);
-
-        saveNextButton.setDisabled(true);
-    }
-
-    // ============================================================
-    // LOAD REASONS FOR ACTION
-    // ============================================================
-
-    private void loadReasonsForAction(
-            String action) {
-
-        reasonCombobox.getItems().clear();
-
-        reasonCombobox.setSelectedItem(null);
-
-        List<ReturnReason> reasons =
-                processingService.getReturnReasons(
-                        action);
-
-        if (reasons == null
-                || reasons.isEmpty()) {
-
-            return;
-        }
-
-        for (ReturnReason reason : reasons) {
-
-            if (reason == null) {
-
-                continue;
-            }
-
-            Comboitem item =
-                    reasonCombobox.appendItem(
-                            reason.getReasonName());
-
-            /*
-             * Store reason CODE as the Comboitem value.
-             *
-             * Example:
-             *
-             * ACCOUNT_DETAILS_MISMATCH
-             *
-             * NOT numeric ID.
-             */
-
-            item.setValue(
-                    reason.getReasonCode());
-        }
-    }
-
-    // ============================================================
-    // UPDATE SAVE BUTTON
-    // ============================================================
-
-    private void updateSaveNextButton() {
-
-        if (selectedAction == null
-                || selectedAction.trim().isEmpty()) {
-
-            saveNextButton.setDisabled(true);
-
-            return;
-        }
-
-        // ========================================================
-        // ACCEPT
-        // ========================================================
-
-        if ("ACCEPT".equalsIgnoreCase(
-                selectedAction)) {
-
-            saveNextButton.setDisabled(
-                    !"PASS".equalsIgnoreCase(
-                            cbsResult));
-
-            return;
-        }
-
-        // ========================================================
-        // REJECT / SEND BACK
-        // ========================================================
-
-        if ("REJECT".equalsIgnoreCase(
-                selectedAction)
-                || "SEND_BACK".equalsIgnoreCase(
-                        selectedAction)) {
-
-            saveNextButton.setDisabled(
-                    reasonCombobox
-                            .getSelectedItem() == null);
-
-            return;
-        }
-
-        saveNextButton.setDisabled(true);
-    }
-
-    // ============================================================
-    // BACK TO QUEUE
-    // ============================================================
-
-    private void goBackToQueue() {
-
-        String url =
-                "/zul/outward/outward-checker/batchesQueue.zul";
-
-        Executions.sendRedirect(url);
-    }
-
-    // ============================================================
-    // CONFIRM ACTION
-    // ============================================================
-
-    private void confirmAction(
-            String action) {
-
-        String message;
-
-        if ("ACCEPT".equalsIgnoreCase(action)) {
-
-            message =
-                    "Are you sure you want to ACCEPT this cheque?";
-
-        } else if ("REJECT".equalsIgnoreCase(action)) {
-
-            message =
-                    "Are you sure you want to REJECT this cheque?";
-
-        } else if ("SEND_BACK".equalsIgnoreCase(action)) {
-
-            message =
-                    "Are you sure you want to SEND BACK this cheque to Maker?";
-
-        } else {
-
-            return;
-        }
-
-        Messagebox.show(
-                message,
-                "Confirm Action",
-                Messagebox.YES | Messagebox.NO,
-                Messagebox.QUESTION,
-                event -> {
-
-                    if ("onYes".equals(event.getName())) {
-
-                        selectAction(action);
-                    }
-                });
-    }
+		Clients.showNotification(
+				message,
+				Clients.NOTIFICATION_TYPE_ERROR,
+				null,
+				"top_center",
+				3000);
+	}
 }

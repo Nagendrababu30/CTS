@@ -9,6 +9,7 @@ import java.util.List;
 import javax.xml.stream.XMLInputFactory;
 
 import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
 import org.zkoss.zk.ui.event.Events;
@@ -110,9 +111,16 @@ public class SessionManagementController
         ApplicationConfiguration appConfig =
                 ApplicationConfiguration.of();
 
+        String webAppRoot = (Executions.getCurrent() != null && Executions.getCurrent().getDesktop() != null)
+                ? Executions.getCurrent().getDesktop().getWebApp().getRealPath("/")
+                : "";
+        String inwardRoot = appConfig.getInwardRootPath();
+        Path rootPath = (inwardRoot != null && Path.of(inwardRoot).isAbsolute())
+                ? Path.of(inwardRoot)
+                : Path.of(webAppRoot, inwardRoot != null ? inwardRoot : "inward-files");
+
         FileConfiguration fileConfig =
-                FileConfiguration.of(
-                        Path.of(appConfig.getInwardRootPath()));
+                FileConfiguration.of(rootPath);
 
         int threadPoolSize =
                 appConfig.getFileProcessingThreadPoolSize();

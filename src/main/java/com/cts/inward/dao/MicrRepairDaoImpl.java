@@ -6,7 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.cts.inward.config.ConnectionPool;
 import com.cts.inward.dto.ReturnReasonDto;
@@ -323,6 +325,54 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
         return null;
     }
 
+    @Override
+    public Map<String, String> getCompletedRepairedMicrs(
+            List<String> chequeNumbers) {
+
+        Map<String, String> map = new HashMap<>();
+        if (chequeNumbers == null || chequeNumbers.isEmpty()) {
+            return map;
+        }
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT DISTINCT ON (cheque_no) cheque_no, new_value "
+                        + "FROM public.inward_micr_repair_history "
+                        + "WHERE cheque_no IN (");
+        int count = 0;
+        for (String cn : chequeNumbers) {
+            if (cn != null && !cn.trim().isEmpty()) {
+                if (count > 0) sql.append(",");
+                sql.append("?");
+                count++;
+            }
+        }
+        sql.append(") ORDER BY cheque_no, micr_repair_id DESC");
+
+        if (count == 0) return map;
+
+        try (Connection conn = ConnectionPool.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            int idx = 1;
+            for (String cn : chequeNumbers) {
+                if (cn != null && !cn.trim().isEmpty()) {
+                    ps.setString(idx++, cn.trim());
+                }
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String chq = rs.getString("cheque_no");
+                    String val = rs.getString("new_value");
+                    if (chq != null && val != null) {
+                        map.put(chq.trim(), val.trim());
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to batch fetch completed repaired MICRs", e);
+        }
+        return map;
+    }
+
     // =========================================================
     // Get Latest Cheque Status
     // =========================================================
@@ -375,6 +425,54 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
         return null;
     }
 
+    @Override
+    public Map<String, String> getLatestChequeStatuses(
+            List<String> chequeNumbers) {
+
+        Map<String, String> map = new HashMap<>();
+        if (chequeNumbers == null || chequeNumbers.isEmpty()) {
+            return map;
+        }
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT DISTINCT ON (cheque_number) cheque_number, status "
+                        + "FROM public.inward_cheque_status_history "
+                        + "WHERE cheque_number IN (");
+        int count = 0;
+        for (String cn : chequeNumbers) {
+            if (cn != null && !cn.trim().isEmpty()) {
+                if (count > 0) sql.append(",");
+                sql.append("?");
+                count++;
+            }
+        }
+        sql.append(") ORDER BY cheque_number, status_history_id DESC");
+
+        if (count == 0) return map;
+
+        try (Connection conn = ConnectionPool.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            int idx = 1;
+            for (String cn : chequeNumbers) {
+                if (cn != null && !cn.trim().isEmpty()) {
+                    ps.setString(idx++, cn.trim());
+                }
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String chq = rs.getString("cheque_number");
+                    String st = rs.getString("status");
+                    if (chq != null && st != null) {
+                        map.put(chq.trim(), st.trim());
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to batch fetch latest cheque statuses", e);
+        }
+        return map;
+    }
+
     // =========================================================
     // Get Latest Cheque Return Reason
     // =========================================================
@@ -425,6 +523,54 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
         }
 
         return null;
+    }
+
+    @Override
+    public Map<String, String> getLatestChequeReturnReasons(
+            List<String> chequeNumbers) {
+
+        Map<String, String> map = new HashMap<>();
+        if (chequeNumbers == null || chequeNumbers.isEmpty()) {
+            return map;
+        }
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT DISTINCT ON (cheque_number) cheque_number, return_reason_code "
+                        + "FROM public.inward_cheque_status_history "
+                        + "WHERE cheque_number IN (");
+        int count = 0;
+        for (String cn : chequeNumbers) {
+            if (cn != null && !cn.trim().isEmpty()) {
+                if (count > 0) sql.append(",");
+                sql.append("?");
+                count++;
+            }
+        }
+        sql.append(") ORDER BY cheque_number, status_history_id DESC");
+
+        if (count == 0) return map;
+
+        try (Connection conn = ConnectionPool.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            int idx = 1;
+            for (String cn : chequeNumbers) {
+                if (cn != null && !cn.trim().isEmpty()) {
+                    ps.setString(idx++, cn.trim());
+                }
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String chq = rs.getString("cheque_number");
+                    String reason = rs.getString("return_reason_code");
+                    if (chq != null && reason != null) {
+                        map.put(chq.trim(), reason.trim());
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to batch fetch latest cheque return reasons", e);
+        }
+        return map;
     }
 
     // =========================================================
@@ -525,14 +671,22 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
             if (code.startsWith("CR-IMG-")) {
                 String makerSql = """
                         SELECT return_reason_code
-                        FROM public.inward_cheque_status_history
-                        WHERE cheque_number = ?
-                          AND status = 'RETURN_BY_MAKER'
-                        ORDER BY status_history_id DESC
+                        FROM (
+                            SELECT return_reason_code, status_history_id AS ord
+                            FROM public.inward_cheque_status_history
+                            WHERE cheque_number = ?
+                              AND (status = 'RETURN_BY_MAKER' OR maker_action = 'RETURN_BY_MAKER')
+                            UNION ALL
+                            SELECT return_reason_code, return_id AS ord
+                            FROM public.inward_cheque_return
+                            WHERE cheque_number = ?
+                        ) sub
+                        ORDER BY ord DESC
                         """;
                 try (Connection conn = ConnectionPool.getDataSource().getConnection();
                      PreparedStatement mPs = conn.prepareStatement(makerSql)) {
                     mPs.setString(1, chequeNumber.trim());
+                    mPs.setString(2, chequeNumber.trim());
                     try (ResultSet mRs = mPs.executeQuery()) {
                         while (mRs.next()) {
                             String mCode = mRs.getString("return_reason_code");

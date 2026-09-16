@@ -2454,42 +2454,46 @@ public class BatchDetailsController
         }
     }
 
-    private byte[] resolveImageBytes(String imagePath) {
+    private void renderChequeImage(String imagePath) {
+        if (chequeImage == null) return;
         if (imagePath == null || imagePath.trim().isEmpty()) {
-            return null;
+            chequeImage.setContent((org.zkoss.image.AImage) null);
+            chequeImage.setSrc("");
+            chequeImage.setVisible(false);
+            if (chequePreview != null) {
+                chequePreview.setVisible(true);
+            }
+            return;
         }
+
         try {
-            java.io.File file = new java.io.File(imagePath);
+            String realPath = (org.zkoss.zk.ui.Executions.getCurrent() != null && org.zkoss.zk.ui.Executions.getCurrent().getDesktop() != null)
+                    ? org.zkoss.zk.ui.Executions.getCurrent().getDesktop().getWebApp().getRealPath(imagePath)
+                    : null;
+            java.io.File file = (realPath != null) ? new java.io.File(realPath) : new java.io.File(imagePath);
             if (file.exists() && file.isFile()) {
-                return java.nio.file.Files.readAllBytes(file.toPath());
-            }
-
-            java.nio.file.Path path = java.nio.file.Path.of(imagePath);
-            if (java.nio.file.Files.exists(path) && java.nio.file.Files.isRegularFile(path)) {
-                return java.nio.file.Files.readAllBytes(path);
-            }
-
-            try {
-                String root = com.cts.inward.config.ApplicationConfiguration.of().getInwardRootPath();
-                if (root != null && !root.trim().isEmpty()) {
-                    java.nio.file.Path resolved = java.nio.file.Path.of(root).resolve(imagePath);
-                    if (java.nio.file.Files.exists(resolved) && java.nio.file.Files.isRegularFile(resolved)) {
-                        return java.nio.file.Files.readAllBytes(resolved);
-                    }
+                chequeImage.setContent(new org.zkoss.image.AImage(file));
+                chequeImage.setVisible(true);
+                if (chequePreview != null) {
+                    chequePreview.setVisible(false);
                 }
-            } catch (Exception ignored) {}
-
-            if (imagePath.contains("inward-files")) {
-                String sub = imagePath.substring(imagePath.indexOf("inward-files"));
-                java.io.File wsFile = new java.io.File("C:/JavaPrograms/eclipse workspace iispl/CTS/" + sub);
-                if (wsFile.exists() && wsFile.isFile()) {
-                    return java.nio.file.Files.readAllBytes(wsFile.toPath());
+            } else {
+                String webSrc = imagePath.startsWith("/") ? imagePath : "/" + imagePath;
+                chequeImage.setContent((org.zkoss.image.AImage) null);
+                chequeImage.setSrc(webSrc.replace("\\", "/"));
+                chequeImage.setVisible(true);
+                if (chequePreview != null) {
+                    chequePreview.setVisible(false);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
+            chequeImage.setContent((org.zkoss.image.AImage) null);
+            chequeImage.setVisible(false);
+            if (chequePreview != null) {
+                chequePreview.setVisible(true);
+            }
         }
-        return null;
     }
 
     private void showFrontImage() {
@@ -2507,30 +2511,7 @@ public class BatchDetailsController
             toggleImageButton.setLabel("View Back");
         }
 
-        byte[] bytes = resolveImageBytes(currentFrontImagePath);
-        if (bytes != null && bytes.length > 0) {
-            try {
-                chequeImage.setContent(new org.zkoss.image.AImage("front.jpg", bytes));
-                chequeImage.setVisible(true);
-                if (chequePreview != null) {
-                    chequePreview.setVisible(false);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                chequeImage.setContent((org.zkoss.image.AImage) null);
-                chequeImage.setVisible(false);
-                if (chequePreview != null) {
-                    chequePreview.setVisible(true);
-                }
-            }
-        } else {
-            chequeImage.setContent((org.zkoss.image.AImage) null);
-            chequeImage.setVisible(false);
-            if (chequePreview != null) {
-                chequePreview.setVisible(true);
-            }
-        }
-
+        renderChequeImage(currentFrontImagePath);
         applyImageStyle();
     }
 
@@ -2549,30 +2530,7 @@ public class BatchDetailsController
             toggleImageButton.setLabel("View Front");
         }
 
-        byte[] bytes = resolveImageBytes(currentBackImagePath);
-        if (bytes != null && bytes.length > 0) {
-            try {
-                chequeImage.setContent(new org.zkoss.image.AImage("back.jpg", bytes));
-                chequeImage.setVisible(true);
-                if (chequePreview != null) {
-                    chequePreview.setVisible(false);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                chequeImage.setContent((org.zkoss.image.AImage) null);
-                chequeImage.setVisible(false);
-                if (chequePreview != null) {
-                    chequePreview.setVisible(true);
-                }
-            }
-        } else {
-            chequeImage.setContent((org.zkoss.image.AImage) null);
-            chequeImage.setVisible(false);
-            if (chequePreview != null) {
-                chequePreview.setVisible(true);
-            }
-        }
-
+        renderChequeImage(currentBackImagePath);
         applyImageStyle();
     }
 

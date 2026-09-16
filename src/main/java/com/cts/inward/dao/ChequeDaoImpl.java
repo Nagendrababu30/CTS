@@ -592,14 +592,22 @@ public class ChequeDaoImpl implements ChequeDao {
             if (code.startsWith("CR-IMG-")) {
                 String makerSql = """
                         SELECT return_reason_code
-                        FROM public.inward_cheque_status_history
-                        WHERE cheque_number = ?
-                          AND status = 'RETURN_BY_MAKER'
-                        ORDER BY status_history_id DESC
+                        FROM (
+                            SELECT return_reason_code, status_history_id AS ord
+                            FROM public.inward_cheque_status_history
+                            WHERE cheque_number = ?
+                              AND (status = 'RETURN_BY_MAKER' OR maker_action = 'RETURN_BY_MAKER')
+                            UNION ALL
+                            SELECT return_reason_code, return_id AS ord
+                            FROM public.inward_cheque_return
+                            WHERE cheque_number = ?
+                        ) sub
+                        ORDER BY ord DESC
                         """;
                 try (Connection conn = dataSource.getConnection();
                      PreparedStatement mPs = conn.prepareStatement(makerSql)) {
                     mPs.setString(1, chequeNumber.trim());
+                    mPs.setString(2, chequeNumber.trim());
                     try (ResultSet mRs = mPs.executeQuery()) {
                         while (mRs.next()) {
                             String mCode = mRs.getString("return_reason_code");
@@ -657,14 +665,22 @@ public class ChequeDaoImpl implements ChequeDao {
             if (code.startsWith("CR-IMG-")) {
                 String makerSql = """
                         SELECT return_reason_code
-                        FROM public.inward_cheque_status_history
-                        WHERE cheque_number = ?
-                          AND status = 'RETURN_BY_MAKER'
-                        ORDER BY status_history_id DESC
+                        FROM (
+                            SELECT return_reason_code, status_history_id AS ord
+                            FROM public.inward_cheque_status_history
+                            WHERE cheque_number = ?
+                              AND (status = 'RETURN_BY_MAKER' OR maker_action = 'RETURN_BY_MAKER')
+                            UNION ALL
+                            SELECT return_reason_code, return_id AS ord
+                            FROM public.inward_cheque_return
+                            WHERE cheque_number = ?
+                        ) sub
+                        ORDER BY ord DESC
                         """;
                 try (Connection conn = dataSource.getConnection();
                      PreparedStatement mPs = conn.prepareStatement(makerSql)) {
                     mPs.setString(1, chequeNumber.trim());
+                    mPs.setString(2, chequeNumber.trim());
                     try (ResultSet mRs = mPs.executeQuery()) {
                         while (mRs.next()) {
                             String mCode = mRs.getString("return_reason_code");

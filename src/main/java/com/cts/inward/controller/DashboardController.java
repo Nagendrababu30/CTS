@@ -17,6 +17,7 @@ import org.zkoss.zul.Rows;
 
 import com.cts.admin.model.User;
 import com.cts.inward.dto.DashboardBatchDto;
+import com.cts.inward.dto.MicrComparisonDto;
 import com.cts.inward.service.DashboardService;
 import com.cts.inward.service.DashboardServiceImpl;
 import com.cts.inward.service.MicrRepairService;
@@ -888,6 +889,42 @@ public class DashboardController
      * Lock & Validate
      * -------------------------------------------------------------------------
      */
+    private static class BatchRepairStatus {
+        final boolean needsMicrRepair;
+        final int nextRepairIndex;
+
+        BatchRepairStatus(boolean needsMicrRepair, int nextRepairIndex) {
+            this.needsMicrRepair = needsMicrRepair;
+            this.nextRepairIndex = nextRepairIndex;
+        }
+    }
+
+    private BatchRepairStatus checkBatchRepairStatus(long batchId) {
+        List<MicrComparisonDto> comparisons =
+                micrRepairService.compareBatch(batchId);
+
+        boolean needsRepair = false;
+        int firstIndex = -1;
+
+        if (comparisons != null) {
+            for (int i = 0; i < comparisons.size(); i++) {
+                MicrComparisonDto c = comparisons.get(i);
+                if (c != null && c.isNeedsMicrRepair()) {
+                    needsRepair = true;
+                    if (firstIndex < 0) {
+                        firstIndex = i;
+                    }
+                }
+            }
+        }
+        return new BatchRepairStatus(needsRepair, firstIndex);
+    }
+
+    /*
+     * -----------------------------------------------------------------
+     * 2. Run NPCI vs OCR MICR validation
+     * -----------------------------------------------------------------
+     */
     private void lockAndValidate(
             long batchId) {
 
@@ -923,20 +960,18 @@ public class DashboardController
 
         /*
          * -----------------------------------------------------------------
-         * 2. Run NPCI vs OCR MICR validation
+         * 2. Run NPCI vs OCR MICR validation (Single check)
          * -----------------------------------------------------------------
          */
-        boolean needsMicrRepair =
-                micrRepairService
-                        .needsMicrRepair(
-                                batchId);
+        BatchRepairStatus repairStatus =
+                checkBatchRepairStatus(batchId);
 
         /*
          * -----------------------------------------------------------------
          * 3. MICR REPAIR required
          * -----------------------------------------------------------------
          */
-        if (needsMicrRepair) {
+        if (repairStatus.needsMicrRepair) {
 
             boolean updated =
                     dashboardService
@@ -955,12 +990,7 @@ public class DashboardController
                 return;
             }
 
-            int nextRepairIndex =
-                    micrRepairService
-                            .getNextRepairIndex(
-                                    batchId);
-
-            if (nextRepairIndex < 0) {
+            if (repairStatus.nextRepairIndex < 0) {
 
                 showError(
                         "MICR validation indicates repair is needed, "
@@ -971,7 +1001,7 @@ public class DashboardController
 
             openMicrRepair(
                     batchId,
-                    nextRepairIndex);
+                    repairStatus.nextRepairIndex);
 
             return;
         }
@@ -1011,26 +1041,16 @@ public class DashboardController
     private void openBatch(
             long batchId) {
 
-        boolean needsMicrRepair =
-                micrRepairService
-                        .needsMicrRepair(
-                                batchId);
+        BatchRepairStatus repairStatus =
+                checkBatchRepairStatus(batchId);
 
-        if (needsMicrRepair) {
+        if (repairStatus.needsMicrRepair && repairStatus.nextRepairIndex >= 0) {
 
-            int nextRepairIndex =
-                    micrRepairService
-                            .getNextRepairIndex(
-                                    batchId);
+            openMicrRepair(
+                    batchId,
+                    repairStatus.nextRepairIndex);
 
-            if (nextRepairIndex >= 0) {
-
-                openMicrRepair(
-                        batchId,
-                        nextRepairIndex);
-
-                return;
-            }
+            return;
         }
 
         openDataEntry(
@@ -1117,23 +1137,14 @@ public class DashboardController
     private void openReturnToMakerBatch(
             long batchId) {
 
-        boolean needsMicrRepair =
-                micrRepairService
-                        .needsMicrRepair(
-                                batchId);
+        BatchRepairStatus repairStatus =
+                checkBatchRepairStatus(batchId);
 
-        if (needsMicrRepair) {
-            int nextRepairIndex =
-                    micrRepairService
-                            .getNextRepairIndex(
-                                    batchId);
-
-            if (nextRepairIndex >= 0) {
-                openMicrRepair(
-                        batchId,
-                        nextRepairIndex);
-                return;
-            }
+        if (repairStatus.needsMicrRepair && repairStatus.nextRepairIndex >= 0) {
+            openMicrRepair(
+                    batchId,
+                    repairStatus.nextRepairIndex);
+            return;
         }
 
         openDataEntry(

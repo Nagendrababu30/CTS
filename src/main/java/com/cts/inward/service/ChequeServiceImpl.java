@@ -70,6 +70,13 @@ public class ChequeServiceImpl implements ChequeService {
 		chequeDao.saveDataEntryCorrections(chequeNumber, batchId, accountNumber, amount, chequeDate, userId);
 	}
 
+	@Override
+	public void saveDataEntryCorrections(String chequeNumber, long batchId, String correctedChequeNumber, String accountNumber,
+			BigDecimal amount, LocalDate chequeDate, long userId) {
+
+		chequeDao.saveDataEntryCorrections(chequeNumber, batchId, correctedChequeNumber, accountNumber, amount, chequeDate, userId);
+	}
+
 	/*
 	 * Cheque status is saved into inward_cheque_status_history.
 	 */
@@ -77,5 +84,20 @@ public class ChequeServiceImpl implements ChequeService {
 	public void updateChequeStatus(String chequeNumber, String status, long userId) {
 
 		chequeDao.updateChequeStatus(chequeNumber, status, userId);
+	}
+
+	@Override
+	public java.util.Map<String, String> getChequeReturnInfo(String chequeNumber) {
+		return chequeDao.getChequeReturnInfo(chequeNumber);
+	}
+
+	@Override
+	public List<com.cts.inward.dto.ReturnReasonDto> getDataEntryReturnReasons() {
+		return chequeDao.getDataEntryReturnReasons();
+	}
+
+	@Override
+	public boolean saveMakerDataEntryReturn(String chequeNumber, List<String> reasonCodes, String remarks, Long userId) {
+		return chequeDao.saveMakerDataEntryReturn(chequeNumber, reasonCodes, remarks, userId);
 	}
 }

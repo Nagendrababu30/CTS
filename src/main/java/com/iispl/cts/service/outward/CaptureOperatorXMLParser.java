@@ -1,3 +1,4 @@
+
 package com.iispl.cts.service.outward;
 
 import java.io.File;
@@ -479,9 +480,7 @@ public class CaptureOperatorXMLParser {
         String imageValue = value.trim();
 
         // -----------------------------------------------------
-        // IMPORTANT:
-        // If XML contains an HTTP/HTTPS URL,
-        // keep it exactly as a URL.
+        // HTTP / HTTPS URL
         // -----------------------------------------------------
 
         if (imageValue.startsWith("http://")
@@ -491,24 +490,81 @@ public class CaptureOperatorXMLParser {
         }
 
         // -----------------------------------------------------
-        // If XML contains absolute local path
+        // Normalize Windows path separators
         // -----------------------------------------------------
 
-        File image = new File(imageValue);
+        imageValue = imageValue.replace("\\", "/");
 
-        if (image.isAbsolute()) {
-            return image.getAbsolutePath();
+        // -----------------------------------------------------
+        // Remove leading slash(es)
+        // -----------------------------------------------------
+
+        while (imageValue.startsWith("/")) {
+            imageValue = imageValue.substring(1);
         }
 
         // -----------------------------------------------------
-        // Otherwise image is inside batch folder
+        // Actual project web path:
+        //
+        // src/main/webapp/zul/outward/images/Batch1/
+        //
+        // XML example:
+        // outward/Images/Batch1/000101_front.png
+        //
+        // Result:
+        // /zul/outward/images/Batch1/000101_front.png
         // -----------------------------------------------------
 
-        image = new File(
-                batchFolder,
-                imageValue);
+        if (imageValue.matches("(?i)^outward/images/.*")) {
 
-        return image.getAbsolutePath();
+            imageValue = imageValue.replaceFirst(
+                    "(?i)^outward/images/",
+                    "zul/outward/images/");
+        }
+
+        else if (imageValue.matches("(?i)^outward/Images/.*")) {
+
+            imageValue = imageValue.replaceFirst(
+                    "(?i)^outward/Images/",
+                    "zul/outward/images/");
+        }
+
+        // -----------------------------------------------------
+        // XML may contain only:
+        //
+        // Batch1/000101_front.png
+        //
+        // -----------------------------------------------------
+
+        else if (imageValue.matches("(?i)^Batch1/.*")) {
+
+            imageValue =
+                    "zul/outward/images/" + imageValue;
+        }
+
+        // -----------------------------------------------------
+        // If the XML already contains the complete web path:
+        //
+        // zul/outward/images/Batch1/file.png
+        //
+        // nothing else needs to be added.
+        // -----------------------------------------------------
+
+        else if (!imageValue.matches(
+                "(?i)^zul/outward/images/.*")) {
+
+            /*
+             * For any other relative image path, keep the
+             * original value instead of guessing a filesystem
+             * location.
+             */
+        }
+
+        // -----------------------------------------------------
+        // Return WEB application path
+        // -----------------------------------------------------
+
+        return "/" + imageValue;
     }
 
     // =========================================================
@@ -533,3 +589,4 @@ public class CaptureOperatorXMLParser {
         return false;
     }
 }
+

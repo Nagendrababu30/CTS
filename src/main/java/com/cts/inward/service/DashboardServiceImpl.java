@@ -44,4 +44,9 @@ public class DashboardServiceImpl
                 batchStatus,
                 userId);
     }
+
+    @Override
+    public List<String> getReturnedChequeReasons(Long batchId) {
+        return dashboardDao.getReturnedChequeReasons(batchId);
+    }
 }

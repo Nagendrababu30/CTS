@@ -63,16 +63,32 @@ public class FileProcessingExecutorImpl
          *  - PIBF can safely look up inward_cheque rows
          */
         executorService.submit(() -> {
+            boolean pxfFailed = false;
             for (String filePath : orderedFilePaths) {
+                if (pxfFailed) {
+                    System.err.println(
+                            "[FileProcessingExecutor] Skipping " + filePath
+                            + " because PXF failed for this batch.");
+                    break;
+                }
                 try {
                     inwardIngestionService.processFile(filePath);
                 } catch (Exception e) {
                     System.err.println(
                             "[FileProcessingExecutor] ERROR processing file: "
-                            + filePath
-                            + " — stopping batch, remaining files will not be processed.");
+                            + filePath);
                     e.printStackTrace();
-                    break; // stop processing remaining files in this batch
+
+                    boolean isPxf = filePath.toLowerCase().contains("pxf");
+                    if (isPxf) {
+                        pxfFailed = true;
+                        System.err.println(
+                                "[FileProcessingExecutor] PXF failed. Aborting remaining files for this batch.");
+                        break;
+                    } else {
+                        System.err.println(
+                                "[FileProcessingExecutor] Non-PXF file failed. Continuing with remaining batch files.");
+                    }
                 }
             }
         });

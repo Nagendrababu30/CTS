@@ -97,10 +97,19 @@ public class BatchDaoImpl implements BatchDao {
 	public int getDataEntryPendingCount(long batchId) {
 
 		String sql = "SELECT COUNT(*) " + "FROM public.inward_cheque c " + "LEFT JOIN LATERAL ( "
-				+ "    SELECT h.status " + "    FROM public.inward_cheque_status_history h "
+				+ "    SELECT h.status, h.return_reason_code " + "    FROM public.inward_cheque_status_history h "
 				+ "    WHERE h.cheque_number = c.cheque_number " + "    ORDER BY h.status_history_id DESC "
 				+ "    LIMIT 1 " + ") latest ON TRUE " + "WHERE c.batch_id = ? "
-				+ "AND COALESCE(latest.status, '') NOT IN " + "('DATA_ENTRY_COMPLETED', 'RETURN_BY_MAKER')";
+				+ "AND COALESCE(latest.status, '') NOT IN ('DATA_ENTRY_COMPLETED', 'RETURN_BY_MAKER', 'ACCEPT', 'REJECT') "
+				+ "AND NOT ( "
+				+ "    latest.status = 'RETURN_TO_MAKER' "
+				+ "    AND ( "
+				+ "        latest.return_reason_code LIKE 'CR-MICR-%' "
+				+ "        OR latest.return_reason_code LIKE 'CR-IMG-%' "
+				+ "        OR latest.return_reason_code LIKE 'MR-MICR-%' "
+				+ "        OR latest.return_reason_code LIKE 'MICR_%' "
+				+ "    ) "
+				+ ") ";
 
 		try (Connection connection = ConnectionPool.getDataSource().getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -139,25 +148,29 @@ public class BatchDaoImpl implements BatchDao {
 			// ---------------------------------------------------------
 
 			String checkSql = """
-					SELECT
-					    COUNT(*) AS eligible_count,
-					    COUNT(*) FILTER (
-					        WHERE latest.status = 'DATA_ENTRY_COMPLETED'
-					    ) AS completed_count
+					SELECT COUNT(*) AS pending_count
 					FROM public.inward_cheque c
 					LEFT JOIN LATERAL (
-					    SELECT h.status
+					    SELECT h.status, h.return_reason_code
 					    FROM public.inward_cheque_status_history h
 					    WHERE h.cheque_number = c.cheque_number
 					    ORDER BY h.status_history_id DESC
 					    LIMIT 1
 					) latest ON TRUE
 					WHERE c.batch_id = ?
-					  AND COALESCE(latest.status, '') <> 'RETURN_BY_MAKER'
+					  AND COALESCE(latest.status, '') NOT IN ('DATA_ENTRY_COMPLETED', 'RETURN_BY_MAKER', 'ACCEPT', 'REJECT')
+					  AND NOT (
+					      latest.status = 'RETURN_TO_MAKER'
+					      AND (
+					          latest.return_reason_code LIKE 'CR-MICR-%'
+					          OR latest.return_reason_code LIKE 'CR-IMG-%'
+					          OR latest.return_reason_code LIKE 'MR-MICR-%'
+					          OR latest.return_reason_code LIKE 'MICR_%'
+					      )
+					  )
 					""";
 
-			int eligibleCount = 0;
-			int completedCount = 0;
+			int pendingCount = 0;
 
 			try (PreparedStatement statement = connection.prepareStatement(checkSql)) {
 
@@ -167,9 +180,7 @@ public class BatchDaoImpl implements BatchDao {
 
 					if (resultSet.next()) {
 
-						eligibleCount = resultSet.getInt("eligible_count");
-
-						completedCount = resultSet.getInt("completed_count");
+						pendingCount = resultSet.getInt("pending_count");
 					}
 				}
 			}
@@ -178,7 +189,7 @@ public class BatchDaoImpl implements BatchDao {
 			// 2. Do not complete batch if any eligible cheque is pending
 			// ---------------------------------------------------------
 
-			if (eligibleCount == 0 || eligibleCount != completedCount) {
+			if (pendingCount != 0) {
 
 				connection.rollback();
 
@@ -259,7 +270,7 @@ public class BatchDaoImpl implements BatchDao {
 		String sql = "SELECT " + "b.batch_id, " + "b.file_id, " + "b.presenting_bank_name, " + "b.total_cheques "
 				+ "FROM public.inward_batch b " + "INNER JOIN LATERAL ( " + "    SELECT h.batch_status "
 				+ "    FROM public.inward_batch_history h " + "    WHERE h.batch_id = b.batch_id "
-				+ "    ORDER BY h.changed_on DESC " + "    LIMIT 1 " + ") latest ON TRUE "
+				+ "    ORDER BY h.changed_on DESC NULLS LAST, h.batch_history_id DESC " + "    LIMIT 1 " + ") latest ON TRUE "
 				+ "WHERE latest.batch_status = ? " + "ORDER BY b.batch_id";
 
 		List<NpciBatchData> batches = new ArrayList<>();
@@ -290,10 +301,37 @@ public class BatchDaoImpl implements BatchDao {
 	@Override
 	public long getBatchIdByFileName(String batchName) {
 
+		if (batchName == null || batchName.isBlank()) {
+			return -1L;
+		}
+
 		/*
-		 * Find the batch_id by joining inward_batch with inward_file
+		 * 1. Extract the numeric batch number directly from batchName.
+		 * e.g. "BATCH003" -> 3, "BATCH010" -> 10, "3" -> 3
+		 * If verified in inward_batch, return it immediately.
+		 */
+		String digits = batchName.replaceAll("\\D+", "");
+		if (!digits.isEmpty()) {
+			try {
+				long parsedBatchId = Long.parseLong(digits);
+				String checkSql = "SELECT batch_id FROM inward_batch WHERE batch_id = ?";
+				try (Connection connection = dataSource.getConnection();
+				     PreparedStatement statement = connection.prepareStatement(checkSql)) {
+					statement.setLong(1, parsedBatchId);
+					try (ResultSet resultSet = statement.executeQuery()) {
+						if (resultSet.next()) {
+							return resultSet.getLong("batch_id");
+						}
+					}
+				}
+			} catch (Exception e) {
+				// Fall through to secondary lookup
+			}
+		}
+
+		/*
+		 * 2. Fallback: Find the batch_id by joining inward_batch with inward_file
 		 * where the PXF file name starts with the given batch name.
-		 *
 		 * e.g. batchName = "BATCH001" matches file_name = "BATCH001.xml"
 		 */
 		String sql =
@@ -506,7 +544,7 @@ public class BatchDaoImpl implements BatchDao {
 				    SELECT h.batch_status
 				    FROM public.inward_batch_history h
 				    WHERE h.batch_id = b.batch_id
-				    ORDER BY h.changed_on DESC, h.batch_history_id DESC
+				    ORDER BY h.changed_on DESC NULLS LAST, h.batch_history_id DESC
 				    LIMIT 1
 				) latest ON TRUE
 				LEFT JOIN LATERAL (

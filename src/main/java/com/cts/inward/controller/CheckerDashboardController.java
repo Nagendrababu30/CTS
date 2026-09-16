@@ -380,6 +380,9 @@ public class CheckerDashboardController
         int myBatchesCount =
                 0;
 
+        int onHoldCount =
+                0;
+
 
         for (CheckerBatch batch :
                 batches) {
@@ -388,6 +391,8 @@ public class CheckerDashboardController
                 continue;
             }
 
+            boolean isOnHold = "RETURN_TO_MAKER".equalsIgnoreCase(batch.getBatchStatus())
+                    || "ON_HOLD".equalsIgnoreCase(batch.getBatchStatus());
 
             /*
              * AVAILABLE
@@ -401,6 +406,8 @@ public class CheckerDashboardController
                 availableCountValue++;
             }
 
+                    availableCountValue++;
+                }
 
             /*
              * MY BATCHES
@@ -413,7 +420,8 @@ public class CheckerDashboardController
                             .longValue()
                             == userId) {
 
-                myBatchesCount++;
+                    myBatchesCount++;
+                }
             }
         }
 
@@ -518,13 +526,35 @@ public class CheckerDashboardController
             else if ("MY_BATCHES".equals(
                     selectedFilter)) {
 
-                if ("LOCKED".equals(
+                boolean isOnHold = "RETURN_TO_MAKER".equalsIgnoreCase(batch.getBatchStatus())
+                        || "ON_HOLD".equalsIgnoreCase(batch.getBatchStatus());
+
+                if (!isOnHold && "LOCKED".equals(
                         batch.getLockStatus())
                         && batch.getUserId() != null
                         && batch.getUserId()
                                 .longValue()
                                 == userId) {
 
+                    filteredBatches.add(
+                            batch);
+                }
+            }
+
+
+            /*
+             * =================================================
+             * ON HOLD
+             * =================================================
+             */
+
+            else if ("ON_HOLD".equals(
+                    selectedFilter)) {
+
+                boolean isOnHold = "RETURN_TO_MAKER".equalsIgnoreCase(batch.getBatchStatus())
+                        || "ON_HOLD".equalsIgnoreCase(batch.getBatchStatus());
+
+                if (isOnHold) {
                     filteredBatches.add(
                             batch);
                 }
@@ -1056,6 +1086,11 @@ public class CheckerDashboardController
         myBatchesFilter.setSclass(
                 "filter-btn");
 
+        if (onHoldFilter != null) {
+            onHoldFilter.setSclass(
+                    "filter-btn");
+        }
+
 
         /*
          * Set active button.
@@ -1077,6 +1112,13 @@ public class CheckerDashboardController
                 selectedFilter)) {
 
             myBatchesFilter.setSclass(
+                    "filter-btn active-filter");
+        }
+
+        else if ("ON_HOLD".equals(
+                selectedFilter) && onHoldFilter != null) {
+
+            onHoldFilter.setSclass(
                     "filter-btn active-filter");
         }
     }

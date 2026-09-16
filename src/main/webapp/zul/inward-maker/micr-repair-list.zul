@@ -15,13 +15,13 @@
         self="@define(content)"
         width="100%"
         height="100%"
-        sclass="content">
+        sclass="micr-repair-content">
 
         <vlayout
             width="100%"
             height="100%"
             apply="com.cts.inward.controller.MicrRepairListController"
-            sclass="micr-repair-list-content">
+            sclass="micr-repair-layout">
 
             <label
                 value="MICR Repair"
@@ -58,7 +58,7 @@
                             width="100%"
                             mold="paging"
                             pageSize="10"
-                            sclass="micr-repair-grid">
+                            sclass="custom-grid">
 
                             <columns>
                                 <column label="Batch ID" width="20%" />

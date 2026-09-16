@@ -1,4 +1,3 @@
-
 package com.iispl.cts.dao.outward.checker;
 
 import java.sql.Connection;
@@ -95,6 +94,7 @@ public class CheckerChequeDAO {
                             rs.getDate("cheque_date");
 
                     if (chequeDate != null) {
+
                         cheque.setChequeDate(
                                 chequeDate.toLocalDate());
                     }
@@ -291,6 +291,179 @@ public class CheckerChequeDAO {
 
     /*
      * ============================================================
+     * GET RE-VERIFIED CHEQUES
+     * ============================================================
+     *
+     * Re-Verify is based ONLY on:
+     *
+     * 1. batch_number
+     * 2. original checker_id
+     * 3. checker_action = SEND_BACK
+     * 4. cheque_status = RE_VERIFIED
+     *
+     * outward_batch.batch_status is deliberately NOT used.
+     *
+     * This method returns only the cheques that were originally
+     * sent back by the current/original Checker and subsequently
+     * re-verified by Maker.
+     */
+
+    public List<OutwardCheque> getReVerifiedCheques(
+            String batchNumber,
+            long checkerUserId) {
+
+        List<OutwardCheque> cheques =
+                new ArrayList<>();
+
+        String sql =
+                "SELECT oc.batch_number, " +
+                "       oc.cheque_number, " +
+                "       oc.drawer_account_number, " +
+                "       oc.drawer_name, " +
+                "       oc.payee_account_number, " +
+                "       oc.payee_name, " +
+                "       oc.amount, " +
+                "       oc.amount_in_words, " +
+                "       oc.cheque_date, " +
+                "       oc.front_image_path, " +
+                "       oc.back_image_path, " +
+                "       oc.cheque_status, " +
+                "       oc.bank_code, " +
+                "       oc.branch_code, " +
+                "       oc.city_code, " +
+                "       oc.return_reason_id, " +
+                "       oc.checker_remarks " +
+                "FROM outward_cheque oc " +
+                "INNER JOIN cheque_processing cp " +
+                "   ON cp.batch_number = oc.batch_number " +
+                "  AND cp.cheque_number = oc.cheque_number " +
+                "WHERE oc.batch_number = ? " +
+                "AND cp.checker_id = ? " +
+                "AND UPPER(TRIM(cp.checker_action)) = 'SEND_BACK' " +
+                "AND UPPER(TRIM(oc.cheque_status)) = 'RE_VERIFIED' " +
+                "ORDER BY oc.cheque_number";
+
+        try (Connection connection =
+                     CTSStaticData.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
+
+            statement.setString(
+                    1,
+                    batchNumber);
+
+            statement.setLong(
+                    2,
+                    checkerUserId);
+
+            try (ResultSet rs =
+                         statement.executeQuery()) {
+
+                while (rs.next()) {
+
+                    OutwardCheque cheque =
+                            new OutwardCheque();
+
+                    cheque.setBatchNumber(
+                            rs.getString(
+                                    "batch_number"));
+
+                    cheque.setChequeNumber(
+                            rs.getString(
+                                    "cheque_number"));
+
+                    cheque.setDrawerAccountNumber(
+                            rs.getString(
+                                    "drawer_account_number"));
+
+                    cheque.setDrawerName(
+                            rs.getString(
+                                    "drawer_name"));
+
+                    cheque.setPayeeAccountNumber(
+                            rs.getString(
+                                    "payee_account_number"));
+
+                    cheque.setPayeeName(
+                            rs.getString(
+                                    "payee_name"));
+
+                    cheque.setAmount(
+                            rs.getBigDecimal(
+                                    "amount"));
+
+                    cheque.setAmountInWords(
+                            rs.getString(
+                                    "amount_in_words"));
+
+                    Date chequeDate =
+                            rs.getDate(
+                                    "cheque_date");
+
+                    if (chequeDate != null) {
+
+                        cheque.setChequeDate(
+                                chequeDate.toLocalDate());
+                    }
+
+                    cheque.setFrontImagePath(
+                            rs.getString(
+                                    "front_image_path"));
+
+                    cheque.setBackImagePath(
+                            rs.getString(
+                                    "back_image_path"));
+
+                    cheque.setChequeStatus(
+                            rs.getString(
+                                    "cheque_status"));
+
+                    cheque.setBankCode(
+                            rs.getString(
+                                    "bank_code"));
+
+                    cheque.setBranchCode(
+                            rs.getString(
+                                    "branch_code"));
+
+                    cheque.setCityCode(
+                            rs.getString(
+                                    "city_code"));
+
+                    Object reasonObject =
+                            rs.getObject(
+                                    "return_reason_id");
+
+                    if (reasonObject != null) {
+
+                        cheque.setReturnReasonId(
+                                ((Number) reasonObject)
+                                        .intValue());
+                    }
+
+                    cheque.setCheckerRemarks(
+                            rs.getString(
+                                    "checker_remarks"));
+
+                    cheques.add(cheque);
+                }
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            throw new RuntimeException(
+                    "Error while fetching re-verified cheques",
+                    e);
+        }
+
+        return cheques;
+    }
+
+
+    /*
+     * ============================================================
      * GET CHEQUE PROCESSING INFORMATION
      * ============================================================
      */
@@ -329,10 +502,12 @@ public class CheckerChequeDAO {
                             new ChequeProcessing();
 
                     processing.setBatchNumber(
-                            rs.getString("batch_number"));
+                            rs.getString(
+                                    "batch_number"));
 
                     processing.setChequeNumber(
-                            rs.getString("cheque_number"));
+                            rs.getString(
+                                    "cheque_number"));
 
                     Object makerId =
                             rs.getObject("maker_id");
@@ -345,7 +520,8 @@ public class CheckerChequeDAO {
                     }
 
                     processing.setMakerAction(
-                            rs.getString("maker_action"));
+                            rs.getString(
+                                    "maker_action"));
 
                     processing.setMakerReasonCode(
                             rs.getString(
@@ -949,4 +1125,3 @@ public class CheckerChequeDAO {
         return account;
     }
 }
-

@@ -33,6 +33,12 @@ public interface MicrRepairDao {
     String getLatestChequeStatus(
             String chequeNumber);
 
+    String getLatestChequeReturnReason(
+            String chequeNumber);
+
+    boolean isBatchReturnedToMaker(
+            long batchId);
+
 
     /*
      * -------------------------------------------------------------------------

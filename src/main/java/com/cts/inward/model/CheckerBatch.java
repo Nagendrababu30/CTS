@@ -9,6 +9,15 @@ public class CheckerBatch {
 	private String maker;
 	private Long userId;
 	private String lockStatus;
+	private String batchStatus;
+
+	public String getBatchStatus() {
+		return batchStatus;
+	}
+
+	public void setBatchStatus(String batchStatus) {
+		this.batchStatus = batchStatus;
+	}
 
 	public long getLockId() {
 		return lockId;

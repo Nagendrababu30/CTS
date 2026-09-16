@@ -19,8 +19,11 @@ import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Window;
 
 import com.cts.admin.model.User;
+import com.cts.inward.dao.ChequeDaoImpl;
 import com.cts.inward.dto.MicrComparisonDto;
 import com.cts.inward.dto.ReturnReasonDto;
+import com.cts.inward.service.ChequeService;
+import com.cts.inward.service.ChequeServiceImpl;
 import com.cts.inward.service.MicrRepairService;
 import com.cts.inward.service.MicrRepairServiceImpl;
 
@@ -53,6 +56,15 @@ public class MicrRepairController
     private Label chequeCounter;
 
     private Button backToList;
+
+    // =========================================================
+    // ZUL components — return reason banner
+    // =========================================================
+
+    private org.zkoss.zul.Div returnReasonBanner;
+    private Label lblReturnReason;
+    private Label lblReturnRemarks;
+    private org.zkoss.zul.Hlayout rowReturnRemarks;
 
     // =========================================================
     // ZUL components — image panel
@@ -97,6 +109,7 @@ public class MicrRepairController
     // =========================================================
 
     private MicrRepairService micrRepairService;
+    private ChequeService chequeService;
 
     private long batchId;
 
@@ -151,6 +164,11 @@ public class MicrRepairController
 
         micrRepairService =
                 new MicrRepairServiceImpl();
+
+        chequeService =
+                ChequeServiceImpl.of(ChequeDaoImpl.of());
+
+        loadLoggedInUser();
 
         String batchIdParam =
                 Executions.getCurrent()
@@ -597,7 +615,44 @@ public class MicrRepairController
             );
         }
 
+        updateReturnBanner(c.getChequeNumber());
+
         updateNavigationButtons();
+    }
+
+    // =========================================================
+    // Update Return Banner
+    // =========================================================
+
+    private void updateReturnBanner(String chqNo) {
+        if (returnReasonBanner == null) {
+            return;
+        }
+
+        if (chqNo == null || chqNo.trim().isEmpty() || chequeService == null) {
+            returnReasonBanner.setVisible(false);
+            return;
+        }
+
+        java.util.Map<String, String> returnInfo = chequeService.getChequeReturnInfo(chqNo);
+        if (returnInfo != null && "RETURN_TO_MAKER".equalsIgnoreCase(returnInfo.get("status"))) {
+            returnReasonBanner.setVisible(true);
+
+            String desc = returnInfo.get("description");
+            if (desc == null || desc.trim().isEmpty()) {
+                desc = returnInfo.get("returnReasonCode");
+            }
+            if (lblReturnReason != null) {
+                lblReturnReason.setValue(desc != null ? desc : "Return to Maker");
+            }
+
+            String remarks = returnInfo.get("remarks");
+            if (lblReturnRemarks != null) {
+                lblReturnRemarks.setValue(remarks != null && !remarks.trim().isEmpty() ? remarks : "No remarks provided");
+            }
+        } else {
+            returnReasonBanner.setVisible(false);
+        }
     }
 
     // =========================================================
@@ -1334,7 +1389,6 @@ public class MicrRepairController
     // =========================================================
 
     private void goToDataEntry() {
-
         Executions.sendRedirect(
                 "/zul/inward-maker/data-entryform.zul?batchId="
                         + batchId);

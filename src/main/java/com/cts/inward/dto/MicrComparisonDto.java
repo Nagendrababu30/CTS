@@ -65,6 +65,9 @@ public class MicrComparisonDto {
 
     private boolean needsMicrRepair;
     private boolean micrRepaired;
+    private boolean returnByMaker;
+    private String returnReasonCode;
+    private String returnRemarks;
     
     private String repairedMicrCode;
     private String repairedCityCode;
@@ -474,6 +477,30 @@ public class MicrComparisonDto {
 
         this.micrRepaired =
                 micrRepaired;
+    }
+
+    public boolean isReturnByMaker() {
+        return returnByMaker;
+    }
+
+    public void setReturnByMaker(boolean returnByMaker) {
+        this.returnByMaker = returnByMaker;
+    }
+
+    public String getReturnReasonCode() {
+        return returnReasonCode;
+    }
+
+    public void setReturnReasonCode(String returnReasonCode) {
+        this.returnReasonCode = returnReasonCode;
+    }
+
+    public String getReturnRemarks() {
+        return returnRemarks;
+    }
+
+    public void setReturnRemarks(String returnRemarks) {
+        this.returnRemarks = returnRemarks;
     }
     
     public String getRepairedMicrCode() {

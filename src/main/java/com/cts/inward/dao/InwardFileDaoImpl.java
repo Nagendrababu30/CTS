@@ -121,4 +121,29 @@ public class InwardFileDaoImpl
 
         return -1L;
     }
+
+    @Override
+    public long getFileIdByFileName(String fileName) {
+
+        String sql =
+                "SELECT file_id FROM inward_file WHERE file_name = ? ORDER BY file_id DESC LIMIT 1";
+
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setString(1, fileName);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getLong("file_id");
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new IllegalStateException(
+                    "Failed to get file_id for file_name: " + fileName, e);
+        }
+
+        return -1L;
+    }
 }

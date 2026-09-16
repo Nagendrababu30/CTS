@@ -287,5 +287,39 @@ public class CheckerDashboardService {
 			return false;
 		}
 	}
+	
+	// ============================================================
+	// GET RE-VERIFIED CHEQUE NUMBERS
+	// ============================================================
+
+	// ============================================================
+	// GET RE-VERIFIED CHEQUE NUMBERS
+	// ============================================================
+
+	public List<String> getReVerifiedChequeNumbers(
+	        String batchNumber,
+	        String checkerUserId) {
+
+	    if (batchNumber == null
+	            || batchNumber.trim().isEmpty()
+	            || checkerUserId == null
+	            || checkerUserId.trim().isEmpty()) {
+
+	        return Collections.emptyList();
+	    }
+
+	    try {
+
+	        return dao.getReVerifiedChequeNumbers(
+	                batchNumber.trim(),
+	                checkerUserId.trim());
+
+	    } catch (Exception e) {
+
+	        e.printStackTrace();
+
+	        return Collections.emptyList();
+	    }
+	}
 
 }

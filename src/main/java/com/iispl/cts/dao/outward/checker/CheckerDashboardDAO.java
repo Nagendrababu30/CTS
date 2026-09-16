@@ -732,6 +732,104 @@ public class CheckerDashboardDAO {
 
         return 0;
     }
+    
+    /*
+     * ============================================================
+     * GET RE-VERIFIED CHEQUE NUMBERS
+     * ============================================================
+     *
+     * Returns the exact cheque numbers that:
+     *
+     * 1. Belong to this batch
+     * 2. Were SEND_BACK by this Checker
+     * 3. Are now RE_VERIFIED
+     *
+     * Used by Dashboard to open the exact corrected cheque.
+     * ============================================================
+     */
+    public List<String> getReVerifiedChequeNumbers(
+            String batchNumber,
+            String checkerUserId) {
+
+        List<String> chequeNumbers =
+                new ArrayList<>();
+
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()) {
+
+            return chequeNumbers;
+        }
+
+        if (checkerUserId == null ||
+                checkerUserId.trim().isEmpty()) {
+
+            return chequeNumbers;
+        }
+
+        String sql =
+                "SELECT oc.cheque_number " +
+
+                "FROM public.outward_cheque oc " +
+
+                "INNER JOIN public.cheque_processing cp " +
+                "    ON oc.batch_number = cp.batch_number " +
+                "    AND oc.cheque_number = cp.cheque_number " +
+
+                "WHERE oc.batch_number = ? " +
+
+                "  AND cp.checker_id = ? " +
+
+                "  AND UPPER(TRIM(cp.checker_action)) = " +
+                "      'SEND_BACK' " +
+
+                "  AND UPPER(TRIM(oc.cheque_status)) = " +
+                "      'RE_VERIFIED' " +
+
+                "ORDER BY oc.cheque_number";
+
+        try (Connection con =
+                     dataSource.getConnection();
+
+             PreparedStatement ps =
+                     con.prepareStatement(sql)) {
+
+            ps.setString(
+                    1,
+                    batchNumber.trim()
+            );
+
+            ps.setInt(
+                    2,
+                    Integer.parseInt(
+                            checkerUserId.trim()
+                    )
+            );
+
+            try (ResultSet rs =
+                         ps.executeQuery()) {
+
+                while (rs.next()) {
+
+                    chequeNumbers.add(
+                            rs.getString(
+                                    "cheque_number"
+                            )
+                    );
+                }
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            throw new RuntimeException(
+                    "Unable to get Re-Verify cheque numbers.",
+                    e
+            );
+        }
+
+        return chequeNumbers;
+    }
 
 
     /*

@@ -1,5 +1,7 @@
 package com.iispl.cts.controller.outward.checker;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -136,8 +138,8 @@ public class CheckerDashboardController
         if (session == null) {
 
             Executions.sendRedirect(
-                    "/zul/login.zul"
-            );
+                    Executions.getCurrent().getContextPath()
+                            + "/zul/login.zul");
 
             return;
         }
@@ -156,8 +158,8 @@ public class CheckerDashboardController
         if (sessionUserId == null) {
 
             Executions.sendRedirect(
-                    "/zul/login.zul"
-            );
+                    Executions.getCurrent().getContextPath()
+                            + "/zul/login.zul");
 
             return;
         }
@@ -177,14 +179,13 @@ public class CheckerDashboardController
 
                 currentCheckerUser =
                         Long.parseLong(
-                                sessionUserId.toString()
-                        );
+                                sessionUserId.toString());
 
             } catch (NumberFormatException e) {
 
                 Executions.sendRedirect(
-                        "/zul/login.zul"
-                );
+                        Executions.getCurrent().getContextPath()
+                                + "/zul/login.zul");
 
                 return;
             }
@@ -194,10 +195,10 @@ public class CheckerDashboardController
         // LOG CURRENT CHECKER
         // ========================================================
 
-        System.out.println("CHECKER SESSION: "
+        System.out.println(
+                "CHECKER SESSION: "
                         + "userId="
-                      + currentCheckerUser
-        );
+                        + currentCheckerUser);
 
         // ========================================================
         // CREATE SERVICE
@@ -259,10 +260,8 @@ public class CheckerDashboardController
                         currentPage = 1;
 
                         updateFilterButtonStyles();
-
                         loadDashboard();
-                    }
-            );
+                    });
         }
 
         if (availableBtn != null) {
@@ -275,10 +274,8 @@ public class CheckerDashboardController
                         currentPage = 1;
 
                         updateFilterButtonStyles();
-
                         loadDashboard();
-                    }
-            );
+                    });
         }
 
         if (myBatchesBtn != null) {
@@ -291,10 +288,8 @@ public class CheckerDashboardController
                         currentPage = 1;
 
                         updateFilterButtonStyles();
-
                         loadDashboard();
-                    }
-            );
+                    });
         }
 
         if (reVerifyBatchesBtn != null) {
@@ -309,10 +304,8 @@ public class CheckerDashboardController
                         currentPage = 1;
 
                         updateFilterButtonStyles();
-
                         loadDashboard();
-                    }
-            );
+                    });
         }
     }
 
@@ -334,8 +327,7 @@ public class CheckerDashboardController
 
                             loadDashboard();
                         }
-                    }
-            );
+                    });
         }
 
         if (nextPageButton != null) {
@@ -353,8 +345,7 @@ public class CheckerDashboardController
 
                             loadDashboard();
                         }
-                    }
-            );
+                    });
         }
 
         registerPageButton(page1Button, 1);
@@ -386,13 +377,11 @@ public class CheckerDashboardController
 
                     if (pageNumber <= totalPages) {
 
-                        currentPage =
-                                pageNumber;
+                        currentPage = pageNumber;
 
                         loadDashboard();
                     }
-                }
-        );
+                });
     }
 
     // ============================================================
@@ -405,56 +394,40 @@ public class CheckerDashboardController
 
             allBtn.setSclass(
                     "filter-btn"
-                            + (
-                                    "ALL".equals(
-                                            currentFilter
-                                    )
-                                            ? " active-filter"
-                                            : ""
-                            )
-            );
+                            + ("ALL".equals(
+                                    currentFilter)
+                                    ? " active-filter"
+                                    : ""));
         }
 
         if (availableBtn != null) {
 
             availableBtn.setSclass(
                     "filter-btn"
-                            + (
-                                    "AVAILABLE".equals(
-                                            currentFilter
-                                    )
-                                            ? " active-filter"
-                                            : ""
-                            )
-            );
+                            + ("AVAILABLE".equals(
+                                    currentFilter)
+                                    ? " active-filter"
+                                    : ""));
         }
 
         if (myBatchesBtn != null) {
 
             myBatchesBtn.setSclass(
                     "filter-btn"
-                            + (
-                                    "MY_BATCHES".equals(
-                                            currentFilter
-                                    )
-                                            ? " active-filter"
-                                            : ""
-                            )
-            );
+                            + ("MY_BATCHES".equals(
+                                    currentFilter)
+                                    ? " active-filter"
+                                    : ""));
         }
 
         if (reVerifyBatchesBtn != null) {
 
             reVerifyBatchesBtn.setSclass(
                     "filter-btn"
-                            + (
-                                    "RE_VERIFY_BATCHES".equals(
-                                            currentFilter
-                                    )
-                                            ? " active-filter"
-                                            : ""
-                            )
-            );
+                            + ("RE_VERIFY_BATCHES".equals(
+                                    currentFilter)
+                                    ? " active-filter"
+                                    : ""));
         }
     }
 
@@ -482,8 +455,7 @@ public class CheckerDashboardController
                     Clients.NOTIFICATION_TYPE_ERROR,
                     null,
                     "top_center",
-                    4000
-            );
+                    4000);
         }
     }
 
@@ -496,9 +468,7 @@ public class CheckerDashboardController
         List<OutwardBatch> batches =
                 service.getBatches(
                         String.valueOf(
-                                currentCheckerUser
-                        )
-                );
+                                currentCheckerUser));
 
         if (batches == null) {
 
@@ -515,13 +485,13 @@ public class CheckerDashboardController
          *
          * This is only a UI marker.
          *
-         * outward_batch.batch_status is not changed here.
+         * outward_batch.batch_status is NOT changed here.
          */
 
         for (OutwardBatch batch : batches) {
 
-            if (batch == null ||
-                    batch.getBatchNumber() == null) {
+            if (batch == null
+                    || batch.getBatchNumber() == null) {
 
                 continue;
             }
@@ -530,15 +500,12 @@ public class CheckerDashboardController
                     service.hasReVerifiedCheques(
                             batch.getBatchNumber(),
                             String.valueOf(
-                                    currentCheckerUser
-                            )
-                    );
+                                    currentCheckerUser));
 
             if (reVerified) {
 
                 batch.setLockStatus(
-                        "RE_VERIFY"
-                );
+                        "RE_VERIFY");
             }
         }
 
@@ -553,7 +520,9 @@ public class CheckerDashboardController
             List<OutwardBatch> batches) {
 
         int pending = 0;
+
         int cbsValidation = 0;
+
         int readyToSend = 0;
 
         if (batches != null) {
@@ -601,22 +570,19 @@ public class CheckerDashboardController
         if (pendingVerificationCount != null) {
 
             pendingVerificationCount.setValue(
-                    String.valueOf(pending)
-            );
+                    String.valueOf(pending));
         }
 
         if (cbsValidationCount != null) {
 
             cbsValidationCount.setValue(
-                    String.valueOf(cbsValidation)
-            );
+                    String.valueOf(cbsValidation));
         }
 
         if (readyToSendCount != null) {
 
             readyToSendCount.setValue(
-                    String.valueOf(readyToSend)
-            );
+                    String.valueOf(readyToSend));
         }
     }
 
@@ -647,36 +613,28 @@ public class CheckerDashboardController
         }
 
         System.out.println(
-                "======================================"
-        );
+                "======================================");
 
         System.out.println(
-                "CHECKER BATCH LIST"
-        );
+                "CHECKER BATCH LIST");
 
         System.out.println(
                 "Filter        : "
-                        + currentFilter
-        );
+                        + currentFilter);
 
         System.out.println(
                 "Total Batches : "
-                        + (
-                                batches == null
-                                        ? 0
-                                        : batches.size()
-                        )
-        );
+                        + (batches == null
+                                ? 0
+                                : batches.size()));
 
         System.out.println(
                 "Filtered      : "
-                        + filteredBatches.size()
-        );
+                        + filteredBatches.size());
 
         int totalPages =
                 calculateTotalPages(
-                        filteredBatches.size()
-                );
+                        filteredBatches.size());
 
         if (totalPages == 0) {
 
@@ -688,24 +646,19 @@ public class CheckerDashboardController
         }
 
         List<OutwardBatch> pageData =
-                getPageData(
-                        filteredBatches
-                );
+                getPageData(filteredBatches);
 
         System.out.println(
                 "Current Page  : "
-                        + currentPage
-        );
+                        + currentPage);
 
         System.out.println(
                 "Total Pages   : "
-                        + totalPages
-        );
+                        + totalPages);
 
         System.out.println(
                 "Page Records  : "
-                        + pageData.size()
-        );
+                        + pageData.size());
 
         ListModelList<OutwardBatch> model =
                 new ListModelList<>();
@@ -713,15 +666,13 @@ public class CheckerDashboardController
         model.addAll(pageData);
 
         batchListbox.setItemRenderer(
-                new CheckerBatchRenderer()
-        );
+                new CheckerBatchRenderer());
 
         batchListbox.setModel(model);
 
         updatePagination(
                 filteredBatches.size(),
-                totalPages
-        );
+                totalPages);
     }
 
     // ============================================================
@@ -775,8 +726,7 @@ public class CheckerDashboardController
                 batch.getLockStatus();
 
         return "AVAILABLE".equalsIgnoreCase(
-                safe(lockStatus)
-        );
+                safe(lockStatus));
     }
 
     // ============================================================
@@ -801,10 +751,9 @@ public class CheckerDashboardController
         }
 
         return String.valueOf(
-                currentCheckerUser
-        ).equalsIgnoreCase(
-                checkerUser.trim()
-        );
+                currentCheckerUser)
+                .equalsIgnoreCase(
+                        checkerUser.trim());
     }
 
     // ============================================================
@@ -820,10 +769,7 @@ public class CheckerDashboardController
         }
 
         return "RE_VERIFY".equalsIgnoreCase(
-                safe(
-                        batch.getLockStatus()
-                )
-        );
+                safe(batch.getLockStatus()));
     }
 
     // ============================================================
@@ -854,15 +800,12 @@ public class CheckerDashboardController
         int endIndex =
                 Math.min(
                         startIndex + PAGE_SIZE,
-                        filteredBatches.size()
-                );
+                        filteredBatches.size());
 
         pageData.addAll(
                 filteredBatches.subList(
                         startIndex,
-                        endIndex
-                )
-        );
+                        endIndex));
 
         return pageData;
     }
@@ -882,8 +825,8 @@ public class CheckerDashboardController
         return (
                 totalRecords
                         + PAGE_SIZE
-                        - 1
-        ) / PAGE_SIZE;
+                        - 1)
+                / PAGE_SIZE;
     }
 
     // ============================================================
@@ -919,8 +862,7 @@ public class CheckerDashboardController
             }
 
             return calculateTotalPages(
-                    filteredCount
-            );
+                    filteredCount);
 
         } catch (Exception e) {
 
@@ -945,34 +887,42 @@ public class CheckerDashboardController
         if (totalRecords == 0) {
 
             if (previousPageButton != null) {
+
                 previousPageButton.setVisible(false);
             }
 
             if (nextPageButton != null) {
+
                 nextPageButton.setVisible(false);
             }
 
             if (page1Button != null) {
+
                 page1Button.setVisible(false);
             }
 
             if (page2Button != null) {
+
                 page2Button.setVisible(false);
             }
 
             if (page3Button != null) {
+
                 page3Button.setVisible(false);
             }
 
             if (page4Button != null) {
+
                 page4Button.setVisible(false);
             }
 
             if (page5Button != null) {
+
                 page5Button.setVisible(false);
             }
 
             if (paginationInfo != null) {
+
                 paginationInfo.setVisible(false);
             }
 
@@ -984,6 +934,7 @@ public class CheckerDashboardController
         // ========================================================
 
         if (paginationInfo != null) {
+
             paginationInfo.setVisible(true);
         }
 
@@ -993,8 +944,7 @@ public class CheckerDashboardController
 
             previousPageButton.setVisible(
                     totalPages > 1
-                            && currentPage > 1
-            );
+                            && currentPage > 1);
         }
 
         // Next button
@@ -1003,8 +953,7 @@ public class CheckerDashboardController
 
             nextPageButton.setVisible(
                     totalPages > 1
-                            && currentPage < totalPages
-            );
+                            && currentPage < totalPages);
         }
 
         // ========================================================
@@ -1014,32 +963,27 @@ public class CheckerDashboardController
         updatePageButton(
                 page1Button,
                 1,
-                totalPages
-        );
+                totalPages);
 
         updatePageButton(
                 page2Button,
                 2,
-                totalPages
-        );
+                totalPages);
 
         updatePageButton(
                 page3Button,
                 3,
-                totalPages
-        );
+                totalPages);
 
         updatePageButton(
                 page4Button,
                 4,
-                totalPages
-        );
+                totalPages);
 
         updatePageButton(
                 page5Button,
                 5,
-                totalPages
-        );
+                totalPages);
 
         // ========================================================
         // PAGINATION INFORMATION
@@ -1055,8 +999,7 @@ public class CheckerDashboardController
             int end =
                     Math.min(
                             currentPage * PAGE_SIZE,
-                            totalRecords
-                    );
+                            totalRecords);
 
             paginationInfo.setValue(
                     "Showing "
@@ -1064,8 +1007,7 @@ public class CheckerDashboardController
                             + "-"
                             + end
                             + " of "
-                            + totalRecords
-            );
+                            + totalRecords);
         }
     }
 
@@ -1086,9 +1028,7 @@ public class CheckerDashboardController
         boolean visible =
                 pageNumber <= totalPages;
 
-        button.setVisible(
-                visible
-        );
+        button.setVisible(visible);
 
         if (!visible) {
 
@@ -1100,14 +1040,12 @@ public class CheckerDashboardController
         if (currentPage == pageNumber) {
 
             button.setSclass(
-                    "pagination-btn pagination-active"
-            );
+                    "pagination-btn pagination-active");
 
         } else {
 
             button.setSclass(
-                    "pagination-btn"
-            );
+                    "pagination-btn");
         }
     }
 
@@ -1133,14 +1071,9 @@ public class CheckerDashboardController
                     new Listcell();
 
             batchCell.setLabel(
-                    safe(
-                            batch.getBatchNumber()
-                    )
-            );
+                    safe(batch.getBatchNumber()));
 
-            item.appendChild(
-                    batchCell
-            );
+            item.appendChild(batchCell);
 
             // ====================================================
             // CHEQUE COUNT
@@ -1152,29 +1085,22 @@ public class CheckerDashboardController
             int chequeCount =
                     batch.getNumberOfCheques();
 
-            if ("RE_VERIFY_BATCHES".equals(currentFilter)
+            if ("RE_VERIFY_BATCHES".equals(
+                    currentFilter)
                     && "RE_VERIFY".equalsIgnoreCase(
-                            batch.getLockStatus()
-                    )) {
+                            batch.getLockStatus())) {
 
                 chequeCount =
                         service.getReVerifiedChequeCount(
                                 batch.getBatchNumber(),
                                 String.valueOf(
-                                        currentCheckerUser
-                                )
-                        );
+                                        currentCheckerUser));
             }
 
             chequeCell.setLabel(
-                    String.valueOf(
-                            chequeCount
-                    )
-            );
+                    String.valueOf(chequeCount));
 
-            item.appendChild(
-                    chequeCell
-            );
+            item.appendChild(chequeCell);
 
             // ====================================================
             // STATUS
@@ -1184,29 +1110,23 @@ public class CheckerDashboardController
                     new Listcell();
 
             boolean reVerifyStatus =
-                    "RE_VERIFY_BATCHES".equals(currentFilter)
-                    && "RE_VERIFY".equalsIgnoreCase(
-                            batch.getLockStatus()
-                    );
+                    "RE_VERIFY_BATCHES".equals(
+                            currentFilter)
+                            && "RE_VERIFY".equalsIgnoreCase(
+                                    batch.getLockStatus());
 
             if (reVerifyStatus) {
 
                 statusCell.setLabel(
-                        "RE-VERIFIED"
-                );
+                        "RE-VERIFIED");
 
             } else {
 
                 statusCell.setLabel(
-                        safe(
-                                batch.getBatchStatus()
-                        )
-                );
+                        safe(batch.getBatchStatus()));
             }
 
-            item.appendChild(
-                    statusCell
-            );
+            item.appendChild(statusCell);
 
             // ====================================================
             // ASSIGNMENT
@@ -1221,29 +1141,22 @@ public class CheckerDashboardController
             if (lockStatus == null) {
 
                 assignmentCell.setLabel(
-                        "AVAILABLE"
-                );
+                        "AVAILABLE");
 
-            } else if (
-                    "AVAILABLE".equalsIgnoreCase(
-                            lockStatus
-                    )) {
+            } else if ("AVAILABLE".equalsIgnoreCase(
+                    lockStatus)) {
 
                 assignmentCell.setLabel(
-                        "Available"
-                );
+                        "Available");
 
             } else if (
                     "RE_VERIFY".equalsIgnoreCase(
-                            lockStatus
-                    )
-                    && "RE_VERIFY_BATCHES".equals(
-                            currentFilter
-                    )) {
+                            lockStatus)
+                            && "RE_VERIFY_BATCHES".equals(
+                                    currentFilter)) {
 
                 assignmentCell.setLabel(
-                        "Re-Verify"
-                );
+                        "Re-Verify");
 
             } else {
 
@@ -1255,20 +1168,16 @@ public class CheckerDashboardController
 
                     assignmentCell.setLabel(
                             "Locked by Checker "
-                                    + checker
-                    );
+                                    + checker);
 
                 } else {
 
                     assignmentCell.setLabel(
-                            "Locked"
-                    );
+                            "Locked");
                 }
             }
 
-            item.appendChild(
-                    assignmentCell
-            );
+            item.appendChild(assignmentCell);
 
             // ====================================================
             // ACTION
@@ -1279,32 +1188,25 @@ public class CheckerDashboardController
 
             boolean available =
                     "AVAILABLE".equalsIgnoreCase(
-                            batch.getLockStatus()
-                    );
+                            batch.getLockStatus());
 
             boolean reVerify =
                     "RE_VERIFY_BATCHES".equals(
-                            currentFilter
-                    )
-                    && "RE_VERIFY".equalsIgnoreCase(
-                            batch.getLockStatus()
-                    );
+                            currentFilter)
+                            && "RE_VERIFY".equalsIgnoreCase(
+                                    batch.getLockStatus());
 
             boolean assignedToCurrentChecker =
                     service.isAssignedToChecker(
                             batch.getBatchNumber(),
                             String.valueOf(
-                                    currentCheckerUser
-                            )
-                    );
+                                    currentCheckerUser));
 
             boolean originalCheckerCanReVerify =
                     service.hasReVerifiedCheques(
                             batch.getBatchNumber(),
                             String.valueOf(
-                                    currentCheckerUser
-                            )
-                    );
+                                    currentCheckerUser));
 
             if (available
                     || reVerify
@@ -1315,36 +1217,28 @@ public class CheckerDashboardController
                         new Button("Open");
 
                 openButton.setSclass(
-                        "btn btn-primary"
-                );
+                        "btn btn-primary");
 
                 openButton.addEventListener(
                         Events.ON_CLICK,
                         event ->
-                                openBatch(batch)
-                );
+                                openBatch(batch));
 
                 actionCell.appendChild(
-                        openButton
-                );
+                        openButton);
 
             } else {
 
                 Button lockedButton =
                         new Button("🔒 Locked");
 
-                lockedButton.setDisabled(
-                        true
-                );
+                lockedButton.setDisabled(true);
 
                 actionCell.appendChild(
-                        lockedButton
-                );
+                        lockedButton);
             }
 
-            item.appendChild(
-                    actionCell
-            );
+            item.appendChild(actionCell);
         }
     }
 
@@ -1363,8 +1257,7 @@ public class CheckerDashboardController
                     Clients.NOTIFICATION_TYPE_ERROR,
                     null,
                     "top_center",
-                    3000
-            );
+                    3000);
 
             return;
         }
@@ -1379,9 +1272,7 @@ public class CheckerDashboardController
             // ====================================================
 
             OutwardBatch latest =
-                    service.findBatch(
-                            batchNumber
-                    );
+                    service.findBatch(batchNumber);
 
             if (latest == null) {
 
@@ -1390,8 +1281,7 @@ public class CheckerDashboardController
                         Clients.NOTIFICATION_TYPE_ERROR,
                         null,
                         "top_center",
-                        3000
-                );
+                        3000);
 
                 loadDashboard();
 
@@ -1415,9 +1305,7 @@ public class CheckerDashboardController
                     service.hasReVerifiedCheques(
                             batchNumber,
                             String.valueOf(
-                                    currentCheckerUser
-                            )
-                    );
+                                    currentCheckerUser));
 
             // ====================================================
             // RE-VERIFY
@@ -1426,31 +1314,75 @@ public class CheckerDashboardController
             if (reVerifyAllowed) {
 
                 /*
-                 * Do NOT:
+                 * IMPORTANT:
                  *
-                 * - create a new assignment
-                 * - call assignBatch()
-                 * - change outward_batch.batch_status
+                 * Get the exact corrected cheque number
+                 * from the database.
                  *
-                 * Same Checker continues with the
-                 * existing assignment.
+                 * We do NOT pass only:
+                 *
+                 *     batchNumber + mode=RE_VERIFY
+                 *
+                 * because ProcessingController then does
+                 * not know which cheque to open.
                  */
+
+                List<String> reVerifiedChequeNumbers =
+                        service.getReVerifiedChequeNumbers(
+                                batchNumber,
+                                String.valueOf(
+                                        currentCheckerUser));
+
+                if (reVerifiedChequeNumbers == null
+                        || reVerifiedChequeNumbers.isEmpty()) {
+
+                    Clients.showNotification(
+                            "No corrected cheque is available for re-verification.",
+                            Clients.NOTIFICATION_TYPE_WARNING,
+                            null,
+                            "top_center",
+                            4000);
+
+                    return;
+                }
+
+                /*
+                 * Open the first corrected cheque.
+                 *
+                 * ProcessingController receives:
+                 *
+                 * batchNumber
+                 * chequeNumber
+                 *
+                 * and therefore loads ONLY that cheque.
+                 */
+                String reVerifyChequeNumber =
+                        reVerifiedChequeNumbers.get(0);
 
                 System.out.println(
                         "CHECKER RE-VERIFY OPEN: "
+                                + "batch="
                                 + batchNumber
+                                + " | cheque="
+                                + reVerifyChequeNumber
                                 + " | checker="
-                                + currentCheckerUser
-                );
+                                + currentCheckerUser);
 
-                Executions.sendRedirect(
-                        "/zul/outward/outward-checker/processing.zul"
+                String url ="/zul/outward/outward-checker/processing.zul"
                                 + "?batchNumber="
-                                + Executions.encodeURL(
-                                        batchNumber
-                                )
-                                + "&mode=RE_VERIFY"
-                );
+                                + URLEncoder.encode(
+                                        batchNumber,
+                                        StandardCharsets.UTF_8)
+                                + "&chequeNumber="
+                                + URLEncoder.encode(
+                                        reVerifyChequeNumber,
+                                        StandardCharsets.UTF_8);
+
+                System.out.println(
+                        "CHECKER PROCESSING URL: "
+                                + url);
+
+                Executions.sendRedirect(url);
 
                 return;
             }
@@ -1463,9 +1395,7 @@ public class CheckerDashboardController
                     service.hasPendingMakerCheques(
                             batchNumber,
                             String.valueOf(
-                                    currentCheckerUser
-                            )
-                    );
+                                    currentCheckerUser));
 
             if (pendingMakerCheques) {
 
@@ -1474,8 +1404,7 @@ public class CheckerDashboardController
                         Clients.NOTIFICATION_TYPE_WARNING,
                         null,
                         "top_center",
-                        4000
-                );
+                        4000);
 
                 return;
             }
@@ -1488,19 +1417,17 @@ public class CheckerDashboardController
                     service.isAssignedToChecker(
                             batchNumber,
                             String.valueOf(
-                                    currentCheckerUser
-                            )
-                    );
+                                    currentCheckerUser));
 
             if (assignedToCurrentChecker) {
 
-                Executions.sendRedirect(
-                        "/zul/outward/outward-checker/batchesQueue.zul"
+                String url ="/zul/outward/outward-checker/batchesQueue.zul"
                                 + "?batchNumber="
-                                + Executions.encodeURL(
-                                        batchNumber
-                                )
-                );
+                                + URLEncoder.encode(
+                                        batchNumber,
+                                        StandardCharsets.UTF_8);
+
+                Executions.sendRedirect(url);
 
                 return;
             }
@@ -1510,16 +1437,14 @@ public class CheckerDashboardController
             // ====================================================
 
             if (!"AVAILABLE".equalsIgnoreCase(
-                    latest.getLockStatus()
-            )) {
+                    latest.getLockStatus())) {
 
                 Clients.showNotification(
                         "Batch is already locked.",
                         Clients.NOTIFICATION_TYPE_WARNING,
                         null,
                         "top_center",
-                        3000
-                );
+                        3000);
 
                 loadDashboard();
 
@@ -1533,8 +1458,7 @@ public class CheckerDashboardController
             boolean assigned =
                     service.assignBatch(
                             batchNumber,
-                            currentCheckerUser
-                    );
+                            currentCheckerUser);
 
             if (!assigned) {
 
@@ -1543,8 +1467,7 @@ public class CheckerDashboardController
                         Clients.NOTIFICATION_TYPE_WARNING,
                         null,
                         "top_center",
-                        4000
-                );
+                        4000);
 
                 loadDashboard();
 
@@ -1560,20 +1483,19 @@ public class CheckerDashboardController
                     Clients.NOTIFICATION_TYPE_INFO,
                     null,
                     "top_center",
-                    2000
-            );
+                    2000);
 
             // ====================================================
             // MOVE TO BATCH QUEUE
             // ====================================================
 
-            Executions.sendRedirect(
-                    "/zul/outward/outward-checker/batchesQueue.zul"
+            String url ="/zul/outward/outward-checker/batchesQueue.zul"
                             + "?batchNumber="
-                            + Executions.encodeURL(
-                                    batchNumber
-                            )
-            );
+                            + URLEncoder.encode(
+                                    batchNumber,
+                                    StandardCharsets.UTF_8);
+
+            Executions.sendRedirect(url);
 
         } catch (Exception e) {
 
@@ -1584,8 +1506,7 @@ public class CheckerDashboardController
                     Clients.NOTIFICATION_TYPE_ERROR,
                     null,
                     "top_center",
-                    4000
-            );
+                    4000);
         }
     }
 

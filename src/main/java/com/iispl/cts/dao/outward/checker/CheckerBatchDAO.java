@@ -18,131 +18,131 @@ public class CheckerBatchDAO {
      *
      * These batches come from outward_batch_assignment.
      */
-	public List<OutwardBatch> getCheckerBatches(
-	        String checkerUserId,
-	        String searchText,
-	        int pageSize,
-	        int offset) {
+    public List<OutwardBatch> getCheckerBatches(
+            String checkerUserId,
+            String searchText,
+            int pageSize,
+            int offset) {
 
-	    List<OutwardBatch> batches = new ArrayList<>();
+        List<OutwardBatch> batches = new ArrayList<>();
 
-	    String sql = "SELECT ob.batch_number, "
-	            + "       ob.branch_code, "
-	            + "       ob.cheque_count, "
-	            + "       ob.batch_folder_path, "
-	            + "       ob.created_by, "
-	            + "       ob.created_at, "
-	            + "       ob.batch_status, "
-	            + "       oba.user_id, "
-	            + "       oba.assignment_status, "
-	            + "       oba.assigned_at, "
-	            + "       oba.started_at, "
-	            + "       oba.completed_at "
-	            + "FROM outward_batch ob "
-	            + "JOIN outward_batch_assignment oba "
-	            + "  ON ob.batch_number = oba.batch_number "
-	            + "WHERE oba.user_id = ? "
-	            + "  AND UPPER(oba.assignment_role) = 'CHECKER' "
-	            + "  AND UPPER(oba.assignment_status) "
-	            + "      IN ('ASSIGNED', 'IN_PROGRESS') "
-	            + "  AND UPPER(ob.batch_status) <> 'CHECKER_COMPLETED' "
-	            + "  AND (? IS NULL OR ? = '' OR "
-	            + "       LOWER(ob.batch_number) LIKE LOWER(?)) "
-	            + "ORDER BY oba.assigned_at DESC "
-	            + "LIMIT ? OFFSET ?";
+        String sql = "SELECT ob.batch_number, "
+                + "       ob.branch_code, "
+                + "       ob.cheque_count, "
+                + "       ob.batch_folder_path, "
+                + "       ob.created_by, "
+                + "       ob.created_at, "
+                + "       ob.batch_status, "
+                + "       oba.user_id, "
+                + "       oba.assignment_status, "
+                + "       oba.assigned_at, "
+                + "       oba.started_at, "
+                + "       oba.completed_at "
+                + "FROM outward_batch ob "
+                + "JOIN outward_batch_assignment oba "
+                + "  ON ob.batch_number = oba.batch_number "
+                + "WHERE oba.user_id = ? "
+                + "  AND UPPER(oba.assignment_role) = 'CHECKER' "
+                + "  AND UPPER(oba.assignment_status) "
+                + "      IN ('ASSIGNED', 'IN_PROGRESS') "
+                + "  AND UPPER(ob.batch_status) "
+                + "      NOT IN ('CHECKER_VERIFIED', 'CHECKER_COMPLETED') "
+                + "  AND (? IS NULL OR ? = '' OR "
+                + "       LOWER(ob.batch_number) LIKE LOWER(?)) "
+                + "ORDER BY oba.assigned_at DESC "
+                + "LIMIT ? OFFSET ?";
 
-	    try (Connection connection = CTSStaticData.getConnection();
-	         PreparedStatement statement =
-	                 connection.prepareStatement(sql)) {
+        try (Connection connection = CTSStaticData.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
 
-	        statement.setLong(
-	                1,
-	                Long.parseLong(checkerUserId));
+            statement.setLong(
+                    1,
+                    Long.parseLong(checkerUserId));
 
-	        String search =
-	                searchText == null
-	                        ? ""
-	                        : searchText.trim();
+            String search =
+                    searchText == null
+                            ? ""
+                            : searchText.trim();
 
-	        String searchPattern =
-	                "%" + search + "%";
+            String searchPattern =
+                    "%" + search + "%";
 
-	        statement.setString(2, search);
-	        statement.setString(3, search);
-	        statement.setString(4, searchPattern);
+            statement.setString(2, search);
+            statement.setString(3, search);
+            statement.setString(4, searchPattern);
 
-	        statement.setInt(5, pageSize);
-	        statement.setInt(6, offset);
+            statement.setInt(5, pageSize);
+            statement.setInt(6, offset);
 
-	        try (ResultSet rs = statement.executeQuery()) {
+            try (ResultSet rs = statement.executeQuery()) {
 
-	            while (rs.next()) {
+                while (rs.next()) {
 
-	                OutwardBatch batch =
-	                        new OutwardBatch();
+                    OutwardBatch batch =
+                            new OutwardBatch();
 
-	                batch.setBatchNumber(
-	                        rs.getString("batch_number"));
+                    batch.setBatchNumber(
+                            rs.getString("batch_number"));
 
-	                batch.setBranchCode(
-	                        rs.getString("branch_code"));
+                    batch.setBranchCode(
+                            rs.getString("branch_code"));
 
-	                batch.setNumberOfCheques(
-	                        rs.getInt("cheque_count"));
+                    batch.setNumberOfCheques(
+                            rs.getInt("cheque_count"));
 
-	                batch.setBatchFolderPath(
-	                        rs.getString("batch_folder_path"));
+                    batch.setBatchFolderPath(
+                            rs.getString("batch_folder_path"));
 
-	                batch.setCreatedBy(
-	                        String.valueOf(
-	                                rs.getInt("created_by")));
+                    batch.setCreatedBy(
+                            String.valueOf(
+                                    rs.getInt("created_by")));
 
-	                if (rs.getTimestamp("created_at") != null) {
+                    if (rs.getTimestamp("created_at") != null) {
 
-	                    batch.setCreatedAt(
-	                            rs.getTimestamp("created_at")
-	                                    .toLocalDateTime());
-	                }
+                        batch.setCreatedAt(
+                                rs.getTimestamp("created_at")
+                                        .toLocalDateTime());
+                    }
 
-	                batch.setBatchStatus(
-	                        rs.getString("batch_status"));
+                    batch.setBatchStatus(
+                            rs.getString("batch_status"));
 
-	                batch.setCheckerUserNumber(
-	                        checkerUserId);
+                    batch.setCheckerUserNumber(
+                            checkerUserId);
 
-	                if (rs.getTimestamp("started_at") != null) {
+                    if (rs.getTimestamp("started_at") != null) {
 
-	                    batch.setCheckerStartedAt(
-	                            rs.getTimestamp("started_at")
-	                                    .toLocalDateTime());
-	                }
+                        batch.setCheckerStartedAt(
+                                rs.getTimestamp("started_at")
+                                        .toLocalDateTime());
+                    }
 
-	                if (rs.getTimestamp("completed_at") != null) {
+                    if (rs.getTimestamp("completed_at") != null) {
 
-	                    batch.setCheckerCompletedAt(
-	                            rs.getTimestamp("completed_at")
-	                                    .toLocalDateTime());
-	                }
+                        batch.setCheckerCompletedAt(
+                                rs.getTimestamp("completed_at")
+                                        .toLocalDateTime());
+                    }
 
-	                batch.setLockStatus(
-	                        rs.getString("assignment_status"));
+                    batch.setLockStatus(
+                            rs.getString("assignment_status"));
 
-	                batches.add(batch);
-	            }
-	        }
+                    batches.add(batch);
+                }
+            }
 
-	    } catch (Exception e) {
+        } catch (Exception e) {
 
-	        e.printStackTrace();
+            e.printStackTrace();
 
-	        throw new RuntimeException(
-	                "Error while fetching Checker batches",
-	                e);
-	    }
+            throw new RuntimeException(
+                    "Error while fetching Checker batches",
+                    e);
+        }
 
-	    return batches;
-	}
-
+        return batches;
+    }
 
 
     /*
@@ -524,8 +524,9 @@ public class CheckerBatchDAO {
                 + "      'CHECKER' "
                 + "  AND UPPER(oba.assignment_status) "
                 + "      IN ('ASSIGNED', 'IN_PROGRESS') "
-                + "  AND UPPER(ob.batch_status) <> "
-                + "      'CHECKER_COMPLETED' "
+                + "  AND UPPER(ob.batch_status) "
+                + "      NOT IN "
+                + "      ('CHECKER_VERIFIED', 'CHECKER_COMPLETED') "
                 + "  AND (? IS NULL OR ? = '' OR "
                 + "       LOWER(ob.batch_number) "
                 + "       LIKE LOWER(?))";
@@ -570,4 +571,4 @@ public class CheckerBatchDAO {
 
         return 0;
     }
-}	
+}

@@ -1,0 +1,323 @@
+ /* =========================================================
+   VERIFY BATCH - SAME STYLE AS MAKER DASHBOARD
+   ========================================================= */
+
+/* Main page background */
+.verify-content {
+    width: 100%;
+    height: 100%;
+    padding: 24px;
+    background: #EAF0FA;
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.page-header {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0B1F3F;
+}
+
+.page-description {
+    margin-top: 5px;
+    font-size: 13px;
+    color: #667085;
+}
+
+
+/* =========================================================
+   MAIN BATCHES BOX
+   SAME AS MAKER DASHBOARD .table-panel
+   ========================================================= */
+
+.batch-card {
+    width: 100%;
+
+    padding: 20px;
+
+    background: #FFFFFF;
+
+    border: 1px solid #E4EAF3;
+
+    border-radius: 10px;
+
+    box-sizing: border-box;
+
+    box-shadow: 0 2px 6px rgba(16, 24, 40, 0.04);
+}
+
+
+/* =========================================================
+   SEARCH
+   ========================================================= */
+
+.search-row {
+    width: 100%;
+    height: 40px;
+    margin-bottom: 16px;
+}
+
+.search-box {
+    width: 178px;
+    height: 30px;
+
+    border: 1px solid #D0D5DD;
+
+    border-radius: 6px;
+
+    background: #FFFFFF;
+
+    padding: 0 8px;
+
+    box-sizing: border-box;
+}
+
+.search-box:focus-within {
+    border-color: #175CD3;
+}
+
+.search-icon {
+    width: 18px;
+
+    color: #98A2B3;
+
+    font-size: 14px;
+
+    text-align: center;
+
+    line-height: 28px;
+}
+
+.search-input {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+
+    font-size: 11px;
+
+    color: #344054;
+
+    background: transparent;
+}
+
+
+/* =========================================================
+   TABLE CONTAINER
+   SAME LOOK AS MAKER DASHBOARD TABLE
+   ========================================================= */
+
+.batch-table {
+    width: 100%;
+
+    border: 1px solid #E4EAF3;
+
+    border-radius: 8px;
+
+    overflow: hidden;
+
+    background: #FFFFFF;
+}
+
+
+/* =========================================================
+   TABLE HEADER
+   ========================================================= */
+
+.table-header {
+    width: 100%;
+
+    height: 40px;
+
+    background: #F8FAFC;
+
+    border-bottom: 1px solid #E4EAF3;
+}
+
+.table-header-cell {
+    height: 40px;
+
+    padding-left: 12px;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    color: #0B1F3F;
+
+    box-sizing: border-box;
+
+    line-height: 40px;
+}
+
+
+/* =========================================================
+   TABLE ROW
+   ========================================================= */
+
+.table-row {
+    width: 100%;
+
+    height: 44px;
+
+    background: #FFFFFF;
+
+    border-bottom: 1px solid #E4EAF3;
+
+    box-sizing: border-box;
+}
+
+.table-row:hover {
+    background: #F8FAFF;
+}
+
+.table-row:last-child {
+    border-bottom: none;
+}
+
+
+/* =========================================================
+   TABLE CELL
+   ========================================================= */
+
+.table-cell {
+    height: 44px;
+
+    padding-left: 12px;
+
+    font-size: 12px;
+
+    color: #344054;
+
+    box-sizing: border-box;
+
+    line-height: 44px;
+}
+
+.maker-cell {
+    color: #175CD3;
+}
+
+
+/* =========================================================
+   OPEN BUTTON
+   SAME BLUE STYLE AS MAKER DASHBOARD
+   ========================================================= */
+
+.open-button {
+    width: 70px;
+
+    height: 28px;
+
+    background: #175CD3;
+
+    border: 1px solid #175CD3;
+
+    border-radius: 5px;
+
+    color: #FFFFFF;
+
+    font-size: 11px;
+
+    font-weight: 500;
+
+    padding: 0;
+}
+
+.open-button:hover {
+    background: #154FB5;
+
+    border-color: #154FB5;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.bottom-row {
+    width: 100%;
+
+    height: 45px;
+
+    padding-top: 8px;
+
+    box-sizing: border-box;
+}
+
+.showing-text {
+    font-size: 11px;
+
+    color: #667085;
+
+    line-height: 35px;
+}
+
+
+/* =========================================================
+   PAGINATION
+   ========================================================= */
+
+.pagination {
+    height: 30px;
+}
+
+.page-button {
+    width: 25px;
+
+    height: 25px;
+
+    margin-left: 4px;
+
+    border: 1px solid #D0D5DD;
+
+    border-radius: 5px;
+
+    background: #FFFFFF;
+
+    color: #98A2B3;
+
+    font-size: 11px;
+
+    padding: 0;
+}
+
+.page-button:hover {
+    background: #F2F4F7;
+}
+
+.page-button-active {
+    width: 25px;
+
+    height: 25px;
+
+    margin-left: 4px;
+
+    border: 1px solid #175CD3;
+
+    border-radius: 5px;
+
+    background: #175CD3;
+
+    color: #FFFFFF;
+
+    font-size: 11px;
+
+    padding: 0;
+}
+
+.page-button:disabled {
+    background: #F2F4F7;
+
+    color: #D0D5DD;
+
+    border-color: #E4E7EC;
+}

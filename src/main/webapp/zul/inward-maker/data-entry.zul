@@ -14,43 +14,47 @@
 	<div self="@define(content)" width="100%" height="100%"
 		sclass="content">
 
-		<vlayout width="100%" spacing="20px" sclass="content-layout"
+		<vlayout width="100%" spacing="0px" sclass="content-layout"
 			apply="com.cts.inward.controller.DataEntryController">
 
 			<!-- PAGE HEADER -->
 
-			<vlayout spacing="4px">
+			<label value="Inward Data Entry Queue"
+				sclass="page-title" />
 
-				<label value="Inward Data Entry Queue"
-					sclass="page-title" />
+			<!-- BATCH TABLE PANEL — wraps listbox like dashboard wraps grid -->
+			<vlayout sclass="table-panel" spacing="0" width="100%">
+
+				<!-- Table Header -->
+				<hlayout valign="middle" width="100%" style="padding-bottom:16px;">
+					<label value="Batches" sclass="table-title"/>
+				</hlayout>
+
+				<!-- Listbox -->
+				<listbox id="batchListbox" width="100%"
+					sclass="batch-listbox"
+					emptyMessage="No batches available for Data Entry." mold="paging"
+					pageSize="10">
+
+					<listhead>
+
+						<listheader label="Batch No" width="25%"
+							align="center" />
+
+						<listheader label="Total Cheques" width="25%"
+							align="center" />
+
+						<listheader label="Data Entry Pending" width="30%"
+							align="center" />
+
+						<listheader label="Action" width="20%"
+							align="center" />
+
+					</listhead>
+
+				</listbox>
 
 			</vlayout>
-
-
-			<!-- BATCH TABLE -->
-
-			<listbox id="batchListbox" width="100%"
-				sclass="batch-listbox"
-				emptyMessage="No batches available for Data Entry." mold="paging"
-				pageSize="10">
-
-				<listhead>
-
-					<listheader label="Batch No" width="25%"
-						align="center" />
-
-					<listheader label="Total Cheques" width="25%"
-						align="center" />
-
-					<listheader label="Data Entry Pending" width="30%"
-						align="center" />
-
-					<listheader label="Action" width="20%"
-						align="center" />
-
-				</listhead>
-
-			</listbox>
 
 		</vlayout>
 

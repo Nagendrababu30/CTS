@@ -1973,32 +1973,12 @@ private Button reVerifyBatchesBtn;
         if (isReturned
                 && isOriginalMaker) {
 
-            Button openButton =
-                    new Button("Open");
-
-            openButton.setWidth("75px");
-
-            openButton.setHeight("32px");
-
-            openButton.setStyle(
-                    "background:#12B76A;"
-                            + "color:white;"
-                            + "border:none;"
-                            + "border-radius:5px;"
-                            + "font-weight:bold;"
-                            + "cursor:pointer;"
-            );
-
-            openButton.addEventListener(
-                    Events.ON_CLICK,
-                    event ->
-                            openHoldBatch(
-                                    batch.getBatchNumber()
-                            )
-            );
-
-            actionCell.appendChild(
-                    openButton
+            // Returned batches can contain different repair types.
+            // Show one action per actual repair type instead of
+            // opening all returned cheques together.
+            appendReturnedRepairButtons(
+                    actionCell,
+                    batch.getBatchNumber()
             );
         }
 
@@ -3129,6 +3109,464 @@ private Button reVerifyBatchesBtn;
             );
         }
     }
+    // =========================================================
+    // RENDER RETURNED-BATCH REPAIR ACTIONS
+    //
+    // Dashboard-only change:
+    // determine which repair types actually exist for this batch
+    // from cheque_processing and expose one action per type.
+    //
+    // Normal Maker workflow is not changed.
+    // =========================================================
+
+    private void appendReturnedRepairButtons(
+            Listcell actionCell,
+            String batchNumber) {
+
+        if (actionCell == null
+                || !hasValue(batchNumber)) {
+            return;
+        }
+
+        int micrCount = 0;
+        int dataEntryCount = 0;
+
+        try {
+
+            List<OutwardCheque> returnedCheques =
+                    service.getReturnedCheques(
+                            batchNumber.trim()
+                    );
+
+            if (returnedCheques != null) {
+
+                for (OutwardCheque cheque :
+                        returnedCheques) {
+
+                    if (cheque == null
+                            || !hasValue(
+                                    cheque.getChequeNumber()
+                            )) {
+                        continue;
+                    }
+
+                    String chequeStatus =
+                            cheque.getChequeStatus();
+
+                    if (!hasValue(chequeStatus)
+                            || !"SENT_BACK_TO_MAKER"
+                                    .equalsIgnoreCase(
+                                            chequeStatus.trim()
+                                    )) {
+                        continue;
+                    }
+
+                    ChequeProcessing processing =
+                            service.getChequeProcessing(
+                                    batchNumber.trim(),
+                                    cheque.getChequeNumber().trim()
+                            );
+
+                    if (processing == null) {
+                        continue;
+                    }
+
+                    String checkerAction =
+                            processing.getCheckerAction();
+
+                    if (!hasValue(checkerAction)
+                            || !"SEND_BACK"
+                                    .equalsIgnoreCase(
+                                            checkerAction.trim()
+                                    )) {
+                        continue;
+                    }
+
+                    String reasonCode =
+                            processing.getCheckerReasonCode();
+
+                    if (isMicrReturnReason(reasonCode)) {
+                        micrCount++;
+                    } else if (
+                            isDataEntryReturnReason(
+                                    reasonCode
+                            )) {
+                        dataEntryCount++;
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            // Preserve the previous generic Open behavior if the
+            // dashboard cannot determine the repair type.
+            Button openButton =
+                    createReturnedRepairButton(
+                            "Open",
+                            "75px",
+                            batchNumber,
+                            null
+                    );
+
+            actionCell.appendChild(openButton);
+            return;
+        }
+
+        if (micrCount > 0) {
+
+            Button micrButton =
+                    createReturnedRepairButton(
+                            "MICR (" + micrCount + ")",
+                            "105px",
+                            batchNumber,
+                            "MICR"
+                    );
+
+            actionCell.appendChild(micrButton);
+        }
+
+        if (dataEntryCount > 0) {
+
+            Button dataEntryButton =
+                    createReturnedRepairButton(
+                            "Data Entry (" + dataEntryCount + ")",
+                            "125px",
+                            batchNumber,
+                            "DATA_ENTRY"
+                    );
+
+            if (micrCount > 0) {
+                dataEntryButton.setStyle(
+                        "background:#2E90FA;"
+                                + "color:white;"
+                                + "border:none;"
+                                + "border-radius:5px;"
+                                + "font-weight:bold;"
+                                + "cursor:pointer;"
+                                + "margin-top:4px;"
+                );
+            }
+
+            actionCell.appendChild(dataEntryButton);
+        }
+
+        // Unknown reason: retain old generic Open behavior.
+        if (micrCount == 0
+                && dataEntryCount == 0) {
+
+            Button openButton =
+                    createReturnedRepairButton(
+                            "Open",
+                            "75px",
+                            batchNumber,
+                            null
+                    );
+
+            actionCell.appendChild(openButton);
+        }
+    }
+
+    // =========================================================
+    // CREATE RETURNED REPAIR BUTTON
+    // =========================================================
+
+    private Button createReturnedRepairButton(
+            String caption,
+            String width,
+            String batchNumber,
+            String repairType) {
+
+        Button button =
+                new Button(caption);
+
+        button.setWidth(width);
+        button.setHeight("32px");
+
+        button.setStyle(
+                "background:#12B76A;"
+                        + "color:white;"
+                        + "border:none;"
+                        + "border-radius:5px;"
+                        + "font-weight:bold;"
+                        + "cursor:pointer;"
+        );
+
+        button.addEventListener(
+                Events.ON_CLICK,
+                event -> {
+
+                    if (hasValue(repairType)) {
+
+                        openReturnedRepair(
+                                batchNumber,
+                                repairType
+                        );
+
+                    } else {
+
+                        // Existing generic returned-batch behavior.
+                        openHoldBatch(batchNumber);
+                    }
+                }
+        );
+
+        return button;
+    }
+
+    // =========================================================
+    // OPEN ONE RETURNED REPAIR TYPE
+    //
+    // A real cheque belonging to the selected repair type is
+    // selected first. The repairType is passed to the repair page
+    // so that page can filter the batch to that category.
+    // =========================================================
+
+    private void openReturnedRepair(
+            String batchNumber,
+            String repairType) {
+
+        if (!hasValue(batchNumber)
+                || !hasValue(repairType)) {
+
+            Messagebox.show(
+                    "Batch number or repair type is missing.",
+                    "Returned Repair",
+                    Messagebox.OK,
+                    Messagebox.ERROR
+            );
+
+            return;
+        }
+
+        String cleanBatchNumber =
+                batchNumber.trim();
+
+        String cleanRepairType =
+                repairType.trim();
+
+        try {
+
+            OutwardBatch batch =
+                    findBatch(cleanBatchNumber);
+
+            if (batch == null) {
+
+                Messagebox.show(
+                        "Batch "
+                                + cleanBatchNumber
+                                + " was not found.",
+                        "Batch Not Found",
+                        Messagebox.OK,
+                        Messagebox.ERROR
+                );
+
+                return;
+            }
+
+            String batchStatus =
+                    safeValue(
+                            batch.getBatchStatus()
+                    ).trim();
+
+            boolean returnedBatch =
+                    "HOLD".equalsIgnoreCase(batchStatus)
+                            || "ON_HOLD".equalsIgnoreCase(batchStatus)
+                            || "SENT_TO_MAKER".equalsIgnoreCase(batchStatus);
+
+            if (!returnedBatch) {
+
+                Messagebox.show(
+                        "Batch "
+                                + cleanBatchNumber
+                                + " is not a returned Maker batch."
+                                + "\n\nCurrent status: "
+                                + batchStatus,
+                        "Invalid Batch State",
+                        Messagebox.OK,
+                        Messagebox.EXCLAMATION
+                );
+
+                return;
+            }
+
+            String assignedMaker =
+                    batch.getMakerUserNumber();
+
+            if (!hasValue(assignedMaker)
+                    || !hasValue(currentUserId)
+                    || !currentUserId.trim()
+                            .equalsIgnoreCase(
+                                    assignedMaker.trim()
+                            )) {
+
+                Messagebox.show(
+                        "This returned batch is assigned to Maker "
+                                + safeValue(assignedMaker)
+                                + ".\n\n"
+                                + "Only the original Maker can process it.",
+                        "Access Denied",
+                        Messagebox.OK,
+                        Messagebox.ERROR
+                );
+
+                return;
+            }
+
+            List<OutwardCheque> returnedCheques =
+                    service.getReturnedCheques(
+                            cleanBatchNumber
+                    );
+
+            if (returnedCheques == null
+                    || returnedCheques.isEmpty()) {
+
+                Messagebox.show(
+                        "No returned cheques were found for batch "
+                                + cleanBatchNumber
+                                + ".",
+                        "Returned Cheques",
+                        Messagebox.OK,
+                        Messagebox.EXCLAMATION
+                );
+
+                return;
+            }
+
+            OutwardCheque selectedCheque = null;
+
+            for (OutwardCheque cheque :
+                    returnedCheques) {
+
+                if (cheque == null
+                        || !hasValue(
+                                cheque.getChequeNumber()
+                        )) {
+                    continue;
+                }
+
+                String chequeStatus =
+                        cheque.getChequeStatus();
+
+                if (!hasValue(chequeStatus)
+                        || !"SENT_BACK_TO_MAKER"
+                                .equalsIgnoreCase(
+                                        chequeStatus.trim()
+                                )) {
+                    continue;
+                }
+
+                ChequeProcessing processing =
+                        service.getChequeProcessing(
+                                cleanBatchNumber,
+                                cheque.getChequeNumber().trim()
+                        );
+
+                if (processing == null) {
+                    continue;
+                }
+
+                String checkerAction =
+                        processing.getCheckerAction();
+
+                if (!hasValue(checkerAction)
+                        || !"SEND_BACK"
+                                .equalsIgnoreCase(
+                                        checkerAction.trim()
+                                )) {
+                    continue;
+                }
+
+                String reasonCode =
+                        processing.getCheckerReasonCode();
+
+                boolean matches =
+                        "MICR".equalsIgnoreCase(
+                                cleanRepairType
+                        )
+                                ? isMicrReturnReason(reasonCode)
+                                : isDataEntryReturnReason(reasonCode);
+
+                if (matches) {
+                    selectedCheque = cheque;
+                    break;
+                }
+            }
+
+            if (selectedCheque == null) {
+
+                Messagebox.show(
+                        "No "
+                                + cleanRepairType
+                                + " repair cheques are currently available "
+                                + "for batch "
+                                + cleanBatchNumber
+                                + ".",
+                        "Repair Queue",
+                        Messagebox.OK,
+                        Messagebox.EXCLAMATION
+                );
+
+                return;
+            }
+
+            String chequeNumber =
+                    selectedCheque
+                            .getChequeNumber()
+                            .trim();
+
+            String targetPage;
+
+            if ("MICR".equalsIgnoreCase(
+                    cleanRepairType
+            )) {
+                targetPage =
+                        "outward-maker-micr-repair-detail.zul";
+            } else {
+                targetPage =
+                        "outward-maker-data-entry.zul";
+            }
+
+            String url =
+                    "/zul/outward/outward-maker/"
+                            + targetPage
+                            + "?batchNumber="
+                            + encode(cleanBatchNumber)
+                            + "&returnMode=HOLD"
+                            + "&repairType="
+                            + encode(cleanRepairType)
+                            + "&chequeNumber="
+                            + encode(chequeNumber);
+
+            System.out.println(
+                    "Opening returned repair : "
+                            + url
+            );
+
+            Executions.sendRedirect(url);
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            Messagebox.show(
+                    "Unable to open returned "
+                            + cleanRepairType
+                            + " repair.\n\n"
+                            + "Batch: "
+                            + cleanBatchNumber
+                            + "\n\n"
+                            + "Error: "
+                            + safeExceptionMessage(e),
+                    "Returned Repair Error",
+                    Messagebox.OK,
+                    Messagebox.ERROR
+            );
+        }
+    }
+
+
 
 
     // =========================================================

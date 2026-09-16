@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Session;
+import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Textbox;
@@ -38,7 +39,7 @@ public class LoginComposer extends GenericForwardComposer<Component> {
         auditLogService = new AuditLogServiceImpl();
     }
 
-	public void onClick$loginButton() {
+	public void onClick$loginButton(Event event) {
 
         String usernameValue = username.getValue();
         String passwordValue = password.getValue();

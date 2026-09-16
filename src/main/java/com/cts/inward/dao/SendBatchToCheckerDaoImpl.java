@@ -36,10 +36,14 @@ public class SendBatchToCheckerDaoImpl implements SendBatchToCheckerDao {
                     b.presenting_bank_name, 
                     b.total_cheques
                 FROM inward_batch b
-                LEFT JOIN LATERAL (
+                INNER JOIN LATERAL (
                     SELECT bl.user_id, bl.lock_status
                     FROM inward_batch_lock bl
+                    INNER JOIN public."user" u ON u.user_id = bl.user_id
+                    INNER JOIN public."role" r ON r.role_id = u.role_id
                     WHERE bl.batch_id = b.batch_id
+                      AND u.status = 'ACTIVE'
+                      AND r.role_name = 'INWARD_MAKER'
                     ORDER BY bl.locked_time DESC, bl.lock_id DESC
                     LIMIT 1
                 ) l ON TRUE
@@ -50,7 +54,20 @@ public class SendBatchToCheckerDaoImpl implements SendBatchToCheckerDao {
                     ORDER BY h.changed_on DESC NULLS LAST, h.batch_history_id DESC
                     LIMIT 1
                 ) = 'DATA_ENTRY_COMPLETED'
-                  AND (l.lock_status IS NULL OR l.lock_status <> 'LOCKED' OR (? IS NOT NULL AND l.user_id = ?))
+                  AND l.lock_status = 'LOCKED'
+                """ + (userId != null ? """
+                  AND (
+                      l.user_id = ?
+                      OR (
+                          SELECT h2.changed_by
+                          FROM inward_batch_history h2
+                          WHERE h2.batch_id = b.batch_id
+                            AND h2.batch_status = 'DATA_ENTRY_COMPLETED'
+                          ORDER BY h2.changed_on DESC NULLS LAST, h2.batch_history_id DESC
+                          LIMIT 1
+                      ) = ?
+                  )
+                """ : "") + """
                 ORDER BY b.batch_id
                 """;
 
@@ -63,9 +80,6 @@ public class SendBatchToCheckerDaoImpl implements SendBatchToCheckerDao {
             if (userId != null) {
                 statement.setLong(1, userId);
                 statement.setLong(2, userId);
-            } else {
-                statement.setNull(1, java.sql.Types.BIGINT);
-                statement.setNull(2, java.sql.Types.BIGINT);
             }
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
@@ -156,7 +170,7 @@ public class SendBatchToCheckerDaoImpl implements SendBatchToCheckerDao {
                     }
                 }
 
-                // 4. Update batch history status
+                // 4. Update batch history status (update existing row, fallback to insert if none exists)
                 String updateHistorySql = """
                         UPDATE inward_batch_history
                         SET batch_status = 'SENT_TO_CHECKER',
@@ -164,7 +178,6 @@ public class SendBatchToCheckerDaoImpl implements SendBatchToCheckerDao {
                             reason = 'Forwarded to Inward Checker',
                             remarks = 'Actioned from UI'
                         WHERE batch_id = ?
-                          AND batch_status IN ('DATA_ENTRY_COMPLETED', 'RETURN_TO_MAKER')
                         """;
                 int rowsAffected = 0;
                 try (PreparedStatement historyStmt = connection.prepareStatement(updateHistorySql)) {
@@ -184,17 +197,37 @@ public class SendBatchToCheckerDaoImpl implements SendBatchToCheckerDao {
                     }
                 }
 
-                // 5. Insert SENT_TO_CHECKER status for all cheques in the batch
-                String insertChequeSql = """
-                        INSERT INTO inward_cheque_status_history
-                        (cheque_number, status)
-                        SELECT cheque_number, 'SENT_TO_CHECKER'
-                        FROM inward_cheque
-                        WHERE batch_id = ?
+                // 5. Update existing status to SENT_TO_CHECKER for cheques in the batch (excluding RETURN_BY_MAKER, ACCEPT, REJECT)
+                String updateChequeSql = """
+                        UPDATE inward_cheque_status_history
+                        SET status = 'SENT_TO_CHECKER'
+                        WHERE cheque_number IN (
+                            SELECT c.cheque_number
+                            FROM inward_cheque c
+                            WHERE c.batch_id = ?
+                        )
+                        AND status NOT IN ('RETURN_BY_MAKER', 'ACCEPT', 'REJECT')
                         """;
-                try (PreparedStatement chequeStmt = connection.prepareStatement(insertChequeSql)) {
+                try (PreparedStatement chequeStmt = connection.prepareStatement(updateChequeSql)) {
                     chequeStmt.setLong(1, batchId);
                     chequeStmt.executeUpdate();
+                }
+
+                // 5b. Fallback: insert for any cheque in batch that has no row in status history yet
+                String insertMissingChequeSql = """
+                        INSERT INTO inward_cheque_status_history
+                        (cheque_number, status)
+                        SELECT c.cheque_number, 'SENT_TO_CHECKER'
+                        FROM inward_cheque c
+                        WHERE c.batch_id = ?
+                          AND NOT EXISTS (
+                              SELECT 1 FROM inward_cheque_status_history h
+                              WHERE h.cheque_number = c.cheque_number
+                          )
+                        """;
+                try (PreparedStatement insertMissingStmt = connection.prepareStatement(insertMissingChequeSql)) {
+                    insertMissingStmt.setLong(1, batchId);
+                    insertMissingStmt.executeUpdate();
                 }
 
                 connection.commit();

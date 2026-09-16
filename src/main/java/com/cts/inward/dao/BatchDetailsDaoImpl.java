@@ -87,16 +87,36 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
 
         String sql = """
                 SELECT
-                    cheque_number,
-                    batch_id,
-                    account_number,
-                    payee_name,
-                    amount,
-                    micr_code,
-                    cheque_date
-                FROM inward_cheque
-                WHERE batch_id = ?
-                ORDER BY cheque_number
+                    c.cheque_number,
+                    c.batch_id,
+                    c.account_number,
+                    c.payee_name,
+                    c.amount,
+                    c.micr_code,
+                    c.cheque_date,
+                    latest.status AS cheque_status,
+                    latest.return_reason_code,
+                    r.description AS return_reason_description,
+                    latest.remarks AS maker_remarks,
+                    ocr.micr_code AS ocr_micr_code
+                FROM inward_cheque c
+                LEFT JOIN LATERAL (
+                    SELECT h.status, h.return_reason_code, h.remarks
+                    FROM inward_cheque_status_history h
+                    WHERE h.cheque_number = c.cheque_number
+                    ORDER BY h.status_history_id DESC
+                    LIMIT 1
+                ) latest ON TRUE
+                LEFT JOIN inward_cheque_return_reason r ON latest.return_reason_code = r.return_reason_code
+                LEFT JOIN LATERAL (
+                    SELECT o.micr_code
+                    FROM public.ocr_cheque_data o
+                    WHERE o.cheque_number = c.cheque_number OR o.inward_cheque_id = c.inward_cheque_id
+                    ORDER BY o.inward_cheque_id DESC
+                    LIMIT 1
+                ) ocr ON TRUE
+                WHERE c.batch_id = ?
+                ORDER BY c.cheque_number
                 """;
 
         List<Map<String, Object>> cheques = new java.util.ArrayList<>();
@@ -151,6 +171,31 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
                             "chequeDate",
                             resultSet.getDate(
                                     "cheque_date"));
+
+                    cheque.put(
+                            "status",
+                            resultSet.getString(
+                                    "cheque_status"));
+
+                    cheque.put(
+                            "returnReasonCode",
+                            resultSet.getString(
+                                    "return_reason_code"));
+
+                    cheque.put(
+                            "returnReasonDescription",
+                            resultSet.getString(
+                                    "return_reason_description"));
+
+                    cheque.put(
+                            "makerRemarks",
+                            resultSet.getString(
+                                    "maker_remarks"));
+
+                    cheque.put(
+                            "ocrMicrCode",
+                            resultSet.getString(
+                                    "ocr_micr_code"));
 
                     cheques.add(cheque);
                 }
@@ -455,6 +500,39 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
     }
 
     @Override
+    public List<Map<String, String>> getMakerReturnReasons(String chequeNumber) {
+        List<Map<String, String>> list = new ArrayList<>();
+        if (chequeNumber == null || chequeNumber.trim().isEmpty()) {
+            return list;
+        }
+        String sql = """
+                SELECT DISTINCT h.return_reason_code, r.description, h.remarks
+                FROM inward_cheque_status_history h
+                LEFT JOIN inward_cheque_return_reason r ON h.return_reason_code = r.return_reason_code
+                WHERE h.cheque_number = ?
+                  AND h.status = 'RETURN_BY_MAKER'
+                  AND h.return_reason_code IS NOT NULL
+                ORDER BY h.return_reason_code
+                """;
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, chequeNumber.trim());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, String> map = new HashMap<>();
+                    map.put("returnReasonCode", rs.getString("return_reason_code"));
+                    map.put("description", rs.getString("description"));
+                    map.put("remarks", rs.getString("remarks"));
+                    list.add(map);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    @Override
     public void saveCheckerDecision(
             String chequeNumber,
             String status,
@@ -495,7 +573,6 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
                     SELECT status_history_id
                     FROM inward_cheque_status_history
                     WHERE cheque_number = ?
-                      AND status = 'SENT_TO_CHECKER'
                     ORDER BY status_history_id DESC
                     LIMIT 1
                 )
@@ -662,20 +739,43 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
                     }
                 }
 
-                String insertCompletedHistorySql = """
-                        INSERT INTO inward_batch_history
-                        (batch_id, batch_status, changed_on, changed_by, reason, remarks)
-                        VALUES (?, 'COMPLETED', CURRENT_TIMESTAMP, ?, 'Verification completed by Checker', 'All cheques verified successfully')
+                String updateCompletedHistorySql = """
+                        UPDATE inward_batch_history
+                        SET batch_status = 'COMPLETED',
+                            changed_on = CURRENT_TIMESTAMP,
+                            changed_by = ?,
+                            reason = 'Verification completed by Checker',
+                            remarks = 'All cheques verified successfully'
+                        WHERE batch_id = ?
                         """;
 
-                try (PreparedStatement ps = connection.prepareStatement(insertCompletedHistorySql)) {
-                    ps.setLong(1, batchId);
+                int updatedComp = 0;
+                try (PreparedStatement ps = connection.prepareStatement(updateCompletedHistorySql)) {
                     if (checkerId != null) {
-                        ps.setInt(2, checkerId);
+                        ps.setInt(1, checkerId);
                     } else {
-                        ps.setNull(2, java.sql.Types.INTEGER);
+                        ps.setNull(1, java.sql.Types.INTEGER);
                     }
-                    ps.executeUpdate();
+                    ps.setLong(2, batchId);
+                    updatedComp = ps.executeUpdate();
+                }
+
+                if (updatedComp == 0) {
+                    String insertCompletedHistorySql = """
+                            INSERT INTO inward_batch_history
+                            (batch_id, batch_status, changed_on, changed_by, reason, remarks)
+                            VALUES (?, 'COMPLETED', CURRENT_TIMESTAMP, ?, 'Verification completed by Checker', 'All cheques verified successfully')
+                            """;
+
+                    try (PreparedStatement ps = connection.prepareStatement(insertCompletedHistorySql)) {
+                        ps.setLong(1, batchId);
+                        if (checkerId != null) {
+                            ps.setInt(2, checkerId);
+                        } else {
+                            ps.setNull(2, java.sql.Types.INTEGER);
+                        }
+                        ps.executeUpdate();
+                    }
                 }
 
                 connection.commit();
@@ -736,22 +836,36 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
             }
 
             // =========================================================
-            // Step 2: Insert RETURN_TO_MAKER record in inward_batch_history
+            // Step 2: Update/Insert RETURN_TO_MAKER record in inward_batch_history
             // =========================================================
-            String insertHistorySql = """
-                    INSERT INTO inward_batch_history
-                    (batch_id, batch_status, changed_on, changed_by, reason, remarks)
-                    VALUES (?, 'RETURN_TO_MAKER', CURRENT_TIMESTAMP, ?, 'Returned to Maker by Checker', 'Cheque(s) returned for reprocessing')
+            String updateReturnHistorySql = """
+                    UPDATE inward_batch_history
+                    SET batch_status = 'RETURN_TO_MAKER',
+                        changed_on = CURRENT_TIMESTAMP,
+                        changed_by = ?,
+                        reason = 'Returned to Maker by Checker',
+                        remarks = 'Cheque(s) returned for reprocessing'
+                    WHERE batch_id = ?
                     """;
 
-            try (PreparedStatement ps = connection.prepareStatement(insertHistorySql)) {
-                ps.setLong(1, batchId);
-                ps.setInt(2, makerId);
+            int returnHistUpdated = 0;
+            try (PreparedStatement ps = connection.prepareStatement(updateReturnHistorySql)) {
+                ps.setInt(1, makerId);
+                ps.setLong(2, batchId);
+                returnHistUpdated = ps.executeUpdate();
+            }
 
-                int historyRows = ps.executeUpdate();
-                if (historyRows == 0) {
-                    throw new IllegalStateException(
-                            "Failed to insert RETURN_TO_MAKER into inward_batch_history for batch " + batchId);
+            if (returnHistUpdated == 0) {
+                String insertHistorySql = """
+                        INSERT INTO inward_batch_history
+                        (batch_id, batch_status, changed_on, changed_by, reason, remarks)
+                        VALUES (?, 'RETURN_TO_MAKER', CURRENT_TIMESTAMP, ?, 'Returned to Maker by Checker', 'Cheque(s) returned for reprocessing')
+                        """;
+
+                try (PreparedStatement ps = connection.prepareStatement(insertHistorySql)) {
+                    ps.setLong(1, batchId);
+                    ps.setInt(2, makerId);
+                    ps.executeUpdate();
                 }
             }
 

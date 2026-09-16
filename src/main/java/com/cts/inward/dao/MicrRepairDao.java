@@ -39,6 +39,9 @@ public interface MicrRepairDao {
     boolean isBatchReturnedToMaker(
             long batchId);
 
+    boolean chequeNeedsMicrRepair(
+            String chequeNumber);
+
 
     /*
      * -------------------------------------------------------------------------

@@ -19,6 +19,8 @@ public class IncomingFileWatcherImpl implements IncomingFileWatcher {
     private final FileProcessingExecutor fileProcessingExecutor;
 
     private final AtomicBoolean running = new AtomicBoolean(false);
+    private final java.util.Set<String> submittedFiles =
+            java.util.concurrent.ConcurrentHashMap.newKeySet();
 
     private IncomingFileWatcherImpl(
             FileConfiguration fileConfiguration,
@@ -114,6 +116,10 @@ public class IncomingFileWatcherImpl implements IncomingFileWatcher {
                 ordered.add(filesByType.get("pibf"));
             }
 
+            for (String filePath : ordered) {
+                submittedFiles.add(normalizeFilePath(filePath));
+            }
+
             System.out.println(
                     "[FileWatcher] Submitting batch: "
                     + batchName
@@ -122,6 +128,10 @@ public class IncomingFileWatcherImpl implements IncomingFileWatcher {
 
             fileProcessingExecutor.submitBatch(ordered);
         }
+    }
+
+    private String normalizeFilePath(String path) {
+        return Path.of(path).toAbsolutePath().normalize().toString().replace("\\", "/").toLowerCase();
     }
 
     private void collectFiles(
@@ -240,6 +250,14 @@ public class IncomingFileWatcherImpl implements IncomingFileWatcher {
                         watchedDirectory.resolve(fileName);
 
                 if (!Files.isRegularFile(filePath)) {
+                    continue;
+                }
+
+                String normalized = normalizeFilePath(filePath.toString());
+                if (!submittedFiles.add(normalized)) {
+                    System.out.println(
+                            "[FileWatcher] Skipping already submitted file: "
+                            + filePath);
                     continue;
                 }
 

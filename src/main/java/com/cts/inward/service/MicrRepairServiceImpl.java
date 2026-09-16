@@ -2,8 +2,10 @@ package com.cts.inward.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.cts.inward.dao.BatchDao;
 import com.cts.inward.dao.BatchDaoImpl;
@@ -199,16 +201,58 @@ public class MicrRepairServiceImpl implements MicrRepairService {
         boolean isBatchReturned =
                 micrRepairDao.isBatchReturnedToMaker(batchId);
 
+        // =========================================================
+        // BATCH QUERY OPTIMIZATION (Option C)
+        // Pre-fetch statuses, repaired MICRs, and master validity
+        // in bulk instead of 5 individual queries per cheque.
+        // =========================================================
+        List<String> allChequeNumbers = new ArrayList<>();
+        Set<String> allMicrCodes = new HashSet<>();
+
+        for (NpciChequeData npci : npciCheques) {
+            if (npci != null && npci.getChequeNumber() != null) {
+                allChequeNumbers.add(npci.getChequeNumber().trim());
+                String npciMicr = normalizeMicr(npci.getMicrCode());
+                if (!npciMicr.isEmpty()) {
+                    allMicrCodes.add(npciMicr);
+                }
+            }
+        }
+        for (OcrChequeData ocr : ocrCheques) {
+            if (ocr != null) {
+                String ocrMicr = normalizeMicr(ocr.getMicrCode());
+                if (!ocrMicr.isEmpty()) {
+                    allMicrCodes.add(ocrMicr);
+                }
+            }
+        }
+
+        Map<String, String> latestStatuses =
+                micrRepairDao.getLatestChequeStatuses(allChequeNumbers);
+
+        Map<String, String> completedRepairs =
+                micrRepairDao.getCompletedRepairedMicrs(allChequeNumbers);
+
+        for (String rep : completedRepairs.values()) {
+            if (rep != null && rep.trim().length() == 9) {
+                allMicrCodes.add(rep.trim());
+            }
+        }
+
+        Set<String> validMasterMicrs =
+                micrMasterDao.findExistingMicrCodes(allMicrCodes);
+
+        Map<String, String> returnReasons =
+                micrRepairDao.getLatestChequeReturnReasons(allChequeNumbers);
+
         for (NpciChequeData npci : npciCheques) {
 
             if (npci == null) {
                 continue;
             }
 
-            String latestStatus =
-                    micrRepairDao.getLatestChequeStatus(
-                            npci.getChequeNumber()
-                    );
+            String chqNo = npci.getChequeNumber() != null ? npci.getChequeNumber().trim() : "";
+            String latestStatus = latestStatuses.get(chqNo);
 
             boolean returnByMaker =
                     STATUS_RETURN_BY_MAKER.equalsIgnoreCase(
@@ -222,13 +266,8 @@ public class MicrRepairServiceImpl implements MicrRepairService {
             }
 
             if (isBatchReturned) {
-                if (!"RETURN_TO_MAKER".equalsIgnoreCase(latestStatus) && !returnByMaker) {
+                if (!micrRepairDao.chequeNeedsMicrRepair(chqNo)) {
                     continue;
-                }
-                if ("RETURN_TO_MAKER".equalsIgnoreCase(latestStatus)) {
-                    if (!micrRepairDao.chequeNeedsMicrRepair(npci.getChequeNumber())) {
-                        continue;
-                    }
                 }
             }
 
@@ -359,11 +398,11 @@ public class MicrRepairServiceImpl implements MicrRepairService {
 
             boolean npciMicrFound =
                     !npciMicr.isEmpty()
-                    && micrMasterDao.exists(npciMicr);
+                    && validMasterMicrs.contains(npciMicr);
 
             boolean ocrMicrFound =
                     !ocrMicr.isEmpty()
-                    && micrMasterDao.exists(ocrMicr);
+                    && validMasterMicrs.contains(ocrMicr);
 
             comparison.setNpciMicrFoundInMaster(
                     npciMicrFound
@@ -381,10 +420,7 @@ public class MicrRepairServiceImpl implements MicrRepairService {
                     || !npciMicrFound;
 
             // Check if this cheque was already repaired
-            String completedMicr =
-                    micrRepairDao.getCompletedRepairedMicr(
-                            npci.getChequeNumber()
-                    );
+            String completedMicr = completedRepairs.get(chqNo);
 
             if (completedMicr != null && completedMicr.trim().length() == 9) {
                 String rep = completedMicr.trim();
@@ -393,20 +429,21 @@ public class MicrRepairServiceImpl implements MicrRepairService {
                 comparison.setRepairedBankCode(rep.substring(3, 6));
                 comparison.setRepairedBranchCode(rep.substring(6, 9));
 
-                if (micrMasterDao.exists(rep)) {
+                if (validMasterMicrs.contains(rep)) {
                     needsRepair = false;
                 }
             }
 
-
             if (returnByMaker) {
                 needsRepair = false;
                 comparison.setReturnByMaker(true);
-                String returnReason =
-                        micrRepairDao.getLatestChequeReturnReason(
-                                npci.getChequeNumber()
-                        );
+                String returnReason = returnReasons.get(chqNo);
                 comparison.setReturnReasonCode(returnReason);
+            }
+
+            if (isBatchReturned && "RETURN_TO_MAKER".equalsIgnoreCase(latestStatus)) {
+                needsRepair = true;
+                micrRepaired = false;
             }
 
             comparison.setNeedsMicrRepair(

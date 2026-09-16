@@ -97,7 +97,7 @@
 		radial-gradient(1000px 600px at 100% 0%, rgba(122, 90, 248, 0.10),
 		transparent 60%),
 		radial-gradient(900px 700px at 100% 100%, rgba(18, 183, 106, 0.07),
-		transparent 60%), linear-gradient(180deg, var(--bg-app-1) 0%,
+		transparent 60%), linear-gradient(180deg, var(--bg-app) 0%,
 		var(--bg-app-2) 100%);
 	position: relative;
 	overflow: hidden;

@@ -33,13 +33,6 @@ public class OutwardCheque implements Serializable {
     private String drawerName;
 
     // =========================
-    // DEPOSITOR
-    // =========================
-
-    private String depositorAccountNumber;
-    private String depositorName;
-
-    // =========================
     // PAYEE
     // =========================
 
@@ -155,21 +148,6 @@ public class OutwardCheque implements Serializable {
         this.drawerName = drawerName;
     }
 
-    public String getDepositorAccountNumber() {
-        return depositorAccountNumber;
-    }
-
-    public void setDepositorAccountNumber(String depositorAccountNumber) {
-        this.depositorAccountNumber = depositorAccountNumber;
-    }
-
-    public String getDepositorName() {
-        return depositorName;
-    }
-
-    public void setDepositorName(String depositorName) {
-        this.depositorName = depositorName;
-    }
 
     public String getPayeeName() {
         return payeeName;
@@ -296,8 +274,6 @@ public class OutwardCheque implements Serializable {
                 + ", branchCode=" + branchCode
                 + ", drawerAccountNumber=" + drawerAccountNumber
                 + ", drawerName=" + drawerName
-                + ", depositorAccountNumber=" + depositorAccountNumber
-                + ", depositorName=" + depositorName
                 + ", payeeName=" + payeeName
                 + ", payeeAccountNumber=" + payeeAccountNumber
                 + ", amount=" + amount

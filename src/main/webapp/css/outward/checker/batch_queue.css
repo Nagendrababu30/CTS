@@ -1,55 +1,1325 @@
+@charset "UTF-8";
+
 /* =========================================================
-   BATCH QUEUE
+   CHECKER BATCH QUEUE
+   Same UI style as Send to Checker / Reports
+   ========================================================= */
+
+
+/* =========================================================
+   GLOBAL TOKENS
+   ========================================================= */
+
+:root {
+    --bg-app-1: #EBF2FD;
+    --bg-app-2: #E4ECF8;
+
+    --bg-surface: #FFFFFF;
+    --bg-subtle: #F9FAFB;
+
+    --border-light: #E4EAF3;
+    --border-mid: #D0D5DD;
+
+    --text-primary: #0B1F3F;
+    --text-secondary: #2B3A55;
+    --text-muted: #667085;
+
+    --brand-blue: #175CD3;
+    --brand-blue-hover: #154EB5;
+
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 10px;
+
+    --shadow-card:
+        0 2px 8px rgba(16, 24, 40, 0.05);
+}
+
+
+/* =========================================================
+   PAGE BACKGROUND
    ========================================================= */
 
 .checker-page-content {
-    padding: 24px 32px;
-    box-sizing: border-box;
+    width: 100% !important;
+    height: 100% !important;
+
+    box-sizing: border-box !important;
+
+    background:
+        linear-gradient(
+            180deg,
+            var(--bg-app-1) 0%,
+            var(--bg-app-2) 100%
+        ) !important;
+
+    position: relative !important;
+
+    overflow: hidden !important;
 }
 
-/* Page title */
-.page-title {
-    font-size: 28px;
-    font-weight: 600;
-    margin-bottom: 4px;
+
+/* =========================================================
+   MAIN CONTENT
+   ========================================================= */
+
+.checker-batch-layout {
+    width: 100% !important;
+    height: 100% !important;
+
+    box-sizing: border-box !important;
+
+    padding: 24px 30px !important;
+
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+
+    background: transparent !important;
 }
 
-/* Page subtitle */
-.page-subtitle {
-    font-size: 16px;
-    margin-bottom: 8px;
+
+/* =========================================================
+   HEADER ROW
+   ========================================================= */
+
+.batch-header-row {
+    width: 100% !important;
+
+    background: transparent !important;
 }
 
-/* Search row */
-.search-row {
-    margin-top: 8px;
-    margin-bottom: 4px;
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.batch-header {
+    width: 100% !important;
+
+    background: transparent !important;
 }
 
-/* Search box */
-.search-box {
-    height: 42px;
+
+/* =========================================================
+   PAGE TITLE
+   ========================================================= */
+
+.batch-title {
+    font-family:
+        'Inter',
+        'Plus Jakarta Sans',
+        'Segoe UI',
+        Arial,
+        sans-serif !important;
+
+    font-size: 30px !important;
+
+    font-weight: 700 !important;
+
+    color:
+        var(--text-primary) !important;
+
+    letter-spacing:
+        -0.03em !important;
+
+    position: relative !important;
+
+    display: inline-block !important;
 }
 
-/* Buttons */
-.primary-button,
-.secondary-button {
-    height: 42px;
+
+/* =========================================================
+   BLUE TITLE UNDERLINE
+   ========================================================= */
+
+.batch-title::after {
+    content: '' !important;
+
+    display: block !important;
+
+    width: 50px !important;
+
+    height: 3px !important;
+
+    margin-top: 7px !important;
+
+    background:
+        var(--brand-blue) !important;
+
+    border-radius: 3px !important;
 }
 
-/* Section title */
-.section-title {
-    font-size: 17px;
-    margin-top: 4px;
-    margin-bottom: 4px;
+
+/* =========================================================
+   SUBTITLE
+   ========================================================= */
+
+.batch-subtitle {
+    font-family:
+        'Inter',
+        'Segoe UI',
+        Arial,
+        sans-serif !important;
+
+    font-size: 13px !important;
+
+    font-weight: 500 !important;
+
+    color:
+        var(--text-muted) !important;
+
+    line-height: 1.4 !important;
 }
 
-/* Batch table */
-.checker-batch-listbox {
-    width: 100%;
+
+/* =========================================================
+   SEARCH PANEL
+   ========================================================= */
+
+.batch-search-panel {
+    width: 100% !important;
+
+    box-sizing: border-box !important;
+
+    background: transparent !important;
 }
 
-/* Pagination */
-.pagination-container {
-    margin-top: 4px;
+
+/* =========================================================
+   SEARCH BOX
+   ========================================================= */
+
+.batch-search-box {
+    height: 42px !important;
+
+    box-sizing: border-box !important;
+
+    border:
+        1px solid #D0D5DD !important;
+
+    border-radius:
+        6px !important;
+
+    background:
+        #FFFFFF !important;
+
+    color:
+        #344054 !important;
+
+    font-family:
+        'Inter',
+        'Segoe UI',
+        Arial,
+        sans-serif !important;
+
+    font-size:
+        13px !important;
+
+    padding:
+        0 12px !important;
+}
+
+
+/* =========================================================
+   SEARCH BOX FOCUS
+   ========================================================= */
+
+.batch-search-box:focus {
+    border-color:
+        var(--brand-blue) !important;
+
+    box-shadow:
+        0 0 0 2px
+        rgba(23, 92, 211, 0.10) !important;
+}
+
+
+/* =========================================================
+   SEARCH BUTTON
+   ========================================================= */
+
+.batch-search-button {
+    min-height: 40px !important;
+
+    padding:
+        8px 20px !important;
+
+    border:
+        1px solid
+        var(--brand-blue) !important;
+
+    border-radius:
+        6px !important;
+
+    background:
+        var(--brand-blue) !important;
+
+    color:
+        #FFFFFF !important;
+
+    font-family:
+        'Inter',
+        'Segoe UI',
+        Arial,
+        sans-serif !important;
+
+    font-size:
+        13px !important;
+
+    font-weight:
+        600 !important;
+
+    cursor:
+        pointer !important;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease !important;
+}
+
+
+.batch-search-button:hover {
+    background:
+        var(--brand-blue-hover) !important;
+
+    border-color:
+        var(--brand-blue-hover) !important;
+
+    box-shadow:
+        0 3px 8px
+        rgba(23, 92, 211, 0.25) !important;
+}
+
+
+/* =========================================================
+   REFRESH BUTTON
+   ========================================================= */
+
+.batch-refresh-button {
+    min-height: 40px !important;
+
+    padding:
+        8px 20px !important;
+
+    border:
+        1px solid
+        var(--brand-blue) !important;
+
+    border-radius:
+        6px !important;
+
+    background:
+        var(--brand-blue) !important;
+
+    color:
+        #FFFFFF !important;
+
+    font-family:
+        'Inter',
+        'Segoe UI',
+        Arial,
+        sans-serif !important;
+
+    font-size:
+        13px !important;
+
+    font-weight:
+        600 !important;
+
+    cursor:
+        pointer !important;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease !important;
+}
+
+
+.batch-refresh-button:hover {
+    background:
+        var(--brand-blue-hover) !important;
+
+    border-color:
+        var(--brand-blue-hover) !important;
+
+    box-shadow:
+        0 3px 8px
+        rgba(23, 92, 211, 0.25) !important;
+}
+
+
+/* =========================================================
+   BATCH SECTION / WHITE CARD
+   ========================================================= */
+
+.batch-section {
+    width: 100% !important;
+
+    box-sizing: border-box !important;
+
+    padding:
+        20px 24px 14px 24px !important;
+
+    background:
+        #FFFFFF !important;
+
+    border:
+        1px solid
+        var(--border-light) !important;
+
+    border-radius:
+        10px !important;
+
+    box-shadow:
+        var(--shadow-card) !important;
+
+    position:
+        relative !important;
+
+    overflow:
+        hidden !important;
+}
+
+
+/* =========================================================
+   BLUE TOP LINE
+   ========================================================= */
+
+.batch-section::before {
+    content: '' !important;
+
+    position: absolute !important;
+
+    top: 0 !important;
+
+    left: 0 !important;
+
+    right: 0 !important;
+
+    height: 3.5px !important;
+
+    background:
+        var(--brand-blue) !important;
+
+    display: block !important;
+}
+
+
+/* =========================================================
+   SECTION HEADER
+   ========================================================= */
+
+.batch-section-header {
+    width: 100% !important;
+
+    padding-bottom:
+        14px !important;
+
+    background:
+        transparent !important;
+}
+
+
+/* =========================================================
+   SECTION TITLE
+   ========================================================= */
+
+.batch-section-title {
+    font-family:
+        'Inter',
+        'Segoe UI',
+        Arial,
+        sans-serif !important;
+
+    font-size:
+        18px !important;
+
+    font-weight:
+        800 !important;
+
+    color:
+        var(--text-primary) !important;
+
+    position:
+        relative !important;
+
+    padding-left:
+        14px !important;
+}
+
+
+/* =========================================================
+   BLUE VERTICAL BAR
+   ========================================================= */
+
+.batch-section-title::before {
+    content: '' !important;
+
+    position: absolute !important;
+
+    left: 0 !important;
+
+    top: 50% !important;
+
+    transform:
+        translateY(-50%) !important;
+
+    width:
+        4px !important;
+
+    height:
+        18px !important;
+
+    background:
+        var(--brand-blue) !important;
+
+    border-radius:
+        2px !important;
+
+    display:
+        block !important;
+}
+
+
+/* =========================================================
+   BATCH TABLE
+   ========================================================= */
+
+.checker-batch-table {
+    width: 100% !important;
+
+    box-sizing: border-box !important;
+
+    border:
+        1px solid
+        var(--border-light) !important;
+
+    border-radius:
+        var(--radius-md) !important;
+
+    background:
+        var(--bg-surface) !important;
+
+    box-shadow:
+        none !important;
+
+    overflow:
+        hidden !important;
+
+    margin:
+        0 !important;
+}
+
+
+/* =========================================================
+   TABLE HEADER
+   ========================================================= */
+
+.checker-batch-table
+.z-listhead {
+    background:
+        var(--brand-blue) !important;
+
+    border:
+        none !important;
+
+    box-shadow:
+        none !important;
+
+    height:
+        62px !important;
+}
+
+
+/* =========================================================
+   TABLE HEADER CELLS
+   ========================================================= */
+
+.checker-batch-table
+.z-listheader {
+    background:
+        var(--brand-blue) !important;
+
+    border-right:
+        none !important;
+
+    border-bottom:
+        none !important;
+
+    padding:
+        0 !important;
+
+    margin:
+        0 !important;
+
+    vertical-align:
+        middle !important;
+
+    height:
+        62px !important;
+}
+
+
+/* =========================================================
+   TABLE HEADER CONTENT
+   ========================================================= */
+
+.checker-batch-table
+.z-listheader-content {
+
+    background:
+        transparent !important;
+
+    font-family:
+        'Inter',
+        'Plus Jakarta Sans',
+        'Segoe UI',
+        Arial,
+        sans-serif !important;
+
+    font-weight:
+        700 !important;
+
+    font-size:
+        13px !important;
+
+    letter-spacing:
+        0.06em !important;
+
+    text-transform:
+        uppercase !important;
+
+    color:
+        #FFFFFF !important;
+
+    padding:
+        0 20px !important;
+
+    height:
+        62px !important;
+
+    line-height:
+        1.4 !important;
+
+    text-align:
+        center !important;
+
+    vertical-align:
+        middle !important;
+
+    box-sizing:
+        border-box !important;
+
+    display:
+        flex !important;
+
+    align-items:
+        center !important;
+
+    justify-content:
+        center !important;
+
+    white-space:
+        nowrap !important;
+}
+
+
+/* =========================================================
+   EVERYTHING INSIDE HEADER
+   ========================================================= */
+
+.checker-batch-table
+.z-listheader * {
+
+    color:
+        #FFFFFF !important;
+
+    font-weight:
+        700 !important;
+
+    font-size:
+        13px !important;
+
+    background:
+        transparent !important;
+}
+
+
+/* =========================================================
+   REMOVE HEADER DECORATION
+   ========================================================= */
+
+.checker-batch-table
+.z-listheader::after {
+
+    content:
+        none !important;
+
+    display:
+        none !important;
+}
+
+
+/* =========================================================
+   DATA ROW
+   ========================================================= */
+
+.checker-batch-table
+.z-listitem {
+
+    height:
+        54px !important;
+
+    min-height:
+        54px !important;
+
+    background:
+        #FFFFFF !important;
+
+    border-bottom:
+        1px solid
+        #EEF2F8 !important;
+
+    transition:
+        background 0.2s ease !important;
+}
+
+
+/* =========================================================
+   ALTERNATE ROW
+   ========================================================= */
+
+.checker-batch-table
+.z-listitem:nth-child(even) {
+
+    background:
+        #FAFCFF !important;
+}
+
+
+/* =========================================================
+   ROW HOVER
+   ========================================================= */
+
+.checker-batch-table
+.z-listitem:hover {
+
+    background:
+        #F5F9FF !important;
+}
+
+
+/* =========================================================
+   TABLE CELLS
+   ========================================================= */
+
+.checker-batch-table
+.z-listcell {
+
+    height:
+        54px !important;
+
+    border-right:
+        none !important;
+
+    border-bottom:
+        none !important;
+
+    vertical-align:
+        middle !important;
+
+    text-align:
+        center !important;
+
+    padding:
+        0 !important;
+}
+
+
+/* =========================================================
+   CELL CONTENT
+   ========================================================= */
+
+.checker-batch-table
+.z-listcell-content {
+
+    height:
+        54px !important;
+
+    box-sizing:
+        border-box !important;
+
+    padding:
+        0 14px !important;
+
+    display:
+        flex !important;
+
+    align-items:
+        center !important;
+
+    justify-content:
+        center !important;
+
+    font-family:
+        'Inter',
+        'Segoe UI',
+        Arial,
+        sans-serif !important;
+
+    font-size:
+        13px !important;
+
+    color:
+        var(--text-secondary) !important;
+
+    font-weight:
+        500 !important;
+
+    line-height:
+        1.4 !important;
+
+    text-align:
+        center !important;
+}
+
+
+/* =========================================================
+   BATCH NUMBER
+   ========================================================= */
+
+.checker-batch-table
+.z-listitem
+.z-listcell:nth-child(1)
+.z-listcell-content {
+
+    color:
+        var(--text-primary) !important;
+
+    font-weight:
+        600 !important;
+
+    text-align:
+        center !important;
+}
+
+
+/* =========================================================
+   TOTAL CHEQUES
+   ========================================================= */
+
+.checker-batch-table
+.z-listitem
+.z-listcell:nth-child(2)
+.z-listcell-content {
+
+    color:
+        var(--text-secondary) !important;
+
+    font-weight:
+        600 !important;
+
+    text-align:
+        center !important;
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.checker-batch-table
+.z-listitem
+.z-listcell:nth-child(3)
+.z-listcell-content {
+
+    color:
+        var(--text-secondary) !important;
+
+    font-weight:
+        600 !important;
+
+    text-align:
+        center !important;
+}
+
+
+/* =========================================================
+   ACTION
+   ========================================================= */
+
+.checker-batch-table
+.z-listitem
+.z-listcell:nth-child(4)
+.z-listcell-content {
+
+    text-align:
+        center !important;
+}
+
+
+/* =========================================================
+   ACTION BUTTON
+   ========================================================= */
+
+.checker-batch-table
+.btn-action {
+
+    min-height:
+        38px !important;
+
+    padding:
+        7px 18px !important;
+
+    border:
+        1px solid
+        var(--brand-blue) !important;
+
+    border-radius:
+        6px !important;
+
+    background:
+        var(--brand-blue) !important;
+
+    color:
+        #FFFFFF !important;
+
+    font-family:
+        'Inter',
+        'Segoe UI',
+        Arial,
+        sans-serif !important;
+
+    font-size:
+        13px !important;
+
+    font-weight:
+        600 !important;
+
+    cursor:
+        pointer !important;
+}
+
+
+/* =========================================================
+   ACTION BUTTON HOVER
+   ========================================================= */
+
+.checker-batch-table
+.btn-action:hover {
+
+    background:
+        var(--brand-blue-hover) !important;
+
+    border-color:
+        var(--brand-blue-hover) !important;
+}
+
+
+/* =========================================================
+   PAGINATION CONTAINER
+   ========================================================= */
+
+.batch-pagination {
+
+    width:
+        100% !important;
+
+    min-height:
+        52px !important;
+
+    box-sizing:
+        border-box !important;
+
+    padding:
+        10px 0 0 0 !important;
+
+    display:
+        flex !important;
+
+    justify-content:
+        flex-end !important;
+
+    align-items:
+        center !important;
+
+    background:
+        #FFFFFF !important;
+
+    border:
+        none !important;
+}
+
+
+/* =========================================================
+   ZK PAGING
+   ========================================================= */
+
+.batch-pagination
+.z-paging {
+
+    width:
+        auto !important;
+
+    height:
+        42px !important;
+
+    margin:
+        0 !important;
+
+    padding:
+        0 !important;
+
+    background:
+        transparent !important;
+
+    border:
+        none !important;
+
+    display:
+        flex !important;
+
+    align-items:
+        center !important;
+
+    justify-content:
+        flex-end !important;
+}
+
+
+/* =========================================================
+   PAGING BUTTONS
+   ========================================================= */
+
+.batch-pagination
+.z-paging-button,
+.batch-pagination
+.z-paging-link {
+
+    min-width:
+        32px !important;
+
+    width:
+        32px !important;
+
+    height:
+        36px !important;
+
+    margin:
+        0 2px !important;
+
+    padding:
+        0 !important;
+
+    background:
+        transparent !important;
+
+    border:
+        none !important;
+
+    color:
+        #98A2B3 !important;
+
+    font-size:
+        18px !important;
+
+    display:
+        inline-flex !important;
+
+    align-items:
+        center !important;
+
+    justify-content:
+        center !important;
+
+    box-shadow:
+        none !important;
+
+    cursor:
+        pointer !important;
+}
+
+
+/* =========================================================
+   PAGING HOVER
+   ========================================================= */
+
+.batch-pagination
+.z-paging-button:hover,
+.batch-pagination
+.z-paging-link:hover {
+
+    background:
+        transparent !important;
+
+    border:
+        none !important;
+
+    color:
+        var(--brand-blue) !important;
+}
+
+
+/* =========================================================
+   PAGE NUMBER INPUT
+   ========================================================= */
+
+.batch-pagination
+.z-paging-input {
+
+    width:
+        42px !important;
+
+    min-width:
+        42px !important;
+
+    height:
+        36px !important;
+
+    margin:
+        0 4px !important;
+
+    padding:
+        0 !important;
+
+    box-sizing:
+        border-box !important;
+
+    background:
+        #FFFFFF !important;
+
+    border:
+        1px solid
+        #D0D5DD !important;
+
+    border-radius:
+        6px !important;
+
+    color:
+        #101828 !important;
+
+    font-family:
+        'Inter',
+        'Segoe UI',
+        Arial,
+        sans-serif !important;
+
+    font-size:
+        14px !important;
+
+    text-align:
+        center !important;
+}
+
+
+/* =========================================================
+   TOTAL PAGE TEXT
+   ========================================================= */
+
+.batch-pagination
+.z-paging-text {
+
+    color:
+        #344054 !important;
+
+    font-family:
+        'Inter',
+        'Segoe UI',
+        Arial,
+        sans-serif !important;
+
+    font-size:
+        14px !important;
+
+    margin:
+        0 4px !important;
+}
+
+
+/* =========================================================
+   DISABLED PAGING BUTTONS
+   ========================================================= */
+
+.batch-pagination
+.z-paging-button[disabled],
+.batch-pagination
+.z-paging-link[disabled] {
+
+    color:
+        #C5CBD3 !important;
+
+    cursor:
+        default !important;
+
+    background:
+        transparent !important;
+}
+
+
+/* =========================================================
+   PAGINATION INSIDE CARD
+   ========================================================= */
+
+.batch-section
+.batch-pagination {
+
+    padding-right:
+        4px !important;
+
+    padding-bottom:
+        2px !important;
+}
+
+
+/* =========================================================
+   EMPTY MESSAGE
+   ========================================================= */
+
+.checker-batch-table
+.z-listbox-emptybody {
+
+    background:
+        #FFFFFF !important;
+
+    color:
+        var(--text-muted) !important;
+
+    font-family:
+        'Inter',
+        'Segoe UI',
+        Arial,
+        sans-serif !important;
+
+    font-size:
+        13px !important;
+
+    text-align:
+        left !important;
+
+    padding:
+        20px !important;
+}
+
+
+/* =========================================================
+   RESPONSIVE - TABLET
+   ========================================================= */
+
+@media (max-width: 1024px) {
+
+    .checker-batch-layout {
+
+        padding:
+            20px !important;
+    }
+
+
+    .batch-title {
+
+        font-size:
+            26px !important;
+    }
+
+
+    .batch-section {
+
+        padding:
+            18px 20px 14px 20px !important;
+    }
+}
+
+
+/* =========================================================
+   RESPONSIVE - MOBILE
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+    .checker-batch-layout {
+
+        padding:
+            16px 12px !important;
+    }
+
+
+    .batch-title {
+
+        font-size:
+            23px !important;
+    }
+
+
+    .batch-subtitle {
+
+        font-size:
+            12px !important;
+    }
+
+
+    .batch-section {
+
+        padding:
+            16px 12px 12px 12px !important;
+    }
+
+
+    .checker-batch-table
+    .z-listheader-content {
+
+        height:
+            56px !important;
+
+        padding:
+            0 10px !important;
+
+        font-size:
+            11px !important;
+    }
+
+
+    .checker-batch-table
+    .z-listheader {
+
+        height:
+            56px !important;
+    }
+
+
+    .checker-batch-table
+    .z-listitem {
+
+        height:
+            50px !important;
+    }
+
+
+    .checker-batch-table
+    .z-listcell {
+
+        height:
+            50px !important;
+    }
+
+
+    .checker-batch-table
+    .z-listcell-content {
+
+        height:
+            50px !important;
+
+        padding:
+            0 8px !important;
+
+        font-size:
+            12px !important;
+    }
+
+
+    .batch-pagination {
+
+        justify-content:
+            flex-end !important;
+    }
 }

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ocr>
+    <batch>
+        <batch_id>6</batch_id>
+        <presenting_bank_name>ABC Bank Ltd.</presenting_bank_name>
+        <total_cheques>5</total_cheques>
+        <file_id>17</file_id>
+    </batch>
+    <cheques>
+        <cheque>
+            <cheque_number>500006</cheque_number>
+            <account_number>2401015006</account_number>
+            <cheque_amount>88500.00</cheque_amount>
+            <cheque_date>2026-09-09</cheque_date>
+            <presenting_date>2026-09-13</presenting_date>
+            <amount_in_words>Eighty Eight Thousand Five Hundred Only</amount_in_words>
+            <micr_code>101240001</micr_code>
+            <city_code>101</city_code>
+            <bank_code>240</bank_code>
+            <branch_code>001</branch_code>
+            <drawer_name>Harbour General Stores</drawer_name>
+            <payee_name>Central Office Supplies</payee_name>
+            <payee_account_number>2401019506</payee_account_number>
+        </cheque>
+        <cheque>
+            <cheque_number>500007</cheque_number>
+            <account_number>2401025007</account_number>
+            <cheque_amount>125000.00</cheque_amount>
+            <cheque_date>2026-09-10</cheque_date>
+            <presenting_date>2026-09-13</presenting_date>
+            <amount_in_words>One Lakh Twenty Five Thousand Only</amount_in_words>
+            <micr_code>102240002</micr_code>
+            <city_code>102</city_code>
+            <bank_code>240</bank_code>
+            <branch_code>002</branch_code>
+            <drawer_name>Bengaluru Trade Centre</drawer_name>
+            <payee_name>Metro Office Mart</payee_name>
+            <payee_account_number>2401029507</payee_account_number>
+        </cheque>
+        <cheque>
+            <cheque_number>500008</cheque_number>
+            <account_number>2401035008</account_number>
+            <cheque_amount>67500.00</cheque_amount>
+            <cheque_date>2026-09-11</cheque_date>
+            <presenting_date>2026-09-13</presenting_date>
+            <amount_in_words>Sixty Seven Thousand Five Hundred Only</amount_in_words>
+            <micr_code>103240003</micr_code>
+            <city_code>103</city_code>
+            <bank_code>240</bank_code>
+            <branch_code>003</branch_code>
+            <drawer_name>Southline Engineering</drawer_name>
+            <payee_name>Industrial Components Co</payee_name>
+            <payee_account_number>2401039508</payee_account_number>
+        </cheque>
+        <cheque>
+            <cheque_number>500009</cheque_number>
+            <account_number>2401045009</account_number>
+            <cheque_amount>142000.00</cheque_amount>
+            <cheque_date>2026-09-12</cheque_date>
+            <presenting_date>2026-09-13</presenting_date>
+            <amount_in_words>One Lakh Forty Two Thousand Only</amount_in_words>
+            <micr_code>104240004</micr_code>
+            <city_code>104</city_code>
+            <bank_code>240</bank_code>
+            <branch_code>004</branch_code>
+            <drawer_name>Malabar Wholesale Mart</drawer_name>
+            <payee_name>Kochi Business Solutions</payee_name>
+            <payee_account_number>2401049509</payee_account_number>
+        </cheque>
+        <cheque>
+            <cheque_number>500010</cheque_number>
+            <account_number>2401055010</account_number>
+            <cheque_amount>98500.00</cheque_amount>
+            <cheque_date>2026-09-13</cheque_date>
+            <presenting_date>2026-09-13</presenting_date>
+            <amount_in_words>Ninety Eight Thousand Five Hundred Only</amount_in_words>
+            <micr_code>105240005</micr_code>
+            <city_code>105</city_code>
+            <bank_code>240</bank_code>
+            <branch_code>005</branch_code>
+            <drawer_name>Amaravati Commercials</drawer_name>
+            <payee_name>Capital Market Supplies</payee_name>
+            <payee_account_number>2401059510</payee_account_number>
+        </cheque>
+    </cheques>
+</ocr>

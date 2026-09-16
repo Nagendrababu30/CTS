@@ -10,7 +10,6 @@
 <zk xmlns:w="client">
 
     <style src="/css/inward/maker/micr-repair.css"/>
-
     <script src="/javascript/inward/maker/micr-repair.js"/>
 
     <div
@@ -103,6 +102,29 @@
                 </hlayout>
 
             </hlayout>
+
+
+            <!-- ============================================================
+                 RETURN REASON & REMARKS ALERT BANNER (Displayed when returned by Checker)
+                 ============================================================ -->
+            <div id="returnReasonBanner"
+                 visible="false"
+                 width="100%"
+                 style="background:#FFF4ED; border:1px solid #FECDCA; border-radius:8px; padding:10px 16px; box-sizing:border-box; display:flex; align-items:center;">
+                <hlayout spacing="12px" valign="middle" width="100%">
+                    <label sclass="z-icon-exclamation-triangle" style="font-size:18px; color:#C4320A;"/>
+                    <vlayout spacing="3px" hflex="1">
+                        <hlayout spacing="8px" valign="middle">
+                            <label value="Checker Return Reason:" style="font-size:12px; font-weight:700; color:#B42318; text-transform:uppercase; letter-spacing:0.5px;"/>
+                            <label id="lblReturnReason" value="—" style="font-size:13px; font-weight:700; color:#7A271A;"/>
+                        </hlayout>
+                        <hlayout spacing="8px" valign="middle" id="rowReturnRemarks">
+                            <label value="Checker Remarks:" style="font-size:12px; font-weight:600; color:#B42318;"/>
+                            <label id="lblReturnRemarks" value="—" style="font-size:12.5px; color:#344054;"/>
+                        </hlayout>
+                    </vlayout>
+                </hlayout>
+            </div>
 
 
             <!-- ============================================================

@@ -10,6 +10,8 @@
 
 <zk xmlns:w="client">
 
+	<style src="/css/inward/maker/micr-repair.css"/>
+
 	<!-- =========================================================
 	     ENTERPRISE BANKING STYLING (MATCHES INWARD DASHBOARD & OUTWARD MAKER)
 	     ========================================================= -->
@@ -270,53 +272,70 @@
 		<vlayout spacing="12px" width="100%" height="100%"
 			style="padding:14px 20px; box-sizing:border-box;">
 
-			<!-- =====================================================
-			     HEADER STRIP WITH METRICS PILLS (MATCHES 3RD IMAGE)
-			     ===================================================== -->
-			<div width="100%" style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:8px; padding:8px 16px; box-shadow:0 1px 2px rgba(0,0,0,0.03); box-sizing:border-box;">
-				<hlayout width="100%" valign="middle">
+			<!-- ============================================================
+			     BATCH HEADER STRIP (Floating Card - Matches MICR Repair)
+			     ============================================================ -->
+			<hlayout width="100%" valign="middle" sclass="micr-header-card">
 
-					<!-- Back Button -->
+				<!-- Left: Back Button & Batch Title -->
+				<hlayout spacing="12px" valign="middle" sclass="micr-header-left">
 					<button id="btnBackQueue"
 						label="←"
 						tooltiptext="Back to Data Entry Queue"
-						width="32px"
-						height="32px"
-						style="background:#F8FAFC !important; color:#334155 !important; border:1px solid #CBD5E1 !important; border-radius:6px !important; font-size:15px !important; font-weight:bold !important; cursor:pointer !important; margin-right:12px !important; display:inline-flex !important; align-items:center !important; justify-content:center !important;"/>
+						sclass="micr-back-btn"/>
 
-					<!-- Batch ID -->
-					<label value="Batch No : " style="font-size:13px; font-weight:600; color:#64748B;"/>
-					<label id="lblBatchInfo" value="" style="font-size:13px; font-weight:700; color:#1E293B;"/>
+					<label id="lblBatchInfo"
+						value="Batch No : —"
+						sclass="micr-batch-title"/>
+				</hlayout>
 
-					<space hflex="1"/>
-
-					<!-- Total Cheques Pill -->
-					<div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:16px; padding:4px 14px; display:inline-flex; align-items:center;">
-						<label value="Total: " style="font-size:11px; font-weight:600; color:#64748B;"/>
-						<label id="lblTotalCheques" value="0" style="font-size:12px; font-weight:700; color:#0F172A; margin-left:4px;"/>
+				<!-- Center/Right: Badges Spread Horizontally in the Box -->
+				<hlayout hflex="1" valign="middle" sclass="micr-header-badges">
+					<div sclass="micr-count-badge micr-count-total">
+						<label id="lblTotalCheques"
+							value="Total: 0"
+							sclass="micr-count-text"/>
 					</div>
 
-					<space width="8px"/>
-
-					<!-- Completed Cheques Pill -->
-					<div style="background:#ECFDF5; border:1px solid #A7F3D0; border-radius:16px; padding:4px 14px; display:inline-flex; align-items:center;">
-						<label value="Completed: " style="font-size:11px; font-weight:600; color:#047857;"/>
-						<label id="lblCompletedCheques" value="0" style="font-size:12px; font-weight:700; color:#065F46; margin-left:4px;"/>
+					<div sclass="micr-count-badge micr-count-completed">
+						<label id="lblCompletedCheques"
+							value="Completed: 0"
+							sclass="micr-count-text"/>
 					</div>
 
-					<space width="8px"/>
-
-					<!-- Pending Cheques Pill (NO Reject Req pill) -->
-					<div style="background:#FFFBEB; border:1px solid #FDE68A; border-radius:16px; padding:4px 14px; display:inline-flex; align-items:center;">
-						<label value="Pending: " style="font-size:11px; font-weight:600; color:#B45309;"/>
-						<label id="lblPendingCheques" value="0" style="font-size:12px; font-weight:700; color:#92400E; margin-left:4px;"/>
+					<div sclass="micr-count-badge micr-count-pending">
+						<label id="lblPendingCheques"
+							value="Pending: 0"
+							sclass="micr-count-text"/>
 					</div>
 
-					<space hflex="1"/>
+					<div sclass="micr-counter-pill">
+						<label id="lblChequeInfo"
+							value="Cheque 1 of 0"
+							sclass="micr-counter-text"/>
+					</div>
+				</hlayout>
+			</hlayout>
 
-					<!-- Cheque Progress Counter -->
-					<label id="lblChequeInfo" value="" style="font-size:13px; font-weight:700; color:#2563EB;"/>
-
+			<!-- ============================================================
+			     RETURN REASON & REMARKS ALERT BANNER (Displayed when returned by Checker)
+			     ============================================================ -->
+			<div id="returnReasonBanner"
+			     visible="false"
+			     width="100%"
+			     style="background:#FFF4ED; border:1px solid #FECDCA; border-radius:8px; padding:10px 16px; box-sizing:border-box; display:flex; align-items:center;">
+				<hlayout spacing="12px" valign="middle" width="100%">
+					<label sclass="z-icon-exclamation-triangle" style="font-size:18px; color:#C4320A;"/>
+					<vlayout spacing="3px" hflex="1">
+						<hlayout spacing="8px" valign="middle">
+							<label value="Checker Return Reason:" style="font-size:12px; font-weight:700; color:#B42318; text-transform:uppercase; letter-spacing:0.5px;"/>
+							<label id="lblReturnReason" value="—" style="font-size:13px; font-weight:700; color:#7A271A;"/>
+						</hlayout>
+						<hlayout spacing="8px" valign="middle" id="rowReturnRemarks">
+							<label value="Checker Remarks:" style="font-size:12px; font-weight:600; color:#B42318;"/>
+							<label id="lblReturnRemarks" value="—" style="font-size:12.5px; color:#344054;"/>
+						</hlayout>
+					</vlayout>
 				</hlayout>
 			</div>
 
@@ -350,17 +369,36 @@
 						<!-- Spacer -->
 						<space height="2px"/>
 
-						<!-- Image Tools Toolbar: View Back, +, -, ↻ -->
-						<hlayout width="100%" spacing="8px" valign="middle">
+						<!-- Image Tools Toolbar: View Back, +, -, ↻, ⟲ (Matches MICR Repair) -->
+						<hlayout width="100%" spacing="6px" valign="middle" sclass="micr-image-toolbar">
 							<button id="btnSideToggle"
 								label="View Back"
-								width="96px"
-								height="32px"
-								style="background:#2563EB !important; color:#FFFFFF !important; border:none !important; font-size:12px !important; font-weight:600 !important; border-radius:6px !important; cursor:pointer !important;"/>
-							<space width="2px"/>
-							<button id="btnZoomIn" label="+" tooltiptext="Zoom In" sclass="icon-symbol-btn"/>
-							<button id="btnZoomOut" label="−" tooltiptext="Zoom Out" sclass="icon-symbol-btn"/>
-							<button id="btnRotate" label="↻" tooltiptext="Rotate" sclass="icon-symbol-btn"/>
+								hflex="2"
+								sclass="micr-toggle-btn"/>
+
+							<button id="btnZoomIn"
+								label="+"
+								tooltiptext="Zoom In"
+								hflex="1"
+								sclass="micr-zoom-btn"/>
+
+							<button id="btnZoomOut"
+								label="−"
+								tooltiptext="Zoom Out"
+								hflex="1"
+								sclass="micr-zoom-btn"/>
+
+							<button id="btnRotate"
+								label="↻"
+								tooltiptext="Rotate 90°"
+								hflex="1"
+								sclass="micr-zoom-btn"/>
+
+							<button id="btnResetView"
+								label="⟲"
+								tooltiptext="Reset View"
+								hflex="1"
+								sclass="micr-zoom-btn"/>
 						</hlayout>
 
 					</vlayout>
@@ -433,26 +471,26 @@
 						<!-- Push action buttons to bottom -->
 						<space height="6px"/>
 
-						<!-- Action Buttons: Prev + Save & Next (NO Reject Req) -->
+						<!-- Action Buttons: Prev, Next, Return, Save & Next (Matches MICR Repair) -->
 						<vlayout width="100%" spacing="8px" style="margin-top:auto;">
 							<hlayout spacing="10px" valign="middle" width="100%">
 								<button id="btnPrev"
 									label="Prev"
-									width="80px"
-									height="38px"
-									style="background:#F8FAFC !important; color:#334155 !important; border:1px solid #CBD5E1 !important; border-radius:6px !important; font-size:13px !important; font-weight:600 !important; cursor:pointer !important;"/>
+									sclass="micr-prev-btn"/>
 
 								<button id="btnNext"
 									label="Next"
-									width="80px"
-									height="38px"
-									style="background:#F8FAFC !important; color:#334155 !important; border:1px solid #CBD5E1 !important; border-radius:6px !important; font-size:13px !important; font-weight:600 !important; cursor:pointer !important;"/>
+									sclass="micr-next-btn"/>
+
+								<space hflex="1"/>
+
+								<button id="btnReturn"
+									label="Return"
+									sclass="micr-return-btn"/>
 
 								<button id="btnSaveNext"
-									label="💾 Save &amp; Next"
-									hflex="1"
-									height="38px"
-									style="background:#2563EB !important; color:#FFFFFF !important; border:none !important; border-radius:6px !important; font-size:13px !important; font-weight:600 !important; cursor:pointer !important; text-align:center !important;"/>
+									label="Save &amp; Next →"
+									sclass="micr-save-btn"/>
 							</hlayout>
 						</vlayout>
 
@@ -462,6 +500,57 @@
 			</hlayout>
 
 		</vlayout>
+
+		<!-- ================================================================
+		     Return Window (Modal Dialog) - Multi-Select Reasons for Maker Data Entry
+		     ================================================================ -->
+		<window id="returnWindow"
+			title="Return Cheque"
+			border="normal"
+			width="540px"
+			closable="false"
+			visible="false"
+			position="center"
+			sclass="return-window">
+
+			<vlayout width="100%" spacing="18px" sclass="return-form">
+				<label value="Select return reason(s) to send this cheque back to Maker queue:"
+					sclass="return-description"/>
+
+				<vlayout width="100%" spacing="6px">
+					<hlayout spacing="4px" valign="middle">
+						<label value="Return Reason(s)" sclass="return-field-label"/>
+						<label value=" *" sclass="micr-star"/>
+					</hlayout>
+
+					<div style="max-height: 180px; overflow-y: auto; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 10px 14px; background: #FFFFFF;">
+						<vlayout id="returnReasonsContainer" spacing="8px" width="100%">
+							<!-- Checkboxes populated dynamically from inward_cheque_return_reason where applicable_role='MAKER' AND return_reason_code LIKE 'MR-DATA-%' -->
+						</vlayout>
+					</div>
+				</vlayout>
+
+				<vlayout width="100%" spacing="6px">
+					<label value="Remarks (Optional)" sclass="return-field-label"/>
+					<textbox id="txtReturnRemarks"
+						width="100%"
+						rows="3"
+						multiline="true"
+						maxlength="500"
+						placeholder="Enter maker return remarks..."
+						sclass="return-textbox"/>
+				</vlayout>
+
+				<hlayout width="100%" spacing="14px" sclass="return-window-buttons">
+					<button id="btnCancelReturn"
+						label="Cancel"
+						sclass="secondary-button"/>
+					<button id="btnConfirmReturn"
+						label="Confirm Return"
+						sclass="return-button"/>
+				</hlayout>
+			</vlayout>
+		</window>
 
 	</div>
 

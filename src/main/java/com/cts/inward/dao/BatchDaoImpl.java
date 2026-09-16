@@ -301,10 +301,37 @@ public class BatchDaoImpl implements BatchDao {
 	@Override
 	public long getBatchIdByFileName(String batchName) {
 
+		if (batchName == null || batchName.isBlank()) {
+			return -1L;
+		}
+
 		/*
-		 * Find the batch_id by joining inward_batch with inward_file
+		 * 1. Extract the numeric batch number directly from batchName.
+		 * e.g. "BATCH003" -> 3, "BATCH010" -> 10, "3" -> 3
+		 * If verified in inward_batch, return it immediately.
+		 */
+		String digits = batchName.replaceAll("\\D+", "");
+		if (!digits.isEmpty()) {
+			try {
+				long parsedBatchId = Long.parseLong(digits);
+				String checkSql = "SELECT batch_id FROM inward_batch WHERE batch_id = ?";
+				try (Connection connection = dataSource.getConnection();
+				     PreparedStatement statement = connection.prepareStatement(checkSql)) {
+					statement.setLong(1, parsedBatchId);
+					try (ResultSet resultSet = statement.executeQuery()) {
+						if (resultSet.next()) {
+							return resultSet.getLong("batch_id");
+						}
+					}
+				}
+			} catch (Exception e) {
+				// Fall through to secondary lookup
+			}
+		}
+
+		/*
+		 * 2. Fallback: Find the batch_id by joining inward_batch with inward_file
 		 * where the PXF file name starts with the given batch name.
-		 *
 		 * e.g. batchName = "BATCH001" matches file_name = "BATCH001.xml"
 		 */
 		String sql =

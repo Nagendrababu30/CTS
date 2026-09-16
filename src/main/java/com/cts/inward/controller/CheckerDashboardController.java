@@ -1,4 +1,4 @@
-package com.cts.inward.controller;
+ package com.cts.inward.controller;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,10 +8,10 @@ import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
+import org.zkoss.zul.Grid;
+import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Label;
-import org.zkoss.zul.Listbox;
-import org.zkoss.zul.Listcell;
-import org.zkoss.zul.Listitem;
+import org.zkoss.zul.Row;
 
 import com.cts.inward.model.CheckerBatch;
 import com.cts.inward.service.CheckerDashboardService;
@@ -21,6 +21,7 @@ public class CheckerDashboardController
         extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
+
 
     /*
      * =========================================================
@@ -34,9 +35,7 @@ public class CheckerDashboardController
 
     private Label myBatchCount;
 
-    private Label showingText;
-
-    private Listbox batchList;
+    private Grid batchList;
 
     private Button allFilter;
 
@@ -44,7 +43,13 @@ public class CheckerDashboardController
 
     private Button myBatchesFilter;
 
-    private Button onHoldFilter;
+    private Hlayout pagination;
+
+    private Button previousPage;
+
+    private Button currentPage;
+
+    private Button nextPage;
 
 
     /*
@@ -80,6 +85,22 @@ public class CheckerDashboardController
 
     /*
      * =========================================================
+     * PAGINATION
+     * =========================================================
+     */
+
+    private static final int PAGE_SIZE = 10;
+
+    private int currentPageNumber = 1;
+
+    private int totalBatches = 0;
+
+    private List<CheckerBatch> filteredBatches =
+            new ArrayList<>();
+
+
+    /*
+     * =========================================================
      * AFTER COMPOSE
      * =========================================================
      */
@@ -91,21 +112,6 @@ public class CheckerDashboardController
 
         super.doAfterCompose(component);
 
-        /*
-         * GenericForwardComposer automatically wires
-         * ZUL components to fields having the same IDs.
-         *
-         * Therefore:
-         *
-         * id="allFilter"
-         *        -> private Button allFilter;
-         *
-         * id="availableFilter"
-         *        -> private Button availableFilter;
-         *
-         * id="myBatchesFilter"
-         *        -> private Button myBatchesFilter;
-         */
 
         /*
          * =====================================================
@@ -113,7 +119,8 @@ public class CheckerDashboardController
          * =====================================================
          */
 
-        
+        Session session =
+                Executions.getCurrent().getSession();
 
         if (session == null) {
 
@@ -128,10 +135,6 @@ public class CheckerDashboardController
          * =====================================================
          * GET LOGGED-IN USER ID
          * =====================================================
-         *
-         * This keeps your existing session design:
-         *
-         * session attribute = "userId"
          */
 
         Object sessionUserId =
@@ -148,7 +151,9 @@ public class CheckerDashboardController
 
 
         /*
-         * Convert session user ID to long.
+         * =====================================================
+         * CONVERT USER ID TO LONG
+         * =====================================================
          */
 
         if (sessionUserId instanceof Number) {
@@ -244,23 +249,45 @@ public class CheckerDashboardController
 
         /*
          * =====================================================
-         * ON HOLD FILTER
+         * PREVIOUS PAGE
          * =====================================================
          */
 
-        if (onHoldFilter != null) {
-            onHoldFilter.addEventListener(
-                    "onClick",
-                    event -> {
+        previousPage.addEventListener(
+                "onClick",
+                event -> {
 
-                        selectedFilter =
-                                "ON_HOLD";
+                    if (currentPageNumber <= 1) {
+                        return;
+                    }
 
-                        updateFilterButtons();
+                    currentPageNumber--;
 
-                        loadBatches();
-                    });
-        }
+                    renderBatches();
+                });
+
+
+        /*
+         * =====================================================
+         * NEXT PAGE
+         * =====================================================
+         */
+
+        nextPage.addEventListener(
+                "onClick",
+                event -> {
+
+                    int totalPages =
+                            getTotalPages();
+
+                    if (currentPageNumber >= totalPages) {
+                        return;
+                    }
+
+                    currentPageNumber++;
+
+                    renderBatches();
+                });
 
 
         /*
@@ -306,29 +333,17 @@ public class CheckerDashboardController
 
     private void loadCounts() {
 
-        /*
-         * Received Batches
-         */
-
         receivedCount.setValue(
                 String.valueOf(
                         service
                                 .getReceivedBatchCount()));
 
 
-        /*
-         * Available Batches
-         */
-
         availableCount.setValue(
                 String.valueOf(
                         service
                                 .getAvailableBatchCount()));
 
-
-        /*
-         * My Batches
-         */
 
         myBatchCount.setValue(
                 String.valueOf(
@@ -355,6 +370,7 @@ public class CheckerDashboardController
                     new ArrayList<>();
         }
 
+
         int allCount =
                 batches.size();
 
@@ -372,34 +388,37 @@ public class CheckerDashboardController
                 batches) {
 
             if (batch == null) {
-
                 continue;
             }
 
             boolean isOnHold = "RETURN_TO_MAKER".equalsIgnoreCase(batch.getBatchStatus())
                     || "ON_HOLD".equalsIgnoreCase(batch.getBatchStatus());
 
-            if (isOnHold) {
-                onHoldCount++;
-            } else {
-                /*
-                 * AVAILABLE
-                 */
-                if (("AVAILABLE".equals(batch.getLockStatus())
-                        || "UNLOCKED".equals(batch.getLockStatus()))) {
+            /*
+             * AVAILABLE
+             */
+
+            if ("AVAILABLE".equals(
+                    batch.getLockStatus())
+                    || "UNLOCKED".equals(
+                            batch.getLockStatus())) {
+
+                availableCountValue++;
+            }
 
                     availableCountValue++;
                 }
 
-                /*
-                 * MY BATCHES
-                 */
-                if ("LOCKED".equals(
-                        batch.getLockStatus())
-                        && batch.getUserId() != null
-                        && batch.getUserId()
-                                .longValue()
-                                == userId) {
+            /*
+             * MY BATCHES
+             */
+
+            if ("LOCKED".equals(
+                    batch.getLockStatus())
+                    && batch.getUserId() != null
+                    && batch.getUserId()
+                            .longValue()
+                            == userId) {
 
                     myBatchesCount++;
                 }
@@ -408,50 +427,32 @@ public class CheckerDashboardController
 
 
         /*
-         * =====================================================
-         * UPDATE BUTTON LABELS
-         * =====================================================
+         * Keep the existing filter labels.
          */
 
         allFilter.setLabel(
-                "All "
-                + allCount);
+                "All");
 
         availableFilter.setLabel(
-                "Available "
-                + availableCountValue);
+                "Available");
 
         myBatchesFilter.setLabel(
-                "My Batches "
-                + myBatchesCount);
-
-        if (onHoldFilter != null) {
-            onHoldFilter.setLabel(
-                    "On Hold "
-                    + onHoldCount);
-        }
+                "My Batches");
     }
 
 
     /*
      * =========================================================
-     * LOAD BATCH TABLE
+     * LOAD BATCHES
      * =========================================================
      */
 
     private void loadBatches() {
 
         /*
-         * Remove existing rows.
-         */
-
-        batchList
-                .getItems()
-                .clear();
-
-
-        /*
-         * Get all batches.
+         * =====================================================
+         * GET ALL BATCHES
+         * =====================================================
          */
 
         List<CheckerBatch> batches =
@@ -465,10 +466,12 @@ public class CheckerDashboardController
 
 
         /*
-         * List after applying selected filter.
+         * =====================================================
+         * CREATE FILTERED LIST
+         * =====================================================
          */
 
-        List<CheckerBatch> filteredBatches =
+        filteredBatches =
                 new ArrayList<>();
 
 
@@ -482,15 +485,12 @@ public class CheckerDashboardController
                 batches) {
 
             if (batch == null) {
-
                 continue;
             }
 
 
             /*
-             * =================================================
              * ALL
-             * =================================================
              */
 
             if ("ALL".equals(
@@ -502,29 +502,25 @@ public class CheckerDashboardController
 
 
             /*
-             * =================================================
              * AVAILABLE
-             * =================================================
              */
 
             else if ("AVAILABLE".equals(
                     selectedFilter)) {
 
-                boolean isOnHold = "RETURN_TO_MAKER".equalsIgnoreCase(batch.getBatchStatus())
-                        || "ON_HOLD".equalsIgnoreCase(batch.getBatchStatus());
+                if ("AVAILABLE".equals(
+                        batch.getLockStatus())
+                        || "UNLOCKED".equals(
+                                batch.getLockStatus())) {
 
-                if (!isOnHold && ("AVAILABLE".equals(batch.getLockStatus())
-                        || "UNLOCKED".equals(batch.getLockStatus()))) {
-
-                    filteredBatches.add(batch);
+                    filteredBatches.add(
+                            batch);
                 }
             }
 
 
             /*
-             * =================================================
              * MY BATCHES
-             * =================================================
              */
 
             else if ("MY_BATCHES".equals(
@@ -568,325 +564,504 @@ public class CheckerDashboardController
 
         /*
          * =====================================================
-         * CREATE TABLE ROWS
+         * TOTAL FILTERED BATCHES
          * =====================================================
          */
 
-        for (CheckerBatch batch :
-                filteredBatches) {
-
-            Listitem item =
-                    new Listitem();
+        totalBatches =
+                filteredBatches.size();
 
 
-            /*
-             * =================================================
-             * BATCH ID
-             * =================================================
-             */
+        /*
+         * =====================================================
+         * ALWAYS START FROM PAGE 1
+         *
+         * Important when filter changes.
+         * =====================================================
+         */
 
-            Listcell batchIdCell =
-                    new Listcell(
-                            String.valueOf(
-                                    batch.getBatchId()));
-
-            batchIdCell.setSclass(
-                    "batch-id");
-
-            item.appendChild(
-                    batchIdCell);
+        currentPageNumber = 1;
 
 
-            /*
-             * =================================================
-             * TOTAL CHECKS
-             * =================================================
-             */
+        /*
+         * =====================================================
+         * RENDER
+         * =====================================================
+         */
 
-            Listcell totalCell =
-                    new Listcell(
-                            String.valueOf(
-                                    batch.getTotalCheques()));
-
-            item.appendChild(
-                    totalCell);
+        renderBatches();
+    }
 
 
-            /*
-             * =================================================
-             * MAKER
-             * =================================================
-             */
+    /*
+     * =========================================================
+     * RENDER CURRENT PAGE
+     * =========================================================
+     */
 
-            String makerId =
-                    "Not Assigned";
+    private void renderBatches() {
 
-            if (batch.getMaker() != null
-                    && !batch.getMaker()
-                            .trim()
-                            .isEmpty()) {
+        /*
+         * =====================================================
+         * CLEAR EXISTING ROWS
+         * =====================================================
+         */
 
-                makerId =
-                        batch.getMaker();
-            }
-
-            Listcell makerCell =
-                    new Listcell(
-                            makerId);
-
-            makerCell.setSclass(
-                    "maker-name");
-
-            item.appendChild(
-                    makerCell);
+        batchList
+                .getRows()
+                .getChildren()
+                .clear();
 
 
-            /*
-             * =================================================
-             * STATUS
-             * =================================================
-             */
+        /*
+         * =====================================================
+         * TOTAL PAGES
+         * =====================================================
+         */
 
-            boolean isOnHold = "RETURN_TO_MAKER".equalsIgnoreCase(batch.getBatchStatus())
-                    || "ON_HOLD".equalsIgnoreCase(batch.getBatchStatus());
-
-            Listcell statusCell;
-            if (isOnHold) {
-                statusCell = new Listcell("On Hold");
-                statusCell.setSclass("status-on-hold");
-            } else {
-                String lockStatus = batch.getLockStatus();
-                if (lockStatus == null || lockStatus.trim().isEmpty()) {
-                    lockStatus = "AVAILABLE";
-                }
-                statusCell = new Listcell(lockStatus);
-            }
-
-            item.appendChild(
-                    statusCell);
+        int totalPages =
+                getTotalPages();
 
 
-            /*
-             * =================================================
-             * CHECKER USER ID
-             * =================================================
-             */
+        /*
+         * =====================================================
+         * VALIDATE CURRENT PAGE
+         * =====================================================
+         */
 
-            String checkerId =
-                    "Not Assigned";
+        if (currentPageNumber < 1) {
 
-            if (batch.getUserId() != null) {
+            currentPageNumber = 1;
+        }
 
-                checkerId =
+        if (currentPageNumber > totalPages) {
+
+            currentPageNumber = totalPages;
+        }
+
+
+        /*
+         * =====================================================
+         * EMPTY LIST
+         * =====================================================
+         */
+
+        if (filteredBatches.isEmpty()) {
+
+            updatePagination();
+
+            return;
+        }
+
+
+        /*
+         * =====================================================
+         * CALCULATE START INDEX
+         * =====================================================
+         */
+
+        int startIndex =
+                (currentPageNumber - 1)
+                * PAGE_SIZE;
+
+
+        /*
+         * =====================================================
+         * CALCULATE END INDEX
+         * =====================================================
+         */
+
+        int endIndex =
+                Math.min(
+                        startIndex + PAGE_SIZE,
+                        filteredBatches.size());
+
+
+        /*
+         * =====================================================
+         * CREATE ONLY CURRENT PAGE ROWS
+         * =====================================================
+         */
+
+        for (int i = startIndex;
+                i < endIndex;
+                i++) {
+
+            createBatchRow(
+                    filteredBatches.get(i));
+        }
+
+
+        /*
+         * =====================================================
+         * UPDATE PAGINATION
+         * =====================================================
+         */
+
+        updatePagination();
+    }
+
+
+    /*
+     * =========================================================
+     * CREATE BATCH ROW
+     * =========================================================
+     */
+
+    private void createBatchRow(
+            CheckerBatch batch) {
+
+        Row row =
+                new Row();
+
+
+        /*
+         * =====================================================
+         * BATCH ID
+         * =====================================================
+         */
+
+        Label batchIdLabel =
+                new Label(
                         String.valueOf(
-                                batch.getUserId());
-            }
+                                batch.getBatchId()));
 
-            Listcell checkerCell =
-                    new Listcell(
-                            checkerId);
+        batchIdLabel.setSclass(
+                "batch-id");
 
-            item.appendChild(
-                    checkerCell);
+        row.appendChild(
+                batchIdLabel);
 
 
-            /*
-             * =================================================
-             * ACTION
-             * =================================================
-             */
+        /*
+         * =====================================================
+         * TOTAL CHEQUES
+         * =====================================================
+         */
 
-            Listcell actionCell =
-                    new Listcell();
+        Label totalLabel =
+                new Label(
+                        String.valueOf(
+                                batch.getTotalCheques()));
 
-
-            /*
-             * CASE 0: ON HOLD (WITH MAKER)
-             */
-            if (isOnHold) {
-
-                Label onHoldLabel =
-                        new Label(
-                                "On Hold");
-
-                onHoldLabel.setSclass(
-                        "status-on-hold");
-
-                onHoldLabel.setTooltiptext(
-                        "Batch returned to Maker for re-verification");
-
-                actionCell.appendChild(
-                        onHoldLabel);
-            }
-
-            /*
-             * =================================================
-             * CASE 1
-             *
-             * AVAILABLE BATCH
-             * =================================================
-             */
-
-            else if ("AVAILABLE".equals(batch.getLockStatus())
-                    || "UNLOCKED".equals(batch.getLockStatus())) {
-
-                Button openButton =
-                        new Button(
-                                "Open Verification");
-
-                openButton.setSclass(
-                        "verify-button");
+        row.appendChild(
+                totalLabel);
 
 
-                openButton.addEventListener(
-                        "onClick",
-                        event -> {
+        /*
+         * =====================================================
+         * MAKER
+         * =====================================================
+         */
 
-                            long batchId =
-                                    batch.getBatchId();
+        String makerId =
+                "Not Assigned";
 
+        if (batch.getMaker() != null
+                && !batch.getMaker()
+                        .trim()
+                        .isEmpty()) {
 
-                            /*
-                             * Try to lock batch.
-                             */
-
-                            boolean locked =
-                                    service.lockBatch(
-                                            batchId,
-                                            userId);
-
-
-                            /*
-                             * Lock successful.
-                             */
-
-                            if (locked) {
-
-                                Executions.sendRedirect(
-                                        "/zul/inward-checker/"
-                                        + "batch-details.zul"
-                                        + "?batchId="
-                                        + batchId);
-                            }
+            makerId =
+                    batch.getMaker();
+        }
 
 
-                            /*
-                             * Lock failed.
-                             */
+        Label makerLabel =
+                new Label(
+                        makerId);
 
-                            else {
+        makerLabel.setSclass(
+                "maker-name");
 
-                                loadDashboard();
-                            }
-                        });
-
-
-                actionCell.appendChild(
-                        openButton);
-            }
+        row.appendChild(
+                makerLabel);
 
 
-            /*
-             * =================================================
-             * CASE 2
-             *
-             * LOCKED BY CURRENT CHECKER
-             * =================================================
-             */
+        /*
+         * =====================================================
+         * STATUS
+         * =====================================================
+         */
 
-            else if ("LOCKED".equals(
-                    batch.getLockStatus())
-                    && batch.getUserId() != null
-                    && batch.getUserId()
-                            .longValue()
-                            == userId) {
+        String lockStatus =
+                batch.getLockStatus();
 
-                Button openButton =
-                        new Button(
-                                "Open Verification");
+        if (lockStatus == null
+                || lockStatus.trim()
+                        .isEmpty()) {
 
-                openButton.setSclass(
-                        "verify-button");
+            lockStatus =
+                    "AVAILABLE";
+        }
 
 
-                openButton.addEventListener(
-                        "onClick",
-                        event -> {
-
-                            long batchId =
-                                    batch.getBatchId();
+        Label statusLabel =
+                new Label(
+                        lockStatus);
 
 
-                            /*
-                             * Already owned by current checker.
-                             *
-                             * Do not lock again.
-                             */
+        if ("LOCKED".equals(
+                lockStatus)) {
+
+            statusLabel.setSclass(
+                    "status-badge badge-locked");
+
+        } else if ("AVAILABLE".equals(
+                lockStatus)
+                || "UNLOCKED".equals(
+                        lockStatus)) {
+
+            statusLabel.setSclass(
+                    "status-badge badge-available");
+
+        } else {
+
+            statusLabel.setSclass(
+                    "status-badge");
+        }
+
+
+        row.appendChild(
+                statusLabel);
+
+
+        /*
+         * =====================================================
+         * LOCKED BY
+         * =====================================================
+         */
+
+        String checkerId =
+                "Not Assigned";
+
+        if ("LOCKED".equals(
+                batch.getLockStatus())
+                && batch.getUserId() != null) {
+
+            checkerId =
+                    String.valueOf(
+                            batch.getUserId());
+        }
+
+
+        Label checkerLabel =
+                new Label(
+                        checkerId);
+
+        row.appendChild(
+                checkerLabel);
+
+
+        /*
+         * =====================================================
+         * ACTION
+         * =====================================================
+         */
+
+        /*
+         * AVAILABLE / UNLOCKED
+         */
+
+        if ("AVAILABLE".equals(
+                lockStatus)
+                || "UNLOCKED".equals(
+                        lockStatus)) {
+
+            Button openButton =
+                    new Button(
+                            "Open Verification");
+
+            openButton.setSclass(
+                    "btn btn-action");
+
+
+            openButton.addEventListener(
+                    "onClick",
+                    event -> {
+
+                        long batchId =
+                                batch.getBatchId();
+
+
+                        /*
+                         * Try to lock batch.
+                         */
+
+                        boolean locked =
+                                service.lockBatch(
+                                        batchId,
+                                        userId);
+
+
+                        /*
+                         * Lock successful.
+                         */
+
+                        if (locked) {
 
                             Executions.sendRedirect(
                                     "/zul/inward-checker/"
                                     + "batch-details.zul"
                                     + "?batchId="
                                     + batchId);
-                        });
+                        }
 
 
-                actionCell.appendChild(
-                        openButton);
-            }
+                        /*
+                         * Lock failed.
+                         */
+
+                        else {
+
+                            loadDashboard();
+                        }
+                    });
 
 
-            /*
-             * =================================================
-             * CASE 3
-             *
-             * LOCKED BY ANOTHER CHECKER
-             * =================================================
-             */
-
-            else {
-
-                Label lockedLabel =
-                        new Label(
-                                "Locked");
-
-                lockedLabel.setSclass(
-                        "status-locked");
-
-                actionCell.appendChild(
-                        lockedLabel);
-            }
+            row.appendChild(
+                    openButton);
+        }
 
 
-            /*
-             * =================================================
-             * ADD ACTION CELL
-             * =================================================
-             */
+        /*
+         * LOCKED BY CURRENT CHECKER
+         */
 
-            item.appendChild(
-                    actionCell);
+        else if ("LOCKED".equals(
+                lockStatus)
+                && batch.getUserId() != null
+                && batch.getUserId()
+                        .longValue()
+                        == userId) {
+
+            Button openButton =
+                    new Button(
+                            "Open Verification");
+
+            openButton.setSclass(
+                    "btn btn-action");
 
 
-            /*
-             * =================================================
-             * ADD ROW
-             * =================================================
-             */
+            openButton.addEventListener(
+                    "onClick",
+                    event -> {
 
-            batchList.appendChild(
-                    item);
+                        long batchId =
+                                batch.getBatchId();
+
+
+                        Executions.sendRedirect(
+                                "/zul/inward-checker/"
+                                + "batch-details.zul"
+                                + "?batchId="
+                                + batchId);
+                    });
+
+
+            row.appendChild(
+                    openButton);
+        }
+
+
+        /*
+         * LOCKED BY ANOTHER CHECKER
+         */
+
+        else {
+
+            Label lockedLabel =
+                    new Label(
+                            "Locked");
+
+            lockedLabel.setSclass(
+                    "status-locked");
+
+            row.appendChild(
+                    lockedLabel);
         }
 
 
         /*
          * =====================================================
-         * UPDATE FOOTER
+         * ADD ROW
          * =====================================================
          */
 
-        updateShowingText(
-                filteredBatches.size());
+        row.setParent(
+                batchList.getRows());
+    }
+
+
+    /*
+     * =========================================================
+     * GET TOTAL PAGES
+     * =========================================================
+     */
+
+    private int getTotalPages() {
+
+        if (totalBatches <= 0) {
+
+            return 1;
+        }
+
+        return (int) Math.ceil(
+                (double) totalBatches
+                / PAGE_SIZE);
+    }
+
+
+    /*
+     * =========================================================
+     * UPDATE PAGINATION
+     * =========================================================
+     */
+
+    private void updatePagination() {
+
+        int totalPages =
+                getTotalPages();
+
+
+        /*
+         * CURRENT PAGE
+         *
+         * Example:
+         *
+         * 1/5
+         * 2/5
+         * 5/5
+         */
+
+        currentPage.setLabel(
+                currentPageNumber
+                + "/"
+                + totalPages);
+
+
+        /*
+         * PREVIOUS
+         */
+
+        previousPage.setDisabled(
+                currentPageNumber <= 1);
+
+
+        /*
+         * NEXT
+         */
+
+        nextPage.setDisabled(
+                currentPageNumber >= totalPages);
+
+
+        /*
+         * Always visible.
+         */
+
+        pagination.setVisible(
+                true);
     }
 
 
@@ -926,16 +1101,14 @@ public class CheckerDashboardController
 
             allFilter.setSclass(
                     "filter-btn active-filter");
-        }
 
-        else if ("AVAILABLE".equals(
+        } else if ("AVAILABLE".equals(
                 selectedFilter)) {
 
             availableFilter.setSclass(
                     "filter-btn active-filter");
-        }
 
-        else if ("MY_BATCHES".equals(
+        } else if ("MY_BATCHES".equals(
                 selectedFilter)) {
 
             myBatchesFilter.setSclass(
@@ -947,33 +1120,6 @@ public class CheckerDashboardController
 
             onHoldFilter.setSclass(
                     "filter-btn active-filter");
-        }
-    }
-
-
-    /*
-     * =========================================================
-     * UPDATE FOOTER
-     * =========================================================
-     */
-
-    private void updateShowingText(
-            int totalBatches) {
-
-        if (totalBatches == 0) {
-
-            showingText.setValue(
-                    "Showing 0 batches");
-        }
-
-        else {
-
-            showingText.setValue(
-                    "Showing 1 to "
-                    + totalBatches
-                    + " of "
-                    + totalBatches
-                    + " batches");
         }
     }
 }

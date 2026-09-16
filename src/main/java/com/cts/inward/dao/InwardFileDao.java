@@ -11,4 +11,6 @@ public interface InwardFileDao {
     void markAsProcessed(long fileId);
 
     long getFileIdByPath(String filePath);
+
+    long getFileIdByFileName(String fileName);
 }

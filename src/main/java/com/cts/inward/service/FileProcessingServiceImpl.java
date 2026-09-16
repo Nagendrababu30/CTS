@@ -110,6 +110,16 @@ public class FileProcessingServiceImpl
     @Override
     public void processFile(String filePath) {
 
+        Path path = Path.of(filePath);
+        try {
+            if (Files.exists(path) && Files.size(path) == 0) {
+                System.err.println("[FileProcessing] Skipping empty (0 bytes) file: " + filePath);
+                return;
+            }
+        } catch (IOException e) {
+            System.err.println("[FileProcessing] Could not determine file size for: " + filePath);
+        }
+
         FileType fileType = resolveFileType(filePath);
 
         /* CATCH 1 — move to processing/{type}/ before parsing */
@@ -232,8 +242,19 @@ public class FileProcessingServiceImpl
         NpciBatchData batchData = result.getBatchData();
         List<NpciChequeData> chequeDataList = result.getChequeDataList();
 
+        /*
+         * Resolve the actual file_id from inward_file table to prevent
+         * foreign key violations caused by erroneous file_id in XML.
+         */
+        String fileName = Path.of(filePath).getFileName().toString();
+        long actualFileId = inwardFileDao.getFileIdByFileName(fileName);
+        if (actualFileId > 0) {
+            batchData.setFileId(actualFileId);
+        }
+
         System.out.println("[PXF] Parsed batch: " + batchData.getBatchId()
-                + ", cheques parsed: " + chequeDataList.size());
+                + ", cheques parsed: " + chequeDataList.size()
+                + ", fileId: " + batchData.getFileId());
 
         batchService.saveBatch(batchData);
 
@@ -310,6 +331,15 @@ public class FileProcessingServiceImpl
 
         OcrBatchData batchData =
                 ocrParser.parse(filePath);
+
+        /*
+         * Resolve the actual file_id from inward_file table for OCR.
+         */
+        String fileName = Path.of(filePath).getFileName().toString();
+        long actualFileId = inwardFileDao.getFileIdByFileName(fileName);
+        if (actualFileId > 0) {
+            batchData.setFileId(actualFileId);
+        }
 
         /*
          * saveBatch() returns the generated ocr_batch_id via RETURNING.

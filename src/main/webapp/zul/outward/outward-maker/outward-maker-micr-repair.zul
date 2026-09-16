@@ -10,63 +10,12 @@
         arg0="/zul/common/layout.zul"?>
 
 <zk>
-
+<style src="/css/outward/maker/micr-repair.css"/>
     <!-- =========================================================
          PAGE STYLING
          ========================================================= -->
 
-    <style>
-
-        <![CDATA[
-
-        html, body {
-            margin: 0 !important;
-            padding: 0 !important;
-            height: 100% !important;
-            overflow: hidden !important;
-            background: #F4F7FB;
-        }
-
-        .z-window-embedded-cnt,
-        .z-window-content {
-            padding: 0 !important;
-        }
-
-        /* MICR Repair table header */
-
-        .micr-repair-listbox .z-listheader {
-            background: #0091FF !important;
-            color: #FFFFFF !important;
-            font-weight: 700 !important;
-            font-size: 13px !important;
-            border-right: 1px solid rgba(255, 255, 255, 0.2) !important;
-            height: 38px !important;
-        }
-
-        .micr-repair-listbox .z-listheader-content {
-            color: #FFFFFF !important;
-            font-weight: 700 !important;
-            padding: 8px 12px !important;
-        }
-
-        /* MICR Repair table rows */
-
-        .micr-repair-listbox .z-listcell {
-            font-size: 13px !important;
-            color: #1E293B !important;
-            padding: 10px 12px !important;
-            border-bottom: 1px solid #E2E8F0 !important;
-        }
-
-        .micr-repair-listbox .z-listitem\:hover > .z-listcell {
-            background: #F8FAFC !important;
-        }
-
-        ]]>
-
-    </style>
-
-
+   
     <!-- =========================================================
          CONTENT
          Header + Sidebar are provided by:
@@ -150,19 +99,23 @@
 
                         <listheader
                             label="Batch ID"
-                            width="25%"/>
+                            width="20%"/>
 
                         <listheader
                             label="Total Cheques"
-                            width="25%"/>
+                            width="20%"/>
 
-                        <listheader
+                       
+                          <listheader
+                            label="MICR Error"
+                            width="20%"/>
+                             <listheader
                             label="Status"
-                            width="25%"/>
+                            width="20%"/>
 
                         <listheader
                             label="Action"
-                            width="25%"/>
+                            width="20%"/>
 
                     </listhead>
 

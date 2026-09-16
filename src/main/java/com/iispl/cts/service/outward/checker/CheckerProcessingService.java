@@ -125,6 +125,44 @@ public class CheckerProcessingService {
         return "REJECT_REQUEST".equalsIgnoreCase(
                 processing.getMakerAction());
     }
+    
+    // ============================================================
+    // START CHECKER PROCESSING
+    // ============================================================
+
+    /*
+     * Moves a Maker re-verified cheque into
+     * Checker processing.
+     *
+     * Only a cheque with status RE_VERIFIED can
+     * be moved to CHECKER_PROCESSING.
+     *
+     * This prevents already processed cheques from
+     * being moved back into Checker processing.
+     */
+
+    public boolean startCheckerProcessing(
+            String batchNumber,
+            String chequeNumber) {
+
+        if (batchNumber == null
+                || batchNumber.trim().isEmpty()) {
+
+            return false;
+        }
+
+        if (chequeNumber == null
+                || chequeNumber.trim().isEmpty()) {
+
+            return false;
+        }
+
+        return chequeDao.startCheckerProcessing(
+                batchNumber.trim(),
+                chequeNumber.trim());
+    }
+
+
 
 
     public String getMakerReasonCode(

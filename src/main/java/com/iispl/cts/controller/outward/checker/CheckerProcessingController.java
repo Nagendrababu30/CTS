@@ -1,5 +1,6 @@
 package com.iispl.cts.controller.outward.checker;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.zkoss.zk.ui.Executions;
@@ -160,7 +161,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
      * 1.0 = 100%
      * 1.25 = 125%
      * 1.50 = 150%
-     * ...
      *
      * Rotation:
      * 0 -> 90 -> 180 -> 270 -> 0
@@ -176,7 +176,7 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
     private String batchNumber;
 
     /*
-     * Re-Verify mode is enabled only when the Checker Dashboard
+     * Re-Verify mode is enabled only when the Checker
      * opens this screen with mode=RE_VERIFY.
      */
     private boolean reVerifyMode = false;
@@ -227,15 +227,26 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
                 Executions.getCurrent()
                         .getParameter("batchNumber");
 
-        String mode =
-                Executions.getCurrent()
-                        .getParameter("mode");
+        String mode = Executions.getCurrent().getParameter("mode");
 
-        reVerifyMode =
-                "RE_VERIFY".equalsIgnoreCase(mode);
+        System.out.println("========== CHECKER PROCESSING ==========");
+        System.out.println("Batch Number : " + batchNumber);
+        System.out.println("Mode Parameter : [" + mode + "]");
+
+        reVerifyMode = "RE_VERIFY".equalsIgnoreCase(
+                mode != null ? mode.trim() : ""
+        );
+
+        System.out.println("Re-Verify Mode : " + reVerifyMode);
 
         if (batchNumber == null
                 || batchNumber.trim().isEmpty()) {
+
+            Messagebox.show(
+                    "Batch number is missing.",
+                    "Processing",
+                    Messagebox.OK,
+                    Messagebox.EXCLAMATION);
 
             return;
         }
@@ -248,6 +259,36 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
         loadBatch();
 
+        if (currentBatch == null) {
+
+            Messagebox.show(
+                    "Batch could not be found.",
+                    "Processing",
+                    Messagebox.OK,
+                    Messagebox.ERROR);
+
+            return;
+        }
+
+        /*
+         * The same Checker must own the batch.
+         *
+         * No new assignment is created here.
+         * This is especially important for RE_VERIFY mode.
+         */
+        if (!batchService.isAssignedToChecker(
+                batchNumber,
+                checkerUserId)) {
+
+            Messagebox.show(
+                    "This batch is not assigned to the current Checker.",
+                    "Access Denied",
+                    Messagebox.OK,
+                    Messagebox.ERROR);
+
+            return;
+        }
+
         loadFirstCheque();
 
         // ========================================================
@@ -255,7 +296,7 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         // ========================================================
 
         backButton.addEventListener(
-                "onClick",
+                Events.ON_CLICK,
                 event -> goBackToQueue());
 
         // ========================================================
@@ -291,15 +332,15 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         // ========================================================
 
         acceptButton.addEventListener(
-                "onClick",
+                Events.ON_CLICK,
                 event -> confirmAction("ACCEPT"));
 
         rejectButton.addEventListener(
-                "onClick",
+                Events.ON_CLICK,
                 event -> confirmAction("REJECT"));
 
         sendBackButton.addEventListener(
-                "onClick",
+                Events.ON_CLICK,
                 event -> confirmAction("SEND_BACK"));
 
         // ========================================================
@@ -307,7 +348,7 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         // ========================================================
 
         saveNextButton.addEventListener(
-                "onClick",
+                Events.ON_CLICK,
                 event -> saveAndNext());
 
         saveNextButton.setDisabled(true);
@@ -317,7 +358,7 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         // ========================================================
 
         reasonCombobox.addEventListener(
-                "onSelect",
+                Events.ON_SELECT,
                 event -> updateSaveNextButton());
     }
 
@@ -408,7 +449,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         if (imageScale < 3.0) {
 
             imageScale += 0.25;
-
         }
 
         applyImageTransform();
@@ -423,7 +463,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         if (imageScale > 0.50) {
 
             imageScale -= 0.25;
-
         }
 
         applyImageTransform();
@@ -440,7 +479,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         if (imageRotation >= 360) {
 
             imageRotation = 0;
-
         }
 
         applyImageTransform();
@@ -544,6 +582,21 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         OutwardCheque currentCheque =
                 cheques.get(currentChequeIndex);
 
+        if (currentCheque == null
+                || currentCheque.getChequeNumber() == null
+                || currentCheque.getChequeNumber()
+                        .trim()
+                        .isEmpty()) {
+
+            Messagebox.show(
+                    "Invalid cheque information.",
+                    "Error",
+                    Messagebox.OK,
+                    Messagebox.ERROR);
+
+            return;
+        }
+
         // ========================================================
         // SAVE
         // ========================================================
@@ -584,6 +637,37 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
         if (currentChequeIndex >= cheques.size()) {
 
+            /*
+             * For the normal Checker cycle, mark the current
+             * Checker assignment as completed.
+             *
+             * The DAO has already decided the correct batch
+             * status:
+             *
+             *   SEND_BACK exists -> ON_HOLD
+             *   no SEND_BACK    -> CHECKER_VERIFIED
+             *
+             * We only complete the assignment here.
+             */
+            if (!reVerifyMode) {
+
+                boolean completed =
+                        batchService.completeBatch(
+                                batchNumber,
+                                checkerUserId);
+
+                if (!completed) {
+
+                    Messagebox.show(
+                            "Checker decision was saved, but the Checker assignment could not be completed.",
+                            "Warning",
+                            Messagebox.OK,
+                            Messagebox.EXCLAMATION);
+
+                    return;
+                }
+            }
+
             Executions.sendRedirect(
                     "/zul/outward/outward-checker/batchesQueue.zul");
 
@@ -611,7 +695,65 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         }
 
         // ========================================================
-        // RESET IMAGE FOR NEW CHEQUE
+        // CURRENT CHEQUE
+        // ========================================================
+
+        OutwardCheque cheque =
+                cheques.get(currentChequeIndex);
+
+        if (cheque == null) {
+
+            return;
+        }
+
+        // ========================================================
+        // RE-VERIFY MODE
+        // ========================================================
+
+        /*
+         * A corrected cheque comes from Maker with:
+         *
+         * RE_VERIFIED
+         *
+         * When the same Checker opens it for verification:
+         *
+         * RE_VERIFIED
+         *      ↓
+         * CHECKER_PROCESSING
+         *
+         * Only this individual cheque is changed.
+         */
+
+        if (reVerifyMode
+                && "RE_VERIFIED".equalsIgnoreCase(
+                        cheque.getChequeStatus())) {
+
+            boolean started =
+                    processingService.startCheckerProcessing(
+                            batchNumber,
+                            cheque.getChequeNumber());
+
+            if (!started) {
+
+                Messagebox.show(
+                        "Unable to start Checker processing for this cheque.",
+                        "Re-Verify",
+                        Messagebox.OK,
+                        Messagebox.ERROR);
+
+                return;
+            }
+
+            /*
+             * Keep the in-memory object synchronized
+             * with the database.
+             */
+            cheque.setChequeStatus(
+                    "CHECKER_PROCESSING");
+        }
+
+        // ========================================================
+        // RESET IMAGE
         // ========================================================
 
         imageScale = 1.0;
@@ -624,9 +766,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         // LOAD CHEQUE
         // ========================================================
 
-        OutwardCheque cheque =
-                cheques.get(currentChequeIndex);
-
         displayCheque(cheque);
 
         chequeSequence.setValue(
@@ -634,6 +773,10 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
                         "%02d / %02d",
                         currentChequeIndex + 1,
                         cheques.size()));
+
+        // ========================================================
+        // RESET ACTION STATE
+        // ========================================================
 
         selectedAction = null;
 
@@ -699,6 +842,12 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         if (cheques == null
                 || cheques.isEmpty()) {
 
+            Messagebox.show(
+                    "No cheques are available for this batch.",
+                    "Processing",
+                    Messagebox.OK,
+                    Messagebox.EXCLAMATION);
+
             return;
         }
 
@@ -710,15 +859,21 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
     // ============================================================
     // LOAD RE-VERIFY CHEQUES
     // ============================================================
-    //
-    // Re-Verify eligibility is based ONLY on the individual cheque:
-    //
-    // 1. cheque_processing.checker_id = current Checker
-    // 2. cheque_processing.checker_action = SEND_BACK
-    // 3. outward_cheque.cheque_status = RE_VERIFIED
-    //
-    // outward_batch.batch_status is deliberately NOT used here.
-    // ============================================================
+    /*
+     * Re-Verify eligibility is based only on the individual
+     * cheque.
+     *
+     * Conditions:
+     *
+     * 1. checker_id = current Checker
+     * 2. checker_action = SEND_BACK
+     * 3. cheque_status = RE_VERIFIED
+     *
+     * IMPORTANT:
+     *
+     * A cheque which is still with Maker does NOT block
+     * other corrected cheques from being re-verified.
+     */
 
     private void loadReVerifyCheques() {
 
@@ -730,10 +885,10 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
                 || allCheques.isEmpty()) {
 
             cheques =
-                    new java.util.ArrayList<>();
+                    new ArrayList<>();
 
             Messagebox.show(
-                    "No re-verified cheques are available for this batch.",
+                    "No cheques are available for re-verification.",
                     "Re-Verify",
                     Messagebox.OK,
                     Messagebox.EXCLAMATION);
@@ -742,9 +897,7 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         }
 
         List<OutwardCheque> reVerifiedCheques =
-                new java.util.ArrayList<>();
-
-        boolean pendingMakerCheque = false;
+                new ArrayList<>();
 
         for (OutwardCheque cheque : allCheques) {
 
@@ -767,50 +920,50 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
                 continue;
             }
 
-            boolean sentBackByCurrentChecker =
-                    processing.getCheckerId() == checkerUserId
-                    && "SEND_BACK".equalsIgnoreCase(
-                            processing.getCheckerAction());
+            // ====================================================
+            // SAME CHECKER
+            // ====================================================
 
-            if (!sentBackByCurrentChecker) {
+            Integer processingCheckerId =
+                    processing.getCheckerId();
+
+            if (processingCheckerId == null
+                    || processingCheckerId.longValue()
+                            != checkerUserId) {
 
                 continue;
             }
 
-            String chequeStatus =
-                    cheque.getChequeStatus();
+            // ====================================================
+            // PREVIOUS CHECKER DECISION WAS SEND_BACK
+            // ====================================================
+
+            if (!"SEND_BACK".equalsIgnoreCase(
+                    processing.getCheckerAction())) {
+
+                continue;
+            }
+
+            // ====================================================
+            // MAKER HAS COMPLETED REWORK
+            // ====================================================
 
             if ("RE_VERIFIED".equalsIgnoreCase(
-                    chequeStatus)) {
+                    cheque.getChequeStatus())) {
 
                 reVerifiedCheques.add(cheque);
-
-            } else {
-
-                pendingMakerCheque = true;
             }
+
+            /*
+             * If status is not RE_VERIFIED, the cheque is still
+             * with Maker.
+             *
+             * Do NOT block the other re-verified cheques.
+             */
         }
 
         // ========================================================
-        // ANY RETURNED CHEQUE STILL WITH MAKER
-        // ========================================================
-
-        if (pendingMakerCheque) {
-
-            cheques =
-                    new java.util.ArrayList<>();
-
-            Messagebox.show(
-                    "Still in process by Maker.",
-                    "Re-Verify",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
-
-            return;
-        }
-
-        // ========================================================
-        // ONLY RE-VERIFIED CHEQUES
+        // ONLY READY CHEQUES
         // ========================================================
 
         cheques = reVerifiedCheques;
@@ -818,7 +971,7 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         if (cheques.isEmpty()) {
 
             Messagebox.show(
-                    "No re-verified cheques are available for this batch.",
+                    "No re-verified cheques are currently available.",
                     "Re-Verify",
                     Messagebox.OK,
                     Messagebox.EXCLAMATION);
@@ -839,7 +992,13 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
     // DISPLAY CHEQUE
     // ============================================================
 
-    private void displayCheque(OutwardCheque cheque) {
+    private void displayCheque(
+            OutwardCheque cheque) {
+
+        if (cheque == null) {
+
+            return;
+        }
 
         chequeNumberLabel.setValue(
                 valueOrDash(
@@ -878,11 +1037,9 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
                         ? cheque.getChequeDate().toString()
                         : "-");
 
-        /*
-         * MICR:
-         *
-         * City Code + Bank Code + Branch Code
-         */
+        // ========================================================
+        // MICR
+        // ========================================================
 
         micrLabel.setValue(
                 buildMicr(cheque));
@@ -931,7 +1088,7 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
          * Always reset the Maker rejection block first.
          *
          * This is important because the next cheque may not
-         * have been rejected by Maker.
+         * have been rejected/requested for rework by Maker.
          */
 
         makerRejectionBlock.setVisible(false);
@@ -1004,12 +1161,14 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
                 || reasonName.trim().isEmpty()) {
 
             makerRejectionReason.setValue(
-                    "Reason: " + reasonCode);
+                    "Reason: "
+                            + reasonCode);
 
         } else {
 
             makerRejectionReason.setValue(
-                    "Reason: " + reasonName.trim());
+                    "Reason: "
+                            + reasonName.trim());
         }
 
         makerRejectionBlock.setVisible(true);
@@ -1057,6 +1216,11 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
     private void validateCbs(
             OutwardCheque cheque) {
+
+        if (cheque == null) {
+
+            return;
+        }
 
         cbsResult =
                 processingService.validateCbsAccount(
@@ -1145,7 +1309,8 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
             reasonCombobox.setSelectedItem(null);
 
             saveNextButton.setDisabled(
-                    !"PASS".equalsIgnoreCase(cbsResult));
+                    !"PASS".equalsIgnoreCase(
+                            cbsResult));
 
             return;
         }
@@ -1183,6 +1348,11 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
         }
 
         for (ReturnReason reason : reasons) {
+
+            if (reason == null) {
+
+                continue;
+            }
 
             Comboitem item =
                     reasonCombobox.appendItem(

@@ -8,22 +8,33 @@ import com.iispl.cts.data.CTSStaticData;
 
 public class CheckerAssignmentDAO {
 
+    // ============================================================
+    // TAKE BATCH FOR CHECKER
+    // ============================================================
+
     /*
      * Take a batch for Checker processing.
      *
      * A new CHECKER assignment is created.
+     *
      * Existing MAKER assignment records are not changed.
+     *
+     * Batch status:
+     *
+     * SUBMITTED_TO_CHECKER
+     *          ↓
+     * CHECKER_PROCESSING
+     *
+     * This method is only for a newly submitted batch.
+     *
+     * ON_HOLD batches are NOT taken through this method.
+     * The same Checker continues ownership for re-verification.
      */
+
     public boolean takeBatch(
             String batchNumber,
             long checkerUserId) {
 
-        /*
-         * Lock the batch row first.
-         *
-         * This prevents two Checkers from taking
-         * the same batch at the same time.
-         */
         String lockBatchSql =
                 "SELECT batch_number, batch_status "
                 + "FROM outward_batch "
@@ -46,6 +57,13 @@ public class CheckerAssignmentDAO {
                 + "VALUES (?, ?, 'CHECKER', CURRENT_TIMESTAMP, "
                 + " CURRENT_TIMESTAMP, 'IN_PROGRESS')";
 
+        String updateBatchProcessingSql =
+                "UPDATE outward_batch "
+                + "SET batch_status = 'CHECKER_PROCESSING' "
+                + "WHERE batch_number = ? "
+                + "AND UPPER(TRIM(batch_status)) = "
+                + "'SUBMITTED_TO_CHECKER'";
+
         try (Connection connection =
                      CTSStaticData.getConnection()) {
 
@@ -53,88 +71,132 @@ public class CheckerAssignmentDAO {
 
             try {
 
-                /*
-                 * Lock the batch row and check its status.
-                 */
-                try (PreparedStatement lockStatement =
-                             connection.prepareStatement(lockBatchSql)) {
+                // ====================================================
+                // LOCK BATCH
+                // ====================================================
 
-                    lockStatement.setString(1, batchNumber);
+                try (PreparedStatement lockStatement =
+                             connection.prepareStatement(
+                                     lockBatchSql)) {
+
+                    lockStatement.setString(
+                            1,
+                            batchNumber);
 
                     try (ResultSet rs =
                                  lockStatement.executeQuery()) {
 
-                        /*
-                         * Batch does not exist.
-                         */
                         if (!rs.next()) {
+
                             connection.rollback();
+
                             return false;
                         }
 
-                        /*
-                         * Only batches submitted to Checker
-                         * can be taken.
-                         */
                         String batchStatus =
-                                rs.getString("batch_status");
+                                rs.getString(
+                                        "batch_status");
 
                         if (!"SUBMITTED_TO_CHECKER"
-                                .equalsIgnoreCase(batchStatus)) {
+                                .equalsIgnoreCase(
+                                        batchStatus)) {
 
                             connection.rollback();
+
                             return false;
                         }
                     }
                 }
 
-                /*
-                 * Check whether another Checker already
-                 * has an active assignment.
-                 */
-                try (PreparedStatement checkStatement =
-                             connection.prepareStatement(checkSql)) {
+                // ====================================================
+                // CHECK EXISTING ACTIVE CHECKER ASSIGNMENT
+                // ====================================================
 
-                    checkStatement.setString(1, batchNumber);
+                try (PreparedStatement checkStatement =
+                             connection.prepareStatement(
+                                     checkSql)) {
+
+                    checkStatement.setString(
+                            1,
+                            batchNumber);
 
                     try (ResultSet rs =
                                  checkStatement.executeQuery()) {
 
                         if (rs.next()) {
+
                             connection.rollback();
+
                             return false;
                         }
                     }
                 }
 
-                /*
-                 * Create a NEW Checker assignment.
-                 *
-                 * Existing Maker assignment remains untouched.
-                 */
-                try (PreparedStatement insertStatement =
-                             connection.prepareStatement(insertSql)) {
+                // ====================================================
+                // CREATE CHECKER ASSIGNMENT
+                // ====================================================
 
-                    insertStatement.setString(1, batchNumber);
-                    insertStatement.setLong(2, checkerUserId);
+                try (PreparedStatement insertStatement =
+                             connection.prepareStatement(
+                                     insertSql)) {
+
+                    insertStatement.setString(
+                            1,
+                            batchNumber);
+
+                    insertStatement.setLong(
+                            2,
+                            checkerUserId);
 
                     int rows =
                             insertStatement.executeUpdate();
 
-                    if (rows == 1) {
-                        connection.commit();
-                        return true;
-                    }
+                    if (rows != 1) {
 
-                    connection.rollback();
-                    return false;
+                        connection.rollback();
+
+                        return false;
+                    }
                 }
+
+                // ====================================================
+                // MOVE BATCH TO CHECKER PROCESSING
+                // ====================================================
+
+                try (PreparedStatement updateStatement =
+                             connection.prepareStatement(
+                                     updateBatchProcessingSql)) {
+
+                    updateStatement.setString(
+                            1,
+                            batchNumber);
+
+                    int updatedRows =
+                            updateStatement.executeUpdate();
+
+                    if (updatedRows != 1) {
+
+                        throw new RuntimeException(
+                                "Unable to move batch to Checker processing");
+                    }
+                }
+
+                // ====================================================
+                // COMMIT
+                // ====================================================
+
+                connection.commit();
+
+                return true;
 
             } catch (Exception e) {
 
                 try {
+
                     connection.rollback();
+
                 } catch (Exception rollbackException) {
+
                     rollbackException.printStackTrace();
                 }
 
@@ -147,14 +209,21 @@ public class CheckerAssignmentDAO {
 
             throw new RuntimeException(
                     "Error while taking Checker batch: "
-                            + batchNumber, e);
+                            + batchNumber,
+                    e);
         }
     }
 
+    // ============================================================
+    // CHECK WHETHER BATCH IS CURRENTLY ASSIGNED
+    // ============================================================
+
     /*
-     * Check whether a batch is currently assigned
-     * to any Checker.
+     * Returns true when the batch has an active Checker assignment.
+     *
+     * ASSIGNED / IN_PROGRESS are considered active.
      */
+
     public boolean isBatchAssigned(
             String batchNumber) {
 
@@ -172,7 +241,9 @@ public class CheckerAssignmentDAO {
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
-            statement.setString(1, batchNumber);
+            statement.setString(
+                    1,
+                    batchNumber);
 
             try (ResultSet rs =
                          statement.executeQuery()) {
@@ -186,14 +257,26 @@ public class CheckerAssignmentDAO {
 
             throw new RuntimeException(
                     "Error while checking batch assignment: "
-                            + batchNumber, e);
+                            + batchNumber,
+                    e);
         }
     }
 
+    // ============================================================
+    // CHECK WHETHER THIS CHECKER HAS THE BATCH
+    // ============================================================
+
     /*
-     * Check whether this particular Checker currently
-     * has the batch.
+     * Returns true when this particular Checker currently owns
+     * the batch.
+     *
+     * This remains true while the batch is ON_HOLD because the
+     * Checker assignment intentionally remains IN_PROGRESS.
+     *
+     * This allows the same Checker to perform re-verification
+     * after Maker correction.
      */
+
     public boolean isBatchAssignedToChecker(
             String batchNumber,
             long checkerUserId) {
@@ -213,8 +296,13 @@ public class CheckerAssignmentDAO {
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
-            statement.setString(1, batchNumber);
-            statement.setLong(2, checkerUserId);
+            statement.setString(
+                    1,
+                    batchNumber);
+
+            statement.setLong(
+                    2,
+                    checkerUserId);
 
             try (ResultSet rs =
                          statement.executeQuery()) {
@@ -228,16 +316,21 @@ public class CheckerAssignmentDAO {
 
             throw new RuntimeException(
                     "Error while checking Checker assignment: "
-                            + batchNumber, e);
+                            + batchNumber,
+                    e);
         }
     }
 
+    // ============================================================
+    // GET ASSIGNED CHECKER
+    // ============================================================
+
     /*
-     * Get the user ID of the Checker currently holding
-     * the batch.
+     * Get the Checker currently holding the batch.
      *
-     * Returns null when no Checker has the batch.
+     * Returns null when no active Checker assignment exists.
      */
+
     public Long getAssignedChecker(
             String batchNumber) {
 
@@ -256,13 +349,17 @@ public class CheckerAssignmentDAO {
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
-            statement.setString(1, batchNumber);
+            statement.setString(
+                    1,
+                    batchNumber);
 
             try (ResultSet rs =
                          statement.executeQuery()) {
 
                 if (rs.next()) {
-                    return rs.getLong("user_id");
+
+                    return rs.getLong(
+                            "user_id");
                 }
             }
 
@@ -272,23 +369,50 @@ public class CheckerAssignmentDAO {
 
             throw new RuntimeException(
                     "Error while getting assigned Checker: "
-                            + batchNumber, e);
+                            + batchNumber,
+                    e);
         }
 
         return null;
     }
 
+    // ============================================================
+    // COMPLETE CHECKER ASSIGNMENT
+    // ============================================================
+
     /*
-     * Mark the current Checker assignment as completed.
+     * Complete the Checker assignment only when the batch has
+     * reached its final Checker state.
      *
-     * The assignment row is NOT deleted.
-     * It remains in the table for history and tracking.
+     * FINAL:
+     *
+     * CHECKER_VERIFIED
+     *       ↓
+     * assignment COMPLETED
+     *
+     * ON_HOLD:
+     *
+     * ON_HOLD
+     *       ↓
+     * assignment remains IN_PROGRESS
+     *
+     * This is important because the same Checker must continue
+     * with re-verification after Maker correction.
+     *
+     * Therefore an ON_HOLD batch is treated as successfully
+     * left active, not as a completed assignment.
      */
+
     public boolean completeBatch(
             String batchNumber,
             long checkerUserId) {
 
-        String sql =
+        String batchStatusSql =
+                "SELECT batch_status "
+                + "FROM outward_batch "
+                + "WHERE batch_number = ?";
+
+        String completeSql =
                 "UPDATE outward_batch_assignment "
                 + "SET assignment_status = 'COMPLETED', "
                 + "    completed_at = CURRENT_TIMESTAMP "
@@ -299,14 +423,121 @@ public class CheckerAssignmentDAO {
                 + "    IN ('ASSIGNED', 'IN_PROGRESS')";
 
         try (Connection connection =
-                     CTSStaticData.getConnection();
-             PreparedStatement statement =
-                     connection.prepareStatement(sql)) {
+                     CTSStaticData.getConnection()) {
 
-            statement.setString(1, batchNumber);
-            statement.setLong(2, checkerUserId);
+            connection.setAutoCommit(false);
 
-            return statement.executeUpdate() == 1;
+            try {
+
+                // ====================================================
+                // CHECK CURRENT BATCH STATUS
+                // ====================================================
+
+                String batchStatus = null;
+
+                try (PreparedStatement statusStatement =
+                             connection.prepareStatement(
+                                     batchStatusSql)) {
+
+                    statusStatement.setString(
+                            1,
+                            batchNumber);
+
+                    try (ResultSet rs =
+                                 statusStatement.executeQuery()) {
+
+                        if (!rs.next()) {
+
+                            connection.rollback();
+
+                            return false;
+                        }
+
+                        batchStatus =
+                                rs.getString(
+                                        "batch_status");
+                    }
+                }
+
+                // ====================================================
+                // ON HOLD
+                // ====================================================
+
+                /*
+                 * Do NOT complete the Checker assignment.
+                 *
+                 * The same Checker must continue ownership
+                 * for future re-verification.
+                 */
+
+                if ("ON_HOLD".equalsIgnoreCase(
+                        batchStatus)) {
+
+                    connection.commit();
+
+                    return true;
+                }
+
+                // ====================================================
+                // CHECKER VERIFIED
+                // ====================================================
+
+                if (!"CHECKER_VERIFIED".equalsIgnoreCase(
+                        batchStatus)) {
+
+                    connection.rollback();
+
+                    return false;
+                }
+
+                // ====================================================
+                // COMPLETE ASSIGNMENT
+                // ====================================================
+
+                try (PreparedStatement statement =
+                             connection.prepareStatement(
+                                     completeSql)) {
+
+                    statement.setString(
+                            1,
+                            batchNumber);
+
+                    statement.setLong(
+                            2,
+                            checkerUserId);
+
+                    int updatedRows =
+                            statement.executeUpdate();
+
+                    if (updatedRows != 1) {
+
+                        connection.rollback();
+
+                        return false;
+                    }
+                }
+
+                // ====================================================
+                // COMMIT
+                // ====================================================
+
+                connection.commit();
+
+                return true;
+
+            } catch (Exception e) {
+
+                try {
+
+                    connection.rollback();
+
+                } catch (Exception rollbackException) {
+
+                    rollbackException.printStackTrace();
+                }
+
+                throw e;
+            }
 
         } catch (Exception e) {
 
@@ -314,16 +545,22 @@ public class CheckerAssignmentDAO {
 
             throw new RuntimeException(
                     "Error while completing Checker assignment: "
-                            + batchNumber, e);
+                            + batchNumber,
+                    e);
         }
     }
 
+    // ============================================================
+    // GET CHECKER ASSIGNMENT ID
+    // ============================================================
+
     /*
-     * Get the assignment ID of the current Checker
+     * Get the assignment ID of the current active Checker
      * assignment.
      *
      * Database column is "id".
      */
+
     public Long getAssignmentId(
             String batchNumber,
             long checkerUserId) {
@@ -344,14 +581,21 @@ public class CheckerAssignmentDAO {
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
-            statement.setString(1, batchNumber);
-            statement.setLong(2, checkerUserId);
+            statement.setString(
+                    1,
+                    batchNumber);
+
+            statement.setLong(
+                    2,
+                    checkerUserId);
 
             try (ResultSet rs =
                          statement.executeQuery()) {
 
                 if (rs.next()) {
-                    return rs.getLong("id");
+
+                    return rs.getLong(
+                            "id");
                 }
             }
 
@@ -361,7 +605,8 @@ public class CheckerAssignmentDAO {
 
             throw new RuntimeException(
                     "Error while getting assignment ID: "
-                            + batchNumber, e);
+                            + batchNumber,
+                    e);
         }
 
         return null;

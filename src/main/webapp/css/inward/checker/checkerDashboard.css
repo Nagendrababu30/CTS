@@ -796,7 +796,7 @@
  * controlled by the 12px vertical padding.
  */
 
-.custom-grid .z-column,
+ .custom-grid .z-column,
 .custom-grid .z-column-content {
     background: transparent !important;
 
@@ -806,19 +806,18 @@
         sans-serif !important;
 
     font-weight: 700 !important;
-
     font-size: 13px !important;
-
     letter-spacing: 0.06em !important;
-
     text-transform: uppercase !important;
-
     color: #FFFFFF !important;
 
-    padding: 12px 12px !important;
+    height: 22px !important;
+    min-height: 22px !important;
+    max-height: 22px !important;
+
+    padding: 0 12px !important;
 
     border-right: none !important;
-
     border-bottom: none !important;
 
     text-shadow:
@@ -826,20 +825,21 @@
         rgba(0,0,0,0.22);
 
     white-space: nowrap !important;
-}
 
+    text-align: center !important;
+    vertical-align: middle !important;
+}
 .custom-grid .z-column:last-child {
     border-right: none !important;
 }
 
-.custom-grid .z-column * {
-    color: #FFFFFF !important;
-
-    font-weight: 700 !important;
-
-    background: transparent !important;
+ .custom-grid .z-column {
+    font-size: 12px !important;
+    height: 22px !important;
+    min-height: 22px !important;
+    max-height: 22px !important;
+    padding: 0 12px !important;
 }
-
 
 /* ---------- Remove header divider ---------- */
 

@@ -1,617 +1,608 @@
-package com.cts.inward.controller;
+ package com.cts.inward.controller;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
-import org.zkoss.zk.ui.event.Event;
-import org.zkoss.zk.ui.event.EventListener;
+import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
-import org.zkoss.zul.Hlayout;
+import org.zkoss.zul.Grid;
 import org.zkoss.zul.Label;
-import org.zkoss.zul.Textbox;
-import org.zkoss.zul.Vlayout;
+import org.zkoss.zul.Row;
 
-import com.cts.inward.dao.BatchDaoImpl;
-import com.cts.inward.service.BatchService;
-import com.cts.inward.service.BatchServiceImpl;
+import com.cts.inward.model.CheckerBatch;
+import com.cts.inward.service.CheckerDashboardService;
+import com.cts.inward.service.CheckerDashboardServiceImpl;
 
-public class VerifyBatchController extends GenericForwardComposer<Component> {
+public class VerifyBatchController
+        extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
 
     /*
-     * Logged-in user ID.
-     *
-     * Database type:
-     * user_id -> INTEGER
+     * =========================================================
+     * ZUL COMPONENTS
+     * =========================================================
      */
-    private Integer userId;
 
-    /*
-     * ZUL components
-     */
-    private Textbox searchBatch;
+    private Grid batchTable;
 
-    private Vlayout batchTable;
-
-    private Label showingText;
-
-    private Button firstPage;
     private Button previousPage;
     private Button currentPage;
     private Button nextPage;
-    private Button lastPage;
+
 
     /*
-     * Service
+     * =========================================================
+     * SERVICE
+     * =========================================================
      */
-    private BatchService batchService;
+
+    private CheckerDashboardService service;
+
 
     /*
-     * Pagination
+     * =========================================================
+     * CURRENT USER
+     * =========================================================
      */
-    private int currentPageNumber = 1;
+
+    private long userId;
+
+
+    /*
+     * =========================================================
+     * BATCH DATA
+     *
+     * Keep the complete list in memory.
+     * Pagination only changes what is displayed.
+     * =========================================================
+     */
+
+    private List<CheckerBatch> batches =
+            new ArrayList<>();
+
+
+    /*
+     * =========================================================
+     * PAGINATION
+     * =========================================================
+     */
 
     private static final int PAGE_SIZE = 10;
 
-    private int totalBatches = 0;
+    private int currentPageNumber = 1;
+
+
+    /*
+     * =========================================================
+     * AFTER COMPOSE
+     * =========================================================
+     */
 
     @Override
-    public void doAfterCompose(Component component) throws Exception {
+    public void doAfterCompose(
+            Component component)
+            throws Exception {
 
         super.doAfterCompose(component);
 
-        // Create service
-        batchService = BatchServiceImpl.of(BatchDaoImpl.of());
 
         /*
-         * Get logged-in user ID.
-         *
-         * userId is INTEGER in database,
-         * therefore Integer is used in Java.
+         * =====================================================
+         * GET SESSION
+         * =====================================================
          */
-        Object userIdAttr = Executions.getCurrent().getAttribute("userId");
-        if (userIdAttr instanceof Number) {
-            userId = ((Number) userIdAttr).intValue();
+
+        Session session =
+                Executions.getCurrent()
+                        .getSession();
+
+        if (session == null) {
+
+            Executions.sendRedirect(
+                    "/zul/login.zul");
+
+            return;
         }
 
-        // Print current user ID
-        System.out.println(
-                "VERIFY BATCH CURRENT USER ID = " + userId
-        );
 
-        // Make sure user ID exists
-        if (userId == null) {
+        /*
+         * =====================================================
+         * GET LOGGED-IN USER ID
+         * =====================================================
+         */
 
-            throw new IllegalStateException(
-                    "Logged-in user ID not found"
-            );
+        Object sessionUserId =
+                session.getAttribute("userId");
+
+        if (sessionUserId == null) {
+
+            Executions.sendRedirect(
+                    "/zul/login.zul");
+
+            return;
         }
 
-        // Load batches locked by current user
+
+        /*
+         * =====================================================
+         * CONVERT USER ID
+         * =====================================================
+         */
+
+        if (sessionUserId instanceof Number) {
+
+            userId =
+                    ((Number) sessionUserId)
+                            .longValue();
+
+        } else {
+
+            try {
+
+                userId =
+                        Long.parseLong(
+                                sessionUserId.toString());
+
+            } catch (NumberFormatException e) {
+
+                Executions.sendRedirect(
+                        "/zul/login.zul");
+
+                return;
+            }
+        }
+
+
+        /*
+         * =====================================================
+         * INITIALIZE CHECKER DASHBOARD SERVICE
+         *
+         * Use the SAME service used by Checker Dashboard.
+         * =====================================================
+         */
+
+        service =
+                new CheckerDashboardServiceImpl();
+
+
+        /*
+         * =====================================================
+         * LOAD VERIFY BATCHES
+         * =====================================================
+         */
+
         loadBatches();
     }
 
-    /**
-     * Load batches locked by the currently logged-in user.
+
+    /*
+     * =========================================================
+     * LOAD BATCHES
+     * =========================================================
+     *
+     * Get batches from the same source as Checker Dashboard.
+     *
+     * Verify Batch shows batches currently locked by
+     * the logged-in checker.
+     *
+     * =========================================================
      */
+
     private void loadBatches() {
 
         try {
 
-            List<Map<String, Object>> batches =
-                    batchService.getBatchesForVerification(userId);
+            List<CheckerBatch> allBatches =
+                    service.getBatches();
 
-            totalBatches = batches.size();
+            batches =
+                    new ArrayList<>();
 
-            currentPageNumber = 1;
 
-            renderBatches(batches);
+            if (allBatches != null) {
 
-        } catch (Exception e) {
+                for (CheckerBatch batch :
+                        allBatches) {
 
-            e.printStackTrace();
+                    if (batch == null) {
+                        continue;
+                    }
 
-            clearRows();
 
-            showingText.setValue(
-                    "Unable to load batches"
-            );
-        }
-    }
+                    /*
+                     * =================================================
+                     * ONLY CURRENT CHECKER'S BATCHES
+                     * =================================================
+                     */
 
-    /**
-     * Search batches.
-     *
-     * Search is also restricted to the currently logged-in user.
-     */
-    public void onChange$searchBatch() {
+                    if ("LOCKED".equals(
+                            batch.getLockStatus())
 
-        String batchIdText = searchBatch.getValue();
+                            && batch.getUserId() != null
 
-        try {
+                            && batch.getUserId()
+                                    .longValue()
+                                    == userId) {
 
-            List<Map<String, Object>> batches;
-
-            /*
-             * Empty search:
-             * load all batches belonging to current checker.
-             */
-            if (batchIdText == null
-                    || batchIdText.trim().isEmpty()) {
-
-                batches =
-                        batchService.getBatchesForVerification(
-                                userId
-                        );
-
-            } else {
-
-                /*
-                 * Batch ID is BIGINT in database,
-                 * therefore convert the search text to Long.
-                 */
-                Long batchId =
-                        Long.valueOf(batchIdText.trim());
-
-                batches =
-                        batchService.searchBatchesForVerification(
-                                batchId,
-                                userId
-                        );
+                        batches.add(batch);
+                    }
+                }
             }
 
-            totalBatches = batches.size();
 
             currentPageNumber = 1;
 
-            renderBatches(batches);
-
-        } catch (NumberFormatException e) {
-
-            /*
-             * User entered something other than a number.
-             */
-            clearRows();
-
-            totalBatches = 0;
-
-            currentPageNumber = 1;
-
-            showingText.setValue(
-                    "Invalid batch ID"
-            );
-
-            updatePagination();
+            renderCurrentPage();
 
         } catch (Exception e) {
 
             e.printStackTrace();
 
-            clearRows();
+            batches =
+                    new ArrayList<>();
 
-            showingText.setValue(
-                    "Unable to search batches"
-            );
-        }
-    }
-
-    /**
-     * Reload batches while preserving the current search value.
-     */
-    private void reloadBatches() {
-
-        String batchIdText = searchBatch.getValue();
-
-        List<Map<String, Object>> batches;
-
-        try {
-
-            /*
-             * No search value.
-             */
-            if (batchIdText == null
-                    || batchIdText.trim().isEmpty()) {
-
-                batches =
-                        batchService.getBatchesForVerification(
-                                userId
-                        );
-
-            } else {
-
-                /*
-                 * Batch ID is Long.
-                 */
-                Long batchId =
-                        Long.valueOf(batchIdText.trim());
-
-                batches =
-                        batchService.searchBatchesForVerification(
-                                batchId,
-                                userId
-                        );
-            }
-
-            totalBatches = batches.size();
-
-            renderBatches(batches);
-
-        } catch (NumberFormatException e) {
+            currentPageNumber = 1;
 
             clearRows();
-
-            totalBatches = 0;
-
-            updateShowingText(0);
 
             updatePagination();
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            clearRows();
-
-            showingText.setValue(
-                    "Unable to reload batches"
-            );
         }
     }
 
-    /**
-     * Render the batches for the current page.
-     */
-    private void renderBatches(
-            List<Map<String, Object>> batches) {
 
-        /*
-         * Remove previous dynamic rows.
-         * Header remains.
-         */
+    /*
+     * =========================================================
+     * RENDER CURRENT PAGE
+     * =========================================================
+     */
+
+    private void renderCurrentPage() {
+
         clearRows();
 
-        /*
-         * No batches.
-         */
-        if (batches == null || batches.isEmpty()) {
 
-            updateShowingText(0);
+        /*
+         * =====================================================
+         * NO BATCHES
+         * =====================================================
+         */
+
+        if (batches == null
+                || batches.isEmpty()) {
+
+            currentPageNumber = 1;
 
             updatePagination();
 
             return;
         }
 
-        /*
-         * Calculate total pages.
-         */
-        int totalPages =
-                (int) Math.ceil(
-                        (double) batches.size() / PAGE_SIZE
-                );
 
         /*
-         * Make sure current page is within valid range.
+         * =====================================================
+         * TOTAL PAGES
+         * =====================================================
          */
+
+        int totalPages =
+                getTotalPages();
+
+
+        /*
+         * =====================================================
+         * MAKE SURE PAGE IS VALID
+         * =====================================================
+         */
+
+        if (currentPageNumber < 1) {
+
+            currentPageNumber = 1;
+        }
+
         if (currentPageNumber > totalPages) {
 
             currentPageNumber = totalPages;
         }
 
+
         /*
-         * Calculate start and end indexes.
+         * =====================================================
+         * INDEXES
+         * =====================================================
          */
+
         int startIndex =
-                (currentPageNumber - 1) * PAGE_SIZE;
+                (currentPageNumber - 1)
+                        * PAGE_SIZE;
 
         int endIndex =
                 Math.min(
                         startIndex + PAGE_SIZE,
-                        batches.size()
-                );
+                        batches.size());
+
 
         /*
-         * Create rows.
+         * =====================================================
+         * CREATE ROWS
+         * =====================================================
          */
-        for (int i = startIndex; i < endIndex; i++) {
 
-            createBatchRow(batches.get(i));
+        for (int i = startIndex;
+                i < endIndex;
+                i++) {
+
+            CheckerBatch batch =
+                    batches.get(i);
+
+            createBatchRow(batch);
         }
 
-        /*
-         * Update footer text.
-         */
-        updateShowingText(batches.size());
 
         /*
-         * Update pagination buttons.
+         * =====================================================
+         * UPDATE PAGINATION
+         * =====================================================
          */
+
         updatePagination();
     }
 
-    /**
-     * Remove dynamically created rows.
-     *
-     * The first child of batchTable is the table header.
+
+    /*
+     * =========================================================
+     * CLEAR GRID ROWS
+     * =========================================================
      */
+
     private void clearRows() {
 
-        while (batchTable.getChildren().size() > 1) {
-
-            Component child =
-                    batchTable.getChildren().get(1);
-
-            child.detach();
+        if (batchTable == null) {
+            return;
         }
+
+        if (batchTable.getRows() == null) {
+            return;
+        }
+
+        batchTable
+                .getRows()
+                .getChildren()
+                .clear();
     }
 
-    /**
-     * Create one batch table row.
+
+    /*
+     * =========================================================
+     * CREATE BATCH ROW
+     * =========================================================
+     *
+     * Values come directly from CheckerBatch,
+     * exactly like Checker Dashboard.
+     *
+     * batch.getBatchId()
+     * batch.getTotalCheques()
+     * batch.getMaker()
+     *
+     * =========================================================
      */
+
     private void createBatchRow(
-            Map<String, Object> batch) {
+            CheckerBatch batch) {
+
 
         /*
-         * Batch ID comes from BIGINT database column.
-         *
-         * DAO Map value should normally be Long.
+         * =====================================================
+         * BATCH ID
+         * =====================================================
          */
-        Long batchId =
-                (Long) batch.get("batchId");
+
+        Label batchIdLabel =
+                new Label(
+                        String.valueOf(
+                                batch.getBatchId()));
+
+        batchIdLabel.setSclass(
+                "batch-id");
+
 
         /*
-         * Convert values to String only for displaying
-         * them in the UI.
+         * =====================================================
+         * TOTAL CHEQUES
+         * =====================================================
          */
-        String batchIdText =
-                String.valueOf(batchId);
 
-        String chequeCount =
-                String.valueOf(batch.get("chequeCount"));
+        Label totalChequesLabel =
+                new Label(
+                        String.valueOf(
+                                batch.getTotalCheques()));
 
-        String makerId =
-                String.valueOf(batch.get("makerId"));
 
         /*
-         * Main row.
+         * =====================================================
+         * MAKER
+         * =====================================================
          */
-        Hlayout row = new Hlayout();
 
-        row.setWidth("100%");
-        row.setHeight("41px");
-        row.setSpacing("0");
-        row.setSclass("table-row");
+        String makerName =
+                "Not Assigned";
+
+        if (batch.getMaker() != null
+                && !batch.getMaker()
+                        .trim()
+                        .isEmpty()) {
+
+            makerName =
+                    batch.getMaker();
+        }
+
+        Label makerLabel =
+                new Label(
+                        makerName);
+
+        makerLabel.setSclass(
+                "maker-name");
+
 
         /*
-         * Batch ID
+         * =====================================================
+         * OPEN BUTTON
+         * =====================================================
          */
-        Hlayout batchIdCell =
-                createCell(
-                        batchIdText,
-                        "table-cell"
-                );
 
-        batchIdCell.setHflex("26");
+        Button openButton =
+                new Button(
+                        "Open");
+
+        openButton.setSclass(
+                "btn btn-action");
+
 
         /*
-         * Cheque count
+         * Store batch ID.
          */
-        Hlayout chequeCell =
-                createCell(
-                        chequeCount,
-                        "table-cell"
-                );
 
-        chequeCell.setHflex("24");
-
-        /*
-         * Maker ID
-         */
-        Hlayout makerCell =
-                createCell(
-                        makerId,
-                        "table-cell maker-cell"
-                );
-
-        makerCell.setHflex("24");
-
-        /*
-         * Action cell
-         */
-        Hlayout actionCell = new Hlayout();
-
-        actionCell.setHflex("26");
-        actionCell.setHeight("41px");
-        actionCell.setSpacing("0");
-        actionCell.setValign("middle");
-        actionCell.setSclass("table-cell");
-
-        /*
-         * Open button
-         */
-        Button openButton = new Button();
-
-        openButton.setLabel("Open");
-
-        openButton.setSclass("open-button");
-
-        /*
-         * Store Long batch ID in button.
-         */
         openButton.setAttribute(
                 "batchId",
-                batchId
-        );
+                batch.getBatchId());
+
 
         /*
-         * Open button event.
+         * Open event.
          */
+
         openButton.addEventListener(
                 "onClick",
-                new EventListener<Event>() {
+                event -> {
 
-                    @Override
-                    public void onEvent(Event event)
-                            throws Exception {
+                    long selectedBatchId =
+                            ((Number)
+                                    openButton
+                                            .getAttribute(
+                                                    "batchId"))
+                                    .longValue();
 
-                        Long selectedBatchId =
-                                (Long) openButton
-                                        .getAttribute(
-                                                "batchId"
-                                        );
+                    openBatch(
+                            selectedBatchId);
+                });
 
-                        openBatch(selectedBatchId);
-                    }
-                }
-        );
-
-        actionCell.appendChild(openButton);
 
         /*
-         * Add cells to row.
+         * =====================================================
+         * CREATE GRID ROW
+         * =====================================================
          */
-        row.appendChild(batchIdCell);
 
-        row.appendChild(chequeCell);
+        Row row =
+                new Row();
 
-        row.appendChild(makerCell);
-
-        row.appendChild(actionCell);
 
         /*
-         * Add row to table.
+         * Add cells.
          */
-        batchTable.appendChild(row);
+
+        row.appendChild(
+                batchIdLabel);
+
+        row.appendChild(
+                totalChequesLabel);
+
+        row.appendChild(
+                makerLabel);
+
+        row.appendChild(
+                openButton);
+
+
+        /*
+         * Add row to grid.
+         */
+
+        row.setParent(
+                batchTable.getRows());
     }
 
-    /**
-     * Create table cell.
+
+    /*
+     * =========================================================
+     * TOTAL PAGES
+     * =========================================================
      */
-    private Hlayout createCell(
-            String value,
-            String cssClass) {
 
-        Hlayout cell = new Hlayout();
+    private int getTotalPages() {
 
-        cell.setHeight("41px");
-        cell.setSpacing("0");
-        cell.setValign("middle");
+        if (batches == null
+                || batches.isEmpty()) {
 
-        cell.setSclass(cssClass);
-
-        Label label = new Label(value);
-
-        cell.appendChild(label);
-
-        return cell;
-    }
-
-    /**
-     * Update footer text.
-     *
-     * Example:
-     *
-     * Showing 1 to 10 of 25 batches
-     */
-    private void updateShowingText(int total) {
-
-        if (total == 0) {
-
-            showingText.setValue(
-                    "Showing 0 to 0 of 0 batches"
-            );
-
-            return;
+            return 1;
         }
 
-        int start =
-                ((currentPageNumber - 1) * PAGE_SIZE) + 1;
-
-        int end =
-                Math.min(
-                        currentPageNumber * PAGE_SIZE,
-                        total
-                );
-
-        showingText.setValue(
-                "Showing "
-                        + start
-                        + " to "
-                        + end
-                        + " of "
-                        + total
-                        + " batches"
-        );
+        return (int) Math.ceil(
+                (double) batches.size()
+                        / PAGE_SIZE);
     }
 
-    /**
-     * Update pagination buttons.
+
+    /*
+     * =========================================================
+     * UPDATE PAGINATION
+     * =========================================================
+     *
+     * Required display:
+     *
+     * ← Previous    1/1    Next →
+     *
+     * =========================================================
      */
+
     private void updatePagination() {
 
-        int totalPages;
+        int totalPages =
+                getTotalPages();
 
-        if (totalBatches == 0) {
-
-            totalPages = 1;
-
-        } else {
-
-            totalPages =
-                    (int) Math.ceil(
-                            (double) totalBatches / PAGE_SIZE
-                    );
-        }
 
         /*
-         * Current page number.
+         * Current page:
+         *
+         * 1/1
+         * 1/5
+         * 2/5
+         * etc.
          */
+
         currentPage.setLabel(
-                String.valueOf(currentPageNumber)
-        );
+                currentPageNumber
+                        + "/"
+                        + totalPages);
+
 
         /*
-         * First / Previous buttons.
+         * Previous disabled on first page.
          */
-        boolean firstDisabled =
-                currentPageNumber <= 1;
+
+        previousPage.setDisabled(
+                currentPageNumber <= 1);
+
 
         /*
-         * Next / Last buttons.
+         * Next disabled on last page.
          */
-        boolean lastDisabled =
-                currentPageNumber >= totalPages;
 
-        firstPage.setDisabled(firstDisabled);
-
-        previousPage.setDisabled(firstDisabled);
-
-        nextPage.setDisabled(lastDisabled);
-
-        lastPage.setDisabled(lastDisabled);
+        nextPage.setDisabled(
+                currentPageNumber
+                        >= totalPages);
     }
 
-    /**
-     * First page.
+
+    /*
+     * =========================================================
+     * PREVIOUS PAGE
+     * =========================================================
      */
-    public void onClick$firstPage() {
 
-        if (currentPageNumber <= 1) {
-            return;
-        }
-
-        currentPageNumber = 1;
-
-        reloadBatches();
-    }
-
-    /**
-     * Previous page.
-     */
     public void onClick$previousPage() {
 
         if (currentPageNumber <= 1) {
@@ -620,59 +611,50 @@ public class VerifyBatchController extends GenericForwardComposer<Component> {
 
         currentPageNumber--;
 
-        reloadBatches();
+        renderCurrentPage();
     }
 
-    /**
-     * Next page.
+
+    /*
+     * =========================================================
+     * NEXT PAGE
+     * =========================================================
      */
+
     public void onClick$nextPage() {
 
         int totalPages =
-                (int) Math.ceil(
-                        (double) totalBatches / PAGE_SIZE
-                );
+                getTotalPages();
 
-        if (currentPageNumber >= totalPages) {
+        if (currentPageNumber
+                >= totalPages) {
+
             return;
         }
 
         currentPageNumber++;
 
-        reloadBatches();
+        renderCurrentPage();
     }
 
-    /**
-     * Last page.
+
+    /*
+     * =========================================================
+     * OPEN BATCH
+     * =========================================================
      */
-    public void onClick$lastPage() {
 
-        int totalPages =
-                (int) Math.ceil(
-                        (double) totalBatches / PAGE_SIZE
-                );
-
-        currentPageNumber =
-                Math.max(totalPages, 1);
-
-        reloadBatches();
-    }
-
-    /**
-     * Open selected batch.
-     *
-     * Batch ID is Long.
-     */
-    private void openBatch(Long batchId) {
+    private void openBatch(
+            long batchId) {
 
         System.out.println(
                 "Opening Batch Details for Batch ID = "
-                        + batchId
-        );
+                        + batchId);
 
         Executions.sendRedirect(
-                "/zul/inward-checker/batch-details.zul?batchId="
-                        + batchId
-        );
+                "/zul/inward-checker/"
+                        + "batch-details.zul"
+                        + "?batchId="
+                        + batchId);
     }
 }

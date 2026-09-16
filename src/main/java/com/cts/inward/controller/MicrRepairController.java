@@ -843,31 +843,28 @@ public class MicrRepairController
                 && !path.trim().isEmpty()) {
 
             try {
-
-                byte[] bytes =
-                        java.nio.file.Files.readAllBytes(
-                                java.nio.file.Path.of(
-                                        path));
-
-                chequeImage.setContent(
-                        new org.zkoss.image.AImage(
-                                showingFront
-                                        ? "front.jpg"
-                                        : "back.jpg",
-                                bytes));
-
+                String realPath = (org.zkoss.zk.ui.Executions.getCurrent() != null && org.zkoss.zk.ui.Executions.getCurrent().getDesktop() != null)
+                        ? org.zkoss.zk.ui.Executions.getCurrent().getDesktop().getWebApp().getRealPath(path)
+                        : null;
+                java.io.File file = (realPath != null) ? new java.io.File(realPath) : new java.io.File(path);
+                if (file.exists() && file.isFile()) {
+                    chequeImage.setContent(new org.zkoss.image.AImage(file));
+                } else {
+                    String webSrc = path.startsWith("/") ? path : "/" + path;
+                    chequeImage.setContent((org.zkoss.image.AImage) null);
+                    chequeImage.setSrc(webSrc.replace("\\", "/"));
+                }
             } catch (Exception e) {
-
-                e.printStackTrace();
-
-                chequeImage.setContent(
-                        (org.zkoss.image.AImage) null);
+                String webSrc = path.startsWith("/") ? path : "/" + path;
+                chequeImage.setContent((org.zkoss.image.AImage) null);
+                chequeImage.setSrc(webSrc.replace("\\", "/"));
             }
 
         } else {
 
             chequeImage.setContent(
                     (org.zkoss.image.AImage) null);
+            chequeImage.setSrc("");
         }
 
         applyImageStyle();

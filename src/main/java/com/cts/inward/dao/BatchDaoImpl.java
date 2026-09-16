@@ -96,20 +96,43 @@ public class BatchDaoImpl implements BatchDao {
 	@Override
 	public int getDataEntryPendingCount(long batchId) {
 
-		String sql = "SELECT COUNT(*) " + "FROM public.inward_cheque c " + "LEFT JOIN LATERAL ( "
-				+ "    SELECT h.status, h.return_reason_code " + "    FROM public.inward_cheque_status_history h "
-				+ "    WHERE h.cheque_number = c.cheque_number " + "    ORDER BY h.status_history_id DESC "
-				+ "    LIMIT 1 " + ") latest ON TRUE " + "WHERE c.batch_id = ? "
-				+ "AND COALESCE(latest.status, '') NOT IN ('DATA_ENTRY_COMPLETED', 'RETURN_BY_MAKER', 'ACCEPT', 'REJECT') "
-				+ "AND NOT ( "
-				+ "    latest.status = 'RETURN_TO_MAKER' "
-				+ "    AND ( "
-				+ "        latest.return_reason_code LIKE 'CR-MICR-%' "
-				+ "        OR latest.return_reason_code LIKE 'CR-IMG-%' "
-				+ "        OR latest.return_reason_code LIKE 'MR-MICR-%' "
-				+ "        OR latest.return_reason_code LIKE 'MICR_%' "
-				+ "    ) "
-				+ ") ";
+		String sql = """
+				SELECT COUNT(*)
+				FROM public.inward_cheque c
+				LEFT JOIN LATERAL (
+				    SELECT h.status, h.return_reason_code
+				    FROM public.inward_cheque_status_history h
+				    WHERE h.cheque_number = c.cheque_number
+				    ORDER BY h.status_history_id DESC
+				    LIMIT 1
+				) latest ON TRUE
+				WHERE c.batch_id = ?
+				  AND COALESCE(latest.status, '') NOT IN ('DATA_ENTRY_COMPLETED', 'RETURN_BY_MAKER', 'ACCEPT', 'REJECT')
+				  AND NOT (
+				      latest.status = 'RETURN_TO_MAKER'
+				      AND (
+				          latest.return_reason_code LIKE 'CR-MICR-%'
+				          OR latest.return_reason_code LIKE 'MR-MICR-%'
+				          OR latest.return_reason_code LIKE 'MICR_%'
+				          OR (
+				              latest.return_reason_code LIKE 'CR-IMG-%'
+				              AND (
+				                  EXISTS (
+				                      SELECT 1 FROM public.inward_cheque_return r
+				                      WHERE r.cheque_number = c.cheque_number
+				                        AND r.return_reason_code LIKE 'MR-MICR-%'
+				                  )
+				                  OR EXISTS (
+				                      SELECT 1 FROM public.inward_cheque_status_history h2
+				                      WHERE h2.cheque_number = c.cheque_number
+				                        AND (h2.status = 'RETURN_BY_MAKER' OR h2.maker_action = 'RETURN_BY_MAKER')
+				                        AND h2.return_reason_code LIKE 'MR-MICR-%'
+				                  )
+				              )
+				          )
+				      )
+				  )
+				""";
 
 		try (Connection connection = ConnectionPool.getDataSource().getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -163,9 +186,24 @@ public class BatchDaoImpl implements BatchDao {
 					      latest.status = 'RETURN_TO_MAKER'
 					      AND (
 					          latest.return_reason_code LIKE 'CR-MICR-%'
-					          OR latest.return_reason_code LIKE 'CR-IMG-%'
 					          OR latest.return_reason_code LIKE 'MR-MICR-%'
 					          OR latest.return_reason_code LIKE 'MICR_%'
+					          OR (
+					              latest.return_reason_code LIKE 'CR-IMG-%'
+					              AND (
+					                  EXISTS (
+					                      SELECT 1 FROM public.inward_cheque_return r
+					                      WHERE r.cheque_number = c.cheque_number
+					                        AND r.return_reason_code LIKE 'MR-MICR-%'
+					                  )
+					                  OR EXISTS (
+					                      SELECT 1 FROM public.inward_cheque_status_history h2
+					                      WHERE h2.cheque_number = c.cheque_number
+					                        AND (h2.status = 'RETURN_BY_MAKER' OR h2.maker_action = 'RETURN_BY_MAKER')
+					                        AND h2.return_reason_code LIKE 'MR-MICR-%'
+					                  )
+					              )
+					          )
 					      )
 					  )
 					""";

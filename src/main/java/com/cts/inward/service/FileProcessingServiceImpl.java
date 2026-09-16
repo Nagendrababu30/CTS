@@ -107,23 +107,37 @@ public class FileProcessingServiceImpl
                 inwardFileDao);
     }
 
+    private Path resolvePath(String filePath) {
+        if (filePath == null) return null;
+        Path path = Path.of(filePath);
+        if (!path.isAbsolute() && fileConfiguration.getInwardRootPath() != null) {
+            Path webAppRoot = fileConfiguration.getInwardRootPath().getParent();
+            if (webAppRoot != null) {
+                path = webAppRoot.resolve(filePath);
+            }
+        }
+        return path;
+    }
+
     @Override
     public void processFile(String filePath) {
 
-        Path path = Path.of(filePath);
+        Path path = resolvePath(filePath);
+        String resolvedFilePath = path != null ? path.toString() : filePath;
+
         try {
-            if (Files.exists(path) && Files.size(path) == 0) {
-                System.err.println("[FileProcessing] Skipping empty (0 bytes) file: " + filePath);
+            if (path != null && Files.exists(path) && Files.size(path) == 0) {
+                System.err.println("[FileProcessing] Skipping empty (0 bytes) file: " + resolvedFilePath);
                 return;
             }
         } catch (IOException e) {
-            System.err.println("[FileProcessing] Could not determine file size for: " + filePath);
+            System.err.println("[FileProcessing] Could not determine file size for: " + resolvedFilePath);
         }
 
-        FileType fileType = resolveFileType(filePath);
+        FileType fileType = resolveFileType(resolvedFilePath);
 
         /* CATCH 1 — move to processing/{type}/ before parsing */
-        String processingFilePath = moveToProcessing(filePath, fileType);
+        String processingFilePath = moveToProcessing(resolvedFilePath, fileType);
 
         switch (fileType) {
 
@@ -158,7 +172,7 @@ public class FileProcessingServiceImpl
 
         try {
 
-            Path source = Path.of(filePath);
+            Path source = resolvePath(filePath);
 
             Path targetDir = fileConfiguration
                     .getProcessingPath()
@@ -203,7 +217,7 @@ public class FileProcessingServiceImpl
 
         try {
 
-            Path source = Path.of(filePath);
+            Path source = resolvePath(filePath);
 
             Path targetDir = fileConfiguration
                     .getArchivePath()

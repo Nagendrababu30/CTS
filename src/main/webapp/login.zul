@@ -12,8 +12,8 @@
         apply="com.cts.admin.controller.LoginComposer">
 
 
-        <window
-            border="none"
+        <vlayout
+           
             width="420px"
             sclass="login-card">
 
@@ -56,7 +56,7 @@
 
             </vlayout>
 
-        </window>
+        </vlayout>
 
     </window>
 

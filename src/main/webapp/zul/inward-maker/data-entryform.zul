@@ -409,7 +409,7 @@
 					<vlayout width="100%" height="100%" spacing="10px">
 
 						<!-- Header with Blue Icon & Subtitle -->
-						<hlayout spacing="10px" valign="middle" width="100%">
+						<hlayout spacing="10px" valign="middle" width="100%" style="padding-top:40px;">
 							<div sclass="card-header-icon">
 								<label value="🗂" style="font-size:14px;"/>
 							</div>
@@ -422,48 +422,74 @@
 						<!-- Single Column Form Fields -->
 						<vlayout width="100%" spacing="10px" style="margin-top:2px;">
 
-							<!-- Field 1: Cheque Number -->
-							<vlayout width="100%" spacing="4px">
-								<hlayout spacing="0" valign="middle">
-									<label value="CHEQUE NUMBER" sclass="single-field-label"/>
-									<label value="*" sclass="label-star"/>
-								</hlayout>
-								<textbox id="txtChequeNo" width="100%" placeholder="Enter cheque number" sclass="single-field-box"/>
-							</vlayout>
+							<!-- ROW 1: Cheque Number + Account Number (Side by Side) -->
+							<hlayout width="100%" spacing="12px">
+								<!-- Field 1: Cheque Number -->
+								<vlayout hflex="1" spacing="4px">
+									<hlayout spacing="0" valign="middle">
+										<label value="CHEQUE NUMBER" sclass="single-field-label"/>
+										<label value="*" sclass="label-star"/>
+									</hlayout>
+									<textbox id="txtChequeNo" width="100%" placeholder="Enter cheque number" sclass="single-field-box"/>
+								</vlayout>
 
-							<!-- Field 2: Account Number -->
-							<vlayout width="100%" spacing="4px">
-								<hlayout spacing="0" valign="middle">
-									<label value="ACCOUNT NUMBER" sclass="single-field-label"/>
-									<label value="*" sclass="label-star"/>
-								</hlayout>
-								<textbox id="txtAccountNo" width="100%" placeholder="Enter account number" sclass="single-field-box"/>
-							</vlayout>
+								<!-- Field 2: Account Number -->
+								<vlayout hflex="1" spacing="4px">
+									<hlayout spacing="0" valign="middle">
+										<label value="ACCOUNT NUMBER" sclass="single-field-label"/>
+										<label value="*" sclass="label-star"/>
+									</hlayout>
+									<textbox id="txtAccountNo" width="100%" placeholder="Enter account number" sclass="single-field-box"/>
+								</vlayout>
+							</hlayout>
 
-							<!-- Field 3: Cheque Amount (INR) -->
-							<vlayout width="100%" spacing="4px">
-								<hlayout spacing="0" valign="middle">
-									<label value="CHEQUE AMOUNT (INR)" sclass="single-field-label"/>
-									<label value="*" sclass="label-star"/>
-								</hlayout>
-								<decimalbox id="decAmount" width="100%" placeholder="0.00" sclass="single-field-box" />
-							</vlayout>
+							<!-- ROW 2: Cheque Date + Drawer Name (Side by Side) -->
+							<hlayout width="100%" spacing="12px">
+								<!-- Field 3: Cheque Date -->
+								<vlayout hflex="1" spacing="4px">
+									<hlayout spacing="0" valign="middle">
+										<label value="CHEQUE DATE" sclass="single-field-label"/>
+										<label value="*" sclass="label-star"/>
+									</hlayout>
+									<datebox id="dtChequeDate" width="100%" format="dd-MM-yyyy" buttonVisible="true" readonly="false" sclass="single-field-box"/>
+								</vlayout>
 
-							<!-- Field 4: Amount In Words (Auto-converted in real time) -->
+								<!-- Field 4: Payee/Drawer Name -->
+								<vlayout hflex="1" spacing="4px">
+									<hlayout spacing="0" valign="middle">
+										<label value="DRAWER NAME" sclass="single-field-label"/>
+									</hlayout>
+									<textbox id="txtDrawerName" width="100%" placeholder="Enter drawer name" sclass="single-field-box"/>
+								</vlayout>
+							</hlayout>
+
+							<!-- ROW 3: Cheque Amount + Amount In Payee Name (Side by Side) -->
+							<hlayout width="100%" spacing="12px">
+								<!-- Field 5: Cheque Amount (INR) -->
+								<vlayout hflex="1" spacing="4px">
+									<hlayout spacing="0" valign="middle">
+										<label value="AMOUNT (₹)" sclass="single-field-label"/>
+										<label value="*" sclass="label-star"/>
+									</hlayout>
+									<decimalbox id="decAmount" width="100%" placeholder="0.00" sclass="single-field-box" />
+								</vlayout>
+
+								<!-- Field 6: Payee Name -->
+								<vlayout hflex="1" spacing="4px">
+									<hlayout spacing="0" valign="middle">
+										<label value="PAYEE NAME" sclass="single-field-label"/>
+										<label value="*" sclass="label-star"/>
+									</hlayout>
+									<textbox id="txtPayeeName" width="100%" placeholder="Enter payee name" sclass="single-field-box"/>
+								</vlayout>
+							</hlayout>
+
+							<!-- ROW 4: Amount In Words (Full Width) -->
 							<vlayout width="100%" spacing="4px">
 								<hlayout spacing="0" valign="middle">
 									<label value="AMOUNT IN WORDS" sclass="single-field-label"/>
 								</hlayout>
 								<textbox id="txtAmountInWords" width="100%" placeholder="Amount in words" readonly="true" sclass="single-field-box" style="text-transform: uppercase;"/>
-							</vlayout>
-
-							<!-- Field 5: Cheque Date -->
-							<vlayout width="100%" spacing="4px">
-								<hlayout spacing="0" valign="middle">
-									<label value="CHEQUE DATE (DD-MM-YYYY)" sclass="single-field-label"/>
-									<label value="*" sclass="label-star"/>
-								</hlayout>
-								<datebox id="dtChequeDate" width="100%" format="dd-MM-yyyy" buttonVisible="true" readonly="false" sclass="single-field-box"/>
 							</vlayout>
 
 						</vlayout>

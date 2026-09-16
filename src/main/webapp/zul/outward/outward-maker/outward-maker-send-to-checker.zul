@@ -15,50 +15,7 @@
          GLOBAL STYLING
          ========================================================= -->
 
-    <style><![CDATA[
-
-        html, body {
-            margin: 0 !important;
-            padding: 0 !important;
-            height: 100% !important;
-            overflow: hidden !important;
-            background: #F4F7FB;
-        }
-
-        .z-window-embedded-cnt,
-        .z-window-content {
-            padding: 0 !important;
-        }
-
-        /* Listbox styling matching maker UI */
-
-        .send-checker-listbox .z-listheader {
-            background: #0091FF !important;
-            color: #FFFFFF !important;
-            font-weight: 700 !important;
-            font-size: 13px !important;
-            border-right: 1px solid rgba(255, 255, 255, 0.2) !important;
-            height: 38px !important;
-        }
-
-        .send-checker-listbox .z-listheader-content {
-            color: #FFFFFF !important;
-            font-weight: 700 !important;
-            padding: 8px 12px !important;
-        }
-
-        .send-checker-listbox .z-listcell {
-            font-size: 13px !important;
-            color: #1E293B !important;
-            padding: 10px 12px !important;
-            border-bottom: 1px solid #E2E8F0 !important;
-        }
-
-        .send-checker-listbox .z-listitem:hover > .z-listcell {
-            background: #F8FAFC !important;
-        }
-
-    ]]></style>
+ <style src="/css/outward/maker/sendtochecker.css"/>
 
 
     <!-- =========================================================
@@ -115,25 +72,7 @@
                  INFORMATION CARD
                  ================================================= -->
 
-            <div
-                width="100%"
-                style="
-                    background:#EEF6FF;
-                    border:1px solid #B8D5FF;
-                    border-radius:6px;
-                    padding:12px 18px;
-                    box-sizing:border-box;
-                ">
-
-                <label
-                    value="ⓘ The following outward batches have completed maker processing and are ready to be submitted to Outward Checker."
-                    style="
-                        font-size:13px;
-                        font-weight:500;
-                        color:#174EA6;
-                    "/>
-
-            </div>
+       
 
 
             <!-- =================================================

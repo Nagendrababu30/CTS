@@ -58,6 +58,11 @@ public class BatchDetailsServiceImpl implements BatchDetailsService {
     }
 
     @Override
+    public List<Map<String, String>> getMakerReturnReasons(String chequeNumber) {
+        return batchDetailsDao.getMakerReturnReasons(chequeNumber);
+    }
+
+    @Override
     public void saveCheckerDecision(
             String chequeNumber,
             String status,

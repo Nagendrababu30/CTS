@@ -28,4 +28,8 @@ public interface ChequeDao {
 	List<com.cts.inward.dto.ReturnReasonDto> getDataEntryReturnReasons();
 
 	boolean saveMakerDataEntryReturn(String chequeNumber, List<String> reasonCodes, String remarks, Long userId);
+
+	boolean chequeNeedsDataEntry(String chequeNumber);
+
+	boolean chequeNeedsMicrRepair(String chequeNumber);
 }

@@ -45,6 +45,9 @@ public class MicrRepairController
     private static final String STATUS_DATA_ENTRY =
             "DATA_ENTRY";
 
+    private static final String STATUS_RETURN_BY_MAKER =
+            "RETURN_BY_MAKER";
+
     // =========================================================
     // ZUL components — top bar
     // =========================================================
@@ -214,13 +217,16 @@ public class MicrRepairController
         loadLoggedInUser();
 
         Long lockOwner = com.cts.inward.dao.BatchDaoImpl.of().getBatchLockOwner(batchId);
-        if (lockOwner != null && (loggedInUserId == null || !lockOwner.equals(loggedInUserId))) {
+        if (lockOwner == null || loggedInUserId == null || !lockOwner.equals(loggedInUserId)) {
+            String msg = (lockOwner == null)
+                    ? "This batch is not locked. Please lock the batch from the dashboard first."
+                    : "This batch is locked by another user.";
             Messagebox.show(
-                    "This batch is locked by another user.",
+                    msg,
                     "Access Denied",
                     Messagebox.OK,
                     Messagebox.EXCLAMATION,
-                    e -> Executions.sendRedirect("/zul/inward-maker/micr-repair-list.zul"));
+                    e -> Executions.sendRedirect("/zul/inward-maker/dashboard.zul"));
             return;
         }
 
@@ -407,8 +413,8 @@ public class MicrRepairController
                     continue;
                 }
 
-                // Keep both pending and repaired cheques in the error list
-                if (c.isNeedsMicrRepair() || c.isMicrRepaired()) {
+                // Keep pending, repaired, and return_by_maker cheques in the error list
+                if (c.isNeedsMicrRepair() || c.isMicrRepaired() || c.isReturnByMaker()) {
                     originalRepairIndexes.add(i);
                 }
             }
@@ -589,7 +595,13 @@ public class MicrRepairController
 
         populateMicrFields(c);
 
-        if (c.isMicrRepaired()) {
+        if (c.isReturnByMaker()) {
+
+            setCurrentStatus(
+                    STATUS_RETURN_BY_MAKER
+            );
+
+        } else if (c.isMicrRepaired()) {
 
             setCurrentStatus(
                     STATUS_MICR_REPAIRED
@@ -638,12 +650,12 @@ public class MicrRepairController
         if (returnInfo != null && "RETURN_TO_MAKER".equalsIgnoreCase(returnInfo.get("status"))) {
             returnReasonBanner.setVisible(true);
 
-            String desc = returnInfo.get("description");
+            String desc = returnInfo.get("returnReasonDescription");
             if (desc == null || desc.trim().isEmpty()) {
                 desc = returnInfo.get("returnReasonCode");
             }
             if (lblReturnReason != null) {
-                lblReturnReason.setValue(desc != null ? desc : "Return to Maker");
+                lblReturnReason.setValue(desc != null ? desc : "Returned to Maker by Checker");
             }
 
             String remarks = returnInfo.get("remarks");
@@ -717,6 +729,25 @@ public class MicrRepairController
         String cityValue = isRepaired ? c.getRepairedCityCode() : safe(c.getNpciCityCode());
         String bankValue = isRepaired ? c.getRepairedBankCode() : safe(c.getNpciBankCode());
         String branchValue = isRepaired ? c.getRepairedBranchCode() : safe(c.getNpciBranchCode());
+
+        if (c.isReturnByMaker()) {
+            if (ocrCityCode != null) {
+                ocrCityCode.setValue(cityValue);
+                ocrCityCode.setSclass("micr-editable-field");
+                ocrCityCode.setReadonly(true);
+            }
+            if (ocrBankCode != null) {
+                ocrBankCode.setValue(bankValue);
+                ocrBankCode.setSclass("micr-editable-field");
+                ocrBankCode.setReadonly(true);
+            }
+            if (ocrBranchCode != null) {
+                ocrBranchCode.setValue(branchValue);
+                ocrBranchCode.setSclass("micr-editable-field");
+                ocrBranchCode.setReadonly(true);
+            }
+            return;
+        }
 
         boolean anyFieldMismatch = c.isCityCodeMismatch() || c.isBankCodeMismatch() || c.isBranchCodeMismatch();
 
@@ -1129,6 +1160,22 @@ public class MicrRepairController
 
         // Next is disabled only on the very last cheque of the error list
         nextButton.setDisabled(currentPos < 0 || currentPos >= originalRepairIndexes.size() - 1);
+
+        boolean isReturned = false;
+        if (comparisons != null && chequeIndex >= 0 && chequeIndex < comparisons.size()) {
+            MicrComparisonDto c = comparisons.get(chequeIndex);
+            if (c != null && c.isReturnByMaker()) {
+                isReturned = true;
+            }
+        }
+
+        if (saveNextButton != null) {
+            saveNextButton.setDisabled(isReturned);
+        }
+
+        if (returnButton != null) {
+            returnButton.setDisabled(isReturned);
+        }
     }
 
 
@@ -1340,6 +1387,8 @@ public class MicrRepairController
 
     private void moveAfterReturn() {
 
+        int currentPos = originalRepairIndexes != null ? originalRepairIndexes.indexOf(chequeIndex) : -1;
+
         comparisons =
                 micrRepairService
                         .compareBatch(batchId);
@@ -1349,39 +1398,31 @@ public class MicrRepairController
         }
         buildRepairIndexes();
 
-        /*
-         * Continue with the next pending MICR repair
-         * cheque after the returned cheque.
-         */
-        int next =
-                findNextRepairIndexNoWrap(
-                        chequeIndex);
-
-        /*
-         * If nothing exists at or after the current cheque,
-         * search from the beginning.
-         */
-        if (next < 0) {
-
-            next =
-                    findNextRepairIndexNoWrap(0);
+        if (originalRepairIndexes != null && !originalRepairIndexes.isEmpty()) {
+            if (currentPos >= 0 && currentPos < originalRepairIndexes.size() - 1) {
+                chequeIndex = originalRepairIndexes.get(currentPos + 1);
+            } else if (currentPos >= originalRepairIndexes.size() - 1) {
+                chequeIndex = originalRepairIndexes.get(originalRepairIndexes.size() - 1);
+            }
         }
-
-        /*
-         * No pending MICR repair remains.
-         */
-        if (next < 0) {
-
-            goToDataEntry();
-
-            return;
-        }
-
-        chequeIndex = next;
 
         updateTopBar();
 
         loadCheque();
+
+        if (!micrRepairService.needsMicrRepair(batchId)) {
+            Clients.showNotification(
+                    "All cheques in this batch are completed or returned. Moving to Data Entry in 2 seconds...",
+                    Clients.NOTIFICATION_TYPE_INFO,
+                    null,
+                    "top_right",
+                    2000);
+            org.zkoss.zk.ui.util.Clients.evalJavaScript(
+                    "setTimeout(function() { window.location.href = '"
+                            + Executions.encodeURL("/zul/inward-maker/data-entryform.zul?batchId=" + batchId)
+                            + "'; }, 2000);"
+            );
+        }
     }
 
     // =========================================================

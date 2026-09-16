@@ -484,6 +484,71 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
         return false;
     }
 
+    @Override
+    public boolean chequeNeedsMicrRepair(String chequeNumber) {
+        if (chequeNumber == null || chequeNumber.trim().isEmpty()) {
+            return false;
+        }
+
+        String checkerReasonsSql = """
+                SELECT sh.return_reason_code
+                FROM public.inward_cheque_status_history sh
+                WHERE sh.cheque_number = ?
+                  AND sh.status = 'RETURN_TO_MAKER'
+                ORDER BY sh.status_history_id DESC
+                """;
+
+        List<String> checkerCodes = new ArrayList<>();
+        try (Connection conn = ConnectionPool.getDataSource().getConnection();
+             PreparedStatement ps = conn.prepareStatement(checkerReasonsSql)) {
+            ps.setString(1, chequeNumber.trim());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String code = rs.getString("return_reason_code");
+                    if (code != null && !code.trim().isEmpty()) {
+                        checkerCodes.add(code.trim().toUpperCase());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (checkerCodes.isEmpty()) {
+            return false;
+        }
+
+        for (String code : checkerCodes) {
+            if (code.startsWith("CR-MICR-") || code.startsWith("MR-MICR-") || code.startsWith("MICR_")) {
+                return true;
+            }
+            if (code.startsWith("CR-IMG-")) {
+                String makerSql = """
+                        SELECT return_reason_code
+                        FROM public.inward_cheque_status_history
+                        WHERE cheque_number = ?
+                          AND status = 'RETURN_BY_MAKER'
+                        ORDER BY status_history_id DESC
+                        """;
+                try (Connection conn = ConnectionPool.getDataSource().getConnection();
+                     PreparedStatement mPs = conn.prepareStatement(makerSql)) {
+                    mPs.setString(1, chequeNumber.trim());
+                    try (ResultSet mRs = mPs.executeQuery()) {
+                        while (mRs.next()) {
+                            String mCode = mRs.getString("return_reason_code");
+                            if (mCode != null && mCode.trim().toUpperCase().startsWith("MR-MICR-")) {
+                                return true;
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return false;
+    }
+
     // =========================================================
     // Get Batch ID By Cheque Number
     // =========================================================
@@ -873,77 +938,92 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
             }
 
             // -------------------------------------------------
-            // Cheque status history
+            // Cheque status history (update existing row, fallback to insert)
             // -------------------------------------------------
 
-            String historySql =
-                    "INSERT INTO public.inward_cheque_status_history "
-                            + "("
-                            + "cheque_number, "
-                            + "status, "
-                            + "rejection_reason_code, "
-                            + "return_reason_code, "
-                            + "maker_id, "
-                            + "maker_action, "
-                            + "maker_action_on, "
-                            + "checker_id, "
-                            + "checker_action, "
-                            + "checker_action_on, "
-                            + "remarks"
-                            + ") "
-                            + "VALUES "
-                            + "(?, ?, NULL, ?, ?, ?, "
-                            + "CURRENT_TIMESTAMP, "
-                            + "NULL, NULL, NULL, ?)";
+            String updateHistorySql =
+                    "UPDATE public.inward_cheque_status_history "
+                            + "SET status = ?, return_reason_code = ?, maker_id = ?, "
+                            + "maker_action = ?, maker_action_on = CURRENT_TIMESTAMP, remarks = ? "
+                            + "WHERE cheque_number = ?";
 
-            try (
-                    PreparedStatement statement =
-                            connection.prepareStatement(
-                                    historySql)
-            ) {
-
-                statement.setString(
-                        1,
-                        chequeNumber);
-
-                statement.setString(
-                        2,
-                        STATUS_RETURN_BY_MAKER);
-
-                statement.setString(
-                        3,
-                        returnReasonCode);
-
-                statement.setLong(
-                        4,
-                        userId);
-
-                statement.setString(
-                        5,
-                        STATUS_RETURN_BY_MAKER);
-
-                if (makerRemarks == null
-                        || makerRemarks.trim().isEmpty()) {
-
-                    statement.setNull(
-                            6,
-                            Types.VARCHAR);
-
+            int updatedHist = 0;
+            try (PreparedStatement statement = connection.prepareStatement(updateHistorySql)) {
+                statement.setString(1, STATUS_RETURN_BY_MAKER);
+                statement.setString(2, returnReasonCode);
+                statement.setLong(3, userId);
+                statement.setString(4, STATUS_RETURN_BY_MAKER);
+                if (makerRemarks == null || makerRemarks.trim().isEmpty()) {
+                    statement.setNull(5, Types.VARCHAR);
                 } else {
+                    statement.setString(5, makerRemarks.trim());
+                }
+                statement.setString(6, chequeNumber);
+                updatedHist = statement.executeUpdate();
+            }
+
+            if (updatedHist == 0) {
+                String historySql =
+                        "INSERT INTO public.inward_cheque_status_history "
+                                + "("
+                                + "cheque_number, "
+                                + "status, "
+                                + "rejection_reason_code, "
+                                + "return_reason_code, "
+                                + "maker_id, "
+                                + "maker_action, "
+                                + "maker_action_on, "
+                                + "checker_id, "
+                                + "checker_action, "
+                                + "checker_action_on, "
+                                + "remarks"
+                                + ") "
+                                + "VALUES "
+                                + "(?, ?, NULL, ?, ?, ?, "
+                                + "CURRENT_TIMESTAMP, "
+                                + "NULL, NULL, NULL, ?)";
+
+                try (
+                        PreparedStatement statement =
+                                connection.prepareStatement(
+                                        historySql)
+                ) {
 
                     statement.setString(
-                            6,
-                            makerRemarks.trim());
-                }
+                            1,
+                            chequeNumber);
 
-                int inserted =
-                        statement.executeUpdate();
+                    statement.setString(
+                            2,
+                            STATUS_RETURN_BY_MAKER);
 
-                if (inserted != 1) {
+                    statement.setString(
+                            3,
+                            returnReasonCode);
 
-                    connection.rollback();
+                    statement.setLong(
+                            4,
+                            userId);
 
-                    return false;
+                    statement.setString(
+                            5,
+                            STATUS_RETURN_BY_MAKER);
+
+                    if (makerRemarks == null
+                            || makerRemarks.trim().isEmpty()) {
+
+                        statement.setNull(
+                                6,
+                                Types.VARCHAR);
+
+                    } else {
+
+                        statement.setString(
+                                6,
+                                makerRemarks.trim());
+                    }
+
+                    statement.executeUpdate();
                 }
             }
 
@@ -1409,10 +1489,40 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
              * that no cheque still needs MICR repair.
              *
              * Move applicable cheques to DATA_ENTRY.
-             *
-             * RETURN_BY_MAKER must remain RETURN_BY_MAKER.
+             * Update existing status history rows (RETURN_BY_MAKER remains untouched).
              */
-            String chequeStatusSql = """
+            String updateChequeStatusSql = """
+                    UPDATE public.inward_cheque_status_history
+                    SET status = 'DATA_ENTRY',
+                        maker_id = ?,
+                        maker_action = 'MICR_STAGE_COMPLETED',
+                        maker_action_on = CURRENT_TIMESTAMP,
+                        remarks = 'Cheque ready for Data Entry'
+                    WHERE cheque_number IN (
+                        SELECT c.cheque_number
+                        FROM public.inward_cheque c
+                        WHERE c.batch_id = ?
+                    )
+                    AND status NOT IN (
+                        'RETURN_BY_MAKER',
+                        'DATA_ENTRY',
+                        'DATA_ENTRY_COMPLETED',
+                        'SENT_TO_CHECKER'
+                    )
+                    """;
+
+            try (
+                    PreparedStatement statement =
+                            connection.prepareStatement(
+                                    updateChequeStatusSql)
+            ) {
+                statement.setLong(1, userId);
+                statement.setLong(2, batchId);
+                statement.executeUpdate();
+            }
+
+            // Fallback insert for any cheque in batch that has no row in status history yet
+            String insertMissingChequeSql = """
                     INSERT INTO public.inward_cheque_status_history
                     (
                         cheque_number,
@@ -1440,89 +1550,49 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                         NULL,
                         'Cheque ready for Data Entry'
                     FROM public.inward_cheque c
-                    LEFT JOIN LATERAL
-                    (
-                        SELECT h.status
-                        FROM public.inward_cheque_status_history h
-                        WHERE h.cheque_number = c.cheque_number
-                        ORDER BY h.status_history_id DESC
-                        LIMIT 1
-                    ) latest
-                    ON TRUE
                     WHERE c.batch_id = ?
-                    AND COALESCE(
-                        latest.status,
-                        ''
-                    ) NOT IN (
-                        'RETURN_BY_MAKER',
-                        'DATA_ENTRY',
-                        'DATA_ENTRY_COMPLETED',
-                        'SENT_TO_CHECKER'
-                    )
+                      AND NOT EXISTS (
+                          SELECT 1 FROM public.inward_cheque_status_history h
+                          WHERE h.cheque_number = c.cheque_number
+                      )
                     """;
 
             try (
                     PreparedStatement statement =
                             connection.prepareStatement(
-                                    chequeStatusSql)
+                                    insertMissingChequeSql)
             ) {
-
-                statement.setLong(
-                        1,
-                        userId);
-
-                statement.setLong(
-                        2,
-                        batchId);
-
+                statement.setLong(1, userId);
+                statement.setLong(2, batchId);
                 statement.executeUpdate();
             }
 
             // -------------------------------------------------
-            // Check latest batch status
+            // Update batch history status (update existing row, fallback to insert)
             // -------------------------------------------------
 
-            String latestBatchStatusSql = """
-                    SELECT batch_status
-                    FROM public.inward_batch_history
+            String updateBatchHistorySql = """
+                    UPDATE public.inward_batch_history
+                    SET batch_status = 'DATA_ENTRY',
+                        changed_on = CURRENT_TIMESTAMP,
+                        changed_by = ?,
+                        reason = 'MICR validation completed',
+                        remarks = 'Batch ready for Data Entry'
                     WHERE batch_id = ?
-                    ORDER BY batch_history_id DESC
-                    LIMIT 1
                     """;
 
-            String latestBatchStatus = null;
-
+            int updatedBatch = 0;
             try (
                     PreparedStatement statement =
                             connection.prepareStatement(
-                                    latestBatchStatusSql)
+                                    updateBatchHistorySql)
             ) {
-
-                statement.setLong(
-                        1,
-                        batchId);
-
-                try (
-                        ResultSet resultSet =
-                                statement.executeQuery()
-                ) {
-
-                    if (resultSet.next()) {
-
-                        latestBatchStatus =
-                                resultSet.getString(
-                                        "batch_status");
-                    }
-                }
+                statement.setLong(1, userId);
+                statement.setLong(2, batchId);
+                updatedBatch = statement.executeUpdate();
             }
 
-            // -------------------------------------------------
-            // Move batch to DATA_ENTRY only once
-            // -------------------------------------------------
-
-            if (!STATUS_DATA_ENTRY.equalsIgnoreCase(
-                    latestBatchStatus)) {
-
+            if (updatedBatch == 0) {
                 String batchHistorySql = """
                         INSERT INTO public.inward_batch_history
                         (
@@ -1549,24 +1619,9 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                                 connection.prepareStatement(
                                         batchHistorySql)
                 ) {
-
-                    statement.setLong(
-                            1,
-                            batchId);
-
-                    statement.setLong(
-                            2,
-                            userId);
-
-                    int inserted =
-                            statement.executeUpdate();
-
-                    if (inserted != 1) {
-
-                        connection.rollback();
-
-                        return false;
-                    }
+                    statement.setLong(1, batchId);
+                    statement.setLong(2, userId);
+                    statement.executeUpdate();
                 }
             }
 

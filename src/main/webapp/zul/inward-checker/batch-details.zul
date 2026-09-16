@@ -96,18 +96,68 @@
 
         .image-wrapper {
             width: 100% !important;
-            height: auto !important;
+            height: 100% !important;
+            flex: 1 1 auto !important;
+            min-height: 0 !important;
             margin-top: 10px !important;
             padding: 10px 12px !important;
             box-sizing: border-box !important;
             border: 1px solid #E2E8F0 !important;
             border-radius: 10px !important;
             background: #F8FAFC !important;
+            display: flex !important;
+            flex-direction: column !important;
+            overflow: hidden !important;
+        }
+
+        .micr-image-area {
+            width: 100% !important;
+            height: 100% !important;
+            flex: 1 1 auto !important;
+            min-height: 380px !important;
+            box-sizing: border-box !important;
+            border: 1.5px solid #CBD5E1 !important;
+            border-radius: 8px !important;
+            background: #ffffff !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            overflow: hidden !important;
+            position: relative !important;
+        }
+
+        .micr-image-display {
+            object-fit: contain !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
+            display: block !important;
+            margin: auto !important;
+        }
+
+        .maker-return-panel {
+            padding: 4px 0 !important;
+        }
+
+        .return-banner {
+            background: #FEF3F2 !important;
+            border: 1.5px solid #FECDCA !important;
+            border-radius: 10px !important;
+            padding: 12px 16px !important;
+            box-sizing: border-box !important;
+        }
+
+        .maker-return-card {
+            background: #FFFFFF !important;
+            border: 1.5px solid #E2E8F0 !important;
+            border-radius: 10px !important;
+            padding: 12px 16px !important;
+            box-sizing: border-box !important;
+            box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05) !important;
         }
 
         .cheque-image-container {
             width: 100% !important;
-            height: 200px !important;
+            height: 100% !important;
             box-sizing: border-box !important;
             border: 1.5px solid #CBD5E1 !important;
             border-radius: 8px !important;
@@ -118,16 +168,9 @@
             overflow: hidden !important;
         }
 
-        .cheque-image-container:empty,
-        .cheque-image-container:has(img:not([src])),
-        .cheque-image-container:has(img[src=""]),
-        .cheque-image-container:has(img[src*="spacer.gif"]) {
-            display: none !important;
-        }
-
         .cheque-preview {
             width: 100% !important;
-            height: 200px !important;
+            height: 100% !important;
             box-sizing: border-box !important;
             padding: 14px 16px !important;
             border: 1.5px solid #BAE6FD !important;
@@ -313,9 +356,7 @@
 
                 <label
                     value="Cheque Image Preview"
-                    sclass="panel-title"/>
-
-                <!-- =================================================
+                    sclass="panel-title"/>                <!-- =================================================
                      IMAGE PREVIEW
                      ================================================= -->
                 <vlayout
@@ -323,6 +364,49 @@
                     vflex="1"
                     spacing="8px"
                     sclass="image-wrapper">
+
+                    <!-- Image toolbar (Image 2) -->
+                    <hlayout
+                        width="100%"
+                        spacing="6px"
+                        valign="middle"
+                        sclass="micr-image-toolbar">
+
+                        <button
+                            id="toggleImageButton"
+                            label="View Back"
+                            hflex="2"
+                            sclass="micr-toggle-btn"/>
+
+                        <button
+                            id="zoomInButton"
+                            label="+"
+                            tooltiptext="Zoom In"
+                            hflex="1"
+                            sclass="micr-zoom-btn"/>
+
+                        <button
+                            id="zoomOutButton"
+                            label="−"
+                            tooltiptext="Zoom Out"
+                            hflex="1"
+                            sclass="micr-zoom-btn"/>
+
+                        <button
+                            id="rotateButton"
+                            label="↻"
+                            tooltiptext="Rotate 90°"
+                            hflex="1"
+                            sclass="micr-zoom-btn"/>
+
+                        <button
+                            id="resetViewButton"
+                            label="⟲"
+                            tooltiptext="Reset View"
+                            hflex="1"
+                            sclass="micr-zoom-btn"/>
+
+                    </hlayout>
 
                     <!-- Image display area (Matches MICR Repair) -->
                     <div
@@ -333,8 +417,10 @@
                         <!-- ACTUAL CHEQUE IMAGE -->
                         <image
                             id="chequeImage"
+                            width="100%"
+                            height="100%"
                             sclass="micr-image-display"
-                            style="width:100%; height:100%; max-width:100%; max-height:100%; object-fit:contain; display:block;"/>
+                            style="max-width:100%; max-height:100%; object-fit:contain; display:block; margin:auto;"/>
 
                         <!-- CHEQUE PREVIEW (Mock Cheque, displayed when no image file exists) -->
                         <div
@@ -342,7 +428,7 @@
                             width="100%"
                             height="100%"
                             sclass="cheque-preview"
-                            style="display:none;">
+                            visible="false">
 
                             <!-- TOP -->
                             <hlayout
@@ -399,7 +485,7 @@
                                     value="Ravi Kumar"
                                     sclass="cheque-value"/>
 
-                            </hlayout>
+                                </hlayout>
 
                             <!-- AMOUNT -->
                             <hlayout
@@ -440,49 +526,6 @@
                         </div>
 
                     </div>
-
-                    <!-- Image toolbar (Image 2) -->
-                    <hlayout
-                        width="100%"
-                        spacing="6px"
-                        valign="middle"
-                        sclass="micr-image-toolbar">
-
-                        <button
-                            id="toggleImageButton"
-                            label="View Back"
-                            hflex="2"
-                            sclass="micr-toggle-btn"/>
-
-                        <button
-                            id="zoomInButton"
-                            label="+"
-                            tooltiptext="Zoom In"
-                            hflex="1"
-                            sclass="micr-zoom-btn"/>
-
-                        <button
-                            id="zoomOutButton"
-                            label="−"
-                            tooltiptext="Zoom Out"
-                            hflex="1"
-                            sclass="micr-zoom-btn"/>
-
-                        <button
-                            id="rotateButton"
-                            label="↻"
-                            tooltiptext="Rotate 90°"
-                            hflex="1"
-                            sclass="micr-zoom-btn"/>
-
-                        <button
-                            id="resetViewButton"
-                            label="⟲"
-                            tooltiptext="Reset View"
-                            hflex="1"
-                            sclass="micr-zoom-btn"/>
-
-                    </hlayout>
 
                 </vlayout>
 
@@ -569,85 +612,91 @@
                             value="Verification &amp; Corrections"
                             sclass="verification-title"/>
 
-                        <hlayout
-                            spacing="3px"
-                            valign="middle">
-
-                            <label
-                                value="Cheque:"
-                                sclass="verification-subtitle"/>
-
-                            <label
-                                id="rightChequeNumber"
-                                value="000125"
-                                sclass="verification-value"/>
-
-                            <label
-                                id="chequePosition"
-                                value=" | Bank:"
-                                sclass="verification-subtitle"/>
-
-                            <label
-                                id="rightBankName"
-                                value="STATE BANK OF INDIA"
-                                sclass="verification-value"/>
-
-                        </hlayout>
-
                     </vlayout>
-
-                    <label
-                        id="makerId"
-                        value="Maker: maker101"
-                        sclass="maker-badge"/>
 
                 </hlayout>
 
                 <!-- =================================================
-                     MAKER REJECTION
+                     MAKER RETURN DETAILS PANEL (Displayed for RETURN_BY_MAKER)
                      ================================================= -->
                 <vlayout
-                    id="makerRejectionSection"
+                    id="makerReturnPanel"
                     width="100%"
-                    spacing="3px"
-                    sclass="section maker-rejection"
+                    spacing="12px"
+                    sclass="maker-return-panel"
                     visible="false">
 
-                    <hlayout
-                        width="100%"
-                        spacing="0"
-                        valign="middle">
+                    <!-- Alert Banner -->
+                    <div sclass="return-banner">
+                        <hlayout spacing="12px" valign="middle" width="100%">
+                            <label sclass="z-icon-exclamation-triangle" style="font-size:22px; color:#B42318;"/>
+                            <vlayout spacing="2px" hflex="1">
+                                <hlayout spacing="8px" valign="middle">
+                                    <label value="Cheque Returned by Maker" style="font-size:15px; font-weight:800; color:#B42318;"/>
+                                    <label value="RETURN_BY_MAKER" style="font-size:11px; font-weight:700; background:#FEE4E2; color:#B42318; border:1px solid #FECDCA; border-radius:12px; padding:2px 8px;"/>
+                                </hlayout>
+                            </vlayout>
+                        </hlayout>
+                    </div>
 
-                        <label
-                            value="⚠ Cheque Rejected by Maker"
-                            hflex="1"
-                            sclass="rejection-title"/>
+                    <!-- Return Reason Card -->
+                    <vlayout width="100%" spacing="10px" sclass="maker-return-card">
+                        <label value="Maker Return Reason(s) &amp; Remarks" style="font-size:13px; font-weight:800; color:#0F172A; text-transform:uppercase; letter-spacing:0.5px;"/>
+                        
+                        <vlayout width="100%" spacing="6px">
+                            <label value="Return Reasons:" style="font-size:12px; font-weight:600; color:#475467;"/>
+                            <vlayout id="makerReturnReasonsList" width="100%" spacing="6px">
+                                <!-- Populated dynamically by BatchDetailsController -->
+                            </vlayout>
+                        </vlayout>
 
-                        <label
-                            value="REJECTED"
-                            sclass="rejected-badge"/>
+                        <vlayout id="boxMakerRemarks" width="100%" spacing="4px">
+                            <label value="Maker Remarks:" style="font-size:12px; font-weight:600; color:#475467;"/>
+                            <div style="background:#F8FAFC; border:1.5px solid #E2E8F0; border-radius:6px; padding:8px 12px; min-height:36px;">
+                                <label id="lblMakerReturnRemarks" value="—" style="font-size:13px; color:#1E293B;"/>
+                            </div>
+                        </vlayout>
+                    </vlayout>
 
-                    </hlayout>
+                    <!-- MICR Verification Card -->
+                    <vlayout id="boxMicrMasterVerification" width="100%" spacing="10px" sclass="maker-return-card">
+                        <hlayout width="100%" valign="middle">
+                            <label value="MICR Verification" hflex="1" style="font-size:13px; font-weight:800; color:#0F172A; text-transform:uppercase; letter-spacing:0.5px;"/>
+                            <label id="badgeMicrMasterStatus" value="System Verified" style="font-size:11px; font-weight:700; background:#EDF2F7; color:#4A5568; border-radius:10px; padding:2px 8px;"/>
+                        </hlayout>
 
-                    <label
-                        id="makerRejectReason"
-                        value="Reason: 03 - Signature differs from bank records."
-                        sclass="rejection-text rejection-reason"/>
+                        <!-- OCR MICR Check (Single MICR displayed) -->
+                        <hlayout width="100%" spacing="10px" valign="middle" style="background:#FFFFFF; border:1.5px solid #CBD5E1; border-radius:6px; padding:8px 12px;">
+                            <vlayout hflex="1" spacing="2px">
+                                <label value="MICR Code" style="font-size:11px; font-weight:600; color:#64748B;"/>
+                                <label id="lblOcrMicrValue" value="—" style="font-size:13.5px; font-weight:700; color:#0F172A;"/>
+                            </vlayout>
+                            <label id="lblOcrMicrCheck" value="—" style="font-size:12px; font-weight:700; padding:4px 10px; border-radius:6px;"/>
+                        </hlayout>
 
-                    <label
-                        id="makerRejectRemarks"
-                        value="Remarks: Drawer signature differs from mandate on CBS repository."
-                        sclass="rejection-text"/>
+                        <!-- Summary Note -->
+                        <div id="micrMasterSummaryBox" style="background:#FEF3F2; border:1px dashed #FDA29B; border-radius:6px; padding:8px 12px;">
+                            <label id="lblMicrMasterSummary" value="System verified against MICR Master Directory: MICR code is absent from the MICR Master Directory." style="font-size:12px; color:#B42318; font-weight:600;"/>
+                        </div>
+                    </vlayout>
 
                 </vlayout>
 
                 <!-- =================================================
-                     MICR
+                     NORMAL VERIFICATION FORM CONTAINER
                      ================================================= -->
                 <vlayout
-                    id="micrSection"
+                    id="verificationFormContainer"
                     width="100%"
-                    spacing="5px"
+                    spacing="0">
+
+                    <!-- =================================================
+                         MICR
+                         ================================================= -->
+                    <vlayout
+                        id="micrSection"
+                        width="100%"
+                        spacing="5px"
                     sclass="section">
 
                     <hlayout
@@ -1200,7 +1249,7 @@
 
                 </vlayout>
 
-
+                </vlayout>
 
                 <!-- =================================================
                      BOTTOM ACTIONS

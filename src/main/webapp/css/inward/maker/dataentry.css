@@ -1,170 +1,297 @@
 /* =============================================================
-   INWARD DATA ENTRY QUEUE — same static style as dashboard
+   INWARD DATA ENTRY QUEUE
+   CSS exactly matches Inward Maker Dashboard styling
    ============================================================= */
-@import
-	url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap')
-	;
 
 :root {
-	--bg-app: #EAF0FA;
-	--bg-app-2: #E4ECF8;
-	--surface: #FFFFFF;
-	--surface-2: #FCFDFF;
-	--hover: #F6F9FF;
-	--border: #E4EAF3;
-	--text: #0B1F3F;
-	--muted: #667085;
-	--blue: #175CD3;
-	--blue-dark: #1248A8;
-	--shadow-md: 0 6px 18px rgba(16, 24, 40, 0.07), 0 2px 6px
-		rgba(16, 24, 40, 0.03);
+    --bg-app:          #EAF0FA;
+    --bg-app-2:        #E4ECF8;
+    --bg-surface:      #FFFFFF;
+    --bg-surface-2:    #FCFDFF;
+    --bg-hover:        #F6F9FF;
+    --border-light:    #E4EAF3;
+    --border-mid:      #D0D5DD;
+    --text-primary:    #0B1F3F;
+    --text-secondary:  #2B3A55;
+    --text-muted:      #667085;
+    --brand-blue:      #175CD3;
+    --radius-sm:       5px;
+    --radius-md:       8px;
+    --radius-lg:       10px;
+    --radius-pill:     999px;
+    --shadow-sm:       0 1px 3px rgba(16,24,40,0.05);
+    --shadow-md:       0 4px 12px rgba(16,24,40,0.06);
+    --ease:            cubic-bezier(0.4,0,0.2,1);
+    --ease-out-expo:   cubic-bezier(0.16,1,0.3,1);
 }
 
-/* ZUL content root */
+/* ---------- Page wrapper — same as .inward-dashboard-content ---------- */
 .content {
-	width: 100%;
-	height: 100%;
-	box-sizing: border-box;
-	background: radial-gradient(1100px 550px at 0% 0%, rgba(23, 92, 211, 0.10),
-		transparent 60%),
-		radial-gradient(1000px 650px at 100% 0%, rgba(122, 90, 248, 0.08),
-		transparent 60%), linear-gradient(180deg, var(--bg-app) 0%,
-		var(--bg-app-2) 100%);
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    background:
+        radial-gradient(1200px 600px at 0% 0%, rgba(23, 92, 211, 0.12), transparent 60%),
+        radial-gradient(1000px 600px at 100% 0%, rgba(122, 90, 248, 0.10), transparent 60%),
+        radial-gradient(900px 700px at 100% 100%, rgba(18, 183, 106, 0.07), transparent 60%),
+        linear-gradient(180deg, var(--bg-app) 0%, var(--bg-app-2) 100%);
+    position: relative;
+    overflow: hidden;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
+/* ---------- Layout wrapper — same as .inward-dashboard-layout ---------- */
 .content-layout {
-	width: 100%;
-	height: 100%;
-	box-sizing: border-box;
-	padding: 28px 32px 32px 32px;
-	overflow: auto;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 20px 24px 24px 24px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: transparent;
+    position: relative;
+    z-index: 1;
 }
 
+/* Force zero spacing on the main vlayout */
+.content-layout.z-vlayout {
+    padding: 20px 24px 24px 24px !important;
+    margin: 0 !important;
+}
+
+.content-layout.z-vlayout > * {
+    margin: 0 !important;
+}
+
+/* ---------- Page title — same as dashboard .page-title ---------- */
 .page-title {
-	font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
-	font-size: 30px;
-	line-height: 1.2;
-	font-weight: 700;
-	letter-spacing: -0.035em;
-	color: var(--text) !important;
-	position: relative;
-	display: inline-block;
-	margin: 0 0 8px 0;
+    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    color: var(--text-primary) !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
+    background: transparent !important;
+    -webkit-background-clip: initial;
+    background-clip: initial;
+    position: relative;
+    display: inline-block;
+    margin-bottom: 4px;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.1;
 }
 
 .page-title::after {
-	content: '';
-	position: absolute;
-	left: 0;
-	bottom: -10px;
-	width: 54px;
-	height: 4px;
-	background: var(--blue);
-	border-radius: 2px;
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 56px;
+    height: 3px;
+    background: #175CD3;
+    border-radius: 2px;
 }
 
-/* ---------- Data Entry list ---------- */
+/* ---------- Table title — same as dashboard .table-title ---------- */
+.table-title {
+    font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    position: relative;
+    padding-left: 18px;
+    display: block;
+    margin: 0 !important;
+    line-height: 1.2;
+}
+
+.table-title::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 20px;
+    background: #175CD3;
+    border-radius: 3px;
+    box-shadow: none;
+}
+
+/* Table header layout wrapper */
+.table-panel > .z-hlayout {
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box;
+}
+.page-title + .table-panel {
+    margin-top: 32px !important;
+}
+
+/* ---------- Table panel wrapper — same as dashboard .table-panel ---------- */
+.table-panel {
+    background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-surface-2) 100%);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: 16px 20px 14px 20px;
+    box-sizing: border-box;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+    margin-top: 32px !important;
+}
+
+.table-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #175CD3;
+    animation: none;
+}
+
+/* ---------- Listbox card wrapper — same as dashboard .table-panel ---------- */
 .batch-listbox {
-	width: 100%;
-	background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2)
-		100%) !important;
-	border: 1px solid var(--border) !important;
-	border-radius: 16px !important;
-	box-shadow: var(--shadow-md);
-	overflow: hidden;
-	position: relative;
+    width: 100% !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+    position: relative !important;
 }
 
+/* Remove the duplicate blue top border from listbox */
 .batch-listbox::before {
-	content: '';
-	display: block;
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	height: 4px;
-	background: var(--blue);
-	z-index: 3;
+    display: none !important;
 }
 
-.batch-listbox .z-listhead, .batch-listbox .z-listbox-header,
-	.batch-listbox .z-columns {
-	background: var(--blue) !important;
-	border: none !important;
+/* ---------- Listbox header — same as dashboard .custom-grid header ---------- */
+.batch-listbox .z-listhead,
+.batch-listbox .z-listbox-header {
+    background: #175CD3 !important;
+    border: none !important;
+    border-radius: var(--radius-md) !important;
 }
 
-/* Header text and removal of the thin vertical divider line. */
-.batch-listbox .z-listheader, .batch-listbox .z-listheader-content {
-	background: transparent !important;
-	color: #FFFFFF !important;
-	font-family: 'Inter', sans-serif;
-	font-size: 12px;
-	font-weight: 800;
-	text-transform: uppercase;
-	border: none !important;
-	border-left: none !important;
-	border-right: none !important;
-	box-shadow: none !important;
+.batch-listbox .z-listheader {
+    background: transparent !important;
+    color: #FFFFFF !important;
+    font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    padding: 12px 12px !important;
+    border: none !important;
+    border-right: 1px solid rgba(255,255,255,0.25) !important;
+    box-shadow: none !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.22);
+    white-space: nowrap !important;
+    text-align: center !important;
+    vertical-align: middle !important;
 }
 
-.batch-listbox .z-listheader::after, .batch-listbox .z-listheader-content::after
-	{
-	display: none !important;
-	content: none !important;
+.batch-listbox .z-listheader-content {
+    background: transparent !important;
+    color: #FFFFFF !important;
+    font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    padding: 12px 12px !important;
+    border: none !important;
+    box-shadow: none !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.22);
+    white-space: nowrap !important;
+    text-align: center !important;
+    vertical-align: middle !important;
 }
 
+.batch-listbox .z-listheader::after,
+.batch-listbox .z-listheader-content::after {
+    display: none !important;
+    content: none !important;
+}
+
+.batch-listbox .z-listheader:last-child,
+.batch-listbox .z-listheader:last-child .z-listheader-content {
+    border-right: none !important;
+}
+
+/* ---------- Data rows — same as dashboard rows ---------- */
 .batch-listbox .z-listitem {
-	background: #FFFFFF !important;
-	border-bottom: 1px solid var(--border) !important;
+    background: #FFFFFF !important;
+    border-bottom: 1px solid var(--border-light) !important;
+}
+
+.batch-listbox .z-listitem:nth-child(even) {
+    background: linear-gradient(90deg, #FCFDFF 0%, #F9FBFF 100%) !important;
 }
 
 .batch-listbox .z-listitem:hover {
-	background: var(--hover) !important;
-	box-shadow: inset 4px 0 0 var(--blue);
+    background: var(--bg-hover) !important;
+    box-shadow: inset 4px 0 0 var(--brand-blue) !important;
 }
 
+/* ---------- Data cells ---------- */
 .batch-listbox .z-listcell {
-	border-left: none !important;
-	border-right: none !important;
-	border-top: none !important;
-	color: #2B3A55;
-	font-family: 'Inter', sans-serif;
-	font-size: 13px;
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
 }
 
 .batch-listbox .z-listcell-content {
-	padding: 12px 15px !important;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px !important;
+    color: #1D2939 !important;
+    font-weight: 500 !important;
+    padding: 12px 14px !important;
+    line-height: 1.4;
+    text-align: center !important;
+    vertical-align: middle !important;
+    -webkit-font-smoothing: antialiased;
 }
 
-/* Action buttons, regardless of the controller-generated ZK button styling. */
+/* ---------- Action buttons — same as dashboard .btn-action ---------- */
 .batch-listbox .z-button {
-	background: var(--blue) !important;
-	color: #FFFFFF !important;
-	border: none !important;
-	border-radius: 6px !important;
-	padding: 8px 18px !important;
-	font-family: 'Inter', sans-serif;
-	font-size: 13px !important;
-	font-weight: 700 !important;
-	box-shadow: none !important;
-	cursor: pointer;
+    background: #175CD3 !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 7px 18px !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 6px rgba(23,92,211,0.18) !important;
+    cursor: pointer;
 }
 
 .batch-listbox .z-button:hover {
-	background: var(--blue-dark) !important;
+    background: #164EB6 !important;
+    box-shadow: 0 3px 8px rgba(23,92,211,0.22) !important;
 }
 
-/* Paging / empty state */
+/* ---------- Empty state ---------- */
+.batch-listbox .z-listbox-emptybody,
+.batch-listbox .z-listbox-emptybody-content {
+    color: var(--text-muted);
+    background: #FFFFFF;
+    padding: 32px 20px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    text-align: center;
+}
+
+/* ---------- Paging ---------- */
 .batch-listbox .z-paging {
-	background: #FFFFFF;
-	border-top: 1px solid var(--border);
-	padding: 10px;
-}
-
-.batch-listbox .z-listbox-emptybody, .batch-listbox .z-listbox-emptybody-content
-	{
-	color: var(--muted);
-	background: #FFFFFF;
-	padding: 42px 20px;
-	font-family: 'Inter', sans-serif;
+    background: #FFFFFF;
+    border-top: 1px solid var(--border-light);
+    padding: 10px;
 }

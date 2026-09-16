@@ -22,19 +22,8 @@ import javax.sql.DataSource;
 
 public class OutwardMakerDashboardDAO {
 
-    private final javax.sql.DataSource dataSource =
-            ConnectionPool.getDataSource();
-
-    // ============================================================
-    // GET ALL BATCHES
-    // ============================================================
- 
+    private final javax.sql.DataSource dataSource =ConnectionPool.getDataSource();
     public List<OutwardBatch> getBatches() throws SQLException {
-
-        // =========================================================
-        // GET CURRENT LOGGED-IN MAKER USER ID
-        // =========================================================
-
         Session session =
                 Executions.getCurrent().getSession();
 
@@ -87,7 +76,7 @@ public class OutwardMakerDashboardDAO {
                 // is the original Maker.
                 // =================================================
 
-                "    (SELECT oba.user_id " +
+                "    (SELECT oba.user_id" +
                 "       FROM public.outward_batch_assignment oba " +
                 "      WHERE oba.batch_number = ob.batch_number " +
                 "        AND UPPER(TRIM(oba.assignment_role)) = 'MAKER' " +
@@ -172,7 +161,7 @@ public class OutwardMakerDashboardDAO {
                 "               'COMPLETED', " +
                 "               'REJECTED', " +
                 "               'HOLD', " +
-                "               'ON_HOLD') " +
+                "               'ON_HOLD','NPCI_SENT') " +
                 "          AND " +
                 "          ( " +
 
@@ -605,7 +594,7 @@ public class OutwardMakerDashboardDAO {
 
         return batches;
     }
-    
+   
     // ============================================================
     // ASSIGN BATCH TO MAKER
     // ============================================================

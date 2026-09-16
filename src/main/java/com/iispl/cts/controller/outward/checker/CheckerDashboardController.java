@@ -195,10 +195,9 @@ public class CheckerDashboardController
         // LOG CURRENT CHECKER
         // ========================================================
 
-        System.out.println(
-                "CHECKER SESSION: "
+        System.out.println("CHECKER SESSION: "
                         + "userId="
-                        + currentCheckerUser
+                      + currentCheckerUser
         );
 
         // ========================================================

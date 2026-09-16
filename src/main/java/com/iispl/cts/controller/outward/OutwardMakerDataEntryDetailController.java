@@ -187,6 +187,12 @@ public class OutwardMakerDataEntryDetailController
 
     private String returnedChequeNumber;
 
+    /*
+     * Dashboard repair type.
+     * For the returned Data Entry queue this is DATA_ENTRY.
+     */
+    private String repairType;
+
     private String checkerReasonCode;
 
     private String checkerRemarks;
@@ -283,6 +289,26 @@ public class OutwardMakerDataEntryDetailController
                                 "chequeNumber"
                         );
 
+        /*
+         * =====================================================
+         * GET REPAIR TYPE
+         * =====================================================
+         *
+         * Dashboard sends repairType=DATA_ENTRY for the
+         * returned Data Entry repair queue.
+         */
+        repairType =
+                Executions.getCurrent()
+                        .getParameter("repairType");
+
+        if (repairType == null
+                || repairType.trim().isEmpty()) {
+
+            repairType =
+                    Executions.getCurrent()
+                            .getParameter("amp;repairType");
+        }
+
 
         System.out.println(
                 "======================================"
@@ -346,16 +372,35 @@ public class OutwardMakerDataEntryDetailController
 
         // =====================================================
         // RETURNED CHEQUE MODE
+        // =====================================================
         //
-        // Only SENT_BACK_TO_MAKER cheques are allowed.
-        // If chequeNumber is supplied, only that cheque
-        // is displayed.
+        // Dashboard Data Entry repair sends:
+        //
+        //     repairType=DATA_ENTRY
+        //
+        // In that case, filter every returned cheque using its
+        // OWN checker_reason_code. Do NOT filter by batch alone.
+        //
+        // Existing returned-mode behavior is preserved when
+        // repairType is not supplied.
         // =====================================================
 
         if (returnedMode) {
 
             List<OutwardCheque> returnedCheques =
                     new ArrayList<>();
+
+
+            OutwardMakerDashboardService dashboardService =
+                    new OutwardMakerDashboardService();
+
+
+            boolean dataEntryRepairQueue =
+                    "DATA_ENTRY".equalsIgnoreCase(
+                            repairType == null
+                                    ? ""
+                                    : repairType.trim()
+                    );
 
 
             for (OutwardCheque cheque
@@ -368,33 +413,133 @@ public class OutwardMakerDataEntryDetailController
                 String status =
                         cheque.getChequeStatus();
 
-
-                if (status != null
-                        && "SENT_BACK_TO_MAKER"
+                if (status == null
+                        || !"SENT_BACK_TO_MAKER"
                                 .equalsIgnoreCase(
                                         status.trim()
                                 )) {
-
-                    returnedCheques.add(
-                            cheque
-                    );
+                    continue;
                 }
+
+
+                /*
+                 * =================================================
+                 * DATA ENTRY REPAIR QUEUE
+                 * =================================================
+                 *
+                 * The actual checker reason belongs to this
+                 * cheque. A MICR-reason cheque in the same batch
+                 * must never enter this queue.
+                 */
+                if (dataEntryRepairQueue) {
+
+                    String chequeNumber =
+                            cheque.getChequeNumber();
+
+                    if (chequeNumber == null
+                            || chequeNumber.trim().isEmpty()) {
+                        continue;
+                    }
+
+
+                    ChequeProcessing processing =
+                            dashboardService
+                                    .getChequeProcessing(
+                                            batchId,
+                                            chequeNumber.trim()
+                                    );
+
+
+                    if (processing == null) {
+                        continue;
+                    }
+
+
+                    String checkerAction =
+                            processing.getCheckerAction();
+
+                    String checkerReason =
+                            processing
+                                    .getCheckerReasonCode();
+
+
+                    if (checkerAction == null
+                            || !"SEND_BACK"
+                                    .equalsIgnoreCase(
+                                            checkerAction.trim()
+                                    )) {
+                        continue;
+                    }
+
+
+                    if (!isDataEntryRepairReason(
+                            checkerReason)) {
+                        continue;
+                    }
+                }
+
+
+                returnedCheques.add(cheque);
             }
 
 
-            // -------------------------------------------------
-            // If a specific cheque number was supplied,
-            // keep ONLY that returned cheque.
-            // -------------------------------------------------
+            // =====================================================
+            // INITIAL CHEQUE SELECTION
+            // =====================================================
+            //
+            // If Dashboard supplied a chequeNumber, start at
+            // that cheque, but do NOT reduce the queue to one
+            // cheque when repairType=DATA_ENTRY.
+            // =====================================================
 
-            if (returnedChequeNumber != null
+            currentIndex = 0;
+
+
+            if (dataEntryRepairQueue
+                    && returnedChequeNumber != null
                     && !returnedChequeNumber
                             .trim()
                             .isEmpty()) {
 
                 String requestedCheque =
-                        returnedChequeNumber
-                                .trim();
+                        returnedChequeNumber.trim();
+
+
+                for (int i = 0;
+                        i < returnedCheques.size();
+                        i++) {
+
+                    OutwardCheque cheque =
+                            returnedCheques.get(i);
+
+
+                    if (cheque != null
+                            && cheque.getChequeNumber() != null
+                            && requestedCheque
+                                    .equalsIgnoreCase(
+                                            cheque.getChequeNumber()
+                                                    .trim()
+                                    )) {
+
+                        currentIndex = i;
+                        break;
+                    }
+                }
+
+            } else if (!dataEntryRepairQueue
+                    && returnedChequeNumber != null
+                    && !returnedChequeNumber
+                            .trim()
+                            .isEmpty()) {
+
+                /*
+                 * Existing returned flow:
+                 * when no repairType was supplied, keep the
+                 * original single-cheque behavior unchanged.
+                 */
+                String requestedCheque =
+                        returnedChequeNumber.trim();
+
 
                 List<OutwardCheque>
                         specificReturnedCheque =
@@ -404,16 +549,16 @@ public class OutwardMakerDataEntryDetailController
                 for (OutwardCheque cheque
                         : returnedCheques) {
 
-                    if (cheque.getChequeNumber()
-                            != null
+                    if (cheque.getChequeNumber() != null
                             && requestedCheque
                                     .equalsIgnoreCase(
                                             cheque.getChequeNumber()
                                                     .trim()
                                     )) {
 
-                        specificReturnedCheque
-                                .add(cheque);
+                        specificReturnedCheque.add(
+                                cheque
+                        );
 
                         break;
                     }
@@ -428,10 +573,15 @@ public class OutwardMakerDataEntryDetailController
             if (returnedCheques.isEmpty()) {
 
                 Messagebox.show(
-                        "No returned cheque is available "
-                                + "for batch "
-                                + batchId
-                                + ".",
+                        dataEntryRepairQueue
+                                ? "No returned Data Entry cheque is available "
+                                        + "for batch "
+                                        + batchId
+                                        + "."
+                                : "No returned cheque is available "
+                                        + "for batch "
+                                        + batchId
+                                        + ".",
                         "Checker Return",
                         Messagebox.OK,
                         Messagebox.ERROR,
@@ -444,22 +594,20 @@ public class OutwardMakerDataEntryDetailController
             }
 
 
-            // -------------------------------------------------
-            // IMPORTANT:
-            //
-            // Replace the normal full batch list with ONLY
-            // returned cheques.
-            // -------------------------------------------------
+            // =====================================================
+            // ONLY THE FILTERED RETURNED CHEQUES ARE USED
+            // =====================================================
 
             cheques =
                     returnedCheques;
 
-            currentIndex = 0;
 
+            if (currentIndex < 0
+                    || currentIndex >= cheques.size()) {
 
-            // -------------------------------------------------
-            // Load returned cheque information
-            // -------------------------------------------------
+                currentIndex = 0;
+            }
+
 
             updateBatchSummaryMetrics();
 
@@ -468,18 +616,22 @@ public class OutwardMakerDataEntryDetailController
             loadCheque();
 
 
-            // -------------------------------------------------
-            // Returned mode navigation
-            //
-            // There is no normal batch navigation.
-            // Only the returned cheque is handled.
-            // -------------------------------------------------
+            /*
+             * Returned Data Entry repair can contain multiple
+             * Data Entry cheques. Allow navigation inside only
+             * this filtered subset.
+             */
+            if (dataEntryRepairQueue) {
 
-            if (prevButton != null) {
+                updateNavButtons();
 
-                prevButton.setDisabled(
-                        true
-                );
+            } else if (prevButton != null) {
+
+                /*
+                 * Existing returned behavior is preserved when
+                 * no repairType is supplied.
+                 */
+                prevButton.setDisabled(true);
 
                 prevButton.setStyle(
                         "background:#CBD5E1 !important; "
@@ -1062,6 +1214,39 @@ public class OutwardMakerDataEntryDetailController
 
 
     // =========================================================
+    // DATA ENTRY REPAIR REASON CHECK
+    // =========================================================
+    //
+    // Returned Data Entry repair is determined at cheque level
+    // from cheque_processing.checker_reason_code.
+    // =========================================================
+
+    private boolean isDataEntryRepairReason(
+            String reasonCode) {
+
+        if (reasonCode == null
+                || reasonCode.trim().isEmpty()) {
+
+            return false;
+        }
+
+        String cleanReason =
+                reasonCode.trim()
+                        .toUpperCase()
+                        .replace("-", "_")
+                        .replace(" ", "_");
+
+        /*
+         * Keep the existing recognized Data Entry reasons
+         * already used by the Maker Dashboard.
+         */
+        return "DATA_ENTRY".equals(cleanReason)
+                || "DATE_CORRECTION".equals(cleanReason)
+                || "DATE_MISMATCH".equals(cleanReason);
+    }
+
+
+    // =========================================================
     // UPDATE NAVIGATION BUTTONS
     // =========================================================
 
@@ -1070,25 +1255,73 @@ public class OutwardMakerDataEntryDetailController
         if (prevButton != null) {
 
             // -------------------------------------------------
-            // Returned mode has only the selected returned
-            // cheque. Previous is therefore disabled.
+            // Returned mode
+            //
+            // Dashboard repair queue contains multiple
+            // same-reason cheques, so allow Previous inside the
+            // filtered subset.
+            //
+            // Legacy returned mode without repairType remains
+            // single-cheque behavior.
             // -------------------------------------------------
 
             if (returnedMode) {
 
+                boolean filteredDataEntryQueue =
+                        "DATA_ENTRY".equalsIgnoreCase(
+                                repairType == null
+                                        ? ""
+                                        : repairType.trim()
+                        );
+
+                if (!filteredDataEntryQueue) {
+
+                    prevButton.setDisabled(true);
+
+                    prevButton.setStyle(
+                            "background:#CBD5E1 !important; "
+                            + "color:#94A3B8 !important; "
+                            + "border:none !important; "
+                            + "font-size:12px !important; "
+                            + "font-weight:600 !important; "
+                            + "border-radius:6px !important; "
+                            + "cursor:not-allowed !important;"
+                    );
+
+                    return;
+                }
+
+                boolean isFirst =
+                        (currentIndex == 0);
+
                 prevButton.setDisabled(
-                        true
+                        isFirst
                 );
 
-                prevButton.setStyle(
-                        "background:#CBD5E1 !important; "
-                        + "color:#94A3B8 !important; "
-                        + "border:none !important; "
-                        + "font-size:12px !important; "
-                        + "font-weight:600 !important; "
-                        + "border-radius:6px !important; "
-                        + "cursor:not-allowed !important;"
-                );
+                if (isFirst) {
+
+                    prevButton.setStyle(
+                            "background:#CBD5E1 !important; "
+                            + "color:#94A3B8 !important; "
+                            + "border:none !important; "
+                            + "font-size:12px !important; "
+                            + "font-weight:600 !important; "
+                            + "border-radius:6px !important; "
+                            + "cursor:not-allowed !important;"
+                    );
+
+                } else {
+
+                    prevButton.setStyle(
+                            "background:#2563EB !important; "
+                            + "color:#FFFFFF !important; "
+                            + "border:none !important; "
+                            + "font-size:12px !important; "
+                            + "font-weight:600 !important; "
+                            + "border-radius:6px !important; "
+                            + "cursor:pointer !important;"
+                    );
+                }
 
                 return;
             }
@@ -1142,9 +1375,17 @@ public class OutwardMakerDataEntryDetailController
     @Listen("onClick = #prevButton")
     public void previousCheque() {
 
-        // Returned mode is one-cheque repair mode.
-
-        if (returnedMode) {
+        /*
+         * Legacy returned mode is one-cheque repair mode.
+         * Dashboard Data Entry repair mode is a filtered queue,
+         * so Previous is allowed inside that queue.
+         */
+        if (returnedMode
+                && !"DATA_ENTRY".equalsIgnoreCase(
+                        repairType == null
+                                ? ""
+                                : repairType.trim()
+                )) {
 
             return;
         }
@@ -1432,6 +1673,48 @@ public class OutwardMakerDataEntryDetailController
             updateBatchSummaryMetrics();
 
 
+            /*
+             * =====================================================
+             * FILTERED DATA ENTRY RETURN QUEUE
+             * =====================================================
+             *
+             * Continue to the next Data Entry-reason cheque
+             * instead of returning to the batch after every
+             * cheque.
+             */
+            if ("DATA_ENTRY".equalsIgnoreCase(
+                    repairType == null
+                            ? ""
+                            : repairType.trim()
+            )) {
+
+                if (currentIndex < cheques.size() - 1) {
+
+                    currentIndex++;
+
+                    loadCheque();
+
+                    return;
+                }
+
+                Messagebox.show(
+                        "Data Entry repair completed for all "
+                                + "returned Data Entry cheques in this queue.",
+                        "Data Entry Repair",
+                        Messagebox.OK,
+                        Messagebox.INFORMATION,
+                        event -> Executions.sendRedirect(
+                                "outward-maker-dashboard.zul"
+                        )
+                );
+
+                return;
+            }
+
+
+            /*
+             * Existing returned one-cheque behavior preserved.
+             */
             Messagebox.show(
                     "Returned cheque "
                             + cheque.getChequeNumber()
@@ -1650,6 +1933,40 @@ public class OutwardMakerDataEntryDetailController
 
             if (returnedMode) {
 
+                if ("DATA_ENTRY".equalsIgnoreCase(
+                        repairType == null
+                                ? ""
+                                : repairType.trim()
+                )) {
+
+                    if (currentIndex < cheques.size() - 1) {
+
+                        currentIndex++;
+
+                        loadCheque();
+
+                        return;
+                    }
+
+                    Messagebox.show(
+                            "All returned Data Entry cheques "
+                                    + "in this queue have been handled.",
+                            "Data Entry Repair",
+                            Messagebox.OK,
+                            Messagebox.INFORMATION,
+                            event ->
+                                    Executions.sendRedirect(
+                                            "outward-maker-dashboard.zul"
+                                    )
+                    );
+
+                    return;
+                }
+
+
+                /*
+                 * Existing returned behavior preserved.
+                 */
                 Messagebox.show(
                         "Returned cheque "
                                 + currentCheque

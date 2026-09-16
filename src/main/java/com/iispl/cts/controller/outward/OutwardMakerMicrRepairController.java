@@ -43,6 +43,12 @@ public class OutwardMakerMicrRepairController
 
     private String returnedChequeNumber;
 
+    /*
+     * Dashboard repair type.
+     * For returned batches this is normally MICR.
+     */
+    private String repairType;
+
     private String checkerReasonCode;
 
     private String checkerRemarks;
@@ -93,6 +99,9 @@ public class OutwardMakerMicrRepairController
         returnedMode =
                 "RETURNED".equalsIgnoreCase(
                         returnMode
+                )
+                || "HOLD".equalsIgnoreCase(
+                        returnMode
                 );
 
         returnedChequeNumber =
@@ -100,6 +109,22 @@ public class OutwardMakerMicrRepairController
                         .getParameter(
                                 "chequeNumber"
                         );
+
+        /*
+         * =====================================================
+         * RETURNED REPAIR TYPE
+         * =====================================================
+         *
+         * Dashboard sends:
+         *
+         * repairType=MICR
+         *
+         * This is only used for returned repair navigation.
+         * Normal MICR repair is unchanged.
+         */
+        repairType =
+                Executions.getCurrent()
+                        .getParameter("repairType");
 
         /*
          * =====================================================
@@ -351,7 +376,14 @@ public class OutwardMakerMicrRepairController
             url.append("?batchNumber=")
                     .append(batchNumber);
 
-            url.append("&returnMode=RETURNED");
+            url.append("&returnMode=HOLD");
+
+            if (repairType != null
+                    && !repairType.trim().isEmpty()) {
+
+                url.append("&repairType=")
+                        .append(repairType.trim());
+            }
 
             if (returnedChequeNumber != null
                     && !returnedChequeNumber.trim().isEmpty()) {

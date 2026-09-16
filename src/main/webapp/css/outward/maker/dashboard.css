@@ -1,0 +1,414 @@
+@charset "UTF-8";
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+/* ---------- Global Tokens ---------- */
+:root {
+    --bg-app-1:        #EBF2FD;
+    --bg-app-2:        #E4ECF8;
+    --bg-surface:      #FFFFFF;
+    --bg-subtle:       #F9FAFB;
+    
+    --border-light:    #E4EAF3;
+    --border-mid:      #D0D5DD;
+    
+    --text-primary:    #0B1F3F;
+    --text-secondary:  #2B3A55;
+    --text-muted:      #667085;
+    
+    --brand-blue:      #175CD3;
+    --brand-blue-hover:#154EB5;
+    
+    --radius-sm:       6px;
+    --radius-md:       8px;
+    --radius-lg:       12px;
+    --radius-pill:     999px;
+    
+    --shadow-card:     0 2px 8px rgba(16, 24, 40, 0.05);
+}
+
+/* Hide icon containers & glyphs inside summary cards */
+.summary-card > .z-vlayout:first-child,
+.summary-card .card-icon-wrapper,
+.summary-card [class*="z-icon-"],
+.summary-card .card-icon-glyph {
+    display: none !important;
+}
+
+/* ---------- Reset & Background ---------- */
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.outward-dashboard-content {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    background:
+        radial-gradient(1200px 600px at 0% 0%, rgba(23, 92, 211, 0.12), transparent 60%),
+        radial-gradient(1000px 600px at 100% 0%, rgba(122, 90, 248, 0.10), transparent 60%),
+        radial-gradient(900px 700px at 100% 100%, rgba(18, 183, 106, 0.07), transparent 60%),
+        linear-gradient(180deg, var(--bg-app-1) 0%, var(--bg-app-2) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.outward-dashboard-layout {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 24px 30px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: transparent;
+}
+
+/* ---------- Title & Underline ---------- */
+.outward-dashboard-layout > .z-label:first-child,
+.dashboard-page-title {
+    font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary) !important;
+    position: relative;
+    display: inline-block;
+    margin-bottom: 6px;
+}
+
+.outward-dashboard-layout > .z-label:first-child::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 0;
+    width: 50px;
+    height: 3px;
+    background: var(--brand-blue);
+    border-radius: 2px;
+}
+
+/* ---------- Summary Cards ---------- */
+.summary-card {
+    background: #FFFFFF !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: var(--radius-md) !important;
+    padding: 0 !important;
+    height: 76px !important;
+    min-height: 76px !important;
+    max-height: 76px !important;
+    box-sizing: border-box !important;
+    box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+}
+
+.summary-card .z-vlayout,
+.summary-card .card-body-layout {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+}
+
+.card-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    width: 100% !important;
+    text-align: center !important;
+    margin: 0 0 2px 0 !important;
+    padding: 0 !important;
+    line-height: 1.2 !important;
+    display: block !important;
+}
+
+.card-value {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    font-size: 26px !important;
+    font-weight: 700;
+    line-height: 1 !important;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    width: 100% !important;
+    text-align: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+}
+
+.text-blue {
+    color: #175CD3 !important;
+    background: none !important;
+    -webkit-text-fill-color: #175CD3 !important;
+}
+
+.text-purple {
+    color: #16A34A !important;
+    background: none !important;
+    -webkit-text-fill-color: #16A34A !important;
+}
+
+.text-green {
+    color: #175CD3 !important;
+    background: none !important;
+    -webkit-text-fill-color: #175CD3 !important;
+}
+
+/* ---------- Table Panel ---------- */
+.table-panel {
+    background: var(--bg-surface) !important;
+    border: 1px solid var(--border-light) !important;
+    border-radius: var(--radius-lg) !important;
+    padding: 20px 24px !important;
+    box-sizing: border-box;
+    box-shadow: var(--shadow-card) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.table-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3.5px;
+    background: var(--brand-blue) !important;
+    display: block !important;
+}
+
+.table-header-layout {
+    padding-bottom: 14px;
+}
+
+.table-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    position: relative;
+    padding-left: 14px !important;
+}
+
+.table-title::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 18px;
+    background: var(--brand-blue);
+    border-radius: 2px;
+    display: block !important;
+}
+
+.table-title::after {
+    display: none !important;
+}
+
+/* ---------- Filter Pill Buttons ---------- */
+.filter-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-right: 8px;
+}
+
+.filter-btn {
+    margin-left: 6px;
+    border: 1px solid var(--border-mid) !important;
+    border-radius: var(--radius-pill) !important;
+    background: var(--bg-surface) !important;
+    color: var(--text-secondary) !important;
+    font-weight: 600 !important;
+    font-size: 12.5px !important;
+    cursor: pointer;
+    padding: 6px 18px !important;
+    font-family: 'Inter', sans-serif;
+    box-shadow: none !important;
+    transition: all 0.15s ease;
+}
+
+.filter-btn:hover {
+    background: var(--bg-subtle) !important;
+    color: var(--text-primary) !important;
+}
+
+.active-filter {
+    background: var(--brand-blue) !important;
+    color: #FFFFFF !important;
+    border-color: var(--brand-blue) !important;
+}
+
+.active-filter:hover {
+    background: var(--brand-blue-hover) !important;
+    color: #FFFFFF !important;
+}
+
+/* =============================================================
+   LISTBOX HEADER — EXACT INWARD MATCH (CLEAN & COMPACT)
+   ============================================================= */
+
+.batch-grid,
+.custom-batch-listbox {
+    width: 100%;
+    border: 1px solid var(--border-light) !important;
+    border-radius: var(--radius-md) !important;
+    background: var(--bg-surface);
+    box-shadow: none !important;
+    overflow: hidden;
+}
+
+/* Header row & table */
+.batch-grid .z-listhead,
+.batch-grid .z-listhead-table,
+.batch-grid .z-listhead tr {
+    background: #175CD3 !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
+
+/* Header th container */
+.batch-grid .z-listhead th,
+.batch-grid .z-listheader {
+    background: #175CD3 !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    vertical-align: middle !important;
+}
+
+.batch-grid .z-listheader:last-child {
+    border-right: none !important;
+}
+
+/* Header cell text content */
+.batch-grid .z-listheader-content {
+    background: transparent !important;
+    font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    color: #FFFFFF !important;
+    padding: 22px 20px !important;
+    line-height: 1.4 !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+    white-space: nowrap !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    box-sizing: border-box !important;
+}
+
+.batch-grid .z-listheader * {
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    background: transparent !important;
+}
+
+.batch-grid .z-listheader::after {
+    content: none !important;
+    display: none !important;
+}
+
+/* Empty Body */
+.batch-grid .z-listbox-emptybody {
+    padding: 40px 20px;
+    color: var(--text-muted);
+    font-size: 13.5px;
+    font-style: normal;
+    background: var(--bg-surface);
+    text-align: left;
+    padding-left: 20px;
+}
+
+/* Data Rows */
+.batch-grid .z-listbox-body tr,
+.batch-grid .z-listitem {
+    border-bottom: 1px solid #EEF2F8 !important;
+    background: #FFFFFF;
+}
+
+.batch-grid .z-listitem:nth-child(even) {
+    background: #FAFCFF !important;
+}
+
+.batch-grid .z-listcell {
+    border-right: none !important;
+}
+
+.batch-grid .z-listcell-content {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: var(--text-secondary);
+    padding: 12px 14px !important;
+    line-height: 1.4;
+    text-align: center !important;
+    justify-content: center !important;
+}
+
+.batch-grid .z-listbox-body tr .z-listcell:nth-child(1) .z-listcell-content::before {
+    display: none !important;
+}
+
+/* ---------- Pagination ---------- */
+.pagination-btn {
+    min-width: 36px;
+    height: 36px;
+    border: 1px solid var(--border-mid);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    padding: 0 12px;
+    font-variant-numeric: tabular-nums;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.pagination-btn:hover {
+    background: var(--bg-subtle);
+    border-color: var(--border-dark);
+}
+
+.pagination-active {
+    background: var(--brand-blue) !important;
+    border-color: var(--brand-blue) !important;
+    color: #FFFFFF !important;
+    box-shadow: none !important;
+}
+
+.pagination-active:hover {
+    background: var(--brand-blue-hover) !important;
+    border-color: var(--brand-blue-hover) !important;
+    color: #FFFFFF !important;
+}
+
+.pagination-status-info {
+    margin-left: 12px;
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+}

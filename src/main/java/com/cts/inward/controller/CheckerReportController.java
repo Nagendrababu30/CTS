@@ -10,6 +10,7 @@ import org.zkoss.zul.Messagebox;
 import com.cts.inward.service.CheckerReportService;
 import com.cts.inward.service.CheckerReportServiceImpl;
 
+
 public class CheckerReportController
         extends GenericForwardComposer<Component> {
 
@@ -22,6 +23,7 @@ public class CheckerReportController
     private CheckerReportService reportService =
             CheckerReportServiceImpl.of();
 
+
     @Override
     public void doAfterCompose(Component comp)
             throws Exception {
@@ -32,6 +34,7 @@ public class CheckerReportController
 
         initApprovedEvent();
     }
+
 
     private void initRrfEvent() {
 
@@ -46,6 +49,7 @@ public class CheckerReportController
                             byte[] xmlBytes =
                                     reportService.generateRrfXml();
 
+
                             if (xmlBytes == null) {
 
                                 Messagebox.show(
@@ -57,15 +61,18 @@ public class CheckerReportController
                                 return;
                             }
 
+
                             String fileName =
                                     "RRF_Return_Report_"
                                     + System.currentTimeMillis()
                                     + ".xml";
 
+
                             Filedownload.save(
                                     xmlBytes,
                                     "application/xml",
                                     fileName);
+
 
                         } catch (Exception e) {
 
@@ -78,9 +85,11 @@ public class CheckerReportController
                                     Messagebox.OK,
                                     Messagebox.ERROR);
                         }
+
                     });
         }
     }
+
 
     private void initApprovedEvent() {
 
@@ -93,8 +102,8 @@ public class CheckerReportController
                         try {
 
                             byte[] xmlBytes =
-                                    reportService
-                                            .generateApprovedXml();
+                                    reportService.generateApprovedXml();
+
 
                             if (xmlBytes == null) {
 
@@ -107,15 +116,18 @@ public class CheckerReportController
                                 return;
                             }
 
+
                             String fileName =
                                     "Approved_Cheques_Report_"
                                     + System.currentTimeMillis()
                                     + ".xml";
 
+
                             Filedownload.save(
                                     xmlBytes,
                                     "application/xml",
                                     fileName);
+
 
                         } catch (Exception e) {
 
@@ -128,7 +140,9 @@ public class CheckerReportController
                                     Messagebox.OK,
                                     Messagebox.ERROR);
                         }
+
                     });
         }
     }
+
 }

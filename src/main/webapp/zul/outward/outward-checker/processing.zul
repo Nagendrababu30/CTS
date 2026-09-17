@@ -39,34 +39,26 @@
                 <space hflex="1"/>
 
                 <div sclass="summary-pill total-pill">
-
                     <label value="Total:"/>
-
                 </div>
 
                 <space hflex="1"/>
 
                 <div sclass="summary-pill completed-pill">
-
                     <label value="Completed:"/>
-
                 </div>
 
                 <space hflex="1"/>
 
                 <div sclass="summary-pill pending-pill">
-
                     <label value="Pending:"/>
-
                 </div>
 
                 <space hflex="1"/>
 
                 <div sclass="summary-pill cheque-pill">
-
                     <label id="chequeSequence"
                            value=""/>
-
                 </div>
 
             </hlayout>
@@ -220,17 +212,20 @@
                          spacing="0"
                          sclass="processing-card cheque-details-card">
 
-                    <label value="Verification &amp; Corrections"
-                           sclass="verification-title"/>
-
-                    <separator height="8px"/>
-
 
                     <!-- INDEPENDENT SCROLL -->
 
                     <div width="100%"
                          vflex="1"
                          sclass="cheque-details-scroll">
+
+
+                        <!-- VERIFICATION & CORRECTIONS -->
+
+                        <label value="Verification &amp; Corrections"
+                               sclass="verification-title"/>
+
+                        <separator height="8px"/>
 
 
                         <!-- MAKER RETURN -->
@@ -283,6 +278,7 @@
                                        sclass="field-label"/>
 
                                 <textbox value=""
+                                         readonly="true"
                                          sclass="field-value"/>
 
                             </vlayout>
@@ -295,6 +291,7 @@
 
                                 <textbox id="chequeDateLabel"
                                          value=""
+                                         readonly="true"
                                          sclass="field-value"/>
 
                             </vlayout>
@@ -307,6 +304,7 @@
 
                                 <textbox id="micrLabel"
                                          value=""
+                                         readonly="true"
                                          sclass="field-value micr-field"/>
 
                             </vlayout>
@@ -319,6 +317,7 @@
 
                                 <textbox id="amountLabel"
                                          value=""
+                                         readonly="true"
                                          sclass="field-value amount-field"/>
 
                             </vlayout>
@@ -331,6 +330,7 @@
 
                                 <textbox id="amountInWordsLabel"
                                          value=""
+                                         readonly="true"
                                          multiline="true"
                                          rows="2"
                                          sclass="field-value amount-words-field"/>
@@ -359,6 +359,7 @@
 
                                 <textbox id="drawerNameLabel"
                                          value=""
+                                         readonly="true"
                                          multiline="true"
                                          sclass="field-value plain-value"/>
 
@@ -371,6 +372,7 @@
 
                                 <textbox id="accountNumberLabel"
                                          value=""
+                                         readonly="true"
                                          sclass="field-value plain-value"/>
 
                             </vlayout>
@@ -397,6 +399,7 @@
 
                                 <textbox id="payeeNameLabel"
                                          value=""
+                                         readonly="true"
                                          multiline="true"
                                          sclass="field-value plain-value"/>
 

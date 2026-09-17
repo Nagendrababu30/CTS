@@ -66,9 +66,9 @@
 
 /* ---------- Page title — same as dashboard .page-title ---------- */
 .page-title {
-    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Times New Roman', serif;
     font-size: 30px;
-    font-weight: 700;
+    font-weight: 650;
     letter-spacing: -0.035em;
     color: var(--text-primary) !important;
     -webkit-text-fill-color: var(--text-primary) !important;
@@ -293,3 +293,7 @@
     border-top: 1px solid var(--border-light);
     padding: 10px;
 }
+
+
+
+

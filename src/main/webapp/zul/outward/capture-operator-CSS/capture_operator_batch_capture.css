@@ -112,10 +112,7 @@
     color: #0B1F3F !important;
 
     font-family:
-        'Space Grotesk',
-        'Plus Jakarta Sans',
-        'Inter',
-        sans-serif !important;
+        'Times New Roman', serif !important;
 
     font-size: 30px !important;
 
@@ -887,3 +884,4 @@
     border-radius: 0 6px 6px 0 !important;
     background: #FFFFFF !important;
 }
+

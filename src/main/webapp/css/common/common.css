@@ -1085,10 +1085,10 @@ a.z-a.menu-item i {
 
     color: #0B1F3F !important;
 
-    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif !important;
+    font-family: 'Times New Roman', serif !important;
 
     font-size: 30px !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
     letter-spacing: -0.035em !important;
     line-height: 1.1 !important;
 }
@@ -1175,7 +1175,7 @@ a.z-a.menu-item i {
     color: #1e293b;
 
     font-size: 24px;
-    font-weight: 700;
+    font-weight: 650;
 }
 
 .role-subtitle {
@@ -1294,3 +1294,5 @@ a.z-a.menu-item i {
         min-width: 140px !important;
     }
 }
+
+

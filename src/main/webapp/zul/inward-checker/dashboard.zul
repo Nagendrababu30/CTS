@@ -7,7 +7,7 @@
 
 <zk>
 
-    <style src="/css/inward/maker/dashboard.css"/>
+   <style src="/css/inward/checker/checkerDashboard.css"/>
 
     <div
         self="@define(content)"

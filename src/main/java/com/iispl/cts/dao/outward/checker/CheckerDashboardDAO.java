@@ -35,6 +35,7 @@ public class CheckerDashboardDAO {
      * eligibility.
      * ============================================================
      */
+
     public List<OutwardBatch> getCheckerBatches(
             String checkerUserId) {
 
@@ -101,11 +102,13 @@ public class CheckerDashboardDAO {
 
                 "ORDER BY ob.created_at DESC";
 
-        try (Connection con =
-                     dataSource.getConnection();
+        try (
+                Connection con =
+                        dataSource.getConnection();
 
-             PreparedStatement ps =
-                     con.prepareStatement(sql)) {
+                PreparedStatement ps =
+                        con.prepareStatement(sql)
+        ) {
 
             ps.setInt(
                     1,
@@ -122,12 +125,6 @@ public class CheckerDashboardDAO {
                     OutwardBatch batch =
                             new OutwardBatch();
 
-                    /*
-                     * =================================================
-                     * BATCH INFORMATION
-                     * =================================================
-                     */
-
                     batch.setBatchNumber(
                             rs.getString(
                                     "batch_number"
@@ -139,13 +136,6 @@ public class CheckerDashboardDAO {
                                     "branch_code"
                             )
                     );
-
-                    /*
-                     * Normal ALL view shows original count.
-                     *
-                     * Re-Verify view will replace this with the
-                     * RE_VERIFIED count.
-                     */
 
                     batch.setNumberOfCheques(
                             rs.getInt(
@@ -183,21 +173,11 @@ public class CheckerDashboardDAO {
                         );
                     }
 
-                    /*
-                     * Keep actual database batch status untouched.
-                     */
-
                     batch.setBatchStatus(
                             rs.getString(
                                     "batch_status"
                             )
                     );
-
-                    /*
-                     * =================================================
-                     * CHECKER ASSIGNMENT
-                     * =================================================
-                     */
 
                     int checkerUserId1 =
                             rs.getInt(
@@ -218,10 +198,6 @@ public class CheckerDashboardDAO {
                                 )
                         );
 
-                        /*
-                         * Assigned time
-                         */
-
                         if (rs.getTimestamp(
                                 "checker_assigned_at") != null) {
 
@@ -231,10 +207,6 @@ public class CheckerDashboardDAO {
                                     ).toLocalDateTime()
                             );
                         }
-
-                        /*
-                         * Started time
-                         */
 
                         if (rs.getTimestamp(
                                 "checker_started_at") != null) {
@@ -246,10 +218,6 @@ public class CheckerDashboardDAO {
                             );
                         }
 
-                        /*
-                         * Completed time
-                         */
-
                         if (rs.getTimestamp(
                                 "checker_completed_at") != null) {
 
@@ -259,10 +227,6 @@ public class CheckerDashboardDAO {
                                     ).toLocalDateTime()
                             );
                         }
-
-                        /*
-                         * Assignment status
-                         */
 
                         String assignmentStatus =
                                 rs.getString(
@@ -291,12 +255,6 @@ public class CheckerDashboardDAO {
                         }
 
                     } else {
-
-                        /*
-                         * =================================================
-                         * NO CHECKER ASSIGNMENT
-                         * =================================================
-                         */
 
                         batch.setCheckerUserNumber(
                                 null
@@ -340,21 +298,12 @@ public class CheckerDashboardDAO {
         return batches;
     }
 
-
     /*
      * ============================================================
      * GET RE-VERIFY BATCHES
      * ============================================================
-     *
-     * Only the original Checker who performed SEND_BACK can see
-     * the returned batch.
-     *
-     * Only RE_VERIFIED cheques are counted.
-     *
-     * outward_batch.batch_status is NOT used as an eligibility
-     * condition.
-     * ============================================================
      */
+
     public List<OutwardBatch> getReVerifyBatches(
             String checkerUserId) {
 
@@ -409,11 +358,13 @@ public class CheckerDashboardDAO {
 
                 "ORDER BY ob.created_at DESC";
 
-        try (Connection con =
-                     dataSource.getConnection();
+        try (
+                Connection con =
+                        dataSource.getConnection();
 
-             PreparedStatement ps =
-                     con.prepareStatement(sql)) {
+                PreparedStatement ps =
+                        con.prepareStatement(sql)
+        ) {
 
             ps.setInt(
                     1,
@@ -472,19 +423,11 @@ public class CheckerDashboardDAO {
                         );
                     }
 
-                    /*
-                     * ONLY RE-VERIFIED CHEQUE COUNT
-                     */
-
                     batch.setNumberOfCheques(
                             rs.getInt(
                                     "reverify_cheque_count"
                             )
                     );
-
-                    /*
-                     * ORIGINAL CHECKER
-                     */
 
                     String originalChecker =
                             rs.getString(
@@ -499,19 +442,9 @@ public class CheckerDashboardDAO {
                             originalChecker
                     );
 
-                    /*
-                     * UI-only Re-Verify marker.
-                     *
-                     * This is NOT outward_batch.batch_status.
-                     */
-
                     batch.setLockStatus(
                             "RE_VERIFY"
                     );
-
-                    /*
-                     * Keep actual database batch status.
-                     */
 
                     batch.setBatchStatus(
                             rs.getString(
@@ -536,24 +469,12 @@ public class CheckerDashboardDAO {
         return batches;
     }
 
-
     /*
      * ============================================================
      * HAS RE-VERIFIED CHEQUES
      * ============================================================
-     *
-     * Used when Checker clicks OPEN.
-     *
-     * Conditions:
-     *
-     * 1. Same batch
-     * 2. Same original Checker
-     * 3. checker_action = SEND_BACK
-     * 4. cheque_status = RE_VERIFIED
-     *
-     * outward_batch.batch_status is NOT checked.
-     * ============================================================
      */
+
     public boolean hasReVerifiedCheques(
             String batchNumber,
             String checkerUserId) {
@@ -593,11 +514,13 @@ public class CheckerDashboardDAO {
 
                 ")";
 
-        try (Connection con =
-                     dataSource.getConnection();
+        try (
+                Connection con =
+                        dataSource.getConnection();
 
-             PreparedStatement ps =
-                     con.prepareStatement(sql)) {
+                PreparedStatement ps =
+                        con.prepareStatement(sql)
+        ) {
 
             ps.setString(
                     1,
@@ -635,29 +558,12 @@ public class CheckerDashboardDAO {
         return false;
     }
 
-
     /*
      * ============================================================
      * GET RE-VERIFIED CHEQUE COUNT
      * ============================================================
-     *
-     * Returns ONLY the number of cheques that:
-     *
-     * 1. Belong to this batch
-     * 2. Were SEND_BACK by this Checker
-     * 3. Are now RE_VERIFIED
-     *
-     * Example:
-     *
-     * Original batch = 5
-     * SEND_BACK = 2
-     * RE_VERIFIED = 2
-     *
-     * Returned count = 2
-     *
-     * outward_batch.batch_status is NOT checked.
-     * ============================================================
      */
+
     public int getReVerifiedChequeCount(
             String batchNumber,
             String checkerUserId) {
@@ -693,11 +599,13 @@ public class CheckerDashboardDAO {
                 "  AND UPPER(TRIM(cp.checker_action)) = " +
                 "      'SEND_BACK'";
 
-        try (Connection con =
-                     dataSource.getConnection();
+        try (
+                Connection con =
+                        dataSource.getConnection();
 
-             PreparedStatement ps =
-                     con.prepareStatement(sql)) {
+                PreparedStatement ps =
+                        con.prepareStatement(sql)
+        ) {
 
             ps.setString(
                     1,
@@ -733,35 +641,113 @@ public class CheckerDashboardDAO {
         return 0;
     }
 
+    /*
+     * ============================================================
+     * GET RE-VERIFIED CHEQUE NUMBERS
+     * ============================================================
+     *
+     * Returns the exact cheque numbers that:
+     *
+     * 1. Belong to this batch
+     * 2. Were SEND_BACK by this Checker
+     * 3. Are now RE_VERIFIED
+     *
+     * Used by Dashboard to open the exact corrected cheque.
+     * ============================================================
+     */
+
+    public List<String> getReVerifiedChequeNumbers(
+            String batchNumber,
+            String checkerUserId) {
+
+        List<String> chequeNumbers =
+                new ArrayList<>();
+
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()) {
+
+            return chequeNumbers;
+        }
+
+        if (checkerUserId == null ||
+                checkerUserId.trim().isEmpty()) {
+
+            return chequeNumbers;
+        }
+
+        String sql =
+                "SELECT oc.cheque_number " +
+
+                "FROM public.outward_cheque oc " +
+
+                "INNER JOIN public.cheque_processing cp " +
+                "    ON oc.batch_number = cp.batch_number " +
+                "    AND oc.cheque_number = cp.cheque_number " +
+
+                "WHERE oc.batch_number = ? " +
+
+                "  AND cp.checker_id = ? " +
+
+                "  AND UPPER(TRIM(cp.checker_action)) = " +
+                "      'SEND_BACK' " +
+
+                "  AND UPPER(TRIM(oc.cheque_status)) = " +
+                "      'RE_VERIFIED' " +
+
+                "ORDER BY oc.cheque_number";
+
+        try (
+                Connection con =
+                        dataSource.getConnection();
+
+                PreparedStatement ps =
+                        con.prepareStatement(sql)
+        ) {
+
+            ps.setString(
+                    1,
+                    batchNumber.trim()
+            );
+
+            ps.setInt(
+                    2,
+                    Integer.parseInt(
+                            checkerUserId.trim()
+                    )
+            );
+
+            try (ResultSet rs =
+                         ps.executeQuery()) {
+
+                while (rs.next()) {
+
+                    chequeNumbers.add(
+                            rs.getString(
+                                    "cheque_number"
+                            )
+                    );
+                }
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            throw new RuntimeException(
+                    "Unable to get Re-Verify cheque numbers.",
+                    e
+            );
+        }
+
+        return chequeNumbers;
+    }
 
     /*
      * ============================================================
      * HAS PENDING MAKER CHEQUES
      * ============================================================
-     *
-     * IMPORTANT:
-     *
-     * This is used BEFORE opening a Re-Verify batch.
-     *
-     * If even ONE cheque that was SEND_BACK by the original
-     * Checker is still not RE_VERIFIED, the batch must NOT open.
-     *
-     * UI message:
-     *
-     *     Still in process by Maker.
-     *
-     * Conditions:
-     *
-     * 1. Same batch
-     * 2. Same original Checker
-     * 3. checker_action = SEND_BACK
-     * 4. cheque_status IS NULL
-     *       OR
-     *    cheque_status <> RE_VERIFIED
-     *
-     * outward_batch.batch_status is NOT checked.
-     * ============================================================
      */
+
     public boolean hasPendingMakerCheques(
             String batchNumber,
             String checkerUserId) {
@@ -804,11 +790,13 @@ public class CheckerDashboardDAO {
 
                 ")";
 
-        try (Connection con =
-                     dataSource.getConnection();
+        try (
+                Connection con =
+                        dataSource.getConnection();
 
-             PreparedStatement ps =
-                     con.prepareStatement(sql)) {
+                PreparedStatement ps =
+                        con.prepareStatement(sql)
+        ) {
 
             ps.setString(
                     1,
@@ -846,12 +834,12 @@ public class CheckerDashboardDAO {
         return false;
     }
 
-
     /*
      * ============================================================
      * FIND ONE CHECKER BATCH
      * ============================================================
      */
+
     public OutwardBatch findBatch(
             String batchNumber) {
 
@@ -886,11 +874,13 @@ public class CheckerDashboardDAO {
 
                 "WHERE ob.batch_number = ?";
 
-        try (Connection con =
-                     dataSource.getConnection();
+        try (
+                Connection con =
+                        dataSource.getConnection();
 
-             PreparedStatement ps =
-                     con.prepareStatement(sql)) {
+                PreparedStatement ps =
+                        con.prepareStatement(sql)
+        ) {
 
             ps.setString(
                     1,
@@ -907,10 +897,6 @@ public class CheckerDashboardDAO {
 
                 OutwardBatch batch =
                         new OutwardBatch();
-
-                /*
-                 * Batch information
-                 */
 
                 batch.setBatchNumber(
                         rs.getString(
@@ -966,10 +952,6 @@ public class CheckerDashboardDAO {
                         )
                 );
 
-                /*
-                 * Checker assignment
-                 */
-
                 int checkerUserId =
                         rs.getInt(
                                 "checker_user_id"
@@ -989,10 +971,6 @@ public class CheckerDashboardDAO {
                             )
                     );
 
-                    /*
-                     * Assigned time
-                     */
-
                     if (rs.getTimestamp(
                             "checker_assigned_at") != null) {
 
@@ -1002,10 +980,6 @@ public class CheckerDashboardDAO {
                                 ).toLocalDateTime()
                         );
                     }
-
-                    /*
-                     * Started time
-                     */
 
                     if (rs.getTimestamp(
                             "checker_started_at") != null) {
@@ -1017,10 +991,6 @@ public class CheckerDashboardDAO {
                         );
                     }
 
-                    /*
-                     * Completed time
-                     */
-
                     if (rs.getTimestamp(
                             "checker_completed_at") != null) {
 
@@ -1030,10 +1000,6 @@ public class CheckerDashboardDAO {
                                 ).toLocalDateTime()
                         );
                     }
-
-                    /*
-                     * Assignment status
-                     */
 
                     String status =
                             rs.getString(
@@ -1055,10 +1021,6 @@ public class CheckerDashboardDAO {
                     }
 
                 } else {
-
-                    /*
-                     * No active Checker assignment.
-                     */
 
                     batch.setCheckerUserNumber(
                             null
@@ -1087,7 +1049,6 @@ public class CheckerDashboardDAO {
         }
     }
 
-
     /*
      * ============================================================
      * ASSIGN / LOCK CHECKER BATCH
@@ -1098,6 +1059,7 @@ public class CheckerDashboardDAO {
      * Re-Verify flow does NOT call this method.
      * ============================================================
      */
+
     public boolean assignBatch(
             String batchNumber,
             long checkerUserId) {
@@ -1136,11 +1098,13 @@ public class CheckerDashboardDAO {
 
                 ")";
 
-        try (Connection con =
-                     dataSource.getConnection();
+        try (
+                Connection con =
+                        dataSource.getConnection();
 
-             PreparedStatement ps =
-                     con.prepareStatement(sql)) {
+                PreparedStatement ps =
+                        con.prepareStatement(sql)
+        ) {
 
             ps.setString(
                     1,
@@ -1159,11 +1123,6 @@ public class CheckerDashboardDAO {
 
             int inserted =
                     ps.executeUpdate();
-
-            /*
-             * 1 = successfully locked
-             * 0 = already locked
-             */
 
             return inserted == 1;
 

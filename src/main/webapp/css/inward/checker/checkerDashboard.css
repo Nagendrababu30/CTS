@@ -471,7 +471,7 @@
 
     letter-spacing: 0.12em;
 
-    text-transform: uppercase;
+    text-transform: none;
 
     line-height: 1.4;
 
@@ -808,7 +808,7 @@
     font-weight: 700 !important;
     font-size: 13px !important;
     letter-spacing: 0.06em !important;
-    text-transform: uppercase !important;
+    text-transform: none !important;
     color: #FFFFFF !important;
 
     height: 22px !important;

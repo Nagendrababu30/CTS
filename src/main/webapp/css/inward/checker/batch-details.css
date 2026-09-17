@@ -916,7 +916,7 @@
     font-weight: 700 !important;
     color: #475569 !important;
     letter-spacing: 0.3px !important;
-    text-transform: uppercase !important;
+    text-transform: none !important;
 }
 
 .old-label {
@@ -1100,7 +1100,7 @@
     font-weight: 700 !important;
     color: #475569 !important;
     letter-spacing: 0.3px !important;
-    text-transform: uppercase !important;
+    text-transform: none !important;
 }
 
 .remarks-box {

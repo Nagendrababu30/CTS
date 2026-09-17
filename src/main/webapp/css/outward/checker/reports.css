@@ -139,7 +139,7 @@
 .checker-reports-card .z-listheader {
     font-size: 13px;
     font-weight: 700;
-    text-transform: uppercase;
+    text-transform: none;
     letter-spacing: 0.4px;
     color: #5E6C84;
     padding: 14px 16px;

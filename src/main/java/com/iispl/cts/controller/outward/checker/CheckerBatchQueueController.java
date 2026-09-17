@@ -20,7 +20,9 @@ import org.zkoss.zul.Vlayout;
 
 import com.cts.admin.model.User;
 import com.iispl.cts.model.outward.OutwardBatch;
+import com.iispl.cts.model.outward.OutwardCheque;
 import com.iispl.cts.service.outward.checker.CheckerBatchService;
+import com.iispl.cts.service.outward.checker.CheckerProcessingService;
 
 public class CheckerBatchQueueController extends SelectorComposer<Vlayout> {
 
@@ -52,6 +54,8 @@ public class CheckerBatchQueueController extends SelectorComposer<Vlayout> {
 
     private CheckerBatchService batchService;
 
+    private CheckerProcessingService processingService;
+
     private long checkerUserId;
 
     /*
@@ -82,6 +86,7 @@ public class CheckerBatchQueueController extends SelectorComposer<Vlayout> {
         System.out.println("========================================");
 
         batchService = new CheckerBatchService();
+        processingService = new CheckerProcessingService();
 
         /*
          * Get logged-in user.
@@ -401,16 +406,18 @@ public class CheckerBatchQueueController extends SelectorComposer<Vlayout> {
             boolean openInReVerifyMode =
                     reVerifyMode;
 
+            List<OutwardCheque> reVerifiedCheques = null;
+
             if (!openInReVerifyMode) {
 
-                List<com.iispl.cts.model.outward.OutwardCheque> cheques =
+                List<OutwardCheque> cheques =
                         batchService.getChequesByBatchNumber(
                                 batchNumber);
 
                 if (cheques != null
                         && !cheques.isEmpty()) {
 
-                    for (com.iispl.cts.model.outward.OutwardCheque cheque
+                    for (OutwardCheque cheque
                             : cheques) {
 
                         if (cheque == null) {
@@ -450,15 +457,67 @@ public class CheckerBatchQueueController extends SelectorComposer<Vlayout> {
              * ========================================================
              * RE-VERIFY
              * ========================================================
+             *
+             * FIX:
+             * When opening Re-Verify mode, get the RE_VERIFIED
+             * cheque for this checker and pass its cheque number
+             * to processing.zul.
              */
 
             if (openInReVerifyMode) {
 
-                url += "&mode=RE_VERIFY";
+                reVerifiedCheques =
+                        processingService.getReVerifiedCheques(
+                                batchNumber,
+                                checkerUserId);
 
-                System.out.println(
-                        "Opening RE-VERIFY processing page: "
-                                + url);
+                if (reVerifiedCheques != null
+                        && !reVerifiedCheques.isEmpty()) {
+
+                    OutwardCheque reVerifiedCheque =
+                            reVerifiedCheques.get(0);
+
+                    if (reVerifiedCheque != null
+                            && reVerifiedCheque.getChequeNumber() != null
+                            && !reVerifiedCheque.getChequeNumber()
+                                    .trim().isEmpty()) {
+
+                        String chequeNumber =
+                                reVerifiedCheque
+                                        .getChequeNumber()
+                                        .trim();
+
+                        url += "&chequeNumber="
+                                + URLEncoder.encode(
+                                        chequeNumber,
+                                        StandardCharsets.UTF_8);
+
+                        System.out.println(
+                                "Opening RE-VERIFY processing page: "
+                                        + url);
+
+                    } else {
+
+                        System.out.println(
+                                "OPEN BATCH ERROR: "
+                                + "RE_VERIFIED cheque number is empty.");
+
+                        return;
+                    }
+
+                } else {
+
+                    System.out.println(
+                            "OPEN BATCH ERROR: "
+                            + "No RE_VERIFIED cheque found for checker "
+                            + checkerUserId
+                            + " in batch "
+                            + batchNumber);
+
+                    return;
+                }
+
+                url += "&mode=RE_VERIFY";
 
             } else {
 
@@ -479,9 +538,10 @@ public class CheckerBatchQueueController extends SelectorComposer<Vlayout> {
 
             System.out.println(
                     "OPEN BATCH ERROR: "
-                            + "Unable to open processing page.");
+                    + "Unable to open processing page.");
 
             e.printStackTrace();
         }
     }
 }
+

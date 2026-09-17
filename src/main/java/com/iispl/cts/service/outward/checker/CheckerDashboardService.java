@@ -9,317 +9,334 @@ import com.iispl.cts.model.outward.OutwardBatch;
 
 public class CheckerDashboardService {
 
-	private final CheckerDashboardDAO dao;
-	private final CheckerAssignmentDAO assignmentDao;
+    private final CheckerDashboardDAO dao;
+    private final CheckerAssignmentDAO assignmentDao;
 
-	public CheckerDashboardService() {
-		this.dao = new CheckerDashboardDAO();
-		this.assignmentDao = new CheckerAssignmentDAO();
-	}
+    public CheckerDashboardService() {
 
-// ============================================================
-// GET CHECKER DASHBOARD BATCHES
-// ============================================================
+        this.dao = new CheckerDashboardDAO();
+        this.assignmentDao = new CheckerAssignmentDAO();
+    }
 
-	public List<OutwardBatch> getBatches(String checkerUserId) {
+    // ============================================================
+    // GET CHECKER DASHBOARD BATCHES
+    // ============================================================
 
-		if (checkerUserId == null || checkerUserId.trim().isEmpty()) {
+    public List<OutwardBatch> getBatches(String checkerUserId) {
 
-			return Collections.emptyList();
-		}
+        if (checkerUserId == null ||
+                checkerUserId.trim().isEmpty()) {
 
-		try {
+            return Collections.emptyList();
+        }
 
-			return dao.getCheckerBatches(checkerUserId.trim());
+        try {
 
-		} catch (Exception e) {
+            return dao.getCheckerBatches(
+                    checkerUserId.trim());
 
-			e.printStackTrace();
+        } catch (Exception e) {
 
-			return Collections.emptyList();
-		}
-	}
+            e.printStackTrace();
 
-// ============================================================
-// CHECK RE-VERIFIED CHEQUES
-// ============================================================
+            return Collections.emptyList();
+        }
+    }
 
-	public boolean hasReVerifiedCheques(String batchNumber, String checkerUserId) {
+    // ============================================================
+    // CHECK RE-VERIFIED CHEQUES
+    // ============================================================
 
-		if (batchNumber == null || batchNumber.trim().isEmpty()
-				|| checkerUserId == null || checkerUserId.trim().isEmpty()) {
+    public boolean hasReVerifiedCheques(
+            String batchNumber,
+            String checkerUserId) {
 
-			return false;
-		}
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()
+                || checkerUserId == null
+                || checkerUserId.trim().isEmpty()) {
 
-		try {
+            return false;
+        }
 
-			return dao.hasReVerifiedCheques(
-					batchNumber.trim(),
-					checkerUserId.trim());
+        try {
 
-		} catch (Exception e) {
+            return dao.hasReVerifiedCheques(
+                    batchNumber.trim(),
+                    checkerUserId.trim());
 
-			e.printStackTrace();
+        } catch (Exception e) {
 
-			return false;
-		}
-	}
+            e.printStackTrace();
 
-// ============================================================
-// GET RE-VERIFIED CHEQUE COUNT
-// ============================================================
+            return false;
+        }
+    }
 
-	public int getReVerifiedChequeCount(String batchNumber, String checkerUserId) {
+    // ============================================================
+    // GET RE-VERIFIED CHEQUE COUNT
+    // ============================================================
 
-		if (batchNumber == null || batchNumber.trim().isEmpty()
-				|| checkerUserId == null || checkerUserId.trim().isEmpty()) {
+    public int getReVerifiedChequeCount(
+            String batchNumber,
+            String checkerUserId) {
 
-			return 0;
-		}
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()
+                || checkerUserId == null
+                || checkerUserId.trim().isEmpty()) {
 
-		try {
+            return 0;
+        }
 
-			return dao.getReVerifiedChequeCount(
-					batchNumber.trim(),
-					checkerUserId.trim());
+        try {
 
-		} catch (Exception e) {
+            return dao.getReVerifiedChequeCount(
+                    batchNumber.trim(),
+                    checkerUserId.trim());
 
-			e.printStackTrace();
+        } catch (Exception e) {
 
-			return 0;
-		}
-	}
+            e.printStackTrace();
 
-// ============================================================
-// FIND BATCH
-// ============================================================
+            return 0;
+        }
+    }
 
-	public OutwardBatch findBatch(String batchNumber) {
+    // ============================================================
+    // FIND BATCH
+    // ============================================================
 
-		if (batchNumber == null || batchNumber.trim().isEmpty()) {
+    public OutwardBatch findBatch(
+            String batchNumber) {
 
-			return null;
-		}
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()) {
 
-		try {
+            return null;
+        }
 
-			return dao.findBatch(batchNumber.trim());
+        try {
 
-		} catch (Exception e) {
+            return dao.findBatch(
+                    batchNumber.trim());
 
-			e.printStackTrace();
+        } catch (Exception e) {
 
-			return null;
-		}
-	}
+            e.printStackTrace();
 
-// ============================================================
-// ASSIGN BATCH TO CHECKER
-// ============================================================
+            return null;
+        }
+    }
 
-	/*
-	 * The actual Checker batch assignment is handled by
-	 * CheckerAssignmentDAO.takeBatch().
-	 *
-	 * This method:
-	 *
-	 * 1. Locks the batch row.
-	 * 2. Checks that the batch is SUBMITTED_TO_CHECKER.
-	 * 3. Checks that no other active Checker assignment exists.
-	 * 4. Creates the Checker assignment.
-	 * 5. Changes batch status to CHECKER_PROCESSING.
-	 *
-	 * This keeps Dashboard assignment and Queue assignment
-	 * on the same assignment logic.
-	 */
+    // ============================================================
+    // ASSIGN BATCH TO CHECKER
+    // ============================================================
 
-	public boolean assignBatch(String batchNumber, long checkerUserId) {
+    /*
+     * The actual Checker batch assignment is handled by
+     * CheckerAssignmentDAO.takeBatch().
+     *
+     * This method:
+     *
+     * 1. Locks the batch row.
+     * 2. Checks that the batch is SUBMITTED_TO_CHECKER.
+     * 3. Checks that no other active Checker assignment exists.
+     * 4. Creates the Checker assignment.
+     * 5. Changes batch status to CHECKER_PROCESSING.
+     *
+     * This keeps Dashboard assignment and Queue assignment
+     * on the same assignment logic.
+     */
 
-		if (batchNumber == null || batchNumber.trim().isEmpty()) {
+    public boolean assignBatch(
+            String batchNumber,
+            long checkerUserId) {
 
-			return false;
-		}
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()) {
 
-		try {
+            return false;
+        }
 
-			return assignmentDao.takeBatch(
-					batchNumber.trim(),
-					checkerUserId);
+        try {
 
-		} catch (Exception e) {
+            return assignmentDao.takeBatch(
+                    batchNumber.trim(),
+                    checkerUserId);
 
-			e.printStackTrace();
+        } catch (Exception e) {
 
-			return false;
-		}
-	}
+            e.printStackTrace();
 
-// ============================================================
-// CHECK BATCH AVAILABLE
-// ============================================================
+            return false;
+        }
+    }
 
-	public boolean isBatchAvailable(String batchNumber) {
+    // ============================================================
+    // CHECK BATCH AVAILABLE
+    // ============================================================
 
-		if (batchNumber == null || batchNumber.trim().isEmpty()) {
+    public boolean isBatchAvailable(
+            String batchNumber) {
 
-			return false;
-		}
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()) {
 
-		try {
+            return false;
+        }
 
-			OutwardBatch batch = findBatch(batchNumber);
+        try {
 
-			if (batch == null) {
+            OutwardBatch batch =
+                    findBatch(batchNumber);
 
-				return false;
-			}
+            if (batch == null) {
 
-			return "AVAILABLE".equalsIgnoreCase(
-					batch.getLockStatus());
+                return false;
+            }
 
-		} catch (Exception e) {
+            return "AVAILABLE".equalsIgnoreCase(
+                    batch.getLockStatus());
 
-			e.printStackTrace();
+        } catch (Exception e) {
 
-			return false;
-		}
-	}
+            e.printStackTrace();
 
-// ============================================================
-// CHECK ASSIGNED TO CURRENT CHECKER
-// ============================================================
+            return false;
+        }
+    }
 
-	public boolean isAssignedToChecker(
-	        String batchNumber,
-	        String checkerUserId) {
+    // ============================================================
+    // CHECK ASSIGNED TO CURRENT CHECKER
+    // ============================================================
 
-	    if (batchNumber == null || batchNumber.trim().isEmpty()
-	            || checkerUserId == null
-	            || checkerUserId.trim().isEmpty()) {
+    public boolean isAssignedToChecker(
+            String batchNumber,
+            String checkerUserId) {
 
-	        return false;
-	    }
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()
+                || checkerUserId == null
+                || checkerUserId.trim().isEmpty()) {
 
-	    try {
+            return false;
+        }
 
-	        long checkerId =
-	                Long.parseLong(checkerUserId.trim());
+        try {
 
-	        return assignmentDao.isBatchAssignedToChecker(
-	                batchNumber.trim(),
-	                checkerId);
+            long checkerId =
+                    Long.parseLong(
+                            checkerUserId.trim());
 
-	    } catch (Exception e) {
+            return assignmentDao.isBatchAssignedToChecker(
+                    batchNumber.trim(),
+                    checkerId);
 
-	        e.printStackTrace();
+        } catch (Exception e) {
 
-	        return false;
-	    }
-	}
+            e.printStackTrace();
 
-// ============================================================
-// GET RE-VERIFY BATCHES
-// ============================================================
+            return false;
+        }
+    }
 
-	public List<OutwardBatch> getReVerifyBatches(
-			String checkerUserId) {
+    // ============================================================
+    // GET RE-VERIFY BATCHES
+    // ============================================================
 
-		if (checkerUserId == null
-				|| checkerUserId.trim().isEmpty()) {
+    public List<OutwardBatch> getReVerifyBatches(
+            String checkerUserId) {
 
-			return Collections.emptyList();
-		}
+        if (checkerUserId == null ||
+                checkerUserId.trim().isEmpty()) {
 
-		try {
+            return Collections.emptyList();
+        }
 
-			return dao.getReVerifyBatches(
-					checkerUserId.trim());
+        try {
 
-		} catch (Exception e) {
+            return dao.getReVerifyBatches(
+                    checkerUserId.trim());
 
-			e.printStackTrace();
+        } catch (Exception e) {
 
-			return Collections.emptyList();
-		}
-	}
+            e.printStackTrace();
 
-// ============================================================
-// CHECK PENDING MAKER CHEQUES
-// ============================================================
+            return Collections.emptyList();
+        }
+    }
 
-	/**
-	 * Checks whether any cheque sent back by the current Checker
-	 * is still pending with the Maker.
-	 *
-	 * This method does NOT use outward_batch.batch_status.
-	 *
-	 * A pending Maker cheque does not prevent another already
-	 * corrected RE_VERIFIED cheque from being re-verified.
-	 *
-	 * The Controller checks RE_VERIFIED eligibility before using
-	 * this method.
-	 */
+    // ============================================================
+    // CHECK PENDING MAKER CHEQUES
+    // ============================================================
 
-	public boolean hasPendingMakerCheques(
-			String batchNumber,
-			String checkerUserId) {
+    /**
+     * Checks whether any cheque sent back by the current Checker
+     * is still pending with the Maker.
+     *
+     * This method does NOT use outward_batch.batch_status.
+     *
+     * A pending Maker cheque does not prevent another already
+     * corrected RE_VERIFIED cheque from being re-verified.
+     *
+     * The Controller checks RE_VERIFIED eligibility before using
+     * this method.
+     */
 
-		if (batchNumber == null
-				|| batchNumber.trim().isEmpty()
-				|| checkerUserId == null
-				|| checkerUserId.trim().isEmpty()) {
+    public boolean hasPendingMakerCheques(
+            String batchNumber,
+            String checkerUserId) {
 
-			return false;
-		}
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()
+                || checkerUserId == null
+                || checkerUserId.trim().isEmpty()) {
 
-		try {
+            return false;
+        }
 
-			return dao.hasPendingMakerCheques(
-					batchNumber.trim(),
-					checkerUserId.trim());
+        try {
 
-		} catch (Exception e) {
+            return dao.hasPendingMakerCheques(
+                    batchNumber.trim(),
+                    checkerUserId.trim());
 
-			e.printStackTrace();
+        } catch (Exception e) {
 
-			return false;
-		}
-	}
-	
-	// ============================================================
-	// GET RE-VERIFIED CHEQUE NUMBERS
-	// ============================================================
+            e.printStackTrace();
 
-	// ============================================================
-	// GET RE-VERIFIED CHEQUE NUMBERS
-	// ============================================================
+            return false;
+        }
+    }
 
-	public List<String> getReVerifiedChequeNumbers(
-	        String batchNumber,
-	        String checkerUserId) {
+    // ============================================================
+    // GET RE-VERIFIED CHEQUE NUMBERS
+    // ============================================================
 
-	    if (batchNumber == null
-	            || batchNumber.trim().isEmpty()
-	            || checkerUserId == null
-	            || checkerUserId.trim().isEmpty()) {
+    public List<String> getReVerifiedChequeNumbers(
+            String batchNumber,
+            String checkerUserId) {
 
-	        return Collections.emptyList();
-	    }
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()
+                || checkerUserId == null
+                || checkerUserId.trim().isEmpty()) {
 
-	    try {
+            return Collections.emptyList();
+        }
 
-	        return dao.getReVerifiedChequeNumbers(
-	                batchNumber.trim(),
-	                checkerUserId.trim());
+        try {
 
-	    } catch (Exception e) {
+            return dao.getReVerifiedChequeNumbers(
+                    batchNumber.trim(),
+                    checkerUserId.trim());
 
-	        e.printStackTrace();
+        } catch (Exception e) {
 
-	        return Collections.emptyList();
-	    }
-	}
+            e.printStackTrace();
 
+            return Collections.emptyList();
+        }
+    }
 }

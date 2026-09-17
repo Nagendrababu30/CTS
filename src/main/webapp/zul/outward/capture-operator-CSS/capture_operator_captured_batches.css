@@ -422,8 +422,7 @@
     font-weight: 700 !important;
 
     letter-spacing: 0.06em !important;
-
-    text-transform: uppercase !important;
+    text-transform: none !important;
 }
 
 
@@ -558,7 +557,9 @@
 
     color: #1D2939 !important;
 
-    line-height: 1.5 !important;
+    line-height: 2;
+    
+    text-align: center;
 }
 
 

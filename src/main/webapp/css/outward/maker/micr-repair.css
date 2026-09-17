@@ -111,7 +111,7 @@ div[style*="background: white"]::before {
     font-weight: 700 !important;
     font-size: 13px !important;
     letter-spacing: 0.06em !important;
-    text-transform: uppercase !important;
+    text-transform: none !important;
     color: #FFFFFF !important;
     padding: 22px 20px !important;
     line-height: 1.4 !important;
@@ -170,7 +170,7 @@ div[style*="background: white"]::before {
     font-size: 13px !important;
     color: var(--text-secondary) !important;
     padding: 12px 14px !important;
-    line-height: 1.4 !important;
+    line-height: 2;
     text-align: center !important;
     justify-content: center !important;
 }

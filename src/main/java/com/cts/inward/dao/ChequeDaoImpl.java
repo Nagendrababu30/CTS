@@ -110,18 +110,18 @@ public class ChequeDaoImpl implements ChequeDao {
                     String chqNo = resultSet.getString("cheque_number");
                     String latestStatus = resultSet.getString("latest_status");
 
-                    if ("RETURN_TO_MAKER".equalsIgnoreCase(latestStatus)) {
-                        if (chequeNeedsMicrRepair(chqNo)) {
-                            // Needs MICR repair first, not ready for Data Entry
-                            continue;
-                        }
-                        if (!chequeNeedsDataEntry(chqNo)) {
-                            // Only needed MICR repair, not Data Entry
-                            continue;
-                        }
-                    } else if ("MICR_REPAIRED".equalsIgnoreCase(latestStatus)) {
-                        if (batchReturned && !chequeNeedsDataEntry(chqNo)) {
-                            // Cheque was returned only for MICR repair and is now repaired
+                    if (batchReturned) {
+                        // In a returned batch, ONLY include cheques that were returned by checker and need Data Entry
+                        if ("RETURN_TO_MAKER".equalsIgnoreCase(latestStatus)) {
+                            if (chequeNeedsMicrRepair(chqNo) || !chequeNeedsDataEntry(chqNo)) {
+                                continue;
+                            }
+                        } else if ("MICR_REPAIRED".equalsIgnoreCase(latestStatus)) {
+                            if (!chequeNeedsDataEntry(chqNo)) {
+                                continue;
+                            }
+                        } else {
+                            // All other cheques (unreturned, accepted, sent to checker, data entry completed) are skipped
                             continue;
                         }
                     }
@@ -536,13 +536,37 @@ public class ChequeDaoImpl implements ChequeDao {
     }
 
     private boolean isBatchReturned(long batchId) {
-        String sql = "SELECT batch_status FROM public.inward_batch_history WHERE batch_id = ? ORDER BY batch_history_id DESC LIMIT 1";
+        String sql = """
+                SELECT (
+                    (SELECT batch_status FROM public.inward_batch_history WHERE batch_id = ? ORDER BY batch_history_id DESC LIMIT 1) = 'RETURN_TO_MAKER'
+                    OR EXISTS (
+                        SELECT 1 FROM public.inward_cheque c
+                        JOIN LATERAL (
+                            SELECT sh.status, sh.checker_action, sh.return_reason_code
+                            FROM public.inward_cheque_status_history sh
+                            WHERE sh.cheque_number = c.cheque_number
+                            ORDER BY sh.status_history_id DESC
+                            LIMIT 1
+                        ) latest ON TRUE
+                        WHERE c.batch_id = ?
+                          AND (
+                              latest.status = 'RETURN_TO_MAKER'
+                              OR (latest.status = 'MICR_REPAIRED' AND EXISTS (
+                                  SELECT 1 FROM public.inward_cheque_status_history sh2
+                                  WHERE sh2.cheque_number = c.cheque_number
+                                    AND (sh2.status = 'RETURN_TO_MAKER' OR sh2.checker_action = 'Sent Back' OR (sh2.return_reason_code IS NOT NULL AND (sh2.return_reason_code LIKE 'CR-%' OR sh2.return_reason_code = 'OTHER')))
+                              ))
+                          )
+                    )
+                ) AS is_returned
+                """;
         try (Connection connection = dataSource.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setLong(1, batchId);
+            ps.setLong(2, batchId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return "RETURN_TO_MAKER".equalsIgnoreCase(rs.getString("batch_status"));
+                    return rs.getBoolean("is_returned");
                 }
             }
         } catch (Exception e) {
@@ -561,7 +585,7 @@ public class ChequeDaoImpl implements ChequeDao {
                 SELECT sh.return_reason_code
                 FROM public.inward_cheque_status_history sh
                 WHERE sh.cheque_number = ?
-                  AND sh.status = 'RETURN_TO_MAKER'
+                  AND (sh.status = 'RETURN_TO_MAKER' OR sh.checker_action = 'Sent Back' OR (sh.return_reason_code IS NOT NULL AND (sh.return_reason_code LIKE 'CR-%' OR sh.return_reason_code = 'OTHER')))
                 ORDER BY sh.status_history_id DESC
                 """;
 
@@ -634,7 +658,7 @@ public class ChequeDaoImpl implements ChequeDao {
                 SELECT sh.return_reason_code
                 FROM public.inward_cheque_status_history sh
                 WHERE sh.cheque_number = ?
-                  AND sh.status = 'RETURN_TO_MAKER'
+                  AND (sh.status = 'RETURN_TO_MAKER' OR sh.checker_action = 'Sent Back' OR (sh.return_reason_code IS NOT NULL AND (sh.return_reason_code LIKE 'CR-%' OR sh.return_reason_code = 'OTHER')))
                 ORDER BY sh.status_history_id DESC
                 """;
 

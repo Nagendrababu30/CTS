@@ -120,4 +120,17 @@ public interface MicrRepairDao {
     boolean markBatchReadyForDataEntry(
             long batchId,
             long userId);
+
+    /*
+     * -------------------------------------------------------------------------
+     * MOVE BATCH TO SEND TO CHECKER (MICR-only repair completed)
+     * -------------------------------------------------------------------------
+     */
+
+    boolean markBatchReadyForChecker(
+            long batchId,
+            long userId);
+
+    boolean hasChequesNeedingDataEntry(
+            long batchId);
 }

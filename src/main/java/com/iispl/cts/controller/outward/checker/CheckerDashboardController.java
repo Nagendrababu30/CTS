@@ -978,187 +978,195 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 	// ============================================================
 
 	private class CheckerBatchRenderer
-			implements ListitemRenderer<OutwardBatch> {
+    implements ListitemRenderer<OutwardBatch> {
 
-		@Override
-		public void render(
-				Listitem item,
-				OutwardBatch batch,
-				int index) throws Exception {
+@Override
+public void render(
+        Listitem item,
+        OutwardBatch batch,
+        int index) throws Exception {
 
-			// ====================================================
-			// BATCH NUMBER
-			// ====================================================
+    // ====================================================
+    // BATCH NUMBER
+    // ====================================================
 
-			Listcell batchCell =
-					new Listcell();
+    Listcell batchCell =
+            new Listcell();
 
-			batchCell.setLabel(
-					safe(batch.getBatchNumber()));
+    batchCell.setLabel(
+            safe(batch.getBatchNumber()));
 
-			item.appendChild(batchCell);
+    item.appendChild(batchCell);
 
-			// ====================================================
-			// CHEQUE COUNT
-			// ====================================================
+    // ====================================================
+    // CHEQUE COUNT
+    // ====================================================
 
-			Listcell chequeCell =
-					new Listcell();
+    Listcell chequeCell =
+            new Listcell();
 
-			int chequeCount =
-					batch.getNumberOfCheques();
+    int chequeCount =
+            batch.getNumberOfCheques();
 
-			if ("RE_VERIFY_BATCHES".equals(currentFilter)
-					&& "RE_VERIFY".equalsIgnoreCase(
-							batch.getLockStatus())) {
+    /*
+     * UPDATED:
+     * RE-VERIFIED cheque count is now shown
+     * in ALL as well as RE_VERIFY_BATCHES.
+     */
+    if ("RE_VERIFY".equalsIgnoreCase(
+            batch.getLockStatus())) {
 
-				chequeCount =
-						service.getReVerifiedChequeCount(
-								batch.getBatchNumber(),
-								String.valueOf(
-										currentCheckerUser));
-			}
+        chequeCount =
+                service.getReVerifiedChequeCount(
+                        batch.getBatchNumber(),
+                        String.valueOf(
+                                currentCheckerUser));
+    }
 
-			chequeCell.setLabel(
-					String.valueOf(chequeCount));
+    chequeCell.setLabel(
+            String.valueOf(chequeCount));
 
-			item.appendChild(chequeCell);
+    item.appendChild(chequeCell);
 
-			// ====================================================
-			// STATUS
-			// ====================================================
+    // ====================================================
+    // STATUS
+    // ====================================================
 
-			Listcell statusCell =
-					new Listcell();
+    Listcell statusCell =
+            new Listcell();
 
-			boolean reVerifyStatus =
-					"RE_VERIFY_BATCHES".equals(currentFilter)
-							&& "RE_VERIFY".equalsIgnoreCase(
-									batch.getLockStatus());
+    /*
+     * UPDATED:
+     * RE-VERIFIED status is now shown in ALL
+     * as well as RE_VERIFY_BATCHES.
+     */
+    boolean reVerifyStatus =
+            "RE_VERIFY".equalsIgnoreCase(
+                    batch.getLockStatus());
 
-			if (reVerifyStatus) {
+    if (reVerifyStatus) {
 
-				statusCell.setLabel(
-						"RE-VERIFIED");
+        statusCell.setLabel(
+                "RE-VERIFIED");
 
-			} else {
+    } else {
 
-				statusCell.setLabel(
-						safe(batch.getBatchStatus()));
-			}
+        statusCell.setLabel(
+                safe(batch.getBatchStatus()));
+    }
 
-			item.appendChild(statusCell);
+    item.appendChild(statusCell);
 
-			// ====================================================
-			// ASSIGNMENT
-			// ====================================================
+    // ====================================================
+    // ASSIGNMENT
+    // ====================================================
 
-			Listcell assignmentCell =
-					new Listcell();
+    Listcell assignmentCell =
+            new Listcell();
 
-			String lockStatus =
-					batch.getLockStatus();
+    String lockStatus =
+            batch.getLockStatus();
 
-			if (lockStatus == null) {
+    if (lockStatus == null) {
 
-				assignmentCell.setLabel(
-						"AVAILABLE");
+        assignmentCell.setLabel(
+                "AVAILABLE");
 
-			} else if ("AVAILABLE"
-					.equalsIgnoreCase(lockStatus)) {
+    } else if ("AVAILABLE"
+            .equalsIgnoreCase(lockStatus)) {
 
-				assignmentCell.setLabel(
-						"Available");
+        assignmentCell.setLabel(
+                "Available");
 
-			} else if ("RE_VERIFY"
-					.equalsIgnoreCase(lockStatus)
-					&& "RE_VERIFY_BATCHES"
-							.equals(currentFilter)) {
+    } else if ("RE_VERIFY"
+            .equalsIgnoreCase(lockStatus)
+            && "RE_VERIFY_BATCHES"
+                    .equals(currentFilter)) {
 
-				assignmentCell.setLabel(
-						"Re-Verify");
+        assignmentCell.setLabel(
+                "Re-Verify");
 
-			} else {
+    } else {
 
-				String checker =
-						batch.getCheckerUserNumber();
+        String checker =
+                batch.getCheckerUserNumber();
 
-				if (checker != null
-						&& !checker.trim().isEmpty()) {
+        if (checker != null
+                && !checker.trim().isEmpty()) {
 
-					assignmentCell.setLabel(
-							"Locked by Checker "
-									+ checker);
+            assignmentCell.setLabel(
+                    "Locked by Checker "
+                            + checker);
 
-				} else {
+        } else {
 
-					assignmentCell.setLabel(
-							"Locked");
-				}
-			}
+            assignmentCell.setLabel(
+                    "Locked");
+        }
+    }
 
-			item.appendChild(assignmentCell);
+    item.appendChild(assignmentCell);
 
-			// ====================================================
-			// ACTION
-			// ====================================================
+    // ====================================================
+    // ACTION
+    // ====================================================
 
-			Listcell actionCell =
-					new Listcell();
+    Listcell actionCell =
+            new Listcell();
 
-			boolean available =
-					"AVAILABLE".equalsIgnoreCase(
-							batch.getLockStatus());
+    boolean available =
+            "AVAILABLE".equalsIgnoreCase(
+                    batch.getLockStatus());
 
-			boolean reVerify =
-					"RE_VERIFY_BATCHES".equals(currentFilter)
-							&& "RE_VERIFY".equalsIgnoreCase(
-									batch.getLockStatus());
+    boolean reVerify =
+            "RE_VERIFY_BATCHES".equals(currentFilter)
+                    && "RE_VERIFY".equalsIgnoreCase(
+                            batch.getLockStatus());
 
-			boolean assignedToCurrentChecker =
-					service.isAssignedToChecker(
-							batch.getBatchNumber(),
-							String.valueOf(
-									currentCheckerUser));
+    boolean assignedToCurrentChecker =
+            service.isAssignedToChecker(
+                    batch.getBatchNumber(),
+                    String.valueOf(
+                            currentCheckerUser));
 
-			boolean originalCheckerCanReVerify =
-					service.hasReVerifiedCheques(
-							batch.getBatchNumber(),
-							String.valueOf(
-									currentCheckerUser));
+    boolean originalCheckerCanReVerify =
+            service.hasReVerifiedCheques(
+                    batch.getBatchNumber(),
+                    String.valueOf(
+                            currentCheckerUser));
 
-			if (available
-					|| reVerify
-					|| assignedToCurrentChecker
-					|| originalCheckerCanReVerify) {
+    if (available
+            || reVerify
+            || assignedToCurrentChecker
+            || originalCheckerCanReVerify) {
 
-				Button openButton =
-						new Button("Open");
+        Button openButton =
+                new Button("Open");
 
-				openButton.setSclass(
-						"btn btn-primary");
+        openButton.setSclass(
+                "btn btn-primary");
 
-				openButton.addEventListener(
-						Events.ON_CLICK,
-						event -> openBatch(batch));
+        openButton.addEventListener(
+                Events.ON_CLICK,
+                event -> openBatch(batch));
 
-				actionCell.appendChild(
-						openButton);
+        actionCell.appendChild(
+                openButton);
 
-			} else {
+    } else {
 
-				Button lockedButton =
-						new Button("🔒 Locked");
+        Button lockedButton =
+                new Button("🔒 Locked");
 
-				lockedButton.setDisabled(true);
+        lockedButton.setDisabled(true);
 
-				actionCell.appendChild(
-						lockedButton);
-			}
+        actionCell.appendChild(
+                lockedButton);
+    }
 
-			item.appendChild(actionCell);
-		}
-	}
+    item.appendChild(actionCell);
+}
+}
 
 	// ============================================================
 	// OPEN BATCH

@@ -11,249 +11,300 @@ import com.iispl.cts.model.outward.OutwardCheque;
 
 public class OutwardMakerMicrRepairDetailDAO {
 
-private final javax.sql.DataSource dataSource = ConnectionPool.getDataSource();
+    private final javax.sql.DataSource dataSource =
+            ConnectionPool.getDataSource();
 
-public List<OutwardCheque> getMicrErrorCheques(String batchNumber) {
+    public List<OutwardCheque> getMicrErrorCheques(String batchNumber) {
 
-List<OutwardCheque> cheques = new ArrayList<>();
+        List<OutwardCheque> cheques = new ArrayList<>();
 
-String sql =
-"SELECT batch_number, " +
-"       cheque_number, " +
-"       city_code, " +
-"       bank_code, " +
-"       branch_code, " +
-"       drawer_account_number, " +
-"       drawer_name, " +
-"       amount, " +
-"       amount_in_words, " +
-"       cheque_date, " +
-"       front_image_path, " +
-"       back_image_path, " +
-"       cheque_status " +
-"FROM outward_cheque " +
-"WHERE batch_number = ? " +
-"AND cheque_status = 'MICR_ERROR' " +
-"ORDER BY cheque_number";
+        String sql =
+                "SELECT batch_number, "
+                + "       cheque_number, "
+                + "       city_code, "
+                + "       bank_code, "
+                + "       branch_code, "
+                + "       drawer_account_number, "
+                + "       drawer_name, "
+                + "       amount, "
+                + "       amount_in_words, "
+                + "       cheque_date, "
+                + "       front_image_path, "
+                + "       back_image_path, "
+                + "       cheque_status "
+                + "FROM outward_cheque "
+                + "WHERE batch_number = ? "
+                + "AND cheque_status = 'MICR_ERROR' "
+                + "ORDER BY cheque_number";
 
-try (Connection connection = dataSource.getConnection();
-PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
 
-ps.setString(1, batchNumber);
+            ps.setString(1, batchNumber);
 
-try (ResultSet rs = ps.executeQuery()) {
+            try (ResultSet rs = ps.executeQuery()) {
 
-while (rs.next()) {
+                while (rs.next()) {
 
-OutwardCheque cheque = new OutwardCheque();
+                    OutwardCheque cheque = new OutwardCheque();
 
-cheque.setBatchNumber(rs.getString("batch_number"));
-cheque.setChequeNumber(rs.getString("cheque_number"));
-cheque.setCityCode(rs.getString("city_code"));
-cheque.setBankCode(rs.getString("bank_code"));
-cheque.setBranchCode(rs.getString("branch_code"));
-cheque.setDrawerAccountNumber(rs.getString("drawer_account_number"));
-cheque.setDrawerName(rs.getString("drawer_name"));
-cheque.setAmount(rs.getBigDecimal("amount"));
-cheque.setAmountInWords(rs.getString("amount_in_words"));
+                    cheque.setBatchNumber(
+                            rs.getString("batch_number"));
 
-if (rs.getDate("cheque_date") != null) {
-cheque.setChequeDate(rs.getDate("cheque_date").toLocalDate());
-}
+                    cheque.setChequeNumber(
+                            rs.getString("cheque_number"));
 
-cheque.setFrontImagePath(rs.getString("front_image_path"));
-cheque.setBackImagePath(rs.getString("back_image_path"));
-cheque.setChequeStatus(rs.getString("cheque_status"));
+                    cheque.setCityCode(
+                            rs.getString("city_code"));
 
-cheques.add(cheque);
-}
-}
+                    cheque.setBankCode(
+                            rs.getString("bank_code"));
 
-} catch (Exception e) {
-e.printStackTrace();
-}
+                    cheque.setBranchCode(
+                            rs.getString("branch_code"));
 
-return cheques;
-}
+                    cheque.setDrawerAccountNumber(
+                            rs.getString("drawer_account_number"));
 
+                    cheque.setDrawerName(
+                            rs.getString("drawer_name"));
 
+                    cheque.setAmount(
+                            rs.getBigDecimal("amount"));
 
-public boolean updateCorrectedMicr(
-       String batchNumber,
-       String chequeNumber,
-       String cityCode,
-       String bankCode,
-       String branchCode) {
+                    cheque.setAmountInWords(
+                            rs.getString("amount_in_words"));
 
-   String verificationStatus = "MICR_REPAIRED";
+                    if (rs.getDate("cheque_date") != null) {
+                        cheque.setChequeDate(
+                                rs.getDate("cheque_date")
+                                        .toLocalDate());
+                    }
 
-   String checkReturnedSql =
-           "SELECT COUNT(*) " +
-           "FROM outward_cheque " +
-           "WHERE batch_number = ? " +
-           "AND cheque_number = ? " +
-           "AND UPPER(TRIM(cheque_status)) = 'SENT_BACK_TO_MAKER'";
+                    cheque.setFrontImagePath(
+                            rs.getString("front_image_path"));
 
-   Connection connection = null;
+                    cheque.setBackImagePath(
+                            rs.getString("back_image_path"));
 
-   try {
-       connection = dataSource.getConnection();
-       connection.setAutoCommit(false);
+                    cheque.setChequeStatus(
+                            rs.getString("cheque_status"));
 
-       try (PreparedStatement checkPs =
-                    connection.prepareStatement(checkReturnedSql)) {
+                    cheques.add(cheque);
+                }
+            }
 
-           checkPs.setString(1, batchNumber);
-           checkPs.setString(2, chequeNumber);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-           try (ResultSet rs = checkPs.executeQuery()) {
-
-               if (rs.next() && rs.getInt(1) > 0) {
-                   verificationStatus = "RE_VERIFIED";
-               }
-           }
-       }
-
-       String sql =
-               "UPDATE outward_cheque " +
-               "SET city_code = ?, " +
-               "    bank_code = ?, " +
-               "    branch_code = ?, " +
-               "    cheque_status = ? " +
-               "WHERE batch_number = ? " +
-               "AND cheque_number = ? " +
-               "AND ( " +
-               "       cheque_status IN ('MICR_ERROR', 'MICR_REPAIRED') " +
-               "       OR UPPER(TRIM(cheque_status)) = 'SENT_BACK_TO_MAKER' " +
-               "    )";
-
-       try (PreparedStatement ps = connection.prepareStatement(sql)) {
-
-           ps.setString(1, cityCode);
-           ps.setString(2, bankCode);
-           ps.setString(3, branchCode);
-           ps.setString(4, verificationStatus);
-           ps.setString(5, batchNumber);
-           ps.setString(6, chequeNumber);
-
-           int rowsUpdated = ps.executeUpdate();
-
-           if (rowsUpdated > 0) {
-               connection.commit();
-               return true;
-           }
-
-           connection.rollback();
-           return false;
-       }
-
-   } catch (Exception e) {
-
-       if (connection != null) {
-           try {
-               connection.rollback();
-           } catch (Exception ex) {
-               ex.printStackTrace();
-           }
-       }
-
-       e.printStackTrace();
-       return false;
-
-   } finally {
-
-       if (connection != null) {
-           try {
-               connection.close();
-           } catch (Exception e) {
-               e.printStackTrace();
-           }
-       }
-   }
-}
-
-public boolean hasRemainingMicrErrors(String batchNumber) {
-
-String sql =
-"SELECT COUNT(*) " +
-"FROM outward_cheque " +
-"WHERE batch_number = ? " +
-"AND cheque_status = 'MICR_ERROR'";
-
-try (Connection connection = dataSource.getConnection();
-PreparedStatement ps = connection.prepareStatement(sql)) {
-
-ps.setString(1, batchNumber);
-
-try (ResultSet rs = ps.executeQuery()) {
-
-if (rs.next()) {
-return rs.getInt(1) > 0;
-}
-}
-
-} catch (Exception e) {
-e.printStackTrace();
-}
-
-return false;
-}
+        return cheques;
+    }
 
 
+    /**
+     * Updates corrected MICR details.
+     *
+     * Normal MICR repair:
+     *     returnedMode = false
+     *     -> MICR_REPAIRED
+     *
+     * Checker returned MICR repair:
+     *     returnedMode = true
+     *     -> RE_VERIFIED
+     */
+    public boolean updateCorrectedMicr(
+            String batchNumber,
+            String chequeNumber,
+            String cityCode,
+            String bankCode,
+            String branchCode,
+            boolean returnedMode) {
+
+        String verificationStatus =
+                returnedMode
+                        ? "RE_VERIFIED"
+                        : "MICR_REPAIRED";
+
+        String sql =
+                "UPDATE outward_cheque "
+                + "SET city_code = ?, "
+                + "    bank_code = ?, "
+                + "    branch_code = ?, "
+                + "    cheque_status = ? "
+                + "WHERE batch_number = ? "
+                + "AND cheque_number = ? "
+                + "AND ( "
+                + "       cheque_status IN "
+                + "       ('MICR_ERROR', 'MICR_REPAIRED') "
+                + "       OR UPPER(TRIM(cheque_status)) "
+                + "          = 'SENT_BACK_TO_MAKER' "
+                + "    )";
+
+        Connection connection = null;
+
+        try {
+
+            connection = dataSource.getConnection();
+            connection.setAutoCommit(false);
+
+            try (PreparedStatement ps =
+                         connection.prepareStatement(sql)) {
+
+                ps.setString(1, cityCode);
+                ps.setString(2, bankCode);
+                ps.setString(3, branchCode);
+                ps.setString(4, verificationStatus);
+                ps.setString(5, batchNumber);
+                ps.setString(6, chequeNumber);
+
+                int rowsUpdated = ps.executeUpdate();
+
+                if (rowsUpdated > 0) {
+
+                    connection.commit();
+
+                    System.out.println(
+                            "======================================");
+                    System.out.println(
+                            "MICR REPAIR STATUS UPDATED");
+                    System.out.println(
+                            "Batch Number  : " + batchNumber);
+                    System.out.println(
+                            "Cheque Number : " + chequeNumber);
+                    System.out.println(
+                            "Returned Mode : " + returnedMode);
+                    System.out.println(
+                            "New Status    : " + verificationStatus);
+                    System.out.println(
+                            "======================================");
+
+                    return true;
+                }
+
+                connection.rollback();
+
+                System.out.println(
+                        "No cheque updated for batch "
+                        + batchNumber
+                        + ", cheque "
+                        + chequeNumber);
+
+                return false;
+            }
+
+        } catch (Exception e) {
+
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+
+            e.printStackTrace();
+
+            return false;
+
+        } finally {
+
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 
 
-public boolean updateBatchStatus(String batchNumber) {
+    public boolean hasRemainingMicrErrors(String batchNumber) {
 
-String sql =
-"UPDATE outward_batch " +
-"SET batch_status = 'MICR_REPAIR_COMPLETED' " +
-"WHERE batch_number = ? " +
-"AND batch_status = 'MICR_REPAIR'";
+        String sql =
+                "SELECT COUNT(*) "
+                + "FROM outward_cheque "
+                + "WHERE batch_number = ? "
+                + "AND cheque_status = 'MICR_ERROR'";
 
-Connection connection = null;
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement ps =
+                     connection.prepareStatement(sql)) {
 
-try {
-connection = dataSource.getConnection();
-connection.setAutoCommit(false);
+            ps.setString(1, batchNumber);
 
-try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            try (ResultSet rs = ps.executeQuery()) {
 
-ps.setString(1, batchNumber);
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
 
-int rowsUpdated = ps.executeUpdate();
-boolean updated = rowsUpdated > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-if (updated) {
-connection.commit();
-} else {
-connection.rollback();
-}
-
-return updated;
-}
-
-} catch (Exception e) {
-if (connection != null) {
-try {
-connection.rollback();
-} catch (Exception ex) {
-ex.printStackTrace();
-}
-}
-e.printStackTrace();
-} finally {
-if (connection != null) {
-try {
-connection.close();
-} catch (Exception e) {
-e.printStackTrace();
-}
-}
-}
-
-return false;
-}
+        return false;
+    }
 
 
+    public boolean updateBatchStatus(String batchNumber) {
 
+        String sql =
+                "UPDATE outward_batch "
+                + "SET batch_status = 'MICR_REPAIR_COMPLETED' "
+                + "WHERE batch_number = ? "
+                + "AND batch_status = 'MICR_REPAIR'";
+
+        Connection connection = null;
+
+        try {
+
+            connection = dataSource.getConnection();
+            connection.setAutoCommit(false);
+
+            try (PreparedStatement ps =
+                         connection.prepareStatement(sql)) {
+
+                ps.setString(1, batchNumber);
+
+                int rowsUpdated = ps.executeUpdate();
+
+                boolean updated = rowsUpdated > 0;
+
+                if (updated) {
+                    connection.commit();
+                } else {
+                    connection.rollback();
+                }
+
+                return updated;
+            }
+
+        } catch (Exception e) {
+
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+
+            e.printStackTrace();
+
+        } finally {
+
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return false;
+    }
 }

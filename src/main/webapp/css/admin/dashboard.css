@@ -4,9 +4,13 @@
 
 .dashboard-page {
     width: 100%;
-    padding: 34px 40px 40px 40px;
+    padding: 20px 24px 24px 24px;
     box-sizing: border-box;
-    background: #F5F7FC;
+    background:
+        radial-gradient(1200px 600px at 0% 0%, rgba(23, 92, 211, 0.12), transparent 60%),
+        radial-gradient(1000px 600px at 100% 0%, rgba(122, 90, 248, 0.10), transparent 60%),
+        radial-gradient(900px 700px at 100% 100%, rgba(18, 183, 106, 0.07), transparent 60%),
+        linear-gradient(180deg, #EAF0FA 0%, #E4ECF8 100%);
     overflow: hidden;
 }
 
@@ -27,7 +31,7 @@
 
 .dashboard-header {
     width: 100%;
-    margin-bottom: 28px;
+    margin-bottom: 20px;
     display: flex !important;
     align-items: flex-start !important;
     justify-content: space-between !important;
@@ -39,11 +43,27 @@
 }
 
 .dashboard-title {
-    color: #18243A;
-    font-size: 32px;
+    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+    color: #0B1F3F;
+    font-size: 30px;
     font-weight: 700;
-    line-height: 38px;
-    display: block !important;
+    letter-spacing: -0.035em;
+    line-height: 1.1;
+    display: inline-block !important;
+    position: relative;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.dashboard-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 56px;
+    height: 3px;
+    background: #175CD3;
+    border-radius: 2px;
 }
 
 .dashboard-subtitle {
@@ -551,32 +571,46 @@
 }
 
 .recent-audit-listbox .z-listhead {
-    background: #F8FAFC !important;
+    background: #175CD3 !important;
     border: none !important;
+    border-radius: 8px 8px 0 0 !important;
 }
 
 .recent-audit-listbox .z-listheader {
-    height: 46px;
-    background: #F8FAFC !important;
+    height: auto;
+    background: transparent !important;
     border-top: none !important;
     border-left: none !important;
-    border-bottom: 1px solid #E1E8F4 !important;
-    border-right: none !important;
-    padding: 0 20px;
+    border-bottom: none !important;
+    border-right: 1px solid rgba(255,255,255,0.25) !important;
+    padding: 12px 12px !important;
     box-sizing: border-box;
     box-shadow: none !important;
     overflow: visible !important;
 }
 
+.recent-audit-listbox .z-listheader:last-child {
+    border-right: none !important;
+}
+
 .recent-audit-listbox .z-listheader-content {
-    color: #18243A !important;
+    color: #FFFFFF !important;
+    font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
     font-size: 13px !important;
     font-weight: 700 !important;
     text-transform: none !important;
-    letter-spacing: normal !important;
+    letter-spacing: 0.06em !important;
+    padding: 12px 12px !important;
     white-space: nowrap !important;
     overflow: visible !important;
     text-overflow: unset !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.22);
+}
+
+.recent-audit-listbox .z-listheader::after,
+.recent-audit-listbox .z-listheader-content::after {
+    display: none !important;
+    content: none !important;
 }
 
 .recent-audit-listbox .z-listitem {
@@ -585,8 +619,12 @@
     border-top: none !important;
     border-left: none !important;
     border-right: none !important;
-    border-bottom: 1px solid #F0F2F7 !important;
+    border-bottom: 1px solid #E4EAF3 !important;
     box-shadow: none !important;
+}
+
+.recent-audit-listbox .z-listitem:nth-child(even) {
+    background: linear-gradient(90deg, #FCFDFF 0%, #F9FBFF 100%) !important;
 }
 
 .recent-audit-listbox .z-listitem:last-child {
@@ -594,7 +632,8 @@
 }
 
 .recent-audit-listbox .z-listitem:hover {
-    background: #F8FAFF;
+    background: #F6F9FF !important;
+    box-shadow: inset 4px 0 0 #175CD3 !important;
 }
 
 .recent-audit-listbox .z-listcell {
@@ -607,8 +646,9 @@
 }
 
 .recent-audit-listbox .z-listcell-content {
-    color: #374151;
+    color: #0B1F3F;
     font-size: 13px;
+    font-weight: 500;
     line-height: 1.5;
 }
 
@@ -749,3 +789,46 @@
 
 .status-inactive .session-badge-label { color: #4B5563; }
 .status-active   .session-badge-label { color: #FFFFFF; }
+
+
+/* ============================================================
+   USER MODAL WINDOW
+   ============================================================ */
+
+.user-modal-window {
+    border-radius: 14px !important;
+}
+
+.user-modal-window .z-window-titlebar {
+    height: 20px !important;
+    padding: 0 12px !important;
+    background: transparent !important;
+    border: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+}
+
+.user-modal-window .z-window-title {
+    display: none !important;
+}
+
+.user-modal-window .z-window-close {
+    width: 20px !important;
+    height: 20px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer !important;
+}
+
+.user-modal-window .z-window-close::before {
+    content: '✕' !important;
+    font-size: 16px !important;
+    color: #64748B !important;
+    line-height: 1 !important;
+}
+
+.user-modal-window .z-window-close:hover::before {
+    color: #0F172A !important;
+}

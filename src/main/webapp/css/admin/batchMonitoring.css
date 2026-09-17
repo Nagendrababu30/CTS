@@ -2,6 +2,8 @@
    BATCH MONITORING PAGE
    ============================================================ */
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+
 .batch-page {
     width: 100%;
     padding: 20px 24px 24px 24px;
@@ -19,10 +21,10 @@
    ============================================================ */
 
 .batch-page-title {
-    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Times New Roman', serif;
     color: #0B1F3F;
     font-size: 30px;
-    font-weight: 700;
+    font-weight: 650;
     letter-spacing: -0.035em;
     line-height: 1.1;
     display: inline-block;
@@ -205,7 +207,7 @@
     border-radius: 7px;
     color: #FFFFFF;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 650;
     box-shadow: none;
     margin-left: 8px;
     white-space: nowrap;
@@ -235,7 +237,7 @@
 .batch-results-title {
     color: #18243A;
     font-size: 20px;
-    font-weight: 700;
+    font-weight: 650;
     display: block;
     margin-bottom: 18px;
 }
@@ -288,7 +290,7 @@
     color: #FFFFFF !important;
     font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 650;
     padding: 12px 12px !important;
     white-space: normal !important;
     overflow: visible !important;
@@ -296,6 +298,7 @@
     line-height: 1.3;
     text-shadow: 0 1px 2px rgba(0,0,0,0.22);
     letter-spacing: 0.06em;
+    text-align: center;
 }
 
 .batch-listbox .z-listheader::after,
@@ -310,7 +313,7 @@
    ============================================================ */
 
 .batch-listbox .z-listitem {
-    min-height: 64px;
+    height: auto;
     background: #FFFFFF;
     border-top: none !important;
     border-left: none !important;
@@ -338,24 +341,30 @@
    ============================================================ */
 
 .batch-listbox .z-listcell {
-    background: transparent;
+    background: transparent !important;
     border: none !important;
-    padding: 0 12px;
-    box-sizing: border-box;
+    padding: 0 16px !important;
+    box-sizing: border-box !important;
     box-shadow: none !important;
-    vertical-align: middle;
+    vertical-align: middle !important;
+    font-family: 'Inter', sans-serif !important;
 }
 
 .batch-listbox .z-listcell-content {
-    color: #344054;
-    font-size: 13px;
+    color: #1F2D45 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    line-height: 2 !important;
+    text-align: center !important;
+    display: block !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
 }
 
-.batch-listbox .z-listbox-emptybody td {
-    color: #98A2B3;
-    font-size: 14px;
-    text-align: center;
-    padding: 32px 0;
+/* Override global .z-label font */
+.batch-listbox .z-label {
+    font-family: 'Inter', sans-serif !important;
 }
 
 
@@ -363,37 +372,17 @@
    CELL LABEL STYLES
    ============================================================ */
 
-.batch-id-label {
-    color: #2454D6;
-    font-size: 13px;
-    font-weight: 700;
-    white-space: nowrap;
-}
-
-.batch-cheques-label {
-    color: #18243A;
-    font-size: 13px;
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.batch-text-label {
-    color: #344054;
-    font-size: 13px;
-    white-space: nowrap;
-}
-
-.batch-user-label {
-    color: #344054;
-    font-size: 13px;
-    white-space: nowrap;
-}
-
-.batch-date-label {
-    color: #60738F;
-    font-size: 12px;
-    white-space: normal;
-    line-height: 1.4;
+.batch-listbox .batch-id-label,
+.batch-listbox .batch-cheques-label,
+.batch-listbox .batch-text-label,
+.batch-listbox .batch-user-label,
+.batch-listbox .batch-date-label,
+.batch-listbox .batch-status-label {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
 }
 
 
@@ -415,32 +404,30 @@
     vertical-align: middle !important;
 }
 
-.batch-status-label {
-    font-size: 12px;
-    font-weight: 600;
-    white-space: nowrap;
-}
-
 .batch-status-green {
     background: #DCFCE7 !important;
     border: 1px solid #B7EFCA !important;
 }
-.batch-status-green .batch-status-label { color: #166534; }
+.batch-status-green .batch-status-label { }
 
 .batch-status-amber {
     background: #FEF9C3 !important;
     border: 1px solid #FDE68A !important;
 }
-.batch-status-amber .batch-status-label { color: #854D0E; }
+.batch-status-amber .batch-status-label { }
 
 .batch-status-red {
     background: #FEE2E2 !important;
     border: 1px solid #FECACA !important;
 }
-.batch-status-red .batch-status-label { color: #991B1B; }
+.batch-status-red .batch-status-label { }
 
 .batch-status-grey {
     background: #F3F4F6 !important;
     border: 1px solid #D1D5DB !important;
 }
-.batch-status-grey .batch-status-label { color: #374151; }
+.batch-status-grey .batch-status-label { }
+
+
+
+

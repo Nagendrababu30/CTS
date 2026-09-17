@@ -918,7 +918,7 @@
     font-weight: 700 !important;
     color: #475569 !important;
     letter-spacing: 0.3px !important;
-    text-transform: uppercase !important;
+    text-transform: none !important;
 }
 
 .old-label {
@@ -1102,7 +1102,7 @@
     font-weight: 700 !important;
     color: #475569 !important;
     letter-spacing: 0.3px !important;
-    text-transform: uppercase !important;
+    text-transform: none !important;
 }
 
 .remarks-box {
@@ -1493,3 +1493,4 @@ div.checker-modal,
     box-shadow: 0 4px 12px rgba(124, 58, 237, 0.45) !important;
     transform: translateY(-1px) !important;
 }
+

@@ -2,6 +2,8 @@
    AUDIT LOG PAGE
    ============================================================ */
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+
 .audit-page {
     width: 100%;
     padding: 20px 24px 24px 24px;
@@ -35,10 +37,10 @@
 }
 
 .audit-page-title {
-    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Times New Roman', serif;
     color: #0B1F3F;
     font-size: 30px;
-    font-weight: 700;
+    font-weight: 650;
     letter-spacing: -0.035em;
     line-height: 1.1;
     display: inline-block;
@@ -195,7 +197,7 @@
     border-radius: 7px;
     color: #FFFFFF;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 650;
     white-space: nowrap;
     cursor: pointer;
     box-shadow: 0 1px 3px rgba(36, 84, 214, 0.25);
@@ -223,7 +225,7 @@
 .audit-trail-title {
     color: #18243A;
     font-size: 20px;
-    font-weight: 700;
+    font-weight: 650;
     display: block;
     margin-bottom: 18px;
 }
@@ -270,13 +272,14 @@
     color: #FFFFFF !important;
     font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 650;
     padding: 12px 12px !important;
     white-space: nowrap !important;
     overflow: visible !important;
     text-overflow: unset !important;
     text-shadow: 0 1px 2px rgba(0,0,0,0.22);
     letter-spacing: 0.06em;
+    text-align: center;
 }
 
 .audit-listbox .z-listheader::after,
@@ -286,7 +289,7 @@
 }
 
 .audit-listbox .z-listitem {
-    min-height: 72px;
+    height: auto;
     background: #FFFFFF;
     border-top: none !important;
     border-left: none !important;
@@ -309,25 +312,30 @@
 }
 
 .audit-listbox .z-listcell {
-    background: transparent;
+    background: transparent !important;
     border: none !important;
-    padding: 14px 18px;
-    box-sizing: border-box;
+    padding: 0 16px !important;
+    box-sizing: border-box !important;
     box-shadow: none !important;
-    vertical-align: top;
+    vertical-align: middle !important;
+    font-family: 'Inter', sans-serif !important;
 }
 
 .audit-listbox .z-listcell-content {
-    color: #0B1F3F;
-    font-size: 13px;
-    font-weight: 500;
+    color: #1F2D45 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    line-height: 2 !important;
+    text-align: center !important;
+    display: block !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
 }
 
-.audit-listbox .z-listbox-emptybody td {
-    color: #667085;
-    font-size: 14px;
-    text-align: center;
-    padding: 40px 0;
+/* Override global .z-label font */
+.audit-listbox .z-label {
+    font-family: 'Inter', sans-serif !important;
 }
 
 
@@ -335,37 +343,30 @@
    CELL LABEL STYLES
    ============================================================ */
 
-.audit-datetime-label {
-    color: #6B7280;
-    font-size: 13px;
-    line-height: 1.6;
-    white-space: normal;
+.audit-listbox .audit-datetime-label,
+.audit-listbox .audit-user-label,
+.audit-listbox .audit-module-label,
+.audit-listbox .audit-batch-label,
+.audit-listbox .audit-session-label,
+.audit-listbox .audit-role-label {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
 }
 
-.audit-user-label {
-    color: #111827;
-    font-size: 13px;
-    font-weight: 700;
-    white-space: nowrap;
-}
 
-.audit-module-label {
-    color: #374151;
-    font-size: 13px;
-    white-space: nowrap;
-}
-
-.audit-batch-label {
-    color: #2454D6;
-    font-size: 13px;
-    font-weight: 700;
-    white-space: nowrap;
-}
-
-.audit-session-label {
-    color: #374151;
-    font-size: 13px;
-    white-space: nowrap;
+.recent-audit-listbox .audit-datetime-label,
+.recent-audit-listbox .audit-user-label,
+.recent-audit-listbox .audit-module-label,
+.recent-audit-listbox .audit-batch-label,
+.recent-audit-listbox .audit-session-label {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
 }
 
 
@@ -388,10 +389,11 @@
 }
 
 .audit-action-label {
-    font-size: 12px;
-    font-weight: 700;
-    white-space: nowrap;
-    letter-spacing: 0.04em;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    white-space: nowrap !important;
+    letter-spacing: 0.03em !important;
 }
 
 /* Green — LOGIN, STARTED */
@@ -399,35 +401,35 @@
     background: #DCFCE7 !important;
     border: 1px solid #86EFAC !important;
 }
-.audit-action-green .audit-action-label { color: #166534; }
+.audit-action-green .audit-action-label { }
 
 /* Blue — general */
 .audit-action-blue {
     background: #DBEAFE !important;
     border: 1px solid #93C5FD !important;
 }
-.audit-action-blue .audit-action-label { color: #1D4ED8; }
+.audit-action-blue .audit-action-label { }
 
 /* Amber — LOCKED, PENDING */
 .audit-action-amber {
     background: #FEF9C3 !important;
     border: 1px solid #FDE68A !important;
 }
-.audit-action-amber .audit-action-label { color: #92400E; }
+.audit-action-amber .audit-action-label { }
 
 /* Red — FAILED, LOGOUT */
 .audit-action-red {
     background: #FEE2E2 !important;
     border: 1px solid #FCA5A5 !important;
 }
-.audit-action-red .audit-action-label { color: #991B1B; }
+.audit-action-red .audit-action-label { }
 
 /* Grey — anything else */
 .audit-action-grey {
     background: #F3F4F6 !important;
     border: 1px solid #D1D5DB !important;
 }
-.audit-action-grey .audit-action-label { color: #374151; }
+.audit-action-grey .audit-action-label { }
 
 
 /* ============================================================
@@ -448,14 +450,15 @@
 }
 
 .audit-readonly-label {
-    color: #6B7280;
-    font-size: 13px;
-    font-weight: 600;
-    background: #F3F4F6;
-    border: 1px solid #D1D5DB;
-    border-radius: 6px;
-    padding: 4px 12px;
-    white-space: nowrap;
+    color: #6B7280 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    background: #F3F4F6 !important;
+    border: 1px solid #D1D5DB !important;
+    border-radius: 6px !important;
+    padding: 4px 12px !important;
+    white-space: nowrap !important;
 }
 
 /* ============================================================
@@ -473,3 +476,6 @@
     background: transparent !important;
     font-size: 13px !important;
 }
+
+
+

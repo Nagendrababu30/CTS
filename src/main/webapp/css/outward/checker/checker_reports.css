@@ -109,28 +109,19 @@
    ========================================================= */
 
 .reports-title {
-
     font-family:
-        'Inter',
-        'Plus Jakarta Sans',
         'Segoe UI',
-        Arial,
+        'Plus Jakarta Sans',
         sans-serif !important;
 
-    font-size: 26px !important;
-
+    font-size: 30px !important;
     font-weight: 700 !important;
-
-    color:
-        var(--text-primary) !important;
-
-    letter-spacing:
-        -0.02em !important;
+    color: #0B1F3F !important;
+    letter-spacing: -0.035em !important;
+    line-height: 1.1 !important;
 
     position: relative !important;
-
     display: inline-block !important;
-
     margin-bottom: 6px !important;
 }
 
@@ -434,9 +425,7 @@
     letter-spacing:
         0.06em !important;
 
-    text-transform:
-        uppercase !important;
-
+   
     color:
         #FFFFFF !important;
 
@@ -510,8 +499,7 @@
         var(--text-muted) !important;
 
     font-family:
-        'Inter',
-        sans-serif !important;
+        'Times New Roman', serif !important;
 
     font-size:
         13.5px !important;
@@ -593,8 +581,7 @@
 .z-listcell-content {
 
     font-family:
-        'Inter',
-        sans-serif !important;
+        'Times New Roman', serif !important;
 
     font-size:
         12px !important;
@@ -606,7 +593,7 @@
         12px 14px !important;
 
     line-height:
-        1.4 !important;
+        2;
 
     text-align:
         center !important;
@@ -771,3 +758,4 @@
             11px !important;
     }
 }
+

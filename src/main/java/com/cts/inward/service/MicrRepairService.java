@@ -51,4 +51,6 @@ public interface MicrRepairService {
     int getBatchMicrCompletedCount(long batchId);
 
     int getBatchMicrPendingCount(long batchId);
+
+    boolean hasChequesNeedingDataEntry(long batchId);
 }

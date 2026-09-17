@@ -54,7 +54,7 @@ public class CheckerReportsController extends SelectorComposer<Component> {
                 "FROM outward_batch ob " +
                 "LEFT JOIN outward_cheque oc " +
                 "       ON ob.batch_number = oc.batch_number " +
-                "WHERE UPPER(ob.batch_status) = 'CHECKER_COMPLETED' " +
+                "WHERE UPPER(ob.batch_status) = 'CHECKER_VERIFIED' " +
                 "GROUP BY ob.batch_number " +
                 "ORDER BY ob.batch_number DESC";
 

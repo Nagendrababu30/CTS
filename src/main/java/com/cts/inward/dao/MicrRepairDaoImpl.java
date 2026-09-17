@@ -581,12 +581,30 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
     public boolean isBatchReturnedToMaker(
             long batchId) {
 
-        String sql =
-                "SELECT batch_status "
-                        + "FROM public.inward_batch_history "
-                        + "WHERE batch_id = ? "
-                        + "ORDER BY batch_history_id DESC "
-                        + "LIMIT 1";
+        String sql = """
+                SELECT (
+                    (SELECT batch_status FROM public.inward_batch_history WHERE batch_id = ? ORDER BY batch_history_id DESC LIMIT 1) = 'RETURN_TO_MAKER'
+                    OR EXISTS (
+                        SELECT 1 FROM public.inward_cheque c
+                        JOIN LATERAL (
+                            SELECT sh.status, sh.checker_action, sh.return_reason_code
+                            FROM public.inward_cheque_status_history sh
+                            WHERE sh.cheque_number = c.cheque_number
+                            ORDER BY sh.status_history_id DESC
+                            LIMIT 1
+                        ) latest ON TRUE
+                        WHERE c.batch_id = ?
+                          AND (
+                              latest.status = 'RETURN_TO_MAKER'
+                              OR (latest.status = 'MICR_REPAIRED' AND EXISTS (
+                                  SELECT 1 FROM public.inward_cheque_status_history sh2
+                                  WHERE sh2.cheque_number = c.cheque_number
+                                    AND (sh2.status = 'RETURN_TO_MAKER' OR sh2.checker_action = 'Sent Back' OR (sh2.return_reason_code IS NOT NULL AND (sh2.return_reason_code LIKE 'CR-%' OR sh2.return_reason_code = 'OTHER')))
+                              ))
+                          )
+                    )
+                ) AS is_returned
+                """;
 
         try (
                 Connection connection =
@@ -601,6 +619,9 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
             statement.setLong(
                     1,
                     batchId);
+            statement.setLong(
+                    2,
+                    batchId);
 
             try (
                     ResultSet resultSet =
@@ -608,14 +629,7 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
             ) {
 
                 if (resultSet.next()) {
-
-                    String status =
-                            resultSet.getString(
-                                    "batch_status");
-
-                    return "RETURN_TO_MAKER"
-                            .equalsIgnoreCase(
-                                    status);
+                    return resultSet.getBoolean("is_returned");
                 }
             }
 
@@ -640,7 +654,7 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                 SELECT sh.return_reason_code
                 FROM public.inward_cheque_status_history sh
                 WHERE sh.cheque_number = ?
-                  AND sh.status = 'RETURN_TO_MAKER'
+                  AND (sh.status = 'RETURN_TO_MAKER' OR sh.checker_action = 'Sent Back' OR (sh.return_reason_code IS NOT NULL AND (sh.return_reason_code LIKE 'CR-%' OR sh.return_reason_code = 'OTHER')))
                 ORDER BY sh.status_history_id DESC
                 """;
 
@@ -1661,7 +1675,9 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                         'RETURN_BY_MAKER',
                         'DATA_ENTRY',
                         'DATA_ENTRY_COMPLETED',
-                        'SENT_TO_CHECKER'
+                        'SENT_TO_CHECKER',
+                        'ACCEPT',
+                        'REJECT'
                     )
                     """;
 
@@ -1819,5 +1835,149 @@ public class MicrRepairDaoImpl implements MicrRepairDao {
                 }
             }
         }
+    }
+
+    @Override
+    public boolean markBatchReadyForChecker(
+            long batchId,
+            long userId) {
+
+        if (batchId <= 0L || userId <= 0L) {
+            return false;
+        }
+
+        Connection connection = null;
+        try {
+            connection = ConnectionPool.getDataSource().getConnection();
+            connection.setAutoCommit(false);
+
+            // Update repaired cheques in this batch to DATA_ENTRY_COMPLETED
+            String updateChequesSql = """
+                    UPDATE public.inward_cheque_status_history
+                    SET status = 'DATA_ENTRY_COMPLETED',
+                        maker_id = ?,
+                        maker_action = 'MICR_STAGE_COMPLETED',
+                        maker_action_on = CURRENT_TIMESTAMP,
+                        remarks = 'MICR repaired - ready for Checker'
+                    WHERE cheque_number IN (
+                        SELECT c.cheque_number
+                        FROM public.inward_cheque c
+                        WHERE c.batch_id = ?
+                    )
+                    AND status = 'MICR_REPAIRED'
+                    """;
+            try (PreparedStatement statement = connection.prepareStatement(updateChequesSql)) {
+                statement.setLong(1, userId);
+                statement.setLong(2, batchId);
+                statement.executeUpdate();
+            }
+
+            // Update batch history status to DATA_ENTRY_COMPLETED
+            String updateBatchHistorySql = """
+                    UPDATE public.inward_batch_history
+                    SET batch_status = 'DATA_ENTRY_COMPLETED',
+                        changed_on = CURRENT_TIMESTAMP,
+                        changed_by = ?,
+                        reason = 'MICR repair completed',
+                        remarks = 'Batch ready for Checker verification'
+                    WHERE batch_id = ?
+                    """;
+            int updatedBatch = 0;
+            try (PreparedStatement statement = connection.prepareStatement(updateBatchHistorySql)) {
+                statement.setLong(1, userId);
+                statement.setLong(2, batchId);
+                updatedBatch = statement.executeUpdate();
+            }
+
+            if (updatedBatch == 0) {
+                String insertBatchHistorySql = """
+                        INSERT INTO public.inward_batch_history
+                        (batch_id, batch_status, changed_on, changed_by, reason, remarks)
+                        VALUES (?, 'DATA_ENTRY_COMPLETED', CURRENT_TIMESTAMP, ?, 'MICR repair completed', 'Batch ready for Checker verification')
+                        """;
+                try (PreparedStatement statement = connection.prepareStatement(insertBatchHistorySql)) {
+                    statement.setLong(1, batchId);
+                    statement.setLong(2, userId);
+                    statement.executeUpdate();
+                }
+            }
+
+            connection.commit();
+            return true;
+        } catch (Exception e) {
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException rollbackEx) {
+                    rollbackEx.printStackTrace();
+                }
+            }
+            throw new RuntimeException("Failed to mark batch ready for checker: " + batchId, e);
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.setAutoCommit(true);
+                    connection.close();
+                } catch (SQLException closeEx) {
+                    closeEx.printStackTrace();
+                }
+            }
+        }
+    }
+
+    @Override
+    public boolean hasChequesNeedingDataEntry(long batchId) {
+        if (!isBatchReturnedToMaker(batchId)) {
+            // Normal batches always participate in Data Entry
+            return true;
+        }
+
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1 FROM public.inward_cheque c
+                    JOIN LATERAL (
+                        SELECT sh.status, sh.return_reason_code
+                        FROM public.inward_cheque_status_history sh
+                        WHERE sh.cheque_number = c.cheque_number
+                          AND (sh.status = 'RETURN_TO_MAKER' OR sh.checker_action = 'Sent Back' OR (sh.return_reason_code IS NOT NULL AND (sh.return_reason_code LIKE 'CR-%' OR sh.return_reason_code = 'OTHER')))
+                        ORDER BY sh.status_history_id DESC
+                        LIMIT 1
+                    ) rsh ON TRUE
+                    WHERE c.batch_id = ?
+                      AND (
+                          rsh.return_reason_code LIKE 'CR-DATA-%'
+                          OR rsh.return_reason_code = 'OTHER'
+                          OR (
+                              rsh.return_reason_code LIKE 'CR-IMG-%'
+                              AND (
+                                  EXISTS (
+                                      SELECT 1 FROM public.inward_cheque_return r
+                                      WHERE r.cheque_number = c.cheque_number
+                                        AND r.return_reason_code LIKE 'MR-DATA-%'
+                                  )
+                                  OR EXISTS (
+                                      SELECT 1 FROM public.inward_cheque_status_history h2
+                                      WHERE h2.cheque_number = c.cheque_number
+                                        AND (h2.status = 'RETURN_BY_MAKER' OR h2.maker_action = 'RETURN_BY_MAKER')
+                                        AND h2.return_reason_code LIKE 'MR-DATA-%'
+                                  )
+                              )
+                          )
+                      )
+                ) AS has_data_entry
+                """;
+
+        try (Connection connection = ConnectionPool.getDataSource().getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setLong(1, batchId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getBoolean("has_data_entry");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

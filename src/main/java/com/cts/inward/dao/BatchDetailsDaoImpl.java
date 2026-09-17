@@ -89,19 +89,17 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
             return new java.util.ArrayList<>();
         }
 
-        // Check if this batch is a Re-Verify batch (has returned cheques or batch return history)
+        // Check if this batch is a Re-Verify batch (has cheques returned to maker by checker)
         String checkReverifySql = """
-                SELECT (
-                    EXISTS (
-                        SELECT 1 FROM inward_batch_history bh
-                        WHERE bh.batch_id = ? AND bh.batch_status = 'RETURN_TO_MAKER'
-                    )
-                    OR EXISTS (
-                        SELECT 1 FROM inward_cheque c
-                        JOIN inward_cheque_status_history sh ON sh.cheque_number = c.cheque_number
-                        WHERE c.batch_id = ?
-                          AND (sh.checker_action = 'Returned' OR sh.return_reason_code IS NOT NULL OR sh.status = 'RETURN_TO_MAKER')
-                    )
+                SELECT EXISTS (
+                    SELECT 1 FROM inward_cheque c
+                    JOIN inward_cheque_status_history sh ON sh.cheque_number = c.cheque_number
+                    WHERE c.batch_id = ?
+                      AND (
+                          sh.status = 'RETURN_TO_MAKER'
+                          OR sh.checker_action = 'Sent Back'
+                          OR (sh.return_reason_code IS NOT NULL AND (sh.return_reason_code LIKE 'CR-%' OR sh.return_reason_code = 'OTHER'))
+                      )
                 ) AS is_reverify
                 """;
 
@@ -109,7 +107,6 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
         try (Connection connection = dataSource.getConnection();
                 PreparedStatement ps = connection.prepareStatement(checkReverifySql)) {
             ps.setLong(1, batchId);
-            ps.setLong(2, batchId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     isReverifyBatch = rs.getBoolean("is_reverify");
@@ -121,7 +118,7 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
 
         String sql;
         if (isReverifyBatch) {
-            // In Re-Verify batches, ONLY load cheques that were returned to maker
+            // In Re-Verify batches, ONLY load cheques that were returned to maker by checker
             sql = """
                 SELECT
                     c.cheque_number,
@@ -156,7 +153,11 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
                   AND EXISTS (
                       SELECT 1 FROM inward_cheque_status_history sh
                       WHERE sh.cheque_number = c.cheque_number
-                        AND (sh.checker_action = 'Returned' OR sh.return_reason_code IS NOT NULL OR sh.status = 'RETURN_TO_MAKER')
+                        AND (
+                            sh.status = 'RETURN_TO_MAKER'
+                            OR sh.checker_action = 'Sent Back'
+                            OR (sh.return_reason_code IS NOT NULL AND (sh.return_reason_code LIKE 'CR-%' OR sh.return_reason_code = 'OTHER'))
+                        )
                   )
                 ORDER BY c.cheque_number
                 """;

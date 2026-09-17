@@ -618,10 +618,17 @@ public class MicrRepairServiceImpl implements MicrRepairService {
         }
 
         if (!needsMicrRepair(batchId)) {
-            micrRepairDao.markBatchReadyForDataEntry(
-                batchId,
-                userId
-            );
+            if (hasChequesNeedingDataEntry(batchId)) {
+                micrRepairDao.markBatchReadyForDataEntry(
+                    batchId,
+                    userId
+                );
+            } else {
+                micrRepairDao.markBatchReadyForChecker(
+                    batchId,
+                    userId
+                );
+            }
         }
     }
 
@@ -736,5 +743,10 @@ public class MicrRepairServiceImpl implements MicrRepairService {
         }
 
         return count;
+    }
+
+    @Override
+    public boolean hasChequesNeedingDataEntry(long batchId) {
+        return micrRepairDao.hasChequesNeedingDataEntry(batchId);
     }
 }

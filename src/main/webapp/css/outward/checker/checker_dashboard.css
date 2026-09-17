@@ -1,18 +1,61 @@
+@charset "UTF-8";
+
 /* =========================================================
    CHECKER DASHBOARD
+   Same UI style as Batch Queue reference
    ========================================================= */
 
 
 /* =========================================================
-   PAGE
+   GLOBAL TOKENS
+   ========================================================= */
+
+:root {
+    --bg-app-1: #EBF2FD;
+    --bg-app-2: #E4ECF8;
+
+    --bg-surface: #FFFFFF;
+    --bg-subtle: #F9FAFB;
+
+    --border-light: #E4EAF3;
+    --border-mid: #D0D5DD;
+
+    --text-primary: #0B1F3F;
+    --text-secondary: #2B3A55;
+    --text-muted: #667085;
+
+    --brand-blue: #175CD3;
+    --brand-blue-hover: #154EB5;
+
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 10px;
+
+    --shadow-card:
+        0 2px 8px rgba(16, 24, 40, 0.05);
+}
+
+
+/* =========================================================
+   PAGE BACKGROUND
    ========================================================= */
 
 .checker-dashboard-content {
-    width: 100%;
-    height: 100%;
-    box-sizing: border-box;
-    background: #EAF0FA;
-    overflow: hidden;
+    width: 100% !important;
+    height: 100% !important;
+
+    box-sizing: border-box !important;
+
+    background:
+        linear-gradient(
+            180deg,
+            var(--bg-app-1) 0%,
+            var(--bg-app-2) 100%
+        ) !important;
+
+    position: relative !important;
+
+    overflow: hidden !important;
 }
 
 
@@ -21,12 +64,17 @@
    ========================================================= */
 
 .checker-dashboard-layout {
-    width: 100%;
-    height: 100%;
-    box-sizing: border-box;
-    padding: 22px 22px 28px 22px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    width: 100% !important;
+    height: 100% !important;
+
+    box-sizing: border-box !important;
+
+    padding: 24px 30px !important;
+
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+
+    background: transparent !important;
 }
 
 
@@ -35,10 +83,17 @@
    ========================================================= */
 
 .dashboard-header {
-    width: 100%;
-    padding-left: 2px;
+    width: 100% !important;
+
+    background: transparent !important;
+
+    padding-left: 2px !important;
 }
 
+
+/* =========================================================
+   PAGE TITLE
+   ========================================================= */
 
 .dashboard-title {
     font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
@@ -54,6 +109,10 @@
 }
 
 
+/* =========================================================
+   TITLE UNDERLINE
+   ========================================================= */
+
 .dashboard-title::after {
     content: '';
     position: absolute; bottom: -10px; left: 0;
@@ -66,6 +125,10 @@
 }
 
 
+/* =========================================================
+   PAGE SUBTITLE
+   ========================================================= */
+
 .dashboard-subtitle {
     font-family:
         'Inter',
@@ -74,18 +137,23 @@
         sans-serif !important;
 
     font-size: 13px !important;
+
     font-weight: 500 !important;
 
-    color: #667085 !important;
+    color: var(--text-muted) !important;
+
+    line-height: 1.4 !important;
 }
 
 
 /* =========================================================
-   SUMMARY CARDS
+   SUMMARY CARDS CONTAINER
    ========================================================= */
 
 .summary-cards {
-    width: 100%;
+    width: 100% !important;
+
+    background: transparent !important;
 }
 
 
@@ -94,11 +162,11 @@
    ========================================================= */
 
 .summary-card {
-    box-sizing: border-box;
+    box-sizing: border-box !important;
 
-    min-height: 105px;
+    min-height: 105px !important;
 
-    padding: 20px 24px;
+    padding: 20px 24px !important;
 
     background: #FFFFFF !important;
 
@@ -107,31 +175,14 @@
     border-radius: 10px !important;
 
     box-shadow:
-        0 2px 8px rgba(16, 24, 40, 0.06) !important;
+        0 2px 8px rgba(16, 24, 40, 0.05) !important;
+
+    overflow: hidden !important;
 }
 
-
-/*
-   IMPORTANT:
-   No hover effect here.
-
-   The cards are only information cards.
-   They should not look clickable.
-*/
-
-.summary-card {
-    box-sizing: border-box;
-    min-height: 105px;
-    padding: 20px 24px;
-    background: #FFFFFF !important;
-    border: 1px solid #E4EAF3 !important;
-    border-radius: 10px !important;
-    box-shadow: 0 2px 8px rgba(16, 24, 40, 0.06) !important;
-    cursor: default !important;
-}
 
 /* =========================================================
-   CARD LABEL
+   SUMMARY CARD LABEL
    ========================================================= */
 
 .summary-card-label {
@@ -147,14 +198,16 @@
 
     color: #667085 !important;
 
-    letter-spacing: 0.08em;
+    letter-spacing: 0.08em !important;
+
+    line-height: 1.4 !important;
 
     text-transform: none;
 }
 
 
 /* =========================================================
-   CARD VALUE
+   SUMMARY CARD VALUE
    ========================================================= */
 
 .summary-card-value {
@@ -173,18 +226,16 @@
 
 
 /* =========================================================
-   CARD COLORS
+   SUMMARY VALUE COLORS
    ========================================================= */
 
 .summary-value-blue {
     color: #175CD3 !important;
 }
 
-
 .summary-value-purple {
     color: #7A5AF8 !important;
 }
-
 
 .summary-value-green {
     color: #12B76A !important;
@@ -196,45 +247,50 @@
    ========================================================= */
 
 .batch-section {
-    width: 100%;
+    width: 100% !important;
 
-    box-sizing: border-box;
+    box-sizing: border-box !important;
 
-    padding: 20px 20px 14px 20px;
+    padding:
+        20px 24px 14px 24px !important;
 
     background: #FFFFFF !important;
 
-    border: 1px solid #E4EAF3 !important;
+    border:
+        1px solid var(--border-light) !important;
 
     border-radius: 10px !important;
 
     box-shadow:
-        0 4px 12px rgba(16, 24, 40, 0.06) !important;
+        var(--shadow-card) !important;
 
-    position: relative;
+    position: relative !important;
 
-    overflow: hidden;
+    overflow: hidden !important;
 }
 
 
 /* =========================================================
-   TOP BLUE LINE
+   BLUE TOP BORDER
    ========================================================= */
 
 .batch-section::before {
-    content: '';
+    content: '' !important;
 
-    position: absolute;
+    position: absolute !important;
 
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0 !important;
 
-    height: 4px;
+    left: 0 !important;
 
-    background: #175CD3;
+    right: 0 !important;
 
-    border-radius: 10px 10px 0 0;
+    height: 3.5px !important;
+
+    background:
+        var(--brand-blue) !important;
+
+    display: block !important;
 }
 
 
@@ -243,17 +299,23 @@
    ========================================================= */
 
 .batch-section-header {
-    width: 100%;
+    width: 100% !important;
 
-    padding-bottom: 16px;
+    padding-bottom: 14px !important;
+
+    background: transparent !important;
+
+    box-sizing: border-box !important;
 }
 
 
 /* =========================================================
    SECTION TITLE
+   IMPORTANT:
+   ZUL USES checker-dashboard-section-title
    ========================================================= */
 
-.section-title {
+.checker-dashboard-section-title {
     font-family:
         'Inter',
         'Segoe UI',
@@ -262,32 +324,44 @@
 
     font-size: 18px !important;
 
-    font-weight: 700 !important;
+    font-weight: 800 !important;
 
-    color: #0B1F3F !important;
+    color: var(--text-primary) !important;
 
-    padding-left: 14px;
+    position: relative !important;
 
-    position: relative;
+    padding-left: 14px !important;
+
+    line-height: 1.4 !important;
 }
 
 
-.section-title::before {
-    content: '';
+/* =========================================================
+   SECTION TITLE BLUE BAR
+   ========================================================= */
 
-    position: absolute;
+.checker-dashboard-section-title::before {
+    content: '' !important;
 
-    left: 0;
-    top: 50%;
+    position: absolute !important;
 
-    transform: translateY(-50%);
+    left: 0 !important;
 
-    width: 4px;
-    height: 20px;
+    top: 50% !important;
 
-    background: #175CD3;
+    transform:
+        translateY(-50%) !important;
 
-    border-radius: 3px;
+    width: 4px !important;
+
+    height: 18px !important;
+
+    background:
+        var(--brand-blue) !important;
+
+    border-radius: 2px !important;
+
+    display: block !important;
 }
 
 
@@ -308,7 +382,7 @@
 
     color: #667085 !important;
 
-    margin-right: 6px;
+    margin-right: 2px !important;
 }
 
 
@@ -317,13 +391,19 @@
    ========================================================= */
 
 .filter-btn {
-    min-height: 34px;
+    min-height: 36px !important;
 
-    padding: 6px 18px !important;
+    height: 36px !important;
 
-    margin-left: 5px;
+    padding:
+        6px 18px !important;
 
-    border: 1px solid #D0D5DD !important;
+    margin-left: 2px !important;
+
+    box-sizing: border-box !important;
+
+    border:
+        1px solid #D0D5DD !important;
 
     border-radius: 18px !important;
 
@@ -341,21 +421,28 @@
 
     font-weight: 600 !important;
 
-    cursor: pointer;
+    line-height: 1 !important;
+
+    cursor: pointer !important;
 
     transition:
         background 0.2s ease,
         border-color 0.2s ease,
-        color 0.2s ease !important;
+        color 0.2s ease,
+        box-shadow 0.2s ease !important;
 }
 
 
+/* =========================================================
+   FILTER BUTTON HOVER
+   ========================================================= */
+
 .filter-btn:hover {
+    background: #F8FAFF !important;
+
     border-color: #175CD3 !important;
 
     color: #175CD3 !important;
-
-    background: #F8FAFF !important;
 }
 
 
@@ -363,57 +450,67 @@
    ACTIVE FILTER
    ========================================================= */
 
-.active-filter {
-    background: #175CD3 !important;
+.filter-btn.active-filter {
+    background:
+        #175CD3 !important;
 
-    color: #FFFFFF !important;
+    border-color:
+        #175CD3 !important;
 
-    border-color: #175CD3 !important;
+    color:
+        #FFFFFF !important;
 
     box-shadow:
         0 3px 8px rgba(23, 92, 211, 0.25) !important;
 }
 
 
-.active-filter:hover {
-    background: #164EB6 !important;
+/* =========================================================
+   ACTIVE FILTER HOVER
+   ========================================================= */
 
-    color: #FFFFFF !important;
+.filter-btn.active-filter:hover {
+    background:
+        #154EB5 !important;
 
-    border-color: #164EB6 !important;
+    border-color:
+        #154EB5 !important;
+
+    color:
+        #FFFFFF !important;
 }
 
 
 /* =========================================================
-   TABLE
+   =========================================================
+   CHECKER BATCH TABLE
+   IMPORTANT:
+   ZUL USES checker-batch-grid
+   =========================================================
    ========================================================= */
 
-.checker-batch-table {
+.checker-batch-grid {
     width: 100% !important;
 
-    box-sizing: border-box;
+    box-sizing: border-box !important;
 
-    border: 1px solid #E4E7EC !important;
+    background:
+        #FFFFFF !important;
 
-    border-radius: 6px !important;
+    border:
+        1px solid #E4EAF3 !important;
 
-    background: #FFFFFF !important;
+    border-radius:
+        8px !important;
 
-    overflow: hidden;
-}
+    overflow:
+        hidden !important;
 
+    box-shadow:
+        none !important;
 
-/*
-   IMPORTANT:
-   Do NOT give the listbox a fixed height.
-
-   This allows the table to shrink when it is empty.
-*/
-
-.checker-batch-table {
-    height: auto !important;
-
-    min-height: 0 !important;
+    margin:
+        0 !important;
 }
 
 
@@ -421,59 +518,196 @@
    TABLE HEADER
    ========================================================= */
 
-.checker-batch-table .z-listhead {
-    background: #175CD3 !important;
+.checker-batch-grid .z-listhead {
+    width: 100% !important;
 
-    border: none !important;
-}
+    height:
+        62px !important;
 
+    min-height:
+        62px !important;
 
-.checker-batch-table .z-listheader {
-    background: #175CD3 !important;
+    background:
+        #175CD3 !important;
 
-    border-right:
-        1px solid rgba(255, 255, 255, 0.12) !important;
+    border:
+        none !important;
 
-    border-bottom: none !important;
-}
-
-
-.checker-batch-table .z-listheader:last-child {
-    border-right: none !important;
-}
-
-
-.checker-batch-table .z-listheader-content {
-    padding: 14px 12px !important;
-
-    background: #175CD3 !important;
-
-    color: #FFFFFF !important;
-
-    font-family:
-        'Inter',
-        'Segoe UI',
-        Arial,
-        sans-serif !important;
-
-    font-size: 12px !important;
-
-    font-weight: 700 !important;
-
-    text-transform: none;
-
-    letter-spacing: 0.04em;
-
-    text-align: center !important;
+    box-shadow:
+        none !important;
 }
 
 
 /* =========================================================
-   TABLE ROW
+   TABLE HEADER CELL
    ========================================================= */
 
-.checker-batch-table .z-listitem {
-    background: #FFFFFF !important;
+.checker-batch-grid .z-listheader {
+    height:
+        62px !important;
+
+    min-height:
+        62px !important;
+
+    box-sizing:
+        border-box !important;
+
+    padding:
+        0 !important;
+
+    margin:
+        0 !important;
+
+    background:
+        #175CD3 !important;
+
+    border-right:
+        1px solid rgba(255, 255, 255, 0.12) !important;
+
+    border-bottom:
+        none !important;
+
+    vertical-align:
+        middle !important;
+}
+
+
+/* REMOVE LAST HEADER BORDER */
+
+.checker-batch-grid
+.z-listheader:last-child {
+    border-right:
+        none !important;
+}
+
+
+/* =========================================================
+   TABLE HEADER TEXT
+   ========================================================= */
+
+.checker-batch-grid
+.z-listheader-content {
+
+    width:
+        100% !important;
+
+    height:
+        62px !important;
+
+    min-height:
+        62px !important;
+
+    box-sizing:
+        border-box !important;
+
+    padding:
+        0 20px !important;
+
+    background:
+        transparent !important;
+
+    color:
+        #FFFFFF !important;
+
+    font-family:
+        'Inter',
+        'Plus Jakarta Sans',
+        'Segoe UI',
+        Arial,
+        sans-serif !important;
+
+    font-size:
+        13px !important;
+
+    font-weight:
+        700 !important;
+
+    line-height:
+        1.4 !important;
+
+    letter-spacing:
+        0.04em !important;
+
+    text-align:
+        center !important;
+
+    text-transform: none;
+
+    align-items:
+        center !important;
+
+    justify-content:
+        center !important;
+
+    white-space:
+        nowrap !important;
+
+    text-transform:
+        none !important;
+}
+
+
+/* =========================================================
+   FORCE HEADER LABEL
+   ========================================================= */
+
+.checker-batch-grid
+.z-listheader-content * {
+
+    color:
+        #FFFFFF !important;
+
+    background:
+        transparent !important;
+
+    font-family:
+        'Inter',
+        'Plus Jakarta Sans',
+        'Segoe UI',
+        Arial,
+        sans-serif !important;
+
+    font-size:
+        13px !important;
+
+    font-weight:
+        700 !important;
+}
+
+
+/* =========================================================
+   REMOVE ZK HEADER DECORATION
+   ========================================================= */
+
+.checker-batch-grid
+.z-listheader::after {
+
+    content:
+        none !important;
+
+    display:
+        none !important;
+}
+
+
+/* =========================================================
+   TABLE BODY ROW
+   ========================================================= */
+
+.checker-batch-grid
+.z-listitem {
+
+    height:
+        54px !important;
+
+    min-height:
+        54px !important;
+
+    box-sizing:
+        border-box !important;
+
+    background:
+        #FFFFFF !important;
 
     border-bottom:
         1px solid #EEF2F6 !important;
@@ -483,37 +717,112 @@
 }
 
 
-.checker-batch-table .z-listitem:nth-child(even) {
-    background: #FCFDFF !important;
-}
+/* =========================================================
+   ALTERNATE ROW
+   ========================================================= */
 
+.checker-batch-grid
+.z-listitem:nth-child(even) {
 
-.checker-batch-table .z-listitem:hover {
-    background: #F5F9FF !important;
+    background:
+        #FCFDFF !important;
 }
 
 
 /* =========================================================
-   TABLE CELLS
+   ROW HOVER
    ========================================================= */
 
-.checker-batch-table .z-listcell {
+.checker-batch-grid
+.z-listitem:hover {
+
+    background:
+        #F5F9FF !important;
+}
+
+
+/* =========================================================
+   TABLE CELL
+   ========================================================= */
+
+.checker-batch-grid
+.z-listcell {
+
+    height:
+        54px !important;
+
+    min-height:
+        54px !important;
+
+    box-sizing:
+        border-box !important;
+
+    padding:
+        0 !important;
+
+    background:
+        transparent !important;
+
     border-right:
         1px solid #F0F2F5 !important;
 
-    border-bottom: none !important;
+    border-bottom:
+        none !important;
+
+    vertical-align:
+        middle !important;
+
+    text-align:
+        center !important;
 }
 
 
-.checker-batch-table .z-listcell:last-child {
-    border-right: none !important;
+/* REMOVE LAST CELL BORDER */
+
+.checker-batch-grid
+.z-listcell:last-child {
+
+    border-right:
+        none !important;
 }
 
 
-.checker-batch-table .z-listcell-content {
-    padding: 14px 12px !important;
+/* =========================================================
+   CELL CONTENT
+   ========================================================= */
 
-    color: #344054 !important;
+.checker-batch-grid
+.z-listcell-content {
+
+    width:
+        100% !important;
+
+    height:
+        54px !important;
+
+    min-height:
+        54px !important;
+
+    box-sizing:
+        border-box !important;
+
+    padding:
+        0 14px !important;
+
+    display:
+        flex !important;
+
+    align-items:
+        center !important;
+
+    justify-content:
+        center !important;
+
+    background:
+        transparent !important;
+
+    color:
+        #2B3A55 !important;
 
     font-family:
         'Inter',
@@ -521,110 +830,131 @@
         Arial,
         sans-serif !important;
 
-    font-size: 13px !important;
+    font-size:
+        13px !important;
 
-    font-weight: 500 !important;
+    font-weight:
+        500 !important;
 
-    text-align: center !important;
+    line-height:
+        1.4 !important;
 
     line-height: 2;
 }
 
 
 /* =========================================================
-   BATCH NUMBER
+   COLUMN 1 - BATCH NUMBER
    ========================================================= */
 
-.checker-batch-table
+.checker-batch-grid
 .z-listitem
 .z-listcell:nth-child(1)
 .z-listcell-content {
 
-    color: #0B1F3F !important;
+    color:
+        #0B1F3F !important;
 
-    font-weight: 600 !important;
-
-    text-align: left !important;
+    font-weight:
+        600 !important;
 }
 
 
 /* =========================================================
-   TOTAL CHEQUES
+   COLUMN 2 - TOTAL CHEQUES
    ========================================================= */
 
-.checker-batch-table
+.checker-batch-grid
 .z-listitem
 .z-listcell:nth-child(2)
 .z-listcell-content {
 
-    color: #344054 !important;
+    color:
+        #2B3A55 !important;
 
-    font-weight: 600 !important;
+    font-weight:
+        600 !important;
 }
 
 
 /* =========================================================
-   STATUS
+   COLUMN 3 - STATUS
    ========================================================= */
 
-.checker-batch-table
+.checker-batch-grid
 .z-listitem
 .z-listcell:nth-child(3)
 .z-listcell-content {
 
-    font-weight: 600 !important;
+    color:
+        #2B3A55 !important;
 
-    color: #475467 !important;
+    font-weight:
+        600 !important;
 }
 
 
 /* =========================================================
-   ASSIGNMENT
+   COLUMN 4 - ASSIGNMENT
    ========================================================= */
 
-.checker-batch-table
+.checker-batch-grid
 .z-listitem
 .z-listcell:nth-child(4)
 .z-listcell-content {
 
-    color: #667085 !important;
+    color:
+        #667085 !important;
 
-    font-weight: 500 !important;
+    font-weight:
+        500 !important;
 }
 
 
 /* =========================================================
-   ACTION
+   COLUMN 5 - ACTION
    ========================================================= */
 
-.checker-batch-table
+.checker-batch-grid
 .z-listitem
 .z-listcell:nth-child(5)
 .z-listcell-content {
 
-    text-align: center !important;
+    text-align:
+        center !important;
 }
 
 
 /* =========================================================
-   EMPTY TABLE MESSAGE
+   ACTION BUTTON
    ========================================================= */
 
-.checker-batch-table .z-listbox-emptybody {
-    height: auto !important;
+.checker-batch-grid
+.btn-action {
 
-    min-height: 48px !important;
+    min-height:
+        38px !important;
 
-    padding: 14px 12px !important;
+    height:
+        38px !important;
 
-    box-sizing: border-box;
-}
+    padding:
+        7px 18px !important;
 
+    box-sizing:
+        border-box !important;
 
-.checker-batch-table .z-listbox-emptybody td {
-    padding: 14px 12px !important;
+    border:
+        1px solid #175CD3 !important;
 
-    color: #98A2B3 !important;
+    border-radius:
+        6px !important;
+
+    background:
+        #175CD3 !important;
+
+    color:
+        #FFFFFF !important;
 
     font-family:
         'Inter',
@@ -632,29 +962,141 @@
         Arial,
         sans-serif !important;
 
-    font-size: 13px !important;
+    font-size:
+        13px !important;
 
-    text-align: left !important;
+    font-weight:
+        600 !important;
+
+    line-height:
+        1 !important;
+
+    cursor:
+        pointer !important;
 }
 
 
 /* =========================================================
-   PAGINATION
+   ACTION BUTTON HOVER
    ========================================================= */
 
-.pagination-wrapper {
-    width: 100%;
+.checker-batch-grid
+.btn-action:hover {
 
-    text-align: left;
+    background:
+        #154EB5 !important;
 
-    padding-top: 14px;
+    border-color:
+        #154EB5 !important;
 }
 
 
-.pagination-layout {
-    display: inline-flex;
+/* =========================================================
+   EMPTY TABLE
+   ========================================================= */
 
-    align-items: center;
+.checker-batch-grid
+.z-listbox-emptybody {
+
+    background:
+        #FFFFFF !important;
+
+    color:
+        #98A2B3 !important;
+
+    font-family:
+        'Inter',
+        'Segoe UI',
+        Arial,
+        sans-serif !important;
+
+    font-size:
+        13px !important;
+
+    text-align:
+        left !important;
+
+    padding:
+        0 !important;
+}
+
+
+/* =========================================================
+   EMPTY MESSAGE
+   ========================================================= */
+
+.checker-batch-grid
+.z-listbox-emptybody td {
+
+    height:
+        48px !important;
+
+    padding:
+        14px 12px !important;
+
+    box-sizing:
+        border-box !important;
+
+    color:
+        #98A2B3 !important;
+
+    font-family:
+        'Inter',
+        'Segoe UI',
+        Arial,
+        sans-serif !important;
+
+    font-size:
+        13px !important;
+
+    font-weight:
+        400 !important;
+
+    text-align:
+        left !important;
+
+    background:
+        #FFFFFF !important;
+}
+
+
+/* =========================================================
+   PAGINATION WRAPPER
+   ========================================================= */
+
+.pagination-wrapper {
+
+    width:
+        100% !important;
+
+    box-sizing:
+        border-box !important;
+
+    padding:
+        10px 4px 2px 0 !important;
+
+    text-align:
+        right !important;
+
+    background:
+        #FFFFFF !important;
+}
+
+
+/* =========================================================
+   PAGINATION LAYOUT
+   ========================================================= */
+
+.pagination-layout {
+
+    display:
+        inline-flex !important;
+
+    align-items:
+        center !important;
+
+    justify-content:
+        flex-end !important;
 }
 
 
@@ -663,19 +1105,36 @@
    ========================================================= */
 
 .pagination-btn {
-    min-width: 40px !important;
 
-    height: 36px !important;
+    min-width:
+        32px !important;
 
-    padding: 0 12px !important;
+    width:
+        32px !important;
 
-    border: 1px solid #D0D5DD !important;
+    height:
+        36px !important;
 
-    border-radius: 6px !important;
+    padding:
+        0 !important;
 
-    background: #FFFFFF !important;
+    margin:
+        0 2px !important;
 
-    color: #475467 !important;
+    box-sizing:
+        border-box !important;
+
+    background:
+        transparent !important;
+
+    border:
+        none !important;
+
+    border-radius:
+        0 !important;
+
+    color:
+        #98A2B3 !important;
 
     font-family:
         'Inter',
@@ -683,25 +1142,40 @@
         Arial,
         sans-serif !important;
 
-    font-size: 12px !important;
+    font-size:
+        18px !important;
 
-    font-weight: 600 !important;
+    font-weight:
+        600 !important;
 
-    cursor: pointer;
+    cursor:
+        pointer !important;
 
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease,
-        color 0.2s ease !important;
+    display:
+        inline-flex !important;
+
+    align-items:
+        center !important;
+
+    justify-content:
+        center !important;
 }
 
 
+/* =========================================================
+   PAGINATION HOVER
+   ========================================================= */
+
 .pagination-btn:hover {
-    background: #F5F9FF !important;
 
-    border-color: #175CD3 !important;
+    background:
+        transparent !important;
 
-    color: #175CD3 !important;
+    border:
+        none !important;
+
+    color:
+        #175CD3 !important;
 }
 
 
@@ -709,21 +1183,45 @@
    ACTIVE PAGE
    ========================================================= */
 
-.pagination-active {
-    background: #175CD3 !important;
+.pagination-btn.pagination-active {
 
-    border-color: #175CD3 !important;
+    width:
+        42px !important;
 
-    color: #FFFFFF !important;
+    min-width:
+        42px !important;
+
+    height:
+        36px !important;
+
+    background:
+        #FFFFFF !important;
+
+    border:
+        1px solid #D0D5DD !important;
+
+    border-radius:
+        6px !important;
+
+    color:
+        #101828 !important;
 }
 
 
-.pagination-active:hover {
-    background: #164EB6 !important;
+/* =========================================================
+   ACTIVE PAGE HOVER
+   ========================================================= */
 
-    border-color: #164EB6 !important;
+.pagination-btn.pagination-active:hover {
 
-    color: #FFFFFF !important;
+    background:
+        #FFFFFF !important;
+
+    border:
+        1px solid #D0D5DD !important;
+
+    color:
+        #101828 !important;
 }
 
 
@@ -732,7 +1230,12 @@
    ========================================================= */
 
 .pagination-info {
-    margin-left: 12px;
+
+    margin:
+        0 4px !important;
+
+    color:
+        #344054 !important;
 
     font-family:
         'Inter',
@@ -740,67 +1243,181 @@
         Arial,
         sans-serif !important;
 
-    font-size: 12px !important;
+    font-size:
+        14px !important;
 
-    font-weight: 600 !important;
+    font-weight:
+        500 !important;
 
-    color: #667085 !important;
-
-    white-space: nowrap;
+    white-space:
+        nowrap !important;
 }
 
 
 /* =========================================================
-   RESPONSIVE
+   RESPONSIVE - TABLET
    ========================================================= */
 
 @media (max-width: 1024px) {
 
     .checker-dashboard-layout {
-        padding: 20px;
+
+        padding:
+            20px !important;
     }
+
 
     .dashboard-title {
-        font-size: 26px !important;
+
+        font-size:
+            26px !important;
     }
+
 
     .summary-card {
-        padding: 18px;
+
+        padding:
+            18px !important;
     }
 
+
     .summary-card-value {
-        font-size: 30px !important;
+
+        font-size:
+            30px !important;
+    }
+
+
+    .batch-section {
+
+        padding:
+            18px 20px 14px 20px !important;
     }
 }
 
 
+/* =========================================================
+   RESPONSIVE - MOBILE
+   ========================================================= */
+
 @media (max-width: 768px) {
 
     .checker-dashboard-layout {
-        padding: 16px 12px;
+
+        padding:
+            16px 12px !important;
     }
 
-    .summary-cards {
-        spacing: 10px;
-    }
-
-    .summary-card {
-        padding: 14px;
-    }
-
-    .summary-card-value {
-        font-size: 25px !important;
-    }
-
-    .summary-card-label {
-        font-size: 9px !important;
-    }
 
     .dashboard-title {
-        font-size: 23px !important;
+
+        font-size:
+            23px !important;
     }
 
-    .filter-btn {
-        padding: 5px 12px !important;
+
+    .dashboard-subtitle {
+
+        font-size:
+            12px !important;
+    }
+
+
+    .summary-card {
+
+        padding:
+            14px !important;
+    }
+
+
+    .summary-card-label {
+
+        font-size:
+            9px !important;
+    }
+
+
+    .summary-card-value {
+
+        font-size:
+            25px !important;
+    }
+
+
+    .batch-section {
+
+        padding:
+            16px 12px 12px 12px !important;
+    }
+
+
+    .checker-batch-grid
+    .z-listheader {
+
+        height:
+            56px !important;
+    }
+
+
+    .checker-batch-grid
+    .z-listheader-content {
+
+        height:
+            56px !important;
+
+        min-height:
+            56px !important;
+
+        padding:
+            0 10px !important;
+
+        font-size:
+            11px !important;
+    }
+
+
+    .checker-batch-grid
+    .z-listitem {
+
+        height:
+            50px !important;
+
+        min-height:
+            50px !important;
+    }
+
+
+    .checker-batch-grid
+    .z-listcell {
+
+        height:
+            50px !important;
+
+        min-height:
+            50px !important;
+    }
+
+
+    .checker-batch-grid
+    .z-listcell-content {
+
+        height:
+            50px !important;
+
+        min-height:
+            50px !important;
+
+        padding:
+            0 8px !important;
+
+        font-size:
+            12px !important;
+    }
+
+
+    .pagination-wrapper {
+
+        text-align:
+            right !important;
     }
 }

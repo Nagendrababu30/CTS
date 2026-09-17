@@ -773,30 +773,45 @@
 
 /* ---------- Table header ---------- */
 
+ 
 .custom-grid .z-grid-header,
 .custom-grid .z-columns {
-    background: #1677FF !important;
-
+    background: #175CD3 !important;
     background-size: auto !important;
-
     border-bottom: none !important;
-
-    animation: none;
-
-    box-shadow: none;
+    animation: none !important;
+    box-shadow: none !important;
 }
 
+.custom-grid .z-column {
+    background: transparent !important;
 
-/*
- * IMPORTANT:
- *
- * No fixed height is used here.
- *
- * Maker Dashboard uses the natural ZK column height,
- * controlled by the 12px vertical padding.
- */
+    font-family:
+        'Inter',
+        'Plus Jakarta Sans',
+        sans-serif !important;
 
- .custom-grid .z-column,
+    font-weight: 700 !important;
+    font-size: 13px !important;
+
+    letter-spacing: 0.06em !important;
+
+    color: #FFFFFF !important;
+
+    padding: 12px 12px !important;
+
+    border-right: 1px solid rgba(255,255,255,0.25) !important;
+    border-bottom: none !important;
+
+    text-shadow:
+        0 1px 2px rgba(0,0,0,0.22);
+
+    white-space: nowrap !important;
+
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
 .custom-grid .z-column-content {
     background: transparent !important;
 
@@ -807,48 +822,42 @@
 
     font-weight: 700 !important;
     font-size: 13px !important;
+
     letter-spacing: 0.06em !important;
     text-transform: none !important;
     color: #FFFFFF !important;
 
-    height: 22px !important;
-    min-height: 22px !important;
-    max-height: 22px !important;
+    color: #FFFFFF !important;
 
-    padding: 0 12px !important;
+    padding: 12px 12px !important;
 
-    border-right: none !important;
+    border: none !important;
     border-bottom: none !important;
 
     text-shadow:
-        0 1px 2px
-        rgba(0,0,0,0.22);
+        0 1px 2px rgba(0,0,0,0.22);
 
     white-space: nowrap !important;
 
     text-align: center !important;
     vertical-align: middle !important;
 }
-.custom-grid .z-column:last-child {
+
+.custom-grid .z-column:last-child,
+.custom-grid .z-column:last-child .z-column-content {
     border-right: none !important;
 }
 
- .custom-grid .z-column {
-    font-size: 12px !important;
-    height: 22px !important;
-    min-height: 22px !important;
-    max-height: 22px !important;
-    padding: 0 12px !important;
+.custom-grid .z-column * {
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+    background: transparent !important;
 }
-
-/* ---------- Remove header divider ---------- */
 
 .custom-grid .z-column::after {
     content: none !important;
-
     display: none !important;
 }
-
 
 /* ---------- Data rows ---------- */
 

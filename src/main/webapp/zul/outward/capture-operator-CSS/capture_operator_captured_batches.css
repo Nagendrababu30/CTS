@@ -131,7 +131,7 @@
 
     font-size: 30px !important;
 
-    font-weight: 700 !important;
+    font-weight: 50 !important;
 
     line-height: 1.2 !important;
 
@@ -286,7 +286,7 @@
 
     font-size: 17px !important;
 
-    font-weight: 700 !important;
+    font-weight: 300 !important;
 
     line-height: 1.4 !important;
 }
@@ -441,7 +441,7 @@
 
     color: #FFFFFF !important;
 
-    font-weight: 700 !important;
+    font-weight: 300 !important;
 
     background: transparent !important;
 }

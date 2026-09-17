@@ -25,7 +25,18 @@
     
     --shadow-card:     0 2px 8px rgba(16, 24, 40, 0.05);
 }
-
+.micr-page-wrapper {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    background:
+        radial-gradient(1200px 600px at 0% 0%, rgba(23, 92, 211, 0.12), transparent 60%),
+        radial-gradient(1000px 600px at 100% 0%, rgba(122, 90, 248, 0.10), transparent 60%),
+        radial-gradient(900px 700px at 100% 100%, rgba(18, 183, 106, 0.07), transparent 60%),
+        linear-gradient(180deg, var(--bg-app-1) 0%, var(--bg-app-2) 100%);
+    position: relative;
+    overflow: hidden;
+}
 /* ---------- Reset & Background ---------- */
 html, body {
     margin: 0 !important;
@@ -198,12 +209,98 @@ div[style*="background: white"]::before {
     border-color: #059669 !important;
 }
 
-/* Paging Bar (mold="paging") */
-.micr-repair-listbox .z-paging {
+/* =====================================================
+   MICR REPAIR PAGING BAR — POLISHED & RIGHT-ALIGNED
+   ===================================================== */
+
+/* 1. Bar Container */
+.micr-repair-listbox .z-paging,
+.micr-repair-listbox .z-paging-os {
     display: flex !important;
     justify-content: flex-end !important;
     align-items: center !important;
-    padding: 12px 20px !important;
-    background: var(--bg-surface) !important;
-    border-top: 1px solid var(--border-light) !important;
+    width: 100% !important;
+    padding: 10px 18px !important;
+    background: #FFFFFF !important;
+    border-top: 1px solid #EEF2F8 !important;
+    box-sizing: border-box !important;
+}
+
+/* 2. Group the buttons & text together on the right */
+.micr-repair-listbox .z-paging-content,
+.micr-repair-listbox .z-paging table,
+.micr-repair-listbox .z-paging-os table {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 4px !important;
+    margin: 0 !important;
+    float: right !important;
+}
+
+.micr-repair-listbox .z-paging tr {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+}
+
+/* 3. Button Boxes (Arrows « ‹ › ») */
+.micr-repair-listbox .z-paging-btn,
+.micr-repair-listbox .z-paging-button,
+.micr-repair-listbox .z-paging-btn:hover,
+.micr-repair-listbox .z-paging-button:hover {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 28px !important;
+    height: 28px !important;
+    padding: 0 4px !important;
+    border: 1px solid #D0D5DD !important;
+    border-radius: 6px !important;
+    background: #FFFFFF !important;
+    color: #475467 !important;
+    cursor: pointer !important;
+    font-size: 13px !important;
+    line-height: 1 !important;
+    transition: all 0.15s ease !important;
+}
+
+.micr-repair-listbox .z-paging-btn:hover,
+.micr-repair-listbox .z-paging-button:hover {
+    background: #F9FAFB !important;
+    border-color: #98A2B3 !important;
+    color: #175CD3 !important;
+}
+
+/* 4. Page Input Box */
+.micr-repair-listbox .z-paging-input,
+.micr-repair-listbox .z-paging-inp,
+.micr-repair-listbox input.z-paging-input {
+    width: 38px !important;
+    height: 28px !important;
+    text-align: center !important;
+    border: 1.5px solid #175CD3 !important;
+    border-radius: 6px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #0B1F3F !important;
+    background: #FFFFFF !important;
+    padding: 0 !important;
+    margin: 0 4px !important;
+    box-sizing: border-box !important;
+}
+
+/* 5. Page Text ("/ 1") */
+.micr-repair-listbox .z-paging-text {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: #667085 !important;
+    padding: 0 6px 0 2px !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+}
+.micr-repair-listbox .z-paging-info {
+    display: none !important;
 }

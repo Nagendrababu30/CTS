@@ -21,14 +21,101 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
     }
 
     public static CheckerReportDao of() {
-        return new CheckerReportDaoImpl(ConnectionPool.getDataSource());
+        return new CheckerReportDaoImpl(
+                ConnectionPool.getDataSource());
     }
 
     @Override
     public List<Map<String, Object>> getRrfReportData() {
 
         String sql = """
-                SELECT 
+                WITH latest_batch_status AS (
+                    SELECT
+                        batch_id,
+                        batch_status
+                    FROM (
+                        SELECT
+                            batch_id,
+                            batch_status,
+                            ROW_NUMBER() OVER (
+                                PARTITION BY batch_id
+                                ORDER BY changed_on DESC,
+                                         batch_history_id DESC
+                            ) AS rn
+                        FROM inward_batch_history
+                    ) x
+                    WHERE rn = 1
+                ),
+
+                latest_cheque_status AS (
+                    SELECT
+                        cheque_number,
+                        status_history_id,
+                        status,
+                        remarks,
+                        report_generated
+                    FROM (
+                        SELECT
+                            h.*,
+                            ROW_NUMBER() OVER (
+                                PARTITION BY cheque_number
+                                ORDER BY status_history_id DESC
+                            ) AS rn
+                        FROM inward_cheque_status_history h
+                    ) x
+                    WHERE rn = 1
+                ),
+
+                rejection_reasons AS (
+                    SELECT
+                        h.cheque_number,
+
+                        STRING_AGG(
+                            DISTINCT r.description,
+                            ', '
+                            ORDER BY r.description
+                        ) AS return_reason
+
+                    FROM inward_cheque_status_history h
+
+                    CROSS JOIN LATERAL regexp_split_to_table(
+                        COALESCE(h.rejection_reason_code, ''),
+                        '\\s*,\\s*'
+                    ) AS reason_code
+
+                    JOIN inward_cheque_rejection_reason r
+                        ON r.rejection_reason_code =
+                           TRIM(reason_code)
+
+                    WHERE UPPER(TRIM(h.status))
+                            IN ('REJECT', 'REJECTED')
+
+                      AND h.report_generated = 'N'
+
+                    GROUP BY h.cheque_number
+                ),
+
+                rejection_history AS (
+                    SELECT
+                        cheque_number,
+
+                        STRING_AGG(
+                            status_history_id::text,
+                            ','
+                            ORDER BY status_history_id
+                        ) AS status_history_ids
+
+                    FROM inward_cheque_status_history
+
+                    WHERE UPPER(TRIM(status))
+                            IN ('REJECT', 'REJECTED')
+
+                      AND report_generated = 'N'
+
+                    GROUP BY cheque_number
+                )
+
+                SELECT
                     c.cheque_number AS cheque_no,
                     c.batch_id,
                     c.amount,
@@ -39,66 +126,70 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
                     c.cheque_date,
                     b.presenting_bank_name,
 
-                    (
-                        SELECT h.status_history_id
-                        FROM inward_cheque_status_history h
-                        WHERE h.cheque_number = c.cheque_number
-                        ORDER BY h.status_history_id DESC
-                        LIMIT 1
-                    ) AS status_history_id,
+                    lcs.status_history_id,
 
-                    (
-                        SELECT h.rejection_reason_code
-                        FROM inward_cheque_status_history h
-                        WHERE h.cheque_number = c.cheque_number
-                        ORDER BY h.status_history_id DESC
-                        LIMIT 1
-                    ) AS rejection_reason_code,
+                    rr.return_reason,
 
-                    (
-                        SELECT h.remarks
-                        FROM inward_cheque_status_history h
-                        WHERE h.cheque_number = c.cheque_number
-                        ORDER BY h.status_history_id DESC
-                        LIMIT 1
-                    ) AS remarks
+                    lcs.remarks,
+
+                    rh.status_history_ids
 
                 FROM inward_cheque c
+
                 JOIN inward_batch b
                     ON c.batch_id = b.batch_id
 
-                WHERE (
-                    SELECT UPPER(TRIM(h.status))
-                    FROM inward_cheque_status_history h
-                    WHERE h.cheque_number = c.cheque_number
-                    ORDER BY h.status_history_id DESC
-                    LIMIT 1
-                ) = 'REJECT'
+                JOIN latest_batch_status lbs
+                    ON lbs.batch_id = c.batch_id
 
-                AND (
-                    SELECT h.report_generated
-                    FROM inward_cheque_status_history h
-                    WHERE h.cheque_number = c.cheque_number
-                    ORDER BY h.status_history_id DESC
-                    LIMIT 1
-                ) = 'N'
+                JOIN latest_cheque_status lcs
+                    ON lcs.cheque_number = c.cheque_number
 
-                ORDER BY c.batch_id, c.cheque_number
+                JOIN rejection_reasons rr
+                    ON rr.cheque_number = c.cheque_number
+
+                JOIN rejection_history rh
+                    ON rh.cheque_number = c.cheque_number
+
+                WHERE UPPER(TRIM(lbs.batch_status))
+                        = 'COMPLETED'
+
+                  AND UPPER(TRIM(lcs.status))
+                        IN ('REJECT', 'REJECTED')
+
+                  AND lcs.report_generated = 'N'
+
+                ORDER BY
+                    c.batch_id,
+                    c.cheque_number
                 """;
 
-        List<Map<String, Object>> rrfList = new ArrayList<>();
+        List<Map<String, Object>> rrfList =
+                new ArrayList<>();
 
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
-             ResultSet rs = statement.executeQuery()) {
+        try (Connection connection =
+                     dataSource.getConnection();
+
+             PreparedStatement statement =
+                     connection.prepareStatement(sql);
+
+             ResultSet rs =
+                     statement.executeQuery()) {
 
             while (rs.next()) {
 
-                Map<String, Object> row = new HashMap<>();
+                Map<String, Object> row =
+                        new HashMap<>();
 
                 row.put(
                         "statusHistoryId",
                         rs.getLong("status_history_id"));
+
+                row.put(
+                        "statusHistoryIds",
+                        getStatusHistoryIds(
+                                rs.getString(
+                                        "status_history_ids")));
 
                 row.put(
                         "batchId",
@@ -118,7 +209,8 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
 
                 row.put(
                         "payeeAccountNo",
-                        rs.getString("payee_account_number"));
+                        rs.getString(
+                                "payee_account_number"));
 
                 row.put(
                         "payeeName",
@@ -130,23 +222,22 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
 
                 row.put(
                         "bankName",
-                        rs.getString("presenting_bank_name"));
+                        rs.getString(
+                                "presenting_bank_name"));
 
                 row.put(
                         "chequeDate",
                         rs.getDate("cheque_date"));
 
-               
                 row.put(
                         "returnReason",
-                        rs.getString("rejection_reason_code"));
+                        rs.getString("return_reason"));
 
                 row.put(
-                        "remarks",
+                        "remark",
                         rs.getString("remarks"));
 
                 rrfList.add(row);
-                
             }
 
         } catch (Exception e) {
@@ -166,7 +257,43 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
     public List<Map<String, Object>> getApprovedReportData() {
 
         String sql = """
-                SELECT 
+                WITH latest_batch_status AS (
+                    SELECT
+                        batch_id,
+                        batch_status
+                    FROM (
+                        SELECT
+                            batch_id,
+                            batch_status,
+                            ROW_NUMBER() OVER (
+                                PARTITION BY batch_id
+                                ORDER BY changed_on DESC,
+                                         batch_history_id DESC
+                            ) AS rn
+                        FROM inward_batch_history
+                    ) x
+                    WHERE rn = 1
+                ),
+
+                latest_cheque_status AS (
+                    SELECT
+                        cheque_number,
+                        status_history_id,
+                        status,
+                        report_generated
+                    FROM (
+                        SELECT
+                            h.*,
+                            ROW_NUMBER() OVER (
+                                PARTITION BY cheque_number
+                                ORDER BY status_history_id DESC
+                            ) AS rn
+                        FROM inward_cheque_status_history h
+                    ) x
+                    WHERE rn = 1
+                )
+
+                SELECT
                     c.cheque_number AS cheque_no,
                     c.batch_id,
                     c.amount,
@@ -177,46 +304,48 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
                     c.cheque_date,
                     b.presenting_bank_name,
 
-                    (
-                        SELECT h.status_history_id
-                        FROM inward_cheque_status_history h
-                        WHERE h.cheque_number = c.cheque_number
-                        ORDER BY h.status_history_id DESC
-                        LIMIT 1
-                    ) AS status_history_id
+                    lcs.status_history_id
 
                 FROM inward_cheque c
+
                 JOIN inward_batch b
                     ON c.batch_id = b.batch_id
 
-                WHERE (
-                    SELECT UPPER(TRIM(h.status))
-                    FROM inward_cheque_status_history h
-                    WHERE h.cheque_number = c.cheque_number
-                    ORDER BY h.status_history_id DESC
-                    LIMIT 1
-                ) = 'ACCEPT'
+                JOIN latest_batch_status lbs
+                    ON lbs.batch_id = c.batch_id
 
-                AND (
-                    SELECT h.report_generated
-                    FROM inward_cheque_status_history h
-                    WHERE h.cheque_number = c.cheque_number
-                    ORDER BY h.status_history_id DESC
-                    LIMIT 1
-                ) = 'N'
+                JOIN latest_cheque_status lcs
+                    ON lcs.cheque_number = c.cheque_number
 
-                ORDER BY c.batch_id, c.cheque_number
+                WHERE UPPER(TRIM(lbs.batch_status))
+                        = 'COMPLETED'
+
+                  AND UPPER(TRIM(lcs.status))
+                        IN ('ACCEPT', 'ACCEPTED', 'APPROVED')
+
+                  AND lcs.report_generated = 'N'
+
+                ORDER BY
+                    c.batch_id,
+                    c.cheque_number
                 """;
 
-        List<Map<String, Object>> approvedList = new ArrayList<>();
+        List<Map<String, Object>> approvedList =
+                new ArrayList<>();
 
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql);
-             ResultSet rs = statement.executeQuery()) {
+        try (Connection connection =
+                     dataSource.getConnection();
+
+             PreparedStatement statement =
+                     connection.prepareStatement(sql);
+
+             ResultSet rs =
+                     statement.executeQuery()) {
 
             while (rs.next()) {
 
-                Map<String, Object> row = new HashMap<>();
+                Map<String, Object> row =
+                        new HashMap<>();
 
                 row.put(
                         "statusHistoryId",
@@ -240,7 +369,8 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
 
                 row.put(
                         "payeeAccountNo",
-                        rs.getString("payee_account_number"));
+                        rs.getString(
+                                "payee_account_number"));
 
                 row.put(
                         "payeeName",
@@ -252,7 +382,8 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
 
                 row.put(
                         "bankName",
-                        rs.getString("presenting_bank_name"));
+                        rs.getString(
+                                "presenting_bank_name"));
 
                 row.put(
                         "chequeDate",
@@ -278,54 +409,44 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
     public void updateRrfReportGenerated(
             List<Long> statusHistoryIds) {
 
-        String sql = """
-                UPDATE inward_cheque_status_history
-                SET report_generated = 'Y'
-                WHERE status_history_id = ?
-                AND report_generated = 'N'
-                """;
-
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement =
-                     connection.prepareStatement(sql)) {
-
-            for (Long statusHistoryId : statusHistoryIds) {
-
-                statement.setLong(1, statusHistoryId);
-                statement.addBatch();
-            }
-
-            statement.executeBatch();
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            throw new RuntimeException(
-                    "DB Error updating RRF report status: "
-                            + e.getMessage(),
-                    e);
-        }
+        updateReportGenerated(statusHistoryIds);
     }
 
     @Override
     public void updateApprovedReportGenerated(
             List<Long> statusHistoryIds) {
 
+        updateReportGenerated(statusHistoryIds);
+    }
+
+    private void updateReportGenerated(
+            List<Long> statusHistoryIds) {
+
+        if (statusHistoryIds == null
+                || statusHistoryIds.isEmpty()) {
+            return;
+        }
+
         String sql = """
                 UPDATE inward_cheque_status_history
                 SET report_generated = 'Y'
                 WHERE status_history_id = ?
-                AND report_generated = 'N'
+                  AND report_generated = 'N'
                 """;
 
-        try (Connection connection = dataSource.getConnection();
+        try (Connection connection =
+                     dataSource.getConnection();
+
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
-            for (Long statusHistoryId : statusHistoryIds) {
+            for (Long statusHistoryId :
+                    statusHistoryIds) {
 
-                statement.setLong(1, statusHistoryId);
+                statement.setLong(
+                        1,
+                        statusHistoryId);
+
                 statement.addBatch();
             }
 
@@ -336,10 +457,38 @@ public class CheckerReportDaoImpl implements CheckerReportDao {
             e.printStackTrace();
 
             throw new RuntimeException(
-                    "DB Error updating Approved report status: "
+                    "DB Error updating report status: "
                             + e.getMessage(),
                     e);
         }
     }
-}
 
+    private List<Long> getStatusHistoryIds(
+            String statusHistoryIds) {
+
+        List<Long> ids =
+                new ArrayList<>();
+
+        if (statusHistoryIds == null
+                || statusHistoryIds.trim().isEmpty()) {
+
+            return ids;
+        }
+
+        String[] values =
+                statusHistoryIds.split(",");
+
+        for (String value : values) {
+
+            if (value != null
+                    && !value.trim().isEmpty()) {
+
+                ids.add(
+                        Long.parseLong(
+                                value.trim()));
+            }
+        }
+
+        return ids;
+    }
+}

@@ -83,7 +83,7 @@ public class CheckerSendToNPCIDAO {
                 "LEFT JOIN public.outward_cheque oc " +
                 "    ON ob.batch_number = oc.batch_number " +
 
-                "WHERE UPPER(ob.batch_status) = 'CHECKER_COMPLETED' " +
+                "WHERE UPPER(ob.batch_status) = 'CHECKER_VERIFIED' " +
 
                 "GROUP BY " +
                 "    ob.batch_number, " +
@@ -237,7 +237,7 @@ public class CheckerSendToNPCIDAO {
                 "    SELECT 1 " +
                 "    FROM public.outward_batch " +
                 "    WHERE batch_number = ? " +
-                "      AND UPPER(batch_status) = 'CHECKER_COMPLETED' " +
+                "      AND UPPER(batch_status) = 'CHECKER_VERIFIED' " +
                 ")";
 
 

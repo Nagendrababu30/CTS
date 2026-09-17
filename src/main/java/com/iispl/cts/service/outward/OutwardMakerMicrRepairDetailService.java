@@ -7,11 +7,12 @@ import com.iispl.cts.model.outward.OutwardCheque;
 
 public class OutwardMakerMicrRepairDetailService {
 
-
     private OutwardMakerMicrRepairDetailDAO dao;
 
     public OutwardMakerMicrRepairDetailService() {
+
         dao = new OutwardMakerMicrRepairDetailDAO();
+
     }
 
 
@@ -19,22 +20,49 @@ public class OutwardMakerMicrRepairDetailService {
             String batchNumber) {
 
         return dao.getMicrErrorCheques(batchNumber);
+
     }
 
 
+    /**
+     * Updates corrected MICR details.
+     *
+     * Normal MICR repair:
+     *     returnedMode = false
+     *     -> MICR_REPAIRED
+     *
+     * Checker returned MICR repair:
+     *     returnedMode = true
+     *     -> RE_VERIFIED
+     */
     public boolean updateCorrectedMicr(
+
             String batchNumber,
+
             String chequeNumber,
+
             String cityCode,
+
             String bankCode,
-            String branchCode) {
+
+            String branchCode,
+
+            boolean returnedMode) {
 
         return dao.updateCorrectedMicr(
+
                 batchNumber,
+
                 chequeNumber,
+
                 cityCode,
+
                 bankCode,
-                branchCode);
+
+                branchCode,
+
+                returnedMode);
+
     }
 
 
@@ -42,6 +70,7 @@ public class OutwardMakerMicrRepairDetailService {
             String batchNumber) {
 
         return dao.hasRemainingMicrErrors(batchNumber);
+
     }
 
 
@@ -49,6 +78,7 @@ public class OutwardMakerMicrRepairDetailService {
             String batchNumber) {
 
         return dao.updateBatchStatus(batchNumber);
+
     }
 
 }

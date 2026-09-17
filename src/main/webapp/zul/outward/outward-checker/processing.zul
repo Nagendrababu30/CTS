@@ -17,98 +17,110 @@
         <vlayout id="processingPage"
                  width="100%"
                  height="100%"
-                 spacing="20px"
+                 spacing="14px"
                  apply="com.iispl.cts.controller.outward.checker.CheckerProcessingController">
 
-            <!-- =========================================================
-                 PAGE HEADER
-                 ========================================================= -->
+
+            <!-- TOP BATCH BAR -->
 
             <hlayout width="100%"
+                     height="52px"
                      valign="middle"
-                     sclass="processing-header">
+                     sclass="batch-summary-bar">
 
-                <vlayout spacing="4px">
+                <button id="backButton"
+                        label="←"
+                        sclass="batch-back-button"/>
 
-                    <label value="Checker Processing"
-                           sclass="page-title"/>
-
-                    <hlayout spacing="8px"
-                             valign="middle">
-
-                        <label id="verificationBatchId"
-                               value="Batch: -"
-                               sclass="page-subtitle"/>
-
-                        <label value="•"
-                               sclass="page-subtitle-separator"/>
-
-                        <label id="chequeSequence"
-                               value="Cheque -"
-                               sclass="page-subtitle"/>
-
-                    </hlayout>
-
-                </vlayout>
+                <label id="verificationBatchId"
+                       value=""
+                       sclass="batch-number-label"/>
 
                 <space hflex="1"/>
 
-                <button id="backButton"
-                        label="Back to Queue"
-                        iconSclass="z-icon-arrow-left"
-                        sclass="secondary-button"/>
+                <div sclass="summary-pill total-pill">
+
+                    <label value="Total:"/>
+
+                </div>
+
+                <space hflex="1"/>
+
+                <div sclass="summary-pill completed-pill">
+
+                    <label value="Completed:"/>
+
+                </div>
+
+                <space hflex="1"/>
+
+                <div sclass="summary-pill pending-pill">
+
+                    <label value="Pending:"/>
+
+                </div>
+
+                <space hflex="1"/>
+
+                <div sclass="summary-pill cheque-pill">
+
+                    <label id="chequeSequence"
+                           value=""/>
+
+                </div>
 
             </hlayout>
 
 
-            <!-- =========================================================
-                 CHEQUE REVIEW AREA
-                 55% IMAGE | 3% GAP | 42% DETAILS
-                 ========================================================= -->
+            <!-- MAIN AREA -->
 
             <hlayout width="100%"
                      vflex="1"
                      spacing="0"
                      valign="top"
-                     sclass="cheque-information-row">
+                     sclass="processing-main-area">
 
 
-                <!-- =====================================================
-                     CHEQUE IMAGE
-                     ===================================================== -->
+                <!-- LEFT IMAGE -->
 
                 <vlayout hflex="55"
                          vflex="1"
-                         spacing="12px"
+                         spacing="10px"
                          sclass="processing-card cheque-image-card">
 
-                    <label value="Cheque Image"
+                    <label value="Cheque Image Preview"
                            sclass="section-title"/>
 
-                    <separator/>
-
-
-                    <!-- FRONT / BACK -->
-
                     <hlayout width="100%"
+                             height="42px"
                              spacing="8px"
                              valign="middle"
-                             sclass="image-side-controls">
-
-                        <space hflex="1"/>
+                             sclass="image-toolbar">
 
                         <button id="frontButton"
-                                label="Front"
+                                label="View Front"
                                 sclass="image-side-button selected"/>
 
                         <button id="backSideButton"
-                                label="Back"
+                                label="View Back"
                                 sclass="image-side-button"/>
+
+                        <space hflex="1"/>
+
+                        <button id="zoomInButton"
+                                label="+"
+                                sclass="image-tool-button"/>
+
+                        <button id="zoomOutButton"
+                                label="−"
+                                sclass="image-tool-button"/>
+
+                        <button id="rotateButton"
+                                label="↻"
+                                sclass="image-tool-button"/>
 
                     </hlayout>
 
-
-                    <!-- CHEQUE IMAGE -->
 
                     <div width="100%"
                          vflex="1"
@@ -121,391 +133,350 @@
                     </div>
 
 
-                    <!-- ROTATE / ZOOM CONTROLS -->
-
                     <hlayout width="100%"
-                             valign="middle"
-                             sclass="image-controls">
+                             height="28px"
+                             valign="middle">
 
-                        <button id="rotateButton"
-                                label="Rotate"
-                                iconSclass="z-icon-refresh"
-                                sclass="image-control-button"/>
+                        <label value="Cheque Number :"
+                               sclass="cheque-number-prefix"/>
+
+                        <label id="chequeNumberLabel"
+                               value=""
+                               sclass="cheque-number-value"/>
 
                         <space hflex="1"/>
-
-                        <button id="zoomOutButton"
-                                label="−"
-                                sclass="image-zoom-button"/>
 
                         <label id="zoomLevelLabel"
                                value="100%"
                                sclass="zoom-level"/>
 
-                        <button id="zoomInButton"
-                                label="+"
-                                sclass="image-zoom-button"/>
+                    </hlayout>
+
+
+                    <label id="chequeDateValidationMessage"
+                           value=""
+                           visible="false"
+                           multiline="true"
+                           sclass="cheque-date-validation-message"/>
+
+
+                    <hlayout id="cbsValidationRow"
+                             width="100%"
+                             height="30px"
+                             spacing="6px"
+                             valign="middle"
+                             sclass="cbs-validation-row">
+
+                        <label id="accountVerificationIcon"
+                               value=""
+                               sclass="cbs-validation-icon"/>
+
+                        <label id="accountVerificationMessage"
+                               value="CBS Validation Pending"
+                               sclass="cbs-validation-message"/>
+
+                        <label id="accountVerificationReason"
+                               value=""
+                               visible="false"
+                               multiline="true"
+                               sclass="cbs-validation-reason"/>
+
+                    </hlayout>
+
+
+                    <separator/>
+
+
+                    <hlayout width="100%"
+                             height="42px"
+                             spacing="8px"
+                             valign="middle"
+                             sclass="left-action-buttons">
+
+                        <button id="acceptButton"
+                                label="✓ Accept"
+                                sclass="accept-button"/>
+
+                        <button id="sendBackButton"
+                                label="↶ Return"
+                                sclass="return-button"/>
+
+                        <button id="rejectButton"
+                                label="⚠ Reject"
+                                sclass="reject-button"/>
 
                     </hlayout>
 
                 </vlayout>
 
 
-                <!-- =====================================================
-                     3% GAP
-                     ===================================================== -->
-
                 <space width="3%"/>
 
 
-                <!-- =====================================================
-                     CHEQUE DETAILS
-                     ===================================================== -->
+                <!-- RIGHT DETAILS -->
 
                 <vlayout hflex="42"
                          vflex="1"
-                         spacing="14px"
+                         spacing="0"
                          sclass="processing-card cheque-details-card">
 
-                    <label value="Cheque Details"
-                           sclass="section-title"/>
+                    <label value="Verification &amp; Corrections"
+                           sclass="verification-title"/>
 
-                    <separator/>
+                    <separator height="8px"/>
 
 
-                    <!-- SCROLLABLE DETAILS -->
+                    <!-- INDEPENDENT SCROLL -->
 
-                    <div vflex="1"
-                         width="100%"
+                    <div width="100%"
+                         vflex="1"
                          sclass="cheque-details-scroll">
 
 
-                        <!-- =================================================
-                             CHEQUE INFORMATION
-                             ================================================= -->
-
-                        <vlayout width="100%"
-                                 spacing="10px"
-                                 sclass="detail-section">
-
-                            <label value="Cheque Information"
-                                   sclass="detail-section-title"/>
-
-                            <div sclass="section-divider"/>
-
-
-                            <hlayout width="100%"
-                                     valign="top"
-                                     sclass="detail-row">
-
-                                <label value="Cheque Number"
-                                       sclass="detail-label"/>
-
-                                <label id="chequeNumberLabel"
-                                       value="-"
-                                       hflex="1"
-                                       sclass="detail-value"/>
-
-                            </hlayout>
-
-
-                            <hlayout width="100%"
-							         valign="top"
-							         sclass="detail-row">
-							    <label value="Cheque Date"
-							           sclass="detail-label"/>
-							    <vlayout hflex="1"
-							             spacing="3px">
-							
-							        <label id="chequeDateLabel"
-							               value="-"
-							               sclass="detail-value"/>
-							
-							        <label id="chequeDateValidationMessage"
-							               value=""
-							               visible="false"
-							               multiline="true"
-							               sclass="cheque-date-validation-message"/>
-							
-							    </vlayout>
-							</hlayout>
-
-
-                            <hlayout width="100%"
-                                     valign="top"
-                                     sclass="detail-row">
-
-                                <label value="Amount"
-                                       sclass="detail-label"/>
-
-                                <label id="amountLabel"
-                                       value="-"
-                                       hflex="1"
-                                       sclass="amount-value"/>
-
-                            </hlayout>
-
-
-                            <hlayout width="100%"
-                                     valign="top"
-                                     sclass="detail-row">
-
-                                <label value="MICR"
-                                       sclass="detail-label"/>
-
-                                <label id="micrLabel"
-                                       value="-"
-                                       hflex="1"
-                                       sclass="micr-value"/>
-
-                            </hlayout>
-
-                        </vlayout>
-
-
-                        <!-- =================================================
-                             DRAWER DETAILS
-                             ================================================= -->
-
-                        <vlayout width="100%"
-                                 spacing="10px"
-                                 sclass="detail-section">
-
-                            <label value="Drawer Details"
-                                   sclass="detail-section-title"/>
-
-                            <div sclass="section-divider"/>
-
-
-                            <hlayout width="100%"
-                                     valign="top"
-                                     sclass="detail-row">
-
-                                <label value="Drawer Name"
-                                       sclass="detail-label"/>
-
-                                <label id="drawerNameLabel"
-                                       value="-"
-                                       hflex="1"
-                                       sclass="detail-value"/>
-
-                            </hlayout>
-
-
-                            <hlayout width="100%"
-                                     valign="top"
-                                     sclass="detail-row">
-
-                                <label value="Drawer Account"
-                                       sclass="detail-label"/>
-
-                                <label id="accountNumberLabel"
-                                       value="-"
-                                       hflex="1"
-                                       sclass="detail-value"/>
-
-                            </hlayout>
-
-
-                            <!-- CBS VALIDATION -->
-
-                            <hlayout id="cbsValidationRow"
-                                     width="100%"
-                                     spacing="8px"
-                                     valign="top"
-                                     sclass="cbs-validation-row">
-
-                                <label id="accountVerificationIcon"
-                                       value=""
-                                       sclass="cbs-validation-icon"/>
-
-                                <vlayout spacing="2px"
-                                         hflex="1">
-
-                                    <label id="accountVerificationMessage"
-                                           value="CBS Validation Pending"
-                                           sclass="cbs-validation-message"/>
-
-                                    <label id="accountVerificationReason"
-                                           value=""
-                                           visible="false"
-                                           multiline="true"
-                                           sclass="cbs-validation-reason"/>
-
-                                </vlayout>
-
-                            </hlayout>
-
-                        </vlayout>
-
-
-                        <!-- =================================================
-                             MAKER REJECTION
-                             ================================================= -->
+                        <!-- MAKER RETURN -->
 
                         <div id="makerRejectionBlock"
                              visible="false"
-                             sclass="maker-rejection-block">
+                             sclass="maker-return-card">
 
-                            <label value="✕  REJECTED BY MAKER"
-                                   sclass="maker-rejection-title"/>
+                            <hlayout width="100%"
+                                     valign="middle"
+                                     spacing="10px">
+
+                                <label value="▤"
+                                       sclass="maker-return-icon"/>
+
+                                <label value="Cheque Returned by Maker"
+                                       sclass="maker-return-title"/>
+
+                                <label value="RETURN_BY_MAKER"
+                                       sclass="maker-return-tag"/>
+
+                            </hlayout>
+
+                            <separator height="8px"/>
 
                             <label id="makerRejectionReason"
                                    value=""
-                                   sclass="maker-rejection-reason"/>
+                                   multiline="true"
+                                   sclass="maker-return-reason"/>
 
                         </div>
 
 
-                        <!-- =================================================
-                             PAYEE DETAILS
-                             ================================================= -->
+                        <separator height="12px"/>
+
+
+                        <!-- DATA ENTRY -->
 
                         <vlayout width="100%"
                                  spacing="10px"
-                                 sclass="detail-section">
+                                 sclass="right-section">
 
-                            <label value="Payee Details"
-                                   sclass="detail-section-title"/>
-
-                            <div sclass="section-divider"/>
+                            <label value="Data Entry Fields"
+                                   sclass="right-section-title"/>
 
 
-                            <hlayout width="100%"
-                                     valign="top"
-                                     sclass="detail-row">
+                            <vlayout spacing="4px">
 
-                                <label value="Payee Name"
-                                       sclass="detail-label"/>
+                                <label value="CHEQUE NUMBER"
+                                       sclass="field-label"/>
 
-                                <label id="payeeNameLabel"
-                                       value="-"
-                                       hflex="1"
-                                       sclass="detail-value"/>
+                                <textbox value=""
+                                         sclass="field-value"/>
 
-                            </hlayout>
+                            </vlayout>
 
 
-                            <hlayout width="100%"
-                                     valign="top"
-                                     sclass="detail-row amount-words-row">
+                            <vlayout spacing="4px">
 
-                                <label value="Amount in Words"
-                                       sclass="detail-label"/>
+                                <label value="CHEQUE DATE"
+                                       sclass="field-label"/>
 
-                                <label id="amountInWordsLabel"
-                                       value="-"
-                                       hflex="1"
-                                       multiline="true"
-                                       sclass="detail-value"/>
+                                <textbox id="chequeDateLabel"
+                                         value=""
+                                         sclass="field-value"/>
 
-                            </hlayout>
+                            </vlayout>
+
+
+                            <vlayout spacing="4px">
+
+                                <label value="MICR"
+                                       sclass="field-label"/>
+
+                                <textbox id="micrLabel"
+                                         value=""
+                                         sclass="field-value micr-field"/>
+
+                            </vlayout>
+
+
+                            <vlayout spacing="4px">
+
+                                <label value="AMOUNT"
+                                       sclass="field-label"/>
+
+                                <textbox id="amountLabel"
+                                         value=""
+                                         sclass="field-value amount-field"/>
+
+                            </vlayout>
+
+
+                            <vlayout spacing="4px">
+
+                                <label value="AMOUNT IN WORDS"
+                                       sclass="field-label"/>
+
+                                <textbox id="amountInWordsLabel"
+                                         value=""
+                                         multiline="true"
+                                         rows="2"
+                                         sclass="field-value amount-words-field"/>
+
+                            </vlayout>
 
                         </vlayout>
 
+
+                        <separator height="12px"/>
+
+
+                        <!-- DRAWER -->
+
+                        <vlayout width="100%"
+                                 spacing="10px"
+                                 sclass="right-section details-box">
+
+                            <label value="DRAWER DETAILS"
+                                   sclass="right-section-title"/>
+
+                            <vlayout spacing="4px">
+
+                                <label value="DRAWER NAME"
+                                       sclass="field-label"/>
+
+                                <textbox id="drawerNameLabel"
+                                         value=""
+                                         multiline="true"
+                                         sclass="field-value plain-value"/>
+
+                            </vlayout>
+
+                            <vlayout spacing="4px">
+
+                                <label value="DRAWER ACCOUNT"
+                                       sclass="field-label"/>
+
+                                <textbox id="accountNumberLabel"
+                                         value=""
+                                         sclass="field-value plain-value"/>
+
+                            </vlayout>
+
+                        </vlayout>
+
+
+                        <separator height="12px"/>
+
+
+                        <!-- PAYEE -->
+
+                        <vlayout width="100%"
+                                 spacing="10px"
+                                 sclass="right-section details-box">
+
+                            <label value="PAYEE DETAILS"
+                                   sclass="right-section-title"/>
+
+                            <vlayout spacing="4px">
+
+                                <label value="PAYEE NAME"
+                                       sclass="field-label"/>
+
+                                <textbox id="payeeNameLabel"
+                                         value=""
+                                         multiline="true"
+                                         sclass="field-value plain-value"/>
+
+                            </vlayout>
+
+                        </vlayout>
+
+
+                        <separator height="12px"/>
+
+
+                        <!-- REASON -->
+
+                        <hlayout id="reasonRow"
+                                 width="100%"
+                                 spacing="10px"
+                                 valign="middle"
+                                 visible="false"
+                                 sclass="reason-row">
+
+                            <label value="Reason"
+                                   sclass="form-label"/>
+
+                            <combobox id="reasonCombobox"
+                                      hflex="1"
+                                      placeholder="Select reason"
+                                      sclass="form-control"/>
+
+                        </hlayout>
+
+
+                        <!-- REMARKS -->
+
+                        <hlayout width="100%"
+                                 spacing="10px"
+                                 valign="top"
+                                 sclass="remarks-row">
+
+                            <label value="Remarks"
+                                   sclass="form-label"/>
+
+                            <textbox id="checkerRemarksTextbox"
+                                     hflex="1"
+                                     rows="3"
+                                     maxlength="1000"
+                                     placeholder="Enter remarks if required"
+                                     sclass="form-control"/>
+
+                        </hlayout>
+
+                        <separator height="16px"/>
+
                     </div>
+
+
+                    <!-- BOTTOM -->
+
+                    <hlayout width="100%"
+                             height="48px"
+                             spacing="8px"
+                             valign="middle"
+                             sclass="right-bottom-actions">
+
+                        <button label="← Prev"
+                                sclass="navigation-button"/>
+
+                        <button label="Next →"
+                                sclass="navigation-button"/>
+
+                        <space hflex="1"/>
+
+                        <button id="saveNextButton"
+                                label="Complete Verification"
+                                sclass="complete-button"/>
+
+                    </hlayout>
 
                 </vlayout>
 
             </hlayout>
-
-
-            <!-- =========================================================
-                 ACTION AREA
-                 OUTSIDE THE CARDS
-                 ========================================================= -->
-
-            <vlayout width="100%"
-                     spacing="14px"
-                     sclass="decision-area">
-
-                <label value="Actions"
-                       sclass="action-title"/>
-
-
-                <!-- ACTION BUTTONS -->
-
-                <hlayout width="100%"
-                         spacing="10px"
-                         valign="middle"
-                         sclass="decision-buttons">
-
-                    <button id="acceptButton"
-                            label="Accept"
-                            iconSclass="z-icon-check"
-                            sclass="success-button"/>
-
-                    <button id="rejectButton"
-                            label="Reject"
-                            iconSclass="z-icon-close"
-                            sclass="danger-button"/>
-
-                    <button id="sendBackButton"
-                            label="Send Back to Maker"
-                            iconSclass="z-icon-arrow-left"
-                            sclass="secondary-button"/>
-
-                </hlayout>
-
-
-                <!-- REASON -->
-
-                <hlayout id="reasonRow"
-                         width="100%"
-                         spacing="16px"
-                         valign="middle"
-                         visible="false"
-                         sclass="form-row">
-
-                    <label value="Reason"
-                           width="100px"
-                           sclass="form-label"/>
-
-                    <combobox id="reasonCombobox"
-                              hflex="1"
-                              placeholder="Select reason"
-                              sclass="form-control"/>
-
-                </hlayout>
-
-
-                <!-- REMARKS -->
-
-                <hlayout width="100%"
-                         spacing="16px"
-                         valign="top"
-                         sclass="form-row">
-
-                    <label value="Remarks"
-                           width="100px"
-                           sclass="form-label"/>
-
-                    <textbox id="checkerRemarksTextbox"
-                             hflex="1"
-                             rows="3"
-                             maxlength="1000"
-                             placeholder="Enter remarks if required"
-                             sclass="form-control"/>
-
-                </hlayout>
-
-
-                <!-- SAVE & NEXT -->
-
-                <hlayout width="100%"
-                         valign="middle">
-
-                    <space hflex="1"/>
-
-
-                    <button id="saveNextButton"
-                            label="Save &amp; Next"
-                            iconSclass="z-icon-arrow-right"
-                            sclass="primary-button"/>
-
-                </hlayout>
-
-            </vlayout>
 
         </vlayout>
 

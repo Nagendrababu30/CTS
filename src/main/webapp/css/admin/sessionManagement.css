@@ -5,9 +5,13 @@
 .session-page {
     width: 100%;
     min-height: 100%;
-    padding: 34px 40px 40px 40px;
+    padding: 20px 24px 24px 24px;
     box-sizing: border-box;
-    background: #F5F7FC;
+    background:
+        radial-gradient(1200px 600px at 0% 0%, rgba(23, 92, 211, 0.12), transparent 60%),
+        radial-gradient(1000px 600px at 100% 0%, rgba(122, 90, 248, 0.10), transparent 60%),
+        radial-gradient(900px 700px at 100% 100%, rgba(18, 183, 106, 0.07), transparent 60%),
+        linear-gradient(180deg, #EAF0FA 0%, #E4ECF8 100%);
 }
 
 
@@ -16,13 +20,28 @@
    ============================================================ */
 
 .session-page-title {
-    color: #18243A;
-    font-size: 32px;
+    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+    color: #0B1F3F;
+    font-size: 30px;
     font-weight: 700;
-    line-height: 38px;
-    display: block;
+    letter-spacing: -0.035em;
+    line-height: 1.1;
+    display: inline-block;
+    position: relative;
+    margin: 0 0 32px 0 !important;
+    padding: 0 !important;
     white-space: nowrap;
-    margin-bottom: 28px;
+}
+
+.session-page-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 56px;
+    height: 3px;
+    background: #175CD3;
+    border-radius: 2px;
 }
 
 .session-page-subtitle {
@@ -231,41 +250,57 @@
 }
 
 .history-listbox .z-listhead {
-    background: #F8FAFC;
+    background: #175CD3 !important;
+    border-radius: 8px 8px 0 0 !important;
 }
 
 .history-listbox .z-listheader {
-    background: #F8FAFC;
-    border-bottom: 1px solid #D9E1EB;
-    border-right: 1px solid #D9E1EB;
-    padding: 14px 16px;
+    background: transparent !important;
+    border-bottom: none !important;
+    border-right: 1px solid rgba(255,255,255,0.25) !important;
+    padding: 12px 12px !important;
     box-sizing: border-box;
     box-shadow: none;
 }
 
 .history-listbox .z-listheader:last-child {
-    border-right: none;
+    border-right: none !important;
 }
 
 .history-listbox .z-listheader-content {
-    color: #18243A;
-    font-size: 14px;
+    color: #FFFFFF !important;
+    font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 13px;
     font-weight: 700;
+    padding: 12px 12px !important;
     white-space: nowrap;
     overflow: visible;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.22);
+    letter-spacing: 0.06em;
+}
+
+.history-listbox .z-listheader::after,
+.history-listbox .z-listheader-content::after {
+    display: none !important;
+    content: none !important;
 }
 
 .history-listbox .z-listitem {
     background: #FFFFFF;
-    border-bottom: 1px solid #F3F4F6;
+    border-bottom: 1px solid #E4EAF3 !important;
+}
+
+.history-listbox .z-listitem:nth-child(even) {
+    background: linear-gradient(90deg, #FCFDFF 0%, #F9FBFF 100%) !important;
 }
 
 .history-listbox .z-listitem:last-child {
-    border-bottom: none;
+    border-bottom: none !important;
 }
 
 .history-listbox .z-listitem:hover {
-    background: #F9FAFB;
+    background: #F6F9FF !important;
+    box-shadow: inset 4px 0 0 #175CD3 !important;
 }
 
 .history-listbox .z-listcell {

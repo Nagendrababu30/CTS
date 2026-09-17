@@ -4,9 +4,13 @@
 
 .user-management-page {
     width: 100%;
-    padding: 34px 40px 40px 40px;
+    padding: 20px 24px 24px 24px;
     box-sizing: border-box;
-    background: #F4F6FB;
+    background:
+        radial-gradient(1200px 600px at 0% 0%, rgba(23, 92, 211, 0.12), transparent 60%),
+        radial-gradient(1000px 600px at 100% 0%, rgba(122, 90, 248, 0.10), transparent 60%),
+        radial-gradient(900px 700px at 100% 100%, rgba(18, 183, 106, 0.07), transparent 60%),
+        linear-gradient(180deg, #EAF0FA 0%, #E4ECF8 100%);
 }
 
 .user-management-page.z-vlayout > table,
@@ -25,7 +29,7 @@
 
 .user-page-header {
     width: 100%;
-    margin-bottom: 28px;
+    margin-bottom: 20px;
     box-sizing: border-box;
     display: flex !important;
     flex-direction: row !important;
@@ -41,15 +45,28 @@
 }
 
 .user-page-title {
-    display: block !important;
-    color: #111827;
+    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+    color: #0B1F3F;
     font-size: 30px;
     font-weight: 700;
-    line-height: 36px;
-    letter-spacing: -0.3px;
+    letter-spacing: -0.035em;
+    line-height: 1.1;
+    display: inline-block !important;
+    position: relative;
+    margin: 0 0 32px 0 !important;
+    padding: 0 !important;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+}
+
+.user-page-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 56px;
+    height: 3px;
+    background: #175CD3;
+    border-radius: 2px;
 }
 
 .user-page-subtitle {
@@ -344,18 +361,19 @@
    ============================================================ */
 
 .user-listbox .z-listhead {
-    background: #F3F6FB;
-    border-bottom: 1px solid #E1E8F4 !important;
+    background: #175CD3 !important;
+    border-bottom: none !important;
+    border-radius: 8px 8px 0 0 !important;
 }
 
 .user-listbox .z-listheader {
-    height: 44px;
-    background: #F3F6FB;
+    height: auto;
+    background: transparent !important;
     border-top: none !important;
     border-left: none !important;
     border-bottom: none !important;
-    border-right: 1px solid #E8EEF8 !important;
-    padding: 0 16px;
+    border-right: 1px solid rgba(255,255,255,0.25) !important;
+    padding: 12px 12px !important;
     box-sizing: border-box;
     box-shadow: none !important;
     overflow: visible !important;
@@ -366,13 +384,22 @@
 }
 
 .user-listbox .z-listheader-content {
-    color: #5A6E8C;
-    font-size: 11.5px;
+    color: #FFFFFF !important;
+    font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 13px;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.7px;
+    text-transform: none;
+    letter-spacing: 0.06em;
+    padding: 12px 12px !important;
     white-space: nowrap !important;
     overflow: visible !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.22);
+}
+
+.user-listbox .z-listheader::after,
+.user-listbox .z-listheader-content::after {
+    display: none !important;
+    content: none !important;
 }
 
 
@@ -386,8 +413,12 @@
     border-top: none !important;
     border-left: none !important;
     border-right: none !important;
-    border-bottom: 1px solid #EEF2FA !important;
+    border-bottom: 1px solid #E4EAF3 !important;
     box-shadow: none !important;
+}
+
+.user-listbox .z-listitem:nth-child(even) {
+    background: linear-gradient(90deg, #FCFDFF 0%, #F9FBFF 100%) !important;
 }
 
 .user-listbox .z-listitem:last-child {
@@ -395,7 +426,8 @@
 }
 
 .user-listbox .z-listitem:hover {
-    background: #F8FAFF;
+    background: #F6F9FF !important;
+    box-shadow: inset 4px 0 0 #175CD3 !important;
 }
 
 
@@ -638,4 +670,95 @@
     cursor: not-allowed !important;
     pointer-events: none !important;
     box-shadow: none !important;
+}
+
+
+/* ============================================================
+   CREATE / EDIT USER MODAL WINDOW
+   ============================================================ */
+
+/* Scoped to user-modal-window sclass only */
+.user-modal-window {
+    border: 1.5px solid #CBD5E1 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18) !important;
+    overflow: hidden !important;
+}
+
+.user-modal-window .z-window-header {
+    background: #FFFFFF !important;
+    border-bottom: 1.5px solid #EEF2F8 !important;
+    padding: 14px 20px !important;
+    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    color: #0B1F3F !important;
+    letter-spacing: -0.01em !important;
+}
+
+.user-modal-window .z-window-content {
+    padding: 0 !important;
+    background: #FFFFFF !important;
+    border: none !important;
+}
+
+/* Fix combobox double border inside modal */
+.user-modal-window .z-combobox {
+    border: 1.5px solid #CBD5E1 !important;
+    border-radius: 8px !important;
+    background: #F8FAFC !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.user-modal-window .z-combobox .z-combobox-input {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    height: 40px !important;
+    font-size: 14px !important;
+    font-family: 'Inter', sans-serif !important;
+    color: #0F172A !important;
+    padding: 0 12px !important;
+    flex: 1 !important;
+    outline: none !important;
+}
+
+.user-modal-window .z-combobox .z-combobox-button {
+    border: none !important;
+    border-left: 1px solid #CBD5E1 !important;
+    background: #F1F5F9 !important;
+    border-radius: 0 !important;
+    width: 34px !important;
+    height: 40px !important;
+    flex-shrink: 0 !important;
+}
+
+.user-modal-window .z-combobox .z-combobox-button:hover {
+    background: #E2E8F0 !important;
+}
+
+/* Fix textbox borders inside modal */
+.user-modal-window .z-textbox {
+    border: 1.5px solid #CBD5E1 !important;
+    border-radius: 8px !important;
+    background: #F8FAFC !important;
+    box-shadow: none !important;
+    height: 42px !important;
+    font-size: 14px !important;
+    font-family: 'Inter', sans-serif !important;
+    padding: 0 14px !important;
+    box-sizing: border-box !important;
+    color: #0F172A !important;
+}
+
+.user-modal-window .z-textbox:focus {
+    border-color: #175CD3 !important;
+    background: #FFFFFF !important;
+    box-shadow: 0 0 0 3px rgba(23,92,211,0.12) !important;
+    outline: none !important;
 }

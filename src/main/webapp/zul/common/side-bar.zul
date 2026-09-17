@@ -368,18 +368,6 @@
             </a>
 
 
-            <a
-                href="/zul/admin/admin-batch-monitoring.zul"
-                sclass="${arg.active eq 'batch-monitoring' ? 'menu-item active-menu' : 'menu-item'}">
-
-                <n:i class="fa-solid fa-list-check menu-icon"></n:i>
-
-                <label
-                    value="Batch Monitoring"
-                    sclass="menu-label" />
-
-            </a>
-
 
             <a
                 href="/zul/admin/admin-session-management.zul"

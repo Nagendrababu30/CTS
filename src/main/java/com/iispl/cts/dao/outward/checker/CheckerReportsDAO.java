@@ -66,7 +66,7 @@ public class CheckerReportsDAO {
                         + "       created_at, "
                         + "       batch_status "
                         + "FROM public.outward_batch "
-                        + "WHERE UPPER(batch_status) = 'CHECKER_COMPLETED' "
+                        + "WHERE UPPER(batch_status) = 'CHECKER_VERIFIED' "
                         + "ORDER BY batch_number DESC";
 
         try (Connection connection =
@@ -629,7 +629,7 @@ public class CheckerReportsDAO {
                 "    SELECT 1 " +
                 "    FROM public.outward_batch " +
                 "    WHERE batch_number = ? " +
-                "      AND UPPER(batch_status) = 'CHECKER_COMPLETED' " +
+                "      AND UPPER(batch_status) = 'CHECKER_VERIFIED' " +
                 ")";
 
         try (Connection connection =
@@ -683,7 +683,7 @@ public class CheckerReportsDAO {
                 "UPDATE public.outward_batch " +
                 "SET batch_status = 'NPCI_SENT' " +
                 "WHERE batch_number = ? " +
-                "  AND UPPER(batch_status) = 'CHECKER_COMPLETED'";
+                "  AND UPPER(batch_status) = 'CHECKER_VERIFIED'";
 
         try (Connection connection =
                      dataSource.getConnection();

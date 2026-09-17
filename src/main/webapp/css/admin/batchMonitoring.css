@@ -21,10 +21,10 @@
    ============================================================ */
 
 .batch-page-title {
-    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Times New Roman', serif;
     color: #0B1F3F;
     font-size: 30px;
-    font-weight: 700;
+    font-weight: 650;
     letter-spacing: -0.035em;
     line-height: 1.1;
     display: inline-block;
@@ -207,7 +207,7 @@
     border-radius: 7px;
     color: #FFFFFF;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 650;
     box-shadow: none;
     margin-left: 8px;
     white-space: nowrap;
@@ -237,7 +237,7 @@
 .batch-results-title {
     color: #18243A;
     font-size: 20px;
-    font-weight: 700;
+    font-weight: 650;
     display: block;
     margin-bottom: 18px;
 }
@@ -290,7 +290,7 @@
     color: #FFFFFF !important;
     font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 650;
     padding: 12px 12px !important;
     white-space: normal !important;
     overflow: visible !important;
@@ -427,3 +427,7 @@
     border: 1px solid #D1D5DB !important;
 }
 .batch-status-grey .batch-status-label { }
+
+
+
+

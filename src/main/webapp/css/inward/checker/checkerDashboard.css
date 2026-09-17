@@ -319,12 +319,12 @@
 
 .page-title {
     font-family:
-        'Space Grotesk',
+        'Segoe UI',
         'Plus Jakarta Sans',
         sans-serif;
 
     font-size: 30px;
-    font-weight: 700;
+    font-weight: 650;
 
     letter-spacing: -0.035em;
 
@@ -482,7 +482,7 @@
 
 .card-value {
     font-family:
-        'Space Grotesk',
+        'Segoe UI',
         'Plus Jakarta Sans',
         sans-serif;
 
@@ -658,7 +658,7 @@
 
 .filter-label {
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 650;
 
     color: var(--text-muted);
 
@@ -952,10 +952,10 @@
 
 .custom-grid .z-row .z-cell:nth-child(1) .z-cell-cnt {
     font-family:
-        'Space Grotesk',
+        'Segoe UI',
         sans-serif;
 
-    font-weight: 700;
+    font-weight: 650;
 
     color: #344054;
 
@@ -978,7 +978,7 @@
 
     font-size: 12px;
 
-    font-weight: 700;
+    font-weight: 650;
 
     font-family:
         'Plus Jakarta Sans',
@@ -1337,3 +1337,5 @@
         transition-duration: 0.01ms !important;
     }
 }
+
+

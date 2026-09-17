@@ -172,7 +172,7 @@ div[style*="background: white"]::before {
     font-weight: 700 !important;
     font-size: 13px !important;                 /* Same font size as Inward */
     letter-spacing: 0.06em !important;
-    text-transform: uppercase !important;
+    text-transform: none !important;
     color: #FFFFFF !important;
     padding: 12px 14px !important;              /* Compact height matching Inward */
     border-right: none !important;
@@ -207,4 +207,40 @@ div[style*="background: white"]::before {
     font-size: 13px !important;
     color: var(--text-secondary) !important;
     padding: 12px 14px !important;
+    line-height: 2;
+    text-align: center !important;
+    justify-content: center !important;
+}
+
+.data-entry-listbox .z-listbox-body tr .z-listcell:nth-child(1) .z-listcell-content::before {
+    display: none !important;
+}
+
+/* Action Button */
+.data-entry-listbox .z-button {
+    background: #10B981 !important;
+    border: 1px solid #10B981 !important;
+    color: #FFFFFF !important;
+    border-radius: 5px !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    padding: 4px 14px !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+    transition: background 0.15s ease;
+}
+
+.data-entry-listbox .z-button:hover {
+    background: #059669 !important;
+    border-color: #059669 !important;
+}
+
+/* Paging Bar (mold="paging") */
+.data-entry-listbox .z-paging {
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+    padding: 12px 20px !important;
+    background: var(--bg-surface) !important;
+    border-top: 1px solid var(--border-light) !important;
 }

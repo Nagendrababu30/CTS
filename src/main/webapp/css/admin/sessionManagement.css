@@ -2,6 +2,8 @@
    SESSION MANAGEMENT PAGE
    ============================================================ */
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+
 .session-page {
     width: 100%;
     min-height: 100%;
@@ -277,6 +279,7 @@
     overflow: visible;
     text-shadow: 0 1px 2px rgba(0,0,0,0.22);
     letter-spacing: 0.06em;
+    text-align: center;
 }
 
 .history-listbox .z-listheader::after,
@@ -286,6 +289,7 @@
 }
 
 .history-listbox .z-listitem {
+    height: auto;
     background: #FFFFFF;
     border-bottom: 1px solid #E4EAF3 !important;
 }
@@ -304,84 +308,47 @@
 }
 
 .history-listbox .z-listcell {
-    padding: 14px 16px;
-    border-right: none;
-    box-sizing: border-box;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 16px !important;
+    box-sizing: border-box !important;
+    box-shadow: none !important;
+    vertical-align: middle !important;
+    font-family: 'Inter', sans-serif !important;
 }
 
 .history-listbox .z-listcell-content {
-    font-size: 14px;
-    color: #374151;
+    color: #1F2D45 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    line-height: 2 !important;
+    text-align: center !important;
+    display: block !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
 }
 
-.history-listbox .z-listbox-emptybody td {
-    color: #98A2B3;
-    font-size: 14px;
-    text-align: center;
-    padding: 32px 0;
+.history-listbox .session-id,
+.history-listbox .session-name,
+.history-listbox .session-type,
+.history-listbox .session-date,
+.history-listbox .start-time,
+.history-listbox .end-time,
+.history-listbox .in-progress,
+.history-listbox .table-status-active,
+.history-listbox .table-status-ended {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
 }
 
 
 /* ============================================================
-   HISTORY CELL LABELS
+   HISTORY CELL LABELS — REMOVED (use .history-listbox prefixed versions above)
    ============================================================ */
-
-.session-id {
-    color: #2454D6;
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.session-name {
-    color: #18243A;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.session-type {
-    color: #374151;
-    font-size: 14px;
-}
-
-.session-date {
-    color: #374151;
-    font-size: 14px;
-}
-
-.start-time {
-    color: #16A34A;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.end-time {
-    color: #DC2626;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.in-progress {
-    color: #D97706;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.table-status-active {
-    color: #16A34A;
-    font-size: 13px;
-    font-weight: 700;
-}
-
-.table-status-ended {
-    color: #6B7280;
-    font-size: 13px;
-    font-weight: 700;
-}
-
-.session-user {
-    color: #475467;
-    font-size: 14px;
-}
 
 
 /* ============================================================

@@ -1809,7 +1809,7 @@ extends SelectorComposer<Component> {
 			if (returnedMode) {
 				cheque.setChequeStatus("RE_VERIFIED");
 			} else {
-				cheque.setChequeStatus("MICR_REPAIRED");
+				cheque.setChequeStatus("MICR_VERIFIED");
 			}
 
 			currentIndex--;

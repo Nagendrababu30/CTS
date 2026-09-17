@@ -192,24 +192,40 @@ public class AuditLogController extends GenericForwardComposer<Component> {
                 Listitem item = new Listitem();
 
                 /* User ID */
-                item.appendChild(createCell(
+                Listcell userIdCell = new Listcell();
+                Label userIdLabel = new Label(
                         log.getUserId() != null
-                                ? String.valueOf(log.getUserId()) : "-"));
+                                ? String.valueOf(log.getUserId()) : "-");
+                userIdLabel.setSclass("audit-user-label");
+                userIdCell.appendChild(userIdLabel);
+                item.appendChild(userIdCell);
 
                 /* Role */
-                item.appendChild(createCell(
+                Listcell roleCell = new Listcell();
+                Label roleLabel = new Label(
                         log.getRoleName() != null
-                                ? log.getRoleName() : "-"));
+                                ? log.getRoleName() : "-");
+                roleLabel.setSclass("audit-role-label");
+                roleCell.appendChild(roleLabel);
+                item.appendChild(roleCell);
 
                 /* Login */
-                item.appendChild(createCell(
+                Listcell loginCell = new Listcell();
+                Label loginLabel = new Label(
                         log.getLoginTime() != null
-                                ? formatDateTime(log.getLoginTime()) : "-"));
+                                ? formatDateTime(log.getLoginTime()) : "-");
+                loginLabel.setSclass("audit-datetime-label");
+                loginCell.appendChild(loginLabel);
+                item.appendChild(loginCell);
 
                 /* Logout */
-                item.appendChild(createCell(
+                Listcell logoutCell = new Listcell();
+                Label logoutLabel = new Label(
                         log.getLogoutTime() != null
-                                ? formatDateTime(log.getLogoutTime()) : "-"));
+                                ? formatDateTime(log.getLogoutTime()) : "-");
+                logoutLabel.setSclass("audit-datetime-label");
+                logoutCell.appendChild(logoutLabel);
+                item.appendChild(logoutCell);
 
                 auditLogListbox.appendChild(item);
             }
@@ -225,12 +241,7 @@ public class AuditLogController extends GenericForwardComposer<Component> {
     // HELPERS
     // ================================================================
 
-    private Listcell createCell(String value) {
-        Listcell cell = new Listcell();
-        Label label = new Label(value != null ? value : "-");
-        cell.appendChild(label);
-        return cell;
-    }
+
 
     private String formatDateTime(java.util.Date date) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm a");

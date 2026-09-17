@@ -49,7 +49,7 @@
 
                     <div sclass="input-group">
                         <span sclass="z-icon-user input-icon" />
-                        <textbox id="username" placeholder="User ID / Customer ID" sclass="custom-input" />
+                        <textbox id="username" placeholder="User ID" sclass="custom-input" />
                     </div>
 
                     <div sclass="input-group">

@@ -161,7 +161,7 @@ public class OutwardMakerDashboardDAO {
                 "               'COMPLETED', " +
                 "               'REJECTED', " +
                 "               'HOLD', " +
-                "               'ON_HOLD','NPCI_SENT','CHECKER_PROCESSING') " +
+                "               'ON_HOLD','NPCI_SENT','CHECKER_PROCESSING','CHECKER_VERIFIED') " +
                 "          AND " +
                 "          ( " +
 

@@ -1079,7 +1079,7 @@ public class MicrRepairController
                         .compareBatch(batchId);
 
         if (originalRepairIndexes == null || originalRepairIndexes.isEmpty()) {
-            goToDataEntry();
+            navigateAfterMicrCompletion();
             return;
         }
 
@@ -1091,8 +1091,8 @@ public class MicrRepairController
             updateTopBar();
             loadCheque();
         } else {
-            // End of error list reached; directly go to data-entryform.zul
-            goToDataEntry();
+            // End of error list reached
+            navigateAfterMicrCompletion();
         }
     }
 
@@ -1408,23 +1408,55 @@ public class MicrRepairController
         loadCheque();
 
         if (!micrRepairService.needsMicrRepair(batchId)) {
-            Clients.showNotification(
-                    "All cheques in this batch are completed or returned. Moving to Data Entry in 2 seconds...",
-                    Clients.NOTIFICATION_TYPE_INFO,
-                    null,
-                    "top_right",
-                    2000);
-            org.zkoss.zk.ui.util.Clients.evalJavaScript(
-                    "setTimeout(function() { window.location.href = '"
-                            + Executions.encodeURL("/zul/inward-maker/data-entryform.zul?batchId=" + batchId)
-                            + "'; }, 2000);"
-            );
+            if (micrRepairService.hasChequesNeedingDataEntry(batchId)) {
+                Clients.showNotification(
+                        "All cheques in this batch are completed or returned. Moving to Data Entry in 2 seconds...",
+                        Clients.NOTIFICATION_TYPE_INFO,
+                        null,
+                        "top_right",
+                        2000);
+                org.zkoss.zk.ui.util.Clients.evalJavaScript(
+                        "setTimeout(function() { window.location.href = '"
+                                + Executions.encodeURL("/zul/inward-maker/data-entryform.zul?batchId=" + batchId)
+                                + "'; }, 2000);"
+                );
+            } else {
+                Clients.showNotification(
+                        "MICR repair completed. Batch is ready to be sent to Checker.",
+                        Clients.NOTIFICATION_TYPE_INFO,
+                        null,
+                        "top_right",
+                        2000);
+                org.zkoss.zk.ui.util.Clients.evalJavaScript(
+                        "setTimeout(function() { window.location.href = '"
+                                + Executions.encodeURL("/zul/inward-maker/send-to-checker.zul")
+                                + "'; }, 2000);"
+                );
+            }
         }
     }
 
     // =========================================================
     // Navigation
     // =========================================================
+
+    private void navigateAfterMicrCompletion() {
+        if (micrRepairService.hasChequesNeedingDataEntry(batchId)) {
+            goToDataEntry();
+        } else {
+            Clients.showNotification(
+                    "MICR repair completed. Batch is ready to be sent to Checker.",
+                    Clients.NOTIFICATION_TYPE_INFO,
+                    null,
+                    "top_right",
+                    2000);
+            org.zkoss.zk.ui.util.Clients.evalJavaScript(
+                    "setTimeout(function() { window.location.href = '"
+                            + Executions.encodeURL("/zul/inward-maker/send-to-checker.zul")
+                            + "'; }, 2000);"
+            );
+        }
+    }
 
     private void goToDataEntry() {
         Executions.sendRedirect(

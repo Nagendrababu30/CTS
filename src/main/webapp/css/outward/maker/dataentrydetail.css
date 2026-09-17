@@ -1,1 +1,573 @@
 @charset "UTF-8";
+        html, body {
+
+            margin: 0 !important;
+
+            padding: 0 !important;
+
+            height: 100% !important;
+
+            background: #F1F5F9;
+
+        }
+
+        .z-window-embedded-cnt,
+
+        .z-window-content {
+
+            padding: 0 !important;
+
+        }
+
+        /* Modern Banking Clean Cards */
+
+        .equal-card {
+
+            background: #FFFFFF !important;
+
+            border: 1px solid #E2E8F0 !important;
+
+            border-radius: 12px !important;
+
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+
+        }
+
+        .equal-card > .z-groupbox-content {
+
+            padding: 16px 20px 20px 20px !important;
+
+            box-sizing: border-box !important;
+
+        }
+
+        /* Header Icon Box */
+
+        .card-header-icon {
+
+            width: 32px;
+
+            height: 32px;
+
+            background: #EFF6FF;
+
+            border: 1px solid #DBEAFE;
+
+            border-radius: 8px;
+
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            color: #2563EB;
+
+            font-size: 15px;
+
+            font-weight: 700;
+
+        }
+
+        /* Modern Unified Form Fields */
+
+        input.single-field-box,
+
+        .z-decimalbox.single-field-box {
+
+            height: 36px !important;
+
+            font-size: 13px !important;
+
+            border: 1px solid #CBD5E1 !important;
+
+            border-radius: 6px !important;
+
+            padding: 6px 12px !important;
+
+            color: #0F172A !important;
+
+            background: #F8FAFC !important;
+
+            font-weight: 500 !important;
+
+            box-sizing: border-box !important;
+
+            transition: all 0.15s ease-in-out !important;
+
+        }
+
+        input.single-field-box:focus,
+
+        .z-decimalbox.single-field-box:focus {
+
+            background: #FFFFFF !important;
+
+            border-color: #2563EB !important;
+
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+
+            outline: none !important;
+
+        }
+
+        /* Unified Datebox */
+
+        .z-datebox.single-field-box {
+
+            height: 36px !important;
+
+            border: 1px solid #CBD5E1 !important;
+
+            border-radius: 6px !important;
+
+            background: #F8FAFC !important;
+
+            display: inline-flex !important;
+
+            align-items: center !important;
+
+            box-sizing: border-box !important;
+
+        }
+
+        .z-datebox.single-field-box:focus-within {
+
+            background: #FFFFFF !important;
+
+            border-color: #2563EB !important;
+
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+
+        }
+
+        .z-datebox.single-field-box > input.z-datebox-input {
+
+            border: none !important;
+
+            background: transparent !important;
+
+            height: 34px !important;
+
+            font-size: 13px !important;
+
+            font-weight: 500 !important;
+
+            color: #0F172A !important;
+
+            padding-left: 10px !important;
+
+            box-shadow: none !important;
+
+            outline: none !important;
+
+        }
+
+        .z-datebox.single-field-box > a.z-datebox-button {
+
+            border: none !important;
+
+            background: transparent !important;
+
+            height: 34px !important;
+
+            width: 34px !important;
+
+            display: inline-flex !important;
+
+            align-items: center !important;
+
+            justify-content: center !important;
+
+        }
+
+        /* Unified Combobox */
+
+        .z-combobox.single-field-box {
+
+            height: 36px !important;
+
+            border: 1px solid #CBD5E1 !important;
+
+            border-radius: 6px !important;
+
+            background: #F8FAFC !important;
+
+            display: inline-flex !important;
+
+            align-items: center !important;
+
+            box-sizing: border-box !important;
+
+        }
+
+        .z-combobox.single-field-box:focus-within {
+
+            background: #FFFFFF !important;
+
+            border-color: #2563EB !important;
+
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+
+        }
+
+        .z-combobox.single-field-box > input.z-combobox-input {
+
+            border: none !important;
+
+            background: transparent !important;
+
+            height: 34px !important;
+
+            font-size: 12.5px !important;
+
+            font-weight: 500 !important;
+
+            color: #0F172A !important;
+
+            padding-left: 10px !important;
+
+            box-shadow: none !important;
+
+            outline: none !important;
+
+        }
+
+        /* ============================================================
+
+   CHECKER RETURN INFORMATION PANEL
+
+   Modern card style consistent with Data Entry screen
+
+   ============================================================ */
+
+/* ---------- Card Container ---------- */
+
+.checker-return-card {
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 12px;
+
+    padding: 18px 20px;
+
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04),
+
+                0 4px 12px rgba(15, 23, 42, 0.06);
+
+    box-sizing: border-box;
+
+    overflow: hidden;
+
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+
+}
+
+.checker-return-card:hover {
+
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05),
+
+                0 8px 24px rgba(15, 23, 42, 0.08);
+
+}
+
+/* ---------- Header ---------- */
+
+.checker-return-card .checker-return-title {
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.6px;
+
+    color: #1f2937;
+
+    text-transform: uppercase;
+
+}
+
+/* ---------- Field Labels ---------- */
+
+.checker-return-card .checker-return-label {
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    letter-spacing: 0.6px;
+
+    color: #6b7280;
+
+    text-transform: uppercase;
+
+}
+
+/* ---------- Field Values ---------- */
+
+.checker-return-card .checker-return-value {
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+    color: #111827;
+
+    line-height: 1.45;
+
+    padding: 8px 12px;
+
+    background: #f9fafb;
+
+    border: 1px solid #eef0f3;
+
+    border-radius: 8px;
+
+    box-sizing: border-box;
+
+    word-break: break-word;
+
+    white-space: pre-wrap;
+
+}
+
+/* Highlighted accent for reason (left orange bar) */
+
+#checkerReasonLabel {
+
+    border-left: 3px solid #C2410C;
+
+    background: #fff7ed;
+
+    color: #7c2d12;
+
+    font-weight: 600;
+
+}
+
+/* Remarks keeps a soft neutral look */
+
+#checkerRemarksLabel {
+
+    background: #f9fafb;
+
+    color: #374151;
+
+    min-height: 48px;
+
+}
+
+/* ---------- Header Icon accent ---------- */
+
+.checker-return-card .z-label[style*="C2410C"] {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 22px;
+
+    height: 22px;
+
+    border-radius: 6px;
+
+    background: #fff1e6;
+
+    line-height: 1;
+
+}
+
+/* ---------- Layout helpers ---------- */
+
+.checker-return-card .z-vlayout,
+
+.checker-return-card .z-hlayout {
+
+    box-sizing: border-box;
+
+}
+
+/* Slightly tighter spacing for inner field groups */
+
+.checker-return-card .z-vlayout > .z-vlayout {
+
+    margin-top: 2px;
+
+}
+
+/* ---------- Responsive tweak ---------- */
+
+@media (max-width: 480px) {
+
+    .checker-return-card {
+
+        padding: 14px 14px;
+
+        border-radius: 10px;
+
+    }
+
+    .checker-return-card .checker-return-value {
+
+        font-size: 12px;
+
+        padding: 7px 10px;
+
+    }
+
+}
+
+        .z-combobox.single-field-box > a.z-combobox-button {
+
+            border: none !important;
+
+            background: transparent !important;
+
+            height: 34px !important;
+
+            width: 32px !important;
+
+            display: inline-flex !important;
+
+            align-items: center !important;
+
+            justify-content: center !important;
+
+        }
+
+        /* Field Labels */
+
+        .single-field-label {
+
+            font-size: 11px !important;
+
+            font-weight: 700 !important;
+
+            color: #475569 !important;
+
+            letter-spacing: 0.3px;
+
+        }
+
+        .label-star {
+
+            color: #EF4444 !important;
+
+            font-weight: 700 !important;
+
+            font-size: 11px !important;
+
+            margin-left: 2px;
+
+        }
+
+        /* Toolbar Buttons */
+
+        .icon-symbol-btn {
+
+            background: #FFFFFF !important;
+
+            border: 1px solid #CBD5E1 !important;
+
+            border-radius: 6px !important;
+
+            color: #334155 !important;
+
+            font-size: 16px !important;
+
+            font-weight: bold !important;
+
+            cursor: pointer !important;
+
+            height: 32px !important;
+
+            width: 32px !important;
+
+            display: inline-flex !important;
+
+            align-items: center !important;
+
+            justify-content: center !important;
+
+            transition: all 0.15s ease !important;
+
+        }
+
+        .icon-symbol-btn:hover {
+
+            background: #F1F5F9 !important;
+
+            border-color: #94A3B8 !important;
+
+            color: #0F172A !important;
+
+        }
+
+        /* =====================================================
+
+           CHECKER RETURN INFORMATION
+
+           ===================================================== */
+
+        .checker-return-card {
+
+            background: #FFF7ED !important;
+
+            border: 1px solid #FED7AA !important;
+
+            border-radius: 8px !important;
+
+            padding: 12px !important;
+
+            box-sizing: border-box !important;
+
+        }
+
+        .checker-return-title {
+
+            font-size: 11px !important;
+
+            font-weight: 700 !important;
+
+            color: #9A3412 !important;
+
+            letter-spacing: 0.3px;
+
+        }
+
+        .checker-return-label {
+
+            font-size: 10px !important;
+
+            font-weight: 700 !important;
+
+            color: #7C2D12 !important;
+
+            letter-spacing: 0.2px;
+
+        }
+
+        .checker-return-value {
+
+            font-size: 12px !important;
+
+            font-weight: 600 !important;
+
+            color: #431407 !important;
+
+            background: #FFFFFF !important;
+
+            border: 1px solid #FED7AA !important;
+
+            border-radius: 5px !important;
+
+            padding: 6px 8px !important;
+
+            box-sizing: border-box !important;
+
+        }
+

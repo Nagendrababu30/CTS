@@ -8,9 +8,10 @@ import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
+import org.zkoss.zul.A;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Textbox;
-import org.zkoss.zk.ui.util.Composer;
+
 import com.cts.admin.model.User;
 import com.cts.admin.service.AuditLogService;
 import com.cts.admin.service.AuditLogServiceImpl;
@@ -25,12 +26,16 @@ public class LoginComposer extends GenericForwardComposer<Component> {
     private static final java.util.TimeZone IST =
             java.util.TimeZone.getTimeZone("Asia/Kolkata");
 
+    // Strictly ZUL components
     private Textbox username;
     private Textbox password;
     private Label   loginMessage;
+    private A       togglePasswordBtn;
 
     private UserService     userService;
     private AuditLogService auditLogService;
+    
+    private boolean isPasswordVisible = false;
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
@@ -39,10 +44,17 @@ public class LoginComposer extends GenericForwardComposer<Component> {
         auditLogService = new AuditLogServiceImpl();
     }
 
-	public void onClick$loginButton(Event event) {
+    public void onClick$loginButton(Event event) {
+        
+        loginMessage.setValue(""); // Clear previous errors
 
         String usernameValue = username.getValue();
         String passwordValue = password.getValue();
+        
+        if (usernameValue == null || usernameValue.trim().isEmpty() || passwordValue == null || passwordValue.isEmpty()) {
+            loginMessage.setValue("Please enter both User ID and Password.");
+            return;
+        }
 
         User user = userService.authenticate(usernameValue, passwordValue);
 
@@ -69,6 +81,18 @@ public class LoginComposer extends GenericForwardComposer<Component> {
         session.setAttribute("auditSessionId",  auditSessionId);
 
         redirectUser(user);
+    }
+    
+    public void onClick$togglePasswordBtn(Event event) {
+        isPasswordVisible = !isPasswordVisible;
+        
+        if (isPasswordVisible) {
+            password.setType("text");
+            togglePasswordBtn.setIconSclass("z-icon-eye-slash");
+        } else {
+            password.setType("password");
+            togglePasswordBtn.setIconSclass("z-icon-eye");
+        }
     }
 
     /* ------------------------------------------------------------------ */

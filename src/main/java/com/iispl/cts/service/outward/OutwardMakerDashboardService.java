@@ -3,6 +3,7 @@ package com.iispl.cts.service.outward;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.iispl.cts.dao.outward.OutwardMakerDashboardDAO;
 import com.iispl.cts.model.outward.ChequeProcessing;
@@ -293,4 +294,11 @@ public List<OutwardCheque> getCheques(
 
         return value == null || value.trim().isEmpty();
     }
+
+	
+
+	public Map<String, Integer> getDashboardCounts() throws SQLException {
+		// TODO Auto-generated method stub
+		return dao.getDashboardCounts();
+	}
 }

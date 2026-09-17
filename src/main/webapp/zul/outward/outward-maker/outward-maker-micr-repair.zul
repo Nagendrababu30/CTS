@@ -101,21 +101,25 @@
 
                         <listheader
                             label="Batch ID"
-                            width="25%"/>
+                            width="20%"/>
 
                         <listheader
                             label="Total Cheques"
-                            width="25%"/>
+                            width="20%"/>
 
                        
                           <listheader
                             label="MICR Error"
-                            width="25%"/>
+                            width="20%"/>
+                           
+                           <listheader
+                            label="Status"
+                            width="20%"/>
                            
 
                         <listheader
                             label="Action"
-                            width="25%"/>
+                            width="20%"/>
 
                     </listhead>
 

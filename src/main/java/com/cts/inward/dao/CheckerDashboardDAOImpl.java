@@ -123,8 +123,22 @@ public class CheckerDashboardDAOImpl implements CheckerDashboardDAO {
                 + "    COALESCE(l_chk.user_id, l.user_id) AS checker_id, "
                 + "    l.lock_status, "
                 + "    COALESCE(h.maker_id, l_mkr.user_id) AS maker_id, "
-                + "    hs.batch_status "
+                + "    hs.batch_status, "
+                + "    (hs.batch_status IN ('RETURN_TO_MAKER', 'ON_HOLD') "
+                + "     OR EXISTS ( "
+                + "         SELECT 1 FROM inward_cheque c "
+                + "         JOIN inward_cheque_status_history sh ON sh.cheque_number = c.cheque_number "
+                + "         WHERE c.batch_id = b.batch_id "
+                + "           AND (sh.checker_action = 'Returned' OR sh.return_reason_code IS NOT NULL OR sh.status = 'RETURN_TO_MAKER') "
+                + "     ) "
+                + "     OR EXISTS ( "
+                + "         SELECT 1 FROM inward_batch_history bh "
+                + "         WHERE bh.batch_id = b.batch_id "
+                + "           AND bh.batch_status = 'RETURN_TO_MAKER' "
+                + "     ) "
+                + "    ) AS is_reverify "
                 + "FROM inward_batch b "
+
 
                 // Latest lock row per batch by locked_time
                 + "LEFT JOIN ( "
@@ -197,6 +211,9 @@ public class CheckerDashboardDAOImpl implements CheckerDashboardDAO {
 
                 String batchStatus = resultSet.getString("batch_status");
                 batch.setBatchStatus(batchStatus);
+
+                boolean isReverify = resultSet.getBoolean("is_reverify");
+                batch.setReVerify(isReverify);
 
                 batches.add(batch);
             }

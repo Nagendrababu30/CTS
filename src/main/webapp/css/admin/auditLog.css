@@ -4,9 +4,13 @@
 
 .audit-page {
     width: 100%;
-    padding: 34px 40px 40px 40px;
+    padding: 20px 24px 24px 24px;
     box-sizing: border-box;
-    background: #F5F7FC;
+    background:
+        radial-gradient(1200px 600px at 0% 0%, rgba(23, 92, 211, 0.12), transparent 60%),
+        radial-gradient(1000px 600px at 100% 0%, rgba(122, 90, 248, 0.10), transparent 60%),
+        radial-gradient(900px 700px at 100% 100%, rgba(18, 183, 106, 0.07), transparent 60%),
+        linear-gradient(180deg, #EAF0FA 0%, #E4ECF8 100%);
 }
 
 
@@ -17,7 +21,7 @@
 
 .audit-page-header {
     width: 100%;
-    margin-bottom: 28px;
+    margin-bottom: 20px;
     box-sizing: border-box;
     display: flex !important;
     flex-direction: row !important;
@@ -31,12 +35,28 @@
 }
 
 .audit-page-title {
-    color: #18243A;
-    font-size: 32px;
+    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+    color: #0B1F3F;
+    font-size: 30px;
     font-weight: 700;
-    line-height: 38px;
-    display: block;
+    letter-spacing: -0.035em;
+    line-height: 1.1;
+    display: inline-block;
+    position: relative;
+    margin: 0 0 32px 0 !important;
+    padding: 0 !important;
     white-space: nowrap;
+}
+
+.audit-page-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 56px;
+    height: 3px;
+    background: #175CD3;
+    border-radius: 2px;
 }
 
 
@@ -224,30 +244,45 @@
 }
 
 .audit-listbox .z-listhead {
-    background: #F9FAFB;
+    background: #175CD3 !important;
     border: none !important;
+    border-radius: 8px 8px 0 0 !important;
 }
 
 .audit-listbox .z-listheader {
-    height: 54px;
-    background: #F9FAFB;
+    height: auto;
+    background: transparent !important;
     border-top: none !important;
     border-left: none !important;
-    border-bottom: 1px solid #E5E7EB !important;
-    border-right: none !important;
-    padding: 0 18px;
+    border-bottom: none !important;
+    border-right: 1px solid rgba(255,255,255,0.25) !important;
+    padding: 12px 12px !important;
     box-sizing: border-box;
     box-shadow: none !important;
     overflow: visible !important;
 }
 
+.audit-listbox .z-listheader:last-child {
+    border-right: none !important;
+}
+
 .audit-listbox .z-listheader-content {
-    color: #374151;
+    color: #FFFFFF !important;
+    font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
+    padding: 12px 12px !important;
     white-space: nowrap !important;
     overflow: visible !important;
     text-overflow: unset !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.22);
+    letter-spacing: 0.06em;
+}
+
+.audit-listbox .z-listheader::after,
+.audit-listbox .z-listheader-content::after {
+    display: none !important;
+    content: none !important;
 }
 
 .audit-listbox .z-listitem {
@@ -256,8 +291,12 @@
     border-top: none !important;
     border-left: none !important;
     border-right: none !important;
-    border-bottom: 1px solid #F3F4F6 !important;
+    border-bottom: 1px solid #E4EAF3 !important;
     box-shadow: none !important;
+}
+
+.audit-listbox .z-listitem:nth-child(even) {
+    background: linear-gradient(90deg, #FCFDFF 0%, #F9FBFF 100%) !important;
 }
 
 .audit-listbox .z-listitem:last-child {
@@ -265,7 +304,8 @@
 }
 
 .audit-listbox .z-listitem:hover {
-    background: #FAFAFA;
+    background: #F6F9FF !important;
+    box-shadow: inset 4px 0 0 #175CD3 !important;
 }
 
 .audit-listbox .z-listcell {
@@ -278,12 +318,13 @@
 }
 
 .audit-listbox .z-listcell-content {
-    color: #374151;
+    color: #0B1F3F;
     font-size: 13px;
+    font-weight: 500;
 }
 
 .audit-listbox .z-listbox-emptybody td {
-    color: #9CA3AF;
+    color: #667085;
     font-size: 14px;
     text-align: center;
     padding: 40px 0;

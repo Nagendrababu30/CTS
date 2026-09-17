@@ -124,14 +124,11 @@
     color: #0B1F3F !important;
 
     font-family:
-        'Space Grotesk',
-        'Plus Jakarta Sans',
-        'Inter',
-        sans-serif !important;
+        'Times New Roman', serif !important;
 
     font-size: 30px !important;
 
-    font-weight: 700 !important;
+    font-weight: 50 !important;
 
     line-height: 1.2 !important;
 
@@ -286,7 +283,7 @@
 
     font-size: 17px !important;
 
-    font-weight: 700 !important;
+    font-weight: 300 !important;
 
     line-height: 1.4 !important;
 }
@@ -422,8 +419,7 @@
     font-weight: 700 !important;
 
     letter-spacing: 0.06em !important;
-
-    text-transform: uppercase !important;
+    text-transform: none !important;
 }
 
 
@@ -442,7 +438,7 @@
 
     color: #FFFFFF !important;
 
-    font-weight: 700 !important;
+    font-weight: 300 !important;
 
     background: transparent !important;
 }
@@ -558,7 +554,9 @@
 
     color: #1D2939 !important;
 
-    line-height: 1.5 !important;
+    line-height: 2;
+    
+    text-align: center;
 }
 
 
@@ -572,7 +570,7 @@
 .z-listcell-content {
 
     font-family:
-        'Space Grotesk',
+        'Segoe UI',
         'Inter',
         sans-serif !important;
 
@@ -621,7 +619,7 @@
 .z-listcell-content {
 
     font-family:
-        'Space Grotesk',
+        'Segoe UI',
         'Inter',
         sans-serif !important;
 
@@ -706,7 +704,7 @@
 .z-paging-info {
 
     font-family:
-        'Space Grotesk',
+        'Segoe UI',
         'Inter',
         sans-serif !important;
 
@@ -976,3 +974,4 @@
 
     background: #175CD3 !important;
 }
+

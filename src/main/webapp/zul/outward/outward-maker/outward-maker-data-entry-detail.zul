@@ -14,1831 +14,699 @@
 
 <zk>
 
-    <!-- =========================================================
+	<style src="/css/outward/maker/dataentrydetail.css" />
+	<!-- =========================================================
+		
+		CONTENT ROOT
+		
+		========================================================= -->
 
-         ENTERPRISE BANKING STYLING
+	<div self="@define(content)" width="100%" height="100%"
+		style="width:100%; height:100%; background:#F1F5F9;">
 
-         ========================================================= -->
+		<vlayout
+			apply="com.iispl.cts.controller.outward.OutwardMakerDataEntryDetailController"
+			spacing="12px" width="100%" height="100%"
+			style="padding:14px 20px; box-sizing:border-box; overflow:auto;">
 
-    <style><![CDATA[
 
-        html, body {
+			<!-- =================================================
+				
+				BATCH HEADER STRIP & METRICS
+				
+				================================================= -->
 
-            margin: 0 !important;
+			<div width="100%"
+				style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:8px; padding:8px 16px; box-shadow:0 1px 2px rgba(0,0,0,0.03);">
 
-            padding: 0 !important;
+				<hlayout width="100%" valign="middle">
 
-            height: 100% !important;
 
-            background: #F1F5F9;
+					<!-- Back Button -->
 
-        }
+					<button id="backToListButton" label="←"
+						tooltiptext="Back to Data Entry" width="32px" height="32px"
+						style="background:#F8FAFC !important; color:#334155 !important; border:1px solid #CBD5E1 !important; border-radius:6px !important; font-size:15px !important; font-weight:bold !important; cursor:pointer !important; margin-right:12px !important; display:inline-flex !important; align-items:center !important; justify-content:center !important;" />
 
-        .z-window-embedded-cnt,
 
-        .z-window-content {
+					<!-- Batch ID -->
 
-            padding: 0 !important;
+					<label value="Batch No : "
+						style="font-size:13px; font-weight:600; color:#64748B;" />
 
-        }
+					<label id="batchIdLabel" value=""
+						style="font-size:13px; font-weight:700; color:#1E293B;" />
 
-        /* Modern Banking Clean Cards */
+					<space hflex="1" />
 
-        .equal-card {
 
-            background: #FFFFFF !important;
+					<!-- Total -->
 
-            border: 1px solid #E2E8F0 !important;
+					<div
+						style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:16px; padding:4px 14px; display:inline-flex; align-items:center;">
 
-            border-radius: 12px !important;
+						<label value="Total: "
+							style="font-size:11px; font-weight:600; color:#64748B;" />
 
-            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+						<label id="totalChequesLabel" value="0"
+							style="font-size:12px; font-weight:700; color:#0F172A; margin-left:4px;" />
 
-        }
+					</div>
 
-        .equal-card > .z-groupbox-content {
+					<space width="8px" />
 
-            padding: 16px 20px 20px 20px !important;
 
-            box-sizing: border-box !important;
+					<!-- Completed -->
 
-        }
+					<div
+						style="background:#ECFDF5; border:1px solid #A7F3D0; border-radius:16px; padding:4px 14px; display:inline-flex; align-items:center;">
 
-        /* Header Icon Box */
+						<label value="Completed: "
+							style="font-size:11px; font-weight:600; color:#047857;" />
 
-        .card-header-icon {
+						<label id="completedChequesLabel" value="0"
+							style="font-size:12px; font-weight:700; color:#065F46; margin-left:4px;" />
 
-            width: 32px;
+					</div>
 
-            height: 32px;
+					<space width="8px" />
 
-            background: #EFF6FF;
 
-            border: 1px solid #DBEAFE;
+					<!-- Reject -->
 
-            border-radius: 8px;
+					<div
+						style="background:#FFF1F2; border:1px solid #FECDD3; border-radius:16px; padding:4px 14px; display:inline-flex; align-items:center;">
 
-            display: inline-flex;
+						<label value="Reject Req: "
+							style="font-size:11px; font-weight:600; color:#BE123C;" />
 
-            align-items: center;
+						<label id="rejectedChequesLabel" value="0"
+							style="font-size:12px; font-weight:700; color:#9F1239; margin-left:4px;" />
 
-            justify-content: center;
+					</div>
 
-            color: #2563EB;
+					<space width="8px" />
 
-            font-size: 15px;
 
-            font-weight: 700;
+					<!-- Pending -->
 
-        }
+					<div
+						style="background:#FFFBEB; border:1px solid #FDE68A; border-radius:16px; padding:4px 14px; display:inline-flex; align-items:center;">
 
-        /* Modern Unified Form Fields */
+						<label value="Pending: "
+							style="font-size:11px; font-weight:600; color:#B45309;" />
 
-        input.single-field-box,
+						<label id="pendingChequesLabel" value="0"
+							style="font-size:12px; font-weight:700; color:#92400E; margin-left:4px;" />
 
-        .z-decimalbox.single-field-box {
+					</div>
 
-            height: 36px !important;
+					<space hflex="1" />
 
-            font-size: 13px !important;
 
-            border: 1px solid #CBD5E1 !important;
+					<!-- Progress -->
 
-            border-radius: 6px !important;
+					<label id="chequeProgressLabel" value=""
+						style="font-size:13px; font-weight:700; color:#2563EB;" />
 
-            padding: 6px 12px !important;
+				</hlayout>
 
-            color: #0F172A !important;
+			</div>
 
-            background: #F8FAFC !important;
 
-            font-weight: 500 !important;
+			<!-- =================================================
+				
+				CHECKER RETURN INFORMATION
+				
+				IMPORTANT:
+				
+				- No hflex + width combination
+				
+				- Hidden for normal Data Entry
+				
+				- Existing controller shows it for returned mode
+				
+				================================================= -->
 
-            box-sizing: border-box !important;
+			<vlayout id="checkerReturnInformationPanel" visible="false"
+				width="100%" spacing="6px" sclass="checker-return-card">
 
-            transition: all 0.15s ease-in-out !important;
+				<label value="CHECKER RETURN INFORMATION"
+					sclass="checker-return-title" />
 
-        }
+				<hlayout width="100%" spacing="12px" valign="top">
 
-        input.single-field-box:focus,
+					<vlayout hflex="1" spacing="4px">
 
-        .z-decimalbox.single-field-box:focus {
+						<label value="CHECKER RETURN REASON"
+							sclass="checker-return-label" />
 
-            background: #FFFFFF !important;
+						<label id="checkerReasonLabel" value=""
+							width="100%" sclass="checker-return-value" />
 
-            border-color: #2563EB !important;
+					</vlayout>
 
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+					<vlayout hflex="2" spacing="4px">
 
-            outline: none !important;
+						<label value="CHECKER REMARKS"
+							sclass="checker-return-label" />
 
-        }
+						<label id="checkerRemarksLabel" value=""
+							width="100%" multiline="true" sclass="checker-return-value" />
 
-        /* Unified Datebox */
+					</vlayout>
 
-        .z-datebox.single-field-box {
+				</hlayout>
 
-            height: 36px !important;
+			</vlayout>
 
-            border: 1px solid #CBD5E1 !important;
+			<!-- =================================================
+				
+				MAIN SPLIT ROW
+				
+				================================================= -->
 
-            border-radius: 6px !important;
 
-            background: #F8FAFC !important;
 
-            display: inline-flex !important;
+			<hlayout width="100%" spacing="16px" valign="top">
 
-            align-items: center !important;
 
-            box-sizing: border-box !important;
+				<!-- =================================================
+					
+					LEFT CARD : SCANNED CHEQUE
+					
+					================================================= -->
 
-        }
+				<groupbox hflex="1" height="465px"
+					sclass="equal-card">
 
-        .z-datebox.single-field-box:focus-within {
+					<vlayout width="100%" height="100%"
+						spacing="10px">
 
-            background: #FFFFFF !important;
 
-            border-color: #2563EB !important;
+						<!-- Header -->
 
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+						<hlayout spacing="10px" valign="middle"
+							width="100%">
 
-        }
+							<div sclass="card-header-icon">
 
-        .z-datebox.single-field-box > input.z-datebox-input {
+								<label value="📄"
+									style="font-size:14px;" />
 
-            border: none !important;
+							</div>
 
-            background: transparent !important;
+							<vlayout spacing="1px">
 
-            height: 34px !important;
+								<label value="Scanned Cheque"
+									style="font-size:14px; font-weight:700; color:#1E293B;" />
 
-            font-size: 13px !important;
+								<label
+									value="Verify the scanned cheque image and enter the details"
+									style="font-size:11.5px; color:#64748B;" />
 
-            font-weight: 500 !important;
+							</vlayout>
 
-            color: #0F172A !important;
+						</hlayout>
 
-            padding-left: 10px !important;
 
-            box-shadow: none !important;
+						<!-- Image -->
 
-            outline: none !important;
+						<div width="100%" vflex="1"
+							style="display:flex; align-items:center; justify-content:center; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; overflow:hidden; padding:4px; box-sizing:border-box;">
 
-        }
+							<image id="frontImage" visible="true"
+								style="max-width:100%; max-height:100%; width:100%; height:100%; object-fit:contain; display:block !important; margin:auto;" />
 
-        .z-datebox.single-field-box > a.z-datebox-button {
+							<image id="backImage" visible="false"
+								style="display:none !important; width:0; height:0; visibility:hidden;" />
 
-            border: none !important;
+						</div>
 
-            background: transparent !important;
 
-            height: 34px !important;
+						<space height="2px" />
 
-            width: 34px !important;
 
-            display: inline-flex !important;
+						<!-- Image Toolbar -->
 
-            align-items: center !important;
+						<hlayout width="100%" spacing="8px"
+							valign="middle">
 
-            justify-content: center !important;
+							<button id="toggleImageSideButton"
+								label="View Back" width="96px" height="32px"
+								style="background:#2563EB !important; color:#FFFFFF !important; border:none !important; font-size:12px !important; font-weight:600 !important; border-radius:6px !important; cursor:pointer !important;" />
 
-        }
+							<space width="2px" />
 
-        /* Unified Combobox */
+							<button id="zoomInButton" label="+"
+								tooltiptext="Zoom In" sclass="icon-symbol-btn" />
 
-        .z-combobox.single-field-box {
+							<button id="zoomOutButton" label="−"
+								tooltiptext="Zoom Out" sclass="icon-symbol-btn" />
 
-            height: 36px !important;
+							<button id="rotateButton" label="↻"
+								tooltiptext="Rotate" sclass="icon-symbol-btn" />
 
-            border: 1px solid #CBD5E1 !important;
+						</hlayout>
 
-            border-radius: 6px !important;
+					</vlayout>
 
-            background: #F8FAFC !important;
+				</groupbox>
 
-            display: inline-flex !important;
 
-            align-items: center !important;
+				<!-- =================================================
+					
+					RIGHT SIDE
+					
+					================================================= -->
 
-            box-sizing: border-box !important;
+				<hlayout hflex="1" spacing="16px" valign="top">
 
-        }
 
-        .z-combobox.single-field-box:focus-within {
+					<!-- =================================================
+						
+						DATA VERIFICATION
+						
+						================================================= -->
 
-            background: #FFFFFF !important;
+					<groupbox hflex="1" height="465px"
+						sclass="equal-card">
 
-            border-color: #2563EB !important;
+						<vlayout width="100%" height="100%"
+							spacing="10px">
 
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
 
-        }
+							<!-- Header -->
 
-        .z-combobox.single-field-box > input.z-combobox-input {
+							<hlayout spacing="10px" valign="middle"
+								width="100%">
 
-            border: none !important;
+								<div sclass="card-header-icon">
 
-            background: transparent !important;
+									<label value="🗂"
+										style="font-size:14px;" />
 
-            height: 34px !important;
+								</div>
 
-            font-size: 12.5px !important;
+								<vlayout spacing="1px">
 
-            font-weight: 500 !important;
+									<label value="Data Verification"
+										style="font-size:14px; font-weight:700; color:#1E293B;" />
 
-            color: #0F172A !important;
+									<label
+										value="Verify and confirm the extracted data from the cheque"
+										style="font-size:11.5px; color:#64748B;" />
 
-            padding-left: 10px !important;
+								</vlayout>
 
-            box-shadow: none !important;
+							</hlayout>
 
-            outline: none !important;
 
-        }
+							<!-- =================================================
+								
+								ROW 1
+								
+								================================================= -->
 
-        /* ============================================================
+							<hlayout width="100%" spacing="12px">
 
-   CHECKER RETURN INFORMATION PANEL
+								<vlayout hflex="1" spacing="4px">
 
-   Modern card style consistent with Data Entry screen
+									<hlayout spacing="0"
+										valign="middle">
 
-   ============================================================ */
+										<label value="CHEQUE NUMBER"
+											sclass="single-field-label" />
 
-/* ---------- Card Container ---------- */
+										<label value="*"
+											sclass="label-star" />
 
-.checker-return-card {
+									</hlayout>
 
-    background: #ffffff;
+									<textbox id="chequeNumberTextbox"
+										width="100%" placeholder="Enter cheque number"
+										sclass="single-field-box" />
 
-    border: 1px solid #e5e7eb;
+								</vlayout>
 
-    border-radius: 12px;
 
-    padding: 18px 20px;
+								<vlayout hflex="1" spacing="4px">
 
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04),
+									<hlayout spacing="0"
+										valign="middle">
 
-                0 4px 12px rgba(15, 23, 42, 0.06);
+										<label value="ACCOUNT NUMBER"
+											sclass="single-field-label" />
 
-    box-sizing: border-box;
+										<label value="*"
+											sclass="label-star" />
 
-    overflow: hidden;
+									</hlayout>
 
-    transition: box-shadow 0.25s ease, transform 0.25s ease;
+									<textbox id="accountNumberTextbox"
+										width="100%" placeholder="Enter account number"
+										sclass="single-field-box" />
 
-}
+								</vlayout>
 
-.checker-return-card:hover {
+							</hlayout>
 
-    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05),
 
-                0 8px 24px rgba(15, 23, 42, 0.08);
+							<!-- =================================================
+								
+								ROW 2
+								
+								================================================= -->
 
-}
+							<hlayout width="100%" spacing="12px">
 
-/* ---------- Header ---------- */
+								<vlayout hflex="1" spacing="4px">
 
-.checker-return-card .checker-return-title {
+									<hlayout spacing="0"
+										valign="middle">
 
-    font-size: 13px;
+										<label value="CHEQUE DATE"
+											sclass="single-field-label" />
 
-    font-weight: 700;
+										<label value="*"
+											sclass="label-star" />
 
-    letter-spacing: 0.6px;
+									</hlayout>
 
-    color: #1f2937;
+									<datebox id="chequeDatebox"
+										width="100%" format="yyyy-MM-dd" buttonVisible="true"
+										readonly="false" sclass="single-field-box" />
 
-    text-transform: uppercase;
+								</vlayout>
 
-}
 
-/* ---------- Field Labels ---------- */
+								<vlayout hflex="1" spacing="4px">
 
-.checker-return-card .checker-return-label {
+									<hlayout spacing="0"
+										valign="middle">
 
-    font-size: 11px;
+										<label value="DRAWER NAME"
+											sclass="single-field-label" />
 
-    font-weight: 600;
+										<label value="*"
+											sclass="label-star" />
 
-    letter-spacing: 0.6px;
+									</hlayout>
 
-    color: #6b7280;
+									<textbox id="drawerNameTextbox"
+										width="100%" placeholder="Enter drawer name"
+										sclass="single-field-box" />
 
-    text-transform: uppercase;
+								</vlayout>
 
-}
+							</hlayout>
 
-/* ---------- Field Values ---------- */
 
-.checker-return-card .checker-return-value {
+							<!-- =================================================
+								
+								ROW 3
+								
+								================================================= -->
 
-    font-size: 13px;
+							<hlayout width="100%" spacing="12px">
 
-    font-weight: 500;
+								<vlayout hflex="1" spacing="4px">
 
-    color: #111827;
+									<hlayout spacing="0"
+										valign="middle">
 
-    line-height: 1.45;
+										<label value="PAYEE NAME"
+											sclass="single-field-label" />
 
-    padding: 8px 12px;
+										<label value="*"
+											sclass="label-star" />
 
-    background: #f9fafb;
+									</hlayout>
 
-    border: 1px solid #eef0f3;
+									<textbox id="payeeNameTextbox"
+										width="100%" placeholder="Enter payee name"
+										sclass="single-field-box" />
 
-    border-radius: 8px;
+								</vlayout>
 
-    box-sizing: border-box;
 
-    word-break: break-word;
+								<vlayout hflex="1" spacing="4px">
 
-    white-space: pre-wrap;
+									<hlayout spacing="0"
+										valign="middle">
 
-}
+										<label value="AMOUNT (₹)"
+											sclass="single-field-label" />
 
-/* Highlighted accent for reason (left orange bar) */
+										<label value="*"
+											sclass="label-star" />
 
-#checkerReasonLabel {
+									</hlayout>
 
-    border-left: 3px solid #C2410C;
+									<decimalbox id="amountTextbox"
+										width="100%" format="###,##0.00" placeholder="0.00"
+										instant="true" sclass="single-field-box" />
 
-    background: #fff7ed;
+								</vlayout>
 
-    color: #7c2d12;
+							</hlayout>
 
-    font-weight: 600;
 
-}
+							<!-- =================================================
+								
+								ROW 4
+								
+								================================================= -->
 
-/* Remarks keeps a soft neutral look */
+							<vlayout width="100%" spacing="4px">
 
-#checkerRemarksLabel {
+								<hlayout spacing="0" valign="middle">
 
-    background: #f9fafb;
+									<label value="AMOUNT IN WORDS"
+										sclass="single-field-label" />
 
-    color: #374151;
+									<label value="*"
+										sclass="label-star" />
 
-    min-height: 48px;
+								</hlayout>
 
-}
+								<textbox id="amountInWordsTextbox"
+									width="100%" placeholder="Enter amount in words"
+									readonly="true" sclass="single-field-box" />
 
-/* ---------- Header Icon accent ---------- */
+							</vlayout>
 
-.checker-return-card .z-label[style*="C2410C"] {
 
-    display: inline-flex;
+							<!-- =================================================
+								
+								EXISTING BUTTONS
+								
+								================================================= -->
 
-    align-items: center;
+							<space height="12px" />
 
-    justify-content: center;
+							<vlayout width="100%" spacing="8px"
+								style="margin-top:auto;">
 
-    width: 22px;
 
-    height: 22px;
 
-    border-radius: 6px;
+								<!-- Prev + Save & Next -->
 
-    background: #fff1e6;
+								<hlayout width="100%" valign="middle"
+									spacing="8px">
 
-    line-height: 1;
+									<button id="prevButton" label="Prev"
+										width="80px" height="36px"
+										style="background:#2563EB !important; color:#FFFFFF !important; border:none !important; font-size:12px !important; font-weight:600 !important; border-radius:6px !important; cursor:pointer !important;" />
 
-}
+									<button id="saveNextButton"
+										label="💾 Save &amp; Next" hflex="1" height="36px"
+										style="background:#2563EB !important; color:#FFFFFF !important; border:none !important; font-size:12px !important; font-weight:600 !important; border-radius:6px !important; cursor:pointer !important;" />
 
-/* ---------- Layout helpers ---------- */
+								</hlayout>
 
-.checker-return-card .z-vlayout,
 
-.checker-return-card .z-hlayout {
+								<!-- Reject -->
 
-    box-sizing: border-box;
+								<hlayout width="100%" valign="middle">
 
-}
+									<button id="rejectRequestButton"
+										label="⚠ Reject Request"
+										tooltiptext="Submit rejection request for Checker review"
+										width="100%" height="36px"
+										style="background:#FFF1F2 !important; color:#BE123C !important; border:1px solid #FECDD3 !important; font-size:12px !important; font-weight:600 !important; border-radius:6px !important; cursor:pointer !important;" />
 
-/* Slightly tighter spacing for inner field groups */
+								</hlayout>
 
-.checker-return-card .z-vlayout > .z-vlayout {
+							</vlayout>
 
-    margin-top: 2px;
 
-}
+							<!-- Actions pinned evenly at the bottom -->
 
-/* ---------- Responsive tweak ---------- */
+							<vlayout width="100%" spacing="8px"
+								style="margin-top:auto;">
 
-@media (max-width: 480px) {
+								<!-- TOP ROW: Navigation & Verification -->
 
-    .checker-return-card {
+								<hlayout spacing="8px" valign="middle"
+									width="100%" style="margin-top: 15px;">
 
-        padding: 14px 14px;
+									<!-- Prev Button -->
 
-        border-radius: 10px;
+									<button id="btnPrev" label="Prev"
+										sclass="btn-secondary" hflex="1" height="40px"
+										style="font-size: 13px; font-weight: 600; padding: 0 4px; text-align: center;" />
 
-    }
+									<!-- Save & Next Button -->
 
-    .checker-return-card .checker-return-value {
+									<button id="btnSaveNext"
+										label="💾 Save &amp; Next" sclass="btn-primary" hflex="1"
+										height="40px"
+										style="background-color: #2563eb; color: #fff; font-size: 12px; font-weight: 600; padding: 0 2px; text-align: center; white-space: nowrap;" />
 
-        font-size: 12px;
+									<!-- Reject Request Button -->
 
-        padding: 7px 10px;
+									<button id="btnReject"
+										label="⚠ Reject Request" sclass="btn-danger"
+										tooltiptext="Reject Request" hflex="1" height="40px"
+										style="background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; font-size: 13px; font-weight: 600; padding: 0 4px; text-align: center; white-space: nowrap;" />
 
-    }
+								</hlayout>
 
-}
+							</vlayout>
 
-        .z-combobox.single-field-box > a.z-combobox-button {
+						</vlayout>
 
-            border: none !important;
+					</groupbox>
 
-            background: transparent !important;
 
-            height: 34px !important;
 
-            width: 32px !important;
 
-            display: inline-flex !important;
+				</hlayout>
 
-            align-items: center !important;
+			</hlayout>
 
-            justify-content: center !important;
+			<!-- =========================================================
+				
+				MODAL WINDOW: CHEQUE REJECTION
+				
+				========================================================= -->
 
-        }
+			<window id="rejectModalWindow" border="none" width="420px"
+				visible="false" closable="false" position="center,center"
+				style="background: #FFFFFF; border-radius: 10px; box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08); border: 1px solid #E2E8F0; overflow: hidden;">
 
-        /* Field Labels */
+				<vlayout spacing="0" width="100%">
 
-        .single-field-label {
 
-            font-size: 11px !important;
+					<!-- Header -->
 
-            font-weight: 700 !important;
+					<div width="100%"
+						style="padding: 14px 20px; background: #FFFFFF; border-bottom: 1px solid #F1F5F9; display: flex; align-items: center; justify-content: space-between;">
 
-            color: #475569 !important;
+						<hlayout spacing="8px" valign="middle">
 
-            letter-spacing: 0.3px;
+							<div
+								style="width: 26px; height: 26px; border-radius: 6px; background: #FFF1F2; border: 1px solid #FECDD3; display: flex; align-items: center; justify-content: center;">
 
-        }
+								<label value="⚠"
+									style="font-size: 13px; color: #BE123C; font-weight: 700; line-height: 1;" />
 
-        .label-star {
+							</div>
 
-            color: #EF4444 !important;
+							<label value="Confirm Cheque Rejection"
+								style="font-size: 14px; font-weight: 700; color: #0F172A; letter-spacing: -0.2px;" />
 
-            font-weight: 700 !important;
+						</hlayout>
 
-            font-size: 11px !important;
 
-            margin-left: 2px;
+						<button label="✕"
+							onClick="rejectModalWindow.setVisible(false)" tooltiptext="Close"
+							style="background: transparent !important; border: none !important; color: #94A3B8 !important; font-size: 13px !important; font-weight: 700 !important; cursor: pointer !important; padding: 2px 6px !important; line-height: 1 !important;" />
 
-        }
+					</div>
 
-        /* Toolbar Buttons */
 
-        .icon-symbol-btn {
+					<!-- Form Body -->
 
-            background: #FFFFFF !important;
+					<vlayout spacing="14px"
+						style="padding: 18px 20px 20px 20px;">
 
-            border: 1px solid #CBD5E1 !important;
 
-            border-radius: 6px !important;
+						<!-- Rejection Reason -->
 
-            color: #334155 !important;
+						<vlayout spacing="5px" width="100%">
 
-            font-size: 16px !important;
+							<hlayout spacing="0" valign="middle">
 
-            font-weight: bold !important;
+								<label value="REJECTION REASON"
+									style="font-size: 11px; font-weight: 700; color: #475569; letter-spacing: 0.3px;" />
 
-            cursor: pointer !important;
+								<label value="*" sclass="label-star" />
 
-            height: 32px !important;
+							</hlayout>
 
-            width: 32px !important;
+							<combobox id="modalRejectReasonCombobox"
+								width="100%" height="36px"
+								placeholder="Select CTS return reason..." readonly="true"
+								autodrop="true" autocomplete="true"
+								style="font-size: 12.5px; font-weight: 500;" />
 
-            display: inline-flex !important;
+						</vlayout>
 
-            align-items: center !important;
 
-            justify-content: center !important;
+						<!-- Maker Remarks -->
 
-            transition: all 0.15s ease !important;
+						<vlayout spacing="5px" width="100%">
 
-        }
+							<hlayout spacing="0" valign="middle">
 
-        .icon-symbol-btn:hover {
+								<label value="MAKER REMARKS"
+									style="font-size: 11px; font-weight: 700; color: #475569; letter-spacing: 0.3px;" />
 
-            background: #F1F5F9 !important;
+								<label value="(OPTIONAL)"
+									style="font-size: 10px; font-weight: 600; color: #94A3B8; margin-left: 4px;" />
 
-            border-color: #94A3B8 !important;
+							</hlayout>
 
-            color: #0F172A !important;
+							<textbox id="modalRejectRemarksTextbox"
+								width="100%" rows="2"
+								placeholder="Add clarification notes for Checker review..."
+								style="font-size: 12.5px; color: #0F172A; line-height: 1.4; padding: 8px 10px; border: 1px solid #CBD5E1; border-radius: 6px; background: #F8FAFC; resize: none; box-sizing: border-box; font-family: inherit;" />
 
-        }
+						</vlayout>
 
-        /* =====================================================
+					</vlayout>
 
-           CHECKER RETURN INFORMATION
 
-           ===================================================== */
+					<!-- Modal Footer -->
 
-        .checker-return-card {
+					<div width="100%"
+						style="padding: 12px 20px; background: #F8FAFC; border-top: 1px solid #E2E8F0; display: flex; justify-content: center; align-items: center;">
 
-            background: #FFF7ED !important;
+						<hlayout spacing="10px"
+							style="justify-content: center;">
 
-            border: 1px solid #FED7AA !important;
+							<button id="cancelRejectModalButton"
+								label="Cancel" height="34px" width="90px"
+								onClick="rejectModalWindow.setVisible(false)"
+								style="background: #FFFFFF !important; color: #334155 !important; border: 1px solid #CBD5E1 !important; border-radius: 6px !important; font-size: 12px !important; font-weight: 600 !important; cursor: pointer !important; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;" />
 
-            border-radius: 8px !important;
+							<button id="confirmRejectModalButton"
+								label="Confirm &amp; Reject" height="34px" width="140px"
+								forward="onClick=spaceOwner.onConfirmRejectModal"
+								style="background: #BE123C !important; color: #FFFFFF !important; border: none !important; border-radius: 6px !important; font-size: 12px !important; font-weight: 600 !important; cursor: pointer !important; box-shadow: 0 1px 2px rgba(190, 18, 60, 0.25) !important;" />
 
-            padding: 12px !important;
+						</hlayout>
 
-            box-sizing: border-box !important;
+					</div>
 
-        }
+				</vlayout>
 
-        .checker-return-title {
+			</window>
 
-            font-size: 11px !important;
+		</vlayout>
 
-            font-weight: 700 !important;
-
-            color: #9A3412 !important;
-
-            letter-spacing: 0.3px;
-
-        }
-
-        .checker-return-label {
-
-            font-size: 10px !important;
-
-            font-weight: 700 !important;
-
-            color: #7C2D12 !important;
-
-            letter-spacing: 0.2px;
-
-        }
-
-        .checker-return-value {
-
-            font-size: 12px !important;
-
-            font-weight: 600 !important;
-
-            color: #431407 !important;
-
-            background: #FFFFFF !important;
-
-            border: 1px solid #FED7AA !important;
-
-            border-radius: 5px !important;
-
-            padding: 6px 8px !important;
-
-            box-sizing: border-box !important;
-
-        }
-
-    ]]></style>
-
-
-    <!-- =========================================================
-
-         CONTENT ROOT
-
-         ========================================================= -->
-
-    <div
-
-        self="@define(content)"
-
-        width="100%"
-
-        height="100%"
-
-        style="width:100%; height:100%; background:#F1F5F9;">
-
-        <vlayout
-
-            apply="com.iispl.cts.controller.outward.OutwardMakerDataEntryDetailController"
-
-            spacing="12px"
-
-            width="100%"
-
-            height="100%"
-
-            style="padding:14px 20px; box-sizing:border-box; overflow:auto;">
-
-
-            <!-- =================================================
-
-                 BATCH HEADER STRIP & METRICS
-
-                 ================================================= -->
-
-            <div
-
-                width="100%"
-
-                style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:8px; padding:8px 16px; box-shadow:0 1px 2px rgba(0,0,0,0.03);">
-
-                <hlayout
-
-                    width="100%"
-
-                    valign="middle">
-
-
-                    <!-- Back Button -->
-
-                    <button
-
-                        id="backToListButton"
-
-                        label="←"
-
-                        tooltiptext="Back to Data Entry"
-
-                        width="32px"
-
-                        height="32px"
-
-                        style="background:#F8FAFC !important; color:#334155 !important; border:1px solid #CBD5E1 !important; border-radius:6px !important; font-size:15px !important; font-weight:bold !important; cursor:pointer !important; margin-right:12px !important; display:inline-flex !important; align-items:center !important; justify-content:center !important;"/>
-
-
-                    <!-- Batch ID -->
-
-                    <label
-
-                        value="Batch No : "
-
-                        style="font-size:13px; font-weight:600; color:#64748B;"/>
-
-                    <label
-
-                        id="batchIdLabel"
-
-                        value=""
-
-                        style="font-size:13px; font-weight:700; color:#1E293B;"/>
-
-                    <space hflex="1"/>
-
-
-                    <!-- Total -->
-
-                    <div
-
-                        style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:16px; padding:4px 14px; display:inline-flex; align-items:center;">
-
-                        <label
-
-                            value="Total: "
-
-                            style="font-size:11px; font-weight:600; color:#64748B;"/>
-
-                        <label
-
-                            id="totalChequesLabel"
-
-                            value="0"
-
-                            style="font-size:12px; font-weight:700; color:#0F172A; margin-left:4px;"/>
-
-                    </div>
-
-                    <space width="8px"/>
-
-
-                    <!-- Completed -->
-
-                    <div
-
-                        style="background:#ECFDF5; border:1px solid #A7F3D0; border-radius:16px; padding:4px 14px; display:inline-flex; align-items:center;">
-
-                        <label
-
-                            value="Completed: "
-
-                            style="font-size:11px; font-weight:600; color:#047857;"/>
-
-                        <label
-
-                            id="completedChequesLabel"
-
-                            value="0"
-
-                            style="font-size:12px; font-weight:700; color:#065F46; margin-left:4px;"/>
-
-                    </div>
-
-                    <space width="8px"/>
-
-
-                    <!-- Reject -->
-
-                    <div
-
-                        style="background:#FFF1F2; border:1px solid #FECDD3; border-radius:16px; padding:4px 14px; display:inline-flex; align-items:center;">
-
-                        <label
-
-                            value="Reject Req: "
-
-                            style="font-size:11px; font-weight:600; color:#BE123C;"/>
-
-                        <label
-
-                            id="rejectedChequesLabel"
-
-                            value="0"
-
-                            style="font-size:12px; font-weight:700; color:#9F1239; margin-left:4px;"/>
-
-                    </div>
-
-                    <space width="8px"/>
-
-
-                    <!-- Pending -->
-
-                    <div
-
-                        style="background:#FFFBEB; border:1px solid #FDE68A; border-radius:16px; padding:4px 14px; display:inline-flex; align-items:center;">
-
-                        <label
-
-                            value="Pending: "
-
-                            style="font-size:11px; font-weight:600; color:#B45309;"/>
-
-                        <label
-
-                            id="pendingChequesLabel"
-
-                            value="0"
-
-                            style="font-size:12px; font-weight:700; color:#92400E; margin-left:4px;"/>
-
-                    </div>
-
-                    <space hflex="1"/>
-
-
-                    <!-- Progress -->
-
-                    <label
-
-                        id="chequeProgressLabel"
-
-                        value=""
-
-                        style="font-size:13px; font-weight:700; color:#2563EB;"/>
-
-                </hlayout>
-
-            </div>
-
-
-                    <!-- =================================================
-
-                         CHECKER RETURN INFORMATION
-
-                         IMPORTANT:
-
-                         - No hflex + width combination
-
-                         - Hidden for normal Data Entry
-
-                         - Existing controller shows it for returned mode
-
-                         ================================================= -->
-
-           <vlayout
-
-    id="checkerReturnInformationPanel"
-
-    visible="false"
-
-    width="100%"
-
-    spacing="6px"
-
-    sclass="checker-return-card">
-
-    <label
-
-        value="CHECKER RETURN INFORMATION"
-
-        sclass="checker-return-title" />
-
-    <hlayout
-
-        width="100%"
-
-        spacing="12px"
-
-        valign="top">
-
-        <vlayout
-
-            hflex="1"
-
-            spacing="4px">
-
-            <label
-
-                value="CHECKER RETURN REASON"
-
-                sclass="checker-return-label" />
-
-            <label
-
-                id="checkerReasonLabel"
-
-                value=""
-
-                width="100%"
-
-                sclass="checker-return-value" />
-
-        </vlayout>
-
-        <vlayout
-
-            hflex="2"
-
-            spacing="4px">
-
-            <label
-
-                value="CHECKER REMARKS"
-
-                sclass="checker-return-label" />
-
-            <label
-
-                id="checkerRemarksLabel"
-
-                value=""
-
-                width="100%"
-
-                multiline="true"
-
-                sclass="checker-return-value" />
-
-        </vlayout>
-
-    </hlayout>
-
-</vlayout>
-
-            <!-- =================================================
-
-                 MAIN SPLIT ROW
-
-                 ================================================= -->
-
-
-
-            <hlayout
-
-                width="100%"
-
-                spacing="16px"
-
-                valign="top">
-
-
-                <!-- =================================================
-
-                     LEFT CARD : SCANNED CHEQUE
-
-                     ================================================= -->
-
-                <groupbox
-
-                    hflex="1"
-
-                    height="465px"
-
-                    sclass="equal-card">
-
-                    <vlayout
-
-                        width="100%"
-
-                        height="100%"
-
-                        spacing="10px">
-
-
-                        <!-- Header -->
-
-                        <hlayout
-
-                            spacing="10px"
-
-                            valign="middle"
-
-                            width="100%">
-
-                            <div sclass="card-header-icon">
-
-                                <label
-
-                                    value="📄"
-
-                                    style="font-size:14px;"/>
-
-                            </div>
-
-                            <vlayout spacing="1px">
-
-                                <label
-
-                                    value="Scanned Cheque"
-
-                                    style="font-size:14px; font-weight:700; color:#1E293B;"/>
-
-                                <label
-
-                                    value="Verify the scanned cheque image and enter the details"
-
-                                    style="font-size:11.5px; color:#64748B;"/>
-
-                            </vlayout>
-
-                        </hlayout>
-
-
-                        <!-- Image -->
-
-                        <div
-
-                            width="100%"
-
-                            vflex="1"
-
-                            style="display:flex; align-items:center; justify-content:center; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; overflow:hidden; padding:4px; box-sizing:border-box;">
-
-                            <image
-
-                                id="frontImage"
-
-                                visible="true"
-
-                                style="max-width:100%; max-height:100%; width:100%; height:100%; object-fit:contain; display:block !important; margin:auto;"/>
-
-                            <image
-
-                                id="backImage"
-
-                                visible="false"
-
-                                style="display:none !important; width:0; height:0; visibility:hidden;"/>
-
-                        </div>
-
-
-                        <space height="2px"/>
-
-
-                        <!-- Image Toolbar -->
-
-                        <hlayout
-
-                            width="100%"
-
-                            spacing="8px"
-
-                            valign="middle">
-
-                            <button
-
-                                id="toggleImageSideButton"
-
-                                label="View Back"
-
-                                width="96px"
-
-                                height="32px"
-
-                                style="background:#2563EB !important; color:#FFFFFF !important; border:none !important; font-size:12px !important; font-weight:600 !important; border-radius:6px !important; cursor:pointer !important;"/>
-
-                            <space width="2px"/>
-
-                            <button
-
-                                id="zoomInButton"
-
-                                label="+"
-
-                                tooltiptext="Zoom In"
-
-                                sclass="icon-symbol-btn"/>
-
-                            <button
-
-                                id="zoomOutButton"
-
-                                label="−"
-
-                                tooltiptext="Zoom Out"
-
-                                sclass="icon-symbol-btn"/>
-
-                            <button
-
-                                id="rotateButton"
-
-                                label="↻"
-
-                                tooltiptext="Rotate"
-
-                                sclass="icon-symbol-btn"/>
-
-                        </hlayout>
-
-                    </vlayout>
-
-                </groupbox>
-
-
-                <!-- =================================================
-
-                     RIGHT SIDE
-
-                     ================================================= -->
-
-                <hlayout
-
-                    hflex="1"
-
-                    spacing="16px"
-
-                    valign="top">
-
-
-                    <!-- =================================================
-
-                         DATA VERIFICATION
-
-                         ================================================= -->
-
-                    <groupbox
-
-                        hflex="1"
-
-                        height="465px"
-
-                        sclass="equal-card">
-
-                        <vlayout
-
-                            width="100%"
-
-                            height="100%"
-
-                            spacing="10px">
-
-
-                            <!-- Header -->
-
-                            <hlayout
-
-                                spacing="10px"
-
-                                valign="middle"
-
-                                width="100%">
-
-                                <div sclass="card-header-icon">
-
-                                    <label
-
-                                        value="🗂"
-
-                                        style="font-size:14px;"/>
-
-                                </div>
-
-                                <vlayout spacing="1px">
-
-                                    <label
-
-                                        value="Data Verification"
-
-                                        style="font-size:14px; font-weight:700; color:#1E293B;"/>
-
-                                    <label
-
-                                        value="Verify and confirm the extracted data from the cheque"
-
-                                        style="font-size:11.5px; color:#64748B;"/>
-
-                                </vlayout>
-
-                            </hlayout>
-
-
-                            <!-- =================================================
-
-                                 ROW 1
-
-                                 ================================================= -->
-
-                            <hlayout
-
-                                width="100%"
-
-                                spacing="12px">
-
-                                <vlayout
-
-                                    hflex="1"
-
-                                    spacing="4px">
-
-                                    <hlayout
-
-                                        spacing="0"
-
-                                        valign="middle">
-
-                                        <label
-
-                                            value="CHEQUE NUMBER"
-
-                                            sclass="single-field-label"/>
-
-                                        <label
-
-                                            value="*"
-
-                                            sclass="label-star"/>
-
-                                    </hlayout>
-
-                                    <textbox
-
-                                        id="chequeNumberTextbox"
-
-                                        width="100%"
-
-                                        placeholder="Enter cheque number"
-
-                                        sclass="single-field-box"/>
-
-                                </vlayout>
-
-
-                                <vlayout
-
-                                    hflex="1"
-
-                                    spacing="4px">
-
-                                    <hlayout
-
-                                        spacing="0"
-
-                                        valign="middle">
-
-                                        <label
-
-                                            value="ACCOUNT NUMBER"
-
-                                            sclass="single-field-label"/>
-
-                                        <label
-
-                                            value="*"
-
-                                            sclass="label-star"/>
-
-                                    </hlayout>
-
-                                    <textbox
-
-                                        id="accountNumberTextbox"
-
-                                        width="100%"
-
-                                        placeholder="Enter account number"
-
-                                        sclass="single-field-box"/>
-
-                                </vlayout>
-
-                            </hlayout>
-
-
-                            <!-- =================================================
-
-                                 ROW 2
-
-                                 ================================================= -->
-
-                            <hlayout
-
-                                width="100%"
-
-                                spacing="12px">
-
-                                <vlayout
-
-                                    hflex="1"
-
-                                    spacing="4px">
-
-                                    <hlayout
-
-                                        spacing="0"
-
-                                        valign="middle">
-
-                                        <label
-
-                                            value="CHEQUE DATE"
-
-                                            sclass="single-field-label"/>
-
-                                        <label
-
-                                            value="*"
-
-                                            sclass="label-star"/>
-
-                                    </hlayout>
-
-                                    <datebox
-
-                                        id="chequeDatebox"
-
-                                        width="100%"
-
-                                        format="yyyy-MM-dd"
-
-                                        buttonVisible="true"
-
-                                        readonly="false"
-
-                                        sclass="single-field-box"/>
-
-                                </vlayout>
-
-
-                                <vlayout
-
-                                    hflex="1"
-
-                                    spacing="4px">
-
-                                    <hlayout
-
-                                        spacing="0"
-
-                                        valign="middle">
-
-                                        <label
-
-                                            value="DRAWER NAME"
-
-                                            sclass="single-field-label"/>
-
-                                        <label
-
-                                            value="*"
-
-                                            sclass="label-star"/>
-
-                                    </hlayout>
-
-                                    <textbox
-
-                                        id="drawerNameTextbox"
-
-                                        width="100%"
-
-                                        placeholder="Enter drawer name"
-
-                                        sclass="single-field-box"/>
-
-                                </vlayout>
-
-                            </hlayout>
-
-
-                            <!-- =================================================
-
-                                 ROW 3
-
-                                 ================================================= -->
-
-                            <hlayout
-
-                                width="100%"
-
-                                spacing="12px">
-
-                                <vlayout
-
-                                    hflex="1"
-
-                                    spacing="4px">
-
-                                    <hlayout
-
-                                        spacing="0"
-
-                                        valign="middle">
-
-                                        <label
-
-                                            value="PAYEE NAME"
-
-                                            sclass="single-field-label"/>
-
-                                        <label
-
-                                            value="*"
-
-                                            sclass="label-star"/>
-
-                                    </hlayout>
-
-                                    <textbox
-
-                                        id="payeeNameTextbox"
-
-                                        width="100%"
-
-                                        placeholder="Enter payee name"
-
-                                        sclass="single-field-box"/>
-
-                                </vlayout>
-
-
-                                <vlayout
-
-                                    hflex="1"
-
-                                    spacing="4px">
-
-                                    <hlayout
-
-                                        spacing="0"
-
-                                        valign="middle">
-
-                                        <label
-
-                                            value="AMOUNT (₹)"
-
-                                            sclass="single-field-label"/>
-
-                                        <label
-
-                                            value="*"
-
-                                            sclass="label-star"/>
-
-                                    </hlayout>
-
-                                    <decimalbox
-
-                                        id="amountTextbox"
-
-                                        width="100%"
-
-                                        format="###,##0.00"
-
-                                        placeholder="0.00"
-
-                                        instant="true"
-
-                                        sclass="single-field-box"/>
-
-                                </vlayout>
-
-                            </hlayout>
-
-
-                            <!-- =================================================
-
-                                 ROW 4
-
-                                 ================================================= -->
-
-                            <vlayout
-
-                                width="100%"
-
-                                spacing="4px">
-
-                                <hlayout
-
-                                    spacing="0"
-
-                                    valign="middle">
-
-                                    <label
-
-                                        value="AMOUNT IN WORDS"
-
-                                        sclass="single-field-label"/>
-
-                                    <label
-
-                                        value="*"
-
-                                        sclass="label-star"/>
-
-                                </hlayout>
-
-                                <textbox
-
-                                    id="amountInWordsTextbox"
-
-                                    width="100%"
-
-                                    placeholder="Enter amount in words"
-
-                                    readonly="true"
-
-                                    sclass="single-field-box"/>
-
-                            </vlayout>
-
-
-                            <!-- =================================================
-
-                                 EXISTING BUTTONS
-
-                                 ================================================= -->
-
-                            <space height="12px"/>
-
-                            <vlayout
-
-                                width="100%"
-
-                                spacing="8px"
-
-                                style="margin-top:auto;">
-
-
-
-                                <!-- Prev + Save & Next -->
-
-                                <hlayout
-
-                                    width="100%"
-
-                                    valign="middle"
-
-                                    spacing="8px">
-
-                                    <button
-
-                                        id="prevButton"
-
-                                        label="Prev"
-
-                                        width="80px"
-
-                                        height="36px"
-
-                                        style="background:#2563EB !important; color:#FFFFFF !important; border:none !important; font-size:12px !important; font-weight:600 !important; border-radius:6px !important; cursor:pointer !important;"/>
-
-                                    <button
-
-                                        id="saveNextButton"
-
-                                        label="💾 Save &amp; Next"
-
-                                        hflex="1"
-
-                                        height="36px"
-
-                                        style="background:#2563EB !important; color:#FFFFFF !important; border:none !important; font-size:12px !important; font-weight:600 !important; border-radius:6px !important; cursor:pointer !important;"/>
-
-                                </hlayout>
-
-
-                                <!-- Reject -->
-
-                                <hlayout
-
-                                    width="100%"
-
-                                    valign="middle">
-
-                                    <button
-
-                                        id="rejectRequestButton"
-
-                                        label="⚠ Reject Request"
-
-                                        tooltiptext="Submit rejection request for Checker review"
-
-                                        width="100%"
-
-                                        height="36px"
-
-                                        style="background:#FFF1F2 !important; color:#BE123C !important; border:1px solid #FECDD3 !important; font-size:12px !important; font-weight:600 !important; border-radius:6px !important; cursor:pointer !important;"/>
-
-                                </hlayout>
-
-                            </vlayout>
-
-
-                        <!-- Actions pinned evenly at the bottom -->
-
-                        <vlayout width="100%" spacing="8px" style="margin-top:auto;">
-
-                            <!-- TOP ROW: Navigation & Verification -->
-
-  <hlayout spacing="8px" valign="middle" width="100%" style="margin-top: 15px;">
-
-    <!-- Prev Button -->
-
-    <button id="btnPrev" label="Prev" 
-
-            sclass="btn-secondary" 
-
-            hflex="1" height="40px" 
-
-            style="font-size: 13px; font-weight: 600; padding: 0 4px; text-align: center;" />
-
-    <!-- Save & Next Button -->
-
-    <button id="btnSaveNext" label="💾 Save &amp; Next" 
-
-            sclass="btn-primary" 
-
-            hflex="1" height="40px" 
-
-            style="background-color: #2563eb; color: #fff; font-size: 12px; font-weight: 600; padding: 0 2px; text-align: center; white-space: nowrap;" />
-
-    <!-- Reject Request Button -->
-
-    <button id="btnReject" label="⚠ Reject Request" 
-
-            sclass="btn-danger" 
-
-            tooltiptext="Reject Request"
-
-            hflex="1" height="40px" 
-
-            style="background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; font-size: 13px; font-weight: 600; padding: 0 4px; text-align: center; white-space: nowrap;" />
-
-</hlayout>
-
-                        </vlayout>
-
-                    </vlayout>
-
-                    </groupbox>
-
-
-
-
-                </hlayout>
-
-            </hlayout>
-
-            <!-- =========================================================
-
-                 MODAL WINDOW: CHEQUE REJECTION
-
-                 ========================================================= -->
-
-            <window
-
-                id="rejectModalWindow"
-
-                border="none"
-
-                width="420px"
-
-                visible="false"
-
-                closable="false"
-
-                position="center,center"
-
-                style="background: #FFFFFF; border-radius: 10px; box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08); border: 1px solid #E2E8F0; overflow: hidden;">
-
-                <vlayout
-
-                    spacing="0"
-
-                    width="100%">
-
-
-                    <!-- Header -->
-
-                    <div
-
-                        width="100%"
-
-                        style="padding: 14px 20px; background: #FFFFFF; border-bottom: 1px solid #F1F5F9; display: flex; align-items: center; justify-content: space-between;">
-
-                        <hlayout
-
-                            spacing="8px"
-
-                            valign="middle">
-
-                            <div
-
-                                style="width: 26px; height: 26px; border-radius: 6px; background: #FFF1F2; border: 1px solid #FECDD3; display: flex; align-items: center; justify-content: center;">
-
-                                <label
-
-                                    value="⚠"
-
-                                    style="font-size: 13px; color: #BE123C; font-weight: 700; line-height: 1;"/>
-
-                            </div>
-
-                            <label
-
-                                value="Confirm Cheque Rejection"
-
-                                style="font-size: 14px; font-weight: 700; color: #0F172A; letter-spacing: -0.2px;"/>
-
-                        </hlayout>
-
-
-                        <button
-
-                            label="✕"
-
-                            onClick="rejectModalWindow.setVisible(false)"
-
-                            tooltiptext="Close"
-
-                            style="background: transparent !important; border: none !important; color: #94A3B8 !important; font-size: 13px !important; font-weight: 700 !important; cursor: pointer !important; padding: 2px 6px !important; line-height: 1 !important;"/>
-
-                    </div>
-
-
-                    <!-- Form Body -->
-
-                    <vlayout
-
-                        spacing="14px"
-
-                        style="padding: 18px 20px 20px 20px;">
-
-
-                        <!-- Rejection Reason -->
-
-                        <vlayout
-
-                            spacing="5px"
-
-                            width="100%">
-
-                            <hlayout
-
-                                spacing="0"
-
-                                valign="middle">
-
-                                <label
-
-                                    value="REJECTION REASON"
-
-                                    style="font-size: 11px; font-weight: 700; color: #475569; letter-spacing: 0.3px;"/>
-
-                                <label
-
-                                    value="*"
-
-                                    sclass="label-star"/>
-
-                            </hlayout>
-
-                            <combobox
-
-                                id="modalRejectReasonCombobox"
-
-                                width="100%"
-
-                                height="36px"
-
-                                placeholder="Select CTS return reason..."
-
-                                readonly="true"
-
-                                autodrop="true"
-
-                                autocomplete="true"
-
-                                style="font-size: 12.5px; font-weight: 500;"/>
-
-                        </vlayout>
-
-
-                        <!-- Maker Remarks -->
-
-                        <vlayout
-
-                            spacing="5px"
-
-                            width="100%">
-
-                            <hlayout
-
-                                spacing="0"
-
-                                valign="middle">
-
-                                <label
-
-                                    value="MAKER REMARKS"
-
-                                    style="font-size: 11px; font-weight: 700; color: #475569; letter-spacing: 0.3px;"/>
-
-                                <label
-
-                                    value="(OPTIONAL)"
-
-                                    style="font-size: 10px; font-weight: 600; color: #94A3B8; margin-left: 4px;"/>
-
-                            </hlayout>
-
-                            <textbox
-
-                                id="modalRejectRemarksTextbox"
-
-                                width="100%"
-
-                                rows="2"
-
-                                placeholder="Add clarification notes for Checker review..."
-
-                                style="font-size: 12.5px; color: #0F172A; line-height: 1.4; padding: 8px 10px; border: 1px solid #CBD5E1; border-radius: 6px; background: #F8FAFC; resize: none; box-sizing: border-box; font-family: inherit;"/>
-
-                        </vlayout>
-
-                    </vlayout>
-
-
-                    <!-- Modal Footer -->
-
-                    <div
-
-                        width="100%"
-
-                        style="padding: 12px 20px; background: #F8FAFC; border-top: 1px solid #E2E8F0; display: flex; justify-content: center; align-items: center;">
-
-                        <hlayout
-
-                            spacing="10px"
-
-                            style="justify-content: center;">
-
-                            <button
-
-                                id="cancelRejectModalButton"
-
-                                label="Cancel"
-
-                                height="34px"
-
-                                width="90px"
-
-                                onClick="rejectModalWindow.setVisible(false)"
-
-                                style="background: #FFFFFF !important; color: #334155 !important; border: 1px solid #CBD5E1 !important; border-radius: 6px !important; font-size: 12px !important; font-weight: 600 !important; cursor: pointer !important; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;"/>
-
-                            <button
-
-                                id="confirmRejectModalButton"
-
-                                label="Confirm &amp; Reject"
-
-                                height="34px"
-
-                                width="140px"
-
-                                forward="onClick=spaceOwner.onConfirmRejectModal"
-
-                                style="background: #BE123C !important; color: #FFFFFF !important; border: none !important; border-radius: 6px !important; font-size: 12px !important; font-weight: 600 !important; cursor: pointer !important; box-shadow: 0 1px 2px rgba(190, 18, 60, 0.25) !important;"/>
-
-                        </hlayout>
-
-                    </div>
-
-                </vlayout>
-
-            </window>
-
-        </vlayout>
-
-    </div>
+	</div>
 
 </zk>

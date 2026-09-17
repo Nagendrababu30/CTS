@@ -104,26 +104,20 @@
    PAGE TITLE
    ========================================================= */
 
+
 .batch-title {
     font-family:
-        'Inter',
-        'Plus Jakarta Sans',
         'Segoe UI',
-        Arial,
+        'Plus Jakarta Sans',
         sans-serif !important;
 
     font-size: 30px !important;
-
     font-weight: 700 !important;
-
-    color:
-        var(--text-primary) !important;
-
-    letter-spacing:
-        -0.03em !important;
+    color: #0B1F3F !important;
+    letter-spacing: -0.035em !important;
+    line-height: 1.1 !important;
 
     position: relative !important;
-
     display: inline-block !important;
 }
 
@@ -588,9 +582,7 @@
     letter-spacing:
         0.06em !important;
 
-    text-transform:
-        uppercase !important;
-
+     
     color:
         #FFFFFF !important;
 
@@ -779,7 +771,7 @@
         500 !important;
 
     line-height:
-        1.4 !important;
+        2;
 
     text-align:
         center !important;

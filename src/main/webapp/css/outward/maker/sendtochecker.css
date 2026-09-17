@@ -40,7 +40,18 @@ html, body {
 .z-window-content {
     padding: 0 !important;
 }
-
+.send-to-maker-wrapper{
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    background:
+        radial-gradient(1200px 600px at 0% 0%, rgba(23, 92, 211, 0.12), transparent 60%),
+        radial-gradient(1000px 600px at 100% 0%, rgba(122, 90, 248, 0.10), transparent 60%),
+        radial-gradient(900px 700px at 100% 100%, rgba(18, 183, 106, 0.07), transparent 60%),
+        linear-gradient(180deg, var(--bg-app-1) 0%, var(--bg-app-2) 100%);
+    position: relative;
+    overflow: hidden;
+}
 /* ---------- Table Container Card ---------- */
 div[style*="background:white"],
 div[style*="background: white"] {
@@ -110,7 +121,7 @@ div[style*="background: white"]::before {
     font-weight: 700 !important;
     font-size: 13px !important;
     letter-spacing: 0.06em !important;
-    text-transform: uppercase !important;
+    text-transform: none !important;
     color: #FFFFFF !important;
     padding: 22px 20px !important;
     line-height: 1.4 !important;
@@ -169,7 +180,7 @@ div[style*="background: white"]::before {
     font-size: 13px !important;
     color: var(--text-secondary) !important;
     padding: 12px 14px !important;
-    line-height: 1.4 !important;
+    line-height: 2;
     text-align: center !important;
     justify-content: center !important;
 }
@@ -196,13 +207,105 @@ div[style*="background: white"]::before {
     background: #059669 !important;
     border-color: #059669 !important;
 }
+/* =============================================================
+   PAGING BAR — CLEAN, ZERO DUPLICATE / PHANTOM TEXT
+   ============================================================= */
 
-/* Paging Bar (mold="paging") */
-.send-checker-listbox .z-paging {
+/* Container */
+.send-checker-listbox .z-paging,
+.send-checker-listbox .z-paging-os {
     display: flex !important;
     justify-content: flex-end !important;
     align-items: center !important;
-    padding: 12px 20px !important;
+    padding: 10px 18px !important;
     background: var(--bg-surface) !important;
     border-top: 1px solid var(--border-light) !important;
+    box-sizing: border-box !important;
+}
+
+/* 1. Hide duplicate bracketed info text */
+.send-checker-listbox .z-paging-info {
+    display: none !important;
+}
+
+/* 2. Zero-out cell font-size to kill phantom characters (brackets, extra numbers) */
+.send-checker-listbox .z-paging td {
+    font-size: 0 !important;
+    line-height: 0 !important;
+    padding: 0 2px !important;
+    vertical-align: middle !important;
+}
+
+/* 3. Hide fallback text spans inside paging buttons */
+.send-checker-listbox .z-paging button span:not([class*="z-icon-"]),
+.send-checker-listbox .z-paging a span:not([class*="z-icon-"]),
+.send-checker-listbox .z-paging-btn span:not([class*="z-icon-"]),
+.send-checker-listbox .z-paging-button span:not([class*="z-icon-"]) {
+    display: none !important;
+    font-size: 0 !important;
+    visibility: hidden !important;
+}
+
+/* 4. Restore navigation buttons */
+.send-checker-listbox .z-paging-button,
+.send-checker-listbox .z-paging-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 28px !important;
+    height: 28px !important;
+    border: 1px solid var(--border-mid) !important;
+    border-radius: var(--radius-sm) !important;
+    background: #FFFFFF !important;
+    color: var(--text-secondary) !important;
+    cursor: pointer !important;
+    font-size: 12px !important;
+    line-height: normal !important;
+    text-decoration: none !important;
+    box-sizing: border-box !important;
+    padding: 0 4px !important;
+}
+
+.send-checker-listbox .z-paging-button:hover,
+.send-checker-listbox .z-paging-btn:hover {
+    background: var(--bg-subtle) !important;
+    border-color: var(--brand-blue) !important;
+    color: var(--brand-blue) !important;
+}
+
+.send-checker-listbox .z-paging [class*="z-icon-"] {
+    font-size: 12px !important;
+    line-height: normal !important;
+    display: inline-block !important;
+}
+
+/* 5. Page number input box */
+.send-checker-listbox input.z-paging-input,
+.send-checker-listbox .z-paging-inp {
+    width: 36px !important;
+    height: 28px !important;
+    text-align: center !important;
+    border: 1px solid var(--border-mid) !important;
+    border-radius: var(--radius-sm) !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: var(--text-primary) !important;
+    background: #FFFFFF !important;
+    margin: 0 4px !important;
+    box-sizing: border-box !important;
+    line-height: normal !important;
+    display: inline-block !important;
+}
+
+/* 6. Single visible counter text ("/ 1") */
+.send-checker-listbox .z-paging .z-paging-text {
+    display: inline-block !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    line-height: normal !important;
+    color: var(--text-muted) !important;
+    padding: 0 4px !important;
+    visibility: visible !important;
 }

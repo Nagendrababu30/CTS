@@ -1,63 +1,68 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
+<?page title="CTS Login" contentType="text/html;charset=UTF-8"?>
 <zk>
-
     <style src="/css/common/login.css"/>
-
-    <window
-        border="none"
-        width="100%"
-        height="100%"
-        sclass="login-page"
-        apply="com.cts.admin.controller.LoginComposer">
-
-
-        <vlayout
-           
-            width="420px"
-            sclass="login-card">
-
-            <vlayout
-                sclass="login-content"
-                spacing="18px">
-
-                <label
-                    value="CTS System"
-                    sclass="login-title"/>
-
-                <label
-                    value="Login"
-                    sclass="login-subtitle"/>
-
-
-                <textbox
-                    id="username"
-                    placeholder="Username"
-                    width="100%"
-                    sclass="login-input"/>
-
-                <textbox
-                    id="password"
-                    type="password"
-                    placeholder="Password"
-                    width="100%"
-                    sclass="login-input"/>
-
-                <button
-                    id="loginButton"
-                    label="Login"
-                    width="100%"
-                    sclass="login-button"/>
-
-                <label
-                    id="loginMessage"
-                    sclass="login-message"/>
-
-
-            </vlayout>
-
+    
+    <div apply="com.cts.admin.controller.LoginComposer" sclass="main-container">
+        
+       <!-- Left Side: Branding & Features -->
+   <div sclass="brand-section">
+    <vlayout spacing="10px">
+        
+        <vlayout spacing="0px">
+            <label sclass="brand-title" value="Cheque" />
+            <div>
+                <label sclass="brand-title" value="Truncation " />
+                <label sclass="brand-title highlight-text" value="System" />
+            </div>
         </vlayout>
+ 
+        
+        <label sclass="brand-subtitle" value="Secure. Reliable. Always with you." />
+        
+        <div sclass="blue-divider"></div>
+        
+        <hlayout sclass="features-layout" spacing="30px">
+            <vlayout sclass="feature-item">
+                <span sclass="z-icon-shield feature-icon" />
+                <label pre="true" value="Safe&#10;Processing" />
+            </vlayout>
+            <vlayout sclass="feature-item">
+                <span sclass="z-icon-users feature-icon" />
+                <label pre="true" value="Customer&#10;Focused" />
+            </vlayout>
+            <vlayout sclass="feature-item">
+                <span sclass="z-icon-globe feature-icon" />
+                <label pre="true" value="Digital&#10;Anytime" />
+            </vlayout>
+        </hlayout>
+    </vlayout>
+</div>
 
-    </window>
+        <!-- Right Side: Login Card -->
+        <div sclass="login-section">
+            <div sclass="login-card">
+                <vlayout spacing="15px">
+                    <label sclass="card-title" value="Welcome Back" />
+                    <label sclass="card-subtitle" value="Sign in to your account" />
+                    
+                    <label id="loginMessage" sclass="error-message" />
 
+                    <div sclass="input-group">
+                        <span sclass="z-icon-user input-icon" />
+                        <textbox id="username" placeholder="User ID" sclass="custom-input" />
+                    </div>
+
+                    <div sclass="input-group">
+                        <span sclass="z-icon-lock input-icon" />
+                        <textbox id="password" type="password" placeholder="Password" sclass="custom-input" />
+                        <!-- Using ZUL Anchor 'a' element for the clickable icon -->
+                        <a id="togglePasswordBtn" iconSclass="z-icon-eye" sclass="toggle-icon" tooltiptext="Show/Hide Password"/>
+                    </div>
+
+                    <button id="loginButton" label="Login" sclass="login-btn" />
+                </vlayout>
+            </div>
+        </div>
+        
+    </div>
 </zk>

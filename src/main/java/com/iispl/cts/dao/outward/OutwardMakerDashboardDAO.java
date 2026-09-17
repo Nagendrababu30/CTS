@@ -18,6 +18,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import javax.sql.DataSource;
 
 public class OutwardMakerDashboardDAO {
@@ -161,7 +163,7 @@ public class OutwardMakerDashboardDAO {
                 "               'COMPLETED', " +
                 "               'REJECTED', " +
                 "               'HOLD', " +
-                "               'ON_HOLD','NPCI_SENT','CHECKER_PROCESSING') " +
+                "               'ON_HOLD','NPCI_SENT','CHECKER_PROCESSING','CHECKER_VERIFIED') " +
                 "          AND " +
                 "          ( " +
 
@@ -1695,5 +1697,74 @@ public class OutwardMakerDashboardDAO {
                 return processing;
             }
         }
+    }
+
+ // ============================================================
+    // GET MAKER DASHBOARD COUNTS
+    // ============================================================
+
+    public java.util.Map<String, Integer> getDashboardCounts() throws SQLException {
+
+        Session session = Executions.getCurrent().getSession();
+
+        Object sessionUserId = session != null ? session.getAttribute("userId") : null;
+
+        if (sessionUserId == null) {
+            throw new SQLException("Maker user ID is required.");
+        }
+
+        int currentMakerUserId;
+
+        try {
+            currentMakerUserId = Integer.parseInt(sessionUserId.toString().trim());
+        } catch (NumberFormatException e) {
+            throw new SQLException("Invalid maker user ID: " + sessionUserId);
+        }
+
+        java.util.Map<String, Integer> counts = new java.util.HashMap<>();
+        counts.put("PENDING_DATA_ENTRY", 0);
+        counts.put("MICR_REPAIR", 0);
+        counts.put("READY_TO_SUBMIT", 0);
+
+        String sql =
+                "SELECT " +
+                "    COALESCE(SUM(CASE " +
+                "        WHEN UPPER(TRIM(ob.batch_status)) IN ('MICR_VERIFIED', 'MICR_REPAIR_COMPLETED', 'DATA_ENTRY') " +
+                "        THEN 1 ELSE 0 " +
+                "    END), 0) AS pending_data_entry, " +
+
+                "    COALESCE(SUM(CASE " +
+                "        WHEN UPPER(TRIM(ob.batch_status)) IN ('MICR_ERROR', 'MICR_REPAIR') " +
+                "        THEN 1 ELSE 0 " +
+                "    END), 0) AS micr_repair, " +
+
+                "    COALESCE(SUM(CASE " +
+                "        WHEN UPPER(TRIM(ob.batch_status)) IN ('READY_TO_SUBMIT', 'READY') " +
+                "        THEN 1 ELSE 0 " +
+                "    END), 0) AS ready_to_submit " +
+
+                "FROM public.outward_batch ob " +
+                "INNER JOIN public.outward_batch_assignment mba " +
+                "    ON ob.batch_number = mba.batch_number " +
+                "WHERE mba.user_id = ? " +
+                "  AND UPPER(TRIM(mba.assignment_role)) = 'MAKER' " +
+                "  AND UPPER(TRIM(mba.assignment_status)) IN ('ASSIGNED', 'IN_PROGRESS','COMPLETED')";
+
+        try (
+                Connection con = dataSource.getConnection();
+                PreparedStatement ps = con.prepareStatement(sql)
+        ) {
+            ps.setInt(1, currentMakerUserId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    counts.put("PENDING_DATA_ENTRY", rs.getInt("pending_data_entry"));
+                    counts.put("MICR_REPAIR", rs.getInt("micr_repair"));
+                    counts.put("READY_TO_SUBMIT", rs.getInt("ready_to_submit"));
+                }
+            }
+        }
+
+        return counts;
     }
 }

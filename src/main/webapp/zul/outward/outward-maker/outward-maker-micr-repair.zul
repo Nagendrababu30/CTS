@@ -10,7 +10,7 @@
         arg0="/zul/common/layout.zul"?>
 
 <zk>
-<style src="/css/outward/maker/micr-repair.css"/>
+<style src="/css/outward/maker/micr-repair.css?v=25"/>
     <!-- =========================================================
          PAGE STYLING
          ========================================================= -->
@@ -31,8 +31,10 @@
         style="
             width:100%;
             height:100%;
-            background:#F4F7FB;
-        ">
+            ;
+            
+        "
+        sclass="micr-page-wrapper">
 
         <!-- =====================================================
              MICR REPAIR CONTENT
@@ -109,9 +111,11 @@
                           <listheader
                             label="MICR Error"
                             width="20%"/>
-                             <listheader
+                           
+                           <listheader
                             label="Status"
                             width="20%"/>
+                           
 
                         <listheader
                             label="Action"

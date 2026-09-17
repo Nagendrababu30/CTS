@@ -21,7 +21,6 @@ public class CheckerDashboardService {
     // ============================================================
     // GET CHECKER DASHBOARD BATCHES
     // ============================================================
-
     public List<OutwardBatch> getBatches(String checkerUserId) {
 
         if (checkerUserId == null ||
@@ -31,18 +30,14 @@ public class CheckerDashboardService {
         }
 
         try {
-
             return dao.getCheckerBatches(
                     checkerUserId.trim());
 
         } catch (Exception e) {
-
             e.printStackTrace();
-
             return Collections.emptyList();
         }
     }
-
     // ============================================================
     // CHECK RE-VERIFIED CHEQUES
     // ============================================================

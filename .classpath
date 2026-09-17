@@ -19,5 +19,8 @@
 	<classpathentry exported="true" kind="lib" path="src/main/webapp/WEB-INF/lib/commons-logging.jar"/>
 	<classpathentry exported="true" kind="lib" path="src/main/webapp/WEB-INF/lib/commons-beanutils-1.9.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="src/main/webapp/WEB-INF/lib/commons-digester-2.1.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jackson-annotations-2.17.2.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jackson-core-2.17.2.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jackson-databind-2.17.2.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

@@ -66,4 +66,14 @@ public class CheckerBatch {
 	public void setLockStatus(String lockStatus) {
 		this.lockStatus = lockStatus;
 	}
+
+	private boolean reVerify;
+
+	public boolean isReVerify() {
+		return reVerify;
+	}
+
+	public void setReVerify(boolean reVerify) {
+		this.reVerify = reVerify;
+	}
 }

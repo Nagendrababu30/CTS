@@ -85,7 +85,85 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
     public List<Map<String, Object>> getChequesByBatchId(
             Long batchId) {
 
-        String sql = """
+        if (batchId == null) {
+            return new java.util.ArrayList<>();
+        }
+
+        // Check if this batch is a Re-Verify batch (has cheques returned to maker by checker)
+        String checkReverifySql = """
+                SELECT EXISTS (
+                    SELECT 1 FROM inward_cheque c
+                    JOIN inward_cheque_status_history sh ON sh.cheque_number = c.cheque_number
+                    WHERE c.batch_id = ?
+                      AND (
+                          sh.status = 'RETURN_TO_MAKER'
+                          OR sh.checker_action = 'Sent Back'
+                          OR (sh.return_reason_code IS NOT NULL AND (sh.return_reason_code LIKE 'CR-%' OR sh.return_reason_code = 'OTHER'))
+                      )
+                ) AS is_reverify
+                """;
+
+        boolean isReverifyBatch = false;
+        try (Connection connection = dataSource.getConnection();
+                PreparedStatement ps = connection.prepareStatement(checkReverifySql)) {
+            ps.setLong(1, batchId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    isReverifyBatch = rs.getBoolean("is_reverify");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        String sql;
+        if (isReverifyBatch) {
+            // In Re-Verify batches, ONLY load cheques that were returned to maker by checker
+            sql = """
+                SELECT
+                    c.cheque_number,
+                    c.batch_id,
+                    c.account_number,
+                    c.payee_name,
+                    c.amount,
+                    c.micr_code,
+                    c.cheque_date,
+                    latest.status AS cheque_status,
+                    latest.return_reason_code,
+                    r.description AS return_reason_description,
+                    latest.remarks AS maker_remarks,
+                    ocr.micr_code AS ocr_micr_code
+                FROM inward_cheque c
+                LEFT JOIN LATERAL (
+                    SELECT h.status, h.return_reason_code, h.remarks
+                    FROM inward_cheque_status_history h
+                    WHERE h.cheque_number = c.cheque_number
+                    ORDER BY h.status_history_id DESC
+                    LIMIT 1
+                ) latest ON TRUE
+                LEFT JOIN inward_cheque_return_reason r ON latest.return_reason_code = r.return_reason_code
+                LEFT JOIN LATERAL (
+                    SELECT o.micr_code
+                    FROM public.ocr_cheque_data o
+                    WHERE o.cheque_number = c.cheque_number OR o.inward_cheque_id = c.inward_cheque_id
+                    ORDER BY o.inward_cheque_id DESC
+                    LIMIT 1
+                ) ocr ON TRUE
+                WHERE c.batch_id = ?
+                  AND EXISTS (
+                      SELECT 1 FROM inward_cheque_status_history sh
+                      WHERE sh.cheque_number = c.cheque_number
+                        AND (
+                            sh.status = 'RETURN_TO_MAKER'
+                            OR sh.checker_action = 'Sent Back'
+                            OR (sh.return_reason_code IS NOT NULL AND (sh.return_reason_code LIKE 'CR-%' OR sh.return_reason_code = 'OTHER'))
+                        )
+                  )
+                ORDER BY c.cheque_number
+                """;
+        } else {
+            // Normal batch: load all cheques
+            sql = """
                 SELECT
                     c.cheque_number,
                     c.batch_id,
@@ -118,6 +196,7 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
                 WHERE c.batch_id = ?
                 ORDER BY c.cheque_number
                 """;
+        }
 
         List<Map<String, Object>> cheques = new java.util.ArrayList<>();
 

@@ -107,7 +107,7 @@ public class BatchDaoImpl implements BatchDao {
 				    LIMIT 1
 				) latest ON TRUE
 				WHERE c.batch_id = ?
-				  AND COALESCE(latest.status, '') NOT IN ('DATA_ENTRY_COMPLETED', 'RETURN_BY_MAKER', 'ACCEPT', 'REJECT')
+				  AND COALESCE(latest.status, '') NOT IN ('DATA_ENTRY_COMPLETED', 'RETURN_BY_MAKER', 'ACCEPT', 'REJECT', 'SENT_TO_CHECKER')
 				  AND NOT (
 				      latest.status = 'RETURN_TO_MAKER'
 				      AND (
@@ -181,7 +181,7 @@ public class BatchDaoImpl implements BatchDao {
 					    LIMIT 1
 					) latest ON TRUE
 					WHERE c.batch_id = ?
-					  AND COALESCE(latest.status, '') NOT IN ('DATA_ENTRY_COMPLETED', 'RETURN_BY_MAKER', 'ACCEPT', 'REJECT')
+					  AND COALESCE(latest.status, '') NOT IN ('DATA_ENTRY_COMPLETED', 'RETURN_BY_MAKER', 'ACCEPT', 'REJECT', 'SENT_TO_CHECKER')
 					  AND NOT (
 					      latest.status = 'RETURN_TO_MAKER'
 					      AND (
@@ -623,7 +623,28 @@ public class BatchDaoImpl implements BatchDao {
 				    ORDER BY bl.locked_time DESC, bl.lock_id DESC
 				    LIMIT 1
 				) l ON TRUE
-				WHERE (latest.batch_status = ? OR (latest.batch_status = 'RETURN_TO_MAKER' AND ? = 'DATA_ENTRY'))
+				WHERE (latest.batch_status = ? 
+				       OR (latest.batch_status = 'RETURN_TO_MAKER' AND ? = 'DATA_ENTRY' 
+				           AND EXISTS (
+				               SELECT 1 FROM public.inward_cheque c
+				               JOIN LATERAL (
+				                   SELECT h.status, h.return_reason_code
+				                   FROM public.inward_cheque_status_history h
+				                   WHERE h.cheque_number = c.cheque_number
+				                   ORDER BY h.status_history_id DESC
+				                   LIMIT 1
+				               ) lchq ON TRUE
+				               WHERE c.batch_id = b.batch_id
+				                 AND (
+				                     (lchq.status = 'RETURN_TO_MAKER' AND (lchq.return_reason_code LIKE 'CR-DATA-%' OR lchq.return_reason_code = 'OTHER'))
+				                     OR (lchq.status = 'MICR_REPAIRED' AND EXISTS (
+				                         SELECT 1 FROM public.inward_cheque_status_history sh_ret
+				                         WHERE sh_ret.cheque_number = c.cheque_number
+				                           AND (sh_ret.return_reason_code LIKE 'CR-DATA-%' OR sh_ret.return_reason_code = 'OTHER')
+				                     ))
+				                 )
+				           )
+				       ))
 				  AND l.lock_status = 'LOCKED'
 				  AND l.user_id = ?
 				ORDER BY b.batch_id

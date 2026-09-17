@@ -42,6 +42,8 @@ public class CheckerDashboardController
 
     private Button myBatchesFilter;
 
+    private Button reVerifyFilter;
+
     private Button onHoldFilter;
 
     private Hlayout pagination;
@@ -78,7 +80,7 @@ public class CheckerDashboardController
      * ALL
      * AVAILABLE
      * MY_BATCHES
-     * ON_HOLD
+     * RE_VERIFY
      * =========================================================
      */
 
@@ -259,9 +261,27 @@ public class CheckerDashboardController
 
         /*
          * =====================================================
-         * ON HOLD FILTER
+         * RE-VERIFY FILTER
          * =====================================================
          */
+
+        if (reVerifyFilter != null) {
+
+            reVerifyFilter.addEventListener(
+                    "onClick",
+                    event -> {
+
+                        selectedFilter =
+                                "RE_VERIFY";
+
+                        currentPageNumber =
+                                1;
+
+                        updateFilterButtons();
+
+                        loadBatches();
+                    });
+        }
 
         if (onHoldFilter != null) {
 
@@ -270,7 +290,7 @@ public class CheckerDashboardController
                     event -> {
 
                         selectedFilter =
-                                "ON_HOLD";
+                                "RE_VERIFY";
 
                         currentPageNumber =
                                 1;
@@ -494,10 +514,16 @@ public class CheckerDashboardController
         myBatchesFilter.setLabel(
                 "My Batches");
 
+        if (reVerifyFilter != null) {
+
+            reVerifyFilter.setLabel(
+                    "Re-Verify Batches");
+        }
+
         if (onHoldFilter != null) {
 
             onHoldFilter.setLabel(
-                    "On Hold");
+                    "Re-Verify Batches");
         }
     }
 
@@ -610,19 +636,21 @@ public class CheckerDashboardController
 
             /*
              * =================================================
-             * ON HOLD
+             * RE-VERIFY BATCHES
              *
              * Includes:
-             *
              * RETURN_TO_MAKER
              * ON_HOLD
+             * Resubmitted batches with returned cheque history
              * =================================================
              */
 
-            else if ("ON_HOLD".equals(
+            else if ("RE_VERIFY".equals(
+                    selectedFilter)
+                    || "ON_HOLD".equals(
                     selectedFilter)) {
 
-                if (isOnHold(batch)) {
+                if (isReVerify(batch)) {
 
                     filteredBatches.add(
                             batch);
@@ -659,6 +687,23 @@ public class CheckerDashboardController
          */
 
         renderBatches();
+    }
+
+
+    /*
+     * =========================================================
+     * CHECK WHETHER BATCH IS RE-VERIFY BATCH
+     * =========================================================
+     */
+
+    private boolean isReVerify(
+            CheckerBatch batch) {
+
+        if (batch == null) {
+            return false;
+        }
+
+        return batch.isReVerify() || isOnHold(batch);
     }
 
 
@@ -1321,6 +1366,12 @@ public class CheckerDashboardController
         myBatchesFilter.setSclass(
                 "filter-btn");
 
+        if (reVerifyFilter != null) {
+
+            reVerifyFilter.setSclass(
+                    "filter-btn");
+        }
+
         if (onHoldFilter != null) {
 
             onHoldFilter.setSclass(
@@ -1358,12 +1409,17 @@ public class CheckerDashboardController
         }
 
 
-        else if ("ON_HOLD".equals(
-                selectedFilter)
-                && onHoldFilter != null) {
+        else if (("RE_VERIFY".equals(
+                selectedFilter) || "ON_HOLD".equals(selectedFilter))) {
 
-            onHoldFilter.setSclass(
-                    "filter-btn active-filter");
+            if (reVerifyFilter != null) {
+                reVerifyFilter.setSclass(
+                        "filter-btn active-filter");
+            }
+            if (onHoldFilter != null) {
+                onHoldFilter.setSclass(
+                        "filter-btn active-filter");
+            }
         }
     }
 }

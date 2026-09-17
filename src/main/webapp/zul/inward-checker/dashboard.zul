@@ -156,6 +156,11 @@
                         label="My Batches"
                         sclass="filter-btn"/>
 
+                    <button
+                        id="reVerifyFilter"
+                        label="Re-Verify Batches"
+                        sclass="filter-btn"/>
+
                 </hlayout>
 
 

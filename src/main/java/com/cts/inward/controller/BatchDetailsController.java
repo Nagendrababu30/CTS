@@ -2088,7 +2088,7 @@ public class BatchDetailsController
         Map<String, Object> currentCheque = (cheques != null && currentChequeIndex >= 0 && currentChequeIndex < cheques.size())
                 ? cheques.get(currentChequeIndex) : null;
         if (currentCheque != null && "RETURN_BY_MAKER".equalsIgnoreCase(getString(currentCheque, "status"))) {
-            Messagebox.show("This cheque was returned by the Maker and cannot be accepted. Please select Reject or Return to Maker.",
+            Messagebox.show("This cheque was returned by the Maker and cannot be accepted. Please select Return or Send Back to Maker.",
                     "Action Restricted", Messagebox.OK, Messagebox.EXCLAMATION);
             return;
         }
@@ -2115,7 +2115,7 @@ public class BatchDetailsController
             if (acceptConfirmWindow != null) {
                 acceptConfirmWindow.setVisible(false);
             }
-            Messagebox.show("This cheque was returned by the Maker and cannot be accepted. Please select Reject or Return to Maker.",
+            Messagebox.show("This cheque was returned by the Maker and cannot be accepted. Please select Return or Send Back to Maker.",
                     "Action Restricted", Messagebox.OK, Messagebox.EXCLAMATION);
             return;
         }
@@ -2131,7 +2131,7 @@ public class BatchDetailsController
     }
 
     // =========================================================
-    // CHECKER DECISION - REJECT
+    // CHECKER DECISION - REJECT (RETURN)
     // =========================================================
 
     public void onClick$rejectButton() {
@@ -2149,7 +2149,7 @@ public class BatchDetailsController
                     String desc = r.get("description");
                     cb.setLabel((code != null ? code : "") + " - " + (desc != null ? desc : ""));
                     cb.setAttribute("reasonCode", code);
-                    cb.setStyle("display:block; margin-bottom:6px; font-size:13px; color:#1E293B; cursor:pointer;");
+                    cb.setSclass("modal-reason-checkbox");
                     rejectReasonsContainer.appendChild(cb);
                 }
             }
@@ -2187,7 +2187,7 @@ public class BatchDetailsController
 
         if (selectedCodes.isEmpty()) {
             Messagebox.show(
-                    "Please select at least one rejection reason.",
+                    "Please select at least one return reason.",
                     "Validation",
                     Messagebox.OK,
                     Messagebox.EXCLAMATION
@@ -2200,23 +2200,23 @@ public class BatchDetailsController
                 : rejectRemark.getValue();
 
         System.out.println(
-                "REJECT REASON CODES = " + selectedCodes
+                "RETURN REASON CODES = " + selectedCodes
         );
 
         System.out.println(
-                "REJECT REMARKS = " + remarks);
+                "RETURN REMARKS = " + remarks);
 
         saveDecision(
                 "REJECT",
                 selectedCodes,
                 null,
-                "Rejected",
+                "Returned",
                 remarks,
                 rejectWindow);
     }
 
     // =========================================================
-    // CHECKER DECISION - RETURN TO MAKER
+    // CHECKER DECISION - RETURN TO MAKER (SEND BACK)
     // =========================================================
 
     public void onClick$returnButton() {
@@ -2234,7 +2234,7 @@ public class BatchDetailsController
                     String desc = r.get("description");
                     cb.setLabel((code != null ? code : "") + " - " + (desc != null ? desc : ""));
                     cb.setAttribute("reasonCode", code);
-                    cb.setStyle("display:block; margin-bottom:6px; font-size:13px; color:#1E293B; cursor:pointer;");
+                    cb.setSclass("modal-reason-checkbox");
                     returnReasonsContainer.appendChild(cb);
                 }
             }
@@ -2272,7 +2272,7 @@ public class BatchDetailsController
 
         if (selectedCodes.isEmpty()) {
             Messagebox.show(
-                    "Please select at least one return reason.",
+                    "Please select at least one send back reason.",
                     "Validation",
                     Messagebox.OK,
                     Messagebox.EXCLAMATION
@@ -2285,17 +2285,17 @@ public class BatchDetailsController
                 : returnRemark.getValue();
 
         System.out.println(
-                "RETURN REASON CODES = " + selectedCodes
+                "SEND BACK REASON CODES = " + selectedCodes
         );
 
         System.out.println(
-                "RETURN REMARKS = " + remarks);
+                "SEND BACK REMARKS = " + remarks);
 
         saveDecision(
                 "RETURN_TO_MAKER",
                 null,
                 selectedCodes,
-                "Returned",
+                "Sent Back",
                 remarks,
                 returnWindow);
     }
@@ -2347,17 +2347,17 @@ public class BatchDetailsController
             if (selectedDecisionText != null) {
                 if ("Accepted".equals(checkerAction)) {
                     selectedDecisionText.setValue("✓ Selected Decision: Accepted");
-                } else if ("Rejected".equals(checkerAction)) {
-                    selectedDecisionText.setValue("⚠ Selected Decision: Rejected");
+                } else if ("Returned".equals(checkerAction) || "Rejected".equals(checkerAction)) {
+                    selectedDecisionText.setValue("⚠ Selected Decision: Returned");
                 } else {
-                    selectedDecisionText.setValue("↶ Selected Decision: Returned");
+                    selectedDecisionText.setValue("↶ Selected Decision: Sent Back");
                 }
             }
 
             if (selectedDecision != null) {
                 String decisionClass = "Accepted".equals(checkerAction)
                         ? "accepted"
-                        : "Rejected".equals(checkerAction)
+                        : ("Returned".equals(checkerAction) || "Rejected".equals(checkerAction))
                                 ? "rejected"
                                 : "returned";
                 selectedDecision.setSclass("selected-decision " + decisionClass);
@@ -2556,21 +2556,15 @@ public class BatchDetailsController
         int total = (cheques != null) ? cheques.size() : 0;
         int completed = 0;
 
-        if (batchId != null) {
-            try (Connection conn = ConnectionPool.getDataSource().getConnection();
-                    PreparedStatement ps = conn.prepareStatement(
-                            "SELECT COUNT(DISTINCT c.cheque_number) " +
-                                    "FROM inward_cheque c " +
-                                    "JOIN inward_cheque_status_history sh ON c.cheque_number = sh.cheque_number " +
-                                    "WHERE c.batch_id = ? AND sh.checker_action IS NOT NULL")) {
-                ps.setLong(1, batchId);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        completed = rs.getInt(1);
-                    }
+        if (cheques != null) {
+            for (Map<String, Object> chq : cheques) {
+                String st = getString(chq, "cheque_status");
+                if (st == null) {
+                    st = getString(chq, "status");
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
+                if ("ACCEPT".equalsIgnoreCase(st) || "REJECT".equalsIgnoreCase(st) || "RETURN_TO_MAKER".equalsIgnoreCase(st)) {
+                    completed++;
+                }
             }
         }
 
@@ -2894,11 +2888,17 @@ public class BatchDetailsController
 
         if (cheques == null || cheques.isEmpty()) {
             completeVerification.setDisabled(true);
+            completeVerification.setSclass("complete-button complete-button-disabled");
             return;
         }
 
         boolean isLastCheque = (currentChequeIndex == cheques.size() - 1);
         completeVerification.setDisabled(!isLastCheque);
+        if (!isLastCheque) {
+            completeVerification.setSclass("complete-button complete-button-disabled");
+        } else {
+            completeVerification.setSclass("complete-button");
+        }
     }
 
     public void onClick$completeVerification() {

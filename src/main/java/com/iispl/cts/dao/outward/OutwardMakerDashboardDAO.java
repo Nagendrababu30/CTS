@@ -1748,7 +1748,7 @@ public class OutwardMakerDashboardDAO {
                 "    ON ob.batch_number = mba.batch_number " +
                 "WHERE mba.user_id = ? " +
                 "  AND UPPER(TRIM(mba.assignment_role)) = 'MAKER' " +
-                "  AND UPPER(TRIM(mba.assignment_status)) IN ('ASSIGNED', 'IN_PROGRESS')";
+                "  AND UPPER(TRIM(mba.assignment_status)) IN ('ASSIGNED', 'IN_PROGRESS','COMPLETED')";
 
         try (
                 Connection con = dataSource.getConnection();

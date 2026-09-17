@@ -110,7 +110,7 @@
 
 .reports-title {
     font-family:
-        'Space Grotesk',
+        'Segoe UI',
         'Plus Jakarta Sans',
         sans-serif !important;
 
@@ -499,8 +499,7 @@
         var(--text-muted) !important;
 
     font-family:
-        'Inter',
-        sans-serif !important;
+        'Times New Roman', serif !important;
 
     font-size:
         13.5px !important;
@@ -582,8 +581,7 @@
 .z-listcell-content {
 
     font-family:
-        'Inter',
-        sans-serif !important;
+        'Times New Roman', serif !important;
 
     font-size:
         12px !important;
@@ -760,3 +758,4 @@
             11px !important;
     }
 }
+

@@ -42,8 +42,8 @@
 }
 
 .page-title {
-    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
-    font-size: 30px; font-weight: 700; letter-spacing: -0.035em;
+    font-family: 'Times New Roman', serif;
+    font-size: 30px; font-weight: 650; letter-spacing: -0.035em;
     position: relative; display: inline-block;
     animation: none;
     background: transparent !important;
@@ -148,7 +148,7 @@
 
 .section-title {
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 650;
     color: #1d2d42;
     line-height: 22px;
 }
@@ -199,7 +199,7 @@
     background: #edf3fa;
     border-color: #8ea9c4;
     color: #1d4f7a;
-    font-weight: 600;
+    font-weight: 650;
 }
 
 
@@ -317,7 +317,7 @@
 
 .detail-section-title {
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 650;
     color: #34475d;
     text-transform: none;
     letter-spacing: 0.4px;
@@ -387,7 +387,7 @@
 .amount-value {
     min-width: 0;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 650;
     color: #17283d;
     line-height: 20px;
     overflow-wrap: anywhere;
@@ -437,7 +437,7 @@
 .cbs-validation-icon {
     min-width: 18px;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 650;
 }
 
 .cbs-validation-message {
@@ -490,7 +490,7 @@
 
 .action-title {
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 650;
     color: #6a798a;
     text-transform: none;
     letter-spacing: 0.7px;
@@ -826,3 +826,5 @@
         width: 100%;
     }
 }
+
+

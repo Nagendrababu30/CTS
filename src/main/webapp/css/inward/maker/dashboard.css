@@ -138,8 +138,8 @@
 
 /* ---------- Page title ---------- */
 .page-title {
-    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
-    font-size: 30px; font-weight: 700; letter-spacing: -0.035em;
+    font-family: 'Times New Roman', serif;
+    font-size: 30px; font-weight: 650; letter-spacing: -0.035em;
     position: relative; display: inline-block;
     animation: none;
     background: transparent !important;
@@ -209,7 +209,7 @@
     margin-bottom: 6px;
 }
 .card-value {
-    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-size: 34px; font-weight: 800;
     line-height: 1.1; letter-spacing: -0.04em;
     font-variant-numeric: tabular-nums; display: block;
@@ -282,7 +282,7 @@
 
 /* ---------- Filter buttons ---------- */
 .filter-label {
-    font-size: 13px; font-weight: 600;
+    font-size: 13px; font-weight: 650;
     color: var(--text-muted); margin-right: 10px; letter-spacing: 0.02em;
 }
 .filter-btn {
@@ -412,8 +412,8 @@
     display: none !important;
 }
 .custom-grid .z-row .z-cell:nth-child(2) .z-cell-cnt {
-    font-family: 'Space Grotesk', sans-serif;
-    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    font-weight: 650;
     color: #344054;
     font-variant-numeric: tabular-nums;
 }
@@ -424,7 +424,7 @@
     align-items: center; gap: 6px;
     padding: 4px 12px;
     border-radius: var(--radius-pill);
-    font-size: 12px; font-weight: 700;
+    font-size: 12px; font-weight: 650;
     font-family: 'Plus Jakarta Sans', sans-serif;
 }
 .badge-locked {
@@ -538,3 +538,6 @@
     min-height: 24px;
     box-sizing: border-box;
 }
+
+
+

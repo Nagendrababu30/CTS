@@ -164,25 +164,51 @@ public class UserDAOImpl {
     public boolean createUser(User user) {
 
         /* CTS "user" table columns: user_id, username, password, role_id, status, last_login */
+        /* user_id must be generated manually (no DEFAULT/SEQUENCE in schema) */
+        
+        // First, get the next available user_id
+        Long nextUserId = getNextUserId();
+        
         String sql =
                 "INSERT INTO \"user\" "
-                + "(username, password, role_id, status) "
-                + "VALUES (?, ?, ?, ?)";
+                + "(user_id, username, password, role_id, status) "
+                + "VALUES (?, ?, ?, ?, ?)";
 
         try (
                 Connection conn = ConnectionPool.getDataSource().getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)
         ) {
-            stmt.setString(1, user.getUsername());
-            stmt.setString(2, user.getPasswordHash());
-            stmt.setLong(3, user.getRole().getRoleId());
-            stmt.setString(4, user.getStatus());
+            stmt.setLong(1, nextUserId);
+            stmt.setString(2, user.getUsername());
+            stmt.setString(3, user.getPasswordHash());
+            stmt.setLong(4, user.getRole().getRoleId());
+            stmt.setString(5, user.getStatus());
 
             return stmt.executeUpdate() > 0;
 
         } catch (SQLException e) {
             throw new RuntimeException("Unable to create user.", e);
         }
+    }
+
+
+    private Long getNextUserId() {
+        
+        String sql = "SELECT COALESCE(MAX(user_id), 0) + 1 FROM \"user\"";
+
+        try (
+                Connection conn = ConnectionPool.getDataSource().getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()
+        ) {
+            if (rs.next()) {
+                return rs.getLong(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Unable to generate next user_id.", e);
+        }
+
+        return 100L; // Fallback
     }
 
 

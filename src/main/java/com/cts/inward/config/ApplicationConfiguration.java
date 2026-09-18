@@ -41,7 +41,7 @@ public class ApplicationConfiguration {
     }
 
     public String getInwardRootPath() {
-
+    	
         return getRequiredProperty(
                 "inward.root.path");
     }

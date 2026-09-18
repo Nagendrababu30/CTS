@@ -11,6 +11,7 @@ import com.iispl.cts.model.outward.OutwardCheque;
 import com.iispl.cts.model.outward.OutwardValidationResult;
 
 public class OutwardMakerDashboardService {
+	
     private final OutwardMakerDashboardDAO dao;
     private final OutwardValidationService validationService;
     public OutwardMakerDashboardService() {

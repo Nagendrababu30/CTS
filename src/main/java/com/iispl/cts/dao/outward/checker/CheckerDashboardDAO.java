@@ -71,18 +71,33 @@ public class CheckerDashboardDAO {
                 "    AND UPPER(cba.assignment_status) IN " +
                 "        ('ASSIGNED', 'IN_PROGRESS') " +
 
+                // ====================================================
+                // WHERE CONDITION
+                // ====================================================
+
                 "WHERE ( " +
+
+                // ====================================================
+                // NORMAL CHECKER BATCHES
+                // ====================================================
 
                 "    UPPER(ob.batch_status) IN " +
                 "        ('SUBMITTED_TO_CHECKER', " +
                 "         'READY_FOR_CHECKER', " +
                 "         'SUBMITTED', " +
                 "         'CHECKER_PENDING', " +
-                "         'PENDING_CHECKER') " +
+                "         'PENDING_CHECKER', " +
+                "         'CHECKER_PROCESSING', " +
+                "         'ON_HOLD') " +
+
+                // ====================================================
+                // RE-VERIFY BATCHES
+                // ====================================================
 
                 "    OR EXISTS ( " +
 
                 "        SELECT 1 " +
+
                 "        FROM public.cheque_processing cp " +
 
                 "        INNER JOIN public.outward_cheque oc " +
@@ -90,9 +105,12 @@ public class CheckerDashboardDAO {
                 "            AND oc.cheque_number = cp.cheque_number " +
 
                 "        WHERE cp.batch_number = ob.batch_number " +
+
                 "          AND cp.checker_id = ? " +
+
                 "          AND UPPER(TRIM(cp.checker_action)) = " +
                 "              'SEND_BACK' " +
+
                 "          AND UPPER(TRIM(oc.cheque_status)) = " +
                 "              'RE_VERIFIED' " +
 
@@ -101,6 +119,7 @@ public class CheckerDashboardDAO {
                 ") " +
 
                 "ORDER BY ob.created_at DESC";
+
 
         try (
                 Connection con =
@@ -113,7 +132,7 @@ public class CheckerDashboardDAO {
             ps.setInt(
                     1,
                     Integer.parseInt(
-                            checkerUserId
+                            checkerUserId.trim()
                     )
             );
 
@@ -125,11 +144,19 @@ public class CheckerDashboardDAO {
                     OutwardBatch batch =
                             new OutwardBatch();
 
+                    // ====================================================
+                    // BATCH NUMBER
+                    // ====================================================
+
                     batch.setBatchNumber(
                             rs.getString(
                                     "batch_number"
                             )
                     );
+
+                    // ====================================================
+                    // BRANCH CODE
+                    // ====================================================
 
                     batch.setBranchCode(
                             rs.getString(
@@ -137,17 +164,29 @@ public class CheckerDashboardDAO {
                             )
                     );
 
+                    // ====================================================
+                    // CHEQUE COUNT
+                    // ====================================================
+
                     batch.setNumberOfCheques(
                             rs.getInt(
                                     "cheque_count"
                             )
                     );
 
+                    // ====================================================
+                    // BATCH FOLDER
+                    // ====================================================
+
                     batch.setBatchFolderPath(
                             rs.getString(
                                     "batch_folder_path"
                             )
                     );
+
+                    // ====================================================
+                    // CREATED BY
+                    // ====================================================
 
                     int createdBy =
                             rs.getInt(
@@ -163,6 +202,10 @@ public class CheckerDashboardDAO {
                         );
                     }
 
+                    // ====================================================
+                    // CREATED AT
+                    // ====================================================
+
                     if (rs.getTimestamp(
                             "created_at") != null) {
 
@@ -173,11 +216,19 @@ public class CheckerDashboardDAO {
                         );
                     }
 
+                    // ====================================================
+                    // BATCH STATUS
+                    // ====================================================
+
                     batch.setBatchStatus(
                             rs.getString(
                                     "batch_status"
                             )
                     );
+
+                    // ====================================================
+                    // CHECKER ASSIGNMENT
+                    // ====================================================
 
                     int checkerUserId1 =
                             rs.getInt(
@@ -198,6 +249,10 @@ public class CheckerDashboardDAO {
                                 )
                         );
 
+                        // =================================================
+                        // ASSIGNED AT
+                        // =================================================
+
                         if (rs.getTimestamp(
                                 "checker_assigned_at") != null) {
 
@@ -207,6 +262,10 @@ public class CheckerDashboardDAO {
                                     ).toLocalDateTime()
                             );
                         }
+
+                        // =================================================
+                        // STARTED AT
+                        // =================================================
 
                         if (rs.getTimestamp(
                                 "checker_started_at") != null) {
@@ -218,6 +277,10 @@ public class CheckerDashboardDAO {
                             );
                         }
 
+                        // =================================================
+                        // COMPLETED AT
+                        // =================================================
+
                         if (rs.getTimestamp(
                                 "checker_completed_at") != null) {
 
@@ -227,6 +290,10 @@ public class CheckerDashboardDAO {
                                     ).toLocalDateTime()
                             );
                         }
+
+                        // =================================================
+                        // ASSIGNMENT STATUS
+                        // =================================================
 
                         String assignmentStatus =
                                 rs.getString(
@@ -255,6 +322,10 @@ public class CheckerDashboardDAO {
                         }
 
                     } else {
+
+                        // =================================================
+                        // NO CHECKER ASSIGNMENT
+                        // =================================================
 
                         batch.setCheckerUserNumber(
                                 null
@@ -297,7 +368,6 @@ public class CheckerDashboardDAO {
 
         return batches;
     }
-
     /*
      * ============================================================
      * GET RE-VERIFY BATCHES

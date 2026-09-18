@@ -730,6 +730,7 @@ private Button reVerifyBatchesBtn;
 
                             +
 
+                            
                             (
 
                                     "ALL".equals(
@@ -800,6 +801,7 @@ private Button reVerifyBatchesBtn;
 
         }
         if (reVerifyBatchesBtn != null) {
+        	
             reVerifyBatchesBtn.setSclass(
                     "filter-btn"
                             +
@@ -825,24 +827,9 @@ private Button reVerifyBatchesBtn;
 
         loadBatches();
 
-        /*
-
-         * Summary counts are intentionally not handled here.
-
-         *
-
-         * Existing dashboard functionality remains unchanged.
-
-         */
-
     }
 
-    // =========================================================
-
-    // LOAD BATCHES
-
-    // =========================================================
-
+  
     private void loadBatches() {
 
         if (batchListbox == null) {
@@ -933,12 +920,7 @@ private Button reVerifyBatchesBtn;
 
             );
 
-            // -------------------------------------------------
-
-            // APPLY FILTER
-
-            // -------------------------------------------------
-
+         
             List<OutwardBatch> filteredBatches =
 
                     new ArrayList<>();
@@ -981,12 +963,7 @@ private Button reVerifyBatchesBtn;
 
                     );
 
-            // -------------------------------------------------
-
-            // SAFETY CHECK
-
-            // -------------------------------------------------
-
+         
             if (totalPages == 0) {
 
                 currentPage = 1;
@@ -996,12 +973,6 @@ private Button reVerifyBatchesBtn;
                 currentPage = totalPages;
 
             }
-
-            // -------------------------------------------------
-
-            // PAGINATED DATA
-
-            // -------------------------------------------------
 
             List<OutwardBatch> pageBatches =
 
@@ -1034,12 +1005,6 @@ private Button reVerifyBatchesBtn;
                             + pageBatches.size()
 
             );
-
-            // -------------------------------------------------
-
-            // DEBUG DATABASE VALUES
-
-            // -------------------------------------------------
 
             for (OutwardBatch batch : pageBatches) {
 
@@ -2377,29 +2342,7 @@ private Button reVerifyBatchesBtn;
             );
         }
     }
-    // =========================================================
-
-    // OPEN RETURNED / HOLD BATCH
-
-    //
-
-    // IMPORTANT:
-
-    //
-
-    // Return reason is obtained from ChequeProcessing.
-
-    //
-
-    // Different returned cheques can have different reasons.
-
-    //
-
-    // MICR       -> MICR Repair
-
-    // DATA_ENTRY -> Data Entry
-
-    // =========================================================
+    
 
     private void openHoldBatch(
 
@@ -3110,17 +3053,7 @@ private Button reVerifyBatchesBtn;
             );
         }
     }
-    // =========================================================
-    // RENDER RETURNED-BATCH REPAIR ACTIONS
-    //
-    // Dashboard-only change:
-    // determine which repair types actually exist for this batch
-    // from cheque_processing and expose one action per type.
-    //
-    // Normal Maker workflow is not changed.
-    // =========================================================
-
-    private void appendReturnedRepairButtons(
+   private void appendReturnedRepairButtons(
             Listcell actionCell,
             String batchNumber) {
 

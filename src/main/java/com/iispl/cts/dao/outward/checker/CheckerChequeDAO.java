@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.cts.inward.config.ConnectionPool;
 import com.iispl.cts.data.CTSStaticData;
 import com.iispl.cts.model.outward.ChequeProcessing;
 import com.iispl.cts.model.outward.OutwardCheque;
@@ -21,6 +22,8 @@ public class CheckerChequeDAO {
      * GET PARTICULAR CHEQUE
      * ============================================================
      */
+	private final javax.sql.DataSource dataSource =ConnectionPool.getDataSource();
+
 
     public OutwardCheque getCheque(
             String batchNumber,
@@ -49,7 +52,7 @@ public class CheckerChequeDAO {
                 + "AND cheque_number = ?";
 
         try (Connection connection =
-                     CTSStaticData.getConnection();
+        		dataSource.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
@@ -186,7 +189,7 @@ public class CheckerChequeDAO {
                 + "ORDER BY cheque_number";
 
         try (Connection connection =
-                     CTSStaticData.getConnection();
+        		dataSource.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
@@ -353,7 +356,7 @@ public class CheckerChequeDAO {
                 + "ORDER BY oc.cheque_number";
 
         try (Connection connection =
-                     CTSStaticData.getConnection();
+        		dataSource.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
@@ -497,7 +500,7 @@ public class CheckerChequeDAO {
                 + "'RE_VERIFIED'";
 
         try (Connection connection =
-                     CTSStaticData.getConnection();
+        		dataSource.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
@@ -549,7 +552,7 @@ public class CheckerChequeDAO {
                 + "AND cheque_number = ?";
 
         try (Connection connection =
-                     CTSStaticData.getConnection();
+        		dataSource.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
@@ -652,7 +655,7 @@ public class CheckerChequeDAO {
                 + "AND active = true";
 
         try (Connection connection =
-                     CTSStaticData.getConnection();
+        		dataSource.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
@@ -706,7 +709,7 @@ public class CheckerChequeDAO {
                 + "ORDER BY reason_name";
 
         try (Connection connection =
-                     CTSStaticData.getConnection();
+        		dataSource.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
@@ -1012,7 +1015,7 @@ public class CheckerChequeDAO {
          */
 
         try (Connection connection =
-                     CTSStaticData.getConnection()) {
+        		dataSource.getConnection()) {
 
             connection.setAutoCommit(false);
 
@@ -1482,7 +1485,7 @@ public class CheckerChequeDAO {
                 + "AND reason_type = ?";
 
         try (Connection connection =
-                     CTSStaticData.getConnection();
+        		dataSource.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
@@ -1530,7 +1533,7 @@ public class CheckerChequeDAO {
         Map<String, String> account = null;
 
         try (Connection connection =
-                     CTSStaticData.getConnection();
+        		dataSource.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 

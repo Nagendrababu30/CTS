@@ -20,7 +20,6 @@
                  spacing="14px"
                  apply="com.iispl.cts.controller.outward.checker.CheckerProcessingController">
 
-
             <!-- TOP BATCH BAR -->
 
             <hlayout width="100%"
@@ -31,7 +30,7 @@
                 <button id="backButton"
                         label="←"
                         sclass="batch-back-button"/>
-
+                <label value="Batch Number :" sclass="batch-number-label"/>
                 <label id="verificationBatchId"
                        value=""
                        sclass="batch-number-label"/>
@@ -40,18 +39,21 @@
 
                 <div sclass="summary-pill total-pill">
                     <label value="Total:"/>
+                    <label id="totalChequeCount" value="0"/>
                 </div>
 
                 <space hflex="1"/>
 
                 <div sclass="summary-pill completed-pill">
                     <label value="Completed:"/>
+                    <label id="completedChequeCount" value="0"/>
                 </div>
 
                 <space hflex="1"/>
 
                 <div sclass="summary-pill pending-pill">
                     <label value="Pending:"/>
+                    <label id="pendingChequeCount" value="0"/>
                 </div>
 
                 <space hflex="1"/>
@@ -274,10 +276,11 @@
 
                             <vlayout spacing="4px">
 
-                                <label value="CHEQUE NUMBER"
+                                <label value="Cheque Number"
                                        sclass="field-label"/>
 
-                                <textbox value=""
+                            <textbox id="rightChequeNumber"
+                                         value=""
                                          readonly="true"
                                          sclass="field-value"/>
 
@@ -286,7 +289,7 @@
 
                             <vlayout spacing="4px">
 
-                                <label value="CHEQUE DATE"
+                                <label value="Cheque Date"
                                        sclass="field-label"/>
 
                                 <textbox id="chequeDateLabel"
@@ -312,7 +315,7 @@
 
                             <vlayout spacing="4px">
 
-                                <label value="AMOUNT"
+                                <label value="Amount"
                                        sclass="field-label"/>
 
                                 <textbox id="amountLabel"
@@ -325,14 +328,12 @@
 
                             <vlayout spacing="4px">
 
-                                <label value="AMOUNT IN WORDS"
+                                <label value="Amount In Words"
                                        sclass="field-label"/>
 
                                 <textbox id="amountInWordsLabel"
                                          value=""
                                          readonly="true"
-                                         multiline="true"
-                                         rows="2"
                                          sclass="field-value amount-words-field"/>
 
                             </vlayout>
@@ -349,25 +350,26 @@
                                  spacing="10px"
                                  sclass="right-section details-box">
 
-                            <label value="DRAWER DETAILS"
+                            <label value="Drawer Details"
                                    sclass="right-section-title"/>
+
 
                             <vlayout spacing="4px">
 
-                                <label value="DRAWER NAME"
+                                <label value="Drawer Name"
                                        sclass="field-label"/>
 
                                 <textbox id="drawerNameLabel"
                                          value=""
                                          readonly="true"
-                                         multiline="true"
                                          sclass="field-value plain-value"/>
 
                             </vlayout>
 
+
                             <vlayout spacing="4px">
 
-                                <label value="DRAWER ACCOUNT"
+                                <label value="Drawer Account"
                                        sclass="field-label"/>
 
                                 <textbox id="accountNumberLabel"
@@ -389,18 +391,18 @@
                                  spacing="10px"
                                  sclass="right-section details-box">
 
-                            <label value="PAYEE DETAILS"
+                            <label value="Payee Details"
                                    sclass="right-section-title"/>
+
 
                             <vlayout spacing="4px">
 
-                                <label value="PAYEE NAME"
+                                <label value="Payee Name"
                                        sclass="field-label"/>
 
                                 <textbox id="payeeNameLabel"
                                          value=""
                                          readonly="true"
-                                         multiline="true"
                                          sclass="field-value plain-value"/>
 
                             </vlayout>
@@ -450,6 +452,7 @@
 
                         </hlayout>
 
+
                         <separator height="16px"/>
 
                     </div>
@@ -463,16 +466,18 @@
                              valign="middle"
                              sclass="right-bottom-actions">
 
-                        <button label="← Prev"
+                         <button id="prevButton"
+                                label="← Prev"
                                 sclass="navigation-button"/>
 
-                        <button label="Next →"
+                        <button id="nextButton"
+                                label="Next →"
                                 sclass="navigation-button"/>
 
                         <space hflex="1"/>
 
                         <button id="saveNextButton"
-                                label="Complete Verification"
+                                label="SaveNext"
                                 sclass="complete-button"/>
 
                     </hlayout>

@@ -1,0 +1,500 @@
+/* =========================================================
+   BATCH CAPTURE REPORTS
+   ========================================================= */
+
+.reports-page {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+
+    background: #eaf0fa;
+
+    /*
+     * IMPORTANT:
+     * Allow ZK Datebox popup to extend outside the page/card.
+     */
+    overflow: visible !important;
+}
+
+
+.reports-content {
+    width: 100%;
+    min-height: 100%;
+
+    box-sizing: border-box;
+
+    padding: 18px 22px 24px 22px;
+
+    /*
+     * IMPORTANT
+     */
+    overflow: visible !important;
+}
+
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.reports-header {
+    width: 100%;
+    height: 42px;
+
+    box-sizing: border-box;
+
+    display: flex;
+    align-items: flex-start;
+
+    border-bottom: 1px solid #2166d1;
+
+    margin-bottom: 14px;
+}
+
+
+.reports-page-title {
+    font-family: Arial, sans-serif;
+
+    font-size: 19px;
+    font-weight: 500;
+
+    color: #102a43;
+
+    padding-top: 1px;
+}
+
+
+/* =========================================================
+   EXPORT CARD
+   ========================================================= */
+
+.reports-card {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    background: #ffffff;
+
+    border: 1px solid #d5deec;
+
+    border-radius: 6px;
+
+    padding: 18px 20px 14px 20px;
+
+    margin-bottom: 16px;
+
+    box-shadow:
+        0 1px 3px rgba(31, 55, 80, 0.08);
+
+    /*
+     * Date popup must appear above history.
+     */
+    position: relative !important;
+
+    z-index: 100000 !important;
+
+    overflow: visible !important;
+}
+
+
+/* =========================================================
+   CARD TITLE
+   ========================================================= */
+
+.reports-card-title {
+    width: 100%;
+    height: 22px;
+
+    display: flex;
+    align-items: center;
+
+    margin-bottom: 17px;
+}
+
+
+.reports-section-line {
+    width: 3px;
+    height: 16px;
+
+    background: #2166d1;
+
+    margin-right: 8px;
+}
+
+
+.reports-section-label {
+    font-family: Arial, sans-serif;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    color: #173b73;
+}
+
+
+/* =========================================================
+   FILTER ROW
+   ========================================================= */
+
+.reports-filter-row {
+    width: 100%;
+
+    display: flex;
+    align-items: flex-end;
+
+    position: relative !important;
+
+    z-index: 100001 !important;
+
+    overflow: visible !important;
+}
+
+
+.reports-field-label {
+    font-family: Arial, sans-serif;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    color: #334155;
+}
+
+
+/* =========================================================
+   DATE BOX
+   ========================================================= */
+
+.reports-datebox {
+    height: 36px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #b9c7dc;
+
+    border-radius: 4px;
+
+    background: #ffffff;
+
+    font-family: Arial, sans-serif;
+
+    font-size: 12px;
+
+    position: relative !important;
+
+    z-index: 100002 !important;
+}
+
+
+/* =========================================================
+   ZK DATEBOX POPUP
+   ========================================================= */
+
+.z-datebox-popup {
+    position: absolute !important;
+
+    z-index: 9999999 !important;
+
+    display: block !important;
+
+    visibility: visible !important;
+
+    opacity: 1 !important;
+
+    overflow: visible !important;
+
+    height: auto !important;
+
+    min-height: 220px !important;
+
+    background: #ffffff !important;
+}
+
+
+/* =========================================================
+   ZK CALENDAR
+   ========================================================= */
+
+.z-datebox-popup .z-calendar {
+    position: relative !important;
+
+    z-index: 9999999 !important;
+
+    display: block !important;
+
+    visibility: visible !important;
+
+    opacity: 1 !important;
+
+    width: 180px !important;
+
+    min-height: 220px !important;
+
+    height: auto !important;
+
+    overflow: visible !important;
+
+    background: #ffffff !important;
+}
+
+
+/* =========================================================
+   ZK CALENDAR BODY
+   ========================================================= */
+
+.z-datebox-popup .z-calendar-body {
+    display: block !important;
+
+    visibility: visible !important;
+
+    opacity: 1 !important;
+
+    min-height: 160px !important;
+
+    height: auto !important;
+
+    overflow: visible !important;
+
+    background: #ffffff !important;
+}
+
+
+/* =========================================================
+   ZK CALENDAR TABLE
+   ========================================================= */
+
+.z-datebox-popup table {
+    visibility: visible !important;
+
+    opacity: 1 !important;
+}
+
+
+/* =========================================================
+   ZK CALENDAR ROWS
+   ========================================================= */
+
+.z-datebox-popup tr {
+    visibility: visible !important;
+
+    opacity: 1 !important;
+}
+
+
+/* =========================================================
+   ZK CALENDAR CELLS
+   ========================================================= */
+
+.z-datebox-popup td {
+    visibility: visible !important;
+
+    opacity: 1 !important;
+}
+
+
+/* =========================================================
+   COMBOBOX
+   ========================================================= */
+
+.reports-combobox {
+    height: 36px;
+
+    box-sizing: border-box;
+
+    border: 1px solid #b9c7dc;
+
+    border-radius: 4px;
+
+    background: #ffffff;
+
+    font-family: Arial, sans-serif;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   VIEW DATA BUTTON
+   ========================================================= */
+
+.reports-view-button {
+    background: #ffffff;
+
+    color: #2166d1;
+
+    border: 1px solid #2166d1;
+
+    border-radius: 4px;
+
+    font-family: Arial, sans-serif;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+.reports-view-button:hover {
+    background: #eef5ff;
+}
+
+
+/* =========================================================
+   EXPORT BUTTON
+   ========================================================= */
+
+.reports-export-button {
+    background: #2166d1;
+
+    color: #ffffff;
+
+    border: 1px solid #2166d1;
+
+    border-radius: 4px;
+
+    font-family: Arial, sans-serif;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+.reports-export-button:hover {
+    background: #1557b8;
+}
+
+
+/* =========================================================
+   HINT
+   ========================================================= */
+
+.reports-hint {
+    display: block;
+
+    margin-top: 12px;
+
+    font-family: Arial, sans-serif;
+
+    font-size: 10px;
+
+    color: #718096;
+}
+
+
+/* =========================================================
+   DOWNLOAD HISTORY
+   ========================================================= */
+
+.reports-history-card {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    background: #ffffff;
+
+    border: 1px solid #d5deec;
+
+    border-radius: 6px;
+
+    padding: 15px 16px 8px 16px;
+
+    box-shadow:
+        0 1px 3px rgba(31, 55, 80, 0.08);
+
+    /*
+     * Must remain below the date popup.
+     */
+    position: relative !important;
+
+    z-index: 1 !important;
+
+    overflow: visible !important;
+}
+
+
+/* =========================================================
+   HISTORY TABLE
+   ========================================================= */
+
+.reports-history-table-container {
+    width: 100%;
+
+    height: 360px;
+
+    box-sizing: border-box;
+
+    /*
+     * Do not clip the calendar popup.
+     */
+    overflow: visible !important;
+}
+
+
+.reports-history-listbox {
+    width: 100%;
+
+    height: 100%;
+
+    border: 1px solid #d4dce8;
+
+    box-sizing: border-box;
+
+    background: #ffffff;
+}
+
+
+/* =========================================================
+   TABLE HEADER
+   ========================================================= */
+
+.reports-listhead {
+    background: #2166d1;
+}
+
+
+.reports-listheader {
+    background: #2166d1;
+
+    color: #ffffff;
+
+    border-right: 1px solid #4a82d6;
+
+    font-family: Arial, sans-serif;
+
+    font-size: 11px;
+
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   HISTORY FOOTER
+   ========================================================= */
+
+.reports-record-footer {
+    width: 100%;
+
+    height: 25px;
+
+    box-sizing: border-box;
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    align-items: center;
+
+    padding-right: 4px;
+}
+
+
+.reports-record-count {
+    font-family: Arial, sans-serif;
+
+    font-size: 10px;
+
+    color: #718096;
+}

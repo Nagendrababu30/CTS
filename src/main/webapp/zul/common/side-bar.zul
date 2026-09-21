@@ -78,14 +78,12 @@
 
 </vlayout>
         
-        
-    <!-- BATCH CAPTURE -->     
-        
-        <vlayout
+ <!-- BATCH CAPTURE -->
+
+<vlayout
     visible="${arg.roleName eq 'CAPTURE_OPERATOR'}"
     width="100%"
     spacing="0px">
-
 
     <!-- BATCH CAPTURE -->
 
@@ -122,6 +120,25 @@
 
     </a>
 
+
+    <!-- REPORTS -->
+
+   <!-- REPORTS -->
+
+<a
+    href="/zul/outward/outward-maker/capture-operator-reports.zul"
+    sclass="${arg.active eq 'captureReports'
+        ? 'menu-item active-menu'
+        : 'menu-item'}">
+
+    <n:i
+        class="fa-solid fa-chart-column menu-icon"/>
+
+    <label
+        value="Reports"
+        sclass="menu-label"/>
+
+</a>
 
 </vlayout>
 

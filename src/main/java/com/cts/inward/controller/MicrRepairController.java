@@ -261,7 +261,7 @@ public class MicrRepairController
 
         initReturnWindow();
 
-        if (chequeIndex < 0) {
+        if (chequeIndex < 0 && !micrRepairService.needsMicrRepair(batchId)) {
 
             goToDataEntry();
 
@@ -321,7 +321,9 @@ public class MicrRepairController
         if (comparisons == null
                 || comparisons.isEmpty()) {
 
-            goToDataEntry();
+            if (!micrRepairService.needsMicrRepair(batchId)) {
+                goToDataEntry();
+            }
 
             return;
         }
@@ -336,21 +338,45 @@ public class MicrRepairController
 
         if (totalMicrErrors == 0) {
 
-            goToDataEntry();
+            if (!micrRepairService.needsMicrRepair(batchId)) {
+                goToDataEntry();
+            }
 
             return;
         }
 
-        if (!isValidRepairIndex(chequeIndex)) {
+        /*
+         * Issue 2: On landing or re-entry, target the first un-repaired cheque
+         * (e.g. Cheque 2 if Cheque 1 was already repaired).
+         * Keep Cheque 1 in originalRepairIndexes so user can click "Prev" to view/edit it.
+         */
+        int firstPendingIndex = -1;
+        for (int idx : originalRepairIndexes) {
+            if (idx >= 0 && idx < comparisons.size()) {
+                MicrComparisonDto c = comparisons.get(idx);
+                if (c != null && c.isNeedsMicrRepair()) {
+                    firstPendingIndex = idx;
+                    break;
+                }
+            }
+        }
 
-            chequeIndex =
-                    findNextRepairIndexNoWrap(0);
-
-            if (chequeIndex < 0) {
-
-                goToDataEntry();
-
+        if (firstPendingIndex >= 0) {
+            // If chequeIndex is invalid or points to an already-repaired cheque,
+            // advance automatically to the first un-repaired cheque
+            if (!isValidRepairIndex(chequeIndex)
+                    || chequeIndex >= comparisons.size()
+                    || (comparisons.get(chequeIndex) != null && !comparisons.get(chequeIndex).isNeedsMicrRepair())) {
+                chequeIndex = firstPendingIndex;
+            }
+        } else {
+            // All repair cheques in originalRepairIndexes are completed or returned
+            if (!micrRepairService.needsMicrRepair(batchId)) {
+                navigateAfterMicrCompletion();
                 return;
+            }
+            if (!isValidRepairIndex(chequeIndex)) {
+                chequeIndex = originalRepairIndexes.get(0);
             }
         }
 
@@ -1135,7 +1161,9 @@ public class MicrRepairController
                         .compareBatch(batchId);
 
         if (originalRepairIndexes == null || originalRepairIndexes.isEmpty()) {
-            navigateAfterMicrCompletion();
+            if (!micrRepairService.needsMicrRepair(batchId)) {
+                navigateAfterMicrCompletion();
+            }
             return;
         }
 
@@ -1147,7 +1175,22 @@ public class MicrRepairController
             updateTopBar();
             loadCheque();
         } else {
-            // End of error list reached
+            // End of error list reached; check if any cheque still needs repair
+            if (micrRepairService.needsMicrRepair(batchId)) {
+                int nextPending = -1;
+                for (int idx : originalRepairIndexes) {
+                    if (idx >= 0 && idx < comparisons.size() && comparisons.get(idx).isNeedsMicrRepair()) {
+                        nextPending = idx;
+                        break;
+                    }
+                }
+                if (nextPending >= 0) {
+                    chequeIndex = nextPending;
+                    updateTopBar();
+                    loadCheque();
+                    return;
+                }
+            }
             navigateAfterMicrCompletion();
         }
     }
@@ -1497,6 +1540,9 @@ public class MicrRepairController
     // =========================================================
 
     private void navigateAfterMicrCompletion() {
+        if (micrRepairService.needsMicrRepair(batchId)) {
+            return;
+        }
         if (micrRepairService.hasChequesNeedingDataEntry(batchId)) {
             goToDataEntry();
         } else {
@@ -1515,6 +1561,9 @@ public class MicrRepairController
     }
 
     private void goToDataEntry() {
+        if (micrRepairService.needsMicrRepair(batchId)) {
+            return;
+        }
         Executions.sendRedirect(
                 "/zul/inward-maker/data-entryform.zul?batchId="
                         + batchId);

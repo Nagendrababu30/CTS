@@ -828,6 +828,55 @@ public class MicrRepairController
         }
     }
 
+    private java.io.File resolveImageFile(String path) {
+        if (path == null || path.trim().isEmpty()) {
+            return null;
+        }
+
+        String normalized = path.replace("\\", "/").trim();
+        if (normalized.startsWith("/")) {
+            normalized = normalized.substring(1);
+        }
+
+        // 1. Direct file / absolute path
+        java.io.File directFile = new java.io.File(path);
+        if (directFile.isAbsolute() && directFile.isFile()) {
+            return directFile;
+        }
+
+        // 2. Deployed webApp realPath
+        try {
+            if (org.zkoss.zk.ui.Executions.getCurrent() != null
+                    && org.zkoss.zk.ui.Executions.getCurrent().getDesktop() != null) {
+                org.zkoss.zk.ui.WebApp webApp =
+                        org.zkoss.zk.ui.Executions.getCurrent().getDesktop().getWebApp();
+                String realPath = webApp.getRealPath("/" + normalized);
+                if (realPath != null) {
+                    java.io.File realFile = new java.io.File(realPath);
+                    if (realFile.isFile()) {
+                        return realFile;
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+
+        // 3. Local workspace development path: src/main/webapp/ + subPath
+        String subPath = normalized.startsWith("src/main/webapp/")
+                ? normalized.substring("src/main/webapp/".length())
+                : normalized;
+        java.io.File devFile = new java.io.File("src/main/webapp", subPath);
+        if (devFile.isFile()) {
+            return devFile;
+        }
+
+        // 4. Relative path as-is
+        if (directFile.isFile()) {
+            return directFile;
+        }
+
+        return null;
+    }
+
     private void showCurrentImage() {
 
         if (chequeImage == null) {
@@ -843,21 +892,28 @@ public class MicrRepairController
                 && !path.trim().isEmpty()) {
 
             try {
-                String realPath = (org.zkoss.zk.ui.Executions.getCurrent() != null && org.zkoss.zk.ui.Executions.getCurrent().getDesktop() != null)
-                        ? org.zkoss.zk.ui.Executions.getCurrent().getDesktop().getWebApp().getRealPath(path)
-                        : null;
-                java.io.File file = (realPath != null) ? new java.io.File(realPath) : new java.io.File(path);
-                if (file.exists() && file.isFile()) {
+                java.io.File file = resolveImageFile(path);
+                if (file != null) {
                     chequeImage.setContent(new org.zkoss.image.AImage(file));
                 } else {
-                    String webSrc = path.startsWith("/") ? path : "/" + path;
+                    String clean = path.replace("\\", "/").trim();
+                    if (clean.startsWith("/")) clean = clean.substring(1);
+                    if (clean.startsWith("src/main/webapp/")) {
+                        clean = clean.substring("src/main/webapp/".length());
+                    }
+                    String webSrc = "/" + clean;
                     chequeImage.setContent((org.zkoss.image.AImage) null);
-                    chequeImage.setSrc(webSrc.replace("\\", "/"));
+                    chequeImage.setSrc(webSrc);
                 }
             } catch (Exception e) {
-                String webSrc = path.startsWith("/") ? path : "/" + path;
+                String clean = path.replace("\\", "/").trim();
+                if (clean.startsWith("/")) clean = clean.substring(1);
+                if (clean.startsWith("src/main/webapp/")) {
+                    clean = clean.substring("src/main/webapp/".length());
+                }
+                String webSrc = "/" + clean;
                 chequeImage.setContent((org.zkoss.image.AImage) null);
-                chequeImage.setSrc(webSrc.replace("\\", "/"));
+                chequeImage.setSrc(webSrc);
             }
 
         } else {

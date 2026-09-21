@@ -742,7 +742,12 @@
 }
 
 /* Fix textbox borders inside modal */
-.user-modal-window .z-textbox {
+/* ============================================================
+   MODAL TEXTBOXES
+   Exclude password field because it has its own container
+   ============================================================ */
+
+.user-modal-window .z-textbox:not(.password-field) {
     border: 1.5px solid #CBD5E1 !important;
     border-radius: 8px !important;
     background: #F8FAFC !important;
@@ -755,13 +760,182 @@
     color: #0F172A !important;
 }
 
-.user-modal-window .z-textbox:focus {
+.user-modal-window .z-textbox:not(.password-field):focus {
     border-color: #175CD3 !important;
     background: #FFFFFF !important;
     box-shadow: 0 0 0 3px rgba(23,92,211,0.12) !important;
     outline: none !important;
 }
 
+/* Password field outer container */
+/* ============================================================
+   PASSWORD INPUT CONTAINER
+   ============================================================ */
+
+.password-input-layout {
+    width: 100%;
+    height: 40px;
+
+    display: flex !important;
+    align-items: center !important;
+
+    box-sizing: border-box;
+
+    border: 1.5px solid #CBD5E1 !important;
+    border-radius: 8px !important;
+
+    background: #F8FAFC !important;
+
+    overflow: hidden !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+
+/* ============================================================
+   PASSWORD TEXTBOX
+   ============================================================ */
+
+.password-input-layout .password-field,
+.password-input-layout .z-textbox.password-field {
+
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
+
+    height: 40px !important;
+
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+
+    border-radius: 8px 0 0 8px !important;
+
+    background: transparent !important;
+
+    padding: 0 4px 0 12px !important;
+
+    box-sizing: border-box !important;
+
+    color: #0F172A !important;
+
+    font-size: 14px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 500 !important;
+}
+
+
+/* Remove focus styling from password textbox */
+
+.password-input-layout .password-field:focus,
+.password-input-layout .z-textbox.password-field:focus {
+
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+
+    background: transparent !important;
+}
+
+
+/* ============================================================
+   PASSWORD EYE BUTTON
+   ============================================================ */
+
+.password-eye-button,
+.password-eye-button.z-button {
+
+    width: 38px !important;
+    min-width: 38px !important;
+    max-width: 38px !important;
+
+    height: 38px !important;
+
+    flex: 0 0 38px !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    border: none !important;
+    border-radius: 0 !important;
+
+    outline: none !important;
+    box-shadow: none !important;
+
+    background: transparent !important;
+
+    color: #94A3B8 !important;
+
+    cursor: pointer !important;
+}
+
+
+/* Remove ZK default button styling */
+
+.password-eye-button:hover,
+.password-eye-button:focus,
+.password-eye-button:active,
+.password-eye-button.z-button:hover,
+.password-eye-button.z-button:focus,
+.password-eye-button.z-button:active {
+
+    border: none !important;
+    border-radius: 0 !important;
+
+    outline: none !important;
+    box-shadow: none !important;
+
+    background: transparent !important;
+
+    color: #64748B !important;
+}
+
+
+/* Eye icon */
+
+.password-eye-button .z-icon,
+.password-eye-button .z-icon-eye,
+.password-eye-button .z-icon-eye-slash {
+
+    color: #94A3B8 !important;
+
+    background: transparent !important;
+
+    border: none !important;
+}
+
+
+/* Eye icon hover */
+
+.password-eye-button:hover .z-icon,
+.password-eye-button:hover .z-icon-eye,
+.password-eye-button:hover .z-icon-eye-slash {
+
+    color: #64748B !important;
+}
+
+/* Password requirements hint */
+
+/* ============================================================
+   PASSWORD REQUIREMENTS
+   ============================================================ */
+
+.password-requirements {
+
+    display: block;
+
+    margin-top: 6px;
+
+    font-size: 11px;
+
+    line-height: 16px;
+
+    color: #64748B;
+
+    font-family: 'Inter', sans-serif;
+
+}
 
 
 

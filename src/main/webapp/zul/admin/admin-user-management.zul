@@ -10,6 +10,7 @@
 <zk>
 
     <style src="/css/admin/user.css"/>
+    <style src="/css/admin/user-management.css"/>
 
     <div
         self="@define(content)"

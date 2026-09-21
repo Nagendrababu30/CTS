@@ -327,37 +327,32 @@ public class UserController extends GenericForwardComposer<Component> {
         window.setClosable(false);
         window.setSizable(false);
         window.setSclass("user-modal-window");
-        window.setStyle(
-                "border-radius:14px !important; "
-                + "box-shadow:0 20px 60px rgba(0,0,0,0.18) !important; "
-                + "overflow:hidden !important; "
-                + "border:none !important;");
 
         Vbox mainBox = new Vbox();
         mainBox.setSpacing("0");
         mainBox.setHflex("1");
-        mainBox.setStyle("padding:28px 28px 24px 28px; box-sizing:border-box; background:#FFFFFF;");
+        mainBox.setSclass("user-modal-main-box");
 
         /* ── Header ── */
         Div headerDiv = new Div();
         headerDiv.setHflex("1");
-        headerDiv.setStyle("display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:20px; padding-bottom:0; border:none;");
+        headerDiv.setSclass("user-modal-header");
 
         Div headerLeftDiv = new Div();
-        headerLeftDiv.setStyle("display:flex; align-items:center; gap:14px; flex:1;");
+        headerLeftDiv.setSclass("user-modal-header-left");
 
         Div iconDiv = new Div();
-        iconDiv.setStyle("width:42px; height:42px; min-width:42px; background:#EFF6FF; border:1.5px solid #DBEAFE; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;");
+        iconDiv.setSclass("user-modal-icon-box");
         Label iconLabel = new Label(editMode ? "✏" : "👤");
-        iconLabel.setStyle("font-size:18px; line-height:1;");
+        iconLabel.setSclass("user-modal-icon-label");
         iconDiv.appendChild(iconLabel);
 
         Div titleTextDiv = new Div();
-        titleTextDiv.setStyle("flex:1; min-width:0;");
+        titleTextDiv.setSclass("user-modal-title-text");
         Label titleLabel = new Label(editMode ? "Edit User" : "Create New User");
-        titleLabel.setStyle("font-size:17px; font-weight:700; color:#0B1F3F; font-family:'Space Grotesk','Plus Jakarta Sans',sans-serif; letter-spacing:-0.02em; display:block; margin-bottom:3px;");
+        titleLabel.setSclass("user-modal-title");
         Label subtitleLabel = new Label(editMode ? "Update the details for this user account" : "Fill in the details to create a new user account");
-        subtitleLabel.setStyle("font-size:12px; color:#64748B; display:block; font-weight:400;");
+        subtitleLabel.setSclass("user-modal-subtitle");
         titleTextDiv.appendChild(titleLabel);
         titleTextDiv.appendChild(subtitleLabel);
         headerLeftDiv.appendChild(iconDiv);
@@ -365,7 +360,7 @@ public class UserController extends GenericForwardComposer<Component> {
         
         /* Close button */
         Button closeBtn = new Button("✕");
-        closeBtn.setStyle("width:28px; height:28px; padding:0; background:transparent; border:none; cursor:pointer; color:#64748B; font-size:18px; font-weight:300; line-height:1; flex-shrink:0;");
+        closeBtn.setSclass("user-modal-close-button");
         closeBtn.addEventListener("onClick", new EventListener<Event>() {
             @Override
             public void onEvent(Event event) throws Exception {
@@ -379,48 +374,48 @@ public class UserController extends GenericForwardComposer<Component> {
 
         /* ── Username ── */
         Label usernameLabel = new Label("Username");
-        usernameLabel.setStyle("display:block; font-size:11.5px; font-weight:700; color:#475569; margin-bottom:6px; letter-spacing:0.04em; text-transform:uppercase;");
+        usernameLabel.setSclass("user-form-label");
         Textbox usernameBox = new Textbox();
         usernameBox.setHflex("1");
         usernameBox.setPlaceholder("Enter username");
-        usernameBox.setStyle("height:40px; border:1.5px solid #CBD5E1 !important; border-radius:8px !important; font-size:14px; padding:0 12px; box-sizing:border-box; color:#0F172A; background:#F8FAFC; font-family:'Inter',sans-serif; font-weight:500;");
+        usernameBox.setSclass("user-form-input");
         if (editMode) {
             usernameBox.setValue(existingUser.getUsername());
             usernameBox.setReadonly(true);
-            usernameBox.setStyle("height:40px; border:1.5px solid #E2E8F0 !important; border-radius:8px !important; font-size:14px; padding:0 12px; box-sizing:border-box; color:#94A3B8; background:#F1F5F9; font-family:'Inter',sans-serif; cursor:not-allowed;");
+            usernameBox.setSclass("user-form-input-readonly");
         }
         Vbox usernameGroup = new Vbox();
         usernameGroup.setSpacing("0");
         usernameGroup.setHflex("1");
-        usernameGroup.setStyle("margin-bottom:18px;");
+        usernameGroup.setSclass("user-form-input-group");
         usernameGroup.appendChild(usernameLabel);
         usernameGroup.appendChild(usernameBox);
         mainBox.appendChild(usernameGroup);
 
         /* ── Password ── */
         Label passwordLabel = new Label("Password");
-        passwordLabel.setStyle("display:block; font-size:11.5px; font-weight:700; color:#475569; margin-bottom:6px; letter-spacing:0.04em; text-transform:uppercase;");
+        passwordLabel.setSclass("user-form-label");
         Textbox passwordBox = new Textbox();
         passwordBox.setType("password");
         passwordBox.setHflex("1");
         passwordBox.setPlaceholder(editMode ? "Leave blank to keep current password" : "Enter password");
-        passwordBox.setStyle("height:40px; border:1.5px solid #CBD5E1 !important; border-radius:8px !important; font-size:14px; padding:0 12px; box-sizing:border-box; color:#0F172A; background:#F8FAFC; font-family:'Inter',sans-serif; font-weight:500;");
+        passwordBox.setSclass("user-form-input");
         Vbox passwordGroup = new Vbox();
         passwordGroup.setSpacing("0");
         passwordGroup.setHflex("1");
-        passwordGroup.setStyle("margin-bottom:18px;");
+        passwordGroup.setSclass("user-form-input-group");
         passwordGroup.appendChild(passwordLabel);
         passwordGroup.appendChild(passwordBox);
         mainBox.appendChild(passwordGroup);
 
         /* ── Role ── */
         Label roleLabel = new Label("Role");
-        roleLabel.setStyle("display:block; font-size:11.5px; font-weight:700; color:#475569; margin-bottom:6px; letter-spacing:0.04em; text-transform:uppercase;");
+        roleLabel.setSclass("user-form-label");
         Combobox roleCombo = new Combobox();
         roleCombo.setHflex("1");
         roleCombo.setReadonly(true);
         roleCombo.setPlaceholder("Select a role");
-        roleCombo.setStyle("height:40px; border:1.5px solid #CBD5E1 !important; border-radius:8px !important; font-size:14px; box-sizing:border-box; background:#F8FAFC; font-family:'Inter',sans-serif;");
+        roleCombo.setSclass("user-form-combobox");
 
         try {
             for (Role role : roleService.getAllRoles()) {
@@ -440,20 +435,19 @@ public class UserController extends GenericForwardComposer<Component> {
         Vbox roleGroup = new Vbox();
         roleGroup.setSpacing("0");
         roleGroup.setHflex("1");
-        roleGroup.setStyle("margin-bottom:24px;");
+        roleGroup.setSclass("user-form-input-group-last");
         roleGroup.appendChild(roleLabel);
         roleGroup.appendChild(roleCombo);
         mainBox.appendChild(roleGroup);
 
         /* ── Buttons ── */
         Hbox btnBox = new Hbox();
-        btnBox.setSpacing("10px");
+        btnBox.setSclass("user-modal-button-box user-modal-button-spacing");
         btnBox.setAlign("end");
         btnBox.setHflex("1");
-        btnBox.setStyle("border-top:none; padding-top:20px; display:flex; justify-content:flex-end; align-items:center;");
 
         Button cancelBtn = new Button("Cancel");
-        cancelBtn.setStyle("height:40px; padding:0 22px; background:#FFFFFF; border:1.5px solid #CBD5E1 !important; border-radius:8px; color:#475569; font-size:14px; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif;");
+        cancelBtn.setSclass("user-modal-cancel-button");
         cancelBtn.addEventListener("onClick", new EventListener<Event>() {
             @Override
             public void onEvent(Event event) throws Exception {
@@ -462,7 +456,7 @@ public class UserController extends GenericForwardComposer<Component> {
         });
 
         Button saveBtn = new Button(editMode ? "Update User" : "Create User");
-        saveBtn.setStyle("height:40px; padding:0 22px; background:#175CD3; border:none !important; border-radius:8px; color:#FFFFFF; font-size:14px; font-weight:700; cursor:pointer; font-family:'Inter',sans-serif; box-shadow:0 2px 8px rgba(23,92,211,0.25);");
+        saveBtn.setSclass("user-modal-save-button");
         saveBtn.addEventListener("onClick", new EventListener<Event>() {
             @Override
             public void onEvent(Event event) throws Exception {

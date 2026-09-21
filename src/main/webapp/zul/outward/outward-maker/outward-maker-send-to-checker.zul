@@ -32,12 +32,7 @@
         self="@define(content)"
         width="100%"
         height="100%"
-        style="
-            width:100%;
-            height:100%;
-            ;
-        "
-         sclass="send-to-maker-wrapper">
+        sclass="send-to-maker-wrapper">
 
 
         <!-- =====================================================
@@ -49,11 +44,7 @@
             spacing="18px"
             width="100%"
             height="100%"
-            style="
-                padding:24px 30px;
-                box-sizing:border-box;
-                overflow:auto;
-            ">
+            sclass="send-to-checker-vlayout">
 
 
             <!-- =================================================
@@ -62,12 +53,7 @@
 
             <label
                 value="Send to Checker"
-                style="
-                    font-size:26px;
-                    font-weight:700;
-                    color:#0F172A;
-                    letter-spacing:-0.3px;
-                "/>
+                sclass="send-to-checker-title"/>
 
 
             <!-- =================================================
@@ -83,25 +69,13 @@
 
             <div
                 width="100%"
-                style="
-                    background:white;
-                    border:1px solid #DCE5F0;
-                    border-radius:6px;
-                    padding:16px;
-                    box-sizing:border-box;
-                    box-shadow:0 1px 3px rgba(16,24,40,0.04);
-                ">
+                sclass="send-to-checker-card">
 
 
                 <listbox
                     id="batchListbox"
                     width="100%"
                     sclass="send-checker-listbox"
-                    style="
-                        border:1px solid #E2E8F0;
-                        border-radius:6px;
-                        overflow:hidden;
-                    "
                     emptyMessage="No batches are ready to submit."
                     mold="paging"
                     pageSize="10">

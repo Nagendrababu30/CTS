@@ -53,7 +53,7 @@ public class OutwardMakerDashboardController
 
     private static final long serialVersionUID = 1L;
 
-    // =========================================================
+    // ===Ff======================================================
 
     // ZUL COMPONENTS
 
@@ -361,6 +361,7 @@ private Button reVerifyBatchesBtn;
         // =====================================================
 
         loadDashboard();
+        loadSummaryCounts();
 
         System.out.println(
 
@@ -435,6 +436,7 @@ private Button reVerifyBatchesBtn;
                         updateFilterButtonStyles();
 
                         loadBatches();
+                        
 
                     }
 
@@ -530,7 +532,48 @@ private Button reVerifyBatchesBtn;
 
     }
 
-    // =========================================================
+    private void loadSummaryCounts() {
+		// TODO Auto-generated method stub
+    	// =========================================================
+        // LOAD SUMMARY COUNTS (LOGGED-IN MAKER)
+        // =========================================================
+  
+            if (service == null) {
+                return;
+            }
+
+            try {
+                java.util.Map<String, Integer> counts = service.getDashboardCounts();
+
+                if (counts != null) {
+                    if (pendingDataEntryCount != null) {
+                        pendingDataEntryCount.setValue(
+                            String.valueOf(counts.getOrDefault("PENDING_DATA_ENTRY", 0))
+                        );
+                    }
+
+                    if (micrRepairCount != null) {
+                        micrRepairCount.setValue(
+                            String.valueOf(counts.getOrDefault("MICR_REPAIR", 0))
+                        );
+                    }
+
+                    if (readyToSubmitCount != null) {
+                        readyToSubmitCount.setValue(
+                            String.valueOf(counts.getOrDefault("READY_TO_SUBMIT", 0))
+                        );
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to fetch maker dashboard counts: " + safeExceptionMessage(e));
+                e.printStackTrace();
+            }
+        }
+    	
+		
+	
+
+	// =========================================================
 
     // REGISTER PAGINATION EVENTS
 
@@ -1061,7 +1104,7 @@ private Button reVerifyBatchesBtn;
 
                         "Number Of Cheques : "
 
-                                + batch.getNumberOfCheques()
+                               + batch.getNumberOfCheques()
 
                 );
 

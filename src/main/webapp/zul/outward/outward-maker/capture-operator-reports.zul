@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?page title="Batch Capture Reports"
+    contentType="text/html;charset=UTF-8"?>
+
+<?init class="com.cts.admin.controller.LayoutInit"
+    pageTitle="Batch Capture Reports"
+    active="captureReports"?>
+
+<?init class="org.zkoss.zk.ui.util.Composition"
+    arg0="/zul/common/layout.zul"?>
+
+<zk>
+
+    <!-- =====================================================
+         REPORT CSS
+         ===================================================== -->
+
+    <style
+        src="/zul/outward/capture-operator-CSS/capture_operator_reports.css"/>
+
+
+    <!-- =====================================================
+         REPORT CONTENT
+         ===================================================== -->
+
+    <div
+        self="@define(content)"
+        width="100%"
+        height="100%"
+        sclass="reports-page">
+
+        <vlayout
+            apply="com.iispl.cts.controller.outward.CaptureOperatorReportsController"
+            width="100%"
+            height="100%"
+            spacing="0px"
+            sclass="reports-content">
+
+
+            <!-- =================================================
+                 PAGE HEADER
+                 ================================================= -->
+
+            <div
+                sclass="reports-header">
+
+                <label
+                    value="Batch Capture Reports"
+                    sclass="reports-page-title"/>
+
+            </div>
+
+
+            <!-- =================================================
+                 EXPORT CARD
+                 ================================================= -->
+
+            <div
+                sclass="reports-card"
+                style="position:relative; z-index:100000; overflow:visible;">
+
+
+                <!-- CARD TITLE -->
+
+                <div
+                    sclass="reports-card-title">
+
+                    <div
+                        sclass="reports-section-line"/>
+
+                    <label
+                        value="Export Report"
+                        sclass="reports-section-label"/>
+
+                </div>
+
+
+                <!-- =================================================
+                     FILTER ROW
+                     ================================================= -->
+
+                <hlayout
+                    width="100%"
+                    spacing="18px"
+                    sclass="reports-filter-row"
+                    style="position:relative; z-index:100000; overflow:visible;">
+
+
+                    <!-- =================================================
+                         FROM DATE
+                         ================================================= -->
+
+                    <vlayout
+                        width="220px"
+                        spacing="5px"
+                        style="position:relative; z-index:100001; overflow:visible;">
+
+                        <label
+                            value="From Date"
+                            sclass="reports-field-label"/>
+
+                        <datebox
+                            id="fromDate"
+                            width="100%"
+                            format="dd/MM/yyyy"
+                            placeholder="DD/MM/YYYY"
+                            sclass="reports-datebox"/>
+
+                    </vlayout>
+
+
+                    <!-- =================================================
+                         TO DATE
+                         ================================================= -->
+
+                    <vlayout
+                        width="220px"
+                        spacing="5px"
+                        style="position:relative; z-index:100001; overflow:visible;">
+
+                        <label
+                            value="To Date"
+                            sclass="reports-field-label"/>
+
+                        <datebox
+                            id="toDate"
+                            width="100%"
+                            format="dd/MM/yyyy"
+                            placeholder="DD/MM/YYYY"
+                            sclass="reports-datebox"/>
+
+                    </vlayout>
+
+
+                    <!-- =================================================
+                         EXPORT FORMAT
+                         ================================================= -->
+
+                    <vlayout
+                        width="180px"
+                        spacing="5px">
+
+                        <label
+                            value="Export Format"
+                            sclass="reports-field-label"/>
+
+                        <combobox
+                            id="formatCombo"
+                            width="100%"
+                            readonly="true"
+                            placeholder="Select format"
+                            sclass="reports-combobox">
+
+                            <comboitem
+                                label="XML"
+                                value="XML"/>
+
+                            <comboitem
+                                label="CSV"
+                                value="CSV"/>
+
+                        </combobox>
+
+                    </vlayout>
+
+
+                    <!-- SPACE -->
+
+                    <div hflex="1"/>
+
+
+                    <!-- =================================================
+                         VIEW DATA
+                         ================================================= -->
+
+                    <button
+                        id="viewDataButton"
+                        label="View Data"
+                        width="95px"
+                        height="36px"
+                        sclass="reports-view-button"/>
+
+
+                    <!-- =================================================
+                         EXPORT
+                         ================================================= -->
+
+                    <button
+                        id="exportButton"
+                        label="Export"
+                        width="90px"
+                        height="36px"
+                        sclass="reports-export-button"/>
+
+                </hlayout>
+
+
+                <!-- HINT -->
+
+                <label
+                    value="From Date and To Date are optional."
+                    sclass="reports-hint"/>
+
+            </div>
+
+
+            <!-- =================================================
+                 DOWNLOAD HISTORY
+                 ================================================= -->
+
+            <div
+                sclass="reports-history-card"
+                style="position:relative; z-index:1;">
+
+
+                <!-- CARD TITLE -->
+
+                <div
+                    sclass="reports-card-title">
+
+                    <div
+                        sclass="reports-section-line"/>
+
+                    <label
+                        value="Download History"
+                        sclass="reports-section-label"/>
+
+                </div>
+
+
+                <!-- =================================================
+                     HISTORY TABLE
+                     ================================================= -->
+
+                <div
+                    sclass="reports-history-table-container">
+
+                    <listbox
+                        id="downloadHistoryList"
+                        width="100%"
+                        height="360px"
+                        mold="paging"
+                        pageSize="10"
+                        emptyMessage="No download history available."
+                        sclass="reports-history-listbox">
+
+                        <listhead
+                            sizable="true"
+                            height="46px"
+                            sclass="reports-listhead">
+
+                            <listheader
+                                label="Download Date"
+                                width="22%"
+                                sclass="reports-listheader"/>
+
+                            <listheader
+                                label="From Date"
+                                width="18%"
+                                sclass="reports-listheader"/>
+
+                            <listheader
+                                label="To Date"
+                                width="18%"
+                                sclass="reports-listheader"/>
+
+                            <listheader
+                                label="Format"
+                                width="15%"
+                                align="center"
+                                sclass="reports-listheader"/>
+
+                            <listheader
+                                label="Action"
+                                width="27%"
+                                align="center"
+                                sclass="reports-listheader"/>
+
+                        </listhead>
+
+                    </listbox>
+
+                </div>
+
+
+                <!-- RECORD COUNT -->
+
+                <div
+                    sclass="reports-record-footer">
+
+                    <label
+                        id="historyCountLabel"
+                        value="Showing 0 records"
+                        sclass="reports-record-count"/>
+
+                </div>
+
+            </div>
+
+
+        </vlayout>
+
+    </div>
+
+
+    <!-- =========================================================
+         DATEBOX POPUP ZK OVERRIDE
+         ========================================================= -->
+
+    <style>
+
+        .z-datebox-popup {
+            z-index: 9999999 !important;
+            overflow: visible !important;
+            height: auto !important;
+        }
+
+        .z-datebox-popup .z-calendar {
+            z-index: 9999999 !important;
+            overflow: visible !important;
+            height: auto !important;
+            min-height: 220px !important;
+        }
+
+        .z-datebox-popup .z-calendar-body {
+            display: block !important;
+            visibility: visible !important;
+            overflow: visible !important;
+            height: auto !important;
+            min-height: 160px !important;
+        }
+
+    </style>
+
+</zk>

@@ -47,10 +47,10 @@
 }
 
 .user-page-title {
-    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Times New Roman', serif;
     color: #0B1F3F;
     font-size: 30px;
-    font-weight: 700;
+    font-weight: 650;
     letter-spacing: -0.035em;
     line-height: 1.1;
     display: inline-block !important;
@@ -98,7 +98,7 @@
     border-radius: 8px;
     color: #FFFFFF;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 650;
     white-space: nowrap;
     cursor: pointer;
     box-shadow: 0 1px 4px rgba(36, 84, 214, 0.30);
@@ -191,7 +191,7 @@
     border-radius: 8px;
     color: #FFFFFF;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 650;
     white-space: nowrap;
     cursor: pointer;
     box-shadow: 0 1px 3px rgba(36, 84, 214, 0.25);
@@ -244,7 +244,7 @@
     flex-shrink: 0;
     color: #4B5E7A;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 650;
     white-space: nowrap;
 }
 
@@ -337,7 +337,7 @@
 .system-users-title {
     color: #111827;
     font-size: 16px;
-    font-weight: 700;
+    font-weight: 650;
     letter-spacing: -0.1px;
 }
 
@@ -389,7 +389,7 @@
     color: #FFFFFF !important;
     font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 650;
     text-transform: none;
     letter-spacing: 0.06em;
     padding: 12px 12px !important;
@@ -688,7 +688,7 @@
     background: #FFFFFF !important;
     border-bottom: 1.5px solid #EEF2F8 !important;
     padding: 14px 20px !important;
-    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif !important;
+    font-family: 'Inter', sans-serif !important;
     font-size: 15px !important;
     font-weight: 700 !important;
     color: #0B1F3F !important;
@@ -761,3 +761,7 @@
     box-shadow: 0 0 0 3px rgba(23,92,211,0.12) !important;
     outline: none !important;
 }
+
+
+
+

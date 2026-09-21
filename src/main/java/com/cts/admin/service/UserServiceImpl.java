@@ -4,100 +4,178 @@ import java.util.List;
 
 import com.cts.admin.dao.UserDao;
 import com.cts.admin.model.User;
+import com.cts.admin.util.PasswordUtil;
 
 public class UserServiceImpl implements UserService {
 
-    private final UserDao userDao;
+	private final UserDao userDao;
 
-    public UserServiceImpl() {
-        userDao = new UserDao();
-    }
+	public UserServiceImpl() {
+		userDao = new UserDao();
+	}
 
-    // ================================================================
-    // AUTH
-    // ================================================================
+	// ================================================================
+	// AUTH
+	// ================================================================
 
-    @Override
-    public User authenticate(String username, String password) {
-        if (username == null || username.trim().isEmpty()) return null;
-        if (password == null || password.trim().isEmpty()) return null;
-        return userDao.authenticate(username, password);
-    }
+	@Override
+	public User authenticate(String username, String password) {
+		if (username == null || username.trim().isEmpty())
+			return null;
+		if (password == null || password.trim().isEmpty())
+			return null;
+		return userDao.authenticate(username, password);
+	}
 
-    // ================================================================
-    // CRUD
-    // ================================================================
+	// ================================================================
+	// CRUD
+	// ================================================================
 
-    @Override
-    public List<User> getUsers(int limit, int offset,
-            String searchText, Long roleId, String status) {
-        return userDao.getUsers(limit, offset, searchText, roleId, status);
-    }
+	@Override
+	public List<User> getUsers(int limit, int offset, String searchText, Long roleId, String status) {
+		return userDao.getUsers(limit, offset, searchText, roleId, status);
+	}
 
-    @Override
-    public int getUserCount() {
-        return userDao.getUserCount();
-    }
+	@Override
+	public int getUserCount() {
+		return userDao.getUserCount();
+	}
 
-    @Override
-    public User getUserById(Long userId) {
-        return userDao.getUserById(userId);
-    }
+	@Override
+	public User getUserById(Long userId) {
+		return userDao.getUserById(userId);
+	}
 
-    @Override
-    public boolean usernameExists(String username) {
-        return userDao.usernameExists(username);
-    }
+	@Override
+	public boolean usernameExists(String username) {
+		return userDao.usernameExists(username);
+	}
 
-    @Override
-    public boolean createUser(User user) {
+	@Override
+	public boolean createUser(User user) {
 
-        if (user == null) return false;
-        if (user.getUsername() == null || user.getUsername().trim().isEmpty()) return false;
-        if (user.getRole() == null || user.getRole().getRoleId() == null) return false;
-        if (usernameExists(user.getUsername().trim())) return false;
+		if (user == null)
+			return false;
 
-        user.setUsername(user.getUsername().trim());
+		if (user.getUsername() == null || user.getUsername().trim().isEmpty()) {
+			return false;
+		}
 
-        if (user.getStatus() == null || user.getStatus().trim().isEmpty()) {
-            user.setStatus("ACTIVE");
-        }
+		if (user.getRole() == null || user.getRole().getRoleId() == null) {
+			return false;
+		}
 
-        return userDao.createUser(user);
-    }
+		String plainPassword = user.getPasswordHash();
 
-    @Override
-    public boolean updateUser(User user) {
+		if (plainPassword == null || plainPassword.isEmpty()) {
+			return false;
+		}
 
-        if (user == null || user.getUserId() == null) return false;
-        if (user.getUsername() == null || user.getUsername().trim().isEmpty()) return false;
-        if (user.getRole() == null || user.getRole().getRoleId() == null) return false;
+		if (usernameExists(user.getUsername().trim())) {
+			return false;
+		}
 
-        user.setUsername(user.getUsername().trim());
+		user.setUsername(user.getUsername().trim());
 
-        return userDao.updateUser(user);
-    }
+		if (user.getStatus() == null || user.getStatus().trim().isEmpty()) {
+			user.setStatus("ACTIVE");
+		}
 
-    @Override
-    public boolean updateUserStatus(Long userId, String status) {
-        if (userId == null || status == null || status.trim().isEmpty()) return false;
-        return userDao.updateUserStatus(userId, status);
-    }
+		String hashedPassword = PasswordUtil.hashPassword(plainPassword);
 
-    @Override
-    public void deleteUser(Long userId) {
+		user.setPasswordHash(hashedPassword);
 
-        if (userId == null) throw new IllegalArgumentException("User ID cannot be null.");
+		return userDao.createUser(user);
+	}
 
-        User user = userDao.getUserById(userId);
+	@Override
 
-        if (user == null) throw new IllegalArgumentException("User not found.");
+	public boolean updateUser(User user) {
 
-        if ("ACTIVE".equalsIgnoreCase(user.getStatus())) {
-            throw new IllegalStateException(
-                    "Active user cannot be deleted. Deactivate the user first.");
-        }
+		if (user == null || user.getUserId() == null) {
+			return false;
+		}
 
-        userDao.deleteUser(userId);
-    }
+		if (user.getUsername() == null || user.getUsername().trim().isEmpty()) {
+			return false;
+		}
+
+		if (user.getRole() == null || user.getRole().getRoleId() == null) {
+			return false;
+		}
+
+		user.setUsername(user.getUsername().trim());
+
+		/*
+		 * Fetch existing user from database. This is required to compare the old
+		 * password.
+		 */
+		User existingUser = userDao.getUserById(user.getUserId());
+
+		if (existingUser == null) {
+			return false;
+		}
+
+		/*
+		 * Read the new password entered in the UI.
+		 */
+		String newPassword = user.getPasswordHash();
+
+		/*
+		 * If password is blank, keep the existing password.
+		 */
+		if (newPassword == null || newPassword.trim().isEmpty()) {
+
+			user.setPasswordHash(null);
+
+			return userDao.updateUser(user);
+		}
+
+		/*
+		 * Get the existing BCrypt password hash.
+		 */
+		String existingPasswordHash = existingUser.getPasswordHash();
+
+		/*
+		 * Check whether the new password is the same as the existing password.
+		 */
+		if (PasswordUtil.verifyPassword(newPassword, existingPasswordHash)) {
+
+			return false;
+		}
+
+		/*
+		 * New password is different. Hash it before saving.
+		 */
+		String hashedPassword = PasswordUtil.hashPassword(newPassword);
+
+		user.setPasswordHash(hashedPassword);
+
+		return userDao.updateUser(user);
+	}
+
+	@Override
+	public boolean updateUserStatus(Long userId, String status) {
+		if (userId == null || status == null || status.trim().isEmpty())
+			return false;
+		return userDao.updateUserStatus(userId, status);
+	}
+
+	@Override
+	public void deleteUser(Long userId) {
+
+		if (userId == null)
+			throw new IllegalArgumentException("User ID cannot be null.");
+
+		User user = userDao.getUserById(userId);
+
+		if (user == null)
+			throw new IllegalArgumentException("User not found.");
+
+		if ("ACTIVE".equalsIgnoreCase(user.getStatus())) {
+			throw new IllegalStateException("Active user cannot be deleted. Deactivate the user first.");
+		}
+
+		userDao.deleteUser(userId);
+	}
 }

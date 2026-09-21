@@ -8,6 +8,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.zkoss.util.media.Media;
 
@@ -20,6 +30,16 @@ public class CaptureOperatorBatchService {
     private final CaptureOperatorBatchDAO dao;
     private final CaptureOperatorXMLParser parser;
     private final NotificationService notificationService;
+
+    // =========================================================
+    // WATCH SERVICE + THREADING DEMO
+    // =========================================================
+    // These are DEMO ONLY.
+    // They do not replace or modify the existing capture flow.
+    // =========================================================
+    private WatchService demoWatchService;
+    private Thread demoWatchThread;
+    private ExecutorService demoExecutor;
 
     public CaptureOperatorBatchService() {
 
@@ -189,6 +209,9 @@ public class CaptureOperatorBatchService {
             batchFolder =
                     createBatchFolder();
 
+            // DEMO ONLY: watch file activity in this batch folder.
+            startWatchServiceDemo(batchFolder);
+
             System.out.println(
                     "=================================");
 
@@ -210,6 +233,9 @@ public class CaptureOperatorBatchService {
                     saveUploadedFiles(
                             uploadedFiles,
                             batchFolder);
+
+            // DEMO ONLY: stop watching after upload activity.
+            stopWatchServiceDemo();
 
             // =================================================
             // XML VALIDATION
@@ -255,6 +281,11 @@ public class CaptureOperatorBatchService {
             System.out.println(
                     "XML cheque count: "
                     + cheques.size());
+
+            // DEMO ONLY: print multiple worker threads processing
+            // each parsed cheque. The real capture logic below
+            // continues exactly as before.
+            demonstrateThreading(cheques);
 
             // =================================================
             // XML CHEQUE VALIDATION
@@ -1054,6 +1085,250 @@ public class CaptureOperatorBatchService {
                         .format(
                                 DateTimeFormatter.ofPattern(
                                         "yyyyMMddHHmmssSSS"));
+    }
+
+    // =========================================================
+    // WATCH SERVICE DEMO
+    // =========================================================
+    // Watches the temporary batch folder while files are uploaded.
+    // It only prints events; it does NOT change any business logic.
+    // =========================================================
+
+    private void startWatchServiceDemo(File batchFolder) {
+
+        if (batchFolder == null || !batchFolder.exists()) {
+            return;
+        }
+
+        try {
+
+            demoWatchService =
+                    FileSystems.getDefault()
+                            .newWatchService();
+
+            Path folderPath =
+                    batchFolder.toPath();
+
+            folderPath.register(
+                    demoWatchService,
+                    StandardWatchEventKinds.ENTRY_CREATE,
+                    StandardWatchEventKinds.ENTRY_MODIFY);
+
+            demoWatchThread =
+                    new Thread(
+                            () -> runWatchServiceDemo(),
+                            "CTS-WatchService-Thread");
+
+            // Demo watcher should not prevent Tomcat shutdown.
+            demoWatchThread.setDaemon(true);
+
+            demoWatchThread.start();
+
+            System.out.println(
+                    "[WATCH SERVICE] Started on thread: "
+                    + demoWatchThread.getName());
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "[WATCH SERVICE] Demo could not start: "
+                    + e.getMessage());
+        }
+    }
+
+    private void runWatchServiceDemo() {
+
+        try {
+
+            while (!Thread.currentThread().isInterrupted()
+                    && demoWatchService != null) {
+
+                WatchKey key =
+                        demoWatchService.take();
+
+                for (WatchEvent<?> event :
+                        key.pollEvents()) {
+
+                    WatchEvent.Kind<?> kind =
+                            event.kind();
+
+                    if (kind == StandardWatchEventKinds.OVERFLOW) {
+                        continue;
+                    }
+
+                    Object context =
+                            event.context();
+
+                    System.out.println(
+                            "[WATCH SERVICE] Thread="
+                            + Thread.currentThread().getName()
+                            + " | Event="
+                            + kind.name()
+                            + " | File="
+                            + context);
+                }
+
+                if (!key.reset()) {
+                    break;
+                }
+            }
+
+        } catch (InterruptedException e) {
+
+            Thread.currentThread().interrupt();
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "[WATCH SERVICE] Error: "
+                    + e.getMessage());
+        }
+    }
+
+    private void stopWatchServiceDemo() {
+
+        try {
+
+            if (demoWatchThread != null) {
+                demoWatchThread.interrupt();
+            }
+
+            if (demoWatchService != null) {
+                demoWatchService.close();
+            }
+
+            demoWatchThread = null;
+            demoWatchService = null;
+
+            System.out.println(
+                    "[WATCH SERVICE] Stopped.");
+
+        } catch (Exception e) {
+
+            System.out.println(
+                    "[WATCH SERVICE] Stop error: "
+                    + e.getMessage());
+        }
+    }
+
+    // =========================================================
+    // MULTI-THREADING DEMO
+    // =========================================================
+    // IMPORTANT:
+    // This method does NOT modify cheque data.
+    // It only demonstrates that multiple worker threads can
+    // execute independent work in parallel.
+    // =========================================================
+
+    private void demonstrateThreading(
+            List<OutwardCheque> cheques) {
+
+        if (cheques == null || cheques.isEmpty()) {
+            return;
+        }
+
+        int workerCount =
+                Math.min(4, cheques.size());
+
+        demoExecutor =
+                Executors.newFixedThreadPool(
+                        workerCount);
+
+        System.out.println(
+                "=================================");
+
+        System.out.println(
+                "[THREADING DEMO] Starting "
+                + workerCount
+                + " worker threads.");
+
+        System.out.println(
+                "=================================");
+
+        for (int i = 0;
+                i < cheques.size();
+                i++) {
+
+            final OutwardCheque cheque =
+                    cheques.get(i);
+
+            final int index =
+                    i + 1;
+
+            demoExecutor.submit(
+                    () -> {
+
+                        System.out.println(
+                                "[THREADING DEMO] "
+                                + "Thread="
+                                + Thread.currentThread()
+                                        .getName()
+                                + " | Processing cheque #"
+                                + index
+                                + " | Cheque No="
+                                + safeValueForDemo(
+                                        cheque));
+
+                        try {
+                            // Only creates visible timing overlap
+                            // for the live demonstration.
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread()
+                                    .interrupt();
+                        }
+
+                        System.out.println(
+                                "[THREADING DEMO] "
+                                + "Thread="
+                                + Thread.currentThread()
+                                        .getName()
+                                + " | Finished cheque #"
+                                + index);
+                    });
+        }
+
+        demoExecutor.shutdown();
+
+        try {
+
+            if (!demoExecutor.awaitTermination(
+                    10,
+                    TimeUnit.SECONDS)) {
+
+                demoExecutor.shutdownNow();
+            }
+
+        } catch (InterruptedException e) {
+
+            demoExecutor.shutdownNow();
+            Thread.currentThread().interrupt();
+
+        } finally {
+
+            demoExecutor = null;
+        }
+
+        System.out.println(
+                "=================================");
+
+        System.out.println(
+                "[THREADING DEMO] Completed.");
+
+        System.out.println(
+                "=================================");
+    }
+
+    private String safeValueForDemo(
+            OutwardCheque cheque) {
+
+        if (cheque == null
+                || cheque.getChequeNumber() == null) {
+
+            return "UNKNOWN";
+        }
+
+        return cheque.getChequeNumber().trim();
     }
 
     // =========================================================

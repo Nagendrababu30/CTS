@@ -13,272 +13,241 @@ import com.cts.inward.config.ConnectionPool;
 
 public class UserDAOImpl {
 
+	public List<User> getUsers(int limit, int offset, String searchText, Long roleId, String status) {
 
-    public List<User> getUsers(int limit, int offset,
-            String searchText, Long roleId, String status) {
+		List<User> users = new ArrayList<>();
 
-        List<User> users = new ArrayList<>();
+		StringBuilder sql = new StringBuilder();
 
-        StringBuilder sql = new StringBuilder();
+		/* CTS DB uses reserved words "user" and "role" — must be quoted */
+		sql.append("SELECT u.user_id, " + "       u.username, " + "       u.role_id, " + "       r.role_name, "
+				+ "       r.description AS role_description, " + "       r.status      AS role_status, "
+				+ "       u.status, " + "       u.last_login " + "FROM   \"user\" u "
+				+ "LEFT   JOIN \"role\" r ON u.role_id = r.role_id " + "WHERE  1=1 ");
 
-        /* CTS DB uses reserved words "user" and "role" — must be quoted */
-        sql.append(
-                "SELECT u.user_id, "
-                + "       u.username, "
-                + "       u.role_id, "
-                + "       r.role_name, "
-                + "       r.description AS role_description, "
-                + "       r.status      AS role_status, "
-                + "       u.status, "
-                + "       u.last_login "
-                + "FROM   \"user\" u "
-                + "LEFT   JOIN \"role\" r ON u.role_id = r.role_id "
-                + "WHERE  1=1 ");
+		List<Object> parameters = new ArrayList<>();
 
-        List<Object> parameters = new ArrayList<>();
+		if (searchText != null && !searchText.trim().isEmpty()) {
+			sql.append("AND (LOWER(u.username) LIKE ? " + "OR CAST(u.user_id AS TEXT) LIKE ?) ");
+			String v = "%" + searchText.trim().toLowerCase() + "%";
+			parameters.add(v);
+			parameters.add(v);
+		}
 
-        if (searchText != null && !searchText.trim().isEmpty()) {
-            sql.append("AND (LOWER(u.username) LIKE ? "
-                    + "OR CAST(u.user_id AS TEXT) LIKE ?) ");
-            String v = "%" + searchText.trim().toLowerCase() + "%";
-            parameters.add(v);
-            parameters.add(v);
-        }
+		if (roleId != null) {
+			sql.append("AND u.role_id = ? ");
+			parameters.add(roleId);
+		}
 
-        if (roleId != null) {
-            sql.append("AND u.role_id = ? ");
-            parameters.add(roleId);
-        }
+		if (status != null && !status.trim().isEmpty()) {
+			sql.append("AND u.status = ? ");
+			parameters.add(status);
+		}
 
-        if (status != null && !status.trim().isEmpty()) {
-            sql.append("AND u.status = ? ");
-            parameters.add(status);
-        }
+		sql.append("ORDER BY u.user_id LIMIT ? OFFSET ?");
+		parameters.add(limit);
+		parameters.add(offset);
 
-        sql.append("ORDER BY u.user_id LIMIT ? OFFSET ?");
-        parameters.add(limit);
-        parameters.add(offset);
+		try (Connection conn = ConnectionPool.getDataSource().getConnection();
+				PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+			for (int i = 0; i < parameters.size(); i++) {
+				stmt.setObject(i + 1, parameters.get(i));
+			}
 
-        try (
-                Connection conn = ConnectionPool.getDataSource().getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql.toString())
-        ) {
-            for (int i = 0; i < parameters.size(); i++) {
-                stmt.setObject(i + 1, parameters.get(i));
-            }
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					users.add(mapUser(rs));
+				}
+			}
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    users.add(mapUser(rs));
-                }
-            }
+		} catch (SQLException e) {
+			throw new RuntimeException("Unable to fetch users.", e);
+		}
 
-        } catch (SQLException e) {
-            throw new RuntimeException("Unable to fetch users.", e);
-        }
+		return users;
+	}
 
-        return users;
-    }
+	public int getUserCount() {
 
+		String sql = "SELECT COUNT(*) FROM \"user\"";
 
-    public int getUserCount() {
+		try (Connection conn = ConnectionPool.getDataSource().getConnection();
+				PreparedStatement stmt = conn.prepareStatement(sql);
+				ResultSet rs = stmt.executeQuery()) {
+			if (rs.next()) {
+				return rs.getInt(1);
+			}
+		} catch (SQLException e) {
+			throw new RuntimeException("Unable to count users.", e);
+		}
 
-        String sql = "SELECT COUNT(*) FROM \"user\"";
+		return 0;
+	}
 
-        try (
-                Connection conn = ConnectionPool.getDataSource().getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql);
-                ResultSet rs = stmt.executeQuery()
-        ) {
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Unable to count users.", e);
-        }
+	public User getUserById(Long userId) {
 
-        return 0;
-    }
+		String sql = "SELECT u.user_id, " + "       u.username, " + "       u.password, " + "       u.role_id, "
+				+ "       r.role_name, " + "       r.description AS role_description, "
+				+ "       r.status      AS role_status, " + "       u.status, " + "       u.last_login "
+				+ "FROM   \"user\" u " + "LEFT   JOIN \"role\" r ON u.role_id = r.role_id " + "WHERE  u.user_id = ?";
 
+		try (Connection conn = ConnectionPool.getDataSource().getConnection();
+				PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setLong(1, userId);
 
-    public User getUserById(Long userId) {
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next()) {
+					return mapUser(rs);
+				}
+			}
 
-        String sql =
-                "SELECT u.user_id, "
-                + "       u.username, "
-                + "       u.password, "
-                + "       u.role_id, "
-                + "       r.role_name, "
-                + "       r.description AS role_description, "
-                + "       r.status      AS role_status, "
-                + "       u.status, "
-                + "       u.last_login "
-                + "FROM   \"user\" u "
-                + "LEFT   JOIN \"role\" r ON u.role_id = r.role_id "
-                + "WHERE  u.user_id = ?";
+		} catch (SQLException e) {
+			throw new RuntimeException("Unable to fetch user.", e);
+		}
 
-        try (
-                Connection conn = ConnectionPool.getDataSource().getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)
-        ) {
-            stmt.setLong(1, userId);
+		return null;
+	}
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return mapUser(rs);
-                }
-            }
+	public boolean usernameExists(String username) {
 
-        } catch (SQLException e) {
-            throw new RuntimeException("Unable to fetch user.", e);
-        }
+		String sql = "SELECT COUNT(*) FROM \"user\" WHERE username = ?";
 
-        return null;
-    }
+		try (Connection conn = ConnectionPool.getDataSource().getConnection();
+				PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setString(1, username);
 
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next()) {
+					return rs.getInt(1) > 0;
+				}
+			}
 
-    public boolean usernameExists(String username) {
+		} catch (SQLException e) {
+			throw new RuntimeException("Unable to check username.", e);
+		}
 
-        String sql = "SELECT COUNT(*) FROM \"user\" WHERE username = ?";
+		return false;
+	}
 
-        try (
-                Connection conn = ConnectionPool.getDataSource().getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)
-        ) {
-            stmt.setString(1, username);
+	public boolean createUser(User user) {
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1) > 0;
-                }
-            }
+		/*
+		 * CTS "user" table columns: user_id, username, password, role_id, status,
+		 * last_login
+		 */
+		String sql = "INSERT INTO \"user\" " + "(username, password, role_id, status) " + "VALUES (?, ?, ?, ?)";
 
-        } catch (SQLException e) {
-            throw new RuntimeException("Unable to check username.", e);
-        }
+		try (Connection conn = ConnectionPool.getDataSource().getConnection();
+				PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setString(1, user.getUsername());
+			stmt.setString(2, user.getPasswordHash());
+			stmt.setLong(3, user.getRole().getRoleId());
+			stmt.setString(4, user.getStatus());
 
-        return false;
-    }
+			return stmt.executeUpdate() > 0;
 
+		} catch (SQLException e) {
+			throw new RuntimeException("Unable to create user.", e);
+		}
+	}
 
-    public boolean createUser(User user) {
+	public boolean updateUser(User user) {
 
-        /* CTS "user" table columns: user_id, username, password, role_id, status, last_login */
-        String sql =
-                "INSERT INTO \"user\" "
-                + "(username, password, role_id, status) "
-                + "VALUES (?, ?, ?, ?)";
+		String sql = "UPDATE \"user\" " + "SET username = ?, " + "    role_id = ?, "
+				+ "    password = COALESCE(?, password) " + "WHERE user_id = ?";
 
-        try (
-                Connection conn = ConnectionPool.getDataSource().getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)
-        ) {
-            stmt.setString(1, user.getUsername());
-            stmt.setString(2, user.getPasswordHash());
-            stmt.setLong(3, user.getRole().getRoleId());
-            stmt.setString(4, user.getStatus());
+		try (Connection conn = ConnectionPool.getDataSource().getConnection();
 
-            return stmt.executeUpdate() > 0;
+				PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-        } catch (SQLException e) {
-            throw new RuntimeException("Unable to create user.", e);
-        }
-    }
+			stmt.setString(1, user.getUsername());
 
+			stmt.setLong(2, user.getRole().getRoleId());
 
-    public boolean updateUser(User user) {
+			/*
+			 * NULL means preserve the existing password. A new BCrypt hash updates the
+			 * password.
+			 */
+			stmt.setString(3, user.getPasswordHash());
 
-        String sql =
-                "UPDATE \"user\" "
-                + "SET role_id = ? "
-                + "WHERE user_id = ?";
+			stmt.setLong(4, user.getUserId());
 
-        try (
-                Connection conn = ConnectionPool.getDataSource().getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)
-        ) {
-            stmt.setLong(1, user.getRole().getRoleId());
-            stmt.setLong(2, user.getUserId());
+			return stmt.executeUpdate() > 0;
 
-            return stmt.executeUpdate() > 0;
+		} catch (SQLException e) {
 
-        } catch (SQLException e) {
-            throw new RuntimeException("Unable to update user.", e);
-        }
-    }
+			throw new RuntimeException("Unable to update user.", e);
+		}
+	}
 
+	public boolean updateUserStatus(Long userId, String status) {
 
-    public boolean updateUserStatus(Long userId, String status) {
+		String sql = "UPDATE \"user\" SET status = ? WHERE user_id = ?";
 
-        String sql = "UPDATE \"user\" SET status = ? WHERE user_id = ?";
+		try (Connection conn = ConnectionPool.getDataSource().getConnection();
+				PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setString(1, status);
+			stmt.setLong(2, userId);
 
-        try (
-                Connection conn = ConnectionPool.getDataSource().getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)
-        ) {
-            stmt.setString(1, status);
-            stmt.setLong(2, userId);
+			return stmt.executeUpdate() > 0;
 
-            return stmt.executeUpdate() > 0;
+		} catch (SQLException e) {
+			throw new RuntimeException("Unable to update user status.", e);
+		}
+	}
 
-        } catch (SQLException e) {
-            throw new RuntimeException("Unable to update user status.", e);
-        }
-    }
+	public void deleteUser(Long userId) {
 
+		String sql = "DELETE FROM \"user\" WHERE user_id = ?";
 
-    public void deleteUser(Long userId) {
+		try (Connection conn = ConnectionPool.getDataSource().getConnection();
+				PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setLong(1, userId);
+			stmt.executeUpdate();
 
-        String sql = "DELETE FROM \"user\" WHERE user_id = ?";
+		} catch (SQLException e) {
+			throw new RuntimeException("Unable to delete user.", e);
+		}
+	}
 
-        try (
-                Connection conn = ConnectionPool.getDataSource().getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)
-        ) {
-            stmt.setLong(1, userId);
-            stmt.executeUpdate();
+	/* ------------------------------------------------------------------ */
+	/* MAPPER */
+	/* ------------------------------------------------------------------ */
 
-        } catch (SQLException e) {
-            throw new RuntimeException("Unable to delete user.", e);
-        }
-    }
+	private User mapUser(ResultSet rs) throws SQLException {
 
-    /* ------------------------------------------------------------------ */
-    /* MAPPER                                                               */
-    /* ------------------------------------------------------------------ */
+		User user = new User();
 
-    private User mapUser(ResultSet rs) throws SQLException {
+		user.setUserId(rs.getLong("user_id"));
+		user.setUsername(rs.getString("username"));
+		user.setStatus(rs.getString("status"));
 
-        User user = new User();
+		/* password column — only present in getUserById query */
+		try {
+			String pwd = rs.getString("password");
+			if (pwd != null) {
+				user.setPasswordHash(pwd);
+			}
+		} catch (SQLException ignored) {
+		}
 
-        user.setUserId(rs.getLong("user_id"));
-        user.setUsername(rs.getString("username"));
-        user.setStatus(rs.getString("status"));
+		/* last_login */
+		try {
+			user.setLastLoginAt(rs.getTimestamp("last_login"));
+		} catch (SQLException ignored) {
+		}
 
-        /* password column — only present in getUserById query */
-        try {
-            String pwd = rs.getString("password");
-            if (pwd != null) {
-                user.setPasswordHash(pwd);
-            }
-        } catch (SQLException ignored) {}
+		/* Role */
+		long roleIdValue = rs.getLong("role_id");
+		if (!rs.wasNull()) {
+			Role role = new Role();
+			role.setRoleId(roleIdValue);
+			role.setRoleName(rs.getString("role_name"));
+			role.setDescription(rs.getString("role_description"));
+			role.setStatus(rs.getString("role_status"));
+			user.setRole(role);
+		}
 
-        /* last_login */
-        try {
-            user.setLastLoginAt(rs.getTimestamp("last_login"));
-        } catch (SQLException ignored) {}
-
-        /* Role */
-        long roleIdValue = rs.getLong("role_id");
-        if (!rs.wasNull()) {
-            Role role = new Role();
-            role.setRoleId(roleIdValue);
-            role.setRoleName(rs.getString("role_name"));
-            role.setDescription(rs.getString("role_description"));
-            role.setStatus(rs.getString("role_status"));
-            user.setRole(role);
-        }
-
-        return user;
-    }
+		return user;
+	}
 }

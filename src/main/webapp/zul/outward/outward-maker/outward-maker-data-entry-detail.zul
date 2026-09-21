@@ -22,12 +22,12 @@
 		========================================================= -->
 
 	<div self="@define(content)" width="100%" height="100%"
-		style="width:100%; height:100%; background:#F1F5F9;">
+		sclass="data-entry-detail-wrapper">
 
 		<vlayout
 			apply="com.iispl.cts.controller.outward.OutwardMakerDataEntryDetailController"
 			spacing="12px" width="100%" height="100%"
-			style="padding:14px 20px; box-sizing:border-box; overflow:auto;">
+			sclass="data-entry-detail-vlayout">
 
 
 			<!-- =================================================
@@ -37,39 +37,34 @@
 				================================================= -->
 
 			<div width="100%"
-				style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:8px; padding:8px 16px; box-shadow:0 1px 2px rgba(0,0,0,0.03);">
+				sclass="data-entry-detail-header-strip">
 
-				<hlayout width="100%" valign="middle">
+				<hlayout width="100%" valign="middle" sclass="data-entry-detail-header-strip">
 
 
 					<!-- Back Button -->
 
 					<button id="backToListButton" label="←"
 						tooltiptext="Back to Data Entry" width="32px" height="32px"
-						style="background:#F8FAFC !important; color:#334155 !important; border:1px solid #CBD5E1 !important; border-radius:6px !important; font-size:15px !important; font-weight:bold !important; cursor:pointer !important; margin-right:12px !important; display:inline-flex !important; align-items:center !important; justify-content:center !important;" />
+						sclass="btn-back-to-list" />
 
 
 					<!-- Batch ID -->
 
-					<label value="Batch No : "
-						style="font-size:13px; font-weight:600; color:#64748B;" />
+					<label value="Batch No : " sclass="batch-label-text" />
 
-					<label id="batchIdLabel" value=""
-						style="font-size:13px; font-weight:700; color:#1E293B;" />
+					<label id="batchIdLabel" value="" sclass="batch-id-text" />
 
 					<space hflex="1" />
 
 
 					<!-- Total -->
 
-					<div
-						style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:16px; padding:4px 14px; display:inline-flex; align-items:center;">
+					<div sclass="metric-pill-base metric-pill-total">
 
-						<label value="Total: "
-							style="font-size:11px; font-weight:600; color:#64748B;" />
+						<label value="Total: " sclass="metric-pill-label" />
 
-						<label id="totalChequesLabel" value="0"
-							style="font-size:12px; font-weight:700; color:#0F172A; margin-left:4px;" />
+						<label id="totalChequesLabel" value="0" sclass="metric-pill-value" />
 
 					</div>
 
@@ -78,14 +73,11 @@
 
 					<!-- Completed -->
 
-					<div
-						style="background:#ECFDF5; border:1px solid #A7F3D0; border-radius:16px; padding:4px 14px; display:inline-flex; align-items:center;">
+					<div sclass="metric-pill-base metric-pill-completed">
 
-						<label value="Completed: "
-							style="font-size:11px; font-weight:600; color:#047857;" />
+						<label value="Completed: " sclass="metric-pill-label" />
 
-						<label id="completedChequesLabel" value="0"
-							style="font-size:12px; font-weight:700; color:#065F46; margin-left:4px;" />
+						<label id="completedChequesLabel" value="0" sclass="metric-pill-value" />
 
 					</div>
 
@@ -94,14 +86,11 @@
 
 					<!-- Reject -->
 
-					<div
-						style="background:#FFF1F2; border:1px solid #FECDD3; border-radius:16px; padding:4px 14px; display:inline-flex; align-items:center;">
+					<div sclass="metric-pill-base metric-pill-reject">
 
-						<label value="Reject Req: "
-							style="font-size:11px; font-weight:600; color:#BE123C;" />
+						<label value="Reject Req: " sclass="metric-pill-label" />
 
-						<label id="rejectedChequesLabel" value="0"
-							style="font-size:12px; font-weight:700; color:#9F1239; margin-left:4px;" />
+						<label id="rejectedChequesLabel" value="0" sclass="metric-pill-value" />
 
 					</div>
 
@@ -110,14 +99,11 @@
 
 					<!-- Pending -->
 
-					<div
-						style="background:#FFFBEB; border:1px solid #FDE68A; border-radius:16px; padding:4px 14px; display:inline-flex; align-items:center;">
+					<div sclass="metric-pill-base metric-pill-pending">
 
-						<label value="Pending: "
-							style="font-size:11px; font-weight:600; color:#B45309;" />
+						<label value="Pending: " sclass="metric-pill-label" />
 
-						<label id="pendingChequesLabel" value="0"
-							style="font-size:12px; font-weight:700; color:#92400E; margin-left:4px;" />
+						<label id="pendingChequesLabel" value="0" sclass="metric-pill-value" />
 
 					</div>
 
@@ -126,8 +112,7 @@
 
 					<!-- Progress -->
 
-					<label id="chequeProgressLabel" value=""
-						style="font-size:13px; font-weight:700; color:#2563EB;" />
+					<label id="chequeProgressLabel" value="" sclass="cheque-progress-text" />
 
 				</hlayout>
 
@@ -212,18 +197,18 @@
 							<div sclass="card-header-icon">
 
 								<label value="📄"
-									style="font-size:14px;" />
+									sclass="card-header-emoji" />
 
 							</div>
 
 							<vlayout spacing="1px">
 
 								<label value="Scanned Cheque"
-									style="font-size:14px; font-weight:700; color:#1E293B;" />
+									sclass="card-header-title" />
 
 								<label
 									value="Verify the scanned cheque image and enter the details"
-									style="font-size:11.5px; color:#64748B;" />
+									sclass="card-header-subtitle" />
 
 							</vlayout>
 
@@ -233,13 +218,13 @@
 						<!-- Image -->
 
 						<div width="100%" vflex="1"
-							style="display:flex; align-items:center; justify-content:center; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; overflow:hidden; padding:4px; box-sizing:border-box;">
+							sclass="cheque-image-container">
 
 							<image id="frontImage" visible="true"
-								style="max-width:100%; max-height:100%; width:100%; height:100%; object-fit:contain; display:block !important; margin:auto;" />
+								sclass="cheque-image-element" />
 
 							<image id="backImage" visible="false"
-								style="display:none !important; width:0; height:0; visibility:hidden;" />
+								sclass="cheque-image-back" />
 
 						</div>
 
@@ -254,7 +239,7 @@
 
 							<button id="toggleImageSideButton"
 								label="View Back" width="96px" height="32px"
-								style="background:#2563EB !important; color:#FFFFFF !important; border:none !important; font-size:12px !important; font-weight:600 !important; border-radius:6px !important; cursor:pointer !important;" />
+								sclass="btn-view-back" />
 
 							<space width="2px" />
 
@@ -304,18 +289,18 @@
 								<div sclass="card-header-icon">
 
 									<label value="🗂"
-										style="font-size:14px;" />
+										sclass="card-header-emoji" />
 
 								</div>
 
 								<vlayout spacing="1px">
 
 									<label value="Data Verification"
-										style="font-size:14px; font-weight:700; color:#1E293B;" />
+										sclass="card-header-title" />
 
 									<label
 										value="Verify and confirm the extracted data from the cheque"
-										style="font-size:11.5px; color:#64748B;" />
+										sclass="card-header-subtitle" />
 
 								</vlayout>
 
@@ -549,27 +534,24 @@
 								<!-- TOP ROW: Navigation & Verification -->
 
 								<hlayout spacing="8px" valign="middle"
-									width="100%" style="margin-top: 15px;">
+									width="100%">
 
 									<!-- Prev Button -->
 
 									<button id="btnPrev" label="Prev"
-										sclass="btn-secondary" hflex="1" height="40px"
-										style="font-size: 13px; font-weight: 600; padding: 0 4px; text-align: center;" />
+										sclass="btn-prev" hflex="1" height="40px" />
 
 									<!-- Save & Next Button -->
 
 									<button id="btnSaveNext"
-										label="💾 Save &amp; Next" sclass="btn-primary" hflex="1"
-										height="40px"
-										style="background-color: #2563eb; color: #fff; font-size: 12px; font-weight: 600; padding: 0 2px; text-align: center; white-space: nowrap;" />
+										label="💾 Save &amp; Next" sclass="btn-save-next" hflex="1"
+										height="40px" />
 
 									<!-- Reject Request Button -->
 
 									<button id="btnReject"
-										label="⚠ Reject Request" sclass="btn-danger"
-										tooltiptext="Reject Request" hflex="1" height="40px"
-										style="background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; font-size: 13px; font-weight: 600; padding: 0 4px; text-align: center; white-space: nowrap;" />
+										label="⚠ Reject Request" sclass="btn-reject-request"
+										tooltiptext="Reject Request" hflex="1" height="40px" />
 
 								</hlayout>
 
@@ -594,43 +576,39 @@
 
 			<window id="rejectModalWindow" border="none" width="420px"
 				visible="false" closable="false" position="center,center"
-				style="background: #FFFFFF; border-radius: 10px; box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08); border: 1px solid #E2E8F0; overflow: hidden;">
+				sclass="reject-modal-window">
 
 				<vlayout spacing="0" width="100%">
 
 
 					<!-- Header -->
 
-					<div width="100%"
-						style="padding: 14px 20px; background: #FFFFFF; border-bottom: 1px solid #F1F5F9; display: flex; align-items: center; justify-content: space-between;">
+					<div sclass="modal-header">
 
 						<hlayout spacing="8px" valign="middle">
 
-							<div
-								style="width: 26px; height: 26px; border-radius: 6px; background: #FFF1F2; border: 1px solid #FECDD3; display: flex; align-items: center; justify-content: center;">
+							<div sclass="modal-header-icon">
 
-								<label value="⚠"
-									style="font-size: 13px; color: #BE123C; font-weight: 700; line-height: 1;" />
+								<label value="⚠" />
 
 							</div>
 
 							<label value="Confirm Cheque Rejection"
-								style="font-size: 14px; font-weight: 700; color: #0F172A; letter-spacing: -0.2px;" />
+								sclass="modal-header-title" />
 
 						</hlayout>
 
 
 						<button label="✕"
 							onClick="rejectModalWindow.setVisible(false)" tooltiptext="Close"
-							style="background: transparent !important; border: none !important; color: #94A3B8 !important; font-size: 13px !important; font-weight: 700 !important; cursor: pointer !important; padding: 2px 6px !important; line-height: 1 !important;" />
+							sclass="modal-close-button" />
 
 					</div>
 
 
 					<!-- Form Body -->
 
-					<vlayout spacing="14px"
-						style="padding: 18px 20px 20px 20px;">
+					<vlayout spacing="14px" sclass="modal-body">
 
 
 						<!-- Rejection Reason -->
@@ -640,7 +618,7 @@
 							<hlayout spacing="0" valign="middle">
 
 								<label value="REJECTION REASON"
-									style="font-size: 11px; font-weight: 700; color: #475569; letter-spacing: 0.3px;" />
+									sclass="modal-section-label" />
 
 								<label value="*" sclass="label-star" />
 
@@ -650,7 +628,7 @@
 								width="100%" height="36px"
 								placeholder="Select CTS return reason..." readonly="true"
 								autodrop="true" autocomplete="true"
-								style="font-size: 12.5px; font-weight: 500;" />
+								sclass="single-field-box" />
 
 						</vlayout>
 
@@ -662,17 +640,17 @@
 							<hlayout spacing="0" valign="middle">
 
 								<label value="MAKER REMARKS"
-									style="font-size: 11px; font-weight: 700; color: #475569; letter-spacing: 0.3px;" />
+									sclass="modal-section-label" />
 
 								<label value="(OPTIONAL)"
-									style="font-size: 10px; font-weight: 600; color: #94A3B8; margin-left: 4px;" />
+									sclass="modal-section-optional" />
 
 							</hlayout>
 
 							<textbox id="modalRejectRemarksTextbox"
 								width="100%" rows="2"
 								placeholder="Add clarification notes for Checker review..."
-								style="font-size: 12.5px; color: #0F172A; line-height: 1.4; padding: 8px 10px; border: 1px solid #CBD5E1; border-radius: 6px; background: #F8FAFC; resize: none; box-sizing: border-box; font-family: inherit;" />
+								sclass="modal-textarea" />
 
 						</vlayout>
 
@@ -681,8 +659,7 @@
 
 					<!-- Modal Footer -->
 
-					<div width="100%"
-						style="padding: 12px 20px; background: #F8FAFC; border-top: 1px solid #E2E8F0; display: flex; justify-content: center; align-items: center;">
+					<div sclass="modal-footer">
 
 						<hlayout spacing="10px"
 							style="justify-content: center;">
@@ -690,12 +667,12 @@
 							<button id="cancelRejectModalButton"
 								label="Cancel" height="34px" width="90px"
 								onClick="rejectModalWindow.setVisible(false)"
-								style="background: #FFFFFF !important; color: #334155 !important; border: 1px solid #CBD5E1 !important; border-radius: 6px !important; font-size: 12px !important; font-weight: 600 !important; cursor: pointer !important; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;" />
+								sclass="modal-button-cancel" />
 
 							<button id="confirmRejectModalButton"
 								label="Confirm &amp; Reject" height="34px" width="140px"
 								forward="onClick=spaceOwner.onConfirmRejectModal"
-								style="background: #BE123C !important; color: #FFFFFF !important; border: none !important; border-radius: 6px !important; font-size: 12px !important; font-weight: 600 !important; cursor: pointer !important; box-shadow: 0 1px 2px rgba(190, 18, 60, 0.25) !important;" />
+								sclass="modal-button-confirm" />
 
 						</hlayout>
 

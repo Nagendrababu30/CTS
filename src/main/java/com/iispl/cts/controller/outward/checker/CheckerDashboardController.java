@@ -465,65 +465,94 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 
 	private void loadCounts(List<OutwardBatch> batches) {
 
-		int pending = 0;
-		int cbsValidation = 0;
-		int readyToSend = 0;
+	    int pending = 0;
+	    int completedToday = 0;
+	    int readyToSend = 0;
 
-		if (batches != null) {
+	    if (batches != null) {
 
-			for (OutwardBatch batch : batches) {
+	        for (OutwardBatch batch : batches) {
 
-				if (batch == null) {
-					continue;
-				}
+	            if (batch == null) {
+	                continue;
+	            }
 
-				String status = batch.getBatchStatus();
+	            String status = batch.getBatchStatus();
 
-				if (status == null) {
-					continue;
-				}
+	            if (status == null) {
+	                continue;
+	            }
 
-				status = status.toUpperCase();
+	            status = status.trim().toUpperCase();
 
-				if ("READY_FOR_CHECKER".equals(status)
-						|| "SUBMITTED".equals(status)
-						|| "CHECKER_PENDING".equals(status)
-						|| "PENDING_CHECKER".equals(status)) {
+	            /*
+	             * 1. PENDING VERIFICATION
+	             *
+	             * These are batches which still require
+	             * Checker verification.
+	             */
+	            if ("READY_FOR_CHECKER".equals(status)
+	                    || "SUBMITTED".equals(status)
+	                    || "SUBMITTED_TO_CHECKER".equals(status)
+	                    || "CHECKER_PENDING".equals(status)
+	                    || "PENDING_CHECKER".equals(status)
+	                    || "CHECKER_PROCESSING".equals(status)) {
 
-					pending++;
-				}
+	                pending++;
+	            }
 
-				if ("CBS_VALIDATION".equals(status)
-						|| "PENDING_CBS_VALIDATION".equals(status)) {
+	            /*
+	             * 2. BATCHES COMPLETED
+	             *
+	             * Once the batch has been completely processed
+	             * and sent to NPCI, it is considered completed.
+	             *
+	             * Such batches must NOT be counted as pending.
+	             */
+	            if ("NPCI_SENT".equals(status)) {
+	                completedToday++;
+	            }
 
-					cbsValidation++;
-				}
+	            /*
+	             * 3. READY TO SEND
+	             *
+	             * Checker work is completed, but the batch
+	             * has not yet been sent to NPCI.
+	             */
+	            if ("READY_TO_SEND".equals(status)
+	                    || "READY_FOR_NPCI".equals(status)) {
 
-				if ("READY_TO_SEND".equals(status)
-						|| "READY_FOR_NPCI".equals(status)) {
+	                readyToSend++;
+	            }
+	        }
+	    }
 
-					readyToSend++;
-				}
-			}
-		}
+	    /*
+	     * Update Pending Verification KPI
+	     */
+	    if (pendingVerificationCount != null) {
+	        pendingVerificationCount.setValue(
+	                String.valueOf(pending));
+	    }
 
-		if (pendingVerificationCount != null) {
+	    /*
+	     * Update Batches Completed KPI
+	     *
+	     * This label was previously called
+	     * cbsValidationCount.
+	     */
+	    if (cbsValidationCount != null) {
+	        cbsValidationCount.setValue(
+	                String.valueOf(completedToday));
+	    }
 
-			pendingVerificationCount.setValue(
-					String.valueOf(pending));
-		}
-
-		if (cbsValidationCount != null) {
-
-			cbsValidationCount.setValue(
-					String.valueOf(cbsValidation));
-		}
-
-		if (readyToSendCount != null) {
-
-			readyToSendCount.setValue(
-					String.valueOf(readyToSend));
-		}
+	    /*
+	     * Update Ready To Send KPI
+	     */
+	    if (readyToSendCount != null) {
+	        readyToSendCount.setValue(
+	                String.valueOf(readyToSend));
+	    }
 	}
 
 	// ============================================================

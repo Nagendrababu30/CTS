@@ -571,3 +571,541 @@
 
         }
 
+/* ============================================================
+   HEADER STRIP - INLINE STYLES EXTRACTED
+   ============================================================ */
+
+.data-entry-detail-header-strip {
+
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+}
+
+/* Batch label - "Batch No :" */
+
+.batch-label-text {
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    color: #64748B;
+
+}
+
+/* Batch ID label */
+
+.batch-id-text {
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    color: #1E293B;
+
+}
+
+/* Progress label - "Cheque X of Y" */
+
+.cheque-progress-text {
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    color: #2563EB;
+
+}
+
+/* ============================================================
+   METRIC PILLS - EXTRACTED INLINE STYLES
+   ============================================================ */
+
+.metric-pill-base {
+
+    border-radius: 16px;
+
+    padding: 4px 14px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+}
+
+.metric-pill-label {
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+}
+
+.metric-pill-value {
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    margin-left: 4px;
+
+}
+
+/* Total Pill */
+
+.metric-pill-total {
+
+    background: #F8FAFC;
+
+    border: 1px solid #E2E8F0;
+
+}
+
+.metric-pill-total .metric-pill-label {
+
+    color: #64748B;
+
+}
+
+.metric-pill-total .metric-pill-value {
+
+    color: #0F172A;
+
+}
+
+/* Completed Pill */
+
+.metric-pill-completed {
+
+    background: #ECFDF5;
+
+    border: 1px solid #A7F3D0;
+
+}
+
+.metric-pill-completed .metric-pill-label {
+
+    color: #047857;
+
+}
+
+.metric-pill-completed .metric-pill-value {
+
+    color: #065F46;
+
+}
+
+/* Reject Pill */
+
+.metric-pill-reject {
+
+    background: #FFF1F2;
+
+    border: 1px solid #FECDD3;
+
+}
+
+.metric-pill-reject .metric-pill-label {
+
+    color: #BE123C;
+
+}
+
+.metric-pill-reject .metric-pill-value {
+
+    color: #9F1239;
+
+}
+
+/* Pending Pill */
+
+.metric-pill-pending {
+
+    background: #FFFBEB;
+
+    border: 1px solid #FDE68A;
+
+}
+
+.metric-pill-pending .metric-pill-label {
+
+    color: #B45309;
+
+}
+
+.metric-pill-pending .metric-pill-value {
+
+    color: #92400E;
+
+}
+
+/* ============================================================
+   CARD HEADER TEXT - EXTRACTED INLINE STYLES
+   ============================================================ */
+
+.card-header-title {
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    color: #1E293B;
+
+}
+
+.card-header-subtitle {
+
+    font-size: 11.5px;
+
+    color: #64748B;
+
+}
+
+.card-header-emoji {
+
+    font-size: 14px;
+
+}
+
+/* ============================================================
+   IMAGE CONTAINER - EXTRACTED INLINE STYLES
+   ============================================================ */
+
+.cheque-image-container {
+
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: #F8FAFC;
+
+    border: 1px solid #E2E8F0;
+
+    border-radius: 8px;
+
+    overflow: hidden;
+
+    padding: 4px;
+
+    box-sizing: border-box;
+
+}
+
+.cheque-image-element {
+
+    max-width: 100%;
+
+    max-height: 100%;
+
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: contain;
+
+    display: block !important;
+
+    margin: auto;
+
+}
+
+.cheque-image-back {
+
+    display: none !important;
+
+    width: 0;
+
+    height: 0;
+
+    visibility: hidden;
+
+}
+
+/* ============================================================
+   BUTTONS - EXTRACTED INLINE STYLES
+   ============================================================ */
+
+.btn-view-back {
+
+    background: #2563EB !important;
+
+    color: #FFFFFF !important;
+
+    border: none !important;
+
+    font-size: 12px !important;
+
+    font-weight: 600 !important;
+
+    border-radius: 6px !important;
+
+    cursor: pointer !important;
+
+}
+
+.btn-prev {
+
+    background: #2563EB !important;
+
+    color: #FFFFFF !important;
+
+    border: none !important;
+
+    font-size: 12px !important;
+
+    font-weight: 600 !important;
+
+    border-radius: 6px !important;
+
+    cursor: pointer !important;
+
+}
+
+.btn-save-next {
+
+    background: #2563EB !important;
+
+    color: #FFFFFF !important;
+
+    border: none !important;
+
+    font-size: 12px !important;
+
+    font-weight: 600 !important;
+
+    border-radius: 6px !important;
+
+    cursor: pointer !important;
+
+}
+
+.btn-reject-request {
+
+    background: #FFF1F2 !important;
+
+    color: #BE123C !important;
+
+    border: 1px solid #FECDD3 !important;
+
+    font-size: 12px !important;
+
+    font-weight: 600 !important;
+
+    border-radius: 6px !important;
+
+    cursor: pointer !important;
+
+}
+
+/* ============================================================
+   MODAL WINDOW - EXTRACTED INLINE STYLES
+   ============================================================ */
+
+.reject-modal-window {
+
+    background: #FFFFFF;
+
+    border-radius: 10px;
+
+    box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08);
+
+    border: 1px solid #E2E8F0;
+
+    overflow: hidden;
+
+}
+
+.modal-header {
+
+    padding: 14px 20px;
+
+    background: #FFFFFF;
+
+    border-bottom: 1px solid #F1F5F9;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+}
+
+.modal-header-icon {
+
+    width: 26px;
+
+    height: 26px;
+
+    border-radius: 6px;
+
+    background: #FFF1F2;
+
+    border: 1px solid #FECDD3;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 13px;
+
+    color: #BE123C;
+
+    font-weight: 700;
+
+    line-height: 1;
+
+}
+
+.modal-header-title {
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    color: #0F172A;
+
+    letter-spacing: -0.2px;
+
+}
+
+.modal-close-button {
+
+    background: transparent !important;
+
+    border: none !important;
+
+    color: #94A3B8 !important;
+
+    font-size: 13px !important;
+
+    font-weight: 700 !important;
+
+    cursor: pointer !important;
+
+    padding: 2px 6px !important;
+
+    line-height: 1 !important;
+
+}
+
+.modal-body {
+
+    padding: 18px 20px 20px 20px;
+
+}
+
+.modal-section-label {
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    color: #475569;
+
+    letter-spacing: 0.3px;
+
+}
+
+.modal-section-optional {
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+    color: #94A3B8;
+
+    margin-left: 4px;
+
+}
+
+.modal-textarea {
+
+    font-size: 12.5px;
+
+    color: #0F172A;
+
+    line-height: 1.4;
+
+    padding: 8px 10px;
+
+    border: 1px solid #CBD5E1;
+
+    border-radius: 6px;
+
+    background: #F8FAFC;
+
+    resize: none;
+
+    box-sizing: border-box;
+
+    font-family: inherit;
+
+}
+
+.modal-footer {
+
+    padding: 12px 20px;
+
+    background: #F8FAFC;
+
+    border-top: 1px solid #E2E8F0;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+}
+
+.modal-button-cancel {
+
+    background: #FFFFFF !important;
+
+    color: #334155 !important;
+
+    border: 1px solid #CBD5E1 !important;
+
+    border-radius: 6px !important;
+
+    font-size: 12px !important;
+
+    font-weight: 600 !important;
+
+    cursor: pointer !important;
+
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+
+}
+
+.modal-button-confirm {
+
+    background: #BE123C !important;
+
+    color: #FFFFFF !important;
+
+    border: none !important;
+
+    border-radius: 6px !important;
+
+    font-size: 12px !important;
+
+    font-weight: 600 !important;
+
+    cursor: pointer !important;
+
+    box-shadow: 0 1px 2px rgba(190, 18, 60, 0.25) !important;
+
+}
+

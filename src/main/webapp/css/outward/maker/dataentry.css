@@ -37,6 +37,31 @@
     overflow: hidden;
 }
 
+/* VLayout wrapper for data entry */
+.data-entry-vlayout {
+    padding: 24px 30px !important;
+    box-sizing: border-box !important;
+    overflow: auto !important;
+}
+
+/* Title label */
+.data-entry-title {
+    font-size: 26px !important;
+    font-weight: 700 !important;
+    color: #0F172A !important;
+    letter-spacing: -0.3px !important;
+}
+
+/* Card container */
+.data-entry-card {
+    background: white !important;
+    border: 1px solid #DCE5F0 !important;
+    border-radius: 6px !important;
+    padding: 16px !important;
+    box-sizing: border-box !important;
+    box-shadow: 0 1px 3px rgba(16,24,40,0.04) !important;
+}
+
 /* Container Card */
 div[style*="background:white"],
 div[style*="background: white"] {
@@ -147,8 +172,9 @@ div[style*="background: white"]::before {
    ===================================================== */
 .data-entry-listbox {
     width: 100% !important;
-    border: 1px solid var(--border-light) !important;
-    border-radius: var(--radius-md) !important;
+    border: 1px solid #E2E8F0 !important;
+    border-bottom: none !important;
+    border-radius: 6px 6px 0 0 !important;
     background: var(--bg-surface) !important;
     box-shadow: none !important;
     overflow: hidden !important;

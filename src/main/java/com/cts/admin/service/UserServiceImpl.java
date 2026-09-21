@@ -70,7 +70,11 @@ public class UserServiceImpl implements UserService {
 		if (plainPassword == null || plainPassword.isEmpty()) {
 			return false;
 		}
-
+		
+		if (!PasswordUtil.isStrongPassword(plainPassword)) {
+		    return false;
+		}
+		
 		if (usernameExists(user.getUsername().trim())) {
 			return false;
 		}
@@ -129,6 +133,13 @@ public class UserServiceImpl implements UserService {
 			user.setPasswordHash(null);
 
 			return userDao.updateUser(user);
+		}
+		
+		/*
+		 * Validate password strength before hashing.
+		 */
+		if (!PasswordUtil.isStrongPassword(newPassword)) {
+		    return false;
 		}
 
 		/*

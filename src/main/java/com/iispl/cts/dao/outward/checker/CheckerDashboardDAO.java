@@ -70,16 +70,13 @@ public class CheckerDashboardDAO {
                 "    AND UPPER(cba.assignment_role) = 'CHECKER' " +
                 "    AND UPPER(cba.assignment_status) IN " +
                 "        ('ASSIGNED', 'IN_PROGRESS') " +
-
-                "WHERE ( " +
-
                 "    UPPER(ob.batch_status) IN " +
                 "        ('SUBMITTED_TO_CHECKER', " +
                 "         'READY_FOR_CHECKER', " +
                 "         'SUBMITTED', " +
                 "         'CHECKER_PENDING', " +
-                "         'PENDING_CHECKER') " +
-
+                "         'PENDING_CHECKER', " +
+                "         'CHECKER_PROCESSING') " +
                 "    OR EXISTS ( " +
 
                 "        SELECT 1 " +

@@ -30,6 +30,7 @@ public class CaptureOperatorBatchCaptureController
 
     private static final long serialVersionUID = 1L;
 
+
     // =========================================================
     // ZK COMPONENTS
     // =========================================================
@@ -49,11 +50,13 @@ public class CaptureOperatorBatchCaptureController
     @Wire
     private Label selectedFilesLabel;
 
+
     // =========================================================
     // SERVICE
     // =========================================================
 
     private CaptureOperatorBatchService service;
+
 
     // =========================================================
     // UPLOADED FILES
@@ -61,6 +64,7 @@ public class CaptureOperatorBatchCaptureController
 
     private final List<Media> uploadedFiles =
             new ArrayList<>();
+
 
     // =========================================================
     // INIT
@@ -86,6 +90,7 @@ public class CaptureOperatorBatchCaptureController
             return;
         }
 
+
         Object sessionUserId =
                 session.getAttribute(
                         "userId");
@@ -97,6 +102,7 @@ public class CaptureOperatorBatchCaptureController
 
             return;
         }
+
 
         long userId;
 
@@ -123,16 +129,20 @@ public class CaptureOperatorBatchCaptureController
             }
         }
 
+
         System.out.println(
                 "CAPTURE OPERATOR SESSION: "
-                + "userId="
-                + userId);
+                        + "userId="
+                        + userId);
+
 
         service =
                 new CaptureOperatorBatchService();
 
+
         loadBranches();
     }
+
 
     // =========================================================
     // LOAD BRANCHES
@@ -158,6 +168,7 @@ public class CaptureOperatorBatchCaptureController
                 return;
             }
 
+
             for (String[] branch :
                     branches) {
 
@@ -166,6 +177,7 @@ public class CaptureOperatorBatchCaptureController
 
                     continue;
                 }
+
 
                 Comboitem item =
                         new Comboitem();
@@ -190,12 +202,13 @@ public class CaptureOperatorBatchCaptureController
 
             Messagebox.show(
                     "Unable to load branches from database.\n\n"
-                    + e.getMessage(),
+                            + e.getMessage(),
                     "Database Error",
                     Messagebox.OK,
                     Messagebox.ERROR);
         }
     }
+
 
     // =========================================================
     // BRANCH SELECT
@@ -216,6 +229,7 @@ public class CaptureOperatorBatchCaptureController
             return;
         }
 
+
         String branchCode =
                 selectedItem.getValue();
 
@@ -223,6 +237,7 @@ public class CaptureOperatorBatchCaptureController
                 (String) selectedItem
                         .getAttribute(
                                 "branchName");
+
 
         if (branchName == null ||
                 branchName.trim().isEmpty()) {
@@ -232,11 +247,13 @@ public class CaptureOperatorBatchCaptureController
                             branchCode);
         }
 
+
         branchNameTextbox.setValue(
                 branchName == null
                         ? ""
                         : branchName);
     }
+
 
     // =========================================================
     // FILE UPLOAD
@@ -259,6 +276,7 @@ public class CaptureOperatorBatchCaptureController
                 return;
             }
 
+
             String fileName =
                     media.getName();
 
@@ -273,6 +291,7 @@ public class CaptureOperatorBatchCaptureController
 
                 return;
             }
+
 
             // =================================================
             // DUPLICATE FILE NAME
@@ -289,7 +308,7 @@ public class CaptureOperatorBatchCaptureController
 
                     Messagebox.show(
                             "File already selected:\n\n"
-                            + fileName,
+                                    + fileName,
                             "Duplicate File",
                             Messagebox.OK,
                             Messagebox.EXCLAMATION);
@@ -297,6 +316,7 @@ public class CaptureOperatorBatchCaptureController
                     return;
                 }
             }
+
 
             // =================================================
             // ONLY ONE XML
@@ -326,12 +346,14 @@ public class CaptureOperatorBatchCaptureController
                 }
             }
 
+
             // =================================================
             // ADD FILE
             // =================================================
 
             uploadedFiles.add(
                     media);
+
 
             // =================================================
             // COUNT FILES
@@ -340,6 +362,7 @@ public class CaptureOperatorBatchCaptureController
             int xmlCount = 0;
 
             int imageCount = 0;
+
 
             for (Media selectedMedia :
                     uploadedFiles) {
@@ -350,10 +373,12 @@ public class CaptureOperatorBatchCaptureController
                     continue;
                 }
 
+
                 String lowerName =
                         selectedMedia
                                 .getName()
                                 .toLowerCase();
+
 
                 if (lowerName.endsWith(".xml")) {
 
@@ -361,27 +386,29 @@ public class CaptureOperatorBatchCaptureController
 
                 } else if (
                         lowerName.endsWith(".jpg")
-                        || lowerName.endsWith(".jpeg")
-                        || lowerName.endsWith(".png")
-                        || lowerName.endsWith(".tif")
-                        || lowerName.endsWith(".tiff")
-                        || lowerName.endsWith(".bmp")) {
+                                || lowerName.endsWith(".jpeg")
+                                || lowerName.endsWith(".png")
+                                || lowerName.endsWith(".tif")
+                                || lowerName.endsWith(".tiff")
+                                || lowerName.endsWith(".bmp")) {
 
                     imageCount++;
                 }
             }
 
+
             selectedFilesLabel.setValue(
                     "Files selected: "
-                    + uploadedFiles.size()
-                    + " | XML: "
-                    + xmlCount
-                    + " | Images: "
-                    + imageCount);
+                            + uploadedFiles.size()
+                            + " | XML: "
+                            + xmlCount
+                            + " | Images: "
+                            + imageCount);
+
 
             System.out.println(
                     "FILE ADDED: "
-                    + fileName);
+                            + fileName);
 
         } catch (Exception e) {
 
@@ -389,12 +416,13 @@ public class CaptureOperatorBatchCaptureController
 
             Messagebox.show(
                     "Unable to process selected file.\n\n"
-                    + e.getMessage(),
+                            + e.getMessage(),
                     "Upload Error",
                     Messagebox.OK,
                     Messagebox.ERROR);
         }
     }
+
 
     // =========================================================
     // CAPTURE BATCH
@@ -422,11 +450,13 @@ public class CaptureOperatorBatchCaptureController
             return;
         }
 
+
         final String branchCode =
                 selectedItem.getValue();
 
         final Integer chequeCount =
                 numberOfCheques.getValue();
+
 
         if (chequeCount == null ||
                 chequeCount <= 0) {
@@ -440,6 +470,7 @@ public class CaptureOperatorBatchCaptureController
             return;
         }
 
+
         if (uploadedFiles.isEmpty()) {
 
             Messagebox.show(
@@ -451,7 +482,9 @@ public class CaptureOperatorBatchCaptureController
             return;
         }
 
+
         int xmlCount = 0;
+
 
         for (Media media :
                 uploadedFiles) {
@@ -466,6 +499,7 @@ public class CaptureOperatorBatchCaptureController
             }
         }
 
+
         if (xmlCount == 0) {
 
             Messagebox.show(
@@ -477,6 +511,7 @@ public class CaptureOperatorBatchCaptureController
             return;
         }
 
+
         if (xmlCount > 1) {
 
             Messagebox.show(
@@ -487,6 +522,7 @@ public class CaptureOperatorBatchCaptureController
 
             return;
         }
+
 
         // =====================================================
         // SESSION
@@ -510,6 +546,7 @@ public class CaptureOperatorBatchCaptureController
             return;
         }
 
+
         Object sessionUserId =
                 session.getAttribute(
                         "userId");
@@ -528,11 +565,13 @@ public class CaptureOperatorBatchCaptureController
             return;
         }
 
+
         final int createdBy;
 
         try {
 
             long userId;
+
 
             if (sessionUserId instanceof Number) {
 
@@ -546,6 +585,7 @@ public class CaptureOperatorBatchCaptureController
                         Long.parseLong(
                                 sessionUserId.toString());
             }
+
 
             createdBy =
                     Math.toIntExact(
@@ -565,6 +605,7 @@ public class CaptureOperatorBatchCaptureController
             return;
         }
 
+
         // =====================================================
         // FIRST CAPTURE ATTEMPT
         // =====================================================
@@ -579,12 +620,14 @@ public class CaptureOperatorBatchCaptureController
                             createdBy,
                             false);
 
+
             // =================================================
             // SUCCESS
             // =================================================
 
             showCaptureSuccess(
                     batch);
+
 
         } catch (
                 CaptureOperatorBatchService
@@ -600,23 +643,25 @@ public class CaptureOperatorBatchCaptureController
             //
             // =================================================
 
+
             String message =
                     "The entered cheque count does not "
-                    + "match the number of cheque objects "
-                    + "parsed from the XML."
-                    + "\n\n"
-                    + "Entered Cheques : "
-                    + mismatch.getEnteredCount()
-                    + "\n"
-                    + "XML Cheques     : "
-                    + mismatch.getXmlCount()
-                    + "\n\n"
-                    + "If you continue, the batch cheque "
-                    + "count will be changed to "
-                    + mismatch.getXmlCount()
-                    + " based on the XML."
-                    + "\n\n"
-                    + "Do you want to continue?";
+                            + "match the number of cheque objects "
+                            + "parsed from the XML."
+                            + "\n\n"
+                            + "Entered Cheques : "
+                            + mismatch.getEnteredCount()
+                            + "\n"
+                            + "XML Cheques     : "
+                            + mismatch.getXmlCount()
+                            + "\n\n"
+                            + "If you continue, the batch cheque "
+                            + "count will be changed to "
+                            + mismatch.getXmlCount()
+                            + " based on the XML."
+                            + "\n\n"
+                            + "Do you want to continue?";
+
 
             Messagebox.show(
                     message,
@@ -651,7 +696,7 @@ public class CaptureOperatorBatchCaptureController
 
                                 Messagebox.show(
                                         "Batch rejected.\n\n"
-                                        + "No batch was created.",
+                                                + "No batch was created.",
                                         "Batch Rejected",
                                         Messagebox.OK,
                                         Messagebox.EXCLAMATION);
@@ -659,28 +704,25 @@ public class CaptureOperatorBatchCaptureController
                         }
                     });
 
+
         } catch (IllegalArgumentException e) {
 
             // =================================================
-            // DUPLICATE / OTHER VALIDATION ERROR
+            // DUPLICATE CHEQUE
+            // =================================================
+            //
+            // Do NOT display e.getMessage().
+            // This prevents cheque details from being shown.
+            //
             // =================================================
 
-            String message =
-                    e.getMessage();
-
-            if (message == null ||
-                    message.trim().isEmpty()) {
-
-                message =
-                        "Validation failed.\n\n"
-                        + "Batch cannot be created.";
-            }
-
             Messagebox.show(
-                    message,
-                    "Duplicate Cheque / Validation",
+                    "Duplicate cheque found.\n\n"
+                            + "Batch cannot be created.",
+                    "Duplicate Cheque",
                     Messagebox.OK,
                     Messagebox.EXCLAMATION);
+
 
         } catch (Exception e) {
 
@@ -688,13 +730,14 @@ public class CaptureOperatorBatchCaptureController
 
             Messagebox.show(
                     "Unable to capture batch.\n\n"
-                    + "Error: "
-                    + e.getMessage(),
+                            + "Error: "
+                            + e.getMessage(),
                     "Capture Error",
                     Messagebox.OK,
                     Messagebox.ERROR);
         }
     }
+
 
     // =========================================================
     // CONTINUE AFTER COUNT MISMATCH
@@ -718,10 +761,11 @@ public class CaptureOperatorBatchCaptureController
 
             System.out.println(
                     "Entered Count: "
-                    + enteredChequeCount);
+                            + enteredChequeCount);
 
             System.out.println(
                     "=================================");
+
 
             // =================================================
             // IMPORTANT
@@ -745,8 +789,10 @@ public class CaptureOperatorBatchCaptureController
                             createdBy,
                             true);
 
+
             showCaptureSuccess(
                     batch);
+
 
         } catch (
                 CaptureOperatorBatchService
@@ -757,40 +803,37 @@ public class CaptureOperatorBatchCaptureController
 
             Messagebox.show(
                     "Unable to continue because the XML "
-                    + "cheque count changed.\n\n"
-                    + "Entered Count: "
-                    + mismatch.getEnteredCount()
-                    + "\n"
-                    + "XML Count: "
-                    + mismatch.getXmlCount()
-                    + "\n\n"
-                    + "Batch was not created.",
+                            + "cheque count changed.\n\n"
+                            + "Entered Count: "
+                            + mismatch.getEnteredCount()
+                            + "\n"
+                            + "XML Count: "
+                            + mismatch.getXmlCount()
+                            + "\n\n"
+                            + "Batch was not created.",
                     "Count Validation",
                     Messagebox.OK,
                     Messagebox.EXCLAMATION);
+
 
         } catch (IllegalArgumentException e) {
 
             // =================================================
             // DUPLICATE CHEQUE
             // =================================================
-
-            String message =
-                    e.getMessage();
-
-            if (message == null ||
-                    message.trim().isEmpty()) {
-
-                message =
-                        "Validation failed.\n\n"
-                        + "Batch cannot be created.";
-            }
+            //
+            // Do NOT display e.getMessage().
+            // No cheque data will be shown.
+            //
+            // =================================================
 
             Messagebox.show(
-                    message,
-                    "Duplicate Cheque / Validation",
+                    "Duplicate cheque found.\n\n"
+                            + "Batch cannot be created.",
+                    "Duplicate Cheque",
                     Messagebox.OK,
                     Messagebox.EXCLAMATION);
+
 
         } catch (Exception e) {
 
@@ -798,13 +841,14 @@ public class CaptureOperatorBatchCaptureController
 
             Messagebox.show(
                     "Unable to capture batch.\n\n"
-                    + "Error: "
-                    + e.getMessage(),
+                            + "Error: "
+                            + e.getMessage(),
                     "Capture Error",
                     Messagebox.OK,
                     Messagebox.ERROR);
         }
     }
+
 
     // =========================================================
     // SUCCESS MESSAGE
@@ -815,23 +859,24 @@ public class CaptureOperatorBatchCaptureController
 
         Messagebox.show(
                 "Batch captured successfully.\n\n"
-                + "Batch Number: "
-                + batch.getBatchNumber()
-                + "\n\n"
-                + "Branch Code: "
-                + batch.getBranchCode()
-                + "\n\n"
-                + "Total Cheques: "
-                + batch.getNumberOfCheques()
-                + "\n\n"
-                + "Status: "
-                + batch.getBatchStatus(),
+                        + "Batch Number: "
+                        + batch.getBatchNumber()
+                        + "\n\n"
+                        + "Branch Code: "
+                        + batch.getBranchCode()
+                        + "\n\n"
+                        + "Total Cheques: "
+                        + batch.getNumberOfCheques()
+                        + "\n\n"
+                        + "Status: "
+                        + batch.getBatchStatus(),
                 "Batch Captured",
                 Messagebox.OK,
                 Messagebox.INFORMATION);
 
         clearForm();
     }
+
 
     // =========================================================
     // CLEAR FORM

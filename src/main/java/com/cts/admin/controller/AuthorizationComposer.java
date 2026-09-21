@@ -97,17 +97,22 @@ public class AuthorizationComposer
 			    "/zul/outward/outward-maker/outward-maker-data-entry-detail.zul",
 			    "OUTWARD_MAKER"
 			);
-		//CAPTURE OPERATOR 
-		
-		PAGE_PERMISSIONS.put(
-			    "/zul/outward/outward-maker/capture-operator-batch-capture.zul",
-			    "CAPTURE_OPERATOR"
-			);
+		// CAPTURE OPERATOR
 
-			PAGE_PERMISSIONS.put(
-			    "/zul/outward/outward-maker/capture-operator-captured-batches.zul",
-			    "CAPTURE_OPERATOR"
-			);
+		PAGE_PERMISSIONS.put(
+		    "/zul/outward/outward-maker/capture-operator-batch-capture.zul",
+		    "CAPTURE_OPERATOR"
+		);
+
+		PAGE_PERMISSIONS.put(
+		    "/zul/outward/outward-maker/capture-operator-captured-batches.zul",
+		    "CAPTURE_OPERATOR"
+		);
+
+		PAGE_PERMISSIONS.put(
+		    "/zul/outward/outward-maker/capture-operator-reports.zul",
+		    "CAPTURE_OPERATOR"
+		);
 
 		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-micr-repair-detail.zul", "OUTWARD_MAKER");
 

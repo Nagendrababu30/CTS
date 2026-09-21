@@ -108,15 +108,44 @@ public class FileProcessingServiceImpl
     }
 
     private Path resolvePath(String filePath) {
-        if (filePath == null) return null;
+        if (filePath == null || filePath.isBlank()) return null;
         Path path = Path.of(filePath);
-        if (!path.isAbsolute() && fileConfiguration.getInwardRootPath() != null) {
-            Path webAppRoot = fileConfiguration.getInwardRootPath().getParent();
-            if (webAppRoot != null) {
-                path = webAppRoot.resolve(filePath);
-            }
+        if (path.isAbsolute()) {
+            return path.normalize();
         }
-        return path;
+
+        if (Files.exists(path)) {
+            return path.toAbsolutePath().normalize();
+        }
+
+        Path rootPath = fileConfiguration.getInwardRootPath();
+        if (rootPath == null) {
+            return path.toAbsolutePath().normalize();
+        }
+
+        String normalized = filePath.replace("\\", "/");
+        if (normalized.startsWith("/")) {
+            normalized = normalized.substring(1);
+        }
+
+        if (normalized.startsWith("src/main/webapp/")) {
+            String afterWebapp = normalized.substring("src/main/webapp/".length());
+            Path webAppRoot = rootPath.getParent();
+            if (webAppRoot != null) {
+                Path candidate = webAppRoot.resolve(afterWebapp);
+                if (Files.exists(candidate)) {
+                    return candidate.normalize();
+                }
+            }
+            return Path.of(normalized).toAbsolutePath().normalize();
+        }
+
+        if (normalized.startsWith("inward-files/")) {
+            String afterInward = normalized.substring("inward-files/".length());
+            return rootPath.resolve(afterInward).normalize();
+        }
+
+        return rootPath.resolve(filePath).normalize();
     }
 
     @Override
@@ -157,15 +186,14 @@ public class FileProcessingServiceImpl
             break;
 
         default:
-            throw new IllegalStateException(
-                    "Unsupported file type: "
-                            + fileType);
+            throw new IllegalArgumentException(
+                    "Unsupported file type: " + fileType);
         }
     }
 
     /* ------------------------------------------------------------------ */
     /* Move file from incoming/{type}/ to processing/{type}/               */
-    /* Returns the new file path in the processing directory.              */
+    /* Sets inward_file_summary stage to PROCESSING                       */
     /* ------------------------------------------------------------------ */
 
     private String moveToProcessing(String filePath, FileType fileType) {
@@ -193,6 +221,9 @@ public class FileProcessingServiceImpl
              */
             long fileId = inwardFileDao.getFileIdByPath(
                     normalizePathForDb(filePath));
+            if (fileId <= 0 && source != null) {
+                fileId = inwardFileDao.getFileIdByFileName(source.getFileName().toString());
+            }
             if (fileId > 0) {
                 fileSummaryService.updateFileStage(fileId, FileStage.PROCESSING);
             }
@@ -237,6 +268,9 @@ public class FileProcessingServiceImpl
              */
             long fileId = inwardFileDao.getFileIdByPath(
                     normalizePathForDb(filePath));
+            if (fileId <= 0 && source != null) {
+                fileId = inwardFileDao.getFileIdByFileName(source.getFileName().toString());
+            }
             if (fileId > 0) {
                 fileSummaryService.updateFileStage(fileId, FileStage.ARCHIVE);
             }

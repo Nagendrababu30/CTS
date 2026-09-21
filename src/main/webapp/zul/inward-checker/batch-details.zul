@@ -1804,6 +1804,8 @@
                 <vlayout width="100%" spacing="4px">
                     <label value="Maker Instructions / Remark (Optional)" sclass="modal-section-badge-label"/>
 
+
+
                     <textbox id="returnRemark"
                              width="100%"
                              rows="3"

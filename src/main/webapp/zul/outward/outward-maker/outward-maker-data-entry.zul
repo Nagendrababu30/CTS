@@ -32,11 +32,7 @@
             spacing="18px"
             width="100%"
             height="100%"
-            style="
-                padding:24px 30px;
-                box-sizing:border-box;
-                overflow:auto;
-            ">
+            sclass="data-entry-vlayout">
 
 
             <!-- ================================================= -->
@@ -45,12 +41,7 @@
 
             <label
                 value="Data Entry"
-                style="
-                    font-size:26px;
-                    font-weight:700;
-                    color:#0F172A;
-                    letter-spacing:-0.3px;
-                "/>
+                sclass="data-entry-title"/>
 
 
             <!-- ================================================= -->
@@ -59,14 +50,7 @@
 
             <div
                 width="100%"
-                style="
-                    background:white;
-                    border:1px solid #DCE5F0;
-                    border-radius:6px;
-                    padding:16px;
-                    box-sizing:border-box;
-                    box-shadow:0 1px 3px rgba(16,24,40,0.04);
-                ">
+                sclass="data-entry-card">
 
 
                 <!-- ================================================= -->
@@ -78,13 +62,7 @@
                     id="batchListbox"
                     width="100%"
                     sclass="data-entry-listbox"
-                    emptyMessage="No batches available for Data Entry."
-                    style="
-                        border:1px solid #E2E8F0;
-                        border-bottom: none;
-                        border-radius: 6px 6px 0 0;
-                        overflow: hidden;
-                    ">
+                    emptyMessage="No batches available for Data Entry.">
 
                     <listhead>
                         <listheader label="Batch ID"      width="25%"/>

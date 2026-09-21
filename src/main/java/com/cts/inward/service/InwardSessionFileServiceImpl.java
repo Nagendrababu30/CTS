@@ -55,13 +55,7 @@ public class InwardSessionFileServiceImpl
 
         try {
 
-            Path sourceFile = Path.of(file.getFilePath());
-            if (!sourceFile.isAbsolute() && fileConfiguration.getInwardRootPath() != null) {
-                Path webAppRoot = fileConfiguration.getInwardRootPath().getParent();
-                if (webAppRoot != null) {
-                    sourceFile = webAppRoot.resolve(file.getFilePath());
-                }
-            }
+            Path sourceFile = resolveSourcePath(file.getFilePath());
 
             Path targetDirectory =
                     fileConfiguration
@@ -95,5 +89,67 @@ public class InwardSessionFileServiceImpl
                     "Failed to move CHI file to incoming: "
                             + file.getFilePath(), e);
         }
+    }
+
+    private Path resolveSourcePath(String filePath) {
+        if (filePath == null || filePath.isBlank()) return null;
+        Path path = Path.of(filePath);
+        if (path.isAbsolute() && Files.exists(path)) {
+            return path.normalize();
+        }
+
+        String normalized = filePath.replace("\\", "/").trim();
+        if (normalized.startsWith("/")) {
+            normalized = normalized.substring(1);
+        }
+
+        // 1. Direct path relative to working directory
+        Path direct = Path.of(normalized);
+        if (Files.exists(direct)) {
+            return direct.toAbsolutePath().normalize();
+        }
+
+        // 2. Direct path relative to workspace src/main/webapp/
+        String cleanSub = normalized.startsWith("src/main/webapp/")
+                ? normalized.substring("src/main/webapp/".length())
+                : normalized;
+
+        Path workspaceCandidate = Path.of("src/main/webapp", cleanSub);
+        if (Files.exists(workspaceCandidate)) {
+            return workspaceCandidate.toAbsolutePath().normalize();
+        }
+
+        // 3. Resolve using rootPath and webAppRoot
+        Path rootPath = fileConfiguration.getInwardRootPath();
+        if (rootPath != null) {
+            Path webAppRoot = rootPath.getParent();
+
+            // Sibling folder under webAppRoot (e.g. inward-chi-files/...)
+            if (webAppRoot != null) {
+                Path candidate = webAppRoot.resolve(cleanSub);
+                if (Files.exists(candidate)) {
+                    return candidate.normalize();
+                }
+            }
+
+            // Folder inside inward-files/
+            if (cleanSub.startsWith("inward-files/")) {
+                String afterInward = cleanSub.substring("inward-files/".length());
+                Path inwardCandidate = rootPath.resolve(afterInward);
+                if (Files.exists(inwardCandidate)) {
+                    return inwardCandidate.normalize();
+                }
+                return inwardCandidate.normalize();
+            }
+
+            // If path is a sibling like inward-chi-files/
+            if (webAppRoot != null && cleanSub.startsWith("inward-chi-files/")) {
+                return webAppRoot.resolve(cleanSub).normalize();
+            }
+
+            return rootPath.resolve(cleanSub).normalize();
+        }
+
+        return path.toAbsolutePath().normalize();
     }
 }

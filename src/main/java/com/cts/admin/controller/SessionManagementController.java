@@ -1,6 +1,7 @@
 package com.cts.admin.controller;
 
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -29,6 +30,7 @@ import com.cts.admin.service.SessionService;
 import com.cts.admin.service.SessionServiceImpl;
 import com.cts.inward.config.ApplicationConfiguration;
 import com.cts.inward.config.FileConfiguration;
+import com.cts.inward.config.FileSystemInitializer;
 import com.cts.inward.dao.BatchDaoImpl;
 import com.cts.inward.dao.ChequeImageDaoImpl;
 import com.cts.inward.dao.ChequeDaoImpl;
@@ -115,12 +117,11 @@ public class SessionManagementController
                 ? Executions.getCurrent().getDesktop().getWebApp().getRealPath("/")
                 : "";
         String inwardRoot = appConfig.getInwardRootPath();
-        Path rootPath = (inwardRoot != null && Path.of(inwardRoot).isAbsolute())
-                ? Path.of(inwardRoot)
-                : Path.of(webAppRoot, inwardRoot != null ? inwardRoot : "inward-files");
+        Path rootPath = resolveInwardRootPath(inwardRoot, webAppRoot);
 
         FileConfiguration fileConfig =
                 FileConfiguration.of(rootPath);
+        FileSystemInitializer.of(fileConfig).initialize();
 
         int threadPoolSize =
                 appConfig.getFileProcessingThreadPoolSize();
@@ -548,5 +549,53 @@ public class SessionManagementController
         SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
         sdf.setTimeZone(IST);
         return sdf.format(date);
+    }
+
+    private Path resolveInwardRootPath(String inwardRoot, String webAppRoot) {
+        if (inwardRoot == null || inwardRoot.isBlank()) {
+            inwardRoot = "src/main/webapp/inward-files";
+        }
+
+        Path inwardPath = Path.of(inwardRoot);
+        if (inwardPath.isAbsolute()) {
+            return inwardPath.normalize();
+        }
+
+        // 1. Local development: check if workspace src/main/webapp exists relative to current working directory
+        Path devWebapp = Path.of("src/main/webapp");
+        if (Files.isDirectory(devWebapp)) {
+            return inwardPath.toAbsolutePath().normalize();
+        }
+
+        // 2. Eclipse WTP development: webAppRoot is under .metadata/.plugins/.../wtpwebapps/<project>
+        if (webAppRoot != null && !webAppRoot.isBlank()) {
+            String norm = webAppRoot.replace("\\", "/");
+            int metaIdx = norm.indexOf("/.metadata/");
+            if (metaIdx > 0) {
+                String workspaceDir = norm.substring(0, metaIdx);
+                Path wtpPath = Path.of(webAppRoot);
+                String projectName = wtpPath.getFileName() != null ? wtpPath.getFileName().toString() : "CTS";
+                Path workspaceWebapp = Path.of(workspaceDir, projectName, "src", "main", "webapp");
+                if (Files.isDirectory(workspaceWebapp)) {
+                    // Resolves directly to <workspace>/<project>/src/main/webapp/inward-files
+                    return workspaceWebapp.resolve("inward-files").normalize();
+                }
+            }
+
+            // 3. Deployed production/standalone environment:
+            Path base = Path.of(webAppRoot);
+            String baseStr = base.toString().replace("\\", "/");
+            if (baseStr.endsWith("/src/main/webapp") || baseStr.endsWith("/src/main/webapp/")) {
+                return base.resolve("inward-files").normalize();
+            }
+
+            String normalizedInward = inwardRoot.replace("\\", "/");
+            if (normalizedInward.startsWith("src/main/webapp/")) {
+                normalizedInward = normalizedInward.substring("src/main/webapp/".length());
+            }
+            return base.resolve(normalizedInward).normalize();
+        }
+
+        return inwardPath.toAbsolutePath().normalize();
     }
 }

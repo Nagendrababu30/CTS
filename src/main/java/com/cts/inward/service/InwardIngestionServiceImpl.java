@@ -1,10 +1,16 @@
 package com.cts.inward.service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.cts.inward.config.FileConfiguration;
 import com.cts.inward.enums.FileType;
-import com.cts.inward.file.IncomingFileWatcher;
+import com.cts.inward.file.FileProcessingExecutor;
 import com.cts.inward.model.InwardFile;
 
 public class InwardIngestionServiceImpl
@@ -13,7 +19,8 @@ public class InwardIngestionServiceImpl
     private final FileProcessingService     fileProcessingService;
     private final CHIFileService            chiFileService;
     private final InwardSessionFileService  inwardSessionFileService;
-    private final IncomingFileWatcher       incomingFileWatcher;
+    private final FileProcessingExecutor    fileProcessingExecutor;
+    private final FileConfiguration         fileConfiguration;
 
     /* ------------------------------------------------------------------ */
     /* Constructor — full dependencies for processSessionFiles()           */
@@ -23,12 +30,14 @@ public class InwardIngestionServiceImpl
             FileProcessingService     fileProcessingService,
             CHIFileService            chiFileService,
             InwardSessionFileService  inwardSessionFileService,
-            IncomingFileWatcher       incomingFileWatcher) {
+            FileProcessingExecutor    fileProcessingExecutor,
+            FileConfiguration         fileConfiguration) {
 
         this.fileProcessingService    = fileProcessingService;
         this.chiFileService           = chiFileService;
         this.inwardSessionFileService = inwardSessionFileService;
-        this.incomingFileWatcher      = incomingFileWatcher;
+        this.fileProcessingExecutor   = fileProcessingExecutor;
+        this.fileConfiguration        = fileConfiguration;
     }
 
     /* ------------------------------------------------------------------ */
@@ -39,13 +48,15 @@ public class InwardIngestionServiceImpl
             FileProcessingService     fileProcessingService,
             CHIFileService            chiFileService,
             InwardSessionFileService  inwardSessionFileService,
-            IncomingFileWatcher       incomingFileWatcher) {
+            FileProcessingExecutor    fileProcessingExecutor,
+            FileConfiguration         fileConfiguration) {
 
         return new InwardIngestionServiceImpl(
                 fileProcessingService,
                 chiFileService,
                 inwardSessionFileService,
-                incomingFileWatcher);
+                fileProcessingExecutor,
+                fileConfiguration);
     }
 
     /* ------------------------------------------------------------------ */
@@ -60,8 +71,10 @@ public class InwardIngestionServiceImpl
                 fileProcessingService,
                 null,
                 null,
+                null,
                 null);
     }
+
 
     /* ------------------------------------------------------------------ */
     /* Called by FileProcessingExecutor for each file detected by watcher  */
@@ -104,14 +117,13 @@ public class InwardIngestionServiceImpl
         System.out.println(
                 "[InwardIngestion] All CHI files moved to incoming directories.");
 
-        /* Step 3 — start the file watcher                              */
-        /* The watcher will detect the newly moved files (ENTRY_CREATE) */
-        /* and submit each one to the FileProcessingExecutor            */
-        incomingFileWatcher.startWatching();
+        /* Step 3 — submit moved files ordered by batch (PXF -> OCR -> PIBF) */
+        processIncomingFiles();
 
         System.out.println(
-                "[InwardIngestion] IncomingFileWatcher started. File processing in progress.");
+                "[InwardIngestion] Batches submitted for processing.");
     }
+
 
     /* ------------------------------------------------------------------ */
     /* Stub — bulk processing not needed for session-based flow            */
@@ -119,6 +131,68 @@ public class InwardIngestionServiceImpl
 
     @Override
     public void processIncomingFiles() {
-        /* Used for bulk/session processing if required. */
+
+        if (fileConfiguration == null || fileProcessingExecutor == null) {
+            return;
+        }
+
+        Map<String, Map<String, String>> batchMap = new LinkedHashMap<>();
+
+        collectFiles(fileConfiguration.getIncomingPath().resolve("pxf"), "pxf", batchMap);
+        collectFiles(fileConfiguration.getIncomingPath().resolve("ocr"), "ocr", batchMap);
+        collectFiles(fileConfiguration.getIncomingPath().resolve("pibf"), "pibf", batchMap);
+
+        for (Map.Entry<String, Map<String, String>> entry : batchMap.entrySet()) {
+            String batchName = entry.getKey();
+            Map<String, String> filesByType = entry.getValue();
+
+            List<String> ordered = new ArrayList<>();
+            if (filesByType.containsKey("pxf")) {
+                ordered.add(filesByType.get("pxf"));
+            }
+            if (filesByType.containsKey("ocr")) {
+                ordered.add(filesByType.get("ocr"));
+            }
+            if (filesByType.containsKey("pibf")) {
+                ordered.add(filesByType.get("pibf"));
+            }
+
+            System.out.println(
+                    "[InwardIngestion] Submitting batch: " + batchName + " files in order: " + ordered);
+
+            fileProcessingExecutor.submitBatch(ordered);
+        }
     }
+
+    private void collectFiles(Path directory, String fileType, Map<String, Map<String, String>> batchMap) {
+        try {
+            if (!Files.exists(directory)) {
+                return;
+            }
+            Files.list(directory)
+                    .filter(Files::isRegularFile)
+                    .forEach(filePath -> {
+                        String batchName = extractBatchName(filePath.getFileName().toString());
+                        batchMap.computeIfAbsent(batchName, k -> new LinkedHashMap<>())
+                                .put(fileType, filePath.toString());
+                    });
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to scan incoming directory: " + directory, e);
+        }
+    }
+
+    private String extractBatchName(String fileName) {
+        String nameWithoutExtension = fileName.contains(".")
+                ? fileName.substring(0, fileName.lastIndexOf('.'))
+                : fileName;
+
+        String[] parts = nameWithoutExtension.split("_");
+        for (String part : parts) {
+            if (part.toUpperCase().startsWith("BATCH")) {
+                return part.toUpperCase();
+            }
+        }
+        return nameWithoutExtension.toUpperCase();
+    }
+
 }

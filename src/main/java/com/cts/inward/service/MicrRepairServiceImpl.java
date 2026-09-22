@@ -185,6 +185,8 @@ public class MicrRepairServiceImpl implements MicrRepairService {
 
         Map<Long, OcrChequeData> ocrByInwardChequeId =
                 new HashMap<>();
+        Map<String, OcrChequeData> ocrByChequeNumber =
+                new HashMap<>();
 
         for (OcrChequeData ocr : ocrCheques) {
 
@@ -192,10 +194,18 @@ public class MicrRepairServiceImpl implements MicrRepairService {
                 continue;
             }
 
-            ocrByInwardChequeId.put(
-                    ocr.getInwardChequeId(),
-                    ocr
-            );
+            if (ocr.getInwardChequeId() > 0) {
+                ocrByInwardChequeId.put(
+                        ocr.getInwardChequeId(),
+                        ocr
+                );
+            }
+            if (ocr.getChequeNumber() != null && !ocr.getChequeNumber().trim().isEmpty()) {
+                ocrByChequeNumber.put(
+                        ocr.getChequeNumber().trim(),
+                        ocr
+                );
+            }
         }
 
         boolean isBatchReturned =
@@ -280,6 +290,9 @@ public class MicrRepairServiceImpl implements MicrRepairService {
                     ocrByInwardChequeId.get(
                             npci.getInwardChequeId()
                     );
+            if (ocr == null && chqNo != null && !chqNo.isEmpty()) {
+                ocr = ocrByChequeNumber.get(chqNo);
+            }
 
             if (ocr == null) {
                 continue;
@@ -683,6 +696,10 @@ public class MicrRepairServiceImpl implements MicrRepairService {
             long userId) {
 
         if (batchId <= 0L || userId <= 0L) {
+            return false;
+        }
+
+        if (needsMicrRepair(batchId)) {
             return false;
         }
 

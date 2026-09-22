@@ -465,7 +465,7 @@ public class SessionManagementController
 
         closedSessionContent.setVisible(false);
         activeSessionContent.setVisible(true);
-        sessionStatusBadge.setValue("ACTIVE");
+        sessionStatusBadge.setValue("Active");
         sessionStatusBadge.setSclass("status-badge status-active");
 
         activeSessionName.setValue(
@@ -518,7 +518,7 @@ public class SessionManagementController
 
             item.appendChild(createCell(
                     session.getStatus() != null
-                            ? session.getStatus() : "-"));
+                            ? ("STARTED".equalsIgnoreCase(session.getStatus()) ? "Started" : "Ended") : "-"));
 
             sessionHistoryListbox.appendChild(item);
         }

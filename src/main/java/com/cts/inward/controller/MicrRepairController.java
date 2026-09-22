@@ -261,7 +261,7 @@ public class MicrRepairController
 
         initReturnWindow();
 
-        if (chequeIndex < 0) {
+        if (chequeIndex < 0 && !micrRepairService.needsMicrRepair(batchId)) {
 
             goToDataEntry();
 
@@ -321,7 +321,9 @@ public class MicrRepairController
         if (comparisons == null
                 || comparisons.isEmpty()) {
 
-            goToDataEntry();
+            if (!micrRepairService.needsMicrRepair(batchId)) {
+                goToDataEntry();
+            }
 
             return;
         }
@@ -336,21 +338,45 @@ public class MicrRepairController
 
         if (totalMicrErrors == 0) {
 
-            goToDataEntry();
+            if (!micrRepairService.needsMicrRepair(batchId)) {
+                goToDataEntry();
+            }
 
             return;
         }
 
-        if (!isValidRepairIndex(chequeIndex)) {
+        /*
+         * Issue 2: On landing or re-entry, target the first un-repaired cheque
+         * (e.g. Cheque 2 if Cheque 1 was already repaired).
+         * Keep Cheque 1 in originalRepairIndexes so user can click "Prev" to view/edit it.
+         */
+        int firstPendingIndex = -1;
+        for (int idx : originalRepairIndexes) {
+            if (idx >= 0 && idx < comparisons.size()) {
+                MicrComparisonDto c = comparisons.get(idx);
+                if (c != null && c.isNeedsMicrRepair()) {
+                    firstPendingIndex = idx;
+                    break;
+                }
+            }
+        }
 
-            chequeIndex =
-                    findNextRepairIndexNoWrap(0);
-
-            if (chequeIndex < 0) {
-
-                goToDataEntry();
-
+        if (firstPendingIndex >= 0) {
+            // If chequeIndex is invalid or points to an already-repaired cheque,
+            // advance automatically to the first un-repaired cheque
+            if (!isValidRepairIndex(chequeIndex)
+                    || chequeIndex >= comparisons.size()
+                    || (comparisons.get(chequeIndex) != null && !comparisons.get(chequeIndex).isNeedsMicrRepair())) {
+                chequeIndex = firstPendingIndex;
+            }
+        } else {
+            // All repair cheques in originalRepairIndexes are completed or returned
+            if (!micrRepairService.needsMicrRepair(batchId)) {
+                navigateAfterMicrCompletion();
                 return;
+            }
+            if (!isValidRepairIndex(chequeIndex)) {
+                chequeIndex = originalRepairIndexes.get(0);
             }
         }
 
@@ -828,6 +854,55 @@ public class MicrRepairController
         }
     }
 
+    private java.io.File resolveImageFile(String path) {
+        if (path == null || path.trim().isEmpty()) {
+            return null;
+        }
+
+        String normalized = path.replace("\\", "/").trim();
+        if (normalized.startsWith("/")) {
+            normalized = normalized.substring(1);
+        }
+
+        // 1. Direct file / absolute path
+        java.io.File directFile = new java.io.File(path);
+        if (directFile.isAbsolute() && directFile.isFile()) {
+            return directFile;
+        }
+
+        // 2. Deployed webApp realPath
+        try {
+            if (org.zkoss.zk.ui.Executions.getCurrent() != null
+                    && org.zkoss.zk.ui.Executions.getCurrent().getDesktop() != null) {
+                org.zkoss.zk.ui.WebApp webApp =
+                        org.zkoss.zk.ui.Executions.getCurrent().getDesktop().getWebApp();
+                String realPath = webApp.getRealPath("/" + normalized);
+                if (realPath != null) {
+                    java.io.File realFile = new java.io.File(realPath);
+                    if (realFile.isFile()) {
+                        return realFile;
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+
+        // 3. Local workspace development path: src/main/webapp/ + subPath
+        String subPath = normalized.startsWith("src/main/webapp/")
+                ? normalized.substring("src/main/webapp/".length())
+                : normalized;
+        java.io.File devFile = new java.io.File("src/main/webapp", subPath);
+        if (devFile.isFile()) {
+            return devFile;
+        }
+
+        // 4. Relative path as-is
+        if (directFile.isFile()) {
+            return directFile;
+        }
+
+        return null;
+    }
+
     private void showCurrentImage() {
 
         if (chequeImage == null) {
@@ -843,21 +918,28 @@ public class MicrRepairController
                 && !path.trim().isEmpty()) {
 
             try {
-                String realPath = (org.zkoss.zk.ui.Executions.getCurrent() != null && org.zkoss.zk.ui.Executions.getCurrent().getDesktop() != null)
-                        ? org.zkoss.zk.ui.Executions.getCurrent().getDesktop().getWebApp().getRealPath(path)
-                        : null;
-                java.io.File file = (realPath != null) ? new java.io.File(realPath) : new java.io.File(path);
-                if (file.exists() && file.isFile()) {
+                java.io.File file = resolveImageFile(path);
+                if (file != null) {
                     chequeImage.setContent(new org.zkoss.image.AImage(file));
                 } else {
-                    String webSrc = path.startsWith("/") ? path : "/" + path;
+                    String clean = path.replace("\\", "/").trim();
+                    if (clean.startsWith("/")) clean = clean.substring(1);
+                    if (clean.startsWith("src/main/webapp/")) {
+                        clean = clean.substring("src/main/webapp/".length());
+                    }
+                    String webSrc = "/" + clean;
                     chequeImage.setContent((org.zkoss.image.AImage) null);
-                    chequeImage.setSrc(webSrc.replace("\\", "/"));
+                    chequeImage.setSrc(webSrc);
                 }
             } catch (Exception e) {
-                String webSrc = path.startsWith("/") ? path : "/" + path;
+                String clean = path.replace("\\", "/").trim();
+                if (clean.startsWith("/")) clean = clean.substring(1);
+                if (clean.startsWith("src/main/webapp/")) {
+                    clean = clean.substring("src/main/webapp/".length());
+                }
+                String webSrc = "/" + clean;
                 chequeImage.setContent((org.zkoss.image.AImage) null);
-                chequeImage.setSrc(webSrc.replace("\\", "/"));
+                chequeImage.setSrc(webSrc);
             }
 
         } else {
@@ -1079,7 +1161,9 @@ public class MicrRepairController
                         .compareBatch(batchId);
 
         if (originalRepairIndexes == null || originalRepairIndexes.isEmpty()) {
-            navigateAfterMicrCompletion();
+            if (!micrRepairService.needsMicrRepair(batchId)) {
+                navigateAfterMicrCompletion();
+            }
             return;
         }
 
@@ -1091,7 +1175,22 @@ public class MicrRepairController
             updateTopBar();
             loadCheque();
         } else {
-            // End of error list reached
+            // End of error list reached; check if any cheque still needs repair
+            if (micrRepairService.needsMicrRepair(batchId)) {
+                int nextPending = -1;
+                for (int idx : originalRepairIndexes) {
+                    if (idx >= 0 && idx < comparisons.size() && comparisons.get(idx).isNeedsMicrRepair()) {
+                        nextPending = idx;
+                        break;
+                    }
+                }
+                if (nextPending >= 0) {
+                    chequeIndex = nextPending;
+                    updateTopBar();
+                    loadCheque();
+                    return;
+                }
+            }
             navigateAfterMicrCompletion();
         }
     }
@@ -1441,6 +1540,9 @@ public class MicrRepairController
     // =========================================================
 
     private void navigateAfterMicrCompletion() {
+        if (micrRepairService.needsMicrRepair(batchId)) {
+            return;
+        }
         if (micrRepairService.hasChequesNeedingDataEntry(batchId)) {
             goToDataEntry();
         } else {
@@ -1459,6 +1561,9 @@ public class MicrRepairController
     }
 
     private void goToDataEntry() {
+        if (micrRepairService.needsMicrRepair(batchId)) {
+            return;
+        }
         Executions.sendRedirect(
                 "/zul/inward-maker/data-entryform.zul?batchId="
                         + batchId);

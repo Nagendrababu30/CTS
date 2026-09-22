@@ -174,17 +174,11 @@ public class SessionManagementController
         InwardIngestionServiceImpl ingestionForExecutor =
                 InwardIngestionServiceImpl.of(fileProcessingService);
 
-        // 7. Executor + Watcher
+        // 7. Executor
         FileProcessingExecutorImpl executor =
                 FileProcessingExecutorImpl.of(
                         threadPoolSize,
                         ingestionForExecutor);
-
-        IncomingFileWatcherImpl fileWatcher =
-                IncomingFileWatcherImpl.of(
-                        fileConfig,
-                        FileSystems.getDefault().newWatchService(),
-                        executor);
 
         // 8. Full ingestion service — used by processSessionFiles()
         inwardIngestionService =
@@ -192,7 +186,9 @@ public class SessionManagementController
                         fileProcessingService,
                         chiFileService,
                         sessionFileService,
-                        fileWatcher);
+                        executor,
+                        fileConfig);
+
 
         /* --------------------------------------------------------
          * Wire ZUL components

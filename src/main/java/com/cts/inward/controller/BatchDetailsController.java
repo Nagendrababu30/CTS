@@ -963,6 +963,43 @@ public class BatchDetailsController
         // BATCH HEADER COUNTS (Image 4)
         // =====================================================
         updateBatchHeaderCounts();
+
+        // =====================================================
+        // DECISION BADGE FOR CURRENT CHEQUE
+        // =====================================================
+        if (selectedDecision != null && selectedDecisionText != null) {
+            String action = getString(cheque, "checker_action");
+            if (action == null) {
+                action = getString(cheque, "checkerAction");
+            }
+            if (action == null) {
+                String st = getString(cheque, "cheque_status");
+                if (st == null) st = getString(cheque, "status");
+                if ("ACCEPT".equalsIgnoreCase(st)) {
+                    action = "Accepted";
+                } else if ("REJECT".equalsIgnoreCase(st)) {
+                    action = "Returned";
+                } else if ("RETURN_TO_MAKER".equalsIgnoreCase(st)) {
+                    action = "Sent Back";
+                }
+            }
+            if (action != null && !action.trim().isEmpty()) {
+                selectedDecision.setVisible(true);
+                if ("Accepted".equalsIgnoreCase(action)) {
+                    selectedDecisionText.setValue("✓ Selected Decision: Accepted");
+                    selectedDecision.setSclass("selected-decision accepted");
+                } else if ("Returned".equalsIgnoreCase(action) || "Rejected".equalsIgnoreCase(action)) {
+                    selectedDecisionText.setValue("⚠ Selected Decision: Returned");
+                    selectedDecision.setSclass("selected-decision rejected");
+                } else {
+                    selectedDecisionText.setValue("↶ Selected Decision: Sent Back");
+                    selectedDecision.setSclass("selected-decision returned");
+                }
+            } else {
+                selectedDecision.setVisible(false);
+                selectedDecisionText.setValue("");
+            }
+        }
     }
 
     // =========================================================
@@ -2336,8 +2373,13 @@ public class BatchDetailsController
                     remarks);
 
             if (cheques != null && currentChequeIndex >= 0 && currentChequeIndex < cheques.size()) {
-                cheques.get(currentChequeIndex).put("status", status);
-                cheques.get(currentChequeIndex).put("cheque_status", status);
+                Map<String, Object> curr = cheques.get(currentChequeIndex);
+                curr.put("status", status);
+                curr.put("cheque_status", status);
+                curr.put("checker_action", checkerAction);
+                curr.put("checkerAction", checkerAction);
+                curr.put("checker_id", userId);
+                curr.put("checkerId", userId);
             }
 
             if (popupWindow != null) {
@@ -2361,6 +2403,7 @@ public class BatchDetailsController
                                 ? "rejected"
                                 : "returned";
                 selectedDecision.setSclass("selected-decision " + decisionClass);
+                selectedDecision.setVisible(true);
             }
 
             moveToNextAfterDecision();
@@ -2382,15 +2425,14 @@ public class BatchDetailsController
     }
 
     private void moveToNextAfterDecision() {
-        if (currentChequeIndex < cheques.size() - 1) {
-            currentChequeIndex++;
-            loadCurrentCheque();
-        } else {
-            updateChequeNavigation();
-            updateBatchHeaderCounts();
+        updateBatchHeaderCounts();
+        updateCompleteVerificationButtonState();
+        updateChequeNavigation();
+
+        if (isAllChequesVerified()) {
             Messagebox.show(
-                    "Decision saved for the last cheque. Do you want to complete batch verification now?",
-                    "Batch Verification",
+                    "All cheques in this batch have been verified. Do you want to complete batch verification now?",
+                    "Batch Verification Complete",
                     Messagebox.YES | Messagebox.NO,
                     Messagebox.QUESTION,
                     event -> {
@@ -2398,6 +2440,12 @@ public class BatchDetailsController
                             onClick$completeVerification();
                         }
                     });
+        } else {
+            int nextUnverified = findNextUnverifiedChequeIndex(currentChequeIndex);
+            if (nextUnverified != -1 && nextUnverified != currentChequeIndex) {
+                currentChequeIndex = nextUnverified;
+                loadCurrentCheque();
+            }
         }
     }
 
@@ -2429,8 +2477,8 @@ public class BatchDetailsController
             e.printStackTrace();
         }
 
-        System.out.println("LOAD CHEQUE IMAGES: cheque=" + chequeNumber + 
-                ", front=" + currentFrontImagePath + 
+        System.out.println("LOAD CHEQUE IMAGES: cheque=" + chequeNumber +
+                ", front=" + currentFrontImagePath +
                 ", back=" + currentBackImagePath);
 
         showingFront = true;
@@ -2599,6 +2647,77 @@ public class BatchDetailsController
     // BATCH HEADER METRICS (Image 4)
     // =========================================================
 
+    // =========================================================
+    // CHECK IF CHEQUE IS VERIFIED
+    // =========================================================
+
+    private boolean isChequeVerified(Map<String, Object> chq) {
+        if (chq == null) {
+            return false;
+        }
+        String action = getString(chq, "checker_action");
+        if (action == null) {
+            action = getString(chq, "checkerAction");
+        }
+        if (action != null && !action.trim().isEmpty()) {
+            return true;
+        }
+        String st = getString(chq, "cheque_status");
+        if (st == null) {
+            st = getString(chq, "status");
+        }
+        if ("ACCEPT".equalsIgnoreCase(st) || "REJECT".equalsIgnoreCase(st) || "RETURN_TO_MAKER".equalsIgnoreCase(st)) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isAllChequesVerified() {
+        if (cheques == null || cheques.isEmpty()) {
+            return false;
+        }
+        for (Map<String, Object> chq : cheques) {
+            if (!isChequeVerified(chq)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private int findNextUnverifiedChequeIndex(int fromIndex) {
+        if (cheques == null || cheques.isEmpty()) {
+            return -1;
+        }
+        int total = cheques.size();
+        for (int i = fromIndex + 1; i < total; i++) {
+            if (!isChequeVerified(cheques.get(i))) {
+                return i;
+            }
+        }
+        for (int i = 0; i <= fromIndex && i < total; i++) {
+            if (!isChequeVerified(cheques.get(i))) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private int findFirstUnverifiedChequeIndex() {
+        if (cheques == null || cheques.isEmpty()) {
+            return -1;
+        }
+        for (int i = 0; i < cheques.size(); i++) {
+            if (!isChequeVerified(cheques.get(i))) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    // =========================================================
+    // BATCH HEADER METRICS (Image 4)
+    // =========================================================
+
     private void updateBatchHeaderCounts() {
         if (batchLabel != null) {
             batchLabel.setValue("Batch No : " + (batchId != null ? batchId : "—"));
@@ -2609,11 +2728,7 @@ public class BatchDetailsController
 
         if (cheques != null) {
             for (Map<String, Object> chq : cheques) {
-                String st = getString(chq, "cheque_status");
-                if (st == null) {
-                    st = getString(chq, "status");
-                }
-                if ("ACCEPT".equalsIgnoreCase(st) || "REJECT".equalsIgnoreCase(st) || "RETURN_TO_MAKER".equalsIgnoreCase(st)) {
+                if (isChequeVerified(chq)) {
                     completed++;
                 }
             }
@@ -2639,100 +2754,58 @@ public class BatchDetailsController
     private void updateChequeNavigation() {
 
         Button[] chequeButtons = {
-
-                cheque1,
-                cheque2,
-                cheque3,
-                cheque4,
-                cheque5,
-                cheque6,
-                cheque7,
-                cheque8,
-                cheque9,
-                cheque10,
-                cheque11,
-                cheque12,
-                cheque13,
-                cheque14,
-                cheque15
+                cheque1, cheque2, cheque3, cheque4, cheque5,
+                cheque6, cheque7, cheque8, cheque9, cheque10,
+                cheque11, cheque12, cheque13, cheque14, cheque15
         };
 
-        // -----------------------------------------------------
-        // Hide all buttons
-        // -----------------------------------------------------
-
         for (Button button : chequeButtons) {
-
             if (button != null) {
-
                 button.setVisible(false);
-
-                button.setSclass(
-                        "cheque-button");
+                button.setSclass("cheque-button");
             }
         }
 
-        // -----------------------------------------------------
-        // Show required buttons
-        // -----------------------------------------------------
-
         int visibleCount = Math.min(
-                cheques.size(),
+                cheques != null ? cheques.size() : 0,
                 chequeButtons.length);
 
         for (int i = 0; i < visibleCount; i++) {
-
             if (chequeButtons[i] != null) {
-
                 chequeButtons[i].setVisible(true);
-
-                chequeButtons[i].setLabel(
-                        String.valueOf(i + 1));
+                chequeButtons[i].setLabel(String.valueOf(i + 1));
+                if (i == currentChequeIndex) {
+                    chequeButtons[i].setSclass("cheque-button cheque-button-selected");
+                } else if (cheques != null && isChequeVerified(cheques.get(i))) {
+                    chequeButtons[i].setSclass("cheque-button cheque-button-verified");
+                } else {
+                    chequeButtons[i].setSclass("cheque-button");
+                }
             }
         }
 
-        // -----------------------------------------------------
-        // Highlight current cheque
-        // -----------------------------------------------------
-
-        if (currentChequeIndex >= 0
-                && currentChequeIndex < visibleCount
-                && chequeButtons[currentChequeIndex] != null) {
-
-            chequeButtons[currentChequeIndex]
-                    .setSclass(
-                            "cheque-button "
-                                    + "cheque-button-selected");
-        }
-
-        // -----------------------------------------------------
-        // Previous
-        // -----------------------------------------------------
-
         if (previousCheque != null) {
-
-            previousCheque.setDisabled(
-                    currentChequeIndex <= 0);
+            previousCheque.setDisabled(currentChequeIndex <= 0);
         }
 
-        // -----------------------------------------------------
-        // Next
-        // -----------------------------------------------------
+        boolean hasUnverifiedElsewhere = false;
+        if (cheques != null) {
+            for (int i = 0; i < cheques.size(); i++) {
+                if (i != currentChequeIndex && !isChequeVerified(cheques.get(i))) {
+                    hasUnverifiedElsewhere = true;
+                    break;
+                }
+            }
+        }
+
+        boolean canGoNext = (cheques != null) && ((currentChequeIndex < cheques.size() - 1) || hasUnverifiedElsewhere);
 
         if (nextCheque != null) {
-
-            nextCheque.setDisabled(
-                    currentChequeIndex >= cheques.size() - 1);
+            nextCheque.setDisabled(!canGoNext);
         }
 
-        // -----------------------------------------------------
-        // Next arrow
-        // -----------------------------------------------------
-
         if (nextChequeArrow != null) {
-
-            nextChequeArrow.setDisabled(
-                    currentChequeIndex >= cheques.size() - 1);
+            nextChequeArrow.setDisabled(!canGoNext);
         }
 
         updateCompleteVerificationButtonState();
@@ -2744,12 +2817,25 @@ public class BatchDetailsController
 
     public void onClick$nextCheque() {
 
-        if (currentChequeIndex < cheques.size() - 1) {
-
-            currentChequeIndex++;
-
-            loadCurrentCheque();
+        if (cheques == null || cheques.isEmpty()) {
+            return;
         }
+
+        if (currentChequeIndex < cheques.size() - 1) {
+            currentChequeIndex++;
+            loadCurrentCheque();
+        } else {
+            // At the last cheque: loop to the first unverified cheque if any exists
+            int unverified = findFirstUnverifiedChequeIndex();
+            if (unverified != -1 && unverified != currentChequeIndex) {
+                currentChequeIndex = unverified;
+                loadCurrentCheque();
+            }
+        }
+    }
+
+    public void onClick$nextChequeArrow() {
+        onClick$nextCheque();
     }
 
     // =========================================================
@@ -2766,19 +2852,7 @@ public class BatchDetailsController
         }
     }
 
-    // =========================================================
-    // NEXT ARROW
-    // =========================================================
 
-    public void onClick$nextChequeArrow() {
-
-        if (currentChequeIndex < cheques.size() - 1) {
-
-            currentChequeIndex++;
-
-            loadCurrentCheque();
-        }
-    }
 
     // =========================================================
     // CHEQUE 1
@@ -2943,12 +3017,22 @@ public class BatchDetailsController
             return;
         }
 
-        boolean isLastCheque = (currentChequeIndex == cheques.size() - 1);
-        completeVerification.setDisabled(!isLastCheque);
-        if (!isLastCheque) {
-            completeVerification.setSclass("complete-button complete-button-disabled");
+        boolean allVerified = isAllChequesVerified();
+        completeVerification.setDisabled(!allVerified);
+
+        if (allVerified) {
+            completeVerification.setSclass("complete-button complete-button-enabled");
+            completeVerification.setTooltiptext("All cheques verified. Click to complete batch verification.");
         } else {
-            completeVerification.setSclass("complete-button");
+            completeVerification.setSclass("complete-button complete-button-disabled");
+            int pending = 0;
+            for (Map<String, Object> c : cheques) {
+                if (!isChequeVerified(c)) {
+                    pending++;
+                }
+            }
+            completeVerification.setTooltiptext(
+                    pending + " cheque(s) pending verification. Please verify all cheques to complete batch verification.");
         }
     }
 
@@ -2963,9 +3047,19 @@ public class BatchDetailsController
             return;
         }
 
-        // Second-layer safety check: must be on the last cheque
-        if (currentChequeIndex != cheques.size() - 1) {
+        // Safety check: All cheques must be verified!
+        if (!isAllChequesVerified()) {
             updateCompleteVerificationButtonState();
+            int unverified = findFirstUnverifiedChequeIndex();
+            if (unverified != -1) {
+                currentChequeIndex = unverified;
+                loadCurrentCheque();
+            }
+            Messagebox.show(
+                    "Cannot complete verification. All cheques must be verified (Accepted, Returned, or Sent Back) before completing the batch.",
+                    "Verification Incomplete",
+                    Messagebox.OK,
+                    Messagebox.EXCLAMATION);
             return;
         }
 

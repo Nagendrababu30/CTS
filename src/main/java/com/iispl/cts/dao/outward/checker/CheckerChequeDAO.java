@@ -11,6 +11,7 @@ import java.util.Map;
 
 import com.iispl.cts.data.CTSStaticData;
 import com.iispl.cts.model.outward.ChequeProcessing;
+import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.model.outward.OutwardCheque;
 import com.iispl.cts.model.outward.ReturnReason;
 
@@ -298,6 +299,64 @@ public class CheckerChequeDAO {
     }
 
 
+    
+    /*
+     * ============================================================
+     * GET CHECKER COMPLETED BATCHES FOR REPORTS
+     * ============================================================
+     */
+
+    public List<OutwardBatch> getCheckerCompletedBatches() {
+
+        List<OutwardBatch> batches =
+                new ArrayList<>();
+
+        String sql =
+                "SELECT ob.batch_number, "
+                + "       COUNT(oc.cheque_number) AS total_cheques "
+                + "FROM outward_batch ob "
+                + "LEFT JOIN outward_cheque oc "
+                + "       ON ob.batch_number = oc.batch_number "
+                + "WHERE UPPER(ob.batch_status) = 'CHECKER_VERIFIED' "
+                + "GROUP BY ob.batch_number "
+                + "ORDER BY ob.batch_number DESC";
+
+        try (Connection connection =
+                     CTSStaticData.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(sql);
+             ResultSet rs =
+                     statement.executeQuery()) {
+
+            while (rs.next()) {
+
+                OutwardBatch batch =
+                        new OutwardBatch();
+
+                batch.setBatchNumber(
+                        rs.getString("batch_number"));
+
+                batch.setNumberOfCheques(
+                        rs.getInt("total_cheques"));
+
+                batches.add(batch);
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            throw new RuntimeException(
+                    "Error while fetching Checker completed batches",
+                    e);
+        }
+
+        return batches;
+    }
+    
+    
+    
+    
     /*
      * ============================================================
      * GET RE-VERIFIED CHEQUES

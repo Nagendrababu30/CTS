@@ -1,34 +1,12 @@
 package com.iispl.cts.service.outward.checker;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.iispl.cts.dao.outward.checker.CheckerReportsDAO;
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.model.outward.OutwardCheque;
 
-import java.util.ArrayList;
-import java.util.List;
-
-/**
- * ============================================================
- * CHECKER REPORTS SERVICE
- * ============================================================
- *
- * Handles the business logic required by the Checker Reports
- * screen.
- *
- * Report rules:
- *
- * 1. Batch must be selected first.
- * 2. CFX is available for every batch.
- * 3. CIBF is available for every batch.
- * 4. RRF is available only when the batch contains rejected
- *    cheque(s).
- * 5. Rejected cheque information is obtained from
- *    cheque_processing.
- * 6. RRF must never be generated with an empty rejected-cheque
- *    list.
- *
- * ============================================================
- */
 public class CheckerReportsService {
 
     private final CheckerReportsDAO dao;
@@ -47,11 +25,6 @@ public class CheckerReportsService {
     // GET AVAILABLE BATCHES
     // ============================================================
 
-    /**
-     * Get batches displayed in the Checker Reports screen.
-     *
-     * @return available batches
-     */
     public List<OutwardBatch> getCheckerCompletedBatches() {
 
         List<OutwardBatch> batches =
@@ -69,12 +42,6 @@ public class CheckerReportsService {
     // GET BATCH BY NUMBER
     // ============================================================
 
-    /**
-     * Get a particular batch using its batch number.
-     *
-     * @param batchNumber batch number
-     * @return batch or null
-     */
     public OutwardBatch getBatchByNumber(
             String batchNumber) {
 
@@ -89,19 +56,6 @@ public class CheckerReportsService {
     // GET ALL CHEQUES
     // ============================================================
 
-    /**
-     * Get all cheques belonging to the selected batch.
-     *
-     * Used by:
-     *
-     * - CFX
-     * - CIBF
-     *
-     * This method returns ALL cheques.
-     *
-     * @param batchNumber batch number
-     * @return all batch cheques
-     */
     public List<OutwardCheque> getBatchCheques(
             String batchNumber) {
 
@@ -124,25 +78,6 @@ public class CheckerReportsService {
     // GET REJECTED CHEQUES
     // ============================================================
 
-    /**
-     * Get only rejected cheques for a batch.
-     *
-     * IMPORTANT:
-     *
-     * Rejection is determined from:
-     *
-     *     cheque_processing.checker_action = 'REJECT'
-     *
-     * It is NOT determined only from:
-     *
-     *     outward_cheque.return_reason_id
-     *
-     * These rejected cheques are the records that can be
-     * supplied to RRF generation.
-     *
-     * @param batchNumber batch number
-     * @return rejected cheques
-     */
     public List<OutwardCheque> getRejectedCheques(
             String batchNumber) {
 
@@ -165,15 +100,6 @@ public class CheckerReportsService {
     // CHECK RRF AVAILABILITY
     // ============================================================
 
-    /**
-     * Check whether RRF is available for a batch.
-     *
-     * RRF is available only when at least one rejected cheque
-     * exists in cheque_processing.
-     *
-     * @param batchNumber batch number
-     * @return true if RRF is available
-     */
     public boolean isRrfAvailable(
             String batchNumber) {
 
@@ -188,12 +114,6 @@ public class CheckerReportsService {
     // GET REJECTED CHEQUE COUNT
     // ============================================================
 
-    /**
-     * Get number of rejected cheques for a batch.
-     *
-     * @param batchNumber batch number
-     * @return rejected cheque count
-     */
     public int getRejectedChequeCount(
             String batchNumber) {
 
@@ -205,18 +125,9 @@ public class CheckerReportsService {
     }
 
     // ============================================================
-    // VALIDATE RRF AVAILABILITY
+    // GET RRF CHEQUES
     // ============================================================
 
-    /**
-     * Validates that RRF can be generated.
-     *
-     * This provides a service-layer protection against generating
-     * an empty RRF.
-     *
-     * @param batchNumber batch number
-     * @return rejected cheques that should go into RRF
-     */
     public List<OutwardCheque> getRrfCheques(
             String batchNumber) {
 
@@ -242,12 +153,6 @@ public class CheckerReportsService {
     // CHECK BATCH EXISTS
     // ============================================================
 
-    /**
-     * Check whether a batch exists.
-     *
-     * @param batchNumber batch number
-     * @return true if batch exists
-     */
     public boolean batchExists(
             String batchNumber) {
 
@@ -260,6 +165,93 @@ public class CheckerReportsService {
         return dao.getBatchByNumber(
                 batchNumber.trim()
         ) != null;
+    }
+
+    // ============================================================
+    // GET VALID CHEQUES
+    // ============================================================
+
+    public List<OutwardCheque> getValidCheques(
+            String batchNumber) {
+
+        validateBatchNumber(batchNumber);
+
+        List<OutwardCheque> allCheques =
+                getBatchCheques(batchNumber);
+
+        List<OutwardCheque> validCheques =
+                new ArrayList<OutwardCheque>();
+
+        for (OutwardCheque cheque : allCheques) {
+
+            if (cheque != null &&
+                    "CHECKER_ACCEPTED".equalsIgnoreCase(
+                            cheque.getChequeStatus())) {
+
+                validCheques.add(cheque);
+            }
+        }
+
+        return validCheques;
+    }
+
+    // ============================================================
+    // SAVE NPCI SUBMISSION
+    // ============================================================
+
+    public boolean saveNPCISubmission(
+            String batchNumber,
+            int validChequeCount,
+            int invalidChequeCount,
+            String validXmlPath) {
+
+        validateBatchNumber(batchNumber);
+
+        if (validChequeCount <= 0) {
+
+            return false;
+        }
+
+        if (validXmlPath == null ||
+                validXmlPath.trim().isEmpty()) {
+
+            return false;
+        }
+
+        return dao.saveNPCISubmission(
+                batchNumber.trim(),
+                validChequeCount,
+                invalidChequeCount,
+                validXmlPath.trim()
+        );
+    }
+
+    // ============================================================
+    // CHECK NPCI READINESS
+    // ============================================================
+
+    public boolean isBatchReadyForNPCI(
+            String batchNumber) {
+
+        validateBatchNumber(batchNumber);
+
+        return dao.isBatchReadyForNPCI(
+                batchNumber.trim()
+        );
+    }
+
+    // ============================================================
+    // MARK NPCI SENT
+    // ============================================================
+
+    public boolean markBatchAsNPCISent(
+            String batchNumber) {
+
+        validateBatchNumber(batchNumber);
+
+        return dao.markBatchAsNPCISent(
+                batchNumber.trim()
+        );
     }
 
     // ============================================================

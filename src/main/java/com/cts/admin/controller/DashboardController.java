@@ -174,7 +174,7 @@ public class DashboardController extends GenericForwardComposer<Component> {
                 sessionNameLbl.setValue(
                         active.getSessionName() != null ? active.getSessionName() : "-");
                 sessionStatusBadge.setSclass("status-badge status-active");
-                sessionBadgeLbl.setValue("ACTIVE");
+                sessionBadgeLbl.setValue("Active");
 
             }
 

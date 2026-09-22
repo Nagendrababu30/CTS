@@ -79,7 +79,7 @@
                     <button id="allBtn"           label="All"             sclass="filter-btn active-filter"/>
                     <button id="availableBtn"     label="Available"       sclass="filter-btn"/>
                     <button id="myBatchesBtn"     label="My Batches"      sclass="filter-btn"/>
-                    <button id="returnToMakerBtn" label="Re-Verify Batches" sclass="filter-btn"/>
+                    <button id="returnToMakerBtn" label="On Hold" sclass="filter-btn"/>
 
                 </hlayout>
 

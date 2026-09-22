@@ -126,18 +126,18 @@ public class LoginComposer extends GenericForwardComposer<Component> {
             return;
         }
 
-        switch (roleName.toUpperCase()) {
-            case "ADMIN":
+        switch (roleName) {
+            case "Admin":
                 Executions.sendRedirect("/zul/admin/admin-dashboard.zul"); break;
-            case "INWARD_MAKER":
+            case "Inward Maker":
                 Executions.sendRedirect("/zul/inward-maker/dashboard.zul"); break;
-            case "INWARD_CHECKER":
+            case "Inward Checker":
                 Executions.sendRedirect("/zul/inward-checker/dashboard.zul"); break;
-            case "OUTWARD_MAKER":
+            case "Outward Maker":
                 Executions.sendRedirect("/zul/outward/outward-maker/outward-maker-dashboard.zul"); break;
-            case "OUTWARD_CHECKER":
+            case "Outward Checker":
                 Executions.sendRedirect("/zul/outward/outward-checker/dashboard.zul"); break;
-            case "CAPTURE_OPERATOR":
+            case "Capture Operator":
                 Executions.sendRedirect("/zul/outward/outward-maker/capture-operator-batch-capture.zul"); break;
             default:
                 loginMessage.setValue("User role is not configured.");

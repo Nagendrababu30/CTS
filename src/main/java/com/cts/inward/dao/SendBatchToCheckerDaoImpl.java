@@ -43,7 +43,7 @@ public class SendBatchToCheckerDaoImpl implements SendBatchToCheckerDao {
                     INNER JOIN public."role" r ON r.role_id = u.role_id
                     WHERE bl.batch_id = b.batch_id
                       AND u.status = 'ACTIVE'
-                      AND r.role_name = 'INWARD_MAKER'
+                      AND r.role_name = 'Inward Maker'
                     ORDER BY bl.locked_time DESC, bl.lock_id DESC
                     LIMIT 1
                 ) l ON TRUE
@@ -113,7 +113,7 @@ public class SendBatchToCheckerDaoImpl implements SendBatchToCheckerDao {
                         JOIN public."user" u ON u.user_id = bl.user_id
                         JOIN public."role" r ON r.role_id = u.role_id
                         WHERE bl.batch_id = ?
-                          AND r.role_name = 'INWARD_CHECKER'
+                          AND r.role_name = 'Inward Checker'
                         ORDER BY bl.locked_time DESC, bl.lock_id DESC
                         LIMIT 1
                         """;

@@ -132,10 +132,12 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
                     latest.return_reason_code,
                     r.description AS return_reason_description,
                     latest.remarks AS maker_remarks,
-                    ocr.micr_code AS ocr_micr_code
+                    ocr.micr_code AS ocr_micr_code,
+                    latest.checker_action,
+                    latest.checker_id
                 FROM inward_cheque c
                 LEFT JOIN LATERAL (
-                    SELECT h.status, h.return_reason_code, h.remarks
+                    SELECT h.status, h.return_reason_code, h.remarks, h.checker_action, h.checker_id
                     FROM inward_cheque_status_history h
                     WHERE h.cheque_number = c.cheque_number
                     ORDER BY h.status_history_id DESC
@@ -176,10 +178,12 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
                     latest.return_reason_code,
                     r.description AS return_reason_description,
                     latest.remarks AS maker_remarks,
-                    ocr.micr_code AS ocr_micr_code
+                    ocr.micr_code AS ocr_micr_code,
+                    latest.checker_action,
+                    latest.checker_id
                 FROM inward_cheque c
                 LEFT JOIN LATERAL (
-                    SELECT h.status, h.return_reason_code, h.remarks
+                    SELECT h.status, h.return_reason_code, h.remarks, h.checker_action, h.checker_id
                     FROM inward_cheque_status_history h
                     WHERE h.cheque_number = c.cheque_number
                     ORDER BY h.status_history_id DESC
@@ -255,6 +259,31 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
                             "status",
                             resultSet.getString(
                                     "cheque_status"));
+
+                    cheque.put(
+                            "cheque_status",
+                            resultSet.getString(
+                                    "cheque_status"));
+
+                    cheque.put(
+                            "checker_action",
+                            resultSet.getString(
+                                    "checker_action"));
+
+                    cheque.put(
+                            "checkerAction",
+                            resultSet.getString(
+                                    "checker_action"));
+
+                    cheque.put(
+                            "checker_id",
+                            resultSet.getObject(
+                                    "checker_id"));
+
+                    cheque.put(
+                            "checkerId",
+                            resultSet.getObject(
+                                    "checker_id"));
 
                     cheque.put(
                             "returnReasonCode",

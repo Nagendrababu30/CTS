@@ -1,511 +1,614 @@
 package com.iispl.cts.controller.outward.checker;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.Wire;
 import org.zkoss.zul.Button;
+import org.zkoss.zul.Filedownload;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Messagebox;
-import org.zkoss.zul.Filedownload;
 
-import com.iispl.cts.dao.outward.checker.CheckerChequeDAO;
-import com.iispl.cts.data.CTSStaticData;
+import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.model.outward.OutwardCheque;
+import com.iispl.cts.service.outward.checker.CheckerReportsService;
 
-public class CheckerReportsController extends SelectorComposer<Component> {
+public class CheckerReportsController
+extends SelectorComposer<Component> {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    @Wire
-    private Listbox reportList;
+	@Wire
+	private Listbox reportList;
 
-    private CheckerChequeDAO checkerChequeDAO =
-            new CheckerChequeDAO();
+	private CheckerReportsService service =
+			new CheckerReportsService();
 
+	@Override
+	public void doAfterCompose(Component component)
+			throws Exception {
 
-    @Override
-    public void doAfterCompose(Component component)
-            throws Exception {
+		super.doAfterCompose(component);
 
-        super.doAfterCompose(component);
+		loadReportBatches();
+	}
 
-        loadReportBatches();
-    }
+	private void loadReportBatches() {
 
+		try {
 
-    private void loadReportBatches() {
+			List<OutwardBatch> batches =
+					service.getCheckerCompletedBatches();
 
-        String sql =
-                "SELECT ob.batch_number, " +
-                "       COUNT(oc.cheque_number) AS total_cheques, " +
-                "       COUNT(CASE WHEN UPPER(oc.cheque_status) = 'CHECKER_ACCEPTED' " +
-                "                  THEN 1 END) AS valid_cheques, " +
-                "       COUNT(CASE WHEN UPPER(oc.cheque_status) = 'CHECKER_REJECTED' " +
-                "                  THEN 1 END) AS rejected_cheques " +
-                "FROM outward_batch ob " +
-                "LEFT JOIN outward_cheque oc " +
-                "       ON ob.batch_number = oc.batch_number " +
-                "WHERE UPPER(ob.batch_status) = 'CHECKER_VERIFIED' " +
-                "GROUP BY ob.batch_number " +
-                "ORDER BY ob.batch_number DESC";
+			reportList.getItems().clear();
 
-        try (Connection connection =
-                     CTSStaticData.getConnection();
-             PreparedStatement statement =
-                     connection.prepareStatement(sql);
-             ResultSet rs =
-                     statement.executeQuery()) {
+			for (OutwardBatch batch : batches) {
 
-            reportList.getItems().clear();
+				String batchNumber =
+						batch.getBatchNumber();
 
-            while (rs.next()) {
+				Listitem item =
+						new Listitem();
 
-                String batchNumber =
-                        rs.getString("batch_number");
+				// =====================================================
+						// BATCH NUMBER
+						// =====================================================
 
-                int totalCheques =
-                        rs.getInt("total_cheques");
+						Listcell batchCell =
+								new Listcell();
 
-                int validCheques =
-                        rs.getInt("valid_cheques");
+						Label batchLabel =
+								new Label(batchNumber);
 
-                int rejectedCheques =
-                        rs.getInt("rejected_cheques");
+						batchCell.appendChild(batchLabel);
 
-                Listitem item =
-                        new Listitem();
+						item.appendChild(batchCell);
 
-                Listcell batchCell =
-                        new Listcell();
+						// =====================================================
+						// TOTAL CHEQUES
+						// =====================================================
 
-                Label batchLabel =
-                        new Label(batchNumber);
+						Listcell totalCell =
+								new Listcell(
+										String.valueOf(
+												batch.getNumberOfCheques()));
 
-                batchCell.appendChild(batchLabel);
+						item.appendChild(totalCell);
 
-                item.appendChild(batchCell);
+						// =====================================================
+						// CFX / VALID XML
+						// =====================================================
 
+						Listcell validCell =
+								new Listcell();
 
-                Listcell totalCell =
-                        new Listcell(
-                                String.valueOf(
-                                        totalCheques));
+						Button validButton =
+								new Button();
 
-                item.appendChild(totalCell);
+						validButton.setLabel(
+								"Download XML");
 
+						validButton.setSclass(
+								"primary-button");
 
-                Listcell validCell =
-                        new Listcell();
+						validButton.addEventListener(
+								"onClick",
+								event ->
+								downloadValidXml(
+										batchNumber));
 
-                Button validButton =
-                        new Button();
+						validCell.appendChild(
+								validButton);
 
-                validButton.setLabel(
-                        "Download XML");
+						item.appendChild(validCell);
 
-                validButton.setSclass(
-                        "primary-button");
+						// =====================================================
+						// RRF / REJECTED XML
+						// =====================================================
 
-                validButton.setDisabled(
-                        validCheques == 0);
+						Listcell rejectedCell =
+								new Listcell();
 
-                validButton.addEventListener(
-                        "onClick",
-                        event -> downloadValidXml(
-                                batchNumber));
+						Button rejectedButton =
+								new Button();
 
-                validCell.appendChild(
-                        validButton);
+						rejectedButton.setLabel(
+								"Download XML");
+
+						rejectedButton.setSclass(
+								"secondary-button");
+
+						rejectedButton.setDisabled(
+								!service.isRrfAvailable(
+										batchNumber));
+
+						rejectedButton.addEventListener(
+								"onClick",
+								event ->
+								downloadRejectedXml(
+										batchNumber));
+
+						rejectedCell.appendChild(
+								rejectedButton);
+
+						item.appendChild(rejectedCell);
+
+						reportList.appendChild(item);
+			}
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			Messagebox.show(
+					"Unable to load report batches.\n\n"
+							+ e.getMessage(),
+							"Checker Reports",
+							Messagebox.OK,
+							Messagebox.ERROR);
+		}
+	}
+
+	// ================================================================
+	// DOWNLOAD VALID XML
+	// CFX / CIBF
+	//
+	// Only CHECKER_ACCEPTED cheques are included.
+	// Only this XML is submitted to NPCI.
+	// ================================================================
+
+	private void downloadValidXml(
+			String batchNumber) {
+
+		try {
+
+			List<OutwardCheque> cheques =
+					service.getValidCheques(
+							batchNumber);
+
+			String xml =
+					buildValidXml(
+							batchNumber,
+							cheques);
+
+			if (xml == null) {
+				return;
+			}
+
+			String fileName =
+					batchNumber + ".xml";
+
+			// =========================================================
+			// SAVE VALID XML TO ARCHIVE 
+			// =========================================================
+
+			String archivePath = "C:\\Users\\ginja\\eclipse-workspace\\CTS\\src\\main\\webapp\\css\\outward\\Archive\\Valid-Cheques";
+			Path directory = Paths.get(archivePath); 
+			if (!Files.exists(directory)) { 
+				Files.createDirectories(directory);
+			}
+			Path filePath = directory.resolve(fileName); 
+			Files.write( filePath, xml.getBytes(StandardCharsets.UTF_8));
+
+			Filedownload.save(
+					xml,
+					"application/xml",
+					fileName);
+
+			// =========================================================
+			// SAVE NPCI SUBMISSION INFORMATION
+			//
+			// The actual XML being sent to NPCI is the valid XML.
+			// Store the filename/path information in
+			// outward_npci_submission.
+			// =========================================================
+
+			int validChequeCount =
+					cheques.size();
+
+			int totalChequeCount =
+					service.getBatchCheques(
+							batchNumber).size();
+
+			int invalidChequeCount =
+					totalChequeCount
+					- validChequeCount;
+
+			boolean saved =
+					service.saveNPCISubmission(
+							batchNumber,
+							validChequeCount,
+							invalidChequeCount,
+							fileName);
+
+			if (saved) {
+
+				Messagebox.show(
+						"Valid Cheques XML downloaded successfully "
+								+ "and NPCI submission details saved.",
+								"Checker Reports",
+								Messagebox.OK,
+								Messagebox.INFORMATION);
+
+			} else {
+
+				Messagebox.show(
+						"Valid Cheques XML not downloaded successfully, "
+								+ "but NPCI submission details could not be saved.",
+								"Checker Reports",
+								Messagebox.OK,
+								Messagebox.EXCLAMATION);
+			}
+
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			Messagebox.show(
+					"Unable to download Valid XML.\n\n"
+							+ e.getMessage(),
+							"Checker Reports",
+							Messagebox.OK,
+							Messagebox.ERROR);
+		}
+	}
+
+	// ================================================================
+	// DOWNLOAD REJECTED XML
+	// RRF
+	//
+	// Only rejected cheques are included.
+	// This XML is NOT sent to NPCI.
+	// It is the RRF file.
+	// ================================================================
+
+	private void downloadRejectedXml(
+			String batchNumber) {
+
+		try {
+
+			List<OutwardCheque> cheques =
+					service.getRrfCheques(
+							batchNumber);
+
+			String xml =
+					buildRejectedXml(
+							batchNumber,
+							cheques);
+
+			if (xml == null) {
+				return;
+			}
+
+			String fileName = batchNumber
+					+ ".xml";
+
+			// ========================================================= 
+			// SAVE RRF XML TO ARCHIVE 
+			// =========================================================
+
+			String archivePath = "C:\\Users\\ginja\\eclipse-workspace\\CTS\\src\\main\\webapp\\css\\outward\\Archive\\RejectedCheques"; 
+			Path directory = Paths.get(archivePath); 
+			if (!Files.exists(directory)) { 
+				Files.createDirectories(directory); 
+			} Path filePath = directory.resolve(fileName); 
+			Files.write( filePath, xml.getBytes(StandardCharsets.UTF_8));
+
+			Filedownload.save(
+					xml,
+					"application/xml",
+					fileName);
+
+		} catch (IllegalStateException e) {
+
+			Messagebox.show(
+					"RRF is not available for this batch.",
+					"Checker Reports",
+					Messagebox.OK,
+					Messagebox.INFORMATION);
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			Messagebox.show(
+					"Unable to download RRF XML.\n\n"
+							+ e.getMessage(),
+							"Checker Reports",
+							Messagebox.OK,
+							Messagebox.ERROR);
+		}
+	}
+
+	// ================================================================
+	// BUILD VALID XML
+	// ================================================================
+
+	private String buildValidXml(
+			String batchNumber,
+			List<OutwardCheque> cheques) {
+
+		StringBuilder xml =
+				new StringBuilder();
+
+		int validCount = 0;
+
+		for (OutwardCheque cheque : cheques) {
+
+			if (cheque != null &&
+					"CHECKER_ACCEPTED".equalsIgnoreCase(
+							cheque.getChequeStatus())) {
+
+				validCount++;
+			}
+		}
+
+		if (validCount == 0) {
+
+			Messagebox.show(
+					"Valid XML is not available for batch "
+							+ batchNumber
+							+ ".",
+							"Checker Reports",
+							Messagebox.OK,
+							Messagebox.INFORMATION);
+
+			return null;
+		}
+
+		xml.append(
+				"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 
-                item.appendChild(validCell);
+		xml.append(
+				"<ValidChequesReport>\n");
 
+		xml.append(
+				"    <BatchNumber>")
+		.append(xmlValue(batchNumber))
+		.append("</BatchNumber>\n");
 
-                Listcell rejectedCell =
-                        new Listcell();
+		xml.append(
+				"    <TotalValidCheques>")
+		.append(validCount)
+		.append("</TotalValidCheques>\n");
+
+		xml.append(
+				"    <Cheques>\n");
 
-                Button rejectedButton =
-                        new Button();
-
-                rejectedButton.setLabel(
-                        "Download XML");
-
-                rejectedButton.setSclass(
-                        "secondary-button");
-
-                rejectedButton.setDisabled(
-                        rejectedCheques == 0);
-
-                rejectedButton.addEventListener(
-                        "onClick",
-                        event -> downloadRejectedXml(
-                                batchNumber));
-
-                rejectedCell.appendChild(
-                        rejectedButton);
-
-                item.appendChild(rejectedCell);
-
-
-                reportList.appendChild(item);
-            }
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            Messagebox.show(
-                    "Unable to load report batches.\n\n"
-                            + e.getMessage(),
-                    "Checker Reports",
-                    Messagebox.OK,
-                    Messagebox.ERROR);
-        }
-    }
-
-
-    private void downloadValidXml(
-            String batchNumber) {
-
-        try {
-
-            List<OutwardCheque> cheques =
-                    checkerChequeDAO.getChequesByBatch(
-                            batchNumber);
-
-            String xml =
-                    buildValidXml(
-                            batchNumber,
-                            cheques);
-
-            if (xml == null) {
-                return;
-            }
-
-            String fileName =
-                    "Valid_Cheques_"
-                            + batchNumber
-                            + ".xml";
-
-            Filedownload.save(
-                    xml,
-                    "application/xml",
-                    fileName);
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            Messagebox.show(
-                    "Unable to download Valid XML.\n\n"
-                            + e.getMessage(),
-                    "Checker Reports",
-                    Messagebox.OK,
-                    Messagebox.ERROR);
-        }
-    }
-
-
-    private void downloadRejectedXml(
-            String batchNumber) {
-
-        try {
-
-            List<OutwardCheque> cheques =
-                    checkerChequeDAO.getChequesByBatch(
-                            batchNumber);
-
-            String xml =
-                    buildRejectedXml(
-                            batchNumber,
-                            cheques);
-
-            if (xml == null) {
-                return;
-            }
-
-            String fileName =
-                    "Rejected_Cheques_"
-                            + batchNumber
-                            + ".xml";
-
-            Filedownload.save(
-                    xml,
-                    "application/xml",
-                    fileName);
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            Messagebox.show(
-                    "Unable to download Rejected XML.\n\n"
-                            + e.getMessage(),
-                    "Checker Reports",
-                    Messagebox.OK,
-                    Messagebox.ERROR);
-        }
-    }
-
-
-    private String buildValidXml(
-            String batchNumber,
-            List<OutwardCheque> cheques) {
-
-        StringBuilder xml =
-                new StringBuilder();
-
-        int validCount = 0;
-
-        for (OutwardCheque cheque : cheques) {
-
-            if ("CHECKER_ACCEPTED".equalsIgnoreCase(
-                    cheque.getChequeStatus())) {
-
-                validCount++;
-            }
-        }
-
-        if (validCount == 0) {
-
-            Messagebox.show(
-                    "Valid XML is not available for batch "
-                            + batchNumber
-                            + ".",
-                    "Checker Reports",
-                    Messagebox.OK,
-                    Messagebox.INFORMATION);
-
-            return null;
-        }
-
-        xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-
-        xml.append("<ValidChequesReport>\n");
-
-        xml.append("    <BatchNumber>")
-                .append(xmlValue(batchNumber))
-                .append("</BatchNumber>\n");
-
-        xml.append("    <TotalValidCheques>")
-                .append(validCount)
-                .append("</TotalValidCheques>\n");
-
-        xml.append("    <Cheques>\n");
-
-
-        for (OutwardCheque cheque : cheques) {
-
-            if (!"CHECKER_ACCEPTED".equalsIgnoreCase(
-                    cheque.getChequeStatus())) {
-
-                continue;
-            }
-
-            appendChequeXml(
-                    xml,
-                    cheque,
-                    false);
-        }
-
-
-        xml.append("    </Cheques>\n");
-
-        xml.append("</ValidChequesReport>\n");
-
-        return xml.toString();
-    }
-
-
-    private String buildRejectedXml(
-            String batchNumber,
-            List<OutwardCheque> cheques) {
-
-        StringBuilder xml =
-                new StringBuilder();
-
-        int rejectedCount = 0;
-
-        for (OutwardCheque cheque : cheques) {
-
-            if ("CHECKER_REJECTED".equalsIgnoreCase(
-                    cheque.getChequeStatus())) {
-
-                rejectedCount++;
-            }
-        }
-
-        if (rejectedCount == 0) {
-
-            Messagebox.show(
-                    "Rejected XML is not available for batch "
-                            + batchNumber
-                            + ".",
-                    "Checker Reports",
-                    Messagebox.OK,
-                    Messagebox.INFORMATION);
-
-            return null;
-        }
-
-        xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-
-        xml.append("<RejectedChequesReport>\n");
-
-        xml.append("    <BatchNumber>")
-                .append(xmlValue(batchNumber))
-                .append("</BatchNumber>\n");
-
-        xml.append("    <TotalRejectedCheques>")
-                .append(rejectedCount)
-                .append("</TotalRejectedCheques>\n");
-
-        xml.append("    <Cheques>\n");
-
-
-        for (OutwardCheque cheque : cheques) {
-
-            if (!"CHECKER_REJECTED".equalsIgnoreCase(
-                    cheque.getChequeStatus())) {
-
-                continue;
-            }
-
-            appendChequeXml(
-                    xml,
-                    cheque,
-                    true);
-        }
-
-
-        xml.append("    </Cheques>\n");
-
-        xml.append("</RejectedChequesReport>\n");
-
-        return xml.toString();
-    }
-
-
-    private void appendChequeXml(
-            StringBuilder xml,
-            OutwardCheque cheque,
-            boolean rejected) {
-
-        xml.append("        <Cheque>\n");
-
-        xml.append("            <ChequeNumber>")
-                .append(xmlValue(
-                        cheque.getChequeNumber()))
-                .append("</ChequeNumber>\n");
-
-        xml.append("            <BatchNumber>")
-                .append(xmlValue(
-                        cheque.getBatchNumber()))
-                .append("</BatchNumber>\n");
-
-        xml.append("            <ChequeDate>")
-                .append(xmlValue(
-                        cheque.getChequeDate()))
-                .append("</ChequeDate>\n");
-
-        xml.append("            <CityCode>")
-                .append(xmlValue(
-                        cheque.getCityCode()))
-                .append("</CityCode>\n");
-
-        xml.append("            <BankCode>")
-                .append(xmlValue(
-                        cheque.getBankCode()))
-                .append("</BankCode>\n");
-
-        xml.append("            <BranchCode>")
-                .append(xmlValue(
-                        cheque.getBranchCode()))
-                .append("</BranchCode>\n");
-
-        xml.append("            <DrawerAccountNumber>")
-                .append(xmlValue(
-                        cheque.getDrawerAccountNumber()))
-                .append("</DrawerAccountNumber>\n");
-
-        xml.append("            <DrawerName>")
-                .append(xmlValue(
-                        cheque.getDrawerName()))
-                .append("</DrawerName>\n");
-
-        xml.append("            <PayeeName>")
-                .append(xmlValue(
-                        cheque.getPayeeName()))
-                .append("</PayeeName>\n");
-
-        xml.append("            <PayeeAccountNumber>")
-                .append(xmlValue(
-                        cheque.getPayeeAccountNumber()))
-                .append("</PayeeAccountNumber>\n");
-
-        xml.append("            <Amount>")
-                .append(xmlValue(
-                        cheque.getAmount()))
-                .append("</Amount>\n");
-
-        xml.append("            <AmountInWords>")
-                .append(xmlValue(
-                        cheque.getAmountInWords()))
-                .append("</AmountInWords>\n");
-
-        xml.append("            <ChequeStatus>")
-                .append(xmlValue(
-                        cheque.getChequeStatus()))
-                .append("</ChequeStatus>\n");
-
-
-        if (rejected) {
-
-            xml.append("            <ReturnReasonId>")
-                    .append(xmlValue(
-                            cheque.getReturnReasonId()))
-                    .append("</ReturnReasonId>\n");
-
-            xml.append("            <CheckerRemarks>")
-                    .append(xmlValue(
-                            cheque.getCheckerRemarks()))
-                    .append("</CheckerRemarks>\n");
-        }
-
-
-        xml.append("        </Cheque>\n");
-    }
-
-
-    private String xmlValue(Object value) {
-
-        if (value == null) {
-            return "";
-        }
-
-        String text =
-                String.valueOf(value);
-
-        return text
-                .replace("&", "&amp;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
-                .replace("\"", "&quot;")
-                .replace("'", "&apos;");
-    }
-
-
-    @Listen("onClick = #refreshReportBtn")
-    public void refreshReports() {
-
-        loadReportBatches();
-    }
+		for (OutwardCheque cheque : cheques) {
+
+			if (!"CHECKER_ACCEPTED".equalsIgnoreCase(
+					cheque.getChequeStatus())) {
+
+				continue;
+			}
+
+			appendChequeXml(
+					xml,
+					cheque,
+					false);
+		}
+
+		xml.append(
+				"    </Cheques>\n");
+
+		xml.append(
+				"</ValidChequesReport>\n");
+
+		return xml.toString();
+	}
+
+	// ================================================================
+	// BUILD RRF XML
+	// ================================================================
+
+	private String buildRejectedXml(
+			String batchNumber,
+			List<OutwardCheque> cheques) {
+
+		StringBuilder xml =
+				new StringBuilder();
+
+		int rejectedCount =
+				cheques.size();
+
+		if (rejectedCount == 0) {
+
+			Messagebox.show(
+					"Rejected XML is not available for batch "
+							+ batchNumber
+							+ ".",
+							"Checker Reports",
+							Messagebox.OK,
+							Messagebox.INFORMATION);
+
+			return null;
+		}
+
+		xml.append(
+				"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+
+		xml.append(
+				"<RejectedChequesReport>\n");
+
+		xml.append(
+				"    <BatchNumber>")
+		.append(xmlValue(batchNumber))
+		.append("</BatchNumber>\n");
+
+		xml.append(
+				"    <TotalRejectedCheques>")
+		.append(rejectedCount)
+		.append("</TotalRejectedCheques>\n");
+
+		xml.append(
+				"    <Cheques>\n");
+
+		for (OutwardCheque cheque : cheques) {
+
+			appendChequeXml(
+					xml,
+					cheque,
+					true);
+		}
+
+		xml.append(
+				"    </Cheques>\n");
+
+		xml.append(
+				"</RejectedChequesReport>\n");
+
+		return xml.toString();
+	}
+
+	// ================================================================
+	// APPEND CHEQUE XML
+	// ================================================================
+
+	private void appendChequeXml(
+			StringBuilder xml,
+			OutwardCheque cheque,
+			boolean rejected) {
+
+		xml.append(
+				"        <Cheque>\n");
+
+		xml.append(
+				"            <ChequeNumber>")
+		.append(xmlValue(
+				cheque.getChequeNumber()))
+		.append("</ChequeNumber>\n");
+
+		xml.append(
+				"            <BatchNumber>")
+		.append(xmlValue(
+				cheque.getBatchNumber()))
+		.append("</BatchNumber>\n");
+
+		xml.append(
+				"            <ChequeDate>")
+		.append(xmlValue(
+				cheque.getChequeDate()))
+		.append("</ChequeDate>\n");
+
+		xml.append(
+				"            <CityCode>")
+		.append(xmlValue(
+				cheque.getCityCode()))
+		.append("</CityCode>\n");
+
+		xml.append(
+				"            <BankCode>")
+		.append(xmlValue(
+				cheque.getBankCode()))
+		.append("</BankCode>\n");
+
+		xml.append(
+				"            <BranchCode>")
+		.append(xmlValue(
+				cheque.getBranchCode()))
+		.append("</BranchCode>\n");
+
+		xml.append(
+				"            <DrawerAccountNumber>")
+		.append(xmlValue(
+				cheque.getDrawerAccountNumber()))
+		.append("</DrawerAccountNumber>\n");
+
+		xml.append(
+				"            <DrawerName>")
+		.append(xmlValue(
+				cheque.getDrawerName()))
+		.append("</DrawerName>\n");
+
+		xml.append(
+				"            <PayeeName>")
+		.append(xmlValue(
+				cheque.getPayeeName()))
+		.append("</PayeeName>\n");
+
+		xml.append(
+				"            <PayeeAccountNumber>")
+		.append(xmlValue(
+				cheque.getPayeeAccountNumber()))
+		.append("</PayeeAccountNumber>\n");
+
+		xml.append(
+				"            <Amount>")
+		.append(xmlValue(
+				cheque.getAmount()))
+		.append("</Amount>\n");
+
+		xml.append(
+				"            <AmountInWords>")
+		.append(xmlValue(
+				cheque.getAmountInWords()))
+		.append("</AmountInWords>\n");
+
+		xml.append(
+				"            <ChequeStatus>")
+		.append(xmlValue(
+				cheque.getChequeStatus()))
+		.append("</ChequeStatus>\n");
+
+		if (rejected) {
+
+			xml.append(
+					"            <ReturnReasonId>")
+			.append(xmlValue(
+					cheque.getReturnReasonId()))
+			.append("</ReturnReasonId>\n");
+
+			xml.append(
+					"            <CheckerRemarks>")
+			.append(xmlValue(
+					cheque.getCheckerRemarks()))
+			.append("</CheckerRemarks>\n");
+		}
+
+		xml.append(
+				"        </Cheque>\n");
+	}
+
+	// ================================================================
+	// XML VALUE
+	// ================================================================
+
+	private String xmlValue(Object value) {
+
+		if (value == null) {
+			return "";
+		}
+
+		String text =
+				String.valueOf(value);
+
+		return text
+				.replace("&", "&amp;")
+				.replace("<", "&lt;")
+				.replace(">", "&gt;")
+				.replace("\"", "&quot;")
+				.replace("'", "&apos;");
+	}
+
+	// ================================================================
+	// REFRESH
+	// ================================================================
+
+	@Listen("onClick = #refreshReportBtn")
+	public void refreshReports() {
+
+		loadReportBatches();
+	}
 }

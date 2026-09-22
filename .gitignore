@@ -4,4 +4,10 @@
 /inward-files/
 
 /src/main/webapp/inward-files/images/
-/src/main/webapp/inward-chi-files/
+/src/main/webapp/inward-chi-files/pibf/
+/src/main/webapp/inward-chi-files/pxf/
+/src/main/webapp/inward-chi-files/ocr/
+/src/main/webapp/inward-files/archive/
+/src/main/webapp/zul/outward/images/
+*.img
+*.png

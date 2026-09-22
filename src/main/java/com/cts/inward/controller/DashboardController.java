@@ -1,4 +1,4 @@
-package com.cts.inward.controller;
+ package com.cts.inward.controller;
 
 import java.util.List;
 
@@ -65,7 +65,18 @@ public class DashboardController
 
     private String selectedStatus = "All";
 
+    /*
+     * This is still the logged-in user's ID.
+     *
+     * We continue using the ID internally for ownership
+     * checking. We only display the user's name on the UI.
+     */
     private Long loggedInUserId;
+
+
+    // -------------------------------------------------------------------------
+    // Compose
+    // -------------------------------------------------------------------------
 
     @Override
     public void doAfterCompose(
@@ -81,6 +92,7 @@ public class DashboardController
 
         loadLoggedInUser();
 
+
         /*
          * -----------------------------------------------------------------
          * ALL
@@ -89,10 +101,14 @@ public class DashboardController
         allBtn.addEventListener(
                 Events.ON_CLICK,
                 event -> {
+
                     selectedStatus = "All";
+
                     updateFilterButtons();
+
                     loadBatches();
                 });
+
 
         /*
          * -----------------------------------------------------------------
@@ -102,10 +118,14 @@ public class DashboardController
         availableBtn.addEventListener(
                 Events.ON_CLICK,
                 event -> {
+
                     selectedStatus = "Available";
+
                     updateFilterButtons();
+
                     loadBatches();
                 });
+
 
         /*
          * -----------------------------------------------------------------
@@ -115,10 +135,14 @@ public class DashboardController
         myBatchesBtn.addEventListener(
                 Events.ON_CLICK,
                 event -> {
+
                     selectedStatus = "My Batches";
+
                     updateFilterButtons();
+
                     loadBatches();
                 });
+
 
         /*
          * -----------------------------------------------------------------
@@ -126,17 +150,28 @@ public class DashboardController
          * -----------------------------------------------------------------
          */
         if (returnToMakerBtn != null) {
+
             returnToMakerBtn.addEventListener(
                     Events.ON_CLICK,
                     event -> {
-                        selectedStatus = "Return to Maker";
+
+                        selectedStatus =
+                                "Return to Maker";
+
                         updateFilterButtons();
+
                         loadBatches();
                     });
         }
 
+
         loadBatches();
     }
+
+
+    // -------------------------------------------------------------------------
+    // Load logged in user
+    // -------------------------------------------------------------------------
 
     private void loadLoggedInUser() {
 
@@ -155,11 +190,11 @@ public class DashboardController
         }
     }
 
-    /*
-     * -------------------------------------------------------------------------
-     * Filter button styling
-     * -------------------------------------------------------------------------
-     */
+
+    // -------------------------------------------------------------------------
+    // Filter button styling
+    // -------------------------------------------------------------------------
+
     private void updateFilterButtons() {
 
         allBtn.setSclass(
@@ -172,9 +207,11 @@ public class DashboardController
                 "filter-btn");
 
         if (returnToMakerBtn != null) {
+
             returnToMakerBtn.setSclass(
                     "filter-btn");
         }
+
 
         if ("All".equals(selectedStatus)) {
 
@@ -182,11 +219,13 @@ public class DashboardController
                     "filter-btn active-filter");
         }
 
+
         if ("Available".equals(selectedStatus)) {
 
             availableBtn.setSclass(
                     "filter-btn active-filter");
         }
+
 
         if ("My Batches".equals(selectedStatus)) {
 
@@ -194,18 +233,21 @@ public class DashboardController
                     "filter-btn active-filter");
         }
 
-        if ("Return to Maker".equals(selectedStatus) && returnToMakerBtn != null) {
+
+        if ("Return to Maker".equals(
+                selectedStatus)
+                && returnToMakerBtn != null) {
 
             returnToMakerBtn.setSclass(
                     "filter-btn active-filter");
         }
     }
 
-    /*
-     * -------------------------------------------------------------------------
-     * Load dashboard batches
-     * -------------------------------------------------------------------------
-     */
+
+    // -------------------------------------------------------------------------
+    // Load dashboard batches
+    // -------------------------------------------------------------------------
+
     private void loadBatches() {
 
         Rows rows =
@@ -223,8 +265,11 @@ public class DashboardController
                     java.util.Collections.emptyList();
         }
 
+
         int availableCount = 0;
+
         int myBatchesCount = 0;
+
 
         /*
          * -----------------------------------------------------------------
@@ -242,6 +287,7 @@ public class DashboardController
                     STATUS_LOCKED.equalsIgnoreCase(
                             batch.getLockStatus());
 
+
             if (!locked
                     && (STATUS_RECEIVED.equalsIgnoreCase(
                             batchStatus)
@@ -250,11 +296,13 @@ public class DashboardController
                 availableCount++;
             }
 
+
             if (isOwnedByCurrentUser(batch)) {
 
                 myBatchesCount++;
             }
         }
+
 
         receivedCountLabel.setValue(
                 String.valueOf(
@@ -267,6 +315,7 @@ public class DashboardController
         myBatchesCountLabel.setValue(
                 String.valueOf(
                         myBatchesCount));
+
 
         /*
          * -----------------------------------------------------------------
@@ -288,6 +337,7 @@ public class DashboardController
                     getDisplayStatus(
                             batch);
 
+
             if (!matchesFilter(
                     selectedStatus,
                     batch,
@@ -296,8 +346,10 @@ public class DashboardController
                 continue;
             }
 
+
             Row row =
                     new Row();
+
 
             /*
              * -------------------------------------------------------------
@@ -309,6 +361,7 @@ public class DashboardController
                             String.valueOf(
                                     batch.getBatchId())));
 
+
             /*
              * -------------------------------------------------------------
              * Total cheque count
@@ -318,6 +371,7 @@ public class DashboardController
                     new Label(
                             String.valueOf(
                                     batch.getTotalCheques())));
+
 
             /*
              * -------------------------------------------------------------
@@ -330,6 +384,7 @@ public class DashboardController
             Label statusLabel =
                     new Label(
                             displayStatus);
+
 
             if ("Locked".equalsIgnoreCase(
                     displayStatus)) {
@@ -344,7 +399,10 @@ public class DashboardController
                         "z-icon-lock");
 
                 statusLayout.appendChild(icon);
-                statusLayout.appendChild(statusLabel);
+
+                statusLayout.appendChild(
+                        statusLabel);
+
 
             } else if ("MICR Repair".equalsIgnoreCase(
                     displayStatus)) {
@@ -359,7 +417,10 @@ public class DashboardController
                         "z-icon-wrench");
 
                 statusLayout.appendChild(icon);
-                statusLayout.appendChild(statusLabel);
+
+                statusLayout.appendChild(
+                        statusLabel);
+
 
             } else if ("Data Entry".equalsIgnoreCase(
                     displayStatus)) {
@@ -374,7 +435,10 @@ public class DashboardController
                         "z-icon-edit");
 
                 statusLayout.appendChild(icon);
-                statusLayout.appendChild(statusLabel);
+
+                statusLayout.appendChild(
+                        statusLabel);
+
 
             } else if ("Data Entry Completed"
                     .equalsIgnoreCase(
@@ -390,10 +454,14 @@ public class DashboardController
                         "z-icon-check");
 
                 statusLayout.appendChild(icon);
-                statusLayout.appendChild(statusLabel);
 
-            } else if ("Return to Maker".equalsIgnoreCase(
-                    displayStatus)) {
+                statusLayout.appendChild(
+                        statusLabel);
+
+
+            } else if ("Return to Maker"
+                    .equalsIgnoreCase(
+                            displayStatus)) {
 
                 statusLayout.setSclass(
                         "status-badge badge-return-to-maker");
@@ -405,7 +473,10 @@ public class DashboardController
                         "z-icon-reply");
 
                 statusLayout.appendChild(icon);
-                statusLayout.appendChild(statusLabel);
+
+                statusLayout.appendChild(
+                        statusLabel);
+
 
             } else {
 
@@ -416,28 +487,41 @@ public class DashboardController
                         statusLabel);
             }
 
+
             row.appendChild(
                     statusLayout);
 
+
             /*
              * -------------------------------------------------------------
-             * User ID / lock owner
+             * Locked By
+             *
+             * IMPORTANT:
+             * Display maker NAME instead of maker ID.
+             *
+             * lockUserId is still retained inside the DTO
+             * for ownership checking.
              * -------------------------------------------------------------
              */
-            Label userIdLabel =
-                    new Label("Not Assigned");
+            Label userNameLabel =
+                    new Label(
+                            "Not Assigned");
+
 
             if (locked
-                    && batch.getLockUserId()
-                            != null) {
+                    && batch.getLockUserName() != null
+                    && !batch.getLockUserName()
+                            .trim()
+                            .isEmpty()) {
 
-                userIdLabel.setValue(
-                        String.valueOf(
-                                batch.getLockUserId()));
+                userNameLabel.setValue(
+                        batch.getLockUserName());
             }
 
+
             row.appendChild(
-                    userIdLabel);
+                    userNameLabel);
+
 
             /*
              * -------------------------------------------------------------
@@ -456,8 +540,10 @@ public class DashboardController
             row.appendChild(
                     actionButton);
 
+
             rows.appendChild(row);
         }
+
 
         /*
          * -----------------------------------------------------------------
@@ -473,14 +559,15 @@ public class DashboardController
                                     .size());
         }
 
+
         batchesGrid.setActivePage(0);
     }
 
-    /*
-     * -------------------------------------------------------------------------
-     * Determine display status
-     * -------------------------------------------------------------------------
-     */
+
+    // -------------------------------------------------------------------------
+    // Determine display status
+    // -------------------------------------------------------------------------
+
     private String getDisplayStatus(
             DashboardBatchDto batch) {
 
@@ -492,6 +579,7 @@ public class DashboardController
                 STATUS_LOCKED.equalsIgnoreCase(
                         batch.getLockStatus());
 
+
         /*
          * SENT TO CHECKER
          */
@@ -500,6 +588,7 @@ public class DashboardController
 
             return "Sent to Checker";
         }
+
 
         /*
          * RETURN TO MAKER
@@ -510,6 +599,7 @@ public class DashboardController
             return "Return to Maker";
         }
 
+
         /*
          * DATA ENTRY COMPLETED
          */
@@ -518,6 +608,7 @@ public class DashboardController
 
             return "Data Entry Completed";
         }
+
 
         /*
          * MICR REPAIR
@@ -528,6 +619,7 @@ public class DashboardController
             return "MICR Repair";
         }
 
+
         /*
          * DATA ENTRY
          */
@@ -537,6 +629,7 @@ public class DashboardController
             return "Data Entry";
         }
 
+
         /*
          * LOCKED
          */
@@ -545,17 +638,18 @@ public class DashboardController
             return "Locked";
         }
 
+
         /*
          * AVAILABLE
          */
         return "Available";
     }
 
-    /*
-     * -------------------------------------------------------------------------
-     * Filter matching
-     * -------------------------------------------------------------------------
-     */
+
+    // -------------------------------------------------------------------------
+    // Filter matching
+    // -------------------------------------------------------------------------
+
     private boolean matchesFilter(
             String filter,
             DashboardBatchDto batch,
@@ -567,12 +661,14 @@ public class DashboardController
             return true;
         }
 
+
         if ("Available".equalsIgnoreCase(
                 filter)) {
 
             return "Available".equalsIgnoreCase(
                     displayStatus);
         }
+
 
         if ("My Batches".equalsIgnoreCase(
                 filter)) {
@@ -581,6 +677,7 @@ public class DashboardController
                     batch);
         }
 
+
         if ("Return to Maker".equalsIgnoreCase(
                 filter)) {
 
@@ -588,14 +685,15 @@ public class DashboardController
                     displayStatus);
         }
 
+
         return false;
     }
 
-    /*
-     * -------------------------------------------------------------------------
-     * Configure action button
-     * -------------------------------------------------------------------------
-     */
+
+    // -------------------------------------------------------------------------
+    // Configure action button
+    // -------------------------------------------------------------------------
+
     private void configureActionButton(
             Button actionButton,
             DashboardBatchDto batch,
@@ -604,6 +702,7 @@ public class DashboardController
 
         long batchId =
                 batch.getBatchId();
+
 
         /*
          * -----------------------------------------------------------------
@@ -636,6 +735,7 @@ public class DashboardController
             return;
         }
 
+
         /*
          * -----------------------------------------------------------------
          * RETURN TO MAKER
@@ -651,6 +751,7 @@ public class DashboardController
 
                 return;
             }
+
 
             actionButton.setLabel(
                     "Re-verify");
@@ -673,6 +774,7 @@ public class DashboardController
             return;
         }
 
+
         /*
          * -----------------------------------------------------------------
          * MICR REPAIR
@@ -688,6 +790,7 @@ public class DashboardController
 
                 return;
             }
+
 
             int nextRepairIndex =
                     micrRepairService
@@ -706,6 +809,7 @@ public class DashboardController
             actionButton.setDisabled(
                     nextRepairIndex < 0);
 
+
             if (nextRepairIndex >= 0) {
 
                 actionButton.addEventListener(
@@ -718,6 +822,7 @@ public class DashboardController
 
             return;
         }
+
 
         /*
          * -----------------------------------------------------------------
@@ -734,6 +839,7 @@ public class DashboardController
 
                 return;
             }
+
 
             actionButton.setLabel(
                     "Data Entry");
@@ -756,28 +862,10 @@ public class DashboardController
             return;
         }
 
+
         /*
          * -----------------------------------------------------------------
          * DATA ENTRY COMPLETED
-         * -----------------------------------------------------------------
-         *
-         * IMPORTANT:
-         *
-         * Once a batch reaches DATA_ENTRY_COMPLETED,
-         * the action must be "Send to Checker".
-         *
-         * Do NOT check lock ownership here.
-         *
-         * The dashboard screenshot showed:
-         *
-         * Status = Data Entry Completed
-         * Action = Locked
-         *
-         * because the previous code required the batch to still be
-         * owned by the current user.
-         *
-         * DATA_ENTRY_COMPLETED is the workflow state that allows
-         * the Maker to move the batch to Send to Checker.
          * -----------------------------------------------------------------
          */
         if (STATUS_DATA_ENTRY_COMPLETED.equalsIgnoreCase(
@@ -803,6 +891,7 @@ public class DashboardController
 
             return;
         }
+
 
         /*
          * -----------------------------------------------------------------
@@ -840,6 +929,7 @@ public class DashboardController
             return;
         }
 
+
         /*
          * -----------------------------------------------------------------
          * FALLBACK
@@ -849,11 +939,11 @@ public class DashboardController
                 actionButton);
     }
 
-    /*
-     * -------------------------------------------------------------------------
-     * Check current user's ownership
-     * -------------------------------------------------------------------------
-     */
+
+    // -------------------------------------------------------------------------
+    // Check current user's ownership
+    // -------------------------------------------------------------------------
+
     private boolean isOwnedByCurrentUser(
             DashboardBatchDto batch) {
 
@@ -863,11 +953,11 @@ public class DashboardController
                         batch.getLockUserId());
     }
 
-    /*
-     * -------------------------------------------------------------------------
-     * Locked button
-     * -------------------------------------------------------------------------
-     */
+
+    // -------------------------------------------------------------------------
+    // Locked button
+    // -------------------------------------------------------------------------
+
     private void setLockedButton(
             Button actionButton) {
 
@@ -884,47 +974,79 @@ public class DashboardController
                 true);
     }
 
-    /*
-     * -------------------------------------------------------------------------
-     * Lock & Validate
-     * -------------------------------------------------------------------------
-     */
+
+    // -------------------------------------------------------------------------
+    // Batch repair status
+    // -------------------------------------------------------------------------
+
     private static class BatchRepairStatus {
+
         final boolean needsMicrRepair;
+
         final int nextRepairIndex;
 
-        BatchRepairStatus(boolean needsMicrRepair, int nextRepairIndex) {
-            this.needsMicrRepair = needsMicrRepair;
-            this.nextRepairIndex = nextRepairIndex;
+
+        BatchRepairStatus(
+                boolean needsMicrRepair,
+                int nextRepairIndex) {
+
+            this.needsMicrRepair =
+                    needsMicrRepair;
+
+            this.nextRepairIndex =
+                    nextRepairIndex;
         }
     }
 
-    private BatchRepairStatus checkBatchRepairStatus(long batchId) {
+
+    private BatchRepairStatus checkBatchRepairStatus(
+            long batchId) {
+
         List<MicrComparisonDto> comparisons =
-                micrRepairService.compareBatch(batchId);
+                micrRepairService
+                        .compareBatch(
+                                batchId);
 
         boolean needsRepair = false;
+
         int firstIndex = -1;
 
+
         if (comparisons != null) {
-            for (int i = 0; i < comparisons.size(); i++) {
-                MicrComparisonDto c = comparisons.get(i);
-                if (c != null && c.isNeedsMicrRepair()) {
+
+            for (int i = 0;
+                    i < comparisons.size();
+                    i++) {
+
+                MicrComparisonDto c =
+                        comparisons.get(i);
+
+
+                if (c != null
+                        && c.isNeedsMicrRepair()) {
+
                     needsRepair = true;
+
+
                     if (firstIndex < 0) {
+
                         firstIndex = i;
                     }
                 }
             }
         }
-        return new BatchRepairStatus(needsRepair, firstIndex);
+
+
+        return new BatchRepairStatus(
+                needsRepair,
+                firstIndex);
     }
 
-    /*
-     * -----------------------------------------------------------------
-     * 2. Run NPCI vs OCR MICR validation
-     * -----------------------------------------------------------------
-     */
+
+    // -------------------------------------------------------------------------
+    // Lock & Validate
+    // -------------------------------------------------------------------------
+
     private void lockAndValidate(
             long batchId) {
 
@@ -936,6 +1058,7 @@ public class DashboardController
             return;
         }
 
+
         /*
          * -----------------------------------------------------------------
          * 1. Lock
@@ -945,6 +1068,7 @@ public class DashboardController
                 dashboardService.lockBatch(
                         batchId,
                         loggedInUserId);
+
 
         if (!locked) {
 
@@ -958,13 +1082,16 @@ public class DashboardController
             return;
         }
 
+
         /*
          * -----------------------------------------------------------------
-         * 2. Run NPCI vs OCR MICR validation (Single check)
+         * 2. Run NPCI vs OCR MICR validation
          * -----------------------------------------------------------------
          */
         BatchRepairStatus repairStatus =
-                checkBatchRepairStatus(batchId);
+                checkBatchRepairStatus(
+                        batchId);
+
 
         /*
          * -----------------------------------------------------------------
@@ -980,6 +1107,7 @@ public class DashboardController
                                     STATUS_MICR_REPAIR,
                                     loggedInUserId);
 
+
             if (!updated) {
 
                 showError(
@@ -990,6 +1118,7 @@ public class DashboardController
                 return;
             }
 
+
             if (repairStatus.nextRepairIndex < 0) {
 
                 showError(
@@ -999,12 +1128,14 @@ public class DashboardController
                 return;
             }
 
+
             openMicrRepair(
                     batchId,
                     repairStatus.nextRepairIndex);
 
             return;
         }
+
 
         /*
          * -----------------------------------------------------------------
@@ -1019,6 +1150,7 @@ public class DashboardController
                                 batchId,
                                 loggedInUserId);
 
+
         if (!moved) {
 
             showError(
@@ -1029,22 +1161,26 @@ public class DashboardController
             return;
         }
 
+
         openDataEntry(
                 batchId);
     }
 
-    /*
-     * -------------------------------------------------------------------------
-     * Open locked batch
-     * -------------------------------------------------------------------------
-     */
+
+    // -------------------------------------------------------------------------
+    // Open locked batch
+    // -------------------------------------------------------------------------
+
     private void openBatch(
             long batchId) {
 
         BatchRepairStatus repairStatus =
-                checkBatchRepairStatus(batchId);
+                checkBatchRepairStatus(
+                        batchId);
 
-        if (repairStatus.needsMicrRepair && repairStatus.nextRepairIndex >= 0) {
+
+        if (repairStatus.needsMicrRepair
+                && repairStatus.nextRepairIndex >= 0) {
 
             openMicrRepair(
                     batchId,
@@ -1053,15 +1189,16 @@ public class DashboardController
             return;
         }
 
+
         openDataEntry(
                 batchId);
     }
 
-    /*
-     * -------------------------------------------------------------------------
-     * Open MICR Repair
-     * -------------------------------------------------------------------------
-     */
+
+    // -------------------------------------------------------------------------
+    // Open MICR Repair
+    // -------------------------------------------------------------------------
+
     private void openMicrRepair(
             long batchId,
             int chequeIndex) {
@@ -1075,14 +1212,15 @@ public class DashboardController
                         + chequeIndex
                         + "&source=dashboard";
 
-        Executions.sendRedirect(url);
+        Executions.sendRedirect(
+                url);
     }
 
-    /*
-     * -------------------------------------------------------------------------
-     * Open Data Entry
-     * -------------------------------------------------------------------------
-     */
+
+    // -------------------------------------------------------------------------
+    // Open Data Entry
+    // -------------------------------------------------------------------------
+
     private void openDataEntry(
             long batchId) {
 
@@ -1093,14 +1231,15 @@ public class DashboardController
                         + batchId
                         + "&source=dashboard";
 
-        Executions.sendRedirect(url);
+        Executions.sendRedirect(
+                url);
     }
 
-    /*
-     * -------------------------------------------------------------------------
-     * Open Send to Checker
-     * -------------------------------------------------------------------------
-     */
+
+    // -------------------------------------------------------------------------
+    // Open Send to Checker
+    // -------------------------------------------------------------------------
+
     private void openSendToChecker(
             long batchId) {
 
@@ -1111,14 +1250,15 @@ public class DashboardController
                         + batchId
                         + "&source=dashboard";
 
-        Executions.sendRedirect(url);
+        Executions.sendRedirect(
+                url);
     }
 
-    /*
-     * -------------------------------------------------------------------------
-     * Show error
-     * -------------------------------------------------------------------------
-     */
+
+    // -------------------------------------------------------------------------
+    // Show error
+    // -------------------------------------------------------------------------
+
     private void showError(
             String message) {
 
@@ -1129,33 +1269,39 @@ public class DashboardController
                 Messagebox.ERROR);
     }
 
-    /*
-     * -------------------------------------------------------------------------
-     * Open Return to Maker batch (Routes according to return reasons)
-     * -------------------------------------------------------------------------
-     */
+
+    // -------------------------------------------------------------------------
+    // Open Return to Maker batch
+    // -------------------------------------------------------------------------
+
     private void openReturnToMakerBatch(
             long batchId) {
 
         BatchRepairStatus repairStatus =
-                checkBatchRepairStatus(batchId);
+                checkBatchRepairStatus(
+                        batchId);
 
-        if (repairStatus.needsMicrRepair && repairStatus.nextRepairIndex >= 0) {
+
+        if (repairStatus.needsMicrRepair
+                && repairStatus.nextRepairIndex >= 0) {
+
             openMicrRepair(
                     batchId,
                     repairStatus.nextRepairIndex);
+
             return;
         }
+
 
         openDataEntry(
                 batchId);
     }
 
-    /*
-     * -------------------------------------------------------------------------
-     * Safe string
-     * -------------------------------------------------------------------------
-     */
+
+    // -------------------------------------------------------------------------
+    // Safe string
+    // -------------------------------------------------------------------------
+
     private String safe(
             String value) {
 
@@ -1163,4 +1309,4 @@ public class DashboardController
                 ? ""
                 : value.trim();
     }
-}
+}

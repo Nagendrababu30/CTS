@@ -70,22 +70,48 @@ public class RoleDAOImpl implements RoleDAO {
 
         if (role == null) return false;
 
-        String sql =
-                "INSERT INTO \"role\" (role_name, description, status) "
-                + "VALUES (?, ?, ?)";
+        try {
+            /* Generate next role_id */
+            Long nextRoleId = getNextRoleId();
+            
+            String sql =
+                    "INSERT INTO \"role\" (role_id, role_name, description, status) "
+                    + "VALUES (?, ?, ?, ?)";
 
-        try (
-                Connection conn = ConnectionPool.getDataSource().getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)
-        ) {
-            stmt.setString(1, role.getRoleName());
-            stmt.setString(2, role.getDescription());
-            stmt.setString(3, role.getStatus());
-            return stmt.executeUpdate() > 0;
+            try (
+                    Connection conn = ConnectionPool.getDataSource().getConnection();
+                    PreparedStatement stmt = conn.prepareStatement(sql)
+            ) {
+                stmt.setLong(1, nextRoleId);
+                stmt.setString(2, role.getRoleName());
+                stmt.setString(3, role.getDescription());
+                stmt.setString(4, role.getStatus());
+                return stmt.executeUpdate() > 0;
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
+    }
+
+    /* Get next role_id by finding MAX(role_id) + 1 */
+    private Long getNextRoleId() {
+        
+        String sql = "SELECT COALESCE(MAX(role_id), 0) + 1 AS next_id FROM \"role\"";
+        
+        try (
+                Connection conn = ConnectionPool.getDataSource().getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()
+        ) {
+            if (rs.next()) {
+                return rs.getLong("next_id");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return 1L;  // Default to 1 if query fails
     }
 
     @Override

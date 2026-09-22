@@ -114,11 +114,47 @@
     padding: 0 !important;
 }
 
+.system-roles-header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
 .system-roles-title {
     font-size: 16px;
     font-weight: 650;
     color: #111827;
     display: block !important;
+}
+
+/* ============================================================
+   CREATE ROLE BUTTON
+   ============================================================ */
+
+.create-role-button {
+    padding: 8px 16px !important;
+    background: #175CD3 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    color: #FFFFFF !important;
+    font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 1px 3px rgba(23, 92, 211, 0.3) !important;
+}
+
+.create-role-button:hover {
+    background: #0D47A1 !important;
+    box-shadow: 0 4px 8px rgba(23, 92, 211, 0.4) !important;
+}
+
+.create-role-button:active {
+    background: #0A3A8A !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
 }
 
 
@@ -267,7 +303,6 @@
 .role-status-badge {
     display: inline-flex !important;
     align-items: center !important;
-    gap: 6px;
     border-radius: 999px;
     padding: 4px 12px;
     box-sizing: border-box;
@@ -293,14 +328,7 @@
     border: 1px solid #D1D5DB !important;
 }
 
-.role-status-dot {
-    font-size: 8px;
-    font-weight: 900;
-    line-height: 1;
-}
 
-.role-status-active .role-status-dot  { }
-.role-status-inactive .role-status-dot { }
 
 .role-status-label {
     font-family: 'Inter', sans-serif !important;
@@ -310,6 +338,262 @@
 
 .role-status-active .role-status-label  { }
 .role-status-inactive .role-status-label { }
+
+
+/* ============================================================
+   ROLE ACTION CELL & BUTTONS
+   ============================================================ */
+
+.role-action-cell {
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+.role-action-button {
+    padding: 6px 14px !important;
+    border: 1px solid #D1D5DB !important;
+    border-radius: 6px !important;
+    background: #FFFFFF !important;
+    font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    transition: all 0.2s ease !important;
+    min-width: 90px;
+}
+
+.role-action-button:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.role-action-button:active {
+    transform: translateY(1px) !important;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+.role-activate-button {
+    color: #059669 !important;
+    border-color: #A7F3D0 !important;
+    background: #F0FDF4 !important;
+}
+
+.role-activate-button:hover {
+    background: #DCFCE7 !important;
+    border-color: #86EFAC !important;
+}
+
+.role-deactivate-button {
+    color: #DC2626 !important;
+    border-color: #FECACA !important;
+    background: #FEF2F2 !important;
+}
+
+.role-deactivate-button:hover {
+    background: #FEE2E2 !important;
+    border-color: #FCA5A5 !important;
+}
+
+
+/* ============================================================
+   ROLE MODAL WINDOW
+   ============================================================ */
+
+.role-modal-window {
+    border-radius: 14px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18) !important;
+    overflow: hidden !important;
+    border: none !important;
+}
+
+.role-modal-main-box {
+    padding: 28px 28px 24px 28px;
+    box-sizing: border-box;
+    background: #FFFFFF;
+}
+
+/* ── Modal Header ── */
+.role-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 0;
+    border: none;
+}
+
+.role-modal-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+}
+
+.role-modal-icon-box {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    background: #EFF6FF;
+    border: 1.5px solid #DBEAFE;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.role-modal-icon-label {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.role-modal-title-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.role-modal-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #0B1F3F;
+    font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: -0.02em;
+    display: block;
+    margin-bottom: 3px;
+}
+
+.role-modal-subtitle {
+    font-size: 12px;
+    color: #64748B;
+    display: block;
+    font-weight: 400;
+}
+
+.role-modal-close-button {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: #64748B;
+    font-size: 18px;
+    font-weight: 300;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+/* ── Form ── */
+.role-form-box {
+    margin: 20px 0;
+    spacing: 16px;
+    width: 100%;
+}
+
+.role-form-label {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 6px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.role-form-input {
+    padding: 10px 12px !important;
+    border: 1.5px solid #E1E8F4 !important;
+    border-radius: 8px !important;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 13px !important;
+    color: #1F2D45 !important;
+    background: #FFFFFF !important;
+    transition: border-color 0.2s ease !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.role-form-input:focus {
+    border-color: #175CD3 !important;
+    box-shadow: 0 0 0 3px rgba(23, 92, 211, 0.1) !important;
+}
+
+.role-form-textarea {
+    padding: 10px 12px !important;
+    resize: vertical;
+    font-family: 'Inter', sans-serif !important;
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+    overflow-y: auto !important;
+}
+
+/* ── Info Message ── */
+.role-info-message {
+    padding: 12px 14px;
+    background: #EFF6FF;
+    border: 1px solid #DBEAFE;
+    border-radius: 8px;
+    margin-top: 12px;
+}
+
+.role-info-text {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 12px !important;
+    color: #0C63E4 !important;
+    display: block !important;
+}
+
+/* ── Footer ── */
+.role-modal-footer {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #E1E8F4;
+}
+
+.role-modal-cancel-button {
+    padding: 10px 20px !important;
+    background: #F3F4F6 !important;
+    border: 1px solid #D1D5DB !important;
+    border-radius: 8px !important;
+    color: #374151 !important;
+    font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.role-modal-cancel-button:hover {
+    background: #E5E7EB !important;
+}
+
+.role-modal-save-button {
+    padding: 10px 20px !important;
+    background: #175CD3 !important;
+    border: none !important;
+    border-radius: 8px !important;
+    color: #FFFFFF !important;
+    font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 1px 3px rgba(23, 92, 211, 0.3) !important;
+}
+
+.role-modal-save-button:hover {
+    background: #0D47A1 !important;
+    box-shadow: 0 4px 8px rgba(23, 92, 211, 0.4) !important;
+}
+
+.role-modal-save-button:active {
+    background: #0A3A8A !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
 
 
 

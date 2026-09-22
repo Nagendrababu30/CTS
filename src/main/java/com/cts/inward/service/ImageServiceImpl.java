@@ -56,16 +56,6 @@ public class ImageServiceImpl implements ImageService {
             Files.write(frontImagePath, imageData.getFrontImage());
             Files.write(backImagePath,  imageData.getBackImage());
 
-            // Also keep src/main/webapp in sync during development if running from workspace
-            try {
-                Path devDir = Path.of("src/main/webapp/inward-files/images", batchId, chequeNumber);
-                if (Files.exists(Path.of("src/main/webapp")) && !devDir.toAbsolutePath().equals(chequeImageDirectory.toAbsolutePath())) {
-                    Files.createDirectories(devDir);
-                    Files.write(devDir.resolve("front.jpg"), imageData.getFrontImage());
-                    Files.write(devDir.resolve("back.jpg"),  imageData.getBackImage());
-                }
-            } catch (Exception ignored) {}
-
             String relativeFront = "inward-files/images/" + batchId + "/" + chequeNumber + "/front.jpg";
             String relativeBack  = "inward-files/images/" + batchId + "/" + chequeNumber + "/back.jpg";
 

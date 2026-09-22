@@ -49,10 +49,20 @@
                     spacing="0"
                     sclass="system-roles-header">
 
-                    <label
-                        id="systemRolesTitle"
-                        value="System Roles"
-                        sclass="system-roles-title"/>
+                    <div
+                        sclass="system-roles-header-content">
+                        
+                        <label
+                            id="systemRolesTitle"
+                            value="System Roles"
+                            sclass="system-roles-title"/>
+
+                        <button
+                            id="createRoleBtn"
+                            label="+ Create Role"
+                            sclass="create-role-button"/>
+
+                    </div>
 
                 </vlayout>
 
@@ -74,11 +84,16 @@
 
                         <listheader
                             label="Description"
-                            width="45%"/>
+                            width="35%"/>
 
                         <listheader
                             label="Status"
-                            width="30%"
+                            width="20%"
+                            align="center"/>
+
+                        <listheader
+                            label="Actions"
+                            width="20%"
                             align="center"/>
 
                     </listhead>

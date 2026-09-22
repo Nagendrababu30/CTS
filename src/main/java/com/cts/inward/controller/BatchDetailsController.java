@@ -32,2689 +32,3147 @@ import com.cts.inward.model.ChequeImage;
 import com.cts.inward.service.BatchDetailsService;
 import com.cts.inward.service.BatchDetailsServiceImpl;
 
-public class BatchDetailsController extends GenericForwardComposer<Component> {
+public class BatchDetailsController
+        extends GenericForwardComposer<Component> {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	// =========================================================
-	// BATCH
-	// =========================================================
+    // =========================================================
+    // BATCH
+    // =========================================================
 
-	private Long batchId;
+    private Long batchId;
 
-	private List<Map<String, Object>> cheques = new ArrayList<>();
+    private List<Map<String, Object>> cheques = new ArrayList<>();
 
-	private int currentChequeIndex = 0;
+    private int currentChequeIndex = 0;
 
-	private BatchDetailsService batchDetailsService;
+    private BatchDetailsService batchDetailsService;
 
-	// =========================================================
-	// CHEQUE IMAGE & CONTROLS (Image 2)
-	// =========================================================
+    // =========================================================
+    // CHEQUE IMAGE & CONTROLS (Image 2)
+    // =========================================================
 
-	private Image chequeImage;
+    private Image chequeImage;
 
-	private Component chequeImageContainer;
+    private Component chequeImageContainer;
 
-	private Component chequePreview;
+    private Component chequePreview;
 
-	private Button toggleImageButton;
+    private Button toggleImageButton;
 
-	private Button zoomInButton;
+    private Button zoomInButton;
 
-	private Button zoomOutButton;
+    private Button zoomOutButton;
 
-	private Button rotateButton;
+    private Button rotateButton;
 
-	private Button resetViewButton;
+    private Button resetViewButton;
 
-	private Button btnFront;
+    private Button btnFront;
 
-	private Button btnBack;
+    private Button btnBack;
 
-	private String currentFrontImagePath;
+    private String currentFrontImagePath;
 
-	private String currentBackImagePath;
+    private String currentBackImagePath;
 
-	private boolean showingFront = true;
+    private boolean showingFront = true;
 
-	private double currentScale = 1.0;
+    private double currentScale = 1.0;
 
-	private int currentRotation = 0;
+    private int currentRotation = 0;
 
-	private ChequeImageDaoImpl chequeImageDao;
+    private ChequeImageDaoImpl chequeImageDao;
 
-	// =========================================================
-	// HEADER & METRICS (Image 4)
-	// =========================================================
+    // =========================================================
+    // HEADER & METRICS (Image 4)
+    // =========================================================
 
-	private Label pageTitle;
+    private Label pageTitle;
 
-	private Button backToList;
+    private Button backToList;
 
-	private Label batchLabel;
+    private Label batchLabel;
 
-	private Label totalCountLabel;
+    private Label totalCountLabel;
 
-	private Label completedCountLabel;
+    private Label completedCountLabel;
 
-	private Label pendingCountLabel;
+    private Label pendingCountLabel;
 
-	private Label chequeCounter;
+    private Label chequeCounter;
 
-	private Label makerId;
+    private Label makerId;
 
-	// =========================================================
-	// LEFT CHEQUE PREVIEW
-	// =========================================================
+    // =========================================================
+    // LEFT CHEQUE PREVIEW
+    // =========================================================
 
-	private Label bankName;
+    private Label bankName;
 
-	private Label branchName;
+    private Label branchName;
 
-	private Label imageChequeNumber;
+    private Label imageChequeNumber;
 
-	private Label imageChequeDate;
+    private Label imageChequeDate;
 
-	private Label payeeImage;
+    private Label payeeImage;
 
-	private Label amountWordsImage;
+    private Label amountWordsImage;
 
-	private Label amountImage;
+    private Label amountImage;
 
-	private Label micrImage;
+    private Label micrImage;
 
-	private Label chequeNumberLabel;
+    private Label chequeNumberLabel;
 
-	private Label leftCbsStatus;
+    private Label leftCbsStatus;
 
-	// =========================================================
-	// RIGHT VERIFICATION HEADER
-	// =========================================================
+    // =========================================================
+    // RIGHT VERIFICATION HEADER
+    // =========================================================
 
-	private Label rightChequeNumber;
+    private Label rightChequeNumber;
 
-	private Label chequePosition;
+    private Label chequePosition;
 
-	private Label rightBankName;
+    private Label rightBankName;
 
-	// =========================================================
-	// MICR SECTION
-	// =========================================================
+    // =========================================================
+    // MICR SECTION
+    // =========================================================
 
-	private Vlayout micrUnchanged;
+    private Vlayout micrUnchanged;
 
-	private Label micrValue;
+    private Label micrValue;
 
-	private Hlayout micrCorrection;
+    private Hlayout micrCorrection;
 
-	private Label oldMicrValue;
+    private Label oldMicrValue;
 
-	private Label correctedMicrValue;
+    private Label correctedMicrValue;
 
-	private Label micrStatus;
+    private Label micrStatus;
 
-	// =========================================================
-	// DATA ENTRY - ACCOUNT NUMBER
-	// =========================================================
+    // =========================================================
+    // DATA ENTRY - ACCOUNT NUMBER
+    // =========================================================
 
-	private Label accountStatus;
+    private Label accountStatus;
 
-	private Hlayout accountCorrection;
+    private Hlayout accountCorrection;
 
-	private Label oldAccountNumber;
+    private Label oldAccountNumber;
 
-	private Label correctedAccountNumber;
+    private Label correctedAccountNumber;
 
-	private Hlayout accountUnchanged;
+    private Hlayout accountUnchanged;
 
-	private Label accountNumber;
+    private Label accountNumber;
 
-	// =========================================================
-	// DATA ENTRY - AMOUNT
-	// =========================================================
+    // =========================================================
+    // DATA ENTRY - AMOUNT
+    // =========================================================
 
-	private Label amountStatus;
+    private Label amountStatus;
 
-	private Hlayout amountCorrection;
+    private Hlayout amountCorrection;
 
-	private Label oldAmount;
+    private Label oldAmount;
 
-	private Label correctedAmount;
+    private Label correctedAmount;
 
-	private Hlayout amountUnchanged;
+    private Hlayout amountUnchanged;
 
-	private Label amount;
+    private Label amount;
 
-	// =========================================================
-	// DATA ENTRY - CHEQUE DATE
-	// =========================================================
+    // =========================================================
+    // DATA ENTRY - CHEQUE DATE
+    // =========================================================
 
-	private Label dateStatus;
+    private Label dateStatus;
 
-	private Hlayout dateCorrection;
+    private Hlayout dateCorrection;
 
-	private Label oldChequeDate;
+    private Label oldChequeDate;
 
-	private Label correctedChequeDate;
+    private Label correctedChequeDate;
 
-	private Hlayout dateUnchanged;
+    private Hlayout dateUnchanged;
 
-	private Label chequeDate;
+    private Label chequeDate;
 
-	private Label dataEntrySummary;
+    private Label dataEntrySummary;
 
-	// =========================================================
-	// DATA ENTRY - CHEQUE NUMBER
-	// DB FIELD = cheque_number
-	// =========================================================
+    // =========================================================
+    // DATA ENTRY - CHEQUE NUMBER
+    // DB FIELD = cheque_number
+    // =========================================================
 
-	private Label chequeNoStatus;
+    private Label chequeNoStatus;
 
-	private Hlayout chequeNoCorrection;
+    private Hlayout chequeNoCorrection;
 
-	private Label oldChequeNumber;
+    private Label oldChequeNumber;
 
-	private Label correctedChequeNumber;
+    private Label correctedChequeNumber;
 
-	private Hlayout chequeNoUnchanged;
+    private Hlayout chequeNoUnchanged;
 
-	private Label chequeNumberVal;
+    private Label chequeNumberVal;
 
-	// =========================================================
-	// CBS VALIDATION
-	// =========================================================
+    // =========================================================
+    // CBS VALIDATION
+    // =========================================================
 
-	private Label cbsTitle;
+    private Label cbsTitle;
 
-	private Label cbsActionStatus;
+    private Label cbsActionStatus;
 
-	private Hlayout cbsFailure;
+    private Hlayout cbsFailure;
 
-	private Label cbsFailureText;
+    private Label cbsFailureText;
 
-	private Label cbsAmountResult;
+    private Label cbsAmountResult;
 
-	private Label cbsDateResult;
+    private Label cbsDateResult;
 
-	private Label cbsAccountResult;
+    private Label cbsAccountResult;
 
-	// =========================================================
-	// CHEQUE NAVIGATION
-	// =========================================================
+    // =========================================================
+    // CHEQUE NAVIGATION
+    // =========================================================
 
-	private Button cheque1;
+    private Button cheque1;
 
-	private Button cheque2;
+    private Button cheque2;
 
-	private Button cheque3;
+    private Button cheque3;
 
-	private Button cheque4;
+    private Button cheque4;
 
-	private Button cheque5;
+    private Button cheque5;
 
-	private Button cheque6;
+    private Button cheque6;
 
-	private Button cheque7;
+    private Button cheque7;
 
-	private Button cheque8;
+    private Button cheque8;
 
-	private Button cheque9;
+    private Button cheque9;
 
-	private Button cheque10;
+    private Button cheque10;
 
-	private Button cheque11;
+    private Button cheque11;
 
-	private Button cheque12;
+    private Button cheque12;
 
-	private Button cheque13;
+    private Button cheque13;
 
-	private Button cheque14;
+    private Button cheque14;
 
-	private Button cheque15;
+    private Button cheque15;
 
-	private Button nextChequeArrow;
+    private Button nextChequeArrow;
 
-	private Button previousCheque;
+    private Button previousCheque;
 
-	private Button nextCheque;
+    private Button nextCheque;
 
-	private Button completeVerification;
+    private Button completeVerification;
 
-	// =========================================================
-	// INIT
-	// =========================================================
+    // =========================================================
+    // INIT
+    // =========================================================
 
-	// =========================================================
-	// CHECKER DECISION
-	// =========================================================
+    // =========================================================
+    // CHECKER DECISION
+    // =========================================================
 
-	private Integer userId;
+    private Integer userId;
 
-	private Button acceptButton;
-	private Button returnButton;
-	private Button rejectButton;
+    private Button acceptButton;
+    private Button returnButton;
+    private Button rejectButton;
 
-	private Hlayout selectedDecision;
-	private Label selectedDecisionText;
+    private Hlayout selectedDecision;
+    private Label selectedDecisionText;
 
-	private Window acceptConfirmWindow;
-	private Button acceptCancelButton;
-	private Button acceptConfirmButton;
+    private Window acceptConfirmWindow;
+    private Button acceptCancelButton;
+    private Button acceptConfirmButton;
 
-	private Window rejectWindow;
-	private Vlayout rejectReasonsContainer;
-	private Textbox rejectRemark;
-	private Button rejectCancelButton;
-	private Button rejectConfirmButton;
+    private Window rejectWindow;
+    private Vlayout rejectReasonsContainer;
+    private Textbox rejectRemark;
+    private Button rejectCancelButton;
+    private Button rejectConfirmButton;
 
-	private Window returnWindow;
-	private Vlayout returnReasonsContainer;
-	private Textbox returnRemark;
-	private Button returnCancelButton;
-	private Button returnConfirmButton;
-	private boolean cbsPassed = false;
+    private Window returnWindow;
+    private Vlayout returnReasonsContainer;
+    private Textbox returnRemark;
+    private Button returnCancelButton;
+    private Button returnConfirmButton;
+    private boolean cbsPassed = false;
 
-	// =========================================================
-	// MAKER RETURN PANEL (RETURN_BY_MAKER)
-	// =========================================================
-	private Vlayout makerReturnPanel;
-	private Vlayout verificationFormContainer;
-	private Vlayout makerReturnReasonsList;
-	private Label lblMakerReturnRemarks;
-	private Component boxMakerRemarks;
-	private Component boxMicrMasterVerification;
-	private Label badgeMicrMasterStatus;
-	private Label lblNpciMicrValue;
-	private Label lblNpciMicrCheck;
-	private Label lblOcrMicrValue;
-	private Label lblOcrMicrCheck;
-	private Component micrMasterSummaryBox;
-	private Label lblMicrMasterSummary;
+    // =========================================================
+    // MAKER RETURN PANEL (RETURN_BY_MAKER)
+    // =========================================================
+    private Vlayout makerReturnPanel;
+    private Vlayout verificationFormContainer;
+    private Vlayout makerReturnReasonsList;
+    private Label lblMakerReturnRemarks;
+    private Component boxMakerRemarks;
+    private Component boxMicrMasterVerification;
+    private Label badgeMicrMasterStatus;
+    private Label lblNpciMicrValue;
+    private Label lblNpciMicrCheck;
+    private Label lblOcrMicrValue;
+    private Label lblOcrMicrCheck;
+    private Component micrMasterSummaryBox;
+    private Label lblMicrMasterSummary;
 
-	@Override
-	public void doAfterCompose(Component component) throws Exception {
+    @Override
+    public void doAfterCompose(Component component)
+            throws Exception {
 
-		super.doAfterCompose(component);
+        super.doAfterCompose(component);
 
-		// =========================================================
-		// POPUP CONTROLS
-		//
-		// IMPORTANT:
-		// Each Window is its own ZK ID space. Therefore controls
-		// inside the popup windows cannot reliably be wired by the
-		// outer GenericForwardComposer. Get them from their own
-		// Window ID space and register the events explicitly.
-		// =========================================================
+        // =========================================================
+        // POPUP CONTROLS
+        //
+        // IMPORTANT:
+        // Each Window is its own ZK ID space. Therefore controls
+        // inside the popup windows cannot reliably be wired by the
+        // outer GenericForwardComposer. Get them from their own
+        // Window ID space and register the events explicitly.
+        // =========================================================
 
-		if (acceptConfirmWindow != null) {
-			acceptCancelButton = (Button) acceptConfirmWindow.getFellow("acceptCancelButton");
+        if (acceptConfirmWindow != null) {
+            acceptCancelButton = (Button) acceptConfirmWindow.getFellow(
+                    "acceptCancelButton");
 
-			acceptConfirmButton = (Button) acceptConfirmWindow.getFellow("acceptConfirmButton");
+            acceptConfirmButton = (Button) acceptConfirmWindow.getFellow(
+                    "acceptConfirmButton");
 
-			acceptCancelButton.addEventListener(Events.ON_CLICK, event -> handleAcceptCancelButton());
+            acceptCancelButton.addEventListener(
+                    Events.ON_CLICK,
+                    event -> handleAcceptCancelButton());
 
-			acceptConfirmButton.addEventListener(Events.ON_CLICK, event -> handleAcceptConfirmButton());
-		}
+            acceptConfirmButton.addEventListener(
+                    Events.ON_CLICK,
+                    event -> handleAcceptConfirmButton());
+        }
 
-		if (rejectWindow != null) {
-			rejectReasonsContainer = (Vlayout) rejectWindow.getFellowIfAny("rejectReasonsContainer");
+        if (rejectWindow != null) {
+            rejectReasonsContainer =
+                    (Vlayout) rejectWindow.getFellowIfAny(
+                            "rejectReasonsContainer");
 
-			rejectRemark = (Textbox) rejectWindow.getFellow("rejectRemark");
+            rejectRemark = (Textbox) rejectWindow.getFellow(
+                    "rejectRemark");
 
-			rejectCancelButton = (Button) rejectWindow.getFellow("rejectCancelButton");
+            rejectCancelButton = (Button) rejectWindow.getFellow(
+                    "rejectCancelButton");
 
-			rejectConfirmButton = (Button) rejectWindow.getFellow("rejectConfirmButton");
+            rejectConfirmButton = (Button) rejectWindow.getFellow(
+                    "rejectConfirmButton");
 
-			rejectCancelButton.addEventListener(Events.ON_CLICK, event -> handleRejectCancelButton());
+            rejectCancelButton.addEventListener(
+                    Events.ON_CLICK,
+                    event -> handleRejectCancelButton());
 
-			rejectConfirmButton.addEventListener(Events.ON_CLICK, event -> handleRejectConfirmButton());
-		}
+            rejectConfirmButton.addEventListener(
+                    Events.ON_CLICK,
+                    event -> handleRejectConfirmButton());
+        }
 
-		if (returnWindow != null) {
-			returnReasonsContainer = (Vlayout) returnWindow.getFellowIfAny("returnReasonsContainer");
+        if (returnWindow != null) {
+            returnReasonsContainer =
+                    (Vlayout) returnWindow.getFellowIfAny(
+                            "returnReasonsContainer");
 
-			returnRemark = (Textbox) returnWindow.getFellow("returnRemark");
+            returnRemark = (Textbox) returnWindow.getFellow(
+                    "returnRemark");
 
-			returnCancelButton = (Button) returnWindow.getFellow("returnCancelButton");
+            returnCancelButton = (Button) returnWindow.getFellow(
+                    "returnCancelButton");
 
-			returnConfirmButton = (Button) returnWindow.getFellow("returnConfirmButton");
+            returnConfirmButton = (Button) returnWindow.getFellow(
+                    "returnConfirmButton");
 
-			returnCancelButton.addEventListener(Events.ON_CLICK, event -> handleReturnCancelButton());
+            returnCancelButton.addEventListener(
+                    Events.ON_CLICK,
+                    event -> handleReturnCancelButton());
 
-			returnConfirmButton.addEventListener(Events.ON_CLICK, event -> handleReturnConfirmButton());
-		}
+            returnConfirmButton.addEventListener(
+                    Events.ON_CLICK,
+                    event -> handleReturnConfirmButton());
+        }
 
-		// Keep all decision popups hidden when the page is first created.
-		// They are opened explicitly only from their corresponding buttons.
-		if (acceptConfirmWindow != null) {
-			acceptConfirmWindow.setVisible(false);
-		}
-		if (rejectWindow != null) {
-			rejectWindow.setVisible(false);
-		}
-		if (returnWindow != null) {
-			returnWindow.setVisible(false);
-		}
+        // Keep all decision popups hidden when the page is first created.
+        // They are opened explicitly only from their corresponding buttons.
+        if (acceptConfirmWindow != null) {
+            acceptConfirmWindow.setVisible(false);
+        }
+        if (rejectWindow != null) {
+            rejectWindow.setVisible(false);
+        }
+        if (returnWindow != null) {
+            returnWindow.setVisible(false);
+        }
 
-		org.zkoss.zk.ui.Session session = Executions.getCurrent().getSession();
-		com.cts.admin.model.User user = (com.cts.admin.model.User) session.getAttribute("loggedInUser");
-		if (user != null && user.getUserId() != null) {
-			userId = user.getUserId().intValue();
-		} else {
-			Object sessionUserId = Executions.getCurrent().getAttribute("userId");
-			if (sessionUserId instanceof Number) {
-				userId = ((Number) sessionUserId).intValue();
-			} else if (sessionUserId != null) {
-				try {
-					userId = Integer.valueOf(String.valueOf(sessionUserId));
-				} catch (NumberFormatException e) {
-					userId = null;
-				}
-			}
-		}
+        org.zkoss.zk.ui.Session session = Executions.getCurrent().getSession();
+        com.cts.admin.model.User user = (com.cts.admin.model.User) session.getAttribute("loggedInUser");
+        if (user != null && user.getUserId() != null) {
+            userId = user.getUserId().intValue();
+        } else {
+            Object sessionUserId = Executions.getCurrent().getAttribute("userId");
+            if (sessionUserId instanceof Number) {
+                userId = ((Number) sessionUserId).intValue();
+            } else if (sessionUserId != null) {
+                try {
+                    userId = Integer.valueOf(String.valueOf(sessionUserId));
+                } catch (NumberFormatException e) {
+                    userId = null;
+                }
+            }
+        }
 
-		System.out.println("CHECKER USER ID = " + userId);
+        System.out.println("CHECKER USER ID = " + userId);
 
-		// -----------------------------------------------------
-		// Existing DAO + Service
-		// -----------------------------------------------------
+        // -----------------------------------------------------
+        // Existing DAO + Service
+        // -----------------------------------------------------
 
-		batchDetailsService = BatchDetailsServiceImpl.of(BatchDetailsDaoImpl.of());
+        batchDetailsService = BatchDetailsServiceImpl.of(
+                BatchDetailsDaoImpl.of());
 
-		chequeImageDao = ChequeImageDaoImpl.of();
+        chequeImageDao = ChequeImageDaoImpl.of();
 
-		// Wire Image 2 toolbar events
-		if (toggleImageButton != null) {
-			toggleImageButton.addEventListener(Events.ON_CLICK, event -> {
-				showingFront = !showingFront;
-				toggleImageButton.setLabel(showingFront ? "View Back" : "View Front");
-				if (showingFront) {
-					showFrontImage();
-				} else {
-					showBackImage();
-				}
-				applyImageStyle();
-			});
-		}
+        // Wire Image 2 toolbar events
+        if (toggleImageButton != null) {
+            toggleImageButton.addEventListener(Events.ON_CLICK, event -> {
+                showingFront = !showingFront;
+                toggleImageButton.setLabel(showingFront ? "View Back" : "View Front");
+                if (showingFront) {
+                    showFrontImage();
+                } else {
+                    showBackImage();
+                }
+                applyImageStyle();
+            });
+        }
 
-		if (zoomInButton != null) {
-			zoomInButton.addEventListener(Events.ON_CLICK, event -> {
-				if (currentScale < 3.0) {
-					currentScale += 0.2;
-					applyImageStyle();
-				}
-			});
-		}
+        if (zoomInButton != null) {
+            zoomInButton.addEventListener(Events.ON_CLICK, event -> {
+                if (currentScale < 3.0) {
+                    currentScale += 0.2;
+                    applyImageStyle();
+                }
+            });
+        }
 
-		if (zoomOutButton != null) {
-			zoomOutButton.addEventListener(Events.ON_CLICK, event -> {
-				if (currentScale > 0.4) {
-					currentScale -= 0.2;
-					applyImageStyle();
-				}
-			});
-		}
+        if (zoomOutButton != null) {
+            zoomOutButton.addEventListener(Events.ON_CLICK, event -> {
+                if (currentScale > 0.4) {
+                    currentScale -= 0.2;
+                    applyImageStyle();
+                }
+            });
+        }
 
-		if (rotateButton != null) {
-			rotateButton.addEventListener(Events.ON_CLICK, event -> {
-				currentRotation = (currentRotation + 90) % 360;
-				applyImageStyle();
-			});
-		}
+        if (rotateButton != null) {
+            rotateButton.addEventListener(Events.ON_CLICK, event -> {
+                currentRotation = (currentRotation + 90) % 360;
+                applyImageStyle();
+            });
+        }
 
-		if (resetViewButton != null) {
-			resetViewButton.addEventListener(Events.ON_CLICK, event -> {
-				currentScale = 1.0;
-				currentRotation = 0;
-				applyImageStyle();
-			});
-		}
+        if (resetViewButton != null) {
+            resetViewButton.addEventListener(Events.ON_CLICK, event -> {
+                currentScale = 1.0;
+                currentRotation = 0;
+                applyImageStyle();
+            });
+        }
 
-		// Backwards compatibility if legacy btnFront/btnBack exist
-		if (btnFront != null) {
-			btnFront.addEventListener(Events.ON_CLICK, event -> showFrontImage());
-		}
-		if (btnBack != null) {
-			btnBack.addEventListener(Events.ON_CLICK, event -> showBackImage());
-		}
+        // Backwards compatibility if legacy btnFront/btnBack exist
+        if (btnFront != null) {
+            btnFront.addEventListener(Events.ON_CLICK, event -> showFrontImage());
+        }
+        if (btnBack != null) {
+            btnBack.addEventListener(Events.ON_CLICK, event -> showBackImage());
+        }
 
-		// -----------------------------------------------------
-		// Get batch ID from URL
-		// -----------------------------------------------------
+        // -----------------------------------------------------
+        // Get batch ID from URL
+        // -----------------------------------------------------
 
-		String batchIdParameter = Executions.getCurrent().getParameter("batchId");
+        String batchIdParameter = Executions.getCurrent()
+                .getParameter("batchId");
 
-		if (batchIdParameter != null && !batchIdParameter.trim().isEmpty()) {
-			try {
-				batchId = Long.valueOf(batchIdParameter.trim());
-			} catch (NumberFormatException e) {
-				batchId = null;
-			}
-		} else {
-			batchId = null;
-		}
+        if (batchIdParameter != null
+                && !batchIdParameter.trim().isEmpty()) {
+            try {
+                batchId = Long.valueOf(
+                        batchIdParameter.trim());
+            } catch (NumberFormatException e) {
+                batchId = null;
+            }
+        } else {
+            batchId = null;
+        }
 
-		System.out.println();
-		System.out.println("======================================");
+        System.out.println();
+        System.out.println(
+                "======================================");
 
-		System.out.println("BATCH DETAILS - Batch ID = " + batchId);
+        System.out.println(
+                "BATCH DETAILS - Batch ID = "
+                        + batchId);
 
-		System.out.println("======================================");
+        System.out.println(
+                "======================================");
 
-		if (batchId == null) {
+        if (batchId == null) {
 
-			System.out.println("BATCH DETAILS - Batch ID NOT FOUND");
+            System.out.println(
+                    "BATCH DETAILS - Batch ID NOT FOUND");
 
-			return;
-		}
+            return;
+        }
 
-		// -----------------------------------------------------
-		// Load cheques
-		// -----------------------------------------------------
+        // -----------------------------------------------------
+        // Load cheques
+        // -----------------------------------------------------
 
-		loadCheques();
+        loadCheques();
 
-		// -----------------------------------------------------
-		// Load first cheque
-		//
-		// IMPORTANT:
-		// loadCurrentCheque() also performs CBS validation.
-		// -----------------------------------------------------
+        // -----------------------------------------------------
+        // Load first cheque
+        //
+        // IMPORTANT:
+        // loadCurrentCheque() also performs CBS validation.
+        // -----------------------------------------------------
 
-		if (!cheques.isEmpty()) {
+        if (!cheques.isEmpty()) {
 
-			currentChequeIndex = 0;
+            currentChequeIndex = 0;
 
-			loadCurrentCheque();
+            loadCurrentCheque();
 
-		} else {
+        } else {
 
-			System.out.println("NO CHEQUES FOUND FOR BATCH ID = " + batchId);
+            System.out.println(
+                    "NO CHEQUES FOUND FOR BATCH ID = "
+                            + batchId);
 
-			updateCompleteVerificationButtonState();
-		}
-	}
+            updateCompleteVerificationButtonState();
+        }
+    }
 
-	// =========================================================
-	// LOAD CHEQUES
-	// =========================================================
+    // =========================================================
+    // LOAD CHEQUES
+    // =========================================================
 
-	private void loadCheques() {
+    private void loadCheques() {
 
-		cheques = batchDetailsService.getChequesByBatchId(batchId);
+        cheques = batchDetailsService
+                .getChequesByBatchId(batchId);
 
-		if (cheques == null) {
+        if (cheques == null) {
 
-			cheques = new ArrayList<>();
-		}
+            cheques = new ArrayList<>();
+        }
 
-		System.out.println();
+        System.out.println();
 
-		System.out.println("======================================");
+        System.out.println(
+                "======================================");
 
-		System.out.println("BATCH ID = " + batchId);
+        System.out.println(
+                "BATCH ID = " + batchId);
 
-		System.out.println("TOTAL CHEQUES FOUND = " + cheques.size());
+        System.out.println(
+                "TOTAL CHEQUES FOUND = "
+                        + cheques.size());
 
-		System.out.println("======================================");
-	}
+        System.out.println(
+                "======================================");
+    }
 
-	// =========================================================
-	// LOAD CURRENT CHEQUE
-	// =========================================================
+    // =========================================================
+    // LOAD CURRENT CHEQUE
+    // =========================================================
 
-	private void loadCurrentCheque() {
+    private void loadCurrentCheque() {
 
-		if (cheques == null || cheques.isEmpty()) {
+        if (cheques == null
+                || cheques.isEmpty()) {
 
-			return;
-		}
+            return;
+        }
 
-		// -----------------------------------------------------
-		// Protect index
-		// -----------------------------------------------------
+        // -----------------------------------------------------
+        // Protect index
+        // -----------------------------------------------------
 
-		if (currentChequeIndex < 0) {
+        if (currentChequeIndex < 0) {
 
-			currentChequeIndex = 0;
-		}
+            currentChequeIndex = 0;
+        }
 
-		if (currentChequeIndex >= cheques.size()) {
+        if (currentChequeIndex >= cheques.size()) {
 
-			currentChequeIndex = cheques.size() - 1;
-		}
+            currentChequeIndex = cheques.size() - 1;
+        }
 
-		// -----------------------------------------------------
-		// Get current cheque
-		// -----------------------------------------------------
+        // -----------------------------------------------------
+        // Get current cheque
+        // -----------------------------------------------------
 
-		Map<String, Object> cheque = cheques.get(currentChequeIndex);
+        Map<String, Object> cheque = cheques.get(currentChequeIndex);
 
-		// =====================================================
-		// GET VALUES FROM inward_cheque
-		// =====================================================
+        // =====================================================
+        // GET VALUES FROM inward_cheque
+        // =====================================================
 
-		String chequeNumber = getString(cheque, "chequeNumber");
+        String chequeNumber = getString(
+                cheque,
+                "chequeNumber");
 
-		String accountNumber = getString(cheque, "accountNumber");
+        String accountNumber = getString(
+                cheque,
+                "accountNumber");
 
-		String drawerName = getString(cheque, "drawerName");
+        String drawerName = getString(
+                cheque,
+                "drawerName");
 
-		String micrCode = getString(cheque, "micrCode");
+        String micrCode = getString(
+                cheque,
+                "micrCode");
 
-		String chequeDate = getString(cheque, "chequeDate");
+        String chequeDate = getString(
+                cheque,
+                "chequeDate");
 
-		String amount = getString(cheque, "amount");
+        String amount = getString(
+                cheque,
+                "amount");
 
-		// =====================================================
-		// CONSOLE
-		// =====================================================
+        // =====================================================
+        // CONSOLE
+        // =====================================================
 
-		System.out.println();
+        System.out.println();
 
-		System.out.println("========== CURRENT CHEQUE ==========");
+        System.out.println(
+                "========== CURRENT CHEQUE ==========");
 
-		System.out.println("Batch ID = " + batchId);
+        System.out.println(
+                "Batch ID = " + batchId);
 
-		System.out.println("Cheque Number = " + chequeNumber);
+        System.out.println(
+                "Cheque Number = "
+                        + chequeNumber);
 
-		System.out.println("Account Number = " + accountNumber);
+        System.out.println(
+                "Account Number = "
+                        + accountNumber);
 
-		System.out.println("Drawer Name = " + drawerName);
+        System.out.println(
+                "Drawer Name = "
+                        + drawerName);
 
-		System.out.println("Amount = " + amount);
+        System.out.println(
+                "Amount = "
+                        + amount);
 
-		System.out.println("MICR = " + micrCode);
+        System.out.println(
+                "MICR = "
+                        + micrCode);
 
-		System.out.println("Cheque Date = " + chequeDate);
+        System.out.println(
+                "Cheque Date = "
+                        + chequeDate);
 
-		System.out.println("Cheque Position = " + (currentChequeIndex + 1) + " of " + cheques.size());
+        System.out.println(
+                "Cheque Position = "
+                        + (currentChequeIndex + 1)
+                        + " of "
+                        + cheques.size());
 
-		System.out.println("====================================");
+        System.out.println(
+                "====================================");
 
-		// =====================================================
-		// UPDATE HEADER
-		// =====================================================
+        // =====================================================
+        // UPDATE HEADER
+        // =====================================================
 
-		if (pageTitle != null) {
+        if (pageTitle != null) {
 
-			pageTitle.setValue("Verify Inward Batch - BATCH" + batchId);
-		}
+            pageTitle.setValue(
+                    "Verify Inward Batch - BATCH"
+                            + batchId);
+        }
 
-		if (rightChequeNumber != null) {
+        if (rightChequeNumber != null) {
 
-			rightChequeNumber.setValue(nullToEmpty(chequeNumber));
-		}
+            rightChequeNumber.setValue(
+                    nullToEmpty(chequeNumber));
+        }
 
-		if (chequePosition != null) {
+        if (chequePosition != null) {
 
-			chequePosition.setValue(" | Bank:");
-		}
+            chequePosition.setValue(" | Bank:");
+        }
 
-		// =====================================================
-		// UPDATE LEFT CHEQUE INFORMATION
-		// =====================================================
+        // =====================================================
+        // UPDATE LEFT CHEQUE INFORMATION
+        // =====================================================
 
-		if (imageChequeNumber != null) {
+        if (imageChequeNumber != null) {
 
-			imageChequeNumber.setValue(nullToEmpty(chequeNumber));
-		}
+            imageChequeNumber.setValue(
+                    nullToEmpty(chequeNumber));
+        }
 
-		if (chequeNumberLabel != null) {
+        if (chequeNumberLabel != null) {
 
-			chequeNumberLabel.setValue("Cheque Number : " + nullToEmpty(chequeNumber));
-		}
+            chequeNumberLabel.setValue(
+                    "Cheque Number : "
+                            + nullToEmpty(
+                                    chequeNumber));
+        }
 
-		if (payeeImage != null) {
+        if (payeeImage != null) {
 
-			payeeImage.setValue(nullToEmpty(drawerName));
-		}
+            payeeImage.setValue(
+                    nullToEmpty(drawerName));
+        }
 
-		if (amountImage != null) {
+        if (amountImage != null) {
 
-			amountImage.setValue("₹ " + nullToEmpty(amount));
-		}
+            amountImage.setValue(
+                    "₹ "
+                            + nullToEmpty(amount));
+        }
 
-		if (imageChequeDate != null) {
+        if (imageChequeDate != null) {
 
-			imageChequeDate.setValue("DATE: " + formatDate(chequeDate));
-		}
+            imageChequeDate.setValue(
+                    "DATE: "
+                            + formatDate(
+                                    chequeDate));
+        }
 
-		if (micrImage != null) {
+        if (micrImage != null) {
 
-			micrImage.setValue(nullToEmpty(micrCode));
-		}
+            micrImage.setValue(
+                    nullToEmpty(micrCode));
+        }
 
-		// =====================================================
-		// CHECK IF CHEQUE WAS RETURNED BY MAKER
-		// =====================================================
+        // =====================================================
+        // CHECK IF CHEQUE WAS RETURNED BY MAKER
+        // =====================================================
 
-		String status = getString(cheque, "status");
-		boolean isReturnByMaker = "RETURN_BY_MAKER".equalsIgnoreCase(status);
+        String status = getString(cheque, "status");
+        boolean isReturnByMaker = "RETURN_BY_MAKER".equalsIgnoreCase(status);
 
-		if (isReturnByMaker) {
-			// Show Maker Return Panel, hide verification form
-			if (makerReturnPanel != null) {
-				makerReturnPanel.setVisible(true);
-			}
-			if (verificationFormContainer != null) {
-				verificationFormContainer.setVisible(false);
-			}
+        if (isReturnByMaker) {
+            // Show Maker Return Panel, hide verification form
+            if (makerReturnPanel != null) {
+                makerReturnPanel.setVisible(true);
+            }
+            if (verificationFormContainer != null) {
+                verificationFormContainer.setVisible(false);
+            }
 
-			// Populate Maker Return info
-			String returnReasonCode = getString(cheque, "returnReasonCode");
-			String returnReasonDesc = getString(cheque, "returnReasonDescription");
-			String makerRemarks = getString(cheque, "makerRemarks");
-			String ocrMicrCode = getString(cheque, "ocrMicrCode");
+            // Populate Maker Return info
+            String returnReasonCode = getString(cheque, "returnReasonCode");
+            String returnReasonDesc = getString(cheque, "returnReasonDescription");
+            String makerRemarks = getString(cheque, "makerRemarks");
+            String ocrMicrCode = getString(cheque, "ocrMicrCode");
 
-			if (makerReturnReasonsList != null) {
-				makerReturnReasonsList.getChildren().clear();
-				List<Map<String, String>> returnReasons = batchDetailsService.getMakerReturnReasons(chequeNumber);
-				if (returnReasons != null && !returnReasons.isEmpty()) {
-					for (Map<String, String> r : returnReasons) {
-						Hlayout row = new Hlayout();
-						row.setSpacing("10px");
-						row.setValign("middle");
-						row.setWidth("100%");
-						row.setStyle(
-								"background:#FFF5F5; border:1.5px solid #FECDCA; border-radius:6px; padding:8px 12px;");
+            if (makerReturnReasonsList != null) {
+                makerReturnReasonsList.getChildren().clear();
+                List<Map<String, String>> returnReasons = batchDetailsService.getMakerReturnReasons(chequeNumber);
+                if (returnReasons != null && !returnReasons.isEmpty()) {
+                    for (Map<String, String> r : returnReasons) {
+                        Hlayout row = new Hlayout();
+                        row.setSpacing("10px");
+                        row.setValign("middle");
+                        row.setWidth("100%");
+                        row.setStyle("background:#FFF5F5; border:1.5px solid #FECDCA; border-radius:6px; padding:8px 12px;");
 
-						String code = r.get("returnReasonCode");
-						String desc = r.get("description");
-						if (desc == null || desc.trim().isEmpty()) {
-							desc = "Return requested by maker";
-						}
+                        String code = r.get("returnReasonCode");
+                        String desc = r.get("description");
+                        if (desc == null || desc.trim().isEmpty()) {
+                            desc = "Return requested by maker";
+                        }
 
-						Label badge = new Label(code != null ? code : "—");
-						badge.setStyle(
-								"font-size:12px; font-weight:700; background:#FEE4E2; color:#B42318; border:1px solid #FECDCA; border-radius:4px; padding:2px 8px; flex-shrink:0;");
+                        Label badge = new Label(code != null ? code : "—");
+                        badge.setStyle("font-size:12px; font-weight:700; background:#FEE4E2; color:#B42318; border:1px solid #FECDCA; border-radius:4px; padding:2px 8px; flex-shrink:0;");
 
-						Label lblDesc = new Label(desc);
-						lblDesc.setStyle("font-size:13px; font-weight:600; color:#1E293B; word-break:break-word;");
-						lblDesc.setHflex("1");
+                        Label lblDesc = new Label(desc);
+                        lblDesc.setStyle("font-size:13px; font-weight:600; color:#1E293B; word-break:break-word;");
+                        lblDesc.setHflex("1");
 
-						row.appendChild(badge);
-						row.appendChild(lblDesc);
-						makerReturnReasonsList.appendChild(row);
-					}
-				} else {
-					String singleCode = getString(cheque, "returnReasonCode");
-					String singleDesc = getString(cheque, "returnReasonDescription");
-					Hlayout row = new Hlayout();
-					row.setSpacing("10px");
-					row.setValign("middle");
-					row.setWidth("100%");
-					row.setStyle(
-							"background:#FFF5F5; border:1.5px solid #FECDCA; border-radius:6px; padding:8px 12px;");
+                        row.appendChild(badge);
+                        row.appendChild(lblDesc);
+                        makerReturnReasonsList.appendChild(row);
+                    }
+                } else {
+                    String singleCode = getString(cheque, "returnReasonCode");
+                    String singleDesc = getString(cheque, "returnReasonDescription");
+                    Hlayout row = new Hlayout();
+                    row.setSpacing("10px");
+                    row.setValign("middle");
+                    row.setWidth("100%");
+                    row.setStyle("background:#FFF5F5; border:1.5px solid #FECDCA; border-radius:6px; padding:8px 12px;");
 
-					Label badge = new Label(singleCode != null && !singleCode.trim().isEmpty() ? singleCode : "RETURN");
-					badge.setStyle(
-							"font-size:12px; font-weight:700; background:#FEE4E2; color:#B42318; border:1px solid #FECDCA; border-radius:4px; padding:2px 8px; flex-shrink:0;");
+                    Label badge = new Label(singleCode != null && !singleCode.trim().isEmpty() ? singleCode : "RETURN");
+                    badge.setStyle("font-size:12px; font-weight:700; background:#FEE4E2; color:#B42318; border:1px solid #FECDCA; border-radius:4px; padding:2px 8px; flex-shrink:0;");
 
-					Label lblDesc = new Label(
-							singleDesc != null && !singleDesc.trim().isEmpty() ? singleDesc : "Returned by Maker");
-					lblDesc.setStyle("font-size:13px; font-weight:600; color:#1E293B;");
-					lblDesc.setHflex("1");
+                    Label lblDesc = new Label(singleDesc != null && !singleDesc.trim().isEmpty() ? singleDesc : "Returned by Maker");
+                    lblDesc.setStyle("font-size:13px; font-weight:600; color:#1E293B;");
+                    lblDesc.setHflex("1");
 
-					row.appendChild(badge);
-					row.appendChild(lblDesc);
-					makerReturnReasonsList.appendChild(row);
-				}
-			}
+                    row.appendChild(badge);
+                    row.appendChild(lblDesc);
+                    makerReturnReasonsList.appendChild(row);
+                }
+            }
 
-			if (lblMakerReturnRemarks != null) {
-				if (makerRemarks != null && !makerRemarks.trim().isEmpty()) {
-					lblMakerReturnRemarks.setValue(makerRemarks);
-					if (boxMakerRemarks != null) {
-						boxMakerRemarks.setVisible(true);
-					}
-				} else {
-					lblMakerReturnRemarks.setValue("No remarks provided by Maker");
-					if (boxMakerRemarks != null) {
-						boxMakerRemarks.setVisible(false);
-					}
-				}
-			}
+            if (lblMakerReturnRemarks != null) {
+                if (makerRemarks != null && !makerRemarks.trim().isEmpty()) {
+                    lblMakerReturnRemarks.setValue(makerRemarks);
+                    if (boxMakerRemarks != null) {
+                        boxMakerRemarks.setVisible(true);
+                    }
+                } else {
+                    lblMakerReturnRemarks.setValue("No remarks provided by Maker");
+                    if (boxMakerRemarks != null) {
+                        boxMakerRemarks.setVisible(false);
+                    }
+                }
+            }
 
-			// Verify MICR with MicrMaster
-			boolean npciExists = false;
-			if (micrCode != null && !micrCode.trim().isEmpty()) {
-				npciExists = com.cts.inward.dao.MicrMasterDaoImpl.of().exists(micrCode.trim());
-			}
+            // Verify MICR with MicrMaster
+            boolean npciExists = false;
+            if (micrCode != null && !micrCode.trim().isEmpty()) {
+                npciExists = com.cts.inward.dao.MicrMasterDaoImpl.of().exists(micrCode.trim());
+            }
 
-			boolean ocrExists = false;
-			if (ocrMicrCode != null && !ocrMicrCode.trim().isEmpty()) {
-				ocrExists = com.cts.inward.dao.MicrMasterDaoImpl.of().exists(ocrMicrCode.trim());
-			}
+            boolean ocrExists = false;
+            if (ocrMicrCode != null && !ocrMicrCode.trim().isEmpty()) {
+                ocrExists = com.cts.inward.dao.MicrMasterDaoImpl.of().exists(ocrMicrCode.trim());
+            }
 
-			if (lblNpciMicrValue != null) {
-				lblNpciMicrValue.setValue(micrCode != null && !micrCode.trim().isEmpty() ? micrCode : "Not Present");
-			}
-			if (lblNpciMicrCheck != null) {
-				if (npciExists) {
-					lblNpciMicrCheck.setValue("✓ Found in Master");
-					lblNpciMicrCheck.setStyle(
-							"color:#027A48; background:#ECFDF3; border:1px solid #A6F4C5; font-weight:700; padding:4px 10px; border-radius:6px;");
-				} else {
-					lblNpciMicrCheck.setValue("✗ NOT Found in Master");
-					lblNpciMicrCheck.setStyle(
-							"color:#B42318; background:#FEF3F2; border:1px solid #FECDCA; font-weight:700; padding:4px 10px; border-radius:6px;");
-				}
-			}
+            if (lblNpciMicrValue != null) {
+                lblNpciMicrValue.setValue(micrCode != null && !micrCode.trim().isEmpty() ? micrCode : "Not Present");
+            }
+            if (lblNpciMicrCheck != null) {
+                if (npciExists) {
+                    lblNpciMicrCheck.setValue("✓ Found in Master");
+                    lblNpciMicrCheck.setStyle("color:#027A48; background:#ECFDF3; border:1px solid #A6F4C5; font-weight:700; padding:4px 10px; border-radius:6px;");
+                } else {
+                    lblNpciMicrCheck.setValue("✗ NOT Found in Master");
+                    lblNpciMicrCheck.setStyle("color:#B42318; background:#FEF3F2; border:1px solid #FECDCA; font-weight:700; padding:4px 10px; border-radius:6px;");
+                }
+            }
 
-			if (lblOcrMicrValue != null) {
-				lblOcrMicrValue
-						.setValue(ocrMicrCode != null && !ocrMicrCode.trim().isEmpty() ? ocrMicrCode : "Not Present");
-			}
-			if (lblOcrMicrCheck != null) {
-				if (ocrMicrCode != null && !ocrMicrCode.trim().isEmpty()) {
-					if (ocrExists) {
-						lblOcrMicrCheck.setValue("✓ Found in Master");
-						lblOcrMicrCheck.setStyle(
-								"color:#027A48; background:#ECFDF3; border:1px solid #A6F4C5; font-weight:700; padding:4px 10px; border-radius:6px;");
-					} else {
-						lblOcrMicrCheck.setValue("✗ NOT Found in Master");
-						lblOcrMicrCheck.setStyle(
-								"color:#B42318; background:#FEF3F2; border:1px solid #FECDCA; font-weight:700; padding:4px 10px; border-radius:6px;");
-					}
-				} else {
-					lblOcrMicrCheck.setValue("— N/A");
-					lblOcrMicrCheck.setStyle(
-							"color:#64748B; background:#F1F5F9; border:1px solid #E2E8F0; font-weight:700; padding:4px 10px; border-radius:6px;");
-				}
-			}
+            if (lblOcrMicrValue != null) {
+                lblOcrMicrValue.setValue(ocrMicrCode != null && !ocrMicrCode.trim().isEmpty() ? ocrMicrCode : "Not Present");
+            }
+            if (lblOcrMicrCheck != null) {
+                if (ocrMicrCode != null && !ocrMicrCode.trim().isEmpty()) {
+                    if (ocrExists) {
+                        lblOcrMicrCheck.setValue("✓ Found in Master");
+                        lblOcrMicrCheck.setStyle("color:#027A48; background:#ECFDF3; border:1px solid #A6F4C5; font-weight:700; padding:4px 10px; border-radius:6px;");
+                    } else {
+                        lblOcrMicrCheck.setValue("✗ NOT Found in Master");
+                        lblOcrMicrCheck.setStyle("color:#B42318; background:#FEF3F2; border:1px solid #FECDCA; font-weight:700; padding:4px 10px; border-radius:6px;");
+                    }
+                } else {
+                    lblOcrMicrCheck.setValue("— N/A");
+                    lblOcrMicrCheck.setStyle("color:#64748B; background:#F1F5F9; border:1px solid #E2E8F0; font-weight:700; padding:4px 10px; border-radius:6px;");
+                }
+            }
 
-			if (lblMicrMasterSummary != null) {
-				if (ocrExists) {
-					lblMicrMasterSummary.setValue(
-							"System Verification: MICR code (" + ocrMicrCode + ") was found in Master directory.");
-				} else {
-					lblMicrMasterSummary.setValue(
-							"System Verification: MICR code is absent from the MICR Master Directory. Maker return is verified by system.");
-				}
-			}
+            if (lblMicrMasterSummary != null) {
+                if (ocrExists) {
+                    lblMicrMasterSummary.setValue("System Verification: MICR code (" + ocrMicrCode + ") was found in Master directory.");
+                } else {
+                    lblMicrMasterSummary.setValue("System Verification: MICR code is absent from the MICR Master Directory. Maker return is verified by system.");
+                }
+            }
 
-			if (leftCbsStatus != null) {
-				leftCbsStatus.setValue("● RETURNED BY MAKER");
-				leftCbsStatus.setSclass("cbs-fail-badge");
-			}
+            if (leftCbsStatus != null) {
+                leftCbsStatus.setValue("● RETURNED BY MAKER");
+                leftCbsStatus.setSclass("cbs-fail-badge");
+            }
 
-			// Action buttons: Accept is disabled, Return & Reject are enabled
-			if (acceptButton != null) {
-				acceptButton.setDisabled(true);
-				acceptButton.setSclass("decision-button accept-button accept-button-dull");
-				acceptButton
-						.setTooltiptext("Cannot accept cheque returned by Maker. Please reject or return to Maker.");
-			}
-			if (returnButton != null) {
-				returnButton.setDisabled(false);
-			}
-			if (rejectButton != null) {
-				rejectButton.setDisabled(false);
-			}
+            // Action buttons: Accept is disabled, Return & Reject are enabled
+            if (acceptButton != null) {
+                acceptButton.setDisabled(true);
+                acceptButton.setSclass("decision-button accept-button accept-button-dull");
+                acceptButton.setTooltiptext("Cannot accept cheque returned by Maker. Please reject or return to Maker.");
+            }
+            if (returnButton != null) {
+                returnButton.setDisabled(false);
+            }
+            if (rejectButton != null) {
+                rejectButton.setDisabled(false);
+            }
 
-		} else {
-			// Normal cheque: show verification form, hide maker return panel
-			if (makerReturnPanel != null) {
-				makerReturnPanel.setVisible(false);
-			}
-			if (verificationFormContainer != null) {
-				verificationFormContainer.setVisible(true);
-			}
-			if (acceptButton != null) {
-				acceptButton.setTooltiptext(null);
-			}
+        } else {
+            // Normal cheque: show verification form, hide maker return panel
+            if (makerReturnPanel != null) {
+                makerReturnPanel.setVisible(false);
+            }
+            if (verificationFormContainer != null) {
+                verificationFormContainer.setVisible(true);
+            }
+            if (acceptButton != null) {
+                acceptButton.setTooltiptext(null);
+            }
 
-			// MICR
-			loadMicrDetails(chequeNumber);
+            // MICR
+            loadMicrDetails(chequeNumber);
 
-			// DATA ENTRY
-			loadDataEntryDetails(chequeNumber);
+            // DATA ENTRY
+            loadDataEntryDetails(chequeNumber);
 
-			// CBS VALIDATION
-			loadCbsValidation(chequeNumber);
-		}
+            // CBS VALIDATION
+            loadCbsValidation(chequeNumber);
+        }
 
-		// =====================================================
-		// NAVIGATION
-		// =====================================================
+        // =====================================================
+        // NAVIGATION
+        // =====================================================
 
-		updateChequeNavigation();
+        updateChequeNavigation();
 
-		loadChequeImages(chequeNumber);
+        loadChequeImages(chequeNumber);
 
-		// =====================================================
-		// BATCH HEADER COUNTS (Image 4)
-		// =====================================================
-		updateBatchHeaderCounts();
-	}
+        // =====================================================
+        // BATCH HEADER COUNTS (Image 4)
+        // =====================================================
+        updateBatchHeaderCounts();
+    }
 
-	// =========================================================
-	// MICR DETAILS
-	// =========================================================
+    // =========================================================
+    // MICR DETAILS
+    // =========================================================
 
-	private void loadMicrDetails(String chequeNumber) {
+    private void loadMicrDetails(
+            String chequeNumber) {
 
-		if (chequeNumber == null || chequeNumber.trim().isEmpty()) {
+        if (chequeNumber == null
+                || chequeNumber.trim().isEmpty()) {
 
-			System.out.println("MICR DETAILS - CHEQUE NUMBER IS EMPTY");
+            System.out.println(
+                    "MICR DETAILS - CHEQUE NUMBER IS EMPTY");
 
-			return;
-		}
+            return;
+        }
 
-		Map<String, Object> micrDetails = batchDetailsService.getMicrDetails(chequeNumber);
+        Map<String, Object> micrDetails = batchDetailsService
+                .getMicrDetails(
+                        chequeNumber);
 
-		System.out.println();
+        System.out.println();
 
-		System.out.println("========== MICR DETAILS ==========");
+        System.out.println(
+                "========== MICR DETAILS ==========");
 
-		System.out.println("Cheque Number = " + chequeNumber);
+        System.out.println(
+                "Cheque Number = "
+                        + chequeNumber);
 
-		if (micrDetails == null || micrDetails.isEmpty()) {
+        if (micrDetails == null
+                || micrDetails.isEmpty()) {
 
-			System.out.println("MICR DETAILS NOT FOUND");
+            System.out.println(
+                    "MICR DETAILS NOT FOUND");
 
-			if (micrCorrection != null) {
+            if (micrCorrection != null) {
 
-				micrCorrection.setVisible(false);
-			}
+                micrCorrection
+                        .setVisible(false);
+            }
 
-			if (micrUnchanged != null) {
+            if (micrUnchanged != null) {
 
-				micrUnchanged.setVisible(true);
-			}
+                micrUnchanged
+                        .setVisible(true);
+            }
 
-			if (micrStatus != null) {
+            if (micrStatus != null) {
 
-				micrStatus.setValue("• No MICR Correction");
+                micrStatus.setValue(
+                        "• No MICR Correction");
 
-				micrStatus.setSclass("unchanged-status");
-			}
+                micrStatus.setSclass(
+                        "unchanged-status");
+            }
 
-			return;
-		}
+            return;
+        }
 
-		String currentMicr = getString(micrDetails, "currentMicr");
+        String currentMicr = getString(
+                micrDetails,
+                "currentMicr");
 
-		String oldMicr = getString(micrDetails, "oldMicr");
+        String oldMicr = getString(
+                micrDetails,
+                "oldMicr");
 
-		String correctedMicr = getString(micrDetails, "correctedMicr");
+        String correctedMicr = getString(
+                micrDetails,
+                "correctedMicr");
 
-		System.out.println("Current MICR = " + currentMicr);
+        System.out.println(
+                "Current MICR = "
+                        + currentMicr);
 
-		System.out.println("Old MICR = " + oldMicr);
+        System.out.println(
+                "Old MICR = "
+                        + oldMicr);
 
-		System.out.println("Corrected MICR = " + correctedMicr);
+        System.out.println(
+                "Corrected MICR = "
+                        + correctedMicr);
 
-		boolean hasCorrection = oldMicr != null && !oldMicr.trim().isEmpty() && correctedMicr != null
-				&& !correctedMicr.trim().isEmpty() && !oldMicr.equals(correctedMicr);
+        boolean hasCorrection = oldMicr != null
+                && !oldMicr.trim().isEmpty()
+                && correctedMicr != null
+                && !correctedMicr.trim().isEmpty()
+                && !oldMicr.equals(correctedMicr);
 
-		// =====================================================
-		// MICR CORRECTED
-		// =====================================================
+        // =====================================================
+        // MICR CORRECTED
+        // =====================================================
 
-		if (hasCorrection) {
+        if (hasCorrection) {
 
-			System.out.println("MICR CORRECTION = YES");
+            System.out.println(
+                    "MICR CORRECTION = YES");
 
-			if (micrUnchanged != null) {
+            if (micrUnchanged != null) {
 
-				micrUnchanged.setVisible(false);
-			}
+                micrUnchanged
+                        .setVisible(false);
+            }
 
-			if (micrCorrection != null) {
+            if (micrCorrection != null) {
 
-				micrCorrection.setVisible(true);
-			}
+                micrCorrection
+                        .setVisible(true);
+            }
 
-			if (micrStatus != null) {
+            if (micrStatus != null) {
 
-				micrStatus.setValue("• MICR Correction");
+                micrStatus.setValue(
+                        "• MICR Correction");
 
-				micrStatus.setSclass("green-status");
-			}
+                micrStatus.setSclass(
+                        "green-status");
+            }
 
-			if (oldMicrValue != null) {
+            if (oldMicrValue != null) {
 
-				oldMicrValue.setValue(oldMicr);
-			}
+                oldMicrValue.setValue(
+                        oldMicr);
+            }
 
-			if (correctedMicrValue != null) {
+            if (correctedMicrValue != null) {
 
-				correctedMicrValue.setValue(correctedMicr);
-			}
+                correctedMicrValue.setValue(
+                        correctedMicr);
+            }
 
-		}
+        }
 
-		// =====================================================
-		// MICR NOT CORRECTED
-		// =====================================================
+        // =====================================================
+        // MICR NOT CORRECTED
+        // =====================================================
 
-		else {
+        else {
 
-			System.out.println("MICR CORRECTION = NO");
+            System.out.println(
+                    "MICR CORRECTION = NO");
 
-			if (micrCorrection != null) {
+            if (micrCorrection != null) {
 
-				micrCorrection.setVisible(false);
-			}
+                micrCorrection
+                        .setVisible(false);
+            }
 
-			if (micrUnchanged != null) {
+            if (micrUnchanged != null) {
 
-				micrUnchanged.setVisible(true);
-			}
+                micrUnchanged
+                        .setVisible(true);
+            }
 
-			if (micrStatus != null) {
+            if (micrStatus != null) {
 
-				micrStatus.setValue("• No MICR Correction");
+                micrStatus.setValue(
+                        "• No MICR Correction");
 
-				micrStatus.setSclass("unchanged-status");
-			}
+                micrStatus.setSclass(
+                        "unchanged-status");
+            }
 
-			if (micrValue != null) {
+            if (micrValue != null) {
 
-				micrValue.setValue(nullToEmpty(currentMicr));
-			}
-		}
+                micrValue.setValue(
+                        nullToEmpty(
+                                currentMicr));
+            }
+        }
 
-		System.out.println("==================================");
-	}
+        System.out.println(
+                "==================================");
+    }
 
-	// =========================================================
-	// DATA ENTRY DETAILS
-	// =========================================================
+    // =========================================================
+    // DATA ENTRY DETAILS
+    // =========================================================
 
-	private void loadDataEntryDetails(String chequeNumber) {
+    private void loadDataEntryDetails(
+            String chequeNumber) {
 
-		if (chequeNumber == null || chequeNumber.trim().isEmpty()) {
+        if (chequeNumber == null
+                || chequeNumber.trim().isEmpty()) {
 
-			System.out.println("DATA ENTRY - CHEQUE NUMBER IS EMPTY");
+            System.out.println(
+                    "DATA ENTRY - CHEQUE NUMBER IS EMPTY");
 
-			return;
-		}
+            return;
+        }
 
-		Map<String, Object> details = batchDetailsService.getDataEntryDetails(chequeNumber);
+        Map<String, Object> details = batchDetailsService
+                .getDataEntryDetails(
+                        chequeNumber);
 
-		System.out.println();
+        System.out.println();
 
-		System.out.println("========== DATA ENTRY DETAILS ==========");
+        System.out.println(
+                "========== DATA ENTRY DETAILS ==========");
 
-		System.out.println("Cheque Number = " + chequeNumber);
+        System.out.println(
+                "Cheque Number = "
+                        + chequeNumber);
 
-		if (details == null || details.isEmpty()) {
+        if (details == null
+                || details.isEmpty()) {
 
-			System.out.println("DATA ENTRY DETAILS NOT FOUND");
+            System.out.println(
+                    "DATA ENTRY DETAILS NOT FOUND");
 
-			resetDataEntryUI();
+            resetDataEntryUI();
 
-			return;
-		}
+            return;
+        }
 
-		// =====================================================
-		// ACCOUNT NUMBER
-		// =====================================================
+        // =====================================================
+        // ACCOUNT NUMBER
+        // =====================================================
 
-		String oldAccount = getString(details, "oldAccountNumber");
+        String oldAccount = getString(
+                details,
+                "oldAccountNumber");
 
-		String newAccount = getString(details, "newAccountNumber");
+        String newAccount = getString(
+                details,
+                "newAccountNumber");
 
-		boolean accountCorrected = newAccount != null && !newAccount.trim().isEmpty();
+        boolean accountCorrected = newAccount != null
+                && !newAccount.trim().isEmpty();
 
-		if (accountCorrected) {
+        if (accountCorrected) {
 
-			if (accountStatus != null) {
+            if (accountStatus != null) {
 
-				accountStatus.setValue("Corrected");
+                accountStatus.setValue(
+                        "Corrected");
 
-				accountStatus.setSclass("green-status");
-			}
+                accountStatus.setSclass(
+                        "green-status");
+            }
 
-			if (accountCorrection != null) {
+            if (accountCorrection != null) {
 
-				accountCorrection.setVisible(true);
-			}
+                accountCorrection
+                        .setVisible(true);
+            }
 
-			if (accountUnchanged != null) {
+            if (accountUnchanged != null) {
 
-				accountUnchanged.setVisible(false);
-			}
+                accountUnchanged
+                        .setVisible(false);
+            }
 
-			if (oldAccountNumber != null) {
+            if (oldAccountNumber != null) {
 
-				oldAccountNumber.setValue(nullToEmpty(oldAccount));
-			}
+                oldAccountNumber.setValue(
+                        nullToEmpty(
+                                oldAccount));
+            }
 
-			if (correctedAccountNumber != null) {
+            if (correctedAccountNumber != null) {
 
-				correctedAccountNumber.setValue(newAccount);
-			}
+                correctedAccountNumber
+                        .setValue(
+                                newAccount);
+            }
 
-		} else {
+        } else {
 
-			if (accountStatus != null) {
+            if (accountStatus != null) {
 
-				accountStatus.setValue("Unchanged");
+                accountStatus.setValue(
+                        "Unchanged");
 
-				accountStatus.setSclass("unchanged-status");
-			}
+                accountStatus.setSclass(
+                        "unchanged-status");
+            }
 
-			if (accountCorrection != null) {
+            if (accountCorrection != null) {
 
-				accountCorrection.setVisible(false);
-			}
+                accountCorrection
+                        .setVisible(false);
+            }
 
-			if (accountUnchanged != null) {
+            if (accountUnchanged != null) {
 
-				accountUnchanged.setVisible(true);
-			}
+                accountUnchanged
+                        .setVisible(true);
+            }
 
-			if (accountNumber != null) {
+            if (accountNumber != null) {
 
-				accountNumber.setValue(nullToEmpty(oldAccount));
-			}
-		}
+                accountNumber.setValue(
+                        nullToEmpty(
+                                oldAccount));
+            }
+        }
 
-		// =====================================================
-		// AMOUNT
-		// =====================================================
+        // =====================================================
+        // AMOUNT
+        // =====================================================
 
-		String oldAmountValue = getString(details, "oldAmount");
+        String oldAmountValue = getString(
+                details,
+                "oldAmount");
 
-		String newAmountValue = getString(details, "newAmount");
+        String newAmountValue = getString(
+                details,
+                "newAmount");
 
-		boolean amountCorrected = newAmountValue != null && !newAmountValue.trim().isEmpty();
+        boolean amountCorrected = newAmountValue != null
+                && !newAmountValue.trim().isEmpty();
 
-		if (amountCorrected) {
+        if (amountCorrected) {
 
-			if (amountStatus != null) {
+            if (amountStatus != null) {
 
-				amountStatus.setValue("Corrected");
+                amountStatus.setValue(
+                        "Corrected");
 
-				amountStatus.setSclass("green-status");
-			}
+                amountStatus.setSclass(
+                        "green-status");
+            }
 
-			if (amountCorrection != null) {
+            if (amountCorrection != null) {
 
-				amountCorrection.setVisible(true);
-			}
+                amountCorrection
+                        .setVisible(true);
+            }
 
-			if (amountUnchanged != null) {
+            if (amountUnchanged != null) {
 
-				amountUnchanged.setVisible(false);
-			}
+                amountUnchanged
+                        .setVisible(false);
+            }
 
-			if (oldAmount != null) {
+            if (oldAmount != null) {
 
-				oldAmount.setValue(formatAmount(oldAmountValue));
-			}
+                oldAmount.setValue(
+                        formatAmount(
+                                oldAmountValue));
+            }
 
-			if (correctedAmount != null) {
+            if (correctedAmount != null) {
 
-				correctedAmount.setValue(formatAmount(newAmountValue));
-			}
+                correctedAmount.setValue(
+                        formatAmount(
+                                newAmountValue));
+            }
 
-		} else {
+        } else {
 
-			if (amountStatus != null) {
+            if (amountStatus != null) {
 
-				amountStatus.setValue("Unchanged");
+                amountStatus.setValue(
+                        "Unchanged");
 
-				amountStatus.setSclass("unchanged-status");
-			}
+                amountStatus.setSclass(
+                        "unchanged-status");
+            }
 
-			if (amountCorrection != null) {
+            if (amountCorrection != null) {
 
-				amountCorrection.setVisible(false);
-			}
+                amountCorrection
+                        .setVisible(false);
+            }
 
-			if (amountUnchanged != null) {
+            if (amountUnchanged != null) {
 
-				amountUnchanged.setVisible(true);
-			}
+                amountUnchanged
+                        .setVisible(true);
+            }
 
-			if (amount != null) {
+            if (amount != null) {
 
-				amount.setValue(formatAmount(oldAmountValue));
-			}
-		}
+                amount.setValue(
+                        formatAmount(
+                                oldAmountValue));
+            }
+        }
 
-		// =====================================================
-		// CHEQUE DATE
-		// =====================================================
+        // =====================================================
+        // CHEQUE DATE
+        // =====================================================
 
-		String oldDate = getString(details, "oldChequeDate");
+        String oldDate = getString(
+                details,
+                "oldChequeDate");
 
-		String newDate = getString(details, "newChequeDate");
+        String newDate = getString(
+                details,
+                "newChequeDate");
 
-		boolean dateCorrected = newDate != null && !newDate.trim().isEmpty();
+        boolean dateCorrected = newDate != null
+                && !newDate.trim().isEmpty();
 
-		if (dateCorrected) {
+        if (dateCorrected) {
 
-			if (dateStatus != null) {
+            if (dateStatus != null) {
 
-				dateStatus.setValue("Corrected");
+                dateStatus.setValue(
+                        "Corrected");
 
-				dateStatus.setSclass("green-status");
-			}
+                dateStatus.setSclass(
+                        "green-status");
+            }
 
-			if (dateCorrection != null) {
+            if (dateCorrection != null) {
 
-				dateCorrection.setVisible(true);
-			}
+                dateCorrection
+                        .setVisible(true);
+            }
 
-			if (dateUnchanged != null) {
+            if (dateUnchanged != null) {
 
-				dateUnchanged.setVisible(false);
-			}
+                dateUnchanged
+                        .setVisible(false);
+            }
 
-			if (oldChequeDate != null) {
+            if (oldChequeDate != null) {
 
-				oldChequeDate.setValue(formatDate(oldDate));
-			}
+                oldChequeDate.setValue(
+                        formatDate(oldDate));
+            }
 
-			if (correctedChequeDate != null) {
+            if (correctedChequeDate != null) {
 
-				correctedChequeDate.setValue(formatDate(newDate));
-			}
+                correctedChequeDate.setValue(
+                        formatDate(newDate));
+            }
 
-		} else {
+        } else {
 
-			if (dateStatus != null) {
+            if (dateStatus != null) {
 
-				dateStatus.setValue("Unchanged");
+                dateStatus.setValue(
+                        "Unchanged");
 
-				dateStatus.setSclass("unchanged-status");
-			}
+                dateStatus.setSclass(
+                        "unchanged-status");
+            }
 
-			if (dateCorrection != null) {
+            if (dateCorrection != null) {
 
-				dateCorrection.setVisible(false);
-			}
+                dateCorrection
+                        .setVisible(false);
+            }
 
-			if (dateUnchanged != null) {
+            if (dateUnchanged != null) {
 
-				dateUnchanged.setVisible(true);
-			}
+                dateUnchanged
+                        .setVisible(true);
+            }
 
-			if (chequeDate != null) {
+            if (chequeDate != null) {
 
-				chequeDate.setValue(formatDate(oldDate));
-			}
-		}
+                chequeDate.setValue(
+                        formatDate(oldDate));
+            }
+        }
 
-		// =====================================================
-		// CHEQUE NUMBER
-		// DB FIELD = cheque_number
-		// =====================================================
+        // =====================================================
+        // CHEQUE NUMBER
+        // DB FIELD = cheque_number
+        // =====================================================
 
-		String oldChqNo = getString(details, "oldChequeNumber");
-		if (oldChqNo == null || oldChqNo.trim().isEmpty()) {
-			oldChqNo = getString(details, "chequeNumber");
-		}
+        String oldChqNo = getString(
+                details,
+                "oldChequeNumber");
+        if (oldChqNo == null || oldChqNo.trim().isEmpty()) {
+            oldChqNo = getString(details, "chequeNumber");
+        }
 
-		String newChqNo = getString(details, "newChequeNumber");
+        String newChqNo = getString(
+                details,
+                "newChequeNumber");
 
-		boolean chequeNoCorrected = newChqNo != null && !newChqNo.trim().isEmpty()
-				&& !newChqNo.trim().equals(oldChqNo != null ? oldChqNo.trim() : "");
+        boolean chequeNoCorrected = newChqNo != null
+                && !newChqNo.trim().isEmpty()
+                && !newChqNo.trim().equals(oldChqNo != null ? oldChqNo.trim() : "");
 
-		if (chequeNoCorrected) {
+        if (chequeNoCorrected) {
 
-			if (chequeNoStatus != null) {
+            if (chequeNoStatus != null) {
 
-				chequeNoStatus.setValue("Corrected");
+                chequeNoStatus.setValue(
+                        "Corrected");
 
-				chequeNoStatus.setSclass("green-status");
-			}
+                chequeNoStatus.setSclass(
+                        "green-status");
+            }
 
-			if (chequeNoCorrection != null) {
+            if (chequeNoCorrection != null) {
 
-				chequeNoCorrection.setVisible(true);
-			}
+                chequeNoCorrection
+                        .setVisible(true);
+            }
 
-			if (chequeNoUnchanged != null) {
+            if (chequeNoUnchanged != null) {
 
-				chequeNoUnchanged.setVisible(false);
-			}
+                chequeNoUnchanged
+                        .setVisible(false);
+            }
 
-			if (oldChequeNumber != null) {
+            if (oldChequeNumber != null) {
 
-				oldChequeNumber.setValue(nullToEmpty(oldChqNo));
-			}
+                oldChequeNumber.setValue(
+                        nullToEmpty(
+                                oldChqNo));
+            }
 
-			if (correctedChequeNumber != null) {
+            if (correctedChequeNumber != null) {
 
-				correctedChequeNumber.setValue(newChqNo.trim());
-			}
+                correctedChequeNumber.setValue(
+                        newChqNo.trim());
+            }
 
-		} else {
+        } else {
 
-			if (chequeNoStatus != null) {
+            if (chequeNoStatus != null) {
 
-				chequeNoStatus.setValue("Unchanged");
+                chequeNoStatus.setValue(
+                        "Unchanged");
 
-				chequeNoStatus.setSclass("unchanged-status");
-			}
+                chequeNoStatus.setSclass(
+                        "unchanged-status");
+            }
 
-			if (chequeNoCorrection != null) {
+            if (chequeNoCorrection != null) {
 
-				chequeNoCorrection.setVisible(false);
-			}
+                chequeNoCorrection
+                        .setVisible(false);
+            }
 
-			if (chequeNoUnchanged != null) {
+            if (chequeNoUnchanged != null) {
 
-				chequeNoUnchanged.setVisible(true);
-			}
+                chequeNoUnchanged
+                        .setVisible(true);
+            }
 
-			if (chequeNumberVal != null) {
+            if (chequeNumberVal != null) {
 
-				chequeNumberVal.setValue(nullToEmpty(oldChqNo));
-			}
-		}
+                chequeNumberVal.setValue(
+                        nullToEmpty(
+                                oldChqNo));
+            }
+        }
 
-		// =====================================================
-		// DATA ENTRY SUMMARY BADGE (e.g. • 2 Fields Corrected)
-		// =====================================================
-		int correctedFieldsCount = (accountCorrected ? 1 : 0) + (amountCorrected ? 1 : 0) + (dateCorrected ? 1 : 0)
-				+ (chequeNoCorrected ? 1 : 0);
+        // =====================================================
+        // DATA ENTRY SUMMARY BADGE (e.g. • 2 Fields Corrected)
+        // =====================================================
+        int correctedFieldsCount = (accountCorrected ? 1 : 0)
+                + (amountCorrected ? 1 : 0)
+                + (dateCorrected ? 1 : 0)
+                + (chequeNoCorrected ? 1 : 0);
 
-		if (dataEntrySummary != null) {
-			if (correctedFieldsCount > 0) {
-				dataEntrySummary.setValue("• " + correctedFieldsCount
-						+ (correctedFieldsCount == 1 ? " Field Corrected" : " Fields Corrected"));
-				dataEntrySummary.setSclass("green-status");
-			} else {
-				dataEntrySummary.setValue("• No Corrections");
-				dataEntrySummary.setSclass("unchanged-status");
-			}
-		}
+        if (dataEntrySummary != null) {
+            if (correctedFieldsCount > 0) {
+                dataEntrySummary.setValue("• " + correctedFieldsCount
+                        + (correctedFieldsCount == 1 ? " Field Corrected" : " Fields Corrected"));
+                dataEntrySummary.setSclass("green-status");
+            } else {
+                dataEntrySummary.setValue("• No Corrections");
+                dataEntrySummary.setSclass("unchanged-status");
+            }
+        }
 
-		System.out.println("Account Corrected = " + accountCorrected);
+        System.out.println(
+                "Account Corrected = "
+                        + accountCorrected);
 
-		System.out.println("Amount Corrected = " + amountCorrected);
+        System.out.println(
+                "Amount Corrected = "
+                        + amountCorrected);
 
-		System.out.println("Date Corrected = " + dateCorrected);
+        System.out.println(
+                "Date Corrected = "
+                        + dateCorrected);
 
-		System.out.println("Cheque Number Corrected = " + chequeNoCorrected);
+        System.out.println(
+                "Cheque Number Corrected = "
+                        + chequeNoCorrected);
 
-		System.out.println("==========================================");
-	}
+        System.out.println(
+                "==========================================");
+    }
 
-	// =========================================================
-	// CBS VALIDATION
-	// =========================================================
+    // =========================================================
+    // CBS VALIDATION
+    // =========================================================
 
-	private void loadCbsValidation(String chequeNumber) {
+    private void loadCbsValidation(
+            String chequeNumber) {
 
-		cbsPassed = false;
+        cbsPassed = false;
 
-		if (acceptButton != null) {
-			acceptButton.setDisabled(true);
-		}
+        if (acceptButton != null) {
+            acceptButton.setDisabled(true);
+        }
 
-		System.out.println();
+        System.out.println();
 
-		System.out.println("========== CBS VALIDATION ==========");
+        System.out.println(
+                "========== CBS VALIDATION ==========");
 
-		System.out.println("Cheque Number = " + chequeNumber);
+        System.out.println(
+                "Cheque Number = "
+                        + chequeNumber);
 
-		// -----------------------------------------------------
-		// Invalid cheque number
-		// -----------------------------------------------------
+        // -----------------------------------------------------
+        // Invalid cheque number
+        // -----------------------------------------------------
 
-		if (chequeNumber == null || chequeNumber.trim().isEmpty()) {
+        if (chequeNumber == null
+                || chequeNumber.trim().isEmpty()) {
 
-			showCbsFailure("CBS validation failed: cheque details not found.");
+            showCbsFailure(
+                    "CBS validation failed: cheque details not found.");
 
-			return;
-		}
+            return;
+        }
 
-		// -----------------------------------------------------
-		// Get CBS data
-		// -----------------------------------------------------
+        // -----------------------------------------------------
+        // Get CBS data
+        // -----------------------------------------------------
 
-		Map<String, Object> cbsDetails = batchDetailsService.getCbsValidation(chequeNumber);
+        Map<String, Object> cbsDetails = batchDetailsService
+                .getCbsValidation(
+                        chequeNumber);
 
-		if (cbsDetails == null || cbsDetails.isEmpty()) {
+        if (cbsDetails == null
+                || cbsDetails.isEmpty()) {
 
-			showCbsFailure("CBS validation failed: cheque details not found.");
+            showCbsFailure(
+                    "CBS validation failed: cheque details not found.");
 
-			return;
-		}
+            return;
+        }
 
-		// =====================================================
-		// VALUES FROM DATABASE
-		// =====================================================
+        // =====================================================
+        // VALUES FROM DATABASE
+        // =====================================================
 
-		BigDecimal chequeAmount = getBigDecimal(cbsDetails, "chequeAmount");
+        BigDecimal chequeAmount = getBigDecimal(
+                cbsDetails,
+                "chequeAmount");
 
-		BigDecimal availableBalance = getBigDecimal(cbsDetails, "availableBalance");
+        BigDecimal availableBalance = getBigDecimal(
+                cbsDetails,
+                "availableBalance");
 
-		Date chequeSqlDate = getSqlDate(cbsDetails, "chequeDate");
+        Date chequeSqlDate = getSqlDate(
+                cbsDetails,
+                "chequeDate");
 
-		String accountStatus = getString(cbsDetails, "accountStatus");
+        String accountStatus = getString(
+                cbsDetails,
+                "accountStatus");
 
-		// =====================================================
-		// 1. AMOUNT / FUNDS VALIDATION
-		//
-		// available balance MUST be greater than
-		// cheque amount.
-		// =====================================================
+        // =====================================================
+        // 1. AMOUNT / FUNDS VALIDATION
+        //
+        // available balance MUST be greater than
+        // cheque amount.
+        // =====================================================
 
-		boolean amountPassed = chequeAmount != null && availableBalance != null
-				&& availableBalance.compareTo(chequeAmount) > 0;
+        boolean amountPassed = chequeAmount != null
+                && availableBalance != null
+                && availableBalance.compareTo(
+                        chequeAmount) > 0;
 
-		// =====================================================
-		// 2. CHEQUE DATE VALIDATION
-		//
-		// Cheque date should NOT be before 3 months.
-		// =====================================================
+        // =====================================================
+        // 2. CHEQUE DATE VALIDATION
+        //
+        // Cheque date should NOT be before 3 months.
+        // =====================================================
 
-		boolean datePassed = false;
+        boolean datePassed = false;
 
-		if (chequeSqlDate != null) {
+        if (chequeSqlDate != null) {
 
-			LocalDate chequeDate = chequeSqlDate.toLocalDate();
+            LocalDate chequeDate = chequeSqlDate.toLocalDate();
 
-			LocalDate minimumValidDate = LocalDate.now().minusMonths(3);
+            LocalDate minimumValidDate = LocalDate.now()
+                    .minusMonths(3);
 
-			datePassed = !chequeDate.isBefore(minimumValidDate);
-		}
+            datePassed = !chequeDate.isBefore(
+                    minimumValidDate);
+        }
 
-		// =====================================================
-		// 3. ACCOUNT STATUS VALIDATION
-		//
-		// Account must be ACTIVE.
-		// =====================================================
+        // =====================================================
+        // 3. ACCOUNT STATUS VALIDATION
+        //
+        // Account must be ACTIVE.
+        // =====================================================
 
-		boolean accountPassed = "ACTIVE".equalsIgnoreCase(accountStatus);
+        boolean accountPassed = "ACTIVE".equalsIgnoreCase(
+                accountStatus);
 
-		// =====================================================
-		// 4. DUPLICATE CHEQUE VALIDATION
-		// =====================================================
+        // =====================================================
+        // 4. DUPLICATE CHEQUE VALIDATION
+        // =====================================================
 
-		boolean isDuplicate = Boolean.TRUE.equals(cbsDetails.get("isDuplicate"));
+        boolean isDuplicate = Boolean.TRUE.equals(
+                cbsDetails.get("isDuplicate"));
 
-		boolean duplicatePassed = !isDuplicate;
+        boolean duplicatePassed = !isDuplicate;
 
-		// =====================================================
-		// PRINT VALUES
-		// =====================================================
+        // =====================================================
+        // PRINT VALUES
+        // =====================================================
 
-		System.out.println("CBS Cheque Amount = " + chequeAmount);
+        System.out.println(
+                "CBS Cheque Amount = "
+                        + chequeAmount);
 
-		System.out.println("CBS Available Balance = " + availableBalance);
+        System.out.println(
+                "CBS Available Balance = "
+                        + availableBalance);
 
-		System.out.println("CBS Cheque Date = " + chequeSqlDate);
+        System.out.println(
+                "CBS Cheque Date = "
+                        + chequeSqlDate);
 
-		System.out.println("CBS Account Status = " + accountStatus);
+        System.out.println(
+                "CBS Account Status = "
+                        + accountStatus);
 
-		System.out.println("CBS Duplicate Cheque = " + isDuplicate);
+        System.out.println(
+                "CBS Duplicate Cheque = "
+                        + isDuplicate);
 
-		System.out.println("Amount / Funds = " + amountPassed);
+        System.out.println(
+                "Amount / Funds = "
+                        + amountPassed);
 
-		System.out.println("Cheque Date = " + datePassed);
+        System.out.println(
+                "Cheque Date = "
+                        + datePassed);
 
-		System.out.println("Account Status = " + accountPassed);
+        System.out.println(
+                "Account Status = "
+                        + accountPassed);
 
-		System.out.println("Duplicate Cheque = " + duplicatePassed);
+        System.out.println(
+                "Duplicate Cheque = "
+                        + duplicatePassed);
 
-		// =====================================================
-		// FINAL RESULT
-		// =====================================================
+        // =====================================================
+        // FINAL RESULT
+        // =====================================================
 
-		boolean allPassed = amountPassed && datePassed && accountPassed && duplicatePassed;
+        boolean allPassed = amountPassed
+                && datePassed
+                && accountPassed
+                && duplicatePassed;
 
-		cbsPassed = allPassed;
+        cbsPassed = allPassed;
 
-		if (allPassed) {
+        if (allPassed) {
 
-			showCbsPassed();
+            showCbsPassed();
 
-		} else {
+        } else {
 
-			StringBuilder failure = new StringBuilder();
+            StringBuilder failure = new StringBuilder();
 
-			if (!amountPassed) {
+            if (!amountPassed) {
 
-				failure.append("Amount / Funds validation failed.");
-			}
+                failure.append(
+                        "Amount / Funds validation failed.");
+            }
 
-			if (!datePassed) {
+            if (!datePassed) {
 
-				appendFailureSeparator(failure);
+                appendFailureSeparator(
+                        failure);
 
-				failure.append("Cheque date is older than 3 months.");
-			}
+                failure.append(
+                        "Cheque date is older than 3 months.");
+            }
 
-			if (!accountPassed) {
+            if (!accountPassed) {
 
-				appendFailureSeparator(failure);
+                appendFailureSeparator(
+                        failure);
 
-				failure.append("Account status is not ACTIVE.");
-			}
+                failure.append(
+                        "Account status is not ACTIVE.");
+            }
 
-			if (!duplicatePassed) {
+            if (!duplicatePassed) {
 
-				appendFailureSeparator(failure);
+                appendFailureSeparator(
+                        failure);
 
-				failure.append("Duplicate cheque detected in system.");
-			}
+                failure.append(
+                        "Duplicate cheque detected in system.");
+            }
 
-			showCbsFailure(failure.toString());
-		}
+            showCbsFailure(
+                    failure.toString());
+        }
 
-		System.out.println("CBS FINAL RESULT = " + allPassed);
+        System.out.println(
+                "CBS FINAL RESULT = "
+                        + allPassed);
 
-		System.out.println("====================================");
-	}
+        System.out.println(
+                "====================================");
+    }
 
-	// =========================================================
-	// CBS RESULT UI
-	// =========================================================
+    // =========================================================
+    // CBS RESULT UI
+    // =========================================================
 
-	private void updateCbsResult(Label resultLabel, boolean passed) {
+    private void updateCbsResult(
+            Label resultLabel,
+            boolean passed) {
 
-		if (resultLabel == null) {
-			return;
-		}
+        if (resultLabel == null) {
+            return;
+        }
 
-		if (passed) {
+        if (passed) {
 
-			resultLabel.setValue("Passed");
+            resultLabel.setValue(
+                    "Passed");
 
-			resultLabel.setSclass("cbs-check-value");
+            resultLabel.setSclass(
+                    "cbs-check-value");
 
-		} else {
+        } else {
 
-			resultLabel.setValue("Failed");
+            resultLabel.setValue(
+                    "Failed");
 
-			resultLabel.setSclass("cbs-fail-value");
-		}
-	}
+            resultLabel.setSclass(
+                    "cbs-fail-value");
+        }
+    }
 
-	// =========================================================
-	// CBS PASSED
-	// =========================================================
+    // =========================================================
+    // CBS PASSED
+    // =========================================================
 
-	private void showCbsPassed() {
+    private void showCbsPassed() {
 
-		if (cbsTitle != null) {
+        if (cbsTitle != null) {
 
-			cbsTitle.setValue("CBS Validation: PASSED");
+            cbsTitle.setValue(
+                    "CBS Validation: PASSED");
 
-			cbsTitle.setSclass("cbs-title");
-		}
+            cbsTitle.setSclass(
+                    "cbs-title");
+        }
 
-		if (cbsActionStatus != null) {
+        if (cbsActionStatus != null) {
 
-			cbsActionStatus.setValue("");
+            cbsActionStatus.setValue("");
 
-			cbsActionStatus.setVisible(false);
-		}
+            cbsActionStatus.setVisible(false);
+        }
 
-		if (cbsFailure != null) {
+        if (cbsFailure != null) {
 
-			cbsFailure.setVisible(false);
-		}
+            cbsFailure.setVisible(false);
+        }
 
-		if (leftCbsStatus != null) {
+        if (leftCbsStatus != null) {
 
-			leftCbsStatus.setValue("● CBS: PASSED");
+            leftCbsStatus.setValue(
+                    "● CBS: PASSED");
 
-			leftCbsStatus.setSclass("cbs-pass-badge");
-		}
+            leftCbsStatus.setSclass(
+                    "cbs-pass-badge");
+        }
 
-		if (acceptButton != null) {
-			acceptButton.setDisabled(false);
-			acceptButton.setSclass("decision-button accept-button");
-		}
-	}
+        if (acceptButton != null) {
+            acceptButton.setDisabled(false);
+            acceptButton.setSclass(
+                    "decision-button accept-button");
+        }
+    }
 
-	// =========================================================
-	// CBS FAILED
-	// =========================================================
+    // =========================================================
+    // CBS FAILED
+    // =========================================================
 
-	private void showCbsFailure(String message) {
+    private void showCbsFailure(
+            String message) {
 
-		if (cbsTitle != null) {
+        if (cbsTitle != null) {
 
-			cbsTitle.setValue("CBS Validation: FAILED");
+            cbsTitle.setValue(
+                    "CBS Validation: FAILED");
 
-			cbsTitle.setSclass("cbs-title cbs-title-failed");
-		}
+            cbsTitle.setSclass(
+                    "cbs-title cbs-title-failed");
+        }
 
-		if (cbsActionStatus != null) {
+        if (cbsActionStatus != null) {
 
-			cbsActionStatus.setValue("");
+            cbsActionStatus.setValue("");
 
-			cbsActionStatus.setVisible(false);
-		}
+            cbsActionStatus.setVisible(false);
+        }
 
-		if (cbsFailure != null) {
+        if (cbsFailure != null) {
 
-			cbsFailure.setVisible(true);
-		}
+            cbsFailure.setVisible(true);
+        }
 
-		if (cbsFailureText != null) {
+        if (cbsFailureText != null) {
 
-			cbsFailureText.setValue(message);
-		}
+            cbsFailureText.setValue(
+                    message);
+        }
 
-		if (leftCbsStatus != null) {
+        if (leftCbsStatus != null) {
 
-			leftCbsStatus.setValue("● CBS: FAILED");
+            leftCbsStatus.setValue(
+                    "● CBS: FAILED");
 
-			leftCbsStatus.setSclass("cbs-fail-badge");
-		}
+            leftCbsStatus.setSclass(
+                    "cbs-fail-badge");
+        }
 
-		cbsPassed = false;
+        cbsPassed = false;
 
-		if (acceptButton != null) {
-			acceptButton.setDisabled(true);
-			acceptButton.setSclass("decision-button accept-button accept-button-dull");
-		}
-	}
+        if (acceptButton != null) {
+            acceptButton.setDisabled(true);
+            acceptButton.setSclass(
+                    "decision-button accept-button accept-button-dull");
+        }
+    }
 
-	// =========================================================
-	// RESET DATA ENTRY UI
-	// =========================================================
+    // =========================================================
+    // RESET DATA ENTRY UI
+    // =========================================================
 
-	private void resetDataEntryUI() {
+    private void resetDataEntryUI() {
 
-		// -----------------------------------------------------
-		// ACCOUNT
-		// -----------------------------------------------------
+        // -----------------------------------------------------
+        // ACCOUNT
+        // -----------------------------------------------------
 
-		if (accountStatus != null) {
+        if (accountStatus != null) {
 
-			accountStatus.setValue("Unchanged");
+            accountStatus.setValue(
+                    "Unchanged");
 
-			accountStatus.setSclass("unchanged-status");
-		}
+            accountStatus.setSclass(
+                    "unchanged-status");
+        }
 
-		if (accountCorrection != null) {
+        if (accountCorrection != null) {
 
-			accountCorrection.setVisible(false);
-		}
+            accountCorrection
+                    .setVisible(false);
+        }
 
-		if (accountUnchanged != null) {
+        if (accountUnchanged != null) {
 
-			accountUnchanged.setVisible(true);
-		}
+            accountUnchanged
+                    .setVisible(true);
+        }
 
-		if (accountNumber != null) {
+        if (accountNumber != null) {
 
-			accountNumber.setValue("");
-		}
+            accountNumber.setValue("");
+        }
 
-		if (oldAccountNumber != null) {
+        if (oldAccountNumber != null) {
 
-			oldAccountNumber.setValue("");
-		}
+            oldAccountNumber.setValue("");
+        }
 
-		if (correctedAccountNumber != null) {
+        if (correctedAccountNumber != null) {
 
-			correctedAccountNumber.setValue("");
-		}
+            correctedAccountNumber.setValue("");
+        }
 
-		// -----------------------------------------------------
-		// AMOUNT
-		// -----------------------------------------------------
+        // -----------------------------------------------------
+        // AMOUNT
+        // -----------------------------------------------------
 
-		if (amountStatus != null) {
+        if (amountStatus != null) {
 
-			amountStatus.setValue("Unchanged");
+            amountStatus.setValue(
+                    "Unchanged");
 
-			amountStatus.setSclass("unchanged-status");
-		}
+            amountStatus.setSclass(
+                    "unchanged-status");
+        }
 
-		if (amountCorrection != null) {
+        if (amountCorrection != null) {
 
-			amountCorrection.setVisible(false);
-		}
+            amountCorrection
+                    .setVisible(false);
+        }
 
-		if (amountUnchanged != null) {
+        if (amountUnchanged != null) {
 
-			amountUnchanged.setVisible(true);
-		}
+            amountUnchanged
+                    .setVisible(true);
+        }
 
-		if (amount != null) {
+        if (amount != null) {
 
-			amount.setValue("");
-		}
+            amount.setValue("");
+        }
 
-		if (oldAmount != null) {
+        if (oldAmount != null) {
 
-			oldAmount.setValue("");
-		}
+            oldAmount.setValue("");
+        }
 
-		if (correctedAmount != null) {
+        if (correctedAmount != null) {
 
-			correctedAmount.setValue("");
-		}
+            correctedAmount.setValue("");
+        }
 
-		// -----------------------------------------------------
-		// DATE
-		// -----------------------------------------------------
+        // -----------------------------------------------------
+        // DATE
+        // -----------------------------------------------------
 
-		if (dateStatus != null) {
+        if (dateStatus != null) {
 
-			dateStatus.setValue("Unchanged");
+            dateStatus.setValue(
+                    "Unchanged");
 
-			dateStatus.setSclass("unchanged-status");
-		}
+            dateStatus.setSclass(
+                    "unchanged-status");
+        }
 
-		if (dateCorrection != null) {
+        if (dateCorrection != null) {
 
-			dateCorrection.setVisible(false);
-		}
+            dateCorrection
+                    .setVisible(false);
+        }
 
-		if (dateUnchanged != null) {
+        if (dateUnchanged != null) {
 
-			dateUnchanged.setVisible(true);
-		}
+            dateUnchanged
+                    .setVisible(true);
+        }
 
-		if (chequeDate != null) {
+        if (chequeDate != null) {
 
-			chequeDate.setValue("");
-		}
+            chequeDate.setValue("");
+        }
 
-		if (oldChequeDate != null) {
+        if (oldChequeDate != null) {
 
-			oldChequeDate.setValue("");
-		}
+            oldChequeDate.setValue("");
+        }
 
-		if (correctedChequeDate != null) {
+        if (correctedChequeDate != null) {
 
-			correctedChequeDate.setValue("");
-		}
+            correctedChequeDate.setValue("");
+        }
 
-		// -----------------------------------------------------
-		// CHEQUE NUMBER
-		// -----------------------------------------------------
+        // -----------------------------------------------------
+        // CHEQUE NUMBER
+        // -----------------------------------------------------
 
-		if (chequeNoStatus != null) {
+        if (chequeNoStatus != null) {
 
-			chequeNoStatus.setValue("Unchanged");
+            chequeNoStatus.setValue(
+                    "Unchanged");
 
-			chequeNoStatus.setSclass("unchanged-status");
-		}
+            chequeNoStatus.setSclass(
+                    "unchanged-status");
+        }
 
-		if (chequeNoCorrection != null) {
+        if (chequeNoCorrection != null) {
 
-			chequeNoCorrection.setVisible(false);
-		}
+            chequeNoCorrection
+                    .setVisible(false);
+        }
 
-		if (chequeNoUnchanged != null) {
+        if (chequeNoUnchanged != null) {
 
-			chequeNoUnchanged.setVisible(true);
-		}
+            chequeNoUnchanged
+                    .setVisible(true);
+        }
 
-		if (chequeNumberVal != null) {
+        if (chequeNumberVal != null) {
 
-			chequeNumberVal.setValue("");
-		}
+            chequeNumberVal.setValue("");
+        }
 
-		if (oldChequeNumber != null) {
+        if (oldChequeNumber != null) {
 
-			oldChequeNumber.setValue("");
-		}
+            oldChequeNumber.setValue("");
+        }
 
-		if (correctedChequeNumber != null) {
+        if (correctedChequeNumber != null) {
 
-			correctedChequeNumber.setValue("");
-		}
+            correctedChequeNumber.setValue("");
+        }
 
-		if (dataEntrySummary != null) {
+        if (dataEntrySummary != null) {
 
-			dataEntrySummary.setValue("• No Corrections");
+            dataEntrySummary.setValue("• No Corrections");
 
-			dataEntrySummary.setSclass("unchanged-status");
-		}
-	}
+            dataEntrySummary.setSclass("unchanged-status");
+        }
+    }
 
-	// =========================================================
-	// CHEQUE NAVIGATION
-	// =========================================================
+    // =========================================================
+    // CHEQUE NAVIGATION
+    // =========================================================
 
-	// =========================================================
-	// CHECKER DECISION - ACCEPT
-	// =========================================================
+    // =========================================================
+    // CHECKER DECISION - ACCEPT
+    // =========================================================
 
-	public void onClick$acceptButton() {
-		Map<String, Object> currentCheque = (cheques != null && currentChequeIndex >= 0
-				&& currentChequeIndex < cheques.size()) ? cheques.get(currentChequeIndex) : null;
-		if (currentCheque != null && "RETURN_BY_MAKER".equalsIgnoreCase(getString(currentCheque, "status"))) {
-			Messagebox.show(
-					"This cheque was returned by the Maker and cannot be accepted. Please select Return or Send Back to Maker.",
-					"Action Restricted", Messagebox.OK, Messagebox.EXCLAMATION);
-			return;
-		}
-		if (!cbsPassed) {
-			Messagebox.show("CBS validation has failed. This cheque cannot be accepted.", "CBS Validation",
-					Messagebox.OK, Messagebox.ERROR);
-			return;
-		}
-		if (acceptConfirmWindow != null) {
-			acceptConfirmWindow.doModal();
-		}
-	}
+    public void onClick$acceptButton() {
+        Map<String, Object> currentCheque = (cheques != null && currentChequeIndex >= 0 && currentChequeIndex < cheques.size())
+                ? cheques.get(currentChequeIndex) : null;
+        if (currentCheque != null && "RETURN_BY_MAKER".equalsIgnoreCase(getString(currentCheque, "status"))) {
+            Messagebox.show("This cheque was returned by the Maker and cannot be accepted. Please select Return or Send Back to Maker.",
+                    "Action Restricted", Messagebox.OK, Messagebox.EXCLAMATION);
+            return;
+        }
+        if (!cbsPassed) {
+            Messagebox.show("CBS validation has failed. This cheque cannot be accepted.",
+                    "CBS Validation", Messagebox.OK, Messagebox.ERROR);
+            return;
+        }
+        if (acceptConfirmWindow != null) {
+            acceptConfirmWindow.doModal();
+        }
+    }
 
-	private void handleAcceptCancelButton() {
-		if (acceptConfirmWindow != null) {
-			acceptConfirmWindow.setVisible(false);
-		}
-	}
+    private void handleAcceptCancelButton() {
+        if (acceptConfirmWindow != null) {
+            acceptConfirmWindow.setVisible(false);
+        }
+    }
 
-	private void handleAcceptConfirmButton() {
-		Map<String, Object> currentCheque = (cheques != null && currentChequeIndex >= 0
-				&& currentChequeIndex < cheques.size()) ? cheques.get(currentChequeIndex) : null;
-		if (currentCheque != null && "RETURN_BY_MAKER".equalsIgnoreCase(getString(currentCheque, "status"))) {
-			if (acceptConfirmWindow != null) {
-				acceptConfirmWindow.setVisible(false);
-			}
-			Messagebox.show(
-					"This cheque was returned by the Maker and cannot be accepted. Please select Return or Send Back to Maker.",
-					"Action Restricted", Messagebox.OK, Messagebox.EXCLAMATION);
-			return;
-		}
-		if (!cbsPassed) {
-			if (acceptConfirmWindow != null) {
-				acceptConfirmWindow.setVisible(false);
-			}
-			Messagebox.show("CBS validation has failed. This cheque cannot be accepted.", "CBS Validation",
-					Messagebox.OK, Messagebox.ERROR);
-			return;
-		}
-		saveDecision("ACCEPT", null, null, "Accepted", null, acceptConfirmWindow);
-	}
+    private void handleAcceptConfirmButton() {
+        Map<String, Object> currentCheque = (cheques != null && currentChequeIndex >= 0 && currentChequeIndex < cheques.size())
+                ? cheques.get(currentChequeIndex) : null;
+        if (currentCheque != null && "RETURN_BY_MAKER".equalsIgnoreCase(getString(currentCheque, "status"))) {
+            if (acceptConfirmWindow != null) {
+                acceptConfirmWindow.setVisible(false);
+            }
+            Messagebox.show("This cheque was returned by the Maker and cannot be accepted. Please select Return or Send Back to Maker.",
+                    "Action Restricted", Messagebox.OK, Messagebox.EXCLAMATION);
+            return;
+        }
+        if (!cbsPassed) {
+            if (acceptConfirmWindow != null) {
+                acceptConfirmWindow.setVisible(false);
+            }
+            Messagebox.show("CBS validation has failed. This cheque cannot be accepted.",
+                    "CBS Validation", Messagebox.OK, Messagebox.ERROR);
+            return;
+        }
+        saveDecision("ACCEPT", null, null, "Accepted", null, acceptConfirmWindow);
+    }
 
-	// =========================================================
-	// CHECKER DECISION - REJECT (RETURN)
-	// =========================================================
+    // =========================================================
+    // CHECKER DECISION - REJECT (RETURN)
+    // =========================================================
 
-	public void onClick$rejectButton() {
-		if (rejectReasonsContainer != null) {
-			rejectReasonsContainer.getChildren().clear();
-			List<Map<String, String>> reasons = batchDetailsService.getCheckerRejectionReasons();
-			if (reasons != null) {
-				for (Map<String, String> r : reasons) {
-					Checkbox cb = new Checkbox();
-					String code = r.get("rejection_reason_code");
-					if (code == null) {
-						code = r.get("code");
-					}
-					String desc = r.get("description");
-					cb.setLabel((code != null ? code : "") + " - " + (desc != null ? desc : ""));
-					cb.setAttribute("reasonCode", code);
-					cb.setSclass("modal-reason-checkbox");
-					rejectReasonsContainer.appendChild(cb);
-				}
-			}
-		}
-		if (rejectRemark != null) {
-			rejectRemark.setValue("");
-		}
-		if (rejectWindow != null) {
-			rejectWindow.doModal();
-		}
-	}
+    public void onClick$rejectButton() {
+        if (rejectReasonsContainer != null) {
+            rejectReasonsContainer.getChildren().clear();
+            List<Map<String, String>> reasons =
+                    batchDetailsService.getCheckerRejectionReasons();
+            if (reasons != null) {
+                for (Map<String, String> r : reasons) {
+                    Checkbox cb = new Checkbox();
+                    String code = r.get("rejection_reason_code");
+                    if (code == null) {
+                        code = r.get("code");
+                    }
+                    String desc = r.get("description");
+                    cb.setLabel((code != null ? code : "") + " - " + (desc != null ? desc : ""));
+                    cb.setAttribute("reasonCode", code);
+                    cb.setSclass("modal-reason-checkbox");
+                    rejectReasonsContainer.appendChild(cb);
+                }
+            }
+        }
+        if (rejectRemark != null) {
+            rejectRemark.setValue("");
+        }
+        if (rejectWindow != null) {
+            rejectWindow.doModal();
+        }
+    }
 
-	private void handleRejectCancelButton() {
-		if (rejectWindow != null) {
-			rejectWindow.setVisible(false);
-		}
-	}
+    private void handleRejectCancelButton() {
+        if (rejectWindow != null) {
+            rejectWindow.setVisible(false);
+        }
+    }
 
-	private void handleRejectConfirmButton() {
+    private void handleRejectConfirmButton() {
 
-		List<String> selectedCodes = new ArrayList<>();
-		if (rejectReasonsContainer != null) {
-			for (Component comp : rejectReasonsContainer.getChildren()) {
-				if (comp instanceof Checkbox) {
-					Checkbox cb = (Checkbox) comp;
-					if (cb.isChecked()) {
-						String code = (String) cb.getAttribute("reasonCode");
-						if (code != null && !code.trim().isEmpty()) {
-							selectedCodes.add(code.trim());
-						}
-					}
-				}
-			}
-		}
+        List<String> selectedCodes = new ArrayList<>();
+        if (rejectReasonsContainer != null) {
+            for (Component comp : rejectReasonsContainer.getChildren()) {
+                if (comp instanceof Checkbox) {
+                    Checkbox cb = (Checkbox) comp;
+                    if (cb.isChecked()) {
+                        String code = (String) cb.getAttribute("reasonCode");
+                        if (code != null && !code.trim().isEmpty()) {
+                            selectedCodes.add(code.trim());
+                        }
+                    }
+                }
+            }
+        }
 
-		if (selectedCodes.isEmpty()) {
-			Messagebox.show("Please select at least one return reason.", "Validation", Messagebox.OK,
-					Messagebox.EXCLAMATION);
-			return;
-		}
+        if (selectedCodes.isEmpty()) {
+            Messagebox.show(
+                    "Please select at least one return reason.",
+                    "Validation",
+                    Messagebox.OK,
+                    Messagebox.EXCLAMATION
+            );
+            return;
+        }
 
-		String remarks = rejectRemark == null ? null : rejectRemark.getValue();
+        String remarks = rejectRemark == null
+                ? null
+                : rejectRemark.getValue();
 
-		System.out.println("RETURN REASON CODES = " + selectedCodes);
+        System.out.println(
+                "RETURN REASON CODES = " + selectedCodes
+        );
 
-		System.out.println("RETURN REMARKS = " + remarks);
+        System.out.println(
+                "RETURN REMARKS = " + remarks);
 
-		saveDecision("REJECT", selectedCodes, null, "Returned", remarks, rejectWindow);
-	}
+        saveDecision(
+                "REJECT",
+                selectedCodes,
+                null,
+                "Returned",
+                remarks,
+                rejectWindow);
+    }
 
-	// =========================================================
-	// CHECKER DECISION - RETURN TO MAKER (SEND BACK)
-	// =========================================================
+    // =========================================================
+    // CHECKER DECISION - RETURN TO MAKER (SEND BACK)
+    // =========================================================
 
-	public void onClick$returnButton() {
-		if (returnReasonsContainer != null) {
-			returnReasonsContainer.getChildren().clear();
-			List<Map<String, String>> reasons = batchDetailsService.getCheckerReturnReasons();
-			if (reasons != null) {
-				for (Map<String, String> r : reasons) {
-					Checkbox cb = new Checkbox();
-					String code = r.get("return_reason_code");
-					if (code == null) {
-						code = r.get("code");
-					}
-					String desc = r.get("description");
-					cb.setLabel((code != null ? code : "") + " - " + (desc != null ? desc : ""));
-					cb.setAttribute("reasonCode", code);
-					cb.setSclass("modal-reason-checkbox");
-					returnReasonsContainer.appendChild(cb);
-				}
-			}
-		}
-		if (returnRemark != null) {
-			returnRemark.setValue("");
-		}
-		if (returnWindow != null) {
-			returnWindow.doModal();
-		}
-	}
+    public void onClick$returnButton() {
+        if (returnReasonsContainer != null) {
+            returnReasonsContainer.getChildren().clear();
+            List<Map<String, String>> reasons =
+                    batchDetailsService.getCheckerReturnReasons();
+            if (reasons != null) {
+                for (Map<String, String> r : reasons) {
+                    Checkbox cb = new Checkbox();
+                    String code = r.get("return_reason_code");
+                    if (code == null) {
+                        code = r.get("code");
+                    }
+                    String desc = r.get("description");
+                    cb.setLabel((code != null ? code : "") + " - " + (desc != null ? desc : ""));
+                    cb.setAttribute("reasonCode", code);
+                    cb.setSclass("modal-reason-checkbox");
+                    returnReasonsContainer.appendChild(cb);
+                }
+            }
+        }
+        if (returnRemark != null) {
+            returnRemark.setValue("");
+        }
+        if (returnWindow != null) {
+            returnWindow.doModal();
+        }
+    }
 
-	private void handleReturnCancelButton() {
-		if (returnWindow != null) {
-			returnWindow.setVisible(false);
-		}
-	}
+    private void handleReturnCancelButton() {
+        if (returnWindow != null) {
+            returnWindow.setVisible(false);
+        }
+    }
 
-	private void handleReturnConfirmButton() {
+    private void handleReturnConfirmButton() {
 
-		List<String> selectedCodes = new ArrayList<>();
-		if (returnReasonsContainer != null) {
-			for (Component comp : returnReasonsContainer.getChildren()) {
-				if (comp instanceof Checkbox) {
-					Checkbox cb = (Checkbox) comp;
-					if (cb.isChecked()) {
-						String code = (String) cb.getAttribute("reasonCode");
-						if (code != null && !code.trim().isEmpty()) {
-							selectedCodes.add(code.trim());
-						}
-					}
-				}
-			}
-		}
+        List<String> selectedCodes = new ArrayList<>();
+        if (returnReasonsContainer != null) {
+            for (Component comp : returnReasonsContainer.getChildren()) {
+                if (comp instanceof Checkbox) {
+                    Checkbox cb = (Checkbox) comp;
+                    if (cb.isChecked()) {
+                        String code = (String) cb.getAttribute("reasonCode");
+                        if (code != null && !code.trim().isEmpty()) {
+                            selectedCodes.add(code.trim());
+                        }
+                    }
+                }
+            }
+        }
 
-		if (selectedCodes.isEmpty()) {
-			Messagebox.show("Please select at least one send back reason.", "Validation", Messagebox.OK,
-					Messagebox.EXCLAMATION);
-			return;
-		}
+        if (selectedCodes.isEmpty()) {
+            Messagebox.show(
+                    "Please select at least one send back reason.",
+                    "Validation",
+                    Messagebox.OK,
+                    Messagebox.EXCLAMATION
+            );
+            return;
+        }
 
-		String remarks = returnRemark == null ? null : returnRemark.getValue();
+        String remarks = returnRemark == null
+                ? null
+                : returnRemark.getValue();
 
-		System.out.println("SEND BACK REASON CODES = " + selectedCodes);
+        System.out.println(
+                "SEND BACK REASON CODES = " + selectedCodes
+        );
 
-		System.out.println("SEND BACK REMARKS = " + remarks);
+        System.out.println(
+                "SEND BACK REMARKS = " + remarks);
 
-		saveDecision("RETURN_TO_MAKER", null, selectedCodes, "Sent Back", remarks, returnWindow);
-	}
+        saveDecision(
+                "RETURN_TO_MAKER",
+                null,
+                selectedCodes,
+                "Sent Back",
+                remarks,
+                returnWindow);
+    }
 
-	// =========================================================
-	// SAVE CHECKER DECISION
-	// =========================================================
+    // =========================================================
+    // SAVE CHECKER DECISION
+    // =========================================================
 
-	private void saveDecision(String status, List<String> rejectionReasonCodes, List<String> returnReasonCodes,
-			String checkerAction, String remarks, Window popupWindow) {
+    private void saveDecision(String status,
+            List<String> rejectionReasonCodes,
+            List<String> returnReasonCodes,
+            String checkerAction,
+            String remarks,
+            Window popupWindow) {
 
-		String chequeNumber = getCurrentChequeNumber();
+        String chequeNumber = getCurrentChequeNumber();
 
-		if (chequeNumber == null || chequeNumber.trim().isEmpty()) {
-			Messagebox.show("No cheque is currently selected.", "Error", Messagebox.OK, Messagebox.ERROR);
-			return;
-		}
+        if (chequeNumber == null || chequeNumber.trim().isEmpty()) {
+            Messagebox.show("No cheque is currently selected.",
+                    "Error", Messagebox.OK, Messagebox.ERROR);
+            return;
+        }
 
-		if (userId == null) {
-			Messagebox.show("Logged-in checker ID was not found in the session.", "Authentication Error", Messagebox.OK,
-					Messagebox.ERROR);
-			return;
-		}
+        if (userId == null) {
+            Messagebox.show("Logged-in checker ID was not found in the session.",
+                    "Authentication Error", Messagebox.OK, Messagebox.ERROR);
+            return;
+        }
 
-		try {
-			batchDetailsService.saveCheckerDecision(chequeNumber, status, rejectionReasonCodes, returnReasonCodes,
-					userId, checkerAction, remarks);
+        try {
+            batchDetailsService.saveCheckerDecision(
+                    chequeNumber,
+                    status,
+                    rejectionReasonCodes,
+                    returnReasonCodes,
+                    userId,
+                    checkerAction,
+                    remarks);
 
-			if (cheques != null && currentChequeIndex >= 0 && currentChequeIndex < cheques.size()) {
-				cheques.get(currentChequeIndex).put("status", status);
-				cheques.get(currentChequeIndex).put("cheque_status", status);
-			}
+            if (cheques != null && currentChequeIndex >= 0 && currentChequeIndex < cheques.size()) {
+                cheques.get(currentChequeIndex).put("status", status);
+                cheques.get(currentChequeIndex).put("cheque_status", status);
+            }
 
-			if (popupWindow != null) {
-				popupWindow.setVisible(false);
-			}
+            if (popupWindow != null) {
+                popupWindow.setVisible(false);
+            }
 
-			if (selectedDecisionText != null) {
-				if ("Accepted".equals(checkerAction)) {
-					selectedDecisionText.setValue("✓ Selected Decision: Accepted");
-				} else if ("Returned".equals(checkerAction) || "Rejected".equals(checkerAction)) {
-					selectedDecisionText.setValue("⚠ Selected Decision: Returned");
-				} else {
-					selectedDecisionText.setValue("↶ Selected Decision: Sent Back");
-				}
-			}
+            if (selectedDecisionText != null) {
+                if ("Accepted".equals(checkerAction)) {
+                    selectedDecisionText.setValue("✓ Selected Decision: Accepted");
+                } else if ("Returned".equals(checkerAction) || "Rejected".equals(checkerAction)) {
+                    selectedDecisionText.setValue("⚠ Selected Decision: Returned");
+                } else {
+                    selectedDecisionText.setValue("↶ Selected Decision: Sent Back");
+                }
+            }
 
-			if (selectedDecision != null) {
-				String decisionClass = "Accepted".equals(checkerAction) ? "accepted"
-						: ("Returned".equals(checkerAction) || "Rejected".equals(checkerAction)) ? "rejected"
-								: "returned";
-				selectedDecision.setSclass("selected-decision " + decisionClass);
-			}
+            if (selectedDecision != null) {
+                String decisionClass = "Accepted".equals(checkerAction)
+                        ? "accepted"
+                        : ("Returned".equals(checkerAction) || "Rejected".equals(checkerAction))
+                                ? "rejected"
+                                : "returned";
+                selectedDecision.setSclass("selected-decision " + decisionClass);
+            }
 
-			moveToNextAfterDecision();
+            moveToNextAfterDecision();
 
-		} catch (Exception e) {
-			e.printStackTrace();
-			Messagebox.show("Failed to save checker decision. Please check the server log.", "Database Error",
-					Messagebox.OK, Messagebox.ERROR);
-		}
-	}
+        } catch (Exception e) {
+            e.printStackTrace();
+            Messagebox.show("Failed to save checker decision. Please check the server log.",
+                    "Database Error", Messagebox.OK, Messagebox.ERROR);
+        }
+    }
 
-	private String getCurrentChequeNumber() {
-		if (cheques == null || cheques.isEmpty() || currentChequeIndex < 0 || currentChequeIndex >= cheques.size()) {
-			return null;
-		}
-		return getString(cheques.get(currentChequeIndex), "chequeNumber");
-	}
+    private String getCurrentChequeNumber() {
+        if (cheques == null || cheques.isEmpty()
+                || currentChequeIndex < 0
+                || currentChequeIndex >= cheques.size()) {
+            return null;
+        }
+        return getString(cheques.get(currentChequeIndex), "chequeNumber");
+    }
 
-	private void moveToNextAfterDecision() {
-		if (currentChequeIndex < cheques.size() - 1) {
-			currentChequeIndex++;
-			loadCurrentCheque();
-		} else {
-			updateChequeNavigation();
-			updateBatchHeaderCounts();
-			Messagebox.show("Decision saved for the last cheque. Do you want to complete batch verification now?",
-					"Batch Verification", Messagebox.YES | Messagebox.NO, Messagebox.QUESTION, event -> {
-						if (Messagebox.ON_YES.equals(event.getName())) {
-							onClick$completeVerification();
-						}
-					});
-		}
-	}
+    private void moveToNextAfterDecision() {
+        if (currentChequeIndex < cheques.size() - 1) {
+            currentChequeIndex++;
+            loadCurrentCheque();
+        } else {
+            updateChequeNavigation();
+            updateBatchHeaderCounts();
+            Messagebox.show(
+                    "Decision saved for the last cheque. Do you want to complete batch verification now?",
+                    "Batch Verification",
+                    Messagebox.YES | Messagebox.NO,
+                    Messagebox.QUESTION,
+                    event -> {
+                        if (Messagebox.ON_YES.equals(event.getName())) {
+                            onClick$completeVerification();
+                        }
+                    });
+        }
+    }
 
-	// =========================================================
-	// CHEQUE IMAGE LOADING & TRANSFORMS (Image 2)
-	// =========================================================
+    // =========================================================
+    // CHEQUE IMAGE LOADING & TRANSFORMS (Image 2)
+    // =========================================================
 
-	private void loadChequeImages(String chequeNumber) {
+    private void loadChequeImages(String chequeNumber) {
 
-		currentFrontImagePath = null;
-		currentBackImagePath = null;
+        currentFrontImagePath = null;
+        currentBackImagePath = null;
 
-		if (chequeNumber != null) {
-			chequeNumber = chequeNumber.trim();
-		}
+        if (chequeNumber != null) {
+            chequeNumber = chequeNumber.trim();
+        }
 
-		try {
-			ChequeImage image = chequeImageDao.findByChequeNumber(chequeNumber);
-			if (image != null) {
-				currentFrontImagePath = image.getFrontPath();
-				currentBackImagePath = image.getBackPath();
-			}
-			if (currentFrontImagePath == null || currentFrontImagePath.trim().isEmpty()) {
-				com.cts.inward.dao.MicrRepairDao repairDao = new com.cts.inward.dao.MicrRepairDaoImpl();
-				currentFrontImagePath = repairDao.getFrontImagePath(chequeNumber);
-				currentBackImagePath = repairDao.getBackImagePath(chequeNumber);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+        try {
+            ChequeImage image = chequeImageDao.findByChequeNumber(chequeNumber);
+            if (image != null) {
+                currentFrontImagePath = image.getFrontPath();
+                currentBackImagePath = image.getBackPath();
+            }
+            if (currentFrontImagePath == null || currentFrontImagePath.trim().isEmpty()) {
+                com.cts.inward.dao.MicrRepairDao repairDao = new com.cts.inward.dao.MicrRepairDaoImpl();
+                currentFrontImagePath = repairDao.getFrontImagePath(chequeNumber);
+                currentBackImagePath = repairDao.getBackImagePath(chequeNumber);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-		System.out.println("LOAD CHEQUE IMAGES: cheque=" + chequeNumber + ", front=" + currentFrontImagePath + ", back="
-				+ currentBackImagePath);
+        System.out.println("LOAD CHEQUE IMAGES: cheque=" + chequeNumber +
+                ", front=" + currentFrontImagePath +
+                ", back=" + currentBackImagePath);
 
-		showingFront = true;
-		currentScale = 1.0;
-		currentRotation = 0;
+        showingFront = true;
+        currentScale = 1.0;
+        currentRotation = 0;
 
-		if (toggleImageButton != null) {
-			toggleImageButton.setLabel("View Back");
-		}
+        if (toggleImageButton != null) {
+            toggleImageButton.setLabel("View Back");
+        }
 
-		// Default to front image
-		showFrontImage();
-		applyImageStyle();
+        // Default to front image
+        showFrontImage();
+        applyImageStyle();
 
-		// Reset legacy button styles if present
-		if (btnFront != null) {
-			btnFront.setSclass("image-button image-button-active");
-		}
-		if (btnBack != null) {
-			btnBack.setSclass("image-button");
-		}
-	}
+        // Reset legacy button styles if present
+        if (btnFront != null) {
+            btnFront.setSclass("image-button image-button-active");
+        }
+        if (btnBack != null) {
+            btnBack.setSclass("image-button");
+        }
+    }
 
-	private void renderChequeImage(String imagePath) {
-		if (chequeImage == null)
-			return;
-		if (imagePath == null || imagePath.trim().isEmpty()) {
-			chequeImage.setContent((org.zkoss.image.AImage) null);
-			chequeImage.setSrc("");
-			chequeImage.setVisible(false);
-			if (chequePreview != null) {
-				chequePreview.setVisible(true);
-			}
-			return;
-		}
+    private java.io.File resolveImageFile(String path) {
+        if (path == null || path.trim().isEmpty()) {
+            return null;
+        }
 
-		try {
-			String realPath = (org.zkoss.zk.ui.Executions.getCurrent() != null
-					&& org.zkoss.zk.ui.Executions.getCurrent().getDesktop() != null)
-							? org.zkoss.zk.ui.Executions.getCurrent().getDesktop().getWebApp().getRealPath(imagePath)
-							: null;
-			java.io.File file = (realPath != null) ? new java.io.File(realPath) : new java.io.File(imagePath);
-			if (file.exists() && file.isFile()) {
-				chequeImage.setContent(new org.zkoss.image.AImage(file));
-				chequeImage.setVisible(true);
-				if (chequePreview != null) {
-					chequePreview.setVisible(false);
-				}
-			} else {
-				String webSrc = imagePath.startsWith("/") ? imagePath : "/" + imagePath;
-				chequeImage.setContent((org.zkoss.image.AImage) null);
-				chequeImage.setSrc(webSrc.replace("\\", "/"));
-				chequeImage.setVisible(true);
-				if (chequePreview != null) {
-					chequePreview.setVisible(false);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			chequeImage.setContent((org.zkoss.image.AImage) null);
-			chequeImage.setVisible(false);
-			if (chequePreview != null) {
-				chequePreview.setVisible(true);
-			}
-		}
-	}
+        String normalized = path.replace("\\", "/").trim();
+        if (normalized.startsWith("/")) {
+            normalized = normalized.substring(1);
+        }
 
-	private void showFrontImage() {
+        // 1. Direct file / absolute path
+        java.io.File directFile = new java.io.File(path);
+        if (directFile.isAbsolute() && directFile.isFile()) {
+            return directFile;
+        }
 
-		if (chequeImage == null)
-			return;
+        // 2. Deployed webApp realPath
+        try {
+            if (org.zkoss.zk.ui.Executions.getCurrent() != null
+                    && org.zkoss.zk.ui.Executions.getCurrent().getDesktop() != null) {
+                org.zkoss.zk.ui.WebApp webApp =
+                        org.zkoss.zk.ui.Executions.getCurrent().getDesktop().getWebApp();
+                String realPath = webApp.getRealPath("/" + normalized);
+                if (realPath != null) {
+                    java.io.File realFile = new java.io.File(realPath);
+                    if (realFile.isFile()) {
+                        return realFile;
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
 
-		if (btnFront != null) {
-			btnFront.setSclass("image-button image-button-active");
-		}
-		if (btnBack != null) {
-			btnBack.setSclass("image-button");
-		}
-		if (toggleImageButton != null) {
-			toggleImageButton.setLabel("View Back");
-		}
+        // 3. Local workspace development path: src/main/webapp/ + subPath
+        String subPath = normalized.startsWith("src/main/webapp/")
+                ? normalized.substring("src/main/webapp/".length())
+                : normalized;
+        java.io.File devFile = new java.io.File("src/main/webapp", subPath);
+        if (devFile.isFile()) {
+            return devFile;
+        }
 
-		renderChequeImage(currentFrontImagePath);
-		applyImageStyle();
-	}
+        // 4. Relative path as-is
+        if (directFile.isFile()) {
+            return directFile;
+        }
 
-	private void showBackImage() {
+        return null;
+    }
 
-		if (chequeImage == null)
-			return;
+    private void renderChequeImage(String imagePath) {
+        if (chequeImage == null) return;
+        if (imagePath == null || imagePath.trim().isEmpty()) {
+            chequeImage.setContent((org.zkoss.image.AImage) null);
+            chequeImage.setSrc("");
+            chequeImage.setVisible(false);
+            if (chequePreview != null) {
+                chequePreview.setVisible(true);
+            }
+            return;
+        }
 
-		if (btnFront != null) {
-			btnFront.setSclass("image-button");
-		}
-		if (btnBack != null) {
-			btnBack.setSclass("image-button image-button-active");
-		}
-		if (toggleImageButton != null) {
-			toggleImageButton.setLabel("View Front");
-		}
+        try {
+            java.io.File file = resolveImageFile(imagePath);
+            if (file != null) {
+                chequeImage.setContent(new org.zkoss.image.AImage(file));
+                chequeImage.setVisible(true);
+                if (chequePreview != null) {
+                    chequePreview.setVisible(false);
+                }
+            } else {
+                String clean = imagePath.replace("\\", "/").trim();
+                if (clean.startsWith("/")) clean = clean.substring(1);
+                if (clean.startsWith("src/main/webapp/")) {
+                    clean = clean.substring("src/main/webapp/".length());
+                }
+                String webSrc = "/" + clean;
+                chequeImage.setContent((org.zkoss.image.AImage) null);
+                chequeImage.setSrc(webSrc);
+                chequeImage.setVisible(true);
+                if (chequePreview != null) {
+                    chequePreview.setVisible(false);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            chequeImage.setContent((org.zkoss.image.AImage) null);
+            chequeImage.setVisible(false);
+            if (chequePreview != null) {
+                chequePreview.setVisible(true);
+            }
+        }
+    }
 
-		renderChequeImage(currentBackImagePath);
-		applyImageStyle();
-	}
+    private void showFrontImage() {
 
-	private void applyImageStyle() {
-		if (chequeImage != null) {
-			chequeImage.setStyle(String.format(java.util.Locale.US,
-					"object-fit:contain; max-width:100%%; max-height:100%%; display:block; margin:auto; transform: scale(%.2f) rotate(%ddeg); transform-origin: center; transition: transform 0.2s;",
-					currentScale, currentRotation));
-		}
-	}
+        if (chequeImage == null)
+            return;
 
-	// =========================================================
-	// BATCH HEADER METRICS (Image 4)
-	// =========================================================
+        if (btnFront != null) {
+            btnFront.setSclass("image-button image-button-active");
+        }
+        if (btnBack != null) {
+            btnBack.setSclass("image-button");
+        }
+        if (toggleImageButton != null) {
+            toggleImageButton.setLabel("View Back");
+        }
 
-	private void updateBatchHeaderCounts() {
-		if (batchLabel != null) {
-			batchLabel.setValue("Batch No : " + (batchId != null ? batchId : "—"));
-		}
+        renderChequeImage(currentFrontImagePath);
+        applyImageStyle();
+    }
 
-		int total = (cheques != null) ? cheques.size() : 0;
-		int completed = 0;
+    private void showBackImage() {
 
-		if (cheques != null) {
-			for (Map<String, Object> chq : cheques) {
-				String st = getString(chq, "cheque_status");
-				if (st == null) {
-					st = getString(chq, "status");
-				}
-				if ("ACCEPT".equalsIgnoreCase(st) || "REJECT".equalsIgnoreCase(st)
-						|| "RETURN_TO_MAKER".equalsIgnoreCase(st)) {
-					completed++;
-				}
-			}
-		}
+        if (chequeImage == null)
+            return;
 
-		int pending = Math.max(0, total - completed);
+        if (btnFront != null) {
+            btnFront.setSclass("image-button");
+        }
+        if (btnBack != null) {
+            btnBack.setSclass("image-button image-button-active");
+        }
+        if (toggleImageButton != null) {
+            toggleImageButton.setLabel("View Front");
+        }
 
-		if (totalCountLabel != null) {
-			totalCountLabel.setValue("Total: " + total);
-		}
-		if (completedCountLabel != null) {
-			completedCountLabel.setValue("Completed: " + completed);
-		}
-		if (pendingCountLabel != null) {
-			pendingCountLabel.setValue("Pending: " + pending);
-		}
-		if (chequeCounter != null) {
-			int current = (cheques != null && !cheques.isEmpty()) ? (currentChequeIndex + 1) : 0;
-			chequeCounter.setValue("Cheque " + current + " of " + total);
-		}
-	}
+        renderChequeImage(currentBackImagePath);
+        applyImageStyle();
+    }
 
-	private void updateChequeNavigation() {
+    private void applyImageStyle() {
+        if (chequeImage != null) {
+            chequeImage.setStyle(String.format(
+                    java.util.Locale.US,
+                    "object-fit:contain; max-width:100%%; max-height:100%%; display:block; margin:auto; transform: scale(%.2f) rotate(%ddeg); transform-origin: center; transition: transform 0.2s;",
+                    currentScale,
+                    currentRotation));
+        }
+    }
 
-		Button[] chequeButtons = {
+    // =========================================================
+    // BATCH HEADER METRICS (Image 4)
+    // =========================================================
 
-				cheque1, cheque2, cheque3, cheque4, cheque5, cheque6, cheque7, cheque8, cheque9, cheque10, cheque11,
-				cheque12, cheque13, cheque14, cheque15 };
+    private void updateBatchHeaderCounts() {
+        if (batchLabel != null) {
+            batchLabel.setValue("Batch No : " + (batchId != null ? batchId : "—"));
+        }
 
-		// -----------------------------------------------------
-		// Hide all buttons
-		// -----------------------------------------------------
+        int total = (cheques != null) ? cheques.size() : 0;
+        int completed = 0;
 
-		for (Button button : chequeButtons) {
+        if (cheques != null) {
+            for (Map<String, Object> chq : cheques) {
+                String st = getString(chq, "cheque_status");
+                if (st == null) {
+                    st = getString(chq, "status");
+                }
+                if ("ACCEPT".equalsIgnoreCase(st) || "REJECT".equalsIgnoreCase(st) || "RETURN_TO_MAKER".equalsIgnoreCase(st)) {
+                    completed++;
+                }
+            }
+        }
 
-			if (button != null) {
+        int pending = Math.max(0, total - completed);
 
-				button.setVisible(false);
+        if (totalCountLabel != null) {
+            totalCountLabel.setValue("Total: " + total);
+        }
+        if (completedCountLabel != null) {
+            completedCountLabel.setValue("Completed: " + completed);
+        }
+        if (pendingCountLabel != null) {
+            pendingCountLabel.setValue("Pending: " + pending);
+        }
+        if (chequeCounter != null) {
+            int current = (cheques != null && !cheques.isEmpty()) ? (currentChequeIndex + 1) : 0;
+            chequeCounter.setValue("Cheque " + current + " of " + total);
+        }
+    }
 
-				button.setSclass("cheque-button");
-			}
-		}
+    private void updateChequeNavigation() {
 
-		// -----------------------------------------------------
-		// Show required buttons
-		// -----------------------------------------------------
+        Button[] chequeButtons = {
 
-		int visibleCount = Math.min(cheques.size(), chequeButtons.length);
+                cheque1,
+                cheque2,
+                cheque3,
+                cheque4,
+                cheque5,
+                cheque6,
+                cheque7,
+                cheque8,
+                cheque9,
+                cheque10,
+                cheque11,
+                cheque12,
+                cheque13,
+                cheque14,
+                cheque15
+        };
 
-		for (int i = 0; i < visibleCount; i++) {
+        // -----------------------------------------------------
+        // Hide all buttons
+        // -----------------------------------------------------
 
-			if (chequeButtons[i] != null) {
+        for (Button button : chequeButtons) {
 
-				chequeButtons[i].setVisible(true);
+            if (button != null) {
 
-				chequeButtons[i].setLabel(String.valueOf(i + 1));
-			}
-		}
+                button.setVisible(false);
 
-		// -----------------------------------------------------
-		// Highlight current cheque
-		// -----------------------------------------------------
+                button.setSclass(
+                        "cheque-button");
+            }
+        }
 
-		if (currentChequeIndex >= 0 && currentChequeIndex < visibleCount && chequeButtons[currentChequeIndex] != null) {
+        // -----------------------------------------------------
+        // Show required buttons
+        // -----------------------------------------------------
 
-			chequeButtons[currentChequeIndex].setSclass("cheque-button " + "cheque-button-selected");
-		}
+        int visibleCount = Math.min(
+                cheques.size(),
+                chequeButtons.length);
 
-		// -----------------------------------------------------
-		// Previous
-		// -----------------------------------------------------
+        for (int i = 0; i < visibleCount; i++) {
 
-		if (previousCheque != null) {
+            if (chequeButtons[i] != null) {
 
-			previousCheque.setDisabled(currentChequeIndex <= 0);
-		}
+                chequeButtons[i].setVisible(true);
 
-		// -----------------------------------------------------
-		// Next
-		// -----------------------------------------------------
+                chequeButtons[i].setLabel(
+                        String.valueOf(i + 1));
+            }
+        }
 
-		if (nextCheque != null) {
+        // -----------------------------------------------------
+        // Highlight current cheque
+        // -----------------------------------------------------
 
-			nextCheque.setDisabled(currentChequeIndex >= cheques.size() - 1);
-		}
+        if (currentChequeIndex >= 0
+                && currentChequeIndex < visibleCount
+                && chequeButtons[currentChequeIndex] != null) {
 
-		// -----------------------------------------------------
-		// Next arrow
-		// -----------------------------------------------------
+            chequeButtons[currentChequeIndex]
+                    .setSclass(
+                            "cheque-button "
+                                    + "cheque-button-selected");
+        }
 
-		if (nextChequeArrow != null) {
+        // -----------------------------------------------------
+        // Previous
+        // -----------------------------------------------------
 
-			nextChequeArrow.setDisabled(currentChequeIndex >= cheques.size() - 1);
-		}
+        if (previousCheque != null) {
 
-		updateCompleteVerificationButtonState();
-	}
+            previousCheque.setDisabled(
+                    currentChequeIndex <= 0);
+        }
 
-	// =========================================================
-	// NEXT CHEQUE
-	// =========================================================
+        // -----------------------------------------------------
+        // Next
+        // -----------------------------------------------------
 
-	public void onClick$nextCheque() {
+        if (nextCheque != null) {
 
-		if (currentChequeIndex < cheques.size() - 1) {
+            nextCheque.setDisabled(
+                    currentChequeIndex >= cheques.size() - 1);
+        }
 
-			currentChequeIndex++;
+        // -----------------------------------------------------
+        // Next arrow
+        // -----------------------------------------------------
 
-			loadCurrentCheque();
-		}
-	}
+        if (nextChequeArrow != null) {
 
-	// =========================================================
-	// PREVIOUS CHEQUE
-	// =========================================================
+            nextChequeArrow.setDisabled(
+                    currentChequeIndex >= cheques.size() - 1);
+        }
 
-	public void onClick$previousCheque() {
+        updateCompleteVerificationButtonState();
+    }
 
-		if (currentChequeIndex > 0) {
+    // =========================================================
+    // NEXT CHEQUE
+    // =========================================================
 
-			currentChequeIndex--;
+    public void onClick$nextCheque() {
 
-			loadCurrentCheque();
-		}
-	}
+        if (currentChequeIndex < cheques.size() - 1) {
 
-	// =========================================================
-	// NEXT ARROW
-	// =========================================================
+            currentChequeIndex++;
 
-	public void onClick$nextChequeArrow() {
+            loadCurrentCheque();
+        }
+    }
 
-		if (currentChequeIndex < cheques.size() - 1) {
+    // =========================================================
+    // PREVIOUS CHEQUE
+    // =========================================================
 
-			currentChequeIndex++;
+    public void onClick$previousCheque() {
 
-			loadCurrentCheque();
-		}
-	}
+        if (currentChequeIndex > 0) {
 
-	// =========================================================
-	// CHEQUE 1
-	// =========================================================
+            currentChequeIndex--;
 
-	public void onClick$cheque1() {
-		selectCheque(0);
-	}
+            loadCurrentCheque();
+        }
+    }
 
-	// =========================================================
-	// CHEQUE 2
-	// =========================================================
+    // =========================================================
+    // NEXT ARROW
+    // =========================================================
 
-	public void onClick$cheque2() {
-		selectCheque(1);
-	}
+    public void onClick$nextChequeArrow() {
 
-	// =========================================================
-	// CHEQUE 3
-	// =========================================================
+        if (currentChequeIndex < cheques.size() - 1) {
 
-	public void onClick$cheque3() {
-		selectCheque(2);
-	}
+            currentChequeIndex++;
 
-	// =========================================================
-	// CHEQUE 4
-	// =========================================================
+            loadCurrentCheque();
+        }
+    }
 
-	public void onClick$cheque4() {
-		selectCheque(3);
-	}
+    // =========================================================
+    // CHEQUE 1
+    // =========================================================
 
-	// =========================================================
-	// CHEQUE 5
-	// =========================================================
+    public void onClick$cheque1() {
+        selectCheque(0);
+    }
 
-	public void onClick$cheque5() {
-		selectCheque(4);
-	}
+    // =========================================================
+    // CHEQUE 2
+    // =========================================================
 
-	// =========================================================
-	// CHEQUE 6
-	// =========================================================
+    public void onClick$cheque2() {
+        selectCheque(1);
+    }
 
-	public void onClick$cheque6() {
-		selectCheque(5);
-	}
+    // =========================================================
+    // CHEQUE 3
+    // =========================================================
 
-	// =========================================================
-	// CHEQUE 7
-	// =========================================================
+    public void onClick$cheque3() {
+        selectCheque(2);
+    }
 
-	public void onClick$cheque7() {
-		selectCheque(6);
-	}
+    // =========================================================
+    // CHEQUE 4
+    // =========================================================
 
-	// =========================================================
-	// CHEQUE 8
-	// =========================================================
+    public void onClick$cheque4() {
+        selectCheque(3);
+    }
 
-	public void onClick$cheque8() {
-		selectCheque(7);
-	}
+    // =========================================================
+    // CHEQUE 5
+    // =========================================================
 
-	// =========================================================
-	// CHEQUE 9
-	// =========================================================
+    public void onClick$cheque5() {
+        selectCheque(4);
+    }
 
-	public void onClick$cheque9() {
-		selectCheque(8);
-	}
+    // =========================================================
+    // CHEQUE 6
+    // =========================================================
 
-	// =========================================================
-	// CHEQUE 10
-	// =========================================================
+    public void onClick$cheque6() {
+        selectCheque(5);
+    }
 
-	public void onClick$cheque10() {
-		selectCheque(9);
-	}
+    // =========================================================
+    // CHEQUE 7
+    // =========================================================
 
-	// =========================================================
-	// CHEQUE 11
-	// =========================================================
+    public void onClick$cheque7() {
+        selectCheque(6);
+    }
 
-	public void onClick$cheque11() {
-		selectCheque(10);
-	}
+    // =========================================================
+    // CHEQUE 8
+    // =========================================================
 
-	// =========================================================
-	// CHEQUE 12
-	// =========================================================
+    public void onClick$cheque8() {
+        selectCheque(7);
+    }
 
-	public void onClick$cheque12() {
-		selectCheque(11);
-	}
+    // =========================================================
+    // CHEQUE 9
+    // =========================================================
 
-	// =========================================================
-	// CHEQUE 13
-	// =========================================================
+    public void onClick$cheque9() {
+        selectCheque(8);
+    }
 
-	public void onClick$cheque13() {
-		selectCheque(12);
-	}
+    // =========================================================
+    // CHEQUE 10
+    // =========================================================
 
-	// =========================================================
-	// CHEQUE 14
-	// =========================================================
+    public void onClick$cheque10() {
+        selectCheque(9);
+    }
 
-	public void onClick$cheque14() {
-		selectCheque(13);
-	}
+    // =========================================================
+    // CHEQUE 11
+    // =========================================================
 
-	// =========================================================
-	// CHEQUE 15
-	// =========================================================
+    public void onClick$cheque11() {
+        selectCheque(10);
+    }
 
-	public void onClick$cheque15() {
-		selectCheque(14);
-	}
+    // =========================================================
+    // CHEQUE 12
+    // =========================================================
 
-	// =========================================================
-	// SELECT CHEQUE
-	// =========================================================
+    public void onClick$cheque12() {
+        selectCheque(11);
+    }
 
-	private void selectCheque(int index) {
+    // =========================================================
+    // CHEQUE 13
+    // =========================================================
 
-		if (index < 0 || index >= cheques.size()) {
+    public void onClick$cheque13() {
+        selectCheque(12);
+    }
 
-			return;
-		}
+    // =========================================================
+    // CHEQUE 14
+    // =========================================================
 
-		currentChequeIndex = index;
+    public void onClick$cheque14() {
+        selectCheque(13);
+    }
 
-		loadCurrentCheque();
-	}
+    // =========================================================
+    // CHEQUE 15
+    // =========================================================
 
-	// =========================================================
-	// BACK TO LIST
-	// =========================================================
+    public void onClick$cheque15() {
+        selectCheque(14);
+    }
 
-	public void onClick$backToList() {
+    // =========================================================
+    // SELECT CHEQUE
+    // =========================================================
 
-		Executions.sendRedirect("/zul/inward-checker/verification.zul");
-	}
+    private void selectCheque(int index) {
 
-	// =========================================================
-	// COMPLETE VERIFICATION - BUTTON STATE & CLICK
-	// =========================================================
+        if (index < 0
+                || index >= cheques.size()) {
 
-	private void updateCompleteVerificationButtonState() {
+            return;
+        }
 
-		if (completeVerification == null) {
-			return;
-		}
+        currentChequeIndex = index;
 
-		if (cheques == null || cheques.isEmpty()) {
-			completeVerification.setDisabled(true);
-			completeVerification.setSclass("complete-button complete-button-disabled");
-			return;
-		}
+        loadCurrentCheque();
+    }
 
-		boolean isLastCheque = (currentChequeIndex == cheques.size() - 1);
-		completeVerification.setDisabled(!isLastCheque);
-		if (!isLastCheque) {
-			completeVerification.setSclass("complete-button complete-button-disabled");
-		} else {
-			completeVerification.setSclass("complete-button");
-		}
-	}
+    // =========================================================
+    // BACK TO LIST
+    // =========================================================
 
-	public void onClick$completeVerification() {
+    public void onClick$backToList() {
 
-		if (completeVerification == null) {
-			return;
-		}
+        Executions.sendRedirect(
+                "/zul/inward-checker/verification.zul");
+    }
 
-		if (cheques == null || cheques.isEmpty()) {
-			completeVerification.setDisabled(true);
-			return;
-		}
+    // =========================================================
+    // COMPLETE VERIFICATION - BUTTON STATE & CLICK
+    // =========================================================
 
-		// Second-layer safety check: must be on the last cheque
-		if (currentChequeIndex != cheques.size() - 1) {
-			updateCompleteVerificationButtonState();
-			return;
-		}
+    private void updateCompleteVerificationButtonState() {
 
-		if (batchId == null) {
-			Messagebox.show("Batch ID is missing.", "Error", Messagebox.OK, Messagebox.ERROR);
-			return;
-		}
+        if (completeVerification == null) {
+            return;
+        }
 
-		try {
-			boolean returnedToMaker = batchDetailsService.completeVerification(batchId, userId);
+        if (cheques == null || cheques.isEmpty()) {
+            completeVerification.setDisabled(true);
+            completeVerification.setSclass("complete-button complete-button-disabled");
+            return;
+        }
 
-			if (returnedToMaker) {
-				Messagebox.show("Batch contains returned cheque(s). Batch has been returned to Maker for reprocessing.",
-						"Verification Completed - Returned to Maker", Messagebox.OK, Messagebox.INFORMATION,
-						event -> Executions.sendRedirect("/zul/inward-checker/verification.zul"));
-			} else {
-				Messagebox.show("Verification completed successfully.", "Verification Completed", Messagebox.OK,
-						Messagebox.INFORMATION,
-						event -> Executions.sendRedirect("/zul/inward-checker/verification.zul"));
-			}
+        boolean isLastCheque = (currentChequeIndex == cheques.size() - 1);
+        completeVerification.setDisabled(!isLastCheque);
+        if (!isLastCheque) {
+            completeVerification.setSclass("complete-button complete-button-disabled");
+        } else {
+            completeVerification.setSclass("complete-button");
+        }
+    }
 
-		} catch (Exception e) {
-			e.printStackTrace();
-			Messagebox.show("Failed to complete verification: " + e.getMessage(), "Error", Messagebox.OK,
-					Messagebox.ERROR);
-		}
-	}
+    public void onClick$completeVerification() {
 
-	// =========================================================
-	// GET STRING
-	// =========================================================
+        if (completeVerification == null) {
+            return;
+        }
 
-	private String getString(Map<String, Object> map, String key) {
+        if (cheques == null || cheques.isEmpty()) {
+            completeVerification.setDisabled(true);
+            return;
+        }
 
-		if (map == null) {
-			return null;
-		}
+        // Second-layer safety check: must be on the last cheque
+        if (currentChequeIndex != cheques.size() - 1) {
+            updateCompleteVerificationButtonState();
+            return;
+        }
 
-		Object value = map.get(key);
+        if (batchId == null) {
+            Messagebox.show(
+                    "Batch ID is missing.",
+                    "Error",
+                    Messagebox.OK,
+                    Messagebox.ERROR);
+            return;
+        }
 
-		if (value == null) {
-			return null;
-		}
+        try {
+            boolean returnedToMaker = batchDetailsService.completeVerification(batchId, userId);
 
-		return String.valueOf(value);
-	}
+            if (returnedToMaker) {
+                Messagebox.show(
+                        "Batch contains returned cheque(s). Batch has been returned to Maker for reprocessing.",
+                        "Verification Completed - Returned to Maker",
+                        Messagebox.OK,
+                        Messagebox.INFORMATION,
+                        event -> Executions.sendRedirect("/zul/inward-checker/verification.zul"));
+            } else {
+                Messagebox.show(
+                        "Verification completed successfully.",
+                        "Verification Completed",
+                        Messagebox.OK,
+                        Messagebox.INFORMATION,
+                        event -> Executions.sendRedirect("/zul/inward-checker/verification.zul"));
+            }
 
-	// =========================================================
-	// GET BIG DECIMAL
-	// =========================================================
+        } catch (Exception e) {
+            e.printStackTrace();
+            Messagebox.show(
+                    "Failed to complete verification: " + e.getMessage(),
+                    "Error",
+                    Messagebox.OK,
+                    Messagebox.ERROR);
+        }
+    }
 
-	private BigDecimal getBigDecimal(Map<String, Object> map, String key) {
+    // =========================================================
+    // GET STRING
+    // =========================================================
 
-		if (map == null) {
-			return null;
-		}
+    private String getString(
+            Map<String, Object> map,
+            String key) {
 
-		Object value = map.get(key);
+        if (map == null) {
+            return null;
+        }
 
-		if (value == null) {
-			return null;
-		}
+        Object value = map.get(key);
 
-		if (value instanceof BigDecimal) {
+        if (value == null) {
+            return null;
+        }
 
-			return (BigDecimal) value;
-		}
+        return String.valueOf(value);
+    }
 
-		try {
+    // =========================================================
+    // GET BIG DECIMAL
+    // =========================================================
 
-			return new BigDecimal(String.valueOf(value));
+    private BigDecimal getBigDecimal(
+            Map<String, Object> map,
+            String key) {
 
-		} catch (NumberFormatException e) {
+        if (map == null) {
+            return null;
+        }
 
-			return null;
-		}
-	}
+        Object value = map.get(key);
 
-	// =========================================================
-	// GET SQL DATE
-	// =========================================================
+        if (value == null) {
+            return null;
+        }
 
-	private Date getSqlDate(Map<String, Object> map, String key) {
+        if (value instanceof BigDecimal) {
 
-		if (map == null) {
-			return null;
-		}
+            return (BigDecimal) value;
+        }
 
-		Object value = map.get(key);
+        try {
 
-		if (value == null) {
-			return null;
-		}
+            return new BigDecimal(
+                    String.valueOf(value));
 
-		if (value instanceof Date) {
+        } catch (NumberFormatException e) {
 
-			return (Date) value;
-		}
+            return null;
+        }
+    }
 
-		if (value instanceof java.util.Date) {
+    // =========================================================
+    // GET SQL DATE
+    // =========================================================
 
-			return new Date(((java.util.Date) value).getTime());
-		}
+    private Date getSqlDate(
+            Map<String, Object> map,
+            String key) {
 
-		try {
+        if (map == null) {
+            return null;
+        }
 
-			return Date.valueOf(String.valueOf(value));
+        Object value = map.get(key);
 
-		} catch (IllegalArgumentException e) {
+        if (value == null) {
+            return null;
+        }
 
-			return null;
-		}
-	}
+        if (value instanceof Date) {
 
-	// =========================================================
-	// APPEND FAILURE SEPARATOR
-	// =========================================================
+            return (Date) value;
+        }
 
-	private void appendFailureSeparator(StringBuilder builder) {
+        if (value instanceof java.util.Date) {
 
-		if (builder.length() > 0) {
+            return new Date(
+                    ((java.util.Date) value)
+                            .getTime());
+        }
 
-			builder.append(" ");
-		}
-	}
+        try {
 
-	// =========================================================
-	// NULL TO EMPTY
-	// =========================================================
+            return Date.valueOf(
+                    String.valueOf(value));
 
-	private String nullToEmpty(String value) {
+        } catch (IllegalArgumentException e) {
 
-		return value == null ? "" : value;
-	}
+            return null;
+        }
+    }
 
-	// =========================================================
-	// FORMAT AMOUNT
-	// =========================================================
+    // =========================================================
+    // APPEND FAILURE SEPARATOR
+    // =========================================================
 
-	private String formatAmount(String value) {
+    private void appendFailureSeparator(
+            StringBuilder builder) {
 
-		if (value == null || value.trim().isEmpty()) {
-			return "";
-		}
+        if (builder.length() > 0) {
 
-		return "₹ " + value;
-	}
+            builder.append(" ");
+        }
+    }
 
-	// =========================================================
-	// FORMAT DATE — converts any date string to dd/MM/yyyy
-	// Handles: yyyy-MM-dd, yyyy-MM-dd HH:mm:ss, dd/MM/yyyy
-	// =========================================================
+    // =========================================================
+    // NULL TO EMPTY
+    // =========================================================
 
-	private String formatDate(String value) {
+    private String nullToEmpty(
+            String value) {
 
-		if (value == null || value.trim().isEmpty()) {
-			return "";
-		}
+        return value == null
+                ? ""
+                : value;
+    }
 
-		try {
-			// Strip time part if present
-			String datePart = value.trim().split(" ")[0];
+    // =========================================================
+    // FORMAT AMOUNT
+    // =========================================================
 
-			java.time.LocalDate date;
+    private String formatAmount(String value) {
 
-			if (datePart.contains("-")) {
-				// yyyy-MM-dd
-				date = java.time.LocalDate.parse(datePart);
-			} else if (datePart.contains("/")) {
-				// already dd/MM/yyyy
-				return datePart;
-			} else {
-				return value;
-			}
+        if (value == null || value.trim().isEmpty()) {
+            return "";
+        }
 
-			return date.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        return "₹ " + value;
+    }
 
-		} catch (Exception e) {
-			return value;
-		}
-	}
+    // =========================================================
+    // FORMAT DATE — converts any date string to dd/MM/yyyy
+    // Handles: yyyy-MM-dd, yyyy-MM-dd HH:mm:ss, dd/MM/yyyy
+    // =========================================================
+
+    private String formatDate(String value) {
+
+        if (value == null || value.trim().isEmpty()) {
+            return "";
+        }
+
+        try {
+            // Strip time part if present
+            String datePart = value.trim().split(" ")[0];
+
+            java.time.LocalDate date;
+
+            if (datePart.contains("-")) {
+                // yyyy-MM-dd
+                date = java.time.LocalDate.parse(datePart);
+            } else if (datePart.contains("/")) {
+                // already dd/MM/yyyy
+                return datePart;
+            } else {
+                return value;
+            }
+
+            return date.format(
+                    java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+
+        } catch (Exception e) {
+            return value;
+        }
+    }
 }

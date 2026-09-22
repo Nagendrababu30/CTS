@@ -81,7 +81,8 @@ public class RoleController extends GenericForwardComposer<Component> {
                 badge.setSclass(isActive
                         ? "role-status-badge role-status-active"
                         : "role-status-badge role-status-inactive");
-                Label statusLabel = new Label(role.getStatus() == null ? "-" : role.getStatus());
+                String displayStatus = isActive ? "Active" : "Inactive";
+                Label statusLabel = new Label(displayStatus);
                 statusLabel.setSclass("role-status-label");
                 badge.appendChild(statusLabel);
                 statusCell.appendChild(badge);

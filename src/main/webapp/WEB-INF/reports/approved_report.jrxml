@@ -16,6 +16,8 @@
     topMargin="0"
     bottomMargin="0">
 
+    <!-- Parameters -->
+
     <parameter
         name="FILE_DESCRIPTION"
         class="java.lang.String"/>
@@ -23,6 +25,9 @@
     <parameter
         name="TOTAL_RECORDS"
         class="java.lang.Integer"/>
+
+
+    <!-- Fields -->
 
     <field
         name="batchId"
@@ -60,103 +65,170 @@
         name="chequeDate"
         class="java.sql.Date"/>
 
+
+    <!-- Detail -->
+
     <detail>
+
         <band height="20">
 
-            <textField isBlankWhenNull="true">
+
+            <!-- BATCH ID -->
+
+            <textField
+                isBlankWhenNull="true"
+                isPrintRepeatedValues="false">
+
                 <reportElement
                     x="0"
                     y="0"
                     width="80"
                     height="20"/>
+
                 <textFieldExpression>
                     <![CDATA[$F{batchId}]]>
                 </textFieldExpression>
+
             </textField>
 
-            <textField isBlankWhenNull="true">
+
+            <!-- CHEQUE NUMBER -->
+
+            <textField
+                isBlankWhenNull="true">
+
                 <reportElement
                     x="80"
                     y="0"
                     width="80"
                     height="20"/>
+
                 <textFieldExpression>
                     <![CDATA[$F{chequeNo}]]>
                 </textFieldExpression>
+
             </textField>
 
-            <textField isBlankWhenNull="true">
+
+            <!-- AMOUNT -->
+
+            <textField
+                isBlankWhenNull="true">
+
                 <reportElement
                     x="160"
                     y="0"
                     width="80"
                     height="20"/>
+
                 <textFieldExpression>
                     <![CDATA[$F{amount}]]>
                 </textFieldExpression>
+
             </textField>
 
-            <textField isBlankWhenNull="true">
+
+            <!-- ACCOUNT NUMBER -->
+
+            <textField
+                isBlankWhenNull="true">
+
                 <reportElement
                     x="240"
                     y="0"
                     width="80"
                     height="20"/>
+
                 <textFieldExpression>
                     <![CDATA[$F{accountNumber}]]>
                 </textFieldExpression>
+
             </textField>
 
-            <textField isBlankWhenNull="true">
+
+            <!-- DRAWER NAME -->
+
+            <textField
+                isBlankWhenNull="true">
+
                 <reportElement
                     x="320"
                     y="0"
                     width="80"
                     height="20"/>
+
                 <textFieldExpression>
                     <![CDATA[$F{drawerName}]]>
                 </textFieldExpression>
+
             </textField>
 
-            <textField isBlankWhenNull="true">
+
+            <!-- PAYEE ACCOUNT NUMBER -->
+
+            <textField
+                isBlankWhenNull="true">
+
                 <reportElement
                     x="400"
                     y="0"
                     width="80"
                     height="20"/>
+
                 <textFieldExpression>
                     <![CDATA[$F{payeeAccountNo}]]>
                 </textFieldExpression>
+
             </textField>
 
-            <textField isBlankWhenNull="true">
+
+            <!-- PAYEE NAME -->
+
+            <textField
+                isBlankWhenNull="true">
+
                 <reportElement
                     x="480"
                     y="0"
                     width="80"
                     height="20"/>
+
                 <textFieldExpression>
                     <![CDATA[$F{payeeName}]]>
                 </textFieldExpression>
+
             </textField>
 
-            <textField isBlankWhenNull="true">
+
+            <!-- BANK NAME -->
+
+            <textField
+                isBlankWhenNull="true">
+
                 <reportElement
                     x="560"
                     y="0"
                     width="80"
                     height="20"/>
+
                 <textFieldExpression>
                     <![CDATA[$F{bankName}]]>
                 </textFieldExpression>
+
             </textField>
 
-            <textField isBlankWhenNull="true">
+
+            <!-- CHEQUE DATE -->
+
+            <textField
+                isBlankWhenNull="true">
+
                 <reportElement
                     x="640"
                     y="0"
                     width="80"
                     height="20"/>
+
                 <textFieldExpression>
                     <![CDATA[
                         $F{chequeDate} != null
@@ -165,9 +237,12 @@
                         : ""
                     ]]>
                 </textFieldExpression>
+
             </textField>
 
+
         </band>
+
     </detail>
 
 </jasperReport>

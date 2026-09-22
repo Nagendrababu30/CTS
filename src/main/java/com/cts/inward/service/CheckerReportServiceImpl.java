@@ -2,10 +2,10 @@ package com.cts.inward.service;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,13 +22,13 @@ import org.w3c.dom.Element;
 import com.cts.inward.dao.CheckerReportDao;
 import com.cts.inward.dao.CheckerReportDaoImpl;
 
-public class CheckerReportServiceImpl
-        implements CheckerReportService {
+public class CheckerReportServiceImpl  implements CheckerReportService {
 
     private CheckerReportServiceImpl() {
     }
 
     public static CheckerReportServiceImpl of() {
+    	
         return new CheckerReportServiceImpl();
     }
 
@@ -38,8 +38,7 @@ public class CheckerReportServiceImpl
     @Override
     public byte[] generateRrfXml() {
 
-        List<Map<String, Object>> data =
-                reportDao.getRrfReportData();
+        List<Map<String, Object>> data =  reportDao.getRrfReportData();
 
         if (data == null || data.isEmpty()) {
             return null;
@@ -67,6 +66,7 @@ public class CheckerReportServiceImpl
                         row.get("statusHistoryId");
 
                 if (id != null) {
+
                     statusHistoryIds.add(
                             ((Number) id).longValue());
                 }
@@ -75,13 +75,8 @@ public class CheckerReportServiceImpl
 
         try {
 
-            byte[] xml =
-                    buildRrfXml(data);
+            byte[] xml =  buildRrfXml(data);
 
-            /*
-             * Update only after XML was successfully
-             * created.
-             */
             reportDao.updateRrfReportGenerated(
                     statusHistoryIds);
 
@@ -90,22 +85,21 @@ public class CheckerReportServiceImpl
         } catch (Exception e) {
 
             throw new RuntimeException(
-                    "Error generating RRF XML", e);
+                    "Error generating RRF XML",
+                    e);
         }
     }
 
     @Override
     public byte[] generateApprovedXml() {
 
-        List<Map<String, Object>> data =
-                reportDao.getApprovedReportData();
+        List<Map<String, Object>> data = reportDao.getApprovedReportData();
 
         if (data == null || data.isEmpty()) {
             return null;
         }
 
-        List<Long> statusHistoryIds =
-                new ArrayList<>();
+        List<Long> statusHistoryIds = new ArrayList<>();
 
         for (Map<String, Object> row : data) {
 
@@ -124,10 +118,6 @@ public class CheckerReportServiceImpl
             byte[] xml =
                     buildApprovedXml(data);
 
-            /*
-             * Update only after XML was successfully
-             * created.
-             */
             reportDao.updateApprovedReportGenerated(
                     statusHistoryIds);
 
@@ -136,7 +126,8 @@ public class CheckerReportServiceImpl
         } catch (Exception e) {
 
             throw new RuntimeException(
-                    "Error generating Approved XML", e);
+                    "Error generating Approved XML",
+                    e);
         }
     }
 
@@ -150,23 +141,63 @@ public class CheckerReportServiceImpl
                         .newDocumentBuilder()
                         .newDocument();
 
-        Element root =
-                document.createElement("RRFReport");
+        Element root = document.createElement("RRFReport");
 
         document.appendChild(root);
 
+
+        Map<String, Element> batchMap =  new LinkedHashMap<>();
+
+
         for (Map<String, Object> row : data) {
+
+            Object batchIdObject =
+                    row.get("batchId");
+
+            // Skip row if batchId is missing
+            if (batchIdObject == null) {
+                continue;
+            }
+
+            String batchId =
+                    String.valueOf(batchIdObject);
+
+
+            Element cheques =
+                    batchMap.get(batchId);
+
+            if (cheques == null) {
+
+                Element batch =
+                        document.createElement("batch");
+
+                root.appendChild(batch);
+
+
+            
+                appendElement(
+                        document,
+                        batch,
+                        "batchId",
+                        batchIdObject);
+
+
+                cheques = document.createElement("cheques");
+
+                batch.appendChild(cheques);
+
+
+                batchMap.put(
+                        batchId,
+                        cheques);
+            }
+
 
             Element cheque =
                     document.createElement("cheque");
 
-            root.appendChild(cheque);
+            cheques.appendChild(cheque);
 
-            appendElement(
-                    document,
-                    cheque,
-                    "batchId",
-                    row.get("batchId"));
 
             appendElement(
                     document,
@@ -174,64 +205,72 @@ public class CheckerReportServiceImpl
                     "chequeNo",
                     row.get("chequeNo"));
 
+
+           
             appendElement(
                     document,
                     cheque,
                     "amount",
                     row.get("amount"));
 
+
+           
             appendElement(
                     document,
                     cheque,
                     "drawerAccountNo",
                     row.get("drawerAccountNo"));
 
+
+        
             appendElement(
                     document,
                     cheque,
                     "payeeAccountNo",
                     row.get("payeeAccountNo"));
 
+
+           
             appendElement(
                     document,
                     cheque,
                     "payeeName",
                     row.get("payeeName"));
 
+
+            // <drawerName>
             appendElement(
                     document,
                     cheque,
                     "drawerName",
                     row.get("drawerName"));
 
+
+            // <bankName>
             appendElement(
                     document,
                     cheque,
                     "bankName",
                     row.get("bankName"));
 
+
+            // <chequeDate>
             appendDateElement(
                     document,
                     cheque,
                     "chequeDate",
                     row.get("chequeDate"));
 
-            /*
-             * This now contains DESCRIPTION,
-             * not rejection codes.
-             *
-             * Example:
-             *
-             * Insufficient Funds in Account,
-             * Cheque Date Older Than Three Months,
-             * Image Not Clear
-             */
+
+            // <returnReason>
             appendElement(
                     document,
                     cheque,
                     "returnReason",
                     row.get("returnReason"));
 
+
+            // <remark>
             appendElement(
                     document,
                     cheque,
@@ -239,8 +278,10 @@ public class CheckerReportServiceImpl
                     row.get("remark"));
         }
 
+
         return documentToBytes(document);
     }
+
 
     private byte[] buildApprovedXml(
             List<Map<String, Object>> data)
@@ -253,23 +294,72 @@ public class CheckerReportServiceImpl
                         .newDocument();
 
         Element root =
-                document.createElement(
-                        "ApprovedReport");
+                document.createElement("ApprovedReport");
 
         document.appendChild(root);
 
+       
+        Map<String, Element> batchMap =
+                new LinkedHashMap<>();
+
+
         for (Map<String, Object> row : data) {
+
+            Object batchIdObject =
+                    row.get("batchId");
+
+            
+            if (batchIdObject == null) {
+                continue;
+            }
+
+            String batchId =
+                    String.valueOf(batchIdObject);
+
+
+          
+            Element cheques =
+                    batchMap.get(batchId);
+
+
+           
+            if (cheques == null) {
+
+               
+                Element batch =
+                        document.createElement("batch");
+
+                root.appendChild(batch);
+
+
+                
+                appendElement(
+                        document,
+                        batch,
+                        "batchId",
+                        batchIdObject);
+
+
+               
+                cheques =
+                        document.createElement("cheques");
+
+                batch.appendChild(cheques);
+
+
+                batchMap.put(
+                        batchId,
+                        cheques);
+            }
+
 
             Element cheque =
                     document.createElement("cheque");
 
-            root.appendChild(cheque);
+            cheques.appendChild(cheque);
 
-            appendElement(
-                    document,
-                    cheque,
-                    "batchId",
-                    row.get("batchId"));
+
+          
 
             appendElement(
                     document,
@@ -277,11 +367,13 @@ public class CheckerReportServiceImpl
                     "chequeNo",
                     row.get("chequeNo"));
 
+
             appendElement(
                     document,
                     cheque,
                     "amount",
                     row.get("amount"));
+
 
             appendElement(
                     document,
@@ -289,11 +381,13 @@ public class CheckerReportServiceImpl
                     "accountNumber",
                     row.get("accountNumber"));
 
+
             appendElement(
                     document,
                     cheque,
                     "payeeAccountNo",
                     row.get("payeeAccountNo"));
+
 
             appendElement(
                     document,
@@ -301,11 +395,13 @@ public class CheckerReportServiceImpl
                     "payeeName",
                     row.get("payeeName"));
 
+
             appendElement(
                     document,
                     cheque,
                     "drawerName",
                     row.get("drawerName"));
+
 
             appendElement(
                     document,
@@ -313,12 +409,14 @@ public class CheckerReportServiceImpl
                     "bankName",
                     row.get("bankName"));
 
+
             appendDateElement(
                     document,
                     cheque,
                     "chequeDate",
                     row.get("chequeDate"));
         }
+
 
         return documentToBytes(document);
     }
@@ -332,9 +430,11 @@ public class CheckerReportServiceImpl
         Element element =
                 document.createElement(name);
 
+
         if (value != null) {
 
             String text;
+
 
             if (value instanceof BigDecimal) {
 
@@ -344,15 +444,20 @@ public class CheckerReportServiceImpl
 
             } else {
 
-                text = String.valueOf(value);
+                text =
+                        String.valueOf(value);
             }
+
 
             element.appendChild(
                     document.createTextNode(text));
         }
 
+
         parent.appendChild(element);
     }
+
+
 
     private void appendDateElement(
             Document document,
@@ -363,6 +468,7 @@ public class CheckerReportServiceImpl
         Element element =
                 document.createElement(name);
 
+
         if (value instanceof Date) {
 
             SimpleDateFormat formatter =
@@ -372,12 +478,14 @@ public class CheckerReportServiceImpl
             element.appendChild(
                     document.createTextNode(
                             formatter.format(value)));
+
         } else if (value != null) {
 
             element.appendChild(
                     document.createTextNode(
                             String.valueOf(value)));
         }
+
 
         parent.appendChild(element);
     }
@@ -391,24 +499,30 @@ public class CheckerReportServiceImpl
                         .newInstance()
                         .newTransformer();
 
+
         transformer.setOutputProperty(
                 OutputKeys.INDENT,
                 "yes");
+
 
         transformer.setOutputProperty(
                 OutputKeys.ENCODING,
                 "UTF-8");
 
+
         transformer.setOutputProperty(
                 OutputKeys.OMIT_XML_DECLARATION,
                 "no");
 
+
         ByteArrayOutputStream outputStream =
                 new ByteArrayOutputStream();
+
 
         transformer.transform(
                 new DOMSource(document),
                 new StreamResult(outputStream));
+
 
         return outputStream.toByteArray();
     }

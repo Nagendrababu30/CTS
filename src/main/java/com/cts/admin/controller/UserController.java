@@ -332,38 +332,33 @@ public class UserController extends GenericForwardComposer<Component> {
 		window.setClosable(false);
 		window.setSizable(false);
 		window.setSclass("user-modal-window");
-		window.setStyle("border-radius:14px !important; " + "box-shadow:0 20px 60px rgba(0,0,0,0.18) !important; "
-				+ "overflow:hidden !important; " + "border:none !important;");
 
 		Vbox mainBox = new Vbox();
 		mainBox.setSpacing("0");
 		mainBox.setHflex("1");
-		mainBox.setStyle("padding:28px 28px 24px 28px; box-sizing:border-box; background:#FFFFFF;");
+		mainBox.setSclass("user-modal-main-box");
 
 		/* ── Header ── */
 		Div headerDiv = new Div();
 		headerDiv.setHflex("1");
-		headerDiv.setStyle(
-				"display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:20px; padding-bottom:0; border:none;");
+		headerDiv.setSclass("user-modal-header-container");
 
 		Div headerLeftDiv = new Div();
-		headerLeftDiv.setStyle("display:flex; align-items:center; gap:14px; flex:1;");
+		headerLeftDiv.setSclass("user-modal-header-left-section");
 
 		Div iconDiv = new Div();
-		iconDiv.setStyle(
-				"width:42px; height:42px; min-width:42px; background:#EFF6FF; border:1.5px solid #DBEAFE; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;");
+		iconDiv.setSclass("user-modal-icon-box-styled");
 		Label iconLabel = new Label(editMode ? "✏" : "👤");
-		iconLabel.setStyle("font-size:18px; line-height:1;");
+		iconLabel.setSclass("user-modal-icon-label-styled");
 		iconDiv.appendChild(iconLabel);
 
 		Div titleTextDiv = new Div();
-		titleTextDiv.setStyle("flex:1; min-width:0;");
+		titleTextDiv.setSclass("user-modal-title-text-wrapper");
 		Label titleLabel = new Label(editMode ? "Edit User" : "Create New User");
-		titleLabel.setStyle(
-				"font-size:17px; font-weight:700; color:#0B1F3F; font-family:'Space Grotesk','Plus Jakarta Sans',sans-serif; letter-spacing:-0.02em; display:block; margin-bottom:3px;");
+		titleLabel.setSclass("user-modal-title-label");
 		Label subtitleLabel = new Label(editMode ? "Update the details for this user account"
 				: "Fill in the details to create a new user account");
-		subtitleLabel.setStyle("font-size:12px; color:#64748B; display:block; font-weight:400;");
+		subtitleLabel.setSclass("user-modal-subtitle-label");
 		titleTextDiv.appendChild(titleLabel);
 		titleTextDiv.appendChild(subtitleLabel);
 		headerLeftDiv.appendChild(iconDiv);
@@ -371,8 +366,7 @@ public class UserController extends GenericForwardComposer<Component> {
 
 		/* Close button */
 		Button closeBtn = new Button("✕");
-		closeBtn.setStyle(
-				"width:28px; height:28px; padding:0; background:transparent; border:none; cursor:pointer; color:#64748B; font-size:18px; font-weight:300; line-height:1; flex-shrink:0;");
+		closeBtn.setSclass("user-modal-close-button-styled");
 		closeBtn.addEventListener("onClick", new EventListener<Event>() {
 			@Override
 			public void onEvent(Event event) throws Exception {
@@ -386,115 +380,72 @@ public class UserController extends GenericForwardComposer<Component> {
 
 		/* ── Username ── */
 		Label usernameLabel = new Label("Username");
-		usernameLabel.setStyle(
-				"display:block; font-size:11.5px; font-weight:700; color:#475569; margin-bottom:6px; letter-spacing:0.04em; text-transform:uppercase;");
+		usernameLabel.setSclass("user-form-label-styled");
 		Textbox usernameBox = new Textbox();
 		usernameBox.setHflex("1");
 		usernameBox.setPlaceholder("Enter username");
-		usernameBox.setStyle(
-				"height:40px; border:1.5px solid #CBD5E1 !important; border-radius:8px !important; font-size:14px; padding:0 12px; box-sizing:border-box; color:#0F172A; background:#F8FAFC; font-family:'Inter',sans-serif; font-weight:500;");
+		usernameBox.setSclass("user-form-input-styled");
 		if (editMode) {
 			usernameBox.setValue(existingUser.getUsername());
 			usernameBox.setReadonly(true);
-			usernameBox.setStyle(
-					"height:40px; border:1.5px solid #E2E8F0 !important; border-radius:8px !important; font-size:14px; padding:0 12px; box-sizing:border-box; color:#94A3B8; background:#F1F5F9; font-family:'Inter',sans-serif; cursor:not-allowed;");
+			usernameBox.setSclass("user-form-input-readonly-styled");
 		}
 		Vbox usernameGroup = new Vbox();
 		usernameGroup.setSpacing("0");
 		usernameGroup.setHflex("1");
-		usernameGroup.setStyle("margin-bottom:18px;");
+		usernameGroup.setSclass("user-form-input-group-styled");
 		usernameGroup.appendChild(usernameLabel);
 		usernameGroup.appendChild(usernameBox);
 		mainBox.appendChild(usernameGroup);
 
 		/* ── Password ── */
 		Label passwordLabel = new Label("Password");
-
-		passwordLabel.setStyle("display:block; font-size:11.5px; font-weight:700; color:#475569; "
-				+ "margin-bottom:6px; letter-spacing:0.04em; text-transform:uppercase;");
+		passwordLabel.setSclass("user-form-label-styled");
 
 		Textbox passwordBox = new Textbox();
 		passwordBox.setSclass("password-field");
-
 		passwordBox.setType("password");
-
 		passwordBox.setHflex("1");
-
 		passwordBox.setPlaceholder(editMode ? "Leave blank to keep current password" : "Enter password");
-
-		passwordBox.setStyle("height:40px; " + "flex:1; " + "min-width:0; " + "width:auto; "
-				+ "border:none !important; " + "outline:none !important; " + "box-shadow:none !important; "
-				+ "border-radius:8px !important; " + "font-size:14px; " + "padding:0 4px 0 12px; "
-				+ "box-sizing:border-box; " + "color:#0F172A; " + "background:transparent !important; "
-				+ "font-family:'Inter',sans-serif; " + "font-weight:500;");
+		passwordBox.setSclass("password-field-container");
 
 		/* ── Password Eye Button ── */
 
 		Button passwordEyeButton = new Button();
 
 		passwordEyeButton.setIconSclass("z-icon-eye");
-
 		passwordEyeButton.setTooltiptext("Show password");
-
-		passwordEyeButton.setSclass("password-eye-button");
-
-		passwordBox.setStyle("height:40px; " + "flex:1; " + "min-width:0; " + "width:auto; "
-				+ "border:none !important; " + "outline:none !important; " + "box-shadow:none !important; "
-				+ "border-radius:8px !important; " + "font-size:14px; " + "padding:0 4px 0 12px; "
-				+ "box-sizing:border-box; " + "color:#0F172A; " + "background:transparent !important; "
-				+ "font-family:'Inter',sans-serif; " + "font-weight:500;");
+		passwordEyeButton.setSclass("password-eye-button-styled");
 
 		/* ── Password Input Layout ── */
-
 		Hbox passwordInputLayout = new Hbox();
-
 		passwordInputLayout.setHflex("1");
 		passwordInputLayout.setAlign("center");
 		passwordInputLayout.setSpacing("0");
-		passwordInputLayout.setSclass("password-input-layout");
-
-		passwordInputLayout.setStyle("width:100%; " + "height:40px; " + "display:flex; " + "align-items:center; "
-				+ "box-sizing:border-box; " + "border:1.5px solid #CBD5E1; " + "border-radius:8px; "
-				+ "background:#F8FAFC; " + "overflow:hidden;");
-
+		passwordInputLayout.setSclass("password-input-layout-styled");
 		passwordInputLayout.appendChild(passwordBox);
 		passwordInputLayout.appendChild(passwordEyeButton);
 
 		/* ── Password Group ── */
-
 		Vbox passwordGroup = new Vbox();
-
 		passwordGroup.setSpacing("0");
-
 		passwordGroup.setHflex("1");
-
-		passwordGroup.setStyle("margin-bottom:18px;");
-
+		passwordGroup.setSclass("password-group-container");
 		passwordGroup.appendChild(passwordLabel);
-
 		passwordGroup.appendChild(passwordInputLayout);
 
 		/* ── Password Requirements ── */
-
 		Label passwordHint = new Label(
 				"Minimum 8 characters, including uppercase, lowercase, number and special character.");
-
-		passwordHint.setStyle("display:block; " + "margin-top:6px; " + "font-size:11px; " + "line-height:16px; "
-				+ "color:#64748B; " + "font-family:'Inter',sans-serif;");
-
+		passwordHint.setSclass("password-hint-label");
 		passwordGroup.appendChild(passwordHint);
 
 		/* ── Live Password Validation ── */
-
 		passwordBox.addEventListener("onChanging", new EventListener<Event>() {
-
 			@Override
 			public void onEvent(Event event) throws Exception {
-
 				InputEvent inputEvent = (InputEvent) event;
-
 				String currentPassword = inputEvent.getValue();
-
 				updatePasswordValidation(currentPassword, passwordHint, editMode);
 			}
 		});
@@ -502,27 +453,21 @@ public class UserController extends GenericForwardComposer<Component> {
 		mainBox.appendChild(passwordGroup);
 
 		/* ── Eye Button Click Event ── */
-
 		passwordEyeButton.addEventListener("onClick", new EventListener<Event>() {
-
 			@Override
 			public void onEvent(Event event) throws Exception {
-
 				togglePasswordVisibility(passwordBox, passwordEyeButton);
-
 			}
 		});
 
 		/* ── Role ── */
 		Label roleLabel = new Label("Role");
-		roleLabel.setStyle(
-				"display:block; font-size:11.5px; font-weight:700; color:#475569; margin-bottom:6px; letter-spacing:0.04em; text-transform:uppercase;");
+		roleLabel.setSclass("user-form-label-styled");
 		Combobox roleCombo = new Combobox();
 		roleCombo.setHflex("1");
 		roleCombo.setReadonly(true);
 		roleCombo.setPlaceholder("Select a role");
-		roleCombo.setStyle(
-				"height:40px; border:1.5px solid #CBD5E1 !important; border-radius:8px !important; font-size:14px; box-sizing:border-box; background:#F8FAFC; font-family:'Inter',sans-serif;");
+		roleCombo.setSclass("user-form-combobox-styled");
 
 		try {
 			for (Role role : roleService.getAllRoles()) {
@@ -543,7 +488,7 @@ public class UserController extends GenericForwardComposer<Component> {
 		Vbox roleGroup = new Vbox();
 		roleGroup.setSpacing("0");
 		roleGroup.setHflex("1");
-		roleGroup.setStyle("margin-bottom:24px;");
+		roleGroup.setSclass("user-role-form-group");
 		roleGroup.appendChild(roleLabel);
 		roleGroup.appendChild(roleCombo);
 		mainBox.appendChild(roleGroup);
@@ -553,12 +498,10 @@ public class UserController extends GenericForwardComposer<Component> {
 		btnBox.setSpacing("10px");
 		btnBox.setAlign("end");
 		btnBox.setHflex("1");
-		btnBox.setStyle(
-				"border-top:none; padding-top:20px; display:flex; justify-content:flex-end; align-items:center;");
+		btnBox.setSclass("user-modal-button-container");
 
 		Button cancelBtn = new Button("Cancel");
-		cancelBtn.setStyle(
-				"height:40px; padding:0 22px; background:#FFFFFF; border:1.5px solid #CBD5E1 !important; border-radius:8px; color:#475569; font-size:14px; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif;");
+		cancelBtn.setSclass("user-modal-cancel-button-styled");
 		cancelBtn.addEventListener("onClick", new EventListener<Event>() {
 			@Override
 			public void onEvent(Event event) throws Exception {
@@ -567,8 +510,7 @@ public class UserController extends GenericForwardComposer<Component> {
 		});
 
 		Button saveBtn = new Button(editMode ? "Update User" : "Create User");
-		saveBtn.setStyle(
-				"height:40px; padding:0 22px; background:#175CD3; border:none !important; border-radius:8px; color:#FFFFFF; font-size:14px; font-weight:700; cursor:pointer; font-family:'Inter',sans-serif; box-shadow:0 2px 8px rgba(23,92,211,0.25);");
+		saveBtn.setSclass("user-modal-save-button-styled");
 		saveBtn.addEventListener("onClick", new EventListener<Event>() {
 			@Override
 			public void onEvent(Event event) throws Exception {
@@ -599,23 +541,15 @@ public class UserController extends GenericForwardComposer<Component> {
 		 * During edit, an empty password means: Keep the existing password.
 		 */
 		if (editMode && password.isEmpty()) {
-
 			passwordHint.setValue("Leave blank to keep the current password.");
-
-			passwordHint.setStyle("display:block; " + "margin-top:6px; " + "font-size:11px; " + "line-height:16px; "
-					+ "color:#64748B; " + "font-family:'Inter',sans-serif;");
-
+			passwordHint.setSclass("password-hint-label");
 			return;
 		}
 
 		if (password.isEmpty()) {
-
 			passwordHint
 					.setValue("Minimum 8 characters, including uppercase, lowercase, number and special character.");
-
-			passwordHint.setStyle("display:block; " + "margin-top:6px; " + "font-size:11px; " + "line-height:16px; "
-					+ "color:#64748B; " + "font-family:'Inter',sans-serif;");
-
+			passwordHint.setSclass("password-hint-default");
 			return;
 		}
 
@@ -626,19 +560,12 @@ public class UserController extends GenericForwardComposer<Component> {
 		boolean hasSpecial = password.matches(".*[^a-zA-Z0-9].*");
 
 		if (hasMinimumLength && hasUppercase && hasLowercase && hasNumber && hasSpecial) {
-
 			passwordHint.setValue("Password meets all requirements.");
-
-			passwordHint.setStyle("display:block; " + "margin-top:6px; " + "font-size:11px; " + "line-height:16px; "
-					+ "color:#16A34A; " + "font-family:'Inter',sans-serif;");
-
+			passwordHint.setSclass("password-hint-success");
 		} else {
-
 			passwordHint.setValue(
 					"Password must contain 8 characters, uppercase, lowercase, number and special character.");
-
-			passwordHint.setStyle("display:block; " + "margin-top:6px; " + "font-size:11px; " + "line-height:16px; "
-					+ "color:#DC2626; " + "font-family:'Inter',sans-serif;");
+			passwordHint.setSclass("password-hint-error");
 		}
 	}
 

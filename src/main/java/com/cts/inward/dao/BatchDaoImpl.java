@@ -561,7 +561,7 @@ public class BatchDaoImpl implements BatchDao {
 				    INNER JOIN public."role" r ON r.role_id = u.role_id
 				    WHERE bl.batch_id = b.batch_id
 				      AND u.status = 'ACTIVE'
-				      AND r.role_name = 'INWARD_MAKER'
+				      AND r.role_name = 'Inward Maker'
 				    ORDER BY bl.locked_time DESC, bl.lock_id DESC
 				    LIMIT 1
 				) l ON TRUE
@@ -619,7 +619,7 @@ public class BatchDaoImpl implements BatchDao {
 				    INNER JOIN public."role" r ON r.role_id = u.role_id
 				    WHERE bl.batch_id = b.batch_id
 				      AND u.status = 'ACTIVE'
-				      AND r.role_name = 'INWARD_MAKER'
+				      AND r.role_name = 'Inward Maker'
 				    ORDER BY bl.locked_time DESC, bl.lock_id DESC
 				    LIMIT 1
 				) l ON TRUE

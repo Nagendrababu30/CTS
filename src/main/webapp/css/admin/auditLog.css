@@ -477,5 +477,61 @@
     font-size: 13px !important;
 }
 
+/* =========================================================
+   AUDIT TRAIL HEADER
+   ========================================================= */
+
+.audit-trail-header {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+    min-height: 42px !important;
+    padding-right: 180px !important;
+    box-sizing: border-box;
+    margin-bottom: 18px !important;
+}
+
+/* =========================================================
+   AUDIT TRAIL TITLE
+   ========================================================= */
+
+.audit-trail-header .audit-trail-title {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 42px !important;
+}
 
 
+/* =========================================================
+   DOWNLOAD PDF BUTTON
+   ========================================================= */
+
+.audit-trail-header .audit-download-btn {
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+
+    display: inline-block !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: 42px !important;
+
+    margin: 0 !important;
+    padding: 0 18px !important;
+
+    background: #1683E8 !important;
+    border: none !important;
+    border-radius: 7px !important;
+
+    color: #FFFFFF !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+
+    white-space: nowrap !important;
+    z-index: 10 !important;
+}
+
+.audit-trail-header .audit-download-btn:hover {
+    background: #126FCC !important;
+}

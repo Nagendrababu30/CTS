@@ -1,17 +1,27 @@
 package com.cts.admin.service;
 
+import java.util.Date;
 import java.util.List;
+
 import com.cts.admin.model.AuditLog;
 
 public interface AuditLogService {
 
-    List<AuditLog> getAuditLogs(int page, int pageSize);
+	// Existing method
+	List<AuditLog> getAuditLogs(int page, int pageSize);
 
-    int getTotalAuditLogCount();
+	// New filtered method
+	List<AuditLog> getAuditLogs(int page, int pageSize, String searchText, String roleName, Date fromDate, Date toDate);
 
-    /* Called on login — inserts into user_session, returns session_id */
-    String createAuditLog(Long userId);
+	// Existing count method
+	int getTotalAuditLogCount();
 
-    /* Called on logout — updates logout_time in user_session */
-    void endAuditLog(String sessionId);
+	// New filtered count method
+	int getTotalAuditLogCount(String searchText, String roleName, Date fromDate, Date toDate);
+
+	/* Called on login */
+	String createAuditLog(Long userId);
+
+	/* Called on logout */
+	void endAuditLog(String sessionId);
 }

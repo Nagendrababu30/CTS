@@ -256,9 +256,15 @@
 /* ---------- Table title ---------- */
 .table-title {
     font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
-    font-size: 18px; font-weight: 800;
-    color: var(--text-primary); letter-spacing: -0.02em;
-    position: relative; padding-left: 18px; display: block;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    position: relative;
+    padding-left: 18px;
+    display: block;
+    margin: 0 !important;
+    line-height: 1.2;
 }
 .table-title::before {
     content: '';

@@ -16,77 +16,76 @@
     topMargin="0"
     bottomMargin="0">
 
-    <parameter name="FILE_DESCRIPTION" class="java.lang.String"/>
+    <!-- Parameters -->
 
-    <parameter name="TOTAL_RECORDS" class="java.lang.Integer"/>
+    <parameter
+        name="FILE_DESCRIPTION"
+        class="java.lang.String"/>
 
-    <field name="batchId" class="java.lang.Long"/>
-
-    <field name="chequeNo" class="java.lang.String"/>
-
-    <field name="amount"  class="java.math.BigDecimal"/>
-
-    <field  name="drawerAccountNo" class="java.lang.String"/>
+    <parameter
+        name="TOTAL_RECORDS"
+        class="java.lang.Integer"/>
 
 
-    <!-- Payee Account -->
+    <!-- Fields -->
+
+    <field
+        name="batchId"
+        class="java.lang.Long"/>
+
+    <field
+        name="chequeNo"
+        class="java.lang.String"/>
+
+    <field
+        name="amount"
+        class="java.math.BigDecimal"/>
+
+    <field
+        name="drawerAccountNo"
+        class="java.lang.String"/>
 
     <field
         name="payeeAccountNo"
         class="java.lang.String"/>
 
-
-    <!-- Payee -->
-
     <field
         name="payeeName"
         class="java.lang.String"/>
-
-
-    <!-- Drawer -->
 
     <field
         name="drawerName"
         class="java.lang.String"/>
 
-
-    <!-- Bank -->
-
     <field
         name="bankName"
         class="java.lang.String"/>
-
-
-    <!-- Cheque Date -->
 
     <field
         name="chequeDate"
         class="java.sql.Date"/>
 
-
-    <!-- Multiple Rejection Reasons -->
-
     <field
         name="returnReason"
         class="java.lang.String"/>
-
-
-    <!-- Remarks -->
 
     <field
         name="remark"
         class="java.lang.String"/>
 
 
+    <!-- Detail -->
+
     <detail>
 
         <band height="40">
 
 
-            <!-- Batch ID -->
+            <!-- BATCH ID -->
 
             <textField
-                isBlankWhenNull="true">
+                isBlankWhenNull="true"
+                isPrintRepeatedValues="false">
 
                 <reportElement
                     x="0"
@@ -101,7 +100,7 @@
             </textField>
 
 
-            <!-- Cheque Number -->
+            <!-- CHEQUE NUMBER -->
 
             <textField
                 isBlankWhenNull="true">
@@ -119,7 +118,7 @@
             </textField>
 
 
-            <!-- Amount -->
+            <!-- AMOUNT -->
 
             <textField
                 isBlankWhenNull="true">
@@ -137,7 +136,7 @@
             </textField>
 
 
-            <!-- Drawer Account Number -->
+            <!-- DRAWER ACCOUNT NUMBER -->
 
             <textField
                 isBlankWhenNull="true">
@@ -155,7 +154,7 @@
             </textField>
 
 
-            <!-- Payee Account Number -->
+            <!-- PAYEE ACCOUNT NUMBER -->
 
             <textField
                 isBlankWhenNull="true">
@@ -173,7 +172,7 @@
             </textField>
 
 
-            <!-- Drawer Name -->
+            <!-- DRAWER NAME -->
 
             <textField
                 isBlankWhenNull="true">
@@ -191,7 +190,7 @@
             </textField>
 
 
-            <!-- Payee Name -->
+            <!-- PAYEE NAME -->
 
             <textField
                 isBlankWhenNull="true">
@@ -209,7 +208,7 @@
             </textField>
 
 
-            <!-- Bank -->
+            <!-- BANK NAME -->
 
             <textField
                 isBlankWhenNull="true">
@@ -227,7 +226,7 @@
             </textField>
 
 
-            <!-- Cheque Date -->
+            <!-- CHEQUE DATE -->
 
             <textField
                 isBlankWhenNull="true">
@@ -250,7 +249,7 @@
             </textField>
 
 
-            <!-- ALL REJECTION REASONS -->
+            <!-- RETURN REASON -->
 
             <textField
                 isBlankWhenNull="true"
@@ -269,7 +268,7 @@
             </textField>
 
 
-            <!-- Remarks -->
+            <!-- REMARK -->
 
             <textField
                 isBlankWhenNull="true"

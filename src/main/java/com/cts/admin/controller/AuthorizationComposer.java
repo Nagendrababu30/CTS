@@ -24,23 +24,23 @@ public class AuthorizationComposer
 		// ADMIN
 		// =========================================================
 
-		PAGE_PERMISSIONS.put("/zul/admin/admin-dashboard.zul", "ADMIN");
+		PAGE_PERMISSIONS.put("/zul/admin/admin-dashboard.zul", "Admin");
 
-		PAGE_PERMISSIONS.put("/zul/admin/admin-roles.zul", "ADMIN");
+		PAGE_PERMISSIONS.put("/zul/admin/admin-roles.zul", "Admin");
 
-		PAGE_PERMISSIONS.put("/zul/admin/admin-user-management.zul", "ADMIN");
+		PAGE_PERMISSIONS.put("/zul/admin/admin-user-management.zul", "Admin");
 
-		PAGE_PERMISSIONS.put("/zul/admin/admin-batch-monitoring.zul", "ADMIN");
+		PAGE_PERMISSIONS.put("/zul/admin/admin-batch-monitoring.zul", "Admin");
 
-		PAGE_PERMISSIONS.put("/zul/admin/admin-session-management.zul", "ADMIN");
+		PAGE_PERMISSIONS.put("/zul/admin/admin-session-management.zul", "Admin");
 
-		PAGE_PERMISSIONS.put("/zul/admin/admin-audit-logs.zul", "ADMIN");
+		PAGE_PERMISSIONS.put("/zul/admin/admin-audit-logs.zul", "Admin");
 
 		// =========================================================
 		// INWARD MAKER
 		// =========================================================
 
-		PAGE_PERMISSIONS.put("/zul/inward-maker/dashboard.zul", "INWARD_MAKER");
+		PAGE_PERMISSIONS.put("/zul/inward-maker/dashboard.zul", "Inward Maker");
 
 		/*
 		 * MICR Repair queue page.
@@ -49,78 +49,78 @@ public class AuthorizationComposer
 		 *
 		 * /zul/inward-maker/micr-repair-list.zul ↓ Access Denied
 		 */
-		PAGE_PERMISSIONS.put("/zul/inward-maker/micr-repair-list.zul", "INWARD_MAKER");
+		PAGE_PERMISSIONS.put("/zul/inward-maker/micr-repair-list.zul", "Inward Maker");
 
 		/*
 		 * MICR Repair detail page.
 		 */
 
-		PAGE_PERMISSIONS.put("/zul/inward-maker/micr-repair-list.zul", "INWARD_MAKER");
+		PAGE_PERMISSIONS.put("/zul/inward-maker/micr-repair-list.zul", "Inward Maker");
 
-		PAGE_PERMISSIONS.put("/zul/inward-maker/micr-repair.zul", "INWARD_MAKER");
+		PAGE_PERMISSIONS.put("/zul/inward-maker/micr-repair.zul", "Inward Maker");
 
 		/*
 		 * Data Entry page.
 		 */
-		PAGE_PERMISSIONS.put("/zul/inward-maker/data-entry.zul", "INWARD_MAKER");
-		PAGE_PERMISSIONS.put("/zul/inward-maker/data-entryform.zul", "INWARD_MAKER");
+		PAGE_PERMISSIONS.put("/zul/inward-maker/data-entry.zul", "Inward Maker");
+		PAGE_PERMISSIONS.put("/zul/inward-maker/data-entryform.zul", "Inward Maker");
 
 		/*
 		 * These pages can remain protected if they still exist, but they are no longer
 		 * displayed in the Maker sidebar.
 		 */
-		PAGE_PERMISSIONS.put("/zul/inward-maker/send-to-checker.zul", "INWARD_MAKER");
+		PAGE_PERMISSIONS.put("/zul/inward-maker/send-to-checker.zul", "Inward Maker");
 
-		PAGE_PERMISSIONS.put("/zul/inward-maker/reports.zul", "INWARD_MAKER");
+		PAGE_PERMISSIONS.put("/zul/inward-maker/reports.zul", "Inward Maker");
 
 		// =========================================================
 		// INWARD CHECKER
 		// =========================================================
 
-		PAGE_PERMISSIONS.put("/zul/inward-checker/dashboard.zul", "INWARD_CHECKER");
+		PAGE_PERMISSIONS.put("/zul/inward-checker/dashboard.zul", "Inward Checker");
 
-		PAGE_PERMISSIONS.put("/zul/inward-checker/verification.zul", "INWARD_CHECKER");
+		PAGE_PERMISSIONS.put("/zul/inward-checker/verification.zul", "Inward Checker");
 
-		PAGE_PERMISSIONS.put("/zul/inward-checker/batch-details.zul", "INWARD_CHECKER");
+		PAGE_PERMISSIONS.put("/zul/inward-checker/batch-details.zul", "Inward Checker");
 		
-		PAGE_PERMISSIONS.put("/zul/inward-checker/reports.zul", "INWARD_CHECKER");
+		PAGE_PERMISSIONS.put("/zul/inward-checker/reports.zul", "Inward Checker");
 		
 		
 
 		// =========================================================
 		// OUTWARD MAKER
 		// =========================================================
-		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-dashboard.zul", "OUTWARD_MAKER");
+		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-dashboard.zul", "Outward Maker");
 
-		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-micr-repair.zul", "OUTWARD_MAKER");
+		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-micr-repair.zul", "Outward Maker");
 		PAGE_PERMISSIONS.put(
 			    "/zul/outward/outward-maker/outward-maker-data-entry-detail.zul",
-			    "OUTWARD_MAKER"
+			    "Outward Maker"
 			);
 		// CAPTURE OPERATOR
 
 		PAGE_PERMISSIONS.put(
 		    "/zul/outward/outward-maker/capture-operator-batch-capture.zul",
-		    "CAPTURE_OPERATOR"
+		    "Capture Operator"
 		);
 
 		PAGE_PERMISSIONS.put(
 		    "/zul/outward/outward-maker/capture-operator-captured-batches.zul",
-		    "CAPTURE_OPERATOR"
+		    "Capture Operator"
 		);
 
 		PAGE_PERMISSIONS.put(
 		    "/zul/outward/outward-maker/capture-operator-reports.zul",
-		    "CAPTURE_OPERATOR"
+		    "Capture Operator"
 		);
 
-		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-micr-repair-detail.zul", "OUTWARD_MAKER");
+		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-micr-repair-detail.zul", "Outward Maker");
 
-		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-data-entry.zul", "OUTWARD_MAKER");
+		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-data-entry.zul", "Outward Maker");
 
-		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-data-entry-repair.zul", "OUTWARD_MAKER");
+		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-data-entry-repair.zul", "Outward Maker");
 
-		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-send-to-checker.zul", "OUTWARD_MAKER");
+		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-send-to-checker.zul", "Outward Maker");
 		// =========================================================
 		// OUTWARD CHECKER
 		// =========================================================
@@ -131,31 +131,31 @@ public class AuthorizationComposer
 
 		PAGE_PERMISSIONS.put(
 		        "/zul/outward/outward-checker/dashboard.zul",
-		        "OUTWARD_CHECKER"
+		        "Outward Checker"
 		);
 
 		PAGE_PERMISSIONS.put(
 		        "/zul/outward/outward-checker/batchesQueue.zul",
-		        "OUTWARD_CHECKER"
+		        "Outward Checker"
 		);
 
 		PAGE_PERMISSIONS.put(
 		        "/zul/outward/outward-checker/chequeVerification.zul",
-		        "OUTWARD_CHECKER"
+		        "Outward Checker"
 		);
 
 		PAGE_PERMISSIONS.put(
 		        "/zul/outward/outward-checker/reports.zul",
-		        "OUTWARD_CHECKER"
+		        "Outward Checker"
 		);
 
 		PAGE_PERMISSIONS.put(
 		        "/zul/outward/outward-checker/sendToNPCI.zul",
-		        "OUTWARD_CHECKER"
+		        "Outward Checker"
 		);
 		PAGE_PERMISSIONS.put(
 		        "/zul/outward/outward-checker/processing.zul",
-		        "OUTWARD_CHECKER"
+		        "Outward Checker"
 		);
 	}
 

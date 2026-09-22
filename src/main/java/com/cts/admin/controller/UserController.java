@@ -172,18 +172,12 @@ public class UserController extends GenericForwardComposer<Component> {
 				/* Status */
 				Listcell statusCell = new Listcell();
 				String userStatus = user.getStatus() != null ? user.getStatus() : "-";
+				String displayStatus = "-".equals(userStatus) ? "-" : ("ACTIVE".equalsIgnoreCase(userStatus) ? "Active" : "Inactive");
 				Hbox statusContainer = new Hbox();
 				statusContainer.setSclass("status-container");
-				Hbox statusBadge = new Hbox();
-				statusBadge.setAlign("center");
-				statusBadge.setSclass("status-badge");
-				Label statusIcon = new Label("●");
-				statusIcon.setSclass("status-icon");
-				Label statusLbl = new Label(userStatus);
+				Label statusLbl = new Label(displayStatus);
 				statusLbl.setSclass("status-label");
-				statusBadge.appendChild(statusIcon);
-				statusBadge.appendChild(statusLbl);
-				statusContainer.appendChild(statusBadge);
+				statusContainer.appendChild(statusLbl);
 				statusCell.appendChild(statusContainer);
 				item.appendChild(statusCell);
 
@@ -306,11 +300,11 @@ public class UserController extends GenericForwardComposer<Component> {
 		all.setValue(null);
 		statusFilterCombobox.appendChild(all);
 
-		Comboitem active = new Comboitem("ACTIVE");
+		Comboitem active = new Comboitem("Active");
 		active.setValue("ACTIVE");
 		statusFilterCombobox.appendChild(active);
 
-		Comboitem inactive = new Comboitem("INACTIVE");
+		Comboitem inactive = new Comboitem("Inactive");
 		inactive.setValue("INACTIVE");
 		statusFilterCombobox.appendChild(inactive);
 

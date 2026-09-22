@@ -29,9 +29,6 @@
                 <div sclass="audit-header-left">
                     <label sclass="audit-page-title" value="Audit Logs"/>
                 </div>
-                <div sclass="audit-readonly-badge">
-                    <label sclass="audit-readonly-label" value="&#x25CE; Read-Only"/>
-                </div>
             </div>
 
             <!-- FILTER CARD -->

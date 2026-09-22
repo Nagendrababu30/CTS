@@ -13,14 +13,15 @@
     border: none !important;
 }
 
+/* ── Modal Main Box ── */
 .user-modal-main-box {
     padding: 28px 28px 24px 28px;
     box-sizing: border-box;
     background: #FFFFFF;
 }
 
-/* ── Modal Header Container ── */
-.user-modal-header {
+/* ── Header Container Layout ── */
+.user-modal-header-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -30,14 +31,16 @@
     border: none;
 }
 
-.user-modal-header-left {
+/* ── Header Left Section ── */
+.user-modal-header-left-section {
     display: flex;
     align-items: center;
     gap: 14px;
     flex: 1;
 }
 
-.user-modal-icon-box {
+/* ── Icon Box ── */
+.user-modal-icon-box-styled {
     width: 42px;
     height: 42px;
     min-width: 42px;
@@ -50,17 +53,20 @@
     flex-shrink: 0;
 }
 
-.user-modal-icon-label {
+/* ── Icon Label ── */
+.user-modal-icon-label-styled {
     font-size: 18px;
     line-height: 1;
 }
 
-.user-modal-title-text {
+/* ── Title Text Wrapper ── */
+.user-modal-title-text-wrapper {
     flex: 1;
     min-width: 0;
 }
 
-.user-modal-title {
+/* ── Title Label ── */
+.user-modal-title-label {
     font-size: 17px;
     font-weight: 700;
     color: #0B1F3F;
@@ -70,14 +76,16 @@
     margin-bottom: 3px;
 }
 
-.user-modal-subtitle {
+/* ── Subtitle Label ── */
+.user-modal-subtitle-label {
     font-size: 12px;
     color: #64748B;
     display: block;
     font-weight: 400;
 }
 
-.user-modal-close-button {
+/* ── Close Button ── */
+.user-modal-close-button-styled {
     width: 28px;
     height: 28px;
     padding: 0;
@@ -91,8 +99,8 @@
     flex-shrink: 0;
 }
 
-/* ── Form Labels ── */
-.user-form-label {
+/* ── Form Label Styled ── */
+.user-form-label-styled {
     display: block;
     font-size: 11.5px;
     font-weight: 700;
@@ -102,8 +110,8 @@
     text-transform: uppercase;
 }
 
-/* ── Form Input Fields ── */
-.user-form-input {
+/* ── Form Input Styled ── */
+.user-form-input-styled {
     height: 40px;
     border: 1.5px solid #CBD5E1 !important;
     border-radius: 8px !important;
@@ -116,7 +124,8 @@
     font-weight: 500;
 }
 
-.user-form-input-readonly {
+/* ── Form Input Readonly ── */
+.user-form-input-readonly-styled {
     height: 40px;
     border: 1.5px solid #E2E8F0 !important;
     border-radius: 8px !important;
@@ -129,16 +138,69 @@
     cursor: not-allowed;
 }
 
-.user-form-input-group {
+/* ── Form Input Group ── */
+.user-form-input-group-styled {
     margin-bottom: 18px;
 }
 
-.user-form-input-group-last {
-    margin-bottom: 24px;
+/* ── Password Field Container ── */
+.password-field-container {
+    height: 40px;
+    flex: 1;
+    min-width: 0;
+    width: auto;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    border-radius: 8px !important;
+    font-size: 14px;
+    padding: 0 4px 0 12px;
+    box-sizing: border-box;
+    color: #0F172A;
+    background: transparent !important;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
 }
 
-/* ── Form Combobox ── */
-.user-form-combobox {
+/* ── Password Eye Button Styled ── */
+.password-eye-button-styled {
+    width: auto;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+}
+
+/* ── Password Input Layout ── */
+.password-input-layout-styled {
+    width: 100%;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    border: 1.5px solid #CBD5E1;
+    border-radius: 8px;
+    background: #F8FAFC;
+    overflow: hidden;
+}
+
+/* ── Password Group Container ── */
+.password-group-container {
+    margin-bottom: 18px;
+}
+
+/* ── Password Hint Label ── */
+.password-hint-label {
+    display: block;
+    margin-top: 6px;
+    font-size: 11px;
+    line-height: 16px;
+    color: #64748B;
+    font-family: 'Inter', sans-serif;
+}
+
+/* ── Form Combobox Styled ── */
+.user-form-combobox-styled {
     height: 40px;
     border: 1.5px solid #CBD5E1 !important;
     border-radius: 8px !important;
@@ -148,8 +210,13 @@
     font-family: 'Inter', sans-serif;
 }
 
+/* ── Role Form Group ── */
+.user-role-form-group {
+    margin-bottom: 24px;
+}
+
 /* ── Modal Button Container ── */
-.user-modal-button-box {
+.user-modal-button-container {
     border-top: none;
     padding-top: 20px;
     display: flex;
@@ -157,12 +224,8 @@
     align-items: center;
 }
 
-.user-modal-button-spacing {
-    gap: 10px;
-}
-
-/* ── Modal Buttons ── */
-.user-modal-cancel-button {
+/* ── Modal Cancel Button ── */
+.user-modal-cancel-button-styled {
     height: 40px;
     padding: 0 22px;
     background: #FFFFFF;
@@ -175,7 +238,8 @@
     font-family: 'Inter', sans-serif;
 }
 
-.user-modal-save-button {
+/* ── Modal Save Button ── */
+.user-modal-save-button-styled {
     height: 40px;
     padding: 0 22px;
     background: #175CD3;
@@ -283,6 +347,37 @@
 .action-button.z-disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+/* ========================================================================
+   PASSWORD HINT MESSAGES
+   ======================================================================== */
+
+.password-hint-default {
+    display: block !important;
+    margin-top: 6px !important;
+    font-size: 11px !important;
+    line-height: 16px !important;
+    color: #64748B !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+.password-hint-error {
+    display: block !important;
+    margin-top: 6px !important;
+    font-size: 11px !important;
+    line-height: 16px !important;
+    color: #DC2626 !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+.password-hint-success {
+    display: block !important;
+    margin-top: 6px !important;
+    font-size: 11px !important;
+    line-height: 16px !important;
+    color: #16A34A !important;
+    font-family: 'Inter', sans-serif !important;
 }
 
 /* ========================================================================

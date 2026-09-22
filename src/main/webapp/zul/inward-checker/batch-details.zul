@@ -107,54 +107,60 @@
 
                 <label
                     value="Cheque Image Preview"
-                    sclass="panel-title"/>                <!-- =================================================
+                    sclass="panel-title"/>
+
+                <!-- =================================================
                      IMAGE PREVIEW
                      ================================================= -->
                 <vlayout
                     width="100%"
                     vflex="1"
-                    spacing="8px"
+                    spacing="6px"
                     sclass="image-wrapper">
 
                     <!-- Image toolbar (Image 2) -->
                     <hlayout
-                        width="100%"
-                        spacing="6px"
+                        spacing="8px"
                         valign="middle"
                         sclass="micr-image-toolbar">
 
                         <button
                             id="toggleImageButton"
                             label="View Back"
-                            hflex="2"
+                            width="110px"
+                            height="36px"
                             sclass="micr-toggle-btn"/>
 
                         <button
                             id="zoomInButton"
                             label="+"
                             tooltiptext="Zoom In"
-                            hflex="1"
+                            width="36px"
+                            height="36px"
                             sclass="micr-zoom-btn"/>
 
                         <button
                             id="zoomOutButton"
                             label="−"
                             tooltiptext="Zoom Out"
-                            hflex="1"
+                            width="36px"
+                            height="36px"
                             sclass="micr-zoom-btn"/>
 
                         <button
                             id="rotateButton"
                             label="↻"
                             tooltiptext="Rotate 90°"
-                            hflex="1"
+                            width="36px"
+                            height="36px"
                             sclass="micr-zoom-btn"/>
 
                         <button
                             id="resetViewButton"
                             label="⟲"
                             tooltiptext="Reset View"
-                            hflex="1"
+                            width="36px"
+                            height="36px"
                             sclass="micr-zoom-btn"/>
 
                     </hlayout>
@@ -163,7 +169,7 @@
                     <div
                         sclass="micr-image-area"
                         vflex="1"
-                        style="width:100%; height:100%; flex:1 1 auto; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#FFFFFF; border:1.5px solid #CBD5E1; border-radius:8px; position:relative;">
+                        style="width:100%; height:100%; flex:1 1 auto; min-height:0; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#FFFFFF; border:1.5px solid #CBD5E1; border-radius:8px; position:relative;">
 
                         <!-- ACTUAL CHEQUE IMAGE -->
                         <image

@@ -338,12 +338,46 @@
 }
 
 .left-card {
-    padding: 14px 18px !important;
+    padding: 14px 18px 12px 18px !important;
     overflow: hidden !important;
     overflow-y: hidden !important;
     overflow-x: hidden !important;
     display: flex !important;
     flex-direction: column !important;
+    height: 100% !important;
+    box-sizing: border-box !important;
+    min-height: 0 !important;
+}
+
+.left-card > .z-vlayout-inner {
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.left-card > .z-vlayout-inner:nth-child(1) {
+    flex: 0 0 auto !important;
+    height: auto !important;
+}
+
+.left-card > .z-vlayout-inner:nth-child(2) {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    margin-bottom: 10px !important;
+}
+
+.left-card > .z-vlayout-inner:nth-child(3) {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    margin-bottom: 10px !important;
+}
+
+.left-card > .z-vlayout-inner:nth-child(4) {
+    flex: 0 0 auto !important;
+    height: auto !important;
 }
 
 .right-card {
@@ -375,15 +409,79 @@
     height: 100% !important;
     flex: 1 1 auto !important;
     min-height: 0 !important;
-    margin-top: 8px !important;
-    padding: 10px 12px !important;
+    margin-top: 6px !important;
+    margin-bottom: 0 !important;
+    padding: 8px 10px !important;
     box-sizing: border-box !important;
-    border: 1px solid #E2E8F0 !important;
+    border: 1px solid #CBD5E1 !important;
     border-radius: 10px !important;
     background: #F8FAFC !important;
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
+}
+
+.micr-image-toolbar {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    padding: 0 !important;
+    margin-bottom: 8px !important;
+}
+
+.micr-image-toolbar > .z-hlayout-inner {
+    display: inline-flex !important;
+    align-items: center !important;
+    margin-right: 8px !important;
+}
+
+.micr-toggle-btn {
+    width: 110px !important;
+    min-width: 110px !important;
+    height: 36px !important;
+    padding: 0 16px !important;
+    border: 1px solid #1D4ED8 !important;
+    border-radius: 8px !important;
+    background: #2563EB !important;
+    color: #FFFFFF !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.25) !important;
+    transition: all 0.15s ease !important;
+}
+
+.micr-toggle-btn:hover {
+    background: #1D4ED8 !important;
+    border-color: #1E40AF !important;
+}
+
+.micr-zoom-btn {
+    width: 36px !important;
+    min-width: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
+    border: 1.5px solid #CBD5E1 !important;
+    border-radius: 8px !important;
+    background: #FFFFFF !important;
+    color: #1E293B !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05) !important;
+    transition: all 0.15s ease !important;
+}
+
+.micr-zoom-btn:hover {
+    background: #F1F5F9 !important;
+    border-color: #94A3B8 !important;
+    color: #0F172A !important;
 }
 
 .zoom-row {
@@ -589,34 +687,56 @@
 
 .cheque-info-row {
     width: 100% !important;
-    margin-top: 12px !important;
+    min-height: 32px !important;
+    height: 32px !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    display: flex !important;
     align-items: center !important;
+    justify-content: space-between !important;
+    flex-shrink: 0 !important;
+    position: relative !important;
+    z-index: 10 !important;
+}
+
+.cheque-info-row > .z-hlayout-inner {
+    display: flex !important;
+    align-items: center !important;
+    vertical-align: middle !important;
 }
 
 .cheque-info {
-    font-size: 13px !important;
+    font-size: 13.5px !important;
     font-weight: 700 !important;
     color: #0F172A !important;
+    display: inline-flex !important;
+    align-items: center !important;
+}
+
+.cbs-pass-badge,
+.cbs-fail-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    height: 26px !important;
+    line-height: 26px !important;
+    padding: 0 12px !important;
+    border-radius: 6px !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
 }
 
 .cbs-pass-badge {
-    padding: 4px 10px !important;
     border: 1px solid #86EFAC !important;
-    border-radius: 6px !important;
     background: #F0FDF4 !important;
     color: #16A34A !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
 }
 
 .cbs-fail-badge {
-    padding: 4px 10px !important;
     border: 1px solid #FECACA !important;
-    border-radius: 6px !important;
     background: #FEF2F2 !important;
     color: #DC2626 !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
 }
 
 
@@ -697,9 +817,10 @@
 
 .decision-area {
     width: 100% !important;
-    margin-top: 14px !important;
-    padding-top: 12px !important;
+    margin-top: 0 !important;
+    padding-top: 10px !important;
     border-top: 1px solid #E2E8F0 !important;
+    flex-shrink: 0 !important;
 }
 
 .decision-button {
@@ -1183,15 +1304,22 @@
 .z-button[disabled].complete-button,
 .complete-button.complete-button-disabled,
 .complete-button-disabled {
-    background: #A6F4C5 !important;
-    background-color: #A6F4C5 !important;
-    border: 1.5px solid #86EFAC !important;
-    color: #065F46 !important;
-    opacity: 0.55 !important;
+    background: #E2E8F0 !important;
+    background-color: #E2E8F0 !important;
+    border: 1.5px solid #CBD5E1 !important;
+    color: #94A3B8 !important;
+    opacity: 0.7 !important;
     box-shadow: none !important;
     cursor: not-allowed !important;
     transform: none !important;
     pointer-events: none !important;
+}
+
+.cheque-button-verified {
+    border: 1.5px solid #86EFAC !important;
+    background: #F0FDF4 !important;
+    color: #15803D !important;
+    font-weight: 700 !important;
 }
 
 .cbs-fail-value {
@@ -1564,12 +1692,46 @@ div.checker-modal,
         }
 
         .left-card {
-            padding: 14px 18px !important;
+            padding: 14px 18px 12px 18px !important;
             overflow: hidden !important;
             overflow-y: hidden !important;
             overflow-x: hidden !important;
             display: flex !important;
             flex-direction: column !important;
+            height: 100% !important;
+            box-sizing: border-box !important;
+            min-height: 0 !important;
+        }
+
+        .left-card > .z-vlayout-inner {
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
+        .left-card > .z-vlayout-inner:nth-child(1) {
+            flex: 0 0 auto !important;
+            height: auto !important;
+        }
+
+        .left-card > .z-vlayout-inner:nth-child(2) {
+            flex: 1 1 auto !important;
+            min-height: 0 !important;
+            height: 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            overflow: hidden !important;
+            margin-bottom: 10px !important;
+        }
+
+        .left-card > .z-vlayout-inner:nth-child(3) {
+            flex: 0 0 auto !important;
+            height: auto !important;
+            margin-bottom: 10px !important;
+        }
+
+        .left-card > .z-vlayout-inner:nth-child(4) {
+            flex: 0 0 auto !important;
+            height: auto !important;
         }
 
         .right-card {
@@ -1583,10 +1745,11 @@ div.checker-modal,
             height: 100% !important;
             flex: 1 1 auto !important;
             min-height: 0 !important;
-            margin-top: 10px !important;
-            padding: 10px 12px !important;
+            margin-top: 6px !important;
+            margin-bottom: 0 !important;
+            padding: 8px 10px !important;
             box-sizing: border-box !important;
-            border: 1px solid #E2E8F0 !important;
+            border: 1px solid #CBD5E1 !important;
             border-radius: 10px !important;
             background: #F8FAFC !important;
             display: flex !important;
@@ -1598,7 +1761,7 @@ div.checker-modal,
             width: 100% !important;
             height: 100% !important;
             flex: 1 1 auto !important;
-            min-height: 380px !important;
+            min-height: 0 !important;
             box-sizing: border-box !important;
             border: 1.5px solid #CBD5E1 !important;
             border-radius: 8px !important;
@@ -1659,12 +1822,28 @@ div.checker-modal,
             padding: 14px 16px !important;
             border: 1.5px solid #BAE6FD !important;
             border-radius: 8px !important;
-            background: #F0F7FF !important;
+            background: #F0FDF4 !important;
             overflow: hidden !important;
         }
 
         .cheque-info-row {
-            margin-top: 12px !important;
+            width: 100% !important;
+            min-height: 32px !important;
+            height: 32px !important;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            flex-shrink: 0 !important;
+            position: relative !important;
+            z-index: 10 !important;
+        }
+
+        .cheque-info-row > .z-hlayout-inner {
+            display: flex !important;
+            align-items: center !important;
+            vertical-align: middle !important;
         }
 
         .cheque-nav {
@@ -1672,8 +1851,11 @@ div.checker-modal,
         }
 
         .decision-area {
-            margin-top: 14px !important;
-            padding-top: 12px !important;
+            width: 100% !important;
+            margin-top: 0 !important;
+            padding-top: 10px !important;
+            border-top: 1px solid #E2E8F0 !important;
+            flex-shrink: 0 !important;
         }
 
         .z-west,

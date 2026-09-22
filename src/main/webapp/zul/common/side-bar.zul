@@ -5,7 +5,7 @@
     <div
         sclass="sidebar">
         <vlayout
-    visible="${arg.roleName eq 'OUTWARD_CHECKER'}"
+    visible="${arg.roleName eq 'Outward Checker'}"
     width="100%"
     spacing="0px">
 
@@ -81,7 +81,7 @@
  <!-- BATCH CAPTURE -->
 
 <vlayout
-    visible="${arg.roleName eq 'CAPTURE_OPERATOR'}"
+    visible="${arg.roleName eq 'Capture Operator'}"
     width="100%"
     spacing="0px">
 
@@ -145,7 +145,7 @@
         <!-- OUTWARD MAKER -->
 
 <vlayout
-    visible="${arg.roleName eq 'OUTWARD_MAKER'}"
+    visible="${arg.roleName eq 'Outward Maker'}"
     width="100%"
     spacing="0px">
 
@@ -225,7 +225,7 @@
          
    <!-- INWARD MAKER -->
         <vlayout
-            visible="${arg.roleName eq 'INWARD_MAKER'}"
+            visible="${arg.roleName eq 'Inward Maker'}"
             width="100%"
             spacing="0px">
 
@@ -290,7 +290,7 @@
         <!-- INWARD CHECKER -->
 
         <vlayout
-            visible="${arg.roleName eq 'INWARD_CHECKER'}"
+            visible="${arg.roleName eq 'Inward Checker'}"
             width="100%"
             spacing="0px">
 
@@ -339,10 +339,10 @@
 
 
         
-        <!-- ADMIN -->
+        <!-- Admin -->
 
         <vlayout
-            visible="${arg.roleName eq 'ADMIN'}"
+            visible="${arg.roleName eq 'Admin'}"
             width="100%"
             spacing="0px">
 

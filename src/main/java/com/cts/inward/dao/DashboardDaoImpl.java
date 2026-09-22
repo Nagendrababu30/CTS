@@ -67,7 +67,7 @@ public class DashboardDaoImpl
                         ON r.role_id = u.role_id
 
                     WHERE u.status = 'ACTIVE'
-                      AND r.role_name = 'INWARD_MAKER'
+                      AND r.role_name = 'Inward Maker'
 
                     ORDER BY
                         bl.batch_id,

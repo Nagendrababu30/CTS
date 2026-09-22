@@ -630,7 +630,7 @@
 
 
 /* =========================================================
-   VALIDATION STATUS
+   FILE NAME
    ========================================================= */
 
 .send-npci-table
@@ -639,13 +639,22 @@
 .z-listcell-content {
 
     color:
-        #475467 !important;
+        var(--text-secondary) !important;
 
     font-weight:
         600 !important;
 
     text-align:
         center !important;
+
+    white-space:
+        nowrap !important;
+
+    overflow:
+        hidden !important;
+
+    text-overflow:
+        ellipsis !important;
 }
 
 

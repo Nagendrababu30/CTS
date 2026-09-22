@@ -100,13 +100,13 @@
                                     width="15%"
                                     align="center"/>
 
-                        <listheader label="Valid XML"
+                        <listheader label="Accepted Cheques"
                                     width="15%"
                                     align="center"/>
-
-                        <listheader label="Validation Status"
-                                    width="20%"
-                                    align="center"/>
+						
+						<listheader label="File Name"
+                						width="25%"
+                						align="center"/>
 
                         <listheader label="Action"
                                     width="30%"

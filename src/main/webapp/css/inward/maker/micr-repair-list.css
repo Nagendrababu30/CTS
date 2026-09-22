@@ -50,7 +50,7 @@
    PAGE WRAPPER
    Same background as dashboard
    ============================================================= */
-.micr-repair-list-content {
+.micr-repair-content {
 	width: 100%;
 	height: 100%;
 	box-sizing: border-box;
@@ -71,7 +71,7 @@
    STATIC BACKGROUND GLOW
    Same as dashboard
    ============================================================= */
-.micr-repair-list-content::before {
+.micr-repair-content::before {
 	content: '';
 	position: absolute;
 	top: -180px;
@@ -87,7 +87,7 @@
 	filter: blur(10px);
 }
 
-.micr-repair-list-content::after {
+.micr-repair-content::after {
 	content: '';
 	position: absolute;
 	bottom: -200px;
@@ -104,7 +104,7 @@
 }
 
 /* Keep page content above the background */
-.micr-repair-list-content>* {
+.micr-repair-content>* {
 	position: relative;
 	z-index: 1;
 }
@@ -225,6 +225,8 @@
 	position: relative;
 	padding-left: 18px;
 	display: block;
+	margin: 0 !important;
+	line-height: 1.2;
 }
 
 .table-title::before {
@@ -246,11 +248,23 @@
    ============================================================= */
 .custom-grid {
 	width: 100%;
-	border-radius: var(--radius-md) !important;
+	border-radius: 0 !important;
 	overflow: hidden;
 	border: 1px solid var(--border-light) !important;
 	background: var(--bg-surface);
 	box-shadow: inset 0 1px 3px rgba(16, 24, 40, 0.03);
+	position: relative;
+}
+
+/* Add blue bottom border line */
+.custom-grid::after {
+	content: '';
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 3px;
+	background: #175CD3;
 }
 
 /* =============================================================
@@ -262,6 +276,7 @@
 	border-bottom: none !important;
 	animation: none;
 	box-shadow: none;
+	border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
 }
 
 /* =============================================================
@@ -439,6 +454,26 @@
 	background: #FFFFFF;
 	border-top: 1px solid var(--border-light);
 	padding: 10px;
+}
+
+/* =============================================================
+   EMPTY MESSAGE
+   Display line below empty state like data entry page
+   ============================================================= */
+.empty-message {
+	display: block !important;
+	color: var(--text-muted) !important;
+	background: #FFFFFF !important;
+	padding: 16px 20px !important;
+	font-family: 'Inter', sans-serif !important;
+	font-size: 14px !important;
+	font-weight: 500 !important;
+	text-align: center !important;
+	border-bottom: 1px solid var(--border-light) !important;
+	box-sizing: border-box !important;
+	width: 100% !important;
+	margin: 0 !important;
+	line-height: 1.4 !important;
 }
 
 

@@ -480,12 +480,14 @@
     padding: 22px 28px !important;
     border-bottom: none !important;
     box-sizing: border-box !important;
+    overflow: visible !important;
 }
 
 /* Make the hbox table fill full width and never overflow */
 .recent-activity-header.z-hbox > table {
     width: 100% !important;
     table-layout: fixed !important;
+    overflow: visible !important;
 }
 
 /* Strip chrome from all hbox cells */
@@ -495,7 +497,7 @@
     background: transparent !important;
     vertical-align: middle !important;
     padding: 0 !important;
-    overflow: hidden;
+    overflow: visible !important;
 }
 
 /* Left vlayout — strip chrome */
@@ -529,8 +531,9 @@
     flex-shrink: 0;
     height: 36px;
     padding: 0 8px;
-    margin-right: 120px;
-    max-width: 220px !important;
+    margin-left: -18px;  /* Push to the right */
+    margin-right: 30px;  /* Same as header padding */
+    max-width: 175px !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     background: #FFFFFF;

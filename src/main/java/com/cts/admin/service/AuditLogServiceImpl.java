@@ -1,5 +1,6 @@
 package com.cts.admin.service;
 
+import java.util.Date;
 import java.util.List;
 
 import com.cts.admin.dao.AuditLogDAO;
@@ -8,33 +9,84 @@ import com.cts.admin.model.AuditLog;
 
 public class AuditLogServiceImpl implements AuditLogService {
 
-    private final AuditLogDAO auditLogDAO;
+	private final AuditLogDAO auditLogDAO;
 
-    public AuditLogServiceImpl() {
-        auditLogDAO = new AuditLogDAOImpl();
-    }
+	public AuditLogServiceImpl() {
+		auditLogDAO = new AuditLogDAOImpl();
+	}
 
-    @Override
-    public List<AuditLog> getAuditLogs(int page, int pageSize) {
-        if (page < 1) page = 1;
-        if (pageSize < 1) pageSize = 10;
-        return auditLogDAO.getAuditLogs(page, pageSize);
-    }
+	@Override
+	public List<AuditLog> getAuditLogs(int page, int pageSize) {
 
-    @Override
-    public int getTotalAuditLogCount() {
-        return auditLogDAO.getTotalAuditLogCount();
-    }
+		if (page < 1)
+			page = 1;
+		if (pageSize < 1)
+			pageSize = 10;
 
-    @Override
-    public String createAuditLog(Long userId) {
-        if (userId == null) throw new IllegalArgumentException("User ID cannot be null.");
-        return auditLogDAO.createAuditLog(userId);
-    }
+		return auditLogDAO.getAuditLogs(page, pageSize);
+	}
 
-    @Override
-    public void endAuditLog(String sessionId) {
-        if (sessionId == null || sessionId.trim().isEmpty()) return;
-        auditLogDAO.endAuditLog(sessionId);
-    }
+	// ================================================================
+	// FILTERED AUDIT LOGS
+	// ================================================================
+
+	@Override
+	public List<AuditLog> getAuditLogs(int page, int pageSize, String searchText, String roleName, Date fromDate,
+			Date toDate) {
+
+		if (page < 1)
+			page = 1;
+		if (pageSize < 1)
+			pageSize = 10;
+
+		return auditLogDAO.getAuditLogs(page, pageSize, searchText, roleName, fromDate, toDate);
+	}
+
+	// ================================================================
+	// COUNT
+	// ================================================================
+
+	@Override
+	public int getTotalAuditLogCount() {
+
+		return auditLogDAO.getTotalAuditLogCount();
+	}
+
+	// ================================================================
+	// FILTERED COUNT
+	// ================================================================
+
+	@Override
+	public int getTotalAuditLogCount(String searchText, String roleName, Date fromDate, Date toDate) {
+
+		return auditLogDAO.getTotalAuditLogCount(searchText, roleName, fromDate, toDate);
+	}
+
+	// ================================================================
+	// CREATE AUDIT LOG
+	// ================================================================
+
+	@Override
+	public String createAuditLog(Long userId) {
+
+		if (userId == null) {
+			throw new IllegalArgumentException("User ID cannot be null.");
+		}
+
+		return auditLogDAO.createAuditLog(userId);
+	}
+
+	// ================================================================
+	// END AUDIT LOG
+	// ================================================================
+
+	@Override
+	public void endAuditLog(String sessionId) {
+
+		if (sessionId == null || sessionId.trim().isEmpty()) {
+			return;
+		}
+
+		auditLogDAO.endAuditLog(sessionId);
+	}
 }

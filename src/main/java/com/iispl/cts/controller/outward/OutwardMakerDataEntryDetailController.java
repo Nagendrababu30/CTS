@@ -2534,23 +2534,13 @@ public class OutwardMakerDataEntryDetailController
                         entry.getKey();
 
 
-                String name =
-                        entry.getValue();
-
-
                 // -------------------------------------------------
-                // Format: CODE - Description
+                // Display ONLY reason code in the dropdown
                 // -------------------------------------------------
-
-                String displayLabel =
-                        code
-                                + " - "
-                                + name;
-
 
                 Comboitem item =
                         new Comboitem(
-                                displayLabel
+                                code
                         );
 
 
@@ -2586,8 +2576,6 @@ public class OutwardMakerDataEntryDetailController
             );
         }
     }
-
-
     // =========================================================
     // AMOUNT CHANGED
     // =========================================================

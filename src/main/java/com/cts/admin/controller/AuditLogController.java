@@ -1,3 +1,4 @@
+
 package com.cts.admin.controller;
 
 import java.sql.Timestamp;
@@ -13,6 +14,7 @@ import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Datebox;
+import org.zkoss.zul.Filedownload;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listcell;
@@ -23,6 +25,7 @@ import org.zkoss.zul.Textbox;
 import org.zkoss.zul.event.PagingEvent;
 
 import com.cts.admin.model.AuditLog;
+import com.cts.admin.report.AuditLogReportService;
 import com.cts.admin.service.AuditLogService;
 import com.cts.admin.service.AuditLogServiceImpl;
 import com.cts.admin.service.RoleService;
@@ -56,6 +59,8 @@ public class AuditLogController
 
     private Datebox auditToDate;
 
+    private Button auditDownloadPdfButton;
+
     // ================================================================
     // SERVICES
     // ================================================================
@@ -63,6 +68,8 @@ public class AuditLogController
     private AuditLogService auditLogService;
 
     private RoleService roleService;
+
+    private AuditLogReportService auditLogReportService;
 
     // ================================================================
     // INIT
@@ -77,6 +84,9 @@ public class AuditLogController
         auditLogService = new AuditLogServiceImpl();
 
         roleService = new RoleServiceImpl();
+
+        auditLogReportService =
+                new AuditLogReportService();
 
         // Load role filter from database
         loadRoleFilter();
@@ -192,6 +202,22 @@ public class AuditLogController
                             throws Exception {
 
                         refreshAuditLogs();
+                    }
+                });
+
+        // ============================================================
+        // PDF DOWNLOAD BUTTON
+        // ============================================================
+
+        auditDownloadPdfButton.addEventListener(
+                "onClick",
+                new EventListener<Event>() {
+
+                    @Override
+                    public void onEvent(Event event)
+                            throws Exception {
+
+                        exportAuditLogsToPdf();
                     }
                 });
     }
@@ -542,6 +568,121 @@ public class AuditLogController
             Messagebox.show(
                     "Unable to load audit logs.",
                     "Audit Logs",
+                    Messagebox.OK,
+                    Messagebox.ERROR);
+        }
+    }
+
+    // ================================================================
+    // EXPORT AUDIT LOGS TO PDF
+    // ================================================================
+
+    private void exportAuditLogsToPdf() {
+
+        try {
+
+            // ========================================================
+            // GET CURRENT FILTER VALUES
+            // ========================================================
+
+            String searchText =
+                    auditSearchTextbox.getValue();
+
+            if (searchText != null) {
+                searchText = searchText.trim();
+            }
+
+            String roleFilter =
+                    getSelectedRole();
+
+            Date fromDate =
+                    auditFromDate.getValue();
+
+            Date toDate =
+                    auditToDate.getValue();
+
+            // ========================================================
+            // VALIDATE DATE RANGE
+            // ========================================================
+
+            if (fromDate != null
+                    && toDate != null
+                    && fromDate.after(toDate)) {
+
+                Messagebox.show(
+                        "From Date cannot be later than To Date.",
+                        "Invalid Date Range",
+                        Messagebox.OK,
+                        Messagebox.EXCLAMATION);
+
+                return;
+            }
+
+            // ========================================================
+            // GET ALL FILTERED AUDIT LOGS
+            // ========================================================
+
+            List<AuditLog> auditLogs =
+                    auditLogService.getAllAuditLogs(
+                            searchText,
+                            roleFilter,
+                            fromDate,
+                            toDate);
+
+            // ========================================================
+            // FORMAT REPORT DATES
+            // ========================================================
+
+            SimpleDateFormat reportDateFormat =
+                    new SimpleDateFormat("dd/MM/yyyy");
+
+            reportDateFormat.setTimeZone(IST);
+
+            String generatedDate =
+                    reportDateFormat.format(new Date());
+
+            String reportFromDate =
+                    fromDate != null
+                            ? reportDateFormat.format(fromDate)
+                            : "All";
+
+            String reportToDate =
+                    toDate != null
+                            ? reportDateFormat.format(toDate)
+                            : "All";
+
+            // ========================================================
+            // GENERATE PDF
+            // ========================================================
+
+            byte[] pdfBytes =
+                    auditLogReportService.generateAuditLogPdf(
+                            auditLogs,
+                            generatedDate,
+                            reportFromDate,
+                            reportToDate);
+
+            // ========================================================
+            // DOWNLOAD PDF
+            // ========================================================
+
+            String fileName =
+                    "Audit_Log_Report_"
+                            + generatedDate.replace("/", "-")
+                            + ".pdf";
+
+            Filedownload.save(
+                    pdfBytes,
+                    "application/pdf",
+                    fileName);
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            Messagebox.show(
+                    "Unable to generate audit log report.",
+                    "Audit Log Report",
                     Messagebox.OK,
                     Messagebox.ERROR);
         }

@@ -1,72 +1,44 @@
 package com.iispl.cts.controller.outward;
 
 import java.net.URLEncoder;
-
 import java.nio.charset.StandardCharsets;
-
 import java.util.ArrayList;
-
 import java.util.List;
 
 import org.zkoss.zk.ui.Component;
-
 import org.zkoss.zk.ui.Executions;
-
-
 import org.zkoss.zk.ui.Session;
-
 import org.zkoss.zk.ui.event.Events;
-
 import org.zkoss.zk.ui.select.SelectorComposer;
-
 import org.zkoss.zk.ui.select.annotation.Wire;
-
 import org.zkoss.zul.Button;
-
+import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Label;
-
 import org.zkoss.zul.ListModelList;
-
 import org.zkoss.zul.Listbox;
-
 import org.zkoss.zul.Listcell;
-
 import org.zkoss.zul.Listitem;
-
 import org.zkoss.zul.ListitemRenderer;
-
 import org.zkoss.zul.Messagebox;
 
 import com.iispl.cts.model.outward.ChequeProcessing;
-
 import com.iispl.cts.model.outward.OutwardBatch;
-
 import com.iispl.cts.model.outward.OutwardCheque;
-
 import com.iispl.cts.model.outward.OutwardValidationResult;
-
 import com.iispl.cts.service.outward.OutwardMakerDashboardService;
+import com.cts.admin.service.SessionService;
+import com.cts.admin.service.SessionServiceImpl;
 
 public class OutwardMakerDashboardController
 
         extends SelectorComposer<Component> {
 
     private static final long serialVersionUID = 1L;
-
-    // ===Ff======================================================
-
-    // ZUL COMPONENTS
-
-    // =========================================================
-
+    
     @Wire
-
     private Listbox batchListbox;
-
     @Wire
-
     private Label pendingDataEntryCount;
-
     @Wire
 
     private Label micrRepairCount;
@@ -138,6 +110,9 @@ private Button reVerifyBatchesBtn;
 
     private static final int PAGE_SIZE = 5;
     private OutwardMakerDashboardService service;
+
+    private SessionService sessionService;
+
     private String currentUserId;
 
     // =========================================================
@@ -151,7 +126,7 @@ private Button reVerifyBatchesBtn;
     // =========================================================
 
     // AFTER COMPOSE
-
+    
     // =========================================================
 
     @Override
@@ -162,7 +137,7 @@ private Button reVerifyBatchesBtn;
 
         super.doAfterCompose(comp);
 
-        // =====================================================
+  // =====================================================
 
         // GET LOGGED-IN USER FROM SESSION
 
@@ -308,61 +283,26 @@ private Button reVerifyBatchesBtn;
 
         // INITIALIZE SERVICE
 
-        // =====================================================
 
-        service =
+service = new OutwardMakerDashboardService();
 
-                new OutwardMakerDashboardService();
+sessionService = new SessionServiceImpl();
 
-        // =====================================================
+// Check session BEFORE loading dashboard
+if (!isSessionActive()) {
+    return;
+}
 
-        // INITIAL FILTER
 
-        // =====================================================
+currentFilter = "ALL";
+currentPage = 1;
 
-        currentFilter = "ALL";
+updateFilterButtonStyles();
+registerFilterEvents();
+registerPaginationEvents();
 
-        // =====================================================
-
-        // INITIAL PAGE
-
-        // =====================================================
-
-        currentPage = 1;
-
-        // =====================================================
-
-        // UPDATE FILTER BUTTON STYLE
-
-        // =====================================================
-
-        updateFilterButtonStyles();
-
-        // =====================================================
-
-        // REGISTER FILTER EVENTS
-
-        // =====================================================
-
-        registerFilterEvents();
-
-        // =====================================================
-
-        // REGISTER PAGINATION EVENTS
-
-        // =====================================================
-
-        registerPaginationEvents();
-
-        // =====================================================
-
-        // LOAD DASHBOARD
-
-        // =====================================================
-
-        loadDashboard();
-        loadSummaryCounts();
-
+loadDashboard();
+loadSummaryCounts();
         System.out.println(
 
                 "======================================"
@@ -382,7 +322,81 @@ private Button reVerifyBatchesBtn;
     // REGISTER FILTER EVENTS
 
     // =========================================================
+ // =========================================================
+ // CHECK CLEARING SESSION
+ // =========================================================
+    private boolean isSessionActive() {
 
+        try {
+
+            com.cts.admin.model.Session activeSession =
+                    sessionService.getActiveSession();
+
+            if (activeSession == null) {
+
+                Messagebox.show(
+                        "Session not started.\n\n"
+                        + "You cannot perform Maker operations "
+                        + "until a clearing session is started.",
+                        "Session Not Started",
+                        Messagebox.OK,
+                        Messagebox.EXCLAMATION,
+                        event -> {
+
+                        	if (Messagebox.ON_OK.equals(event.getName())) {
+                        	    Executions.sendRedirect(
+                        	            "/login.zul"
+                        	    );
+                        	}
+                            }
+
+                );
+
+                return false;
+            }
+
+            String status = activeSession.getStatus();
+
+            if (status == null
+                    || !"STARTED".equalsIgnoreCase(status.trim())) {
+
+                Messagebox.show(
+                        "Session is not active.\n\n"
+                        + "You cannot perform Maker operations "
+                        + "while the clearing session is inactive.",
+                        "Session Not Active",
+                        Messagebox.OK,
+                        Messagebox.EXCLAMATION,
+                        event -> {
+
+                        	if (Messagebox.ON_OK.equals(event.getName())) {
+                        	    Executions.sendRedirect(
+                        	            "/login.zul"
+                        	    );
+                        	}
+
+                        }
+                );
+
+                return false;
+            }
+
+            return true;
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            Messagebox.show(
+                    "Unable to verify clearing session.",
+                    "Session Validation Error",
+                    Messagebox.OK,
+                    Messagebox.ERROR
+            );
+
+            return false;
+        }
+    }
     private void registerFilterEvents() {
 
         System.out.println(
@@ -2068,6 +2082,20 @@ private Button reVerifyBatchesBtn;
 
         else if (canCurrentMakerOpen) {
 
+            // =====================================================
+            // ACTION LAYOUT
+            // Keep Open + Release Lock side-by-side
+            // =====================================================
+
+            Hlayout actionLayout = new Hlayout();
+
+            actionLayout.setSpacing("5px");
+
+
+            // =====================================================
+            // OPEN BUTTON
+            // =====================================================
+
             Button openButton =
                     new Button("Open");
 
@@ -2092,8 +2120,56 @@ private Button reVerifyBatchesBtn;
                             )
             );
 
-            actionCell.appendChild(
+
+            // =====================================================
+            // RELEASE LOCK BUTTON
+            // Only current Maker gets this button
+            // =====================================================
+
+            Button releaseButton =
+                    new Button("Release Lock");
+
+            releaseButton.setWidth("105px");
+
+            releaseButton.setHeight("32px");
+
+            releaseButton.setStyle(
+                    "background:#F04438;"
+                            + "color:white;"
+                            + "border:none;"
+                            + "border-radius:5px;"
+                            + "font-weight:bold;"
+                            + "cursor:pointer;"
+            );
+
+            releaseButton.addEventListener(
+                    Events.ON_CLICK,
+                    event -> {
+
+                        String batchNumber =
+                                batch.getBatchNumber();
+
+                        releaseBatchLock(
+                                batchNumber
+                        );
+                    }
+            );
+
+
+            // =====================================================
+            // ADD BOTH BUTTONS SIDE-BY-SIDE
+            // =====================================================
+
+            actionLayout.appendChild(
                     openButton
+            );
+
+            actionLayout.appendChild(
+                    releaseButton
+            );
+
+            actionCell.appendChild(
+                    actionLayout
             );
         }
 
@@ -2154,7 +2230,86 @@ private Button reVerifyBatchesBtn;
     }
     
     
-    private void openAndAssignBatch(
+    private void releaseBatchLock(String batchNumber) {
+
+        if (batchNumber == null || batchNumber.trim().isEmpty()) {
+            Messagebox.show(
+                    "Invalid batch number.",
+                    "Release Lock",
+                    Messagebox.OK,
+                    Messagebox.ERROR
+            );
+            return;
+        }
+
+        final String cleanBatchNumber = batchNumber.trim();
+
+        Messagebox.show(
+                "Are you sure you want to release the lock for batch "
+                        + cleanBatchNumber + "?\n\n"
+                        + "The batch will become available again.",
+                "Confirm Release Lock",
+                Messagebox.YES | Messagebox.NO,
+                Messagebox.QUESTION,
+                event -> {
+
+                    if (Messagebox.ON_YES.equals(event.getName())) {
+
+                        try {
+
+                            boolean released =
+                                    service.releaseBatchLock(
+                                            cleanBatchNumber,
+                                            currentUserId
+                                    );
+
+                            if (released) {
+
+                                Messagebox.show(
+                                        "Batch "
+                                                + cleanBatchNumber
+                                                + " has been released successfully.",
+                                        "Release Lock",
+                                        Messagebox.OK,
+                                        Messagebox.INFORMATION
+                                );
+
+                                // Refresh dashboard
+                                loadBatches();
+
+                                // Refresh dashboard counts
+                                loadSummaryCounts();
+
+                            } else {
+
+                                Messagebox.show(
+                                        "Unable to release the batch.\n"
+                                                + "The batch may no longer be assigned to you.",
+                                        "Release Lock",
+                                        Messagebox.OK,
+                                        Messagebox.ERROR
+                                );
+                            }
+
+                        } catch (Exception e) {
+
+                            e.printStackTrace();
+
+                            Messagebox.show(
+                                    "Error while releasing batch "
+                                            + cleanBatchNumber
+                                            + ".",
+                                    "Release Lock",
+                                    Messagebox.OK,
+                                    Messagebox.ERROR
+                            );
+                        }
+                    }
+                }
+        );
+    }
+
+	private void openAndAssignBatch(
             String batchNumber) {
 
         if (!hasValue(batchNumber)) {
@@ -2328,6 +2483,7 @@ private Button reVerifyBatchesBtn;
             // =================================================
 
             loadBatches();
+            
 
             // =================================================
             // SHOW VALIDATION RESULT

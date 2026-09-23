@@ -1,6 +1,7 @@
 package com.iispl.cts.controller.outward;
 
 import java.util.ArrayList;
+
 import java.util.List;
 
 import org.zkoss.util.media.Media;
@@ -21,882 +22,941 @@ import org.zkoss.zul.Intbox;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
+import com.cts.admin.service.SessionService;
+import com.cts.admin.service.SessionServiceImpl;
 
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.service.outward.CaptureOperatorBatchService;
 
 public class CaptureOperatorBatchCaptureController
-        extends SelectorComposer<Component> {
+extends SelectorComposer<Component> {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
 
-    // =========================================================
-    // ZK COMPONENTS
-    // =========================================================
+	// =========================================================
+	// ZK COMPONENTS
+	// =========================================================
 
-    @Wire
-    private Combobox branchCodeCombo;
+	@Wire
+	private Combobox branchCodeCombo;
 
-    @Wire
-    private Textbox branchNameTextbox;
+	@Wire
+	private Textbox branchNameTextbox;
 
-    @Wire
-    private Intbox numberOfCheques;
+	@Wire
+	private Intbox numberOfCheques;
 
-    @Wire
-    private Fileupload batchFilesUpload;
+	@Wire
+	private Fileupload batchFilesUpload;
 
-    @Wire
-    private Label selectedFilesLabel;
+	@Wire
+	private Label selectedFilesLabel;
 
 
-    // =========================================================
-    // SERVICE
-    // =========================================================
+	// =========================================================
+	// SERVICE
+	// =========================================================
 
-    private CaptureOperatorBatchService service;
+	private CaptureOperatorBatchService service;
+	private SessionService sessionService;
 
+	// =========================================================
+	// UPLOADED FILES
+	// =========================================================
 
-    // =========================================================
-    // UPLOADED FILES
-    // =========================================================
+	private final List<Media> uploadedFiles =
+			new ArrayList<>();
 
-    private final List<Media> uploadedFiles =
-            new ArrayList<>();
 
+	// =========================================================
+	// INIT
+	// =========================================================
 
-    // =========================================================
-    // INIT
-    // =========================================================
+	@Override
+	public void doAfterCompose(
+			Component component)
+					throws Exception {
 
-    @Override
-    public void doAfterCompose(
-            Component component)
-            throws Exception {
+		super.doAfterCompose(
+				component);
+		// ========================================================
+		// GET ZK SESSION
+		// ========================================================
 
-        super.doAfterCompose(
-                component);
+		Session session =
+				Executions.getCurrent()
+				.getSession();
 
-        Session session =
-                Executions.getCurrent()
-                        .getSession();
+		// ========================================================
+		// NO SESSION
+		// ========================================================
 
-        if (session == null) {
+		if (session == null) {
 
-            Executions.sendRedirect(
-                    "/zul/login.zul");
+			Executions.sendRedirect(
+					"/login.zul");
 
-            return;
-        }
+			return;
+		}
 
+		// ========================================================
+		// GET USER ID FROM SESSION
+		// ========================================================
 
-        Object sessionUserId =
-                session.getAttribute(
-                        "userId");
+		Object sessionUserId =
+				session.getAttribute("userId");
 
-        if (sessionUserId == null) {
+		// ========================================================
+		// USER ID NOT FOUND
+		// ========================================================
 
-            Executions.sendRedirect(
-                    "/zul/login.zul");
+		if (sessionUserId == null) {
 
-            return;
-        }
+			Executions.sendRedirect(
+					"/login.zul");
 
+			return;
+		}
 
-        long userId;
+		// ========================================================
+		// CONVERT USER ID
+		// ========================================================
 
-        if (sessionUserId instanceof Number) {
+		long userId;
 
-            userId =
-                    ((Number) sessionUserId)
-                            .longValue();
+		if (sessionUserId instanceof Number) {
 
-        } else {
+			userId =
+					((Number) sessionUserId)
+					.longValue();
 
-            try {
+		} else {
 
-                userId =
-                        Long.parseLong(
-                                sessionUserId.toString());
+			try {
 
-            } catch (NumberFormatException e) {
+				userId =
+						Long.parseLong(
+								sessionUserId.toString());
 
-                Executions.sendRedirect(
-                        "/zul/login.zul");
+			} catch (NumberFormatException e) {
 
-                return;
-            }
-        }
+				Executions.sendRedirect(
+						"/login.zul");
 
+				return;
+			}
+		}
 
-        System.out.println(
-                "CAPTURE OPERATOR SESSION: "
-                        + "userId="
-                        + userId);
+		// ========================================================
+		// LOG CURRENT CAPTURE OPERATOR
+		// ========================================================
 
+		System.out.println(
+				"CAPTURE OPERATOR SESSION: "
+						+ "userId="
+						+ userId);
 
-        service =
-                new CaptureOperatorBatchService();
+		// ========================================================
+		// CHECK CLEARING SESSION
+		// ========================================================
 
+		sessionService =
+				new SessionServiceImpl();
 
-        loadBranches();
-    }
+		com.cts.admin.model.Session clearingSession =
+				sessionService.getActiveSession();
 
+		// ========================================================
+		// CLEARING SESSION NOT ACTIVE
+		// ========================================================
 
-    // =========================================================
-    // LOAD BRANCHES
-    // =========================================================
+		if (clearingSession == null
+				|| clearingSession.getStatus() == null
+				|| !"STARTED".equalsIgnoreCase(
+						clearingSession.getStatus().trim())) {
 
-    private void loadBranches() {
+			Messagebox.show(
+					"Clearing session is not started.\n\n"
+							+ "Capture Operator operations "
+							+ "are currently unavailable.",
+							"Session Not Started",
+							Messagebox.OK,
+							Messagebox.EXCLAMATION,
+							event -> {
 
-        branchCodeCombo
-                .getItems()
-                .clear();
+								if (Messagebox.ON_OK.equals(
+										event.getName())) {
 
-        try {
+									Executions.sendRedirect(
+											"/login.zul");
+								}
+							});
 
-            List<String[]> branches =
-                    service.getActiveBranches();
+			return;
+		}
 
-            if (branches == null ||
-                    branches.isEmpty()) {
+		// ========================================================
+		// LOG CLEARING SESSION
+		// ========================================================
 
-                System.out.println(
-                        "No active branches found.");
+		System.out.println(
+				"CAPTURE OPERATOR CLEARING SESSION: "
+						+ "sessionName="
+						+ clearingSession.getSessionName()
+						+ ", status="
+						+ clearingSession.getStatus());
 
-                return;
-            }
+		// ========================================================
+		// CREATE SERVICE
+		// ========================================================
 
+		service =
+				new CaptureOperatorBatchService();
 
-            for (String[] branch :
-                    branches) {
+		// ========================================================
+		// LOAD BRANCHES
+		// ========================================================
 
-                if (branch == null ||
-                        branch.length < 2) {
+		loadBranches();
+	}
 
-                    continue;
-                }
 
+	// =========================================================
+	// LOAD BRANCHES
+	// =========================================================
 
-                Comboitem item =
-                        new Comboitem();
+	private void loadBranches() {
 
-                item.setLabel(
-                        branch[0]);
+		branchCodeCombo
+		.getItems()
+		.clear();
 
-                item.setValue(
-                        branch[0]);
+		try {
 
-                item.setAttribute(
-                        "branchName",
-                        branch[1]);
+			List<String[]> branches =
+					service.getActiveBranches();
 
-                branchCodeCombo
-                        .appendChild(item);
-            }
+			if (branches == null ||
+					branches.isEmpty()) {
 
-        } catch (Exception e) {
+				System.out.println(
+						"No active branches found.");
 
-            e.printStackTrace();
+				return;
+			}
 
-            Messagebox.show(
-                    "Unable to load branches from database.\n\n"
-                            + e.getMessage(),
-                    "Database Error",
-                    Messagebox.OK,
-                    Messagebox.ERROR);
-        }
-    }
 
+			for (String[] branch :
+				branches) {
 
-    // =========================================================
-    // BRANCH SELECT
-    // =========================================================
+				if (branch == null ||
+						branch.length < 2) {
 
-    @Listen("onSelect = #branchCodeCombo")
-    public void onBranchSelected() {
+					continue;
+				}
 
-        Comboitem selectedItem =
-                branchCodeCombo
-                        .getSelectedItem();
 
-        if (selectedItem == null) {
+				Comboitem item =
+						new Comboitem();
 
-            branchNameTextbox
-                    .setValue("");
+				item.setLabel(
+						branch[0]);
 
-            return;
-        }
+				item.setValue(
+						branch[0]);
 
+				item.setAttribute(
+						"branchName",
+						branch[1]);
 
-        String branchCode =
-                selectedItem.getValue();
+				branchCodeCombo
+				.appendChild(item);
+			}
 
-        String branchName =
-                (String) selectedItem
-                        .getAttribute(
-                                "branchName");
+		} catch (Exception e) {
 
+			e.printStackTrace();
 
-        if (branchName == null ||
-                branchName.trim().isEmpty()) {
+			Messagebox.show(
+					"Unable to load branches from database.\n\n"
+							+ e.getMessage(),
+							"Database Error",
+							Messagebox.OK,
+							Messagebox.ERROR);
+		}
+	}
 
-            branchName =
-                    service.getBranchName(
-                            branchCode);
-        }
 
+	// =========================================================
+	// BRANCH SELECT
+	// =========================================================
 
-        branchNameTextbox.setValue(
-                branchName == null
-                        ? ""
-                        : branchName);
-    }
+	@Listen("onSelect = #branchCodeCombo")
+	public void onBranchSelected() {
 
+		Comboitem selectedItem =
+				branchCodeCombo
+				.getSelectedItem();
 
-    // =========================================================
-    // FILE UPLOAD
-    // =========================================================
+		if (selectedItem == null) {
 
-    @Listen("onUpload = #batchFilesUpload")
-    public void onBatchFilesUpload(
-            UploadEvent event) {
+			branchNameTextbox
+			.setValue("");
 
-        try {
+			return;
+		}
 
-            Media media =
-                    event.getMedia();
 
-            if (media == null) {
+		String branchCode =
+				selectedItem.getValue();
 
-                selectedFilesLabel.setValue(
-                        "No file selected.");
+		String branchName =
+				(String) selectedItem
+				.getAttribute(
+						"branchName");
 
-                return;
-            }
 
+		if (branchName == null ||
+				branchName.trim().isEmpty()) {
 
-            String fileName =
-                    media.getName();
+			branchName =
+					service.getBranchName(
+							branchCode);
+		}
 
-            if (fileName == null ||
-                    fileName.trim().isEmpty()) {
 
-                Messagebox.show(
-                        "Invalid file selected.",
-                        "Upload Error",
-                        Messagebox.OK,
-                        Messagebox.ERROR);
+		branchNameTextbox.setValue(
+				branchName == null
+				? ""
+						: branchName);
+	}
 
-                return;
-            }
 
+	// =========================================================
+	// FILE UPLOAD
+	// =========================================================
 
-            // =================================================
-            // DUPLICATE FILE NAME
-            // =================================================
+	@Listen("onUpload = #batchFilesUpload")
+	public void onBatchFilesUpload(
+			UploadEvent event) {
 
-            for (Media existing :
-                    uploadedFiles) {
+		try {
 
-                if (existing != null &&
-                        existing.getName() != null &&
-                        existing.getName()
-                                .equalsIgnoreCase(
-                                        fileName)) {
+			Media media =
+					event.getMedia();
 
-                    Messagebox.show(
-                            "File already selected:\n\n"
-                                    + fileName,
-                            "Duplicate File",
-                            Messagebox.OK,
-                            Messagebox.EXCLAMATION);
+			if (media == null) {
 
-                    return;
-                }
-            }
+				selectedFilesLabel.setValue(
+						"No file selected.");
 
+				return;
+			}
 
-            // =================================================
-            // ONLY ONE XML
-            // =================================================
 
-            if (fileName
-                    .toLowerCase()
-                    .endsWith(".xml")) {
+			String fileName =
+					media.getName();
 
-                for (Media existing :
-                        uploadedFiles) {
+			if (fileName == null ||
+					fileName.trim().isEmpty()) {
 
-                    if (existing != null &&
-                            existing.getName() != null &&
-                            existing.getName()
-                                    .toLowerCase()
-                                    .endsWith(".xml")) {
+				Messagebox.show(
+						"Invalid file selected.",
+						"Upload Error",
+						Messagebox.OK,
+						Messagebox.ERROR);
 
-                        Messagebox.show(
-                                "Only one XML file is allowed.",
-                                "XML Validation",
-                                Messagebox.OK,
-                                Messagebox.EXCLAMATION);
+				return;
+			}
 
-                        return;
-                    }
-                }
-            }
 
+			// =================================================
+			// DUPLICATE FILE NAME
+			// =================================================
 
-            // =================================================
-            // ADD FILE
-            // =================================================
+			for (Media existing :
+				uploadedFiles) {
 
-            uploadedFiles.add(
-                    media);
+				if (existing != null &&
+						existing.getName() != null &&
+						existing.getName()
+						.equalsIgnoreCase(
+								fileName)) {
 
+					Messagebox.show(
+							"File already selected:\n\n"
+									+ fileName,
+									"Duplicate File",
+									Messagebox.OK,
+									Messagebox.EXCLAMATION);
 
-            // =================================================
-            // COUNT FILES
-            // =================================================
+					return;
+				}
+			}
 
-            int xmlCount = 0;
 
-            int imageCount = 0;
+			// =================================================
+			// ONLY ONE XML
+			// =================================================
 
+			if (fileName
+					.toLowerCase()
+					.endsWith(".xml")) {
 
-            for (Media selectedMedia :
-                    uploadedFiles) {
+				for (Media existing :
+					uploadedFiles) {
 
-                if (selectedMedia == null ||
-                        selectedMedia.getName() == null) {
+					if (existing != null &&
+							existing.getName() != null &&
+							existing.getName()
+							.toLowerCase()
+							.endsWith(".xml")) {
 
-                    continue;
-                }
+						Messagebox.show(
+								"Only one XML file is allowed.",
+								"XML Validation",
+								Messagebox.OK,
+								Messagebox.EXCLAMATION);
 
+						return;
+					}
+				}
+			}
 
-                String lowerName =
-                        selectedMedia
-                                .getName()
-                                .toLowerCase();
 
+			// =================================================
+			// ADD FILE
+			// =================================================
 
-                if (lowerName.endsWith(".xml")) {
+			uploadedFiles.add(
+					media);
 
-                    xmlCount++;
 
-                } else if (
-                        lowerName.endsWith(".jpg")
-                                || lowerName.endsWith(".jpeg")
-                                || lowerName.endsWith(".png")
-                                || lowerName.endsWith(".tif")
-                                || lowerName.endsWith(".tiff")
-                                || lowerName.endsWith(".bmp")) {
+			// =================================================
+			// COUNT FILES
+			// =================================================
 
-                    imageCount++;
-                }
-            }
+			int xmlCount = 0;
 
+			int imageCount = 0;
 
-            selectedFilesLabel.setValue(
-                    "Files selected: "
-                            + uploadedFiles.size()
-                            + " | XML: "
-                            + xmlCount
-                            + " | Images: "
-                            + imageCount);
 
+			for (Media selectedMedia :
+				uploadedFiles) {
 
-            System.out.println(
-                    "FILE ADDED: "
-                            + fileName);
+				if (selectedMedia == null ||
+						selectedMedia.getName() == null) {
 
-        } catch (Exception e) {
+					continue;
+				}
 
-            e.printStackTrace();
 
-            Messagebox.show(
-                    "Unable to process selected file.\n\n"
-                            + e.getMessage(),
-                    "Upload Error",
-                    Messagebox.OK,
-                    Messagebox.ERROR);
-        }
-    }
+				String lowerName =
+						selectedMedia
+						.getName()
+						.toLowerCase();
 
 
-    // =========================================================
-    // CAPTURE BATCH
-    // =========================================================
+				if (lowerName.endsWith(".xml")) {
 
-    @Listen("onClick = #capturedBatchButton")
-    public void captureBatch() {
+					xmlCount++;
 
-        // =====================================================
-        // VALIDATE BASIC UI INPUT
-        // =====================================================
+				} else if (
+						lowerName.endsWith(".jpg")
+						|| lowerName.endsWith(".jpeg")
+						|| lowerName.endsWith(".png")
+						|| lowerName.endsWith(".tif")
+						|| lowerName.endsWith(".tiff")
+						|| lowerName.endsWith(".bmp")) {
 
-        Comboitem selectedItem =
-                branchCodeCombo
-                        .getSelectedItem();
+					imageCount++;
+				}
+			}
 
-        if (selectedItem == null) {
 
-            Messagebox.show(
-                    "Please select branch code.",
-                    "Validation",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
+			selectedFilesLabel.setValue(
+					"Files selected: "
+							+ uploadedFiles.size()
+							+ " | XML: "
+							+ xmlCount
+							+ " | Images: "
+							+ imageCount);
 
-            return;
-        }
 
+			System.out.println(
+					"FILE ADDED: "
+							+ fileName);
 
-        final String branchCode =
-                selectedItem.getValue();
+		} catch (Exception e) {
 
-        final Integer chequeCount =
-                numberOfCheques.getValue();
+			e.printStackTrace();
 
+			Messagebox.show(
+					"Unable to process selected file.\n\n"
+							+ e.getMessage(),
+							"Upload Error",
+							Messagebox.OK,
+							Messagebox.ERROR);
+		}
+	}
 
-        if (chequeCount == null ||
-                chequeCount <= 0) {
 
-            Messagebox.show(
-                    "Please enter a valid number of cheques.",
-                    "Validation",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
+	// =========================================================
+	// CAPTURE BATCH
+	// =========================================================
 
-            return;
-        }
+	@Listen("onClick = #capturedBatchButton")
+	public void captureBatch() {
 
+		// =====================================================
+		// VALIDATE BASIC UI INPUT
+		// =====================================================
 
-        if (uploadedFiles.isEmpty()) {
+		Comboitem selectedItem =
+				branchCodeCombo
+				.getSelectedItem();
 
-            Messagebox.show(
-                    "Please select the XML file and cheque images.",
-                    "Validation",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
+		if (selectedItem == null) {
 
-            return;
-        }
+			Messagebox.show(
+					"Please select branch code.",
+					"Validation",
+					Messagebox.OK,
+					Messagebox.EXCLAMATION);
 
+			return;
+		}
 
-        int xmlCount = 0;
 
+		final String branchCode =
+				selectedItem.getValue();
 
-        for (Media media :
-                uploadedFiles) {
+		final Integer chequeCount =
+				numberOfCheques.getValue();
 
-            if (media != null &&
-                    media.getName() != null &&
-                    media.getName()
-                            .toLowerCase()
-                            .endsWith(".xml")) {
 
-                xmlCount++;
-            }
-        }
+		if (chequeCount == null ||
+				chequeCount <= 0) {
 
+			Messagebox.show(
+					"Please enter a valid number of cheques.",
+					"Validation",
+					Messagebox.OK,
+					Messagebox.EXCLAMATION);
 
-        if (xmlCount == 0) {
+			return;
+		}
 
-            Messagebox.show(
-                    "No XML file was selected.",
-                    "Validation",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
 
-            return;
-        }
+		if (uploadedFiles.isEmpty()) {
 
+			Messagebox.show(
+					"Please select the XML file and cheque images.",
+					"Validation",
+					Messagebox.OK,
+					Messagebox.EXCLAMATION);
 
-        if (xmlCount > 1) {
+			return;
+		}
 
-            Messagebox.show(
-                    "Please select only one XML file.",
-                    "Validation",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
 
-            return;
-        }
+		int xmlCount = 0;
 
 
-        // =====================================================
-        // SESSION
-        // =====================================================
+		for (Media media :
+			uploadedFiles) {
 
-        Session session =
-                Executions.getCurrent()
-                        .getSession();
+			if (media != null &&
+					media.getName() != null &&
+					media.getName()
+					.toLowerCase()
+					.endsWith(".xml")) {
 
-        if (session == null) {
+				xmlCount++;
+			}
+		}
 
-            Messagebox.show(
-                    "Your session has expired. Please login again.",
-                    "Session Expired",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
 
-            Executions.sendRedirect(
-                    "/zul/login.zul");
+		if (xmlCount == 0) {
 
-            return;
-        }
+			Messagebox.show(
+					"No XML file was selected.",
+					"Validation",
+					Messagebox.OK,
+					Messagebox.EXCLAMATION);
 
+			return;
+		}
 
-        Object sessionUserId =
-                session.getAttribute(
-                        "userId");
 
-        if (sessionUserId == null) {
+		if (xmlCount > 1) {
 
-            Messagebox.show(
-                    "Your session has expired. Please login again.",
-                    "Session Expired",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
+			Messagebox.show(
+					"Please select only one XML file.",
+					"Validation",
+					Messagebox.OK,
+					Messagebox.EXCLAMATION);
 
-            Executions.sendRedirect(
-                    "/zul/login.zul");
+			return;
+		}
 
-            return;
-        }
 
+		// =====================================================
+		// SESSION
+		// =====================================================
 
-        final int createdBy;
+		Session session =
+				Executions.getCurrent()
+				.getSession();
 
-        try {
+		if (session == null) {
 
-            long userId;
+			Messagebox.show(
+					"Your session has expired. Please login again.",
+					"Session Expired",
+					Messagebox.OK,
+					Messagebox.EXCLAMATION);
 
+			Executions.sendRedirect(
+					"/login.zul");
 
-            if (sessionUserId instanceof Number) {
+			return;
+		}
 
-                userId =
-                        ((Number) sessionUserId)
-                                .longValue();
 
-            } else {
+		Object sessionUserId =
+				session.getAttribute(
+						"userId");
 
-                userId =
-                        Long.parseLong(
-                                sessionUserId.toString());
-            }
+		if (sessionUserId == null) {
 
+			Messagebox.show(
+					"Your session has expired. Please login again.",
+					"Session Expired",
+					Messagebox.OK,
+					Messagebox.EXCLAMATION);
 
-            createdBy =
-                    Math.toIntExact(
-                            userId);
+			Executions.sendRedirect(
+					"/login.zul");
 
-        } catch (Exception e) {
+			return;
+		}
 
-            Messagebox.show(
-                    "Invalid user session. Please login again.",
-                    "Session Error",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
 
-            Executions.sendRedirect(
-                    "/zul/login.zul");
+		final int createdBy;
 
-            return;
-        }
+		try {
 
+			long userId;
 
-        // =====================================================
-        // FIRST CAPTURE ATTEMPT
-        // =====================================================
 
-        try {
+			if (sessionUserId instanceof Number) {
 
-            OutwardBatch batch =
-                    service.captureBatch(
-                            branchCode,
-                            chequeCount,
-                            uploadedFiles,
-                            createdBy,
-                            false);
+				userId =
+						((Number) sessionUserId)
+						.longValue();
 
+			} else {
 
-            // =================================================
-            // SUCCESS
-            // =================================================
+				userId =
+						Long.parseLong(
+								sessionUserId.toString());
+			}
 
-            showCaptureSuccess(
-                    batch);
 
+			createdBy =
+					Math.toIntExact(
+							userId);
 
-        } catch (
-                CaptureOperatorBatchService
-                        .ChequeCountMismatchException mismatch) {
+		} catch (Exception e) {
 
-            // =================================================
-            // COUNT MISMATCH
-            // =================================================
-            //
-            // DO NOT create the batch yet.
-            //
-            // Ask operator whether to continue.
-            //
-            // =================================================
+			Messagebox.show(
+					"Invalid user session. Please login again.",
+					"Session Error",
+					Messagebox.OK,
+					Messagebox.EXCLAMATION);
 
+			Executions.sendRedirect(
+					"/login.zul");
 
-            String message =
-                    "The entered cheque count does not "
-                            + "match the number of cheque objects "
-                            + "parsed from the XML."
-                            + "\n\n"
-                            + "Entered Cheques : "
-                            + mismatch.getEnteredCount()
-                            + "\n"
-                            + "XML Cheques     : "
-                            + mismatch.getXmlCount()
-                            + "\n\n"
-                            + "If you continue, the batch cheque "
-                            + "count will be changed to "
-                            + mismatch.getXmlCount()
-                            + " based on the XML."
-                            + "\n\n"
-                            + "Do you want to continue?";
+			return;
+		}
 
 
-            Messagebox.show(
-                    message,
-                    "Batch Count Mismatch",
-                    Messagebox.YES | Messagebox.NO,
-                    Messagebox.QUESTION,
-                    new EventListener<Event>() {
+		// =====================================================
+		// FIRST CAPTURE ATTEMPT
+		// =====================================================
 
-                        @Override
-                        public void onEvent(
-                                Event event)
-                                throws Exception {
+		try {
 
-                            // =================================
-                            // CONTINUE
-                            // =================================
+			OutwardBatch batch =
+					service.captureBatch(
+							branchCode,
+							chequeCount,
+							uploadedFiles,
+							createdBy,
+							false);
 
-                            if ("onYes".equals(
-                                    event.getName())) {
 
-                                continueAfterMismatch(
-                                        branchCode,
-                                        chequeCount,
-                                        createdBy);
-                            }
+			// =================================================
+					// SUCCESS
+					// =================================================
 
-                            // =================================
-                            // REJECT
-                            // =================================
+			showCaptureSuccess(
+					batch);
 
-                            else {
 
-                                Messagebox.show(
-                                        "Batch rejected.\n\n"
-                                                + "No batch was created.",
-                                        "Batch Rejected",
-                                        Messagebox.OK,
-                                        Messagebox.EXCLAMATION);
-                            }
-                        }
-                    });
+		} catch (
+				CaptureOperatorBatchService
+				.ChequeCountMismatchException mismatch) {
 
+			// =================================================
+			// COUNT MISMATCH
+			// =================================================
+			//
+			// DO NOT create the batch yet.
+			//
+			// Ask operator whether to continue.
+			//
+			// =================================================
 
-        } catch (IllegalArgumentException e) {
 
-            // =================================================
-            // DUPLICATE CHEQUE
-            // =================================================
-            //
-            // Do NOT display e.getMessage().
-            // This prevents cheque details from being shown.
-            //
-            // =================================================
+			String message =
+					"The entered cheque count does not "
+							+ "match the number of cheque objects "
+							+ "parsed from the XML."
+							+ "\n\n"
+							+ "Entered Cheques : "
+							+ mismatch.getEnteredCount()
+							+ "\n"
+							+ "XML Cheques     : "
+							+ mismatch.getXmlCount()
+							+ "\n\n"
+							+ "If you continue, the batch cheque "
+							+ "count will be changed to "
+							+ mismatch.getXmlCount()
+							+ " based on the XML."
+							+ "\n\n"
+							+ "Do you want to continue?";
 
-            Messagebox.show(
-                    "Duplicate cheque found.\n\n"
-                            + "Batch cannot be created.",
-                    "Duplicate Cheque",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
 
+			Messagebox.show(
+					message,
+					"Batch Count Mismatch",
+					Messagebox.YES | Messagebox.NO,
+					Messagebox.QUESTION,
+					new EventListener<Event>() {
 
-        } catch (Exception e) {
+						@Override
+						public void onEvent(
+								Event event)
+										throws Exception {
 
-            e.printStackTrace();
+							// =================================
+							// CONTINUE
+							// =================================
 
-            Messagebox.show(
-                    "Unable to capture batch.\n\n"
-                            + "Error: "
-                            + e.getMessage(),
-                    "Capture Error",
-                    Messagebox.OK,
-                    Messagebox.ERROR);
-        }
-    }
+							if ("onYes".equals(
+									event.getName())) {
 
+								continueAfterMismatch(
+										branchCode,
+										chequeCount,
+										createdBy);
+							}
 
-    // =========================================================
-    // CONTINUE AFTER COUNT MISMATCH
-    // =========================================================
+							// =================================
+							// REJECT
+							// =================================
 
-    private void continueAfterMismatch(
-            String branchCode,
-            Integer enteredChequeCount,
-            int createdBy) {
+							else {
 
-        try {
+								Messagebox.show(
+										"Batch rejected.\n\n"
+												+ "No batch was created.",
+												"Batch Rejected",
+												Messagebox.OK,
+												Messagebox.EXCLAMATION);
+							}
+						}
+					});
 
-            System.out.println(
-                    "=================================");
 
-            System.out.println(
-                    "COUNT MISMATCH OVERRIDE");
+		} catch (IllegalArgumentException e) {
 
-            System.out.println(
-                    "Operator selected CONTINUE");
+			// =================================================
+			// DUPLICATE CHEQUE
+			// =================================================
+			//
+			// Do NOT display e.getMessage().
+			// This prevents cheque details from being shown.
+			//
+			// =================================================
 
-            System.out.println(
-                    "Entered Count: "
-                            + enteredChequeCount);
+			Messagebox.show(
+					"Duplicate cheque found.\n\n"
+							+ "Batch cannot be created.",
+							"Duplicate Cheque",
+							Messagebox.OK,
+							Messagebox.EXCLAMATION);
 
-            System.out.println(
-                    "=================================");
 
+		} catch (Exception e) {
 
-            // =================================================
-            // IMPORTANT
-            // =================================================
-            //
-            // Service parses XML again.
-            //
-            // allowCountMismatch = TRUE
-            //
-            // Therefore:
-            //
-            // actual batch count = XML parsed count
-            //
-            // =================================================
+			e.printStackTrace();
 
-            OutwardBatch batch =
-                    service.captureBatch(
-                            branchCode,
-                            enteredChequeCount,
-                            uploadedFiles,
-                            createdBy,
-                            true);
+			Messagebox.show(
+					"Unable to capture batch.\n\n"
+							+ "Error: "
+							+ e.getMessage(),
+							"Capture Error",
+							Messagebox.OK,
+							Messagebox.ERROR);
+		}
+	}
 
 
-            showCaptureSuccess(
-                    batch);
+	// =========================================================
+	// CONTINUE AFTER COUNT MISMATCH
+	// =========================================================
 
+	private void continueAfterMismatch(
+			String branchCode,
+			Integer enteredChequeCount,
+			int createdBy) {
 
-        } catch (
-                CaptureOperatorBatchService
-                        .ChequeCountMismatchException mismatch) {
+		try {
 
-            // This should normally not happen because
-            // allowCountMismatch=true.
+			System.out.println(
+					"=================================");
 
-            Messagebox.show(
-                    "Unable to continue because the XML "
-                            + "cheque count changed.\n\n"
-                            + "Entered Count: "
-                            + mismatch.getEnteredCount()
-                            + "\n"
-                            + "XML Count: "
-                            + mismatch.getXmlCount()
-                            + "\n\n"
-                            + "Batch was not created.",
-                    "Count Validation",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
+			System.out.println(
+					"COUNT MISMATCH OVERRIDE");
 
+			System.out.println(
+					"Operator selected CONTINUE");
 
-        } catch (IllegalArgumentException e) {
+			System.out.println(
+					"Entered Count: "
+							+ enteredChequeCount);
 
-            // =================================================
-            // DUPLICATE CHEQUE
-            // =================================================
-            //
-            // Do NOT display e.getMessage().
-            // No cheque data will be shown.
-            //
-            // =================================================
+			System.out.println(
+					"=================================");
 
-            Messagebox.show(
-                    "Duplicate cheque found.\n\n"
-                            + "Batch cannot be created.",
-                    "Duplicate Cheque",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
 
+			// =================================================
+			// IMPORTANT
+			// =================================================
+			//
+			// Service parses XML again.
+			//
+			// allowCountMismatch = TRUE
+			//
+			// Therefore:
+			//
+			// actual batch count = XML parsed count
+			//
+			// =================================================
 
-        } catch (Exception e) {
+			OutwardBatch batch =
+					service.captureBatch(
+							branchCode,
+							enteredChequeCount,
+							uploadedFiles,
+							createdBy,
+							true);
 
-            e.printStackTrace();
 
-            Messagebox.show(
-                    "Unable to capture batch.\n\n"
-                            + "Error: "
-                            + e.getMessage(),
-                    "Capture Error",
-                    Messagebox.OK,
-                    Messagebox.ERROR);
-        }
-    }
+			showCaptureSuccess(
+					batch);
 
 
-    // =========================================================
-    // SUCCESS MESSAGE
-    // =========================================================
+		} catch (
+				CaptureOperatorBatchService
+				.ChequeCountMismatchException mismatch) {
 
-    private void showCaptureSuccess(
-            OutwardBatch batch) {
+			// This should normally not happen because
+			// allowCountMismatch=true.
 
-        Messagebox.show(
-                "Batch captured successfully.\n\n"
-                        + "Batch Number: "
-                        + batch.getBatchNumber()
-                        + "\n\n"
-                        + "Branch Code: "
-                        + batch.getBranchCode()
-                        + "\n\n"
-                        + "Total Cheques: "
-                        + batch.getNumberOfCheques()
-                        + "\n\n"
-                        + "Status: "
-                        + batch.getBatchStatus(),
-                "Batch Captured",
-                Messagebox.OK,
-                Messagebox.INFORMATION);
+			Messagebox.show(
+					"Unable to continue because the XML "
+							+ "cheque count changed.\n\n"
+							+ "Entered Count: "
+							+ mismatch.getEnteredCount()
+							+ "\n"
+							+ "XML Count: "
+							+ mismatch.getXmlCount()
+							+ "\n\n"
+							+ "Batch was not created.",
+							"Count Validation",
+							Messagebox.OK,
+							Messagebox.EXCLAMATION);
 
-        clearForm();
-    }
 
+		} catch (IllegalArgumentException e) {
 
-    // =========================================================
-    // CLEAR FORM
-    // =========================================================
+			// =================================================
+			// DUPLICATE CHEQUE
+			// =================================================
+			//
+			// Do NOT display e.getMessage().
+			// No cheque data will be shown.
+			//
+			// =================================================
 
-    private void clearForm() {
+			Messagebox.show(
+					"Duplicate cheque found.\n\n"
+							+ "Batch cannot be created.",
+							"Duplicate Cheque",
+							Messagebox.OK,
+							Messagebox.EXCLAMATION);
 
-        branchCodeCombo
-                .setSelectedItem(null);
 
-        branchNameTextbox
-                .setValue("");
+		} catch (Exception e) {
 
-        numberOfCheques
-                .setValue(null);
+			e.printStackTrace();
 
-        uploadedFiles.clear();
+			Messagebox.show(
+					"Unable to capture batch.\n\n"
+							+ "Error: "
+							+ e.getMessage(),
+							"Capture Error",
+							Messagebox.OK,
+							Messagebox.ERROR);
+		}
+	}
 
-        selectedFilesLabel
-                .setValue(
-                        "No files selected.");
-    }
+
+	private void showCaptureSuccess(
+	        OutwardBatch batch) {
+
+	    Messagebox.show(
+	            "Batch captured successfully.\n\n"
+	                    + "Batch Number: "
+	                    + batch.getBatchNumber()
+	                    + "\n\n"
+	                    + "Branch Code: "
+	                    + batch.getBranchCode()
+	                    + "\n\n"
+	                    + "Total Cheques: "
+	                    + batch.getNumberOfCheques()
+	                    + "\n\n"
+	                    + "Status: "
+	                    + batch.getBatchStatus(),
+	            "Batch Captured",
+	            Messagebox.OK,
+	            Messagebox.INFORMATION,
+	            event -> {
+
+	                if (Messagebox.ON_OK.equals(
+	                        event.getName())) {
+
+	                	Executions.sendRedirect(
+	                	        "/zul/outward/outward-maker/capture-operator-captured-batches.zul"
+	                	);
+	                }
+	            }
+	    );
+	}
 }

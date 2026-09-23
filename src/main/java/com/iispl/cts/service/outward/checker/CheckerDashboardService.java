@@ -72,6 +72,25 @@ public class CheckerDashboardService {
     // GET RE-VERIFIED CHEQUE COUNT
     // ============================================================
 
+    
+    
+    public boolean releaseBatchLock(
+            String batchNumber,
+            long checkerUserId) {
+
+        if (batchNumber == null
+                || batchNumber.trim().isEmpty()) {
+            return false;
+        }
+
+        if (checkerUserId <= 0) {
+            return false;
+        }
+
+        return assignmentDao.releaseBatchLock(
+                batchNumber.trim(),
+                checkerUserId);
+    }
     public int getReVerifiedChequeCount(
             String batchNumber,
             String checkerUserId) {

@@ -2,6 +2,7 @@ package com.iispl.cts.dao.outward;
 
 import com.cts.inward.config.ConnectionPool;
 
+
 import com.iispl.cts.data.CTSStaticData;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Session;
@@ -133,11 +134,21 @@ public class OutwardMakerDashboardDAO {
                 // currently locked by another Maker.
                 // =================================================
 
-                "LEFT JOIN public.outward_batch_assignment mba " +
-                "    ON ob.batch_number = mba.batch_number " +
-                "    AND UPPER(TRIM(mba.assignment_role)) = 'MAKER' " +
-                "    AND UPPER(TRIM(mba.assignment_status)) IN " +
-                "        ('ASSIGNED', 'IN_PROGRESS', 'RELEASED') " +
+"LEFT JOIN LATERAL ( " +
+
+"    SELECT mba.* " +
+
+"    FROM public.outward_batch_assignment mba " +
+
+"    WHERE mba.batch_number = ob.batch_number " +
+
+"      AND UPPER(TRIM(mba.assignment_role)) = 'MAKER' " +
+
+"    ORDER BY mba.assigned_at DESC NULLS LAST " +
+
+"    LIMIT 1 " +
+
+") mba ON TRUE " +
 
                 // =================================================
                 // BATCH FILTER
@@ -518,33 +529,58 @@ public class OutwardMakerDashboardDAO {
                             );
 
                         } else if (
+
                                 "RELEASED"
+
                                         .equalsIgnoreCase(
+
                                                 assignmentStatus
+
                                         )
+
                         ) {
 
+                            // ====================================================
+                            // RELEASED BATCH
+                            // ====================================================
+
                             batch.setLockStatus(
+
                                     "AVAILABLE"
+
                             );
 
                             batch.setLockedBy(
+
                                     null
+
                             );
 
                             batch.setLockedAt(
+
                                     null
+
+                            );
+
+                            // IMPORTANT:
+                            // Previous Maker no longer owns the batch
+                            batch.setMakerUserNumber(
+
+                                    null
+
                             );
 
                         }
 
-                    } else {
+                        } else {
 
-                        batch.setLockStatus(
-                                "AVAILABLE"
-                        );
-                    }
+                            batch.setLockStatus(
 
+                                    "AVAILABLE"
+
+                            );
+
+                        }
                     // ====================================================
                     // RETURNED BATCH
                     // ====================================================
@@ -1466,71 +1502,198 @@ public class OutwardMakerDashboardDAO {
             String batchNumber,
             String userId) throws SQLException {
 
-        if (batchNumber == null ||
-                batchNumber.trim().isEmpty()) {
-
-            throw new SQLException(
-                    "Batch number is required."
-            );
+        if (batchNumber == null || batchNumber.trim().isEmpty()
+                || userId == null || userId.trim().isEmpty()) {
+            return false;
         }
 
-        if (userId == null ||
-                userId.trim().isEmpty()) {
+        String cleanBatchNumber = batchNumber.trim();
 
-            throw new SQLException(
-                    "User ID is required."
-            );
+        int makerUserId;
+
+        try {
+            makerUserId = Integer.parseInt(userId.trim());
+        } catch (NumberFormatException e) {
+            return false;
         }
 
-        int makerId;
+        Connection conn = null;
 
         try {
 
-            makerId =
-                    Integer.parseInt(
-                            userId.trim()
-                    );
+            conn = dataSource.getConnection();
 
-        } catch (NumberFormatException e) {
+            conn.setAutoCommit(false);
 
-            throw new SQLException(
-                    "Invalid maker user ID: " + userId
-            );
-        }
+            // =====================================================
+            // 1. CHECK CURRENT MAKER OWNS THE ACTIVE LOCK
+            // =====================================================
 
-        String sql =
-                "UPDATE public.outward_batch_assignment " +
-                "SET assignment_status = 'RELEASED' " +
-                "WHERE batch_number = ? " +
-                "AND user_id = ? " +
-                "AND UPPER(assignment_role) = 'MAKER' " +
-                "AND UPPER(assignment_status) IN " +
-                "    ('ASSIGNED', 'IN_PROGRESS')";
+            String checkAssignmentSql =
+                    "SELECT 1 "
+                    + "FROM public.outward_batch_assignment "
+                    + "WHERE batch_number = ? "
+                    + "AND user_id = ? "
+                    + "AND UPPER(assignment_role) = 'MAKER' "
+                    + "AND UPPER(assignment_status) IN "
+                    + "('ASSIGNED', 'IN_PROGRESS') "
+                    + "FOR UPDATE";
 
-        try (
-                Connection con =
-                        dataSource.getConnection();
+            boolean ownsBatch = false;
 
-                PreparedStatement ps =
-                        con.prepareStatement(
-                                sql
-                        )
-        ) {
+            try (PreparedStatement ps =
+                         conn.prepareStatement(checkAssignmentSql)) {
 
-            ps.setString(
-                    1,
-                    batchNumber.trim()
-            );
+                ps.setString(1, cleanBatchNumber);
+                ps.setInt(2, makerUserId);
 
-            ps.setInt(
-                    2,
-                    makerId
-            );
+                try (ResultSet rs = ps.executeQuery()) {
 
-            return ps.executeUpdate() > 0;
+                    if (rs.next()) {
+                        ownsBatch = true;
+                    }
+                }
+            }
+
+            // =====================================================
+            // CURRENT MAKER DOES NOT OWN THE BATCH
+            // =====================================================
+
+            if (!ownsBatch) {
+
+                conn.rollback();
+
+                return false;
+            }
+
+
+            // =====================================================
+            // 2. RESET ALL CHEQUES TO CAPTURED
+            // =====================================================
+
+            String resetChequeSql =
+                    "UPDATE public.outward_cheque "
+                    + "SET cheque_status = 'CAPTURED' "
+                    + "WHERE batch_number = ?";
+
+            try (PreparedStatement ps =
+                         conn.prepareStatement(resetChequeSql)) {
+
+                ps.setString(1, cleanBatchNumber);
+
+                ps.executeUpdate();
+            }
+
+
+            // =====================================================
+            // 3. RESET CHEQUE PROCESSING DATA
+            // =====================================================
+
+            String resetProcessingSql =
+                    "DELETE FROM public.cheque_processing "
+                    + "WHERE batch_number = ?";
+
+            try (PreparedStatement ps =
+                         conn.prepareStatement(resetProcessingSql)) {
+
+                ps.setString(1, cleanBatchNumber);
+
+                ps.executeUpdate();
+            }
+
+
+            // =====================================================
+            // 4. RESET BATCH STATUS TO CAPTURED
+            // =====================================================
+
+            String resetBatchSql =
+                    "UPDATE public.outward_batch "
+                    + "SET batch_status = 'CAPTURED' "
+                    + "WHERE batch_number = ?";
+
+            try (PreparedStatement ps =
+                         conn.prepareStatement(resetBatchSql)) {
+
+                ps.setString(1, cleanBatchNumber);
+
+                ps.executeUpdate();
+            }
+
+
+            // =====================================================
+            // 5. RELEASE MAKER ASSIGNMENT
+            // =====================================================
+
+            String releaseAssignmentSql =
+                    "UPDATE public.outward_batch_assignment "
+                    + "SET assignment_status = 'RELEASED' "
+                    + "WHERE batch_number = ? "
+                    + "AND user_id = ? "
+                    + "AND UPPER(assignment_role) = 'MAKER' "
+                    + "AND UPPER(assignment_status) IN "
+                    + "('ASSIGNED', 'IN_PROGRESS')";
+
+            int updatedRows;
+
+            try (PreparedStatement ps =
+                         conn.prepareStatement(releaseAssignmentSql)) {
+
+                ps.setString(1, cleanBatchNumber);
+                ps.setInt(2, makerUserId);
+
+                updatedRows = ps.executeUpdate();
+            }
+
+
+            // =====================================================
+            // 6. VERIFY ASSIGNMENT WAS RELEASED
+            // =====================================================
+
+            if (updatedRows == 0) {
+
+                conn.rollback();
+
+                return false;
+            }
+
+
+            // =====================================================
+            // 7. COMMIT COMPLETE RESET
+            // =====================================================
+
+            conn.commit();
+
+            return true;
+
+        } catch (SQLException e) {
+
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackException) {
+                    rollbackException.printStackTrace();
+                }
+            }
+
+            throw e;
+
+        } finally {
+
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
-
     // ============================================================
     // GET CHEQUE PROCESSING
     // ============================================================

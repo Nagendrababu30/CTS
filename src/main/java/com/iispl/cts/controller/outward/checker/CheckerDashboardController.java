@@ -11,13 +11,17 @@ import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Wire;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Button;
+import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Label;
+import org.zkoss.zul.ListModelList;
 import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.ListitemRenderer;
-import org.zkoss.zul.ListModelList;
+import org.zkoss.zul.Messagebox;
 
+import com.cts.admin.service.SessionService;
+import com.cts.admin.service.SessionServiceImpl;
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.service.outward.checker.CheckerDashboardService;
 
@@ -119,12 +123,15 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 	public void doAfterCompose(Component comp) throws Exception {
 
 		super.doAfterCompose(comp);
+	     SessionService sessionService;
+
 
 		// ========================================================
 		// GET ZK SESSION
 		// ========================================================
 
-		Session session = Executions.getCurrent().getSession();
+		Session session =
+		        Executions.getCurrent().getSession();
 
 		// ========================================================
 		// NO SESSION
@@ -132,15 +139,17 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 
 		if (session == null) {
 
-			Executions.sendRedirect("/zul/login.zul");
-			return;
+		    Executions.sendRedirect("/login.zul");
+
+		    return;
 		}
 
 		// ========================================================
 		// GET USER ID FROM SESSION
 		// ========================================================
 
-		Object sessionUserId = session.getAttribute("userId");
+		Object sessionUserId =
+		        session.getAttribute("userId");
 
 		// ========================================================
 		// USER ID NOT FOUND
@@ -148,8 +157,9 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 
 		if (sessionUserId == null) {
 
-			Executions.sendRedirect("/zul/login.zul");
-			return;
+		    Executions.sendRedirect("/login.zul");
+
+		    return;
 		}
 
 		// ========================================================
@@ -158,19 +168,23 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 
 		if (sessionUserId instanceof Number) {
 
-			currentCheckerUser = ((Number) sessionUserId).longValue();
+		    currentCheckerUser =
+		            ((Number) sessionUserId).longValue();
 
 		} else {
 
-			try {
+		    try {
 
-				currentCheckerUser = Long.parseLong(sessionUserId.toString());
+		        currentCheckerUser =
+		                Long.parseLong(
+		                        sessionUserId.toString());
 
-			} catch (NumberFormatException e) {
+		    } catch (NumberFormatException e) {
 
-				Executions.sendRedirect("/zul/login.zul");
-				return;
-			}
+		        Executions.sendRedirect("/login.zul");
+
+		        return;
+		    }
 		}
 
 		// ========================================================
@@ -178,9 +192,57 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 		// ========================================================
 
 		System.out.println(
-				"CHECKER SESSION: "
-						+ "userId="
-						+ currentCheckerUser);
+		        "CHECKER SESSION: "
+		        + "userId="
+		        + currentCheckerUser);
+
+		// ========================================================
+		// CHECK CLEARING SESSION
+		// ========================================================
+
+		sessionService = new SessionServiceImpl();
+
+		com.cts.admin.model.Session clearingSession =
+		        sessionService.getActiveSession();
+
+		// ========================================================
+		// CLEARING SESSION NOT ACTIVE
+		// ========================================================
+
+		if (clearingSession == null
+		        || clearingSession.getStatus() == null
+		        || !"STARTED".equalsIgnoreCase(
+		                clearingSession.getStatus().trim())) {
+
+		    Messagebox.show(
+		            "Clearing session is not started.\n\n"
+		            + "Checker operations are currently unavailable.",
+		            "Session Not Started",
+		            Messagebox.OK,
+		            Messagebox.EXCLAMATION,
+		            event -> {
+
+		                if (Messagebox.ON_OK.equals(
+		                        event.getName())) {
+
+		                    Executions.sendRedirect(
+		                            "/login.zul");
+		                }
+		            });
+
+		    return;
+		}
+
+		// ========================================================
+		// LOG CLEARING SESSION
+		// ========================================================
+
+		System.out.println(
+		        "CHECKER CLEARING SESSION: "
+		        + "sessionName="
+		        + clearingSession.getSessionName()
+		        + ", status="
+		        + clearingSession.getStatus());
 
 		// ========================================================
 		// CREATE SERVICE
@@ -1140,60 +1202,103 @@ public void render(
     // ACTION
     // ====================================================
 
-    Listcell actionCell =
-            new Listcell();
+ // ====================================================
+ // ACTION
+ // ====================================================
 
-    boolean available =
-            "AVAILABLE".equalsIgnoreCase(
-                    batch.getLockStatus());
+ Listcell actionCell =
+         new Listcell();
 
-    boolean reVerify =
-            "RE_VERIFY_BATCHES".equals(currentFilter)
-                    && "RE_VERIFY".equalsIgnoreCase(
-                            batch.getLockStatus());
+ boolean available =
+         "AVAILABLE".equalsIgnoreCase(
+                 batch.getLockStatus());
 
-    boolean assignedToCurrentChecker =
-            service.isAssignedToChecker(
-                    batch.getBatchNumber(),
-                    String.valueOf(
-                            currentCheckerUser));
+ boolean reVerify =
+         "RE_VERIFY_BATCHES".equals(currentFilter)
+                 && "RE_VERIFY".equalsIgnoreCase(
+                         batch.getLockStatus());
 
-    boolean originalCheckerCanReVerify =
-            service.hasReVerifiedCheques(
-                    batch.getBatchNumber(),
-                    String.valueOf(
-                            currentCheckerUser));
+ boolean assignedToCurrentChecker =
+         service.isAssignedToChecker(
+                 batch.getBatchNumber(),
+                 String.valueOf(
+                         currentCheckerUser));
 
-    if (available
-            || reVerify
-            || assignedToCurrentChecker
-            || originalCheckerCanReVerify) {
+ boolean originalCheckerCanReVerify =
+         service.hasReVerifiedCheques(
+                 batch.getBatchNumber(),
+                 String.valueOf(
+                         currentCheckerUser));
 
-        Button openButton =
-                new Button("Open");
+ if (assignedToCurrentChecker) {
 
-        openButton.setSclass(
-                "btn btn-primary");
+     Button openButton =
+             new Button("Open");
 
-        openButton.addEventListener(
-                Events.ON_CLICK,
-                event -> openBatch(batch));
+     openButton.setSclass(
+             "action-btn");
 
-        actionCell.appendChild(
-                openButton);
+     openButton.addEventListener(
+             Events.ON_CLICK,
+             event -> openBatch(batch));
 
-    } else {
+     Button releaseButton =
+             new Button("Release Lock");
 
-        Button lockedButton =
-                new Button("🔒 Locked");
+     releaseButton.setSclass(
+             "action-btn release-btn");
 
-        lockedButton.setDisabled(true);
+     releaseButton.addEventListener(
+             Events.ON_CLICK,
+             event -> releaseBatchLock(
+                     batch.getBatchNumber()));
 
-        actionCell.appendChild(
-                lockedButton);
-    }
+     Hlayout actionLayout =
+             new Hlayout();
 
-    item.appendChild(actionCell);
+     actionLayout.setSpacing(
+             "4px");
+
+     actionLayout.appendChild(
+             openButton);
+
+     actionLayout.appendChild(
+             releaseButton);
+
+     actionCell.appendChild(
+             actionLayout);
+
+ } else if (available
+         || reVerify
+         || originalCheckerCanReVerify) {
+
+     Button openButton =
+             new Button("Open");
+
+     openButton.setSclass(
+             "action-btn");
+
+     openButton.addEventListener(
+             Events.ON_CLICK,
+             event -> openBatch(batch));
+
+     actionCell.appendChild(
+             openButton);
+
+ } else {
+
+     Button lockedButton =
+             new Button("🔒 Locked");
+
+     lockedButton.setDisabled(
+             true);
+
+     actionCell.appendChild(
+             lockedButton);
+ }
+
+ item.appendChild(
+         actionCell);
 }
 }
 
@@ -1442,6 +1547,108 @@ public void render(
 		}
 	}
 
+	
+	// ============================================================
+	// RELEASE CHECKER BATCH LOCK
+	// ============================================================
+
+	private void releaseBatchLock(
+	        String batchNumber) {
+
+	    if (batchNumber == null
+	            || batchNumber.trim().isEmpty()) {
+
+	        Messagebox.show(
+	                "Invalid batch number.",
+	                "Release Lock",
+	                Messagebox.OK,
+	                Messagebox.ERROR);
+
+	        return;
+	    }
+
+	    final String cleanBatchNumber =
+	            batchNumber.trim();
+
+	    Messagebox.show(
+	            "Are you sure you want to release the lock for batch "
+	                    + cleanBatchNumber
+	                    + "?\n\n"
+	                    + "The batch will become available again "
+	                    + "for Checker processing.",
+
+	            "Confirm Release Lock",
+
+	            Messagebox.YES | Messagebox.NO,
+
+	            Messagebox.QUESTION,
+
+	            event -> {
+
+	                if (!Messagebox.ON_YES.equals(
+	                        event.getName())) {
+
+	                    return;
+	                }
+
+	                try {
+
+	                    boolean released =
+	                            service.releaseBatchLock(
+	                                    cleanBatchNumber,
+	                                    currentCheckerUser);
+
+	                    if (released) {
+
+	                        Messagebox.show(
+	                                "Batch "
+	                                        + cleanBatchNumber
+	                                        + " has been released successfully.",
+
+	                                "Release Lock",
+
+	                                Messagebox.OK,
+
+	                                Messagebox.INFORMATION);
+
+	                        currentPage = 1;
+
+	                        loadDashboard();
+
+	                    } else {
+
+	                        Messagebox.show(
+	                                "Unable to release the batch.\n\n"
+	                                        + "The batch may no longer "
+	                                        + "be assigned to you.",
+
+	                                "Release Lock",
+
+	                                Messagebox.OK,
+
+	                                Messagebox.ERROR);
+
+	                        loadDashboard();
+	                    }
+
+	                } catch (Exception e) {
+
+	                    e.printStackTrace();
+
+	                    Messagebox.show(
+	                            "Error while releasing batch "
+	                                    + cleanBatchNumber
+	                                    + ".\n\n"
+	                                    + e.getMessage(),
+
+	                            "Release Lock",
+
+	                            Messagebox.OK,
+
+	                            Messagebox.ERROR);
+	                }
+	            });
+	}
 	// ============================================================
 	// SAFE STRING
 	// ============================================================

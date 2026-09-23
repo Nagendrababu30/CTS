@@ -8,6 +8,7 @@ import org.zkoss.zk.ui.Execution;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
+import org.zkoss.zk.ui.util.Composer;
 
 import com.cts.admin.model.User;
 
@@ -44,7 +45,8 @@ public class AuthorizationComposer extends GenericForwardComposer<Component> {
 		 *
 		 * /zul/inward-maker/micr-repair-list.zul ↓ Access Denied
 		 */
-		PAGE_PERMISSIONS.put("/zul/inward-maker/micr-repair-list.zul", "Inward Maker");
+		
+		PAGE_PERMISSIONS.put("/zul/inward-maker/micr-repair-l+ist.zul", "Inward Maker");
 
 		/*
 		 * MICR Repair detail page.

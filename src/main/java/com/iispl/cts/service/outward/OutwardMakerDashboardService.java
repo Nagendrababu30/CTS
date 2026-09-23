@@ -143,6 +143,19 @@ public class OutwardMakerDashboardService {
         return returnedCheques;
     }
 
+    public boolean releaseBatchLock(
+            String batchNumber,
+            String userId) throws SQLException {
+
+        if (isEmpty(batchNumber) || isEmpty(userId)) {
+            return false;
+        }
+
+        return dao.releaseBatchLock(
+                batchNumber.trim(),
+                userId.trim()
+        );
+    }
     public ChequeProcessing getChequeProcessing(
             String batchNumber,
             String chequeNumber)

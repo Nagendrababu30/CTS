@@ -82,7 +82,10 @@
 			<separator height="20px" />
 
 
-			<!-- ==================== TABLE PANEL ==================== -->
+            <vlayout
+                width="100%"
+                spacing="0"
+                sclass="table-panel">
 
 			<vlayout width="100%" vflex="1" spacing="0"
 				sclass="table-panel">
@@ -120,8 +123,9 @@
 					Header, filters and pagination remain fixed.
 				-->
 
-				<div width="100%" vflex="1"
-					sclass="batch-scroll-area">
+                <div
+                    width="100%"
+                    sclass="batch-scroll-area">
 
 
 					<!-- ==================== BATCH GRID ==================== -->

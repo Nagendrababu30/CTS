@@ -70,6 +70,8 @@ public class CheckerDashboardDAO {
                 "    AND UPPER(cba.assignment_role) = 'CHECKER' " +
                 "    AND UPPER(cba.assignment_status) IN " +
                 "        ('ASSIGNED', 'IN_PROGRESS') " +
+
+                "WHERE " +
                 "    UPPER(ob.batch_status) IN " +
                 "        ('SUBMITTED_TO_CHECKER', " +
                 "         'READY_FOR_CHECKER', " +
@@ -77,8 +79,8 @@ public class CheckerDashboardDAO {
                 "         'CHECKER_PENDING', " +
                 "         'PENDING_CHECKER', " +
                 "         'CHECKER_PROCESSING') " +
-                "    OR EXISTS ( " +
 
+                "    OR EXISTS ( " +
                 "        SELECT 1 " +
                 "        FROM public.cheque_processing cp " +
 
@@ -94,8 +96,6 @@ public class CheckerDashboardDAO {
                 "              'RE_VERIFIED' " +
 
                 "    ) " +
-
-                ") " +
 
                 "ORDER BY ob.created_at DESC";
 
@@ -1045,6 +1045,8 @@ public class CheckerDashboardDAO {
             );
         }
     }
+    
+    
 
     /*
      * ============================================================

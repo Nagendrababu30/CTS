@@ -611,4 +611,284 @@ public class CheckerAssignmentDAO {
 
         return null;
     }
+    public boolean releaseBatchLock(
+            String batchNumber,
+            long checkerUserId) {
+
+        if (batchNumber == null
+                || batchNumber.trim().isEmpty()) {
+
+            return false;
+        }
+
+        if (checkerUserId <= 0) {
+
+            return false;
+        }
+
+        String cleanBatchNumber =
+                batchNumber.trim();
+
+        try (Connection connection =
+                     CTSStaticData.getConnection()) {
+
+            connection.setAutoCommit(false);
+
+            try {
+
+                // =====================================================
+                // 1. LOCK THE BATCH
+                // =====================================================
+
+                String lockBatchSql =
+                        "SELECT batch_number, batch_status "
+                        + "FROM public.outward_batch "
+                        + "WHERE batch_number = ? "
+                        + "FOR UPDATE";
+
+                String batchStatus = null;
+
+                try (PreparedStatement statement =
+                             connection.prepareStatement(
+                                     lockBatchSql)) {
+
+                    statement.setString(
+                            1,
+                            cleanBatchNumber);
+
+                    try (ResultSet rs =
+                                 statement.executeQuery()) {
+
+                        if (!rs.next()) {
+
+                            connection.rollback();
+                            return false;
+                        }
+
+                        batchStatus =
+                                rs.getString(
+                                        "batch_status");
+                    }
+                }
+
+                // =====================================================
+                // 2. DO NOT RELEASE ON-HOLD BATCH
+                // =====================================================
+
+                if ("ON_HOLD".equalsIgnoreCase(
+                        batchStatus)) {
+
+                    connection.rollback();
+                    return false;
+                }
+
+                // =====================================================
+                // 3. VERIFY CURRENT CHECKER OWNS THE BATCH
+                // =====================================================
+
+                String ownershipSql =
+                        "SELECT id "
+                        + "FROM public.outward_batch_assignment "
+                        + "WHERE batch_number = ? "
+                        + "AND user_id = ? "
+                        + "AND UPPER(TRIM(assignment_role)) = 'CHECKER' "
+                        + "AND UPPER(TRIM(assignment_status)) "
+                        + "IN ('ASSIGNED', 'IN_PROGRESS') "
+                        + "ORDER BY assigned_at DESC "
+                        + "LIMIT 1 "
+                        + "FOR UPDATE";
+
+                Long assignmentId = null;
+
+                try (PreparedStatement statement =
+                             connection.prepareStatement(
+                                     ownershipSql)) {
+
+                    statement.setString(
+                            1,
+                            cleanBatchNumber);
+
+                    statement.setLong(
+                            2,
+                            checkerUserId);
+
+                    try (ResultSet rs =
+                                 statement.executeQuery()) {
+
+                        if (rs.next()) {
+
+                            assignmentId =
+                                    rs.getLong("id");
+                        }
+                    }
+                }
+
+                // Current Checker does not own the batch
+                if (assignmentId == null) {
+
+                    connection.rollback();
+                    return false;
+                }
+
+                // =====================================================
+                // 4. RESET ALL CHEQUE STATUSES
+                //
+                // CHECKER_ACCEPTED
+                // CHECKER_REJECTED
+                // SENT_BACK_TO_MAKER
+                // etc.
+                //
+                //                ↓
+                //
+                //             VERIFIED
+                // =====================================================
+
+                String resetChequeSql =
+                        "UPDATE public.outward_cheque "
+                        + "SET cheque_status = 'VERIFIED' "
+                        + "WHERE batch_number = ?";
+
+                try (PreparedStatement statement =
+                             connection.prepareStatement(
+                                     resetChequeSql)) {
+
+                    statement.setString(
+                            1,
+                            cleanBatchNumber);
+
+                    statement.executeUpdate();
+                }
+
+                // =====================================================
+                // 5. RESET CHEQUE PROCESSING
+                //
+                // Remove previous Checker decisions so the batch
+                // starts completely fresh.
+                // =====================================================
+
+                String deleteProcessingSql =
+                        "DELETE FROM public.cheque_processing "
+                        + "WHERE batch_number = ?";
+
+                try (PreparedStatement statement =
+                             connection.prepareStatement(
+                                     deleteProcessingSql)) {
+
+                    statement.setString(
+                            1,
+                            cleanBatchNumber);
+
+                    statement.executeUpdate();
+                }
+
+                // =====================================================
+                // 6. RESET BATCH STATUS
+                //
+                // Checker takes:
+                //
+                // SUBMITTED_TO_CHECKER
+                //          ↓
+                // CHECKER_PROCESSING
+                //
+                // Release:
+                //
+                // CHECKER_PROCESSING
+                //          ↓
+                // SUBMITTED_TO_CHECKER
+                // =====================================================
+
+                String resetBatchSql =
+                        "UPDATE public.outward_batch "
+                        + "SET batch_status = 'SUBMITTED_TO_CHECKER' "
+                        + "WHERE batch_number = ? "
+                        + "AND UPPER(TRIM(batch_status)) "
+                        + "= 'CHECKER_PROCESSING'";
+
+                try (PreparedStatement statement =
+                             connection.prepareStatement(
+                                     resetBatchSql)) {
+
+                    statement.setString(
+                            1,
+                            cleanBatchNumber);
+
+                    int updatedRows =
+                            statement.executeUpdate();
+
+                    if (updatedRows != 1) {
+
+                        connection.rollback();
+                        return false;
+                    }
+                }
+
+                // =====================================================
+                // 7. RELEASE CHECKER ASSIGNMENT
+                // =====================================================
+
+                String releaseAssignmentSql =
+                        "UPDATE public.outward_batch_assignment "
+                        + "SET assignment_status = 'RELEASED', "
+                        + "completed_at = CURRENT_TIMESTAMP "
+                        + "WHERE id = ? "
+                        + "AND user_id = ? "
+                        + "AND UPPER(TRIM(assignment_role)) = 'CHECKER' "
+                        + "AND UPPER(TRIM(assignment_status)) "
+                        + "IN ('ASSIGNED', 'IN_PROGRESS')";
+
+                try (PreparedStatement statement =
+                             connection.prepareStatement(
+                                     releaseAssignmentSql)) {
+
+                    statement.setLong(
+                            1,
+                            assignmentId);
+
+                    statement.setLong(
+                            2,
+                            checkerUserId);
+
+                    int updatedRows =
+                            statement.executeUpdate();
+
+                    if (updatedRows != 1) {
+
+                        connection.rollback();
+                        return false;
+                    }
+                }
+
+                // =====================================================
+                // 8. COMMIT EVERYTHING
+                // =====================================================
+
+                connection.commit();
+
+                return true;
+
+            } catch (Exception e) {
+
+                try {
+
+                    connection.rollback();
+
+                } catch (Exception rollbackException) {
+
+                    rollbackException.printStackTrace();
+                }
+
+                throw e;
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            throw new RuntimeException(
+                    "Error while releasing Checker batch: "
+                            + cleanBatchNumber,
+                    e);
+        }
+    
+    }
 }

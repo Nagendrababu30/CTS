@@ -72,7 +72,7 @@ public class CaptureOperatorCapturedBatchesController
                     "ERROR: ZK session is NULL.");
 
             Executions.sendRedirect(
-                    "/zul/login.zul");
+                    "/login.zul");
 
             return;
         }
@@ -87,7 +87,7 @@ public class CaptureOperatorCapturedBatchesController
                     "ERROR: userId not found in session.");
 
             Executions.sendRedirect(
-                    "/zul/login.zul");
+                    "/login.zul");
 
             return;
         }
@@ -117,7 +117,7 @@ public class CaptureOperatorCapturedBatchesController
                         + sessionUserId);
 
                 Executions.sendRedirect(
-                        "/zul/login.zul");
+                        "/login.zul");
 
                 return;
             }

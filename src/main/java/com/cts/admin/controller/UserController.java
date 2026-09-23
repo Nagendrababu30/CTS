@@ -37,9 +37,7 @@ public class UserController extends GenericForwardComposer<Component> {
 
 	private static final int PAGE_SIZE = 10;
 
-	// ================================================================
 	// ZUL COMPONENTS
-	// ================================================================
 
 	private Listbox userListbox;
 	private Paging userPaging;
@@ -52,16 +50,12 @@ public class UserController extends GenericForwardComposer<Component> {
 	private Combobox roleFilterCombobox;
 	private Combobox statusFilterCombobox;
 
-	// ================================================================
 	// SERVICES
-	// ================================================================
 
 	private UserService userService;
 	private RoleService roleService;
 
-	// ================================================================
 	// INIT
-	// ================================================================
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
@@ -105,9 +99,7 @@ public class UserController extends GenericForwardComposer<Component> {
 		});
 	}
 
-	// ================================================================
 	// LOAD USERS
-	// ================================================================
 
 	private void loadUsers(int offset) {
 
@@ -172,7 +164,8 @@ public class UserController extends GenericForwardComposer<Component> {
 				/* Status */
 				Listcell statusCell = new Listcell();
 				String userStatus = user.getStatus() != null ? user.getStatus() : "-";
-				String displayStatus = "-".equals(userStatus) ? "-" : ("ACTIVE".equalsIgnoreCase(userStatus) ? "Active" : "Inactive");
+				String displayStatus = "-".equals(userStatus) ? "-"
+						: ("ACTIVE".equalsIgnoreCase(userStatus) ? "Active" : "Inactive");
 				Hbox statusContainer = new Hbox();
 				statusContainer.setSclass("status-container");
 				Label statusLbl = new Label(displayStatus);
@@ -241,9 +234,7 @@ public class UserController extends GenericForwardComposer<Component> {
 		}
 	}
 
-	// ================================================================
 	// BUTTON EVENTS
-	// ================================================================
 
 	public void onClick$createUserButton(Event event) throws Exception {
 		openUserModal(null);
@@ -265,9 +256,7 @@ public class UserController extends GenericForwardComposer<Component> {
 		loadUsers(0);
 	}
 
-	// ================================================================
 	// FILTERS
-	// ================================================================
 
 	private void loadRoleFilter() {
 
@@ -311,9 +300,7 @@ public class UserController extends GenericForwardComposer<Component> {
 		statusFilterCombobox.setSelectedIndex(0);
 	}
 
-	// ================================================================
 	// CREATE / EDIT MODAL
-	// ================================================================
 
 	private void openUserModal(User existingUser) {
 
@@ -521,9 +508,7 @@ public class UserController extends GenericForwardComposer<Component> {
 		window.doModal();
 	}
 
-	// ================================================================
 	// LIVE PASSWORD VALIDATION
-	// ================================================================
 
 	private void updatePasswordValidation(String password, Label passwordHint, boolean editMode) {
 
@@ -563,9 +548,7 @@ public class UserController extends GenericForwardComposer<Component> {
 		}
 	}
 
-	// ================================================================
 	// PASSWORD VISIBILITY
-	// ================================================================
 
 	private void togglePasswordVisibility(Textbox passwordBox, Button passwordEyeButton) {
 
@@ -587,9 +570,7 @@ public class UserController extends GenericForwardComposer<Component> {
 		}
 	}
 
-	// ================================================================
 	// SAVE USER
-	// ================================================================
 
 	private void saveUser(Window window, User existingUser, Textbox usernameBox, Textbox passwordBox,
 			Combobox roleCombo) {
@@ -611,9 +592,7 @@ public class UserController extends GenericForwardComposer<Component> {
 			return;
 		}
 
-		// ================================================================
 		// PASSWORD STRENGTH VALIDATION
-		// ================================================================
 
 		/*
 		 * During edit, an empty password means: Keep the existing password.
@@ -634,9 +613,7 @@ public class UserController extends GenericForwardComposer<Component> {
 			}
 		}
 
-		// ================================================================
 		// ROLE VALIDATION
-		// ================================================================
 
 		if (roleCombo.getSelectedItem() == null) {
 
@@ -649,9 +626,7 @@ public class UserController extends GenericForwardComposer<Component> {
 
 		try {
 
-			// ============================================================
 			// CREATE USER
-			// ============================================================
 
 			if (existingUser == null) {
 
@@ -680,9 +655,7 @@ public class UserController extends GenericForwardComposer<Component> {
 
 			} else {
 
-				// ========================================================
 				// UPDATE USER
-				// ========================================================
 
 				Role role = new Role();
 				role.setRoleId(roleId);
@@ -721,9 +694,7 @@ public class UserController extends GenericForwardComposer<Component> {
 				Messagebox.show("User updated successfully.", "Success", Messagebox.OK, Messagebox.INFORMATION);
 			}
 
-			// ============================================================
 			// REFRESH USER LIST
-			// ============================================================
 
 			window.detach();
 
@@ -741,9 +712,7 @@ public class UserController extends GenericForwardComposer<Component> {
 		}
 	}
 
-	// ================================================================
 	// CHANGE STATUS
-	// ================================================================
 
 	private void changeUserStatus(User user) {
 
@@ -772,9 +741,7 @@ public class UserController extends GenericForwardComposer<Component> {
 				});
 	}
 
-	// ================================================================
 	// DELETE USER
-	// ================================================================
 
 	private void confirmDeleteUser(User user) {
 

@@ -1,1111 +1,715 @@
 @charset "UTF-8";
-        html, body {
-
-            margin: 0 !important;
-
-            padding: 0 !important;
-
-            height: 100% !important;
-
-            background: #F1F5F9;
-
-        }
-
-        .z-window-embedded-cnt,
-
-        .z-window-content {
-
-            padding: 0 !important;
-
-        }
-
-        /* Modern Banking Clean Cards */
-
-        .equal-card {
-
-            background: #FFFFFF !important;
-
-            border: 1px solid #E2E8F0 !important;
-
-            border-radius: 12px !important;
-
-            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
-
-        }
-
-        .equal-card > .z-groupbox-content {
-
-            padding: 16px 20px 20px 20px !important;
-
-            box-sizing: border-box !important;
-
-        }
-
-        /* Header Icon Box */
-
-        .card-header-icon {
-
-            width: 32px;
-
-            height: 32px;
-
-            background: #EFF6FF;
-
-            border: 1px solid #DBEAFE;
-
-            border-radius: 8px;
-
-            display: inline-flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            color: #2563EB;
-
-            font-size: 15px;
-
-            font-weight: 700;
-
-        }
-
-        /* Modern Unified Form Fields */
-
-        input.single-field-box,
-
-        .z-decimalbox.single-field-box {
-
-            height: 36px !important;
-
-            font-size: 13px !important;
-
-            border: 1px solid #CBD5E1 !important;
-
-            border-radius: 6px !important;
-
-            padding: 6px 12px !important;
-
-            color: #0F172A !important;
-
-            background: #F8FAFC !important;
-
-            font-weight: 500 !important;
-
-            box-sizing: border-box !important;
-
-            transition: all 0.15s ease-in-out !important;
-
-        }
-
-        input.single-field-box:focus,
-
-        .z-decimalbox.single-field-box:focus {
-
-            background: #FFFFFF !important;
-
-            border-color: #2563EB !important;
-
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
-
-            outline: none !important;
-
-        }
-
-        /* Unified Datebox */
-
-        .z-datebox.single-field-box {
-
-            height: 36px !important;
-
-            border: 1px solid #CBD5E1 !important;
-
-            border-radius: 6px !important;
-
-            background: #F8FAFC !important;
-
-            display: inline-flex !important;
-
-            align-items: center !important;
-
-            box-sizing: border-box !important;
-
-        }
-
-        .z-datebox.single-field-box:focus-within {
-
-            background: #FFFFFF !important;
-
-            border-color: #2563EB !important;
-
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
-
-        }
-
-        .z-datebox.single-field-box > input.z-datebox-input {
-
-            border: none !important;
-
-            background: transparent !important;
-
-            height: 34px !important;
-
-            font-size: 13px !important;
-
-            font-weight: 500 !important;
-
-            color: #0F172A !important;
-
-            padding-left: 10px !important;
-
-            box-shadow: none !important;
-
-            outline: none !important;
-
-        }
-
-        .z-datebox.single-field-box > a.z-datebox-button {
-
-            border: none !important;
-
-            background: transparent !important;
-
-            height: 34px !important;
-
-            width: 34px !important;
-
-            display: inline-flex !important;
-
-            align-items: center !important;
-
-            justify-content: center !important;
-
-        }
-
-        /* Unified Combobox */
-
-        .z-combobox.single-field-box {
-
-            height: 36px !important;
-
-            border: 1px solid #CBD5E1 !important;
-
-            border-radius: 6px !important;
-
-            background: #F8FAFC !important;
-
-            display: inline-flex !important;
-
-            align-items: center !important;
-
-            box-sizing: border-box !important;
-
-        }
-
-        .z-combobox.single-field-box:focus-within {
-
-            background: #FFFFFF !important;
-
-            border-color: #2563EB !important;
-
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
-
-        }
-
-        .z-combobox.single-field-box > input.z-combobox-input {
-
-            border: none !important;
-
-            background: transparent !important;
-
-            height: 34px !important;
-
-            font-size: 12.5px !important;
-
-            font-weight: 500 !important;
-
-            color: #0F172A !important;
-
-            padding-left: 10px !important;
-
-            box-shadow: none !important;
-
-            outline: none !important;
-
-        }
-
-        /* ============================================================
-
-   CHECKER RETURN INFORMATION PANEL
-
-   Modern card style consistent with Data Entry screen
-
+/* ============================================================
+   GLOBAL RESET & CONTAINER
    ============================================================ */
-
-/* ---------- Card Container ---------- */
-
-.checker-return-card {
-
-    background: #ffffff;
-
-    border: 1px solid #e5e7eb;
-
-    border-radius: 12px;
-
-    padding: 18px 20px;
-
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04),
-
-                0 4px 12px rgba(15, 23, 42, 0.06);
-
-    box-sizing: border-box;
-
-    overflow: hidden;
-
-    transition: box-shadow 0.25s ease, transform 0.25s ease;
-
+:root {
+    --bg-app-1: #F8FAFC;
+    --bg-app-2: #EEF2F6;
 }
 
-.checker-return-card:hover {
-
-    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.05),
-
-                0 8px 24px rgba(15, 23, 42, 0.08);
-
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 100% !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
 }
 
-/* ---------- Header ---------- */
-
-.checker-return-card .checker-return-title {
-
-    font-size: 13px;
-
-    font-weight: 700;
-
-    letter-spacing: 0.6px;
-
-    color: #1f2937;
-
-    text-transform: uppercase;
-
+.data-entry-detail-wrapper {
+    width: 100% !important;
+    height: 100% !important;
+    box-sizing: border-box !important;
+    background:
+        radial-gradient(1200px 600px at 0% 0%, rgba(23, 92, 211, 0.12), transparent 60%),
+        radial-gradient(1000px 600px at 100% 0%, rgba(122, 90, 248, 0.10), transparent 60%),
+        radial-gradient(900px 700px at 100% 100%, rgba(18, 183, 106, 0.07), transparent 60%),
+        linear-gradient(180deg, var(--bg-app-1, #F8FAFC) 0%, var(--bg-app-2, #EEF2F6) 100%) !important;
+    position: relative !important;
+    overflow: hidden !important;
 }
 
-/* ---------- Field Labels ---------- */
-
-.checker-return-card .checker-return-label {
-
-    font-size: 11px;
-
-    font-weight: 600;
-
-    letter-spacing: 0.6px;
-
-    color: #6b7280;
-
-    text-transform: uppercase;
-
+.data-entry-detail-vlayout {
+    background: transparent !important;
+    padding: 16px 24px !important;
+    box-sizing: border-box !important;
+    overflow-y: auto !important;
 }
 
-/* ---------- Field Values ---------- */
-
-.checker-return-card .checker-return-value {
-
-    font-size: 13px;
-
-    font-weight: 500;
-
-    color: #111827;
-
-    line-height: 1.45;
-
-    padding: 8px 12px;
-
-    background: #f9fafb;
-
-    border: 1px solid #eef0f3;
-
-    border-radius: 8px;
-
-    box-sizing: border-box;
-
-    word-break: break-word;
-
-    white-space: pre-wrap;
-
+/* ============================================================
+   MODERN BANKING CLEAN CARDS
+   ============================================================ */
+.equal-card {
+    background: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+    padding: 0 20px 20px 20px !important; /* Top padding set to 0 to eliminate top space */
+    box-sizing: border-box !important;
+    min-height: calc(100vh - 195px) !important;
+    display: flex !important;
+    flex-direction: column !important;
 }
 
-/* Highlighted accent for reason (left orange bar) */
-
-#checkerReasonLabel {
-
-    border-left: 3px solid #C2410C;
-
-    background: #fff7ed;
-
-    color: #7c2d12;
-
-    font-weight: 600;
-
+/* Header inside equal-card starts immediately at top edge */
+.equal-card > .z-vlayout {
+    gap: 8px !important;
+    padding-top: 12px !important;
 }
 
-/* Remarks keeps a soft neutral look */
-
-#checkerRemarksLabel {
-
-    background: #f9fafb;
-
-    color: #374151;
-
-    min-height: 48px;
-
+.equal-card .z-vlayout:last-child {
+    margin-top: 10px !important;
+    gap: 8px !important;
 }
 
-/* ---------- Header Icon accent ---------- */
-
-.checker-return-card .z-label[style*="C2410C"] {
-
+/* Card Header */
+.card-header-icon {
+    width: 32px !important;
+    height: 32px !important;
+    background: #EFF6FF;
+    border: 1px solid #DBEAFE;
+    border-radius: 8px !important;
     display: inline-flex;
-
     align-items: center;
-
     justify-content: center;
-
-    width: 22px;
-
-    height: 22px;
-
-    border-radius: 6px;
-
-    background: #fff1e6;
-
-    line-height: 1;
-
 }
 
-/* ---------- Layout helpers ---------- */
-
-.checker-return-card .z-vlayout,
-
-.checker-return-card .z-hlayout {
-
-    box-sizing: border-box;
-
-}
-
-/* Slightly tighter spacing for inner field groups */
-
-.checker-return-card .z-vlayout > .z-vlayout {
-
-    margin-top: 2px;
-
-}
-
-/* ---------- Responsive tweak ---------- */
-
-@media (max-width: 480px) {
-
-    .checker-return-card {
-
-        padding: 14px 14px;
-
-        border-radius: 10px;
-
-    }
-
-    .checker-return-card .checker-return-value {
-
-        font-size: 12px;
-
-        padding: 7px 10px;
-
-    }
-
-}
-
-        .z-combobox.single-field-box > a.z-combobox-button {
-
-            border: none !important;
-
-            background: transparent !important;
-
-            height: 34px !important;
-
-            width: 32px !important;
-
-            display: inline-flex !important;
-
-            align-items: center !important;
-
-            justify-content: center !important;
-
-        }
-
-        /* Field Labels */
-
-        .single-field-label {
-
-            font-size: 11px !important;
-
-            font-weight: 700 !important;
-
-            color: #475569 !important;
-
-            letter-spacing: 0.3px;
-
-        }
-
-        .label-star {
-
-            color: #EF4444 !important;
-
-            font-weight: 700 !important;
-
-            font-size: 11px !important;
-
-            margin-left: 2px;
-
-        }
-
-        /* Toolbar Buttons */
-
-        .icon-symbol-btn {
-
-            background: #FFFFFF !important;
-
-            border: 1px solid #CBD5E1 !important;
-
-            border-radius: 6px !important;
-
-            color: #334155 !important;
-
-            font-size: 16px !important;
-
-            font-weight: bold !important;
-
-            cursor: pointer !important;
-
-            height: 32px !important;
-
-            width: 32px !important;
-
-            display: inline-flex !important;
-
-            align-items: center !important;
-
-            justify-content: center !important;
-
-            transition: all 0.15s ease !important;
-
-        }
-
-        .icon-symbol-btn:hover {
-
-            background: #F1F5F9 !important;
-
-            border-color: #94A3B8 !important;
-
-            color: #0F172A !important;
-
-        }
-
-        /* =====================================================
-
-           CHECKER RETURN INFORMATION
-
-           ===================================================== */
-
-        .checker-return-card {
-
-            background: #FFF7ED !important;
-
-            border: 1px solid #FED7AA !important;
-
-            border-radius: 8px !important;
-
-            padding: 12px !important;
-
-            box-sizing: border-box !important;
-
-        }
-
-        .checker-return-title {
-
-            font-size: 11px !important;
-
-            font-weight: 700 !important;
-
-            color: #9A3412 !important;
-
-            letter-spacing: 0.3px;
-
-        }
-
-        .checker-return-label {
-
-            font-size: 10px !important;
-
-            font-weight: 700 !important;
-
-            color: #7C2D12 !important;
-
-            letter-spacing: 0.2px;
-
-        }
-
-        .checker-return-value {
-
-            font-size: 12px !important;
-
-            font-weight: 600 !important;
-
-            color: #431407 !important;
-
-            background: #FFFFFF !important;
-
-            border: 1px solid #FED7AA !important;
-
-            border-radius: 5px !important;
-
-            padding: 6px 8px !important;
-
-            box-sizing: border-box !important;
-
-        }
-
-/* ============================================================
-   HEADER STRIP - INLINE STYLES EXTRACTED
-   ============================================================ */
-
-.data-entry-detail-header-strip {
-
-    width: 100%;
-
-    display: flex;
-
-    align-items: center;
-
-}
-
-/* Batch label - "Batch No :" */
-
-.batch-label-text {
-
-    font-size: 13px;
-
-    font-weight: 600;
-
-    color: #64748B;
-
-}
-
-/* Batch ID label */
-
-.batch-id-text {
-
-    font-size: 13px;
-
-    font-weight: 700;
-
-    color: #1E293B;
-
-}
-
-/* Progress label - "Cheque X of Y" */
-
-.cheque-progress-text {
-
-    font-size: 13px;
-
-    font-weight: 700;
-
-    color: #2563EB;
-
-}
-
-/* ============================================================
-   METRIC PILLS - EXTRACTED INLINE STYLES
-   ============================================================ */
-
-.metric-pill-base {
-
-    border-radius: 16px;
-
-    padding: 4px 14px;
-
-    display: inline-flex;
-
-    align-items: center;
-
-}
-
-.metric-pill-label {
-
-    font-size: 11px;
-
-    font-weight: 600;
-
-}
-
-.metric-pill-value {
-
-    font-size: 12px;
-
-    font-weight: 700;
-
-    margin-left: 4px;
-
-}
-
-/* Total Pill */
-
-.metric-pill-total {
-
-    background: #F8FAFC;
-
-    border: 1px solid #E2E8F0;
-
-}
-
-.metric-pill-total .metric-pill-label {
-
-    color: #64748B;
-
-}
-
-.metric-pill-total .metric-pill-value {
-
-    color: #0F172A;
-
-}
-
-/* Completed Pill */
-
-.metric-pill-completed {
-
-    background: #ECFDF5;
-
-    border: 1px solid #A7F3D0;
-
-}
-
-.metric-pill-completed .metric-pill-label {
-
-    color: #047857;
-
-}
-
-.metric-pill-completed .metric-pill-value {
-
-    color: #065F46;
-
-}
-
-/* Reject Pill */
-
-.metric-pill-reject {
-
-    background: #FFF1F2;
-
-    border: 1px solid #FECDD3;
-
-}
-
-.metric-pill-reject .metric-pill-label {
-
-    color: #BE123C;
-
-}
-
-.metric-pill-reject .metric-pill-value {
-
-    color: #9F1239;
-
-}
-
-/* Pending Pill */
-
-.metric-pill-pending {
-
-    background: #FFFBEB;
-
-    border: 1px solid #FDE68A;
-
-}
-
-.metric-pill-pending .metric-pill-label {
-
-    color: #B45309;
-
-}
-
-.metric-pill-pending .metric-pill-value {
-
-    color: #92400E;
-
-}
-
-/* ============================================================
-   CARD HEADER TEXT - EXTRACTED INLINE STYLES
-   ============================================================ */
-
-.card-header-title {
-
-    font-size: 14px;
-
-    font-weight: 700;
-
-    color: #1E293B;
-
-}
-
-.card-header-subtitle {
-
-    font-size: 11.5px;
-
-    color: #64748B;
-
+.card-header-icon-yellow {
+    background: #FEF3C7 !important;
+    border: 1px solid #FDE68A !important;
 }
 
 .card-header-emoji {
+    font-size: 14px !important;
+}
 
-    font-size: 14px;
+.card-header-title {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #0F172A !important;
+}
 
+.card-header-subtitle {
+    font-size: 11.5px !important;
+    color: #64748B !important;
 }
 
 /* ============================================================
-   IMAGE CONTAINER - EXTRACTED INLINE STYLES
+   HEADER STRIP & 3-PART EQUAL DISTRIBUTION
    ============================================================ */
-
-.cheque-image-container {
-
-    width: 100%;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    background: #F8FAFC;
-
-    border: 1px solid #E2E8F0;
-
-    border-radius: 8px;
-
-    overflow: hidden;
-
-    padding: 4px;
-
-    box-sizing: border-box;
-
+.data-entry-detail-header-strip {
+    background: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 8px !important;
+    padding: 12px 20px !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
 }
 
-.cheque-image-element {
-
-    max-width: 100%;
-
-    max-height: 100%;
-
-    width: 100%;
-
-    height: 100%;
-
-    object-fit: contain;
-
-    display: block !important;
-
-    margin: auto;
-
+/* Left: Back Button + Batch Number */
+.header-strip-left {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex: 1 1 0 !important;
+    justify-content: flex-start !important;
+    white-space: nowrap !important;
 }
 
-.cheque-image-back {
-
-    display: none !important;
-
-    width: 0;
-
-    height: 0;
-
-    visibility: hidden;
-
-}
-
-/* ============================================================
-   BUTTONS - EXTRACTED INLINE STYLES
-   ============================================================ */
-
-.btn-view-back {
-
-    background: #2563EB !important;
-
-    color: #FFFFFF !important;
-
-    border: none !important;
-
-    font-size: 12px !important;
-
-    font-weight: 600 !important;
-
+.btn-back-to-list {
+    background: #FFFFFF !important;
+    border: 1px solid #CBD5E1 !important;
     border-radius: 6px !important;
-
+    color: #475569 !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
     cursor: pointer !important;
-
+    width: 30px !important;
+    height: 30px !important;
+    padding: 0 !important;
+    line-height: 28px !important;
+    margin-right: 6px !important;
 }
 
-.btn-prev {
-
-    background: #2563EB !important;
-
-    color: #FFFFFF !important;
-
-    border: none !important;
-
-    font-size: 12px !important;
-
+.batch-label-text {
+    font-size: 12.5px !important;
     font-weight: 600 !important;
-
-    border-radius: 6px !important;
-
-    cursor: pointer !important;
-
+    color: #64748B !important;
 }
 
-.btn-save-next {
-
-    background: #2563EB !important;
-
-    color: #FFFFFF !important;
-
-    border: none !important;
-
-    font-size: 12px !important;
-
-    font-weight: 600 !important;
-
-    border-radius: 6px !important;
-
-    cursor: pointer !important;
-
+.batch-id-text {
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    color: #2563EB !important;
 }
 
-.btn-reject-request {
+/* Center: Metric Pills Group */
+.metric-pills-wrap {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 16px !important;
+    flex: 2 1 auto !important;
+}
 
+/* Right: Cheque Progress */
+.header-strip-right {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    flex: 1 1 0 !important;
+    white-space: nowrap !important;
+}
+
+.cheque-progress-text {
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    color: #2563EB !important;
+}
+
+/* Base Pill */
+.metric-pill-base {
+    padding: 6px 14px !important;
+    border-radius: 14px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    margin: 0 !important;
+}
+
+.metric-pill-label {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+}
+
+.metric-pill-value {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    margin-left: 6px !important;
+}
+
+/* Pill Colors */
+.metric-pill-total {
+    background: #F1F5F9 !important;
+    border: 1px solid #E2E8F0 !important;
+}
+.metric-pill-total .metric-pill-label,
+.metric-pill-total .metric-pill-value {
+    color: #475569 !important;
+}
+
+.metric-pill-completed {
+    background: #ECFDF5 !important;
+    border: 1px solid #A7F3D0 !important;
+}
+.metric-pill-completed .metric-pill-label,
+.metric-pill-completed .metric-pill-value {
+    color: #047857 !important;
+}
+
+.metric-pill-reject {
     background: #FFF1F2 !important;
-
-    color: #BE123C !important;
-
     border: 1px solid #FECDD3 !important;
+}
+.metric-pill-reject .metric-pill-label,
+.metric-pill-reject .metric-pill-value {
+    color: #BE123C !important;
+}
 
-    font-size: 12px !important;
-
-    font-weight: 600 !important;
-
-    border-radius: 6px !important;
-
-    cursor: pointer !important;
-
+.metric-pill-pending {
+    background: #FFFBEB !important;
+    border: 1px solid #FDE68A !important;
+}
+.metric-pill-pending .metric-pill-label,
+.metric-pill-pending .metric-pill-value {
+    color: #B45309 !important;
 }
 
 /* ============================================================
-   MODAL WINDOW - EXTRACTED INLINE STYLES
+   CHEQUE IMAGE VIEWPORT
    ============================================================ */
+.cheque-image-container {
+    width: 100% !important;
+    height: 380px !important;
+    min-height: 380px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    padding: 10px !important;
+    box-sizing: border-box !important;
+    margin-top: 2px !important;
+    margin-bottom: 6px !important;
+}
 
+.cheque-image-element,
+.cheque-image-back {
+    max-width: 100% !important;
+    max-height: 100% !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+    border-radius: 4px !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
+    margin: auto !important;
+}
+
+/* Prevent hidden image from taking up container space */
+.cheque-image-container > image[style*="display: none"],
+.cheque-image-container > .z-image[style*="display: none"] {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    position: absolute !important;
+}
+
+/* Toolbar Buttons */
+.btn-view-back {
+    background: #2563EB !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 6px !important;
+    height: 34px !important;
+    width: 100px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+}
+
+.icon-symbol-btn {
+    background: #FFFFFF !important;
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 6px !important;
+    color: #334155 !important;
+    font-size: 15px !important;
+    font-weight: bold !important;
+    cursor: pointer !important;
+    height: 34px !important;
+    width: 34px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+}
+
+/* ============================================================
+   FORM FIELDS
+   ============================================================ */
+.single-field-label {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #475569 !important;
+    letter-spacing: 0.35px !important;
+    margin-bottom: 2px !important;
+}
+
+.label-star {
+    color: #EF4444 !important;
+    font-weight: 700 !important;
+    font-size: 11.5px !important;
+    margin-left: 2px !important;
+}
+
+input.single-field-box,
+.z-decimalbox.single-field-box {
+    height: 38px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: #0F172A !important;
+    background: #FFFFFF !important;
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 6px !important;
+    padding: 6px 12px !important;
+    box-sizing: border-box !important;
+}
+
+input.single-field-box:focus,
+.z-decimalbox.single-field-box:focus {
+    border-color: #2563EB !important;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12) !important;
+    outline: none !important;
+}
+
+/* Datebox */
+.form-field-datebox {
+    height: 38px !important;
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 6px !important;
+    background: #FFFFFF !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+}
+
+.form-field-datebox > input.z-datebox-input {
+    border: none !important;
+    height: 36px !important;
+    font-size: 13px !important;
+    color: #0F172A !important;
+    padding-left: 10px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.form-field-datebox > a.z-datebox-button {
+    border: none !important;
+    background: transparent !important;
+    height: 36px !important;
+    width: 34px !important;
+}
+
+/* Combobox */
+.z-combobox.single-field-box {
+    height: 38px !important;
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 6px !important;
+    background: #FFFFFF !important;
+    display: inline-flex !important;
+    align-items: center !important;
+}
+
+.z-combobox.single-field-box > input.z-combobox-input {
+    border: none !important;
+    background: transparent !important;
+    height: 36px !important;
+    font-size: 13px !important;
+    color: #0F172A !important;
+    padding-left: 10px !important;
+}
+
+.z-combobox.single-field-box > a.z-combobox-button {
+    border: none !important;
+    background: transparent !important;
+    height: 36px !important;
+    width: 34px !important;
+}
+
+/* ============================================================
+   ACTION BUTTONS
+   ============================================================ */
+.btn-prev-pill {
+    background: #E2E8F0 !important;
+    color: #94A3B8 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: not-allowed !important;
+    height: 38px !important;
+}
+
+.btn-save-pill {
+    background: #2563EB !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    height: 38px !important;
+}
+
+.btn-reject-card {
+    background: #FFF1F2 !important;
+    color: #BE123C !important;
+    border: 1px solid #FECDD3 !important;
+    border-radius: 6px !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    height: 36px !important;
+}
+
+/* ============================================================
+   CHECKER RETURN PANEL
+   ============================================================ */
+.checker-return-card {
+    background: #FFF7ED !important;
+    border: 1px solid #FED7AA !important;
+    border-radius: 8px !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+}
+
+.checker-return-title {
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #9A3412 !important;
+}
+
+.checker-return-label {
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    color: #7C2D12 !important;
+}
+
+.checker-return-value {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #431407 !important;
+    background: #FFFFFF !important;
+    border: 1px solid #FED7AA !important;
+    border-radius: 5px !important;
+    padding: 6px 8px !important;
+    box-sizing: border-box !important;
+}
+
+/* ============================================================
+   REJECTION MODAL
+   ============================================================ */
 .reject-modal-window {
-
     background: #FFFFFF;
-
     border-radius: 10px;
-
-    box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08);
-
+    box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.12);
     border: 1px solid #E2E8F0;
-
     overflow: hidden;
-
+    min-width: 420px !important;
 }
 
 .modal-header {
-
     padding: 14px 20px;
-
-    background: #FFFFFF;
-
     border-bottom: 1px solid #F1F5F9;
-
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
-
 }
 
 .modal-header-icon {
-
     width: 26px;
-
     height: 26px;
-
     border-radius: 6px;
-
     background: #FFF1F2;
-
     border: 1px solid #FECDD3;
-
     display: flex;
-
     align-items: center;
-
     justify-content: center;
-
-    font-size: 13px;
-
     color: #BE123C;
-
     font-weight: 700;
-
-    line-height: 1;
-
 }
 
 .modal-header-title {
-
     font-size: 14px;
-
     font-weight: 700;
-
     color: #0F172A;
-
-    letter-spacing: -0.2px;
-
 }
 
 .modal-close-button {
-
     background: transparent !important;
-
     border: none !important;
-
     color: #94A3B8 !important;
-
-    font-size: 13px !important;
-
-    font-weight: 700 !important;
-
     cursor: pointer !important;
-
-    padding: 2px 6px !important;
-
-    line-height: 1 !important;
-
 }
 
 .modal-body {
-
-    padding: 18px 20px 20px 20px;
-
+    padding: 18px 20px;
 }
 
 .modal-section-label {
-
     font-size: 11px;
-
     font-weight: 700;
-
     color: #475569;
-
-    letter-spacing: 0.3px;
-
 }
 
 .modal-section-optional {
-
     font-size: 10px;
-
-    font-weight: 600;
-
     color: #94A3B8;
-
-    margin-left: 4px;
-
 }
 
 .modal-textarea {
-
     font-size: 12.5px;
-
-    color: #0F172A;
-
-    line-height: 1.4;
-
     padding: 8px 10px;
-
     border: 1px solid #CBD5E1;
-
     border-radius: 6px;
-
     background: #F8FAFC;
-
-    resize: none;
-
     box-sizing: border-box;
-
     font-family: inherit;
-
 }
 
+/* ============================================================
+   MODAL FOOTER
+   ============================================================ */
 .modal-footer {
+    padding: 14px 20px !important;
+    background: #F8FAFC !important;
+    border-top: 1px solid #E2E8F0 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
 
-    padding: 12px 20px;
-
-    background: #F8FAFC;
-
-    border-top: 1px solid #E2E8F0;
-
-    display: flex;
-
-    justify-content: center;
-
-    align-items: center;
-
+.modal-footer-layout {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
 }
 
 .modal-button-cancel {
-
-    background: #FFFFFF !important;
-
-    color: #334155 !important;
-
-    border: 1px solid #CBD5E1 !important;
-
-    border-radius: 6px !important;
-
+    height: 32px !important;
+    line-height: 30px !important;
+    padding: 0 16px !important;
     font-size: 12px !important;
-
+    background: #FFFFFF !important;
+    color: #334155 !important;
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 6px !important;
     font-weight: 600 !important;
-
     cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
 
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
-
+.modal-button-cancel:hover {
+    background: #F1F5F9 !important;
 }
 
 .modal-button-confirm {
-
-    background: #BE123C !important;
-
-    color: #FFFFFF !important;
-
-    border: none !important;
-
-    border-radius: 6px !important;
-
+    height: 32px !important;
+    line-height: 32px !important;
+    padding: 0 16px !important;
     font-size: 12px !important;
-
+    background: #BE123C !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 6px !important;
     font-weight: 600 !important;
-
     cursor: pointer !important;
-
-    box-shadow: 0 1px 2px rgba(190, 18, 60, 0.25) !important;
-
+    white-space: nowrap !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
+.modal-button-confirm:hover {
+    background: #9F1239 !important;
+}
+
+/* ============================================================
+   COLLAPSE HIDDEN CHECKER RETURN PANEL COMPLETELY
+   ============================================================ */
+#checkerReturnInformationPanel[style*="display: none"],
+.checker-return-card[style*="display: none"],
+.z-vlayout:has(> #checkerReturnInformationPanel[style*="display: none"]) {
+    display: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 0 !important;
+}
+
+.data-entry-detail-vlayout > .z-vlayout-inner:nth-child(2):empty,
+.data-entry-detail-vlayout > .z-vlayout-inner:has(#checkerReturnInformationPanel[style*="display: none"]) {
+    display: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* ============================================================
+   TOTAL FIX FOR ZK DATEBOX CALENDAR POPUP & HEADER BAR
+   ============================================================ */
+.z-datebox-popup,
+.z-datebox-pp,
+.z-datebox-shadow,
+.z-calendar {
+    width: 280px !important;
+    min-width: 280px !important;
+    max-width: 280px !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: #FFFFFF !important;
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.18) !important;
+    padding: 8px !important;
+    box-sizing: border-box !important;
+    z-index: 99999 !important;
+}
+
+.z-calendar-header {
+    height: 38px !important;
+    min-height: 38px !important;
+    line-height: 38px !important;
+    display: block !important;
+    position: relative !important;
+    border-bottom: 1px solid #E2E8F0 !important;
+    margin-bottom: 6px !important;
+    padding: 0 4px !important;
+    box-sizing: border-box !important;
+}
+
+.z-calendar-header table {
+    width: 100% !important;
+    height: 38px !important;
+    display: table !important;
+}
+
+.z-calendar-header tr {
+    display: table-row !important;
+    height: 38px !important;
+}
+
+.z-calendar-header td {
+    display: table-cell !important;
+    vertical-align: middle !important;
+    height: 38px !important;
+    line-height: 38px !important;
+}
+
+.z-calendar-title,
+.z-calendar-text {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #0F172A !important;
+    text-align: center !important;
+    line-height: 38px !important;
+}
+
+.z-calendar-icon,
+.z-calendar-prev,
+.z-calendar-next {
+    cursor: pointer !important;
+    color: #475569 !important;
+    font-size: 14px !important;
+    line-height: 38px !important;
+    height: 38px !important;
+    display: inline-block !important;
+}
+
+.z-calendar-body,
+.z-calendar-body table {
+    width: 100% !important;
+    display: table !important;
+    table-layout: fixed !important;
+    border-collapse: separate !important;
+    border-spacing: 2px !important;
+}
+
+.z-calendar-body tr {
+    display: table-row !important;
+    height: 30px !important;
+}
+
+.z-calendar-cell,
+.z-calendar-body td {
+    display: table-cell !important;
+    width: 34px !important;
+    height: 28px !important;
+    line-height: 28px !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    font-size: 12px !important;
+    border-radius: 4px !important;
+    padding: 0 !important;
+}
+
+.z-calendar-selected {
+    background: #2563EB !important;
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+}

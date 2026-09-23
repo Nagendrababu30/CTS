@@ -1040,71 +1040,40 @@ public class OutwardMakerDataEntryDetailDAO {
     }
 
 
-    // =========================================================
-    // GET RETURN REASONS
-    // =========================================================
-
     public Map<String, String> getReturnReasons() {
 
-        Map<String, String> reasons =
-                new LinkedHashMap<>();
-
+        Map<String, String> reasons = new LinkedHashMap<>();
 
         String sql =
-                "SELECT reason_code, reason_name "
+                "SELECT reason_code "
               + "FROM public.return_reason_master "
               + "WHERE active = true "
-              + "ORDER BY reason_name ASC";
+              + "ORDER BY reason_code ASC";
 
-
-        try (Connection con =
-                     dataSource.getConnection();
-
-             PreparedStatement ps =
-                     con.prepareStatement(sql);
-
-             ResultSet rs =
-                     ps.executeQuery()) {
-
+        try (Connection con = dataSource.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-
-                String code =
-                        rs.getString(
-                                "reason_code"
-                        );
-
-
-                String name =
-                        rs.getString(
-                                "reason_name"
-                        );
-
-
-                reasons.put(
-                        code,
-                        name
-                );
+                String code = rs.getString("reason_code");
+                if (code != null && !code.trim().isEmpty()) {
+                    reasons.put(code.trim(), code.trim());
+                }
             }
-
 
             System.out.println(
                     "[DEBUG-CTS] Successfully loaded "
                     + reasons.size()
-                    + " return reasons from database."
+                    + " return reason codes from database."
             );
 
-
         } catch (Exception e) {
-
             System.err.println(
                     "[DEBUG-CTS] Failed to load return reasons: "
                     + e.getMessage()
             );
-
             e.printStackTrace();
         }
-
 
         return reasons;
     }

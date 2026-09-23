@@ -44,40 +44,147 @@ public class CheckerReportsController
     }
 
     // ================================================================
-    // GET ARCHIVE DIRECTORY
+    // GET PROJECT ARCHIVE DIRECTORY
     // ================================================================
-   
-    
-    
-    private Path getArchiveDirectory(
-            String folderName) throws Exception {
 
-        Path projectDirectory =
-                Paths.get(System.getProperty("user.dir"));
+    private Path getArchiveDirectory(String folderName)
+            throws Exception {
 
-        Path archiveDirectory =
-                projectDirectory
-                        .resolve("src")
-                        .resolve("main")
-                        .resolve("webapp")
-                        .resolve("css")
-                        .resolve("outward")
-                        .resolve("Archive")
-                        .resolve(folderName);
+        /*
+         * Get the deployed web application path.
+         *
+         * Example:
+         * C:\Users\ginja\eclipse-workspace\.metadata\
+         * .plugins\org.eclipse.wst.server.core\tmp1\
+         * wtpwebapps\CTS_OUTWARD
+         */
+        String deployedPath = Executions.getCurrent()
+                .getDesktop()
+                .getWebApp()
+                .getRealPath("/");
 
-        Files.createDirectories(archiveDirectory);
+        if (deployedPath == null) {
+            throw new Exception(
+                    "Unable to determine deployed application path.");
+        }
 
+        Path deployedRoot =
+                Paths.get(deployedPath).toAbsolutePath().normalize();
+
+        System.out.println();
         System.out.println("========================================");
-        System.out.println("ARCHIVE DIRECTORY");
-        System.out.println("Folder    : " + folderName);
-        System.out.println("Full Path : "
-                + archiveDirectory.toAbsolutePath());
-        System.out.println("Exists    : "
-                + Files.exists(archiveDirectory));
+        System.out.println("PROJECT ARCHIVE LOCATION");
+        System.out.println("========================================");
+        System.out.println("Deployed application:");
+        System.out.println(deployedRoot);
+
+        /*
+         * The Eclipse WTP deployed application is normally:
+         *
+         * <workspace>\.metadata\.plugins\
+         * org.eclipse.wst.server.core\tmp1\wtpwebapps\
+         * <project>
+         *
+         * We need to go back to the Eclipse workspace.
+         */
+
+        Path workspaceRoot = deployedRoot;
+
+        while (workspaceRoot != null
+                && workspaceRoot.getParent() != null) {
+
+            Path fileName =
+                    workspaceRoot.getFileName();
+
+            if (fileName != null
+                    && ".metadata".equalsIgnoreCase(
+                            fileName.toString())) {
+
+                workspaceRoot =
+                        workspaceRoot.getParent();
+
+                break;
+            }
+
+            workspaceRoot =
+                    workspaceRoot.getParent();
+        }
+
+        if (workspaceRoot == null) {
+            throw new Exception(
+                    "Unable to locate Eclipse workspace.");
+        }
+
+        System.out.println("Eclipse workspace:");
+        System.out.println(workspaceRoot);
+
+        /*
+         * Get project name from deployed application.
+         */
+        Path projectNamePath =
+                deployedRoot.getFileName();
+
+        if (projectNamePath == null) {
+            throw new Exception(
+                    "Unable to determine project name.");
+        }
+
+        String projectName =
+                projectNamePath.toString();
+
+        System.out.println("Project name:");
+        System.out.println(projectName);
+
+        /*
+         * Source project directory:
+         *
+         * <workspace>\<project>
+         */
+        Path projectRoot =
+                workspaceRoot.resolve(projectName);
+
+        System.out.println("Project root:");
+        System.out.println(projectRoot);
+
+        /*
+         * Final location:
+         *
+         * <project>
+         *   \src
+         *     \main
+         *       \webapp
+         *         \css
+         *           \outward
+         *             \Archive
+         *               \<folderName>
+         */
+        Path archiveDirectory =
+                projectRoot.resolve(
+                        Paths.get(
+                                "src",
+                                "main",
+                                "webapp",
+                                "css",
+                                "outward",
+                                "Archive",
+                                folderName));
+
+        Files.createDirectories(
+                archiveDirectory);
+
+        System.out.println("Archive directory:");
+        System.out.println(
+                archiveDirectory.toAbsolutePath());
+
         System.out.println("========================================");
 
         return archiveDirectory;
     }
+
+    // ================================================================
+    // LOAD REPORT BATCHES
+    // ================================================================
+
     private void loadReportBatches() {
 
         try {
@@ -105,9 +212,11 @@ public class CheckerReportsController
                 Label batchLabel =
                         new Label(batchNumber);
 
-                batchCell.appendChild(batchLabel);
+                batchCell.appendChild(
+                        batchLabel);
 
-                item.appendChild(batchCell);
+                item.appendChild(
+                        batchCell);
 
                 // =====================================================
                 // TOTAL CHEQUES
@@ -118,10 +227,11 @@ public class CheckerReportsController
                                 String.valueOf(
                                         batch.getNumberOfCheques()));
 
-                item.appendChild(totalCell);
+                item.appendChild(
+                        totalCell);
 
                 // =====================================================
-                // CFX / VALID XML
+                // VALID XML
                 // =====================================================
 
                 Listcell validCell =
@@ -145,10 +255,11 @@ public class CheckerReportsController
                 validCell.appendChild(
                         validButton);
 
-                item.appendChild(validCell);
+                item.appendChild(
+                        validCell);
 
                 // =====================================================
-                // RRF / REJECTED XML
+                // REJECTED XML
                 // =====================================================
 
                 Listcell rejectedCell =
@@ -176,9 +287,11 @@ public class CheckerReportsController
                 rejectedCell.appendChild(
                         rejectedButton);
 
-                item.appendChild(rejectedCell);
+                item.appendChild(
+                        rejectedCell);
 
-                reportList.appendChild(item);
+                reportList.appendChild(
+                        item);
             }
 
         } catch (Exception e) {
@@ -209,6 +322,7 @@ public class CheckerReportsController
                 "          VALID XML DOWNLOAD STARTED");
         System.out.println(
                 "================================================");
+
         System.out.println(
                 "Batch number:");
         System.out.println(
@@ -280,32 +394,34 @@ public class CheckerReportsController
                     fileName);
 
             // =========================================================
-            // STEP 3 - SAVE XML TO SERVER ARCHIVE
+            // STEP 3 - SAVE XML INSIDE PROJECT
             // =========================================================
 
             System.out.println();
             System.out.println(
-                    "STEP 3 -> Saving XML to ValidCheques archive");
+                    "STEP 3 -> Saving XML internally");
 
             Path archiveDirectory =
-                    getArchiveDirectory("ValidCheques");
+                    getArchiveDirectory(
+                            "ValidCheques");
 
-            Path filePath =
-                    archiveDirectory.resolve(fileName);
+            Path internalFilePath =
+                    archiveDirectory.resolve(
+                            fileName);
 
             Files.write(
-                    filePath,
+                    internalFilePath,
                     xmlBytes);
 
+            System.out.println(
+                    "XML saved internally.");
 
             System.out.println(
-                    "XML archived successfully.");
+                    "Internal file path:");
 
             System.out.println(
-                    "XML archive location:");
-
-            System.out.println(
-                    filePath.toAbsolutePath());
+                    internalFilePath
+                            .toAbsolutePath());
 
             // =========================================================
             // STEP 4 - DOWNLOAD XML TO BROWSER
@@ -443,11 +559,6 @@ public class CheckerReportsController
 
     // ================================================================
     // DOWNLOAD REJECTED XML
-    // RRF
-    //
-    // Only rejected cheques are included.
-    // This XML is NOT sent to NPCI.
-    // It is the RRF file.
     // ================================================================
 
     private void downloadRejectedXml(
@@ -471,7 +582,7 @@ public class CheckerReportsController
         try {
 
             // =========================================================
-            // STEP 1 - GET RRF CHEQUES
+            // STEP 1 - GET REJECTED CHEQUES
             // =========================================================
 
             System.out.println();
@@ -519,34 +630,37 @@ public class CheckerReportsController
                     batchNumber + ".xml";
 
             // =========================================================
-            // STEP 3 - SAVE RRF XML TO SERVER ARCHIVE
+            // STEP 3 - SAVE RRF XML INSIDE PROJECT
             // =========================================================
 
             System.out.println();
             System.out.println(
-                    "STEP 3 -> Saving RRF XML to RejectedCheques archive");
+                    "STEP 3 -> Saving RRF XML internally");
 
             Path archiveDirectory =
-                    getArchiveDirectory("RejectedCheques");
+                    getArchiveDirectory(
+                            "RejectedCheques");
 
-            Path filePath =
-                    archiveDirectory.resolve(fileName);
+            Path internalFilePath =
+                    archiveDirectory.resolve(
+                            fileName);
 
             Files.write(
-                    filePath,
+                    internalFilePath,
                     xmlBytes);
 
             System.out.println(
-                    "RRF XML archived successfully.");
+                    "RRF XML saved internally.");
 
             System.out.println(
-                    "RRF XML archive location:");
+                    "Internal file path:");
 
             System.out.println(
-                    filePath.toAbsolutePath());
+                    internalFilePath
+                            .toAbsolutePath());
 
             // =========================================================
-            // STEP 4 - DOWNLOAD RRF TO BROWSER
+            // STEP 4 - DOWNLOAD RRF
             // =========================================================
 
             System.out.println();
@@ -638,9 +752,10 @@ public class CheckerReportsController
 
         for (OutwardCheque cheque : cheques) {
 
-            if (cheque != null &&
-                    "CHECKER_ACCEPTED".equalsIgnoreCase(
-                            cheque.getChequeStatus())) {
+            if (cheque != null
+                    && "CHECKER_ACCEPTED"
+                            .equalsIgnoreCase(
+                                    cheque.getChequeStatus())) {
 
                 validCount++;
             }
@@ -667,21 +782,26 @@ public class CheckerReportsController
 
         xml.append(
                 "    <BatchNumber>")
-                .append(xmlValue(batchNumber))
-                .append("</BatchNumber>\n");
+                .append(
+                        xmlValue(batchNumber))
+                .append(
+                        "</BatchNumber>\n");
 
         xml.append(
                 "    <TotalValidCheques>")
-                .append(validCount)
-                .append("</TotalValidCheques>\n");
+                .append(
+                        validCount)
+                .append(
+                        "</TotalValidCheques>\n");
 
         xml.append(
                 "    <Cheques>\n");
 
         for (OutwardCheque cheque : cheques) {
 
-            if (!"CHECKER_ACCEPTED".equalsIgnoreCase(
-                    cheque.getChequeStatus())) {
+            if (!"CHECKER_ACCEPTED"
+                    .equalsIgnoreCase(
+                            cheque.getChequeStatus())) {
 
                 continue;
             }
@@ -736,13 +856,17 @@ public class CheckerReportsController
 
         xml.append(
                 "    <BatchNumber>")
-                .append(xmlValue(batchNumber))
-                .append("</BatchNumber>\n");
+                .append(
+                        xmlValue(batchNumber))
+                .append(
+                        "</BatchNumber>\n");
 
         xml.append(
                 "    <TotalRejectedCheques>")
-                .append(rejectedCount)
-                .append("</TotalRejectedCheques>\n");
+                .append(
+                        rejectedCount)
+                .append(
+                        "</TotalRejectedCheques>\n");
 
         xml.append(
                 "    <Cheques>\n");
@@ -778,95 +902,125 @@ public class CheckerReportsController
 
         xml.append(
                 "            <ChequeNumber>")
-                .append(xmlValue(
-                        cheque.getChequeNumber()))
-                .append("</ChequeNumber>\n");
+                .append(
+                        xmlValue(
+                                cheque.getChequeNumber()))
+                .append(
+                        "</ChequeNumber>\n");
 
         xml.append(
                 "            <BatchNumber>")
-                .append(xmlValue(
-                        cheque.getBatchNumber()))
-                .append("</BatchNumber>\n");
+                .append(
+                        xmlValue(
+                                cheque.getBatchNumber()))
+                .append(
+                        "</BatchNumber>\n");
 
         xml.append(
                 "            <ChequeDate>")
-                .append(xmlValue(
-                        cheque.getChequeDate()))
-                .append("</ChequeDate>\n");
+                .append(
+                        xmlValue(
+                                cheque.getChequeDate()))
+                .append(
+                        "</ChequeDate>\n");
 
         xml.append(
                 "            <CityCode>")
-                .append(xmlValue(
-                        cheque.getCityCode()))
-                .append("</CityCode>\n");
+                .append(
+                        xmlValue(
+                                cheque.getCityCode()))
+                .append(
+                        "</CityCode>\n");
 
         xml.append(
                 "            <BankCode>")
-                .append(xmlValue(
-                        cheque.getBankCode()))
-                .append("</BankCode>\n");
+                .append(
+                        xmlValue(
+                                cheque.getBankCode()))
+                .append(
+                        "</BankCode>\n");
 
         xml.append(
                 "            <BranchCode>")
-                .append(xmlValue(
-                        cheque.getBranchCode()))
-                .append("</BranchCode>\n");
+                .append(
+                        xmlValue(
+                                cheque.getBranchCode()))
+                .append(
+                        "</BranchCode>\n");
 
         xml.append(
                 "            <DrawerAccountNumber>")
-                .append(xmlValue(
-                        cheque.getDrawerAccountNumber()))
-                .append("</DrawerAccountNumber>\n");
+                .append(
+                        xmlValue(
+                                cheque.getDrawerAccountNumber()))
+                .append(
+                        "</DrawerAccountNumber>\n");
 
         xml.append(
                 "            <DrawerName>")
-                .append(xmlValue(
-                        cheque.getDrawerName()))
-                .append("</DrawerName>\n");
+                .append(
+                        xmlValue(
+                                cheque.getDrawerName()))
+                .append(
+                        "</DrawerName>\n");
 
         xml.append(
                 "            <PayeeName>")
-                .append(xmlValue(
-                        cheque.getPayeeName()))
-                .append("</PayeeName>\n");
+                .append(
+                        xmlValue(
+                                cheque.getPayeeName()))
+                .append(
+                        "</PayeeName>\n");
 
         xml.append(
                 "            <PayeeAccountNumber>")
-                .append(xmlValue(
-                        cheque.getPayeeAccountNumber()))
-                .append("</PayeeAccountNumber>\n");
+                .append(
+                        xmlValue(
+                                cheque.getPayeeAccountNumber()))
+                .append(
+                        "</PayeeAccountNumber>\n");
 
         xml.append(
                 "            <Amount>")
-                .append(xmlValue(
-                        cheque.getAmount()))
-                .append("</Amount>\n");
+                .append(
+                        xmlValue(
+                                cheque.getAmount()))
+                .append(
+                        "</Amount>\n");
 
         xml.append(
                 "            <AmountInWords>")
-                .append(xmlValue(
-                        cheque.getAmountInWords()))
-                .append("</AmountInWords>\n");
+                .append(
+                        xmlValue(
+                                cheque.getAmountInWords()))
+                .append(
+                        "</AmountInWords>\n");
 
         xml.append(
                 "            <ChequeStatus>")
-                .append(xmlValue(
-                        cheque.getChequeStatus()))
-                .append("</ChequeStatus>\n");
+                .append(
+                        xmlValue(
+                                cheque.getChequeStatus()))
+                .append(
+                        "</ChequeStatus>\n");
 
         if (rejected) {
 
             xml.append(
                     "            <ReturnReasonId>")
-                    .append(xmlValue(
-                            cheque.getReturnReasonId()))
-                    .append("</ReturnReasonId>\n");
+                    .append(
+                            xmlValue(
+                                    cheque.getReturnReasonId()))
+                    .append(
+                            "</ReturnReasonId>\n");
 
             xml.append(
                     "            <CheckerRemarks>")
-                    .append(xmlValue(
-                            cheque.getCheckerRemarks()))
-                    .append("</CheckerRemarks>\n");
+                    .append(
+                            xmlValue(
+                                    cheque.getCheckerRemarks()))
+                    .append(
+                            "</CheckerRemarks>\n");
         }
 
         xml.append(

@@ -176,7 +176,7 @@
 .batch-listbox .z-listbox-header {
     background: #175CD3 !important;
     border: none !important;
-    border-radius: var(--radius-md) !important;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
 }
 
 .batch-listbox .z-listheader {

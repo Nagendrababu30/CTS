@@ -25,17 +25,31 @@
             apply="com.cts.admin.controller.AuditLogController">
 
             <!-- PAGE HEADER -->
+
             <div sclass="audit-page-header">
+
                 <div sclass="audit-header-left">
-                    <label sclass="audit-page-title" value="Audit Logs"/>
+
+                    <label
+                        sclass="audit-page-title"
+                        value="Audit Logs"/>
+
                 </div>
             </div>
 
+
             <!-- FILTER CARD -->
+
             <div sclass="audit-filter-card">
 
+                <!-- SEARCH -->
+
                 <div sclass="audit-search-box">
-                    <label sclass="audit-search-icon" value="&#x2315;"/>
+
+                    <label
+                        sclass="audit-search-icon"
+                        value="&#x2315;"/>
+
                     <textbox
                         id="auditSearchTextbox"
                         hflex="1"
@@ -43,7 +57,11 @@
                         placeholder="Search by username or user ID..."
                         sclass="audit-search-textbox"
                         style="border:none !important; box-shadow:none !important; outline:none !important; background:transparent !important;"/>
+
                 </div>
+
+
+                <!-- SEARCH BUTTON -->
 
                 <button
                     id="auditSearchButton"
@@ -51,18 +69,66 @@
                     label="Search"
                     iconSclass="z-icon-search"/>
 
+
+                <!-- ROLE FILTER -->
+
                 <combobox
                     id="auditRoleCombobox"
                     readonly="true"
                     value="All Roles"
                     sclass="audit-filter-combobox audit-roles-combobox"/>
 
+
+                <!-- FROM DATE -->
+
+                <datebox
+                    id="auditFromDate"
+                    placeholder="From Date"
+                    format="dd/MM/yyyy"
+                    width="145px"
+                    sclass="audit-datebox"/>
+
+
+                <!-- TO DATE -->
+
+                <datebox
+                    id="auditToDate"
+                    placeholder="To Date"
+                    format="dd/MM/yyyy"
+                    width="145px"
+                    sclass="audit-datebox"/>
+
             </div>
 
-            <!-- AUDIT TRAIL CARD -->
-            <vlayout spacing="0" sclass="audit-trail-card">
 
-                <label sclass="audit-trail-title" value="User Session Records"/>
+            <!-- AUDIT TRAIL CARD -->
+
+            <vlayout
+                spacing="0"
+                sclass="audit-trail-card">
+
+
+                <!-- CARD HEADER -->
+
+                <div sclass="audit-trail-header">
+
+                    <label
+                        sclass="audit-trail-title"
+                        value="User Session Records"/>
+
+
+                    <!-- DOWNLOAD PDF -->
+
+                    <button
+                        id="auditDownloadPdfButton"
+                        label="Download PDF"
+                        iconSclass="z-icon-download"
+                        sclass="audit-download-btn"/>
+
+                </div>
+
+
+                <!-- SESSION RECORDS TABLE -->
 
                 <listbox
                     id="auditLogListbox"
@@ -71,16 +137,40 @@
                     span="true"
                     emptyMessage="No audit log records found">
 
-                    <listhead sizable="false" menupopup="none">
+                    <listhead
+                        sizable="false"
+                        menupopup="none">
 
-                        <listheader label="User ID"  width="20%"/>
-                        <listheader label="Role"     width="28%"/>
-                        <listheader label="Login"    width="26%"/>
-                        <listheader label="Logout"   width="26%"/>
+                        <listheader
+                            label="User ID"
+                            width="14%"/>
+
+                        <listheader
+                            label="Role"
+                            width="18%"/>
+
+                        <listheader
+                            label="Login Date"
+                            width="17%"/>
+
+                        <listheader
+                            label="Login Time"
+                            width="17%"/>
+
+                        <listheader
+                            label="Logout Date"
+                            width="17%"/>
+
+                        <listheader
+                            label="Logout Time"
+                            width="17%"/>
 
                     </listhead>
 
                 </listbox>
+
+
+                <!-- PAGINATION -->
 
                 <paging
                     id="auditLogPaging"

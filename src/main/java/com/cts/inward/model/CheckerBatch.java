@@ -1,79 +1,106 @@
-package com.cts.inward.model;
+ package com.cts.inward.model;
 
 public class CheckerBatch {
 
-	private long lockId;
-	private long batchId;
-	private int totalCheques;
+    private long lockId;
 
-	private String maker;
-	private Long userId;
-	private String lockStatus;
-	private String batchStatus;
+    private long batchId;
 
-	public String getBatchStatus() {
-		return batchStatus;
-	}
+    private int totalCheques;
 
-	public void setBatchStatus(String batchStatus) {
-		this.batchStatus = batchStatus;
-	}
+    // Maker username
+    private String maker;
 
-	public long getLockId() {
-		return lockId;
-	}
+    // Checker ID - used internally
+    private Long userId;
 
-	public void setLockId(long lockId) {
-		this.lockId = lockId;
-	}
+    // Checker username - displayed in UI
+    private String checkerName;
 
-	public long getBatchId() {
-		return batchId;
-	}
+    private String lockStatus;
 
-	public void setBatchId(long batchId) {
-		this.batchId = batchId;
-	}
+    private String batchStatus;
 
-	public int getTotalCheques() {
-		return totalCheques;
-	}
+    private boolean reVerify;
 
-	public void setTotalCheques(int totalCheques) {
-		this.totalCheques = totalCheques;
-	}
 
-	public String getMaker() {
-		return maker;
-	}
+    public long getLockId() {
+        return lockId;
+    }
 
-	public void setMaker(String maker) {
-		this.maker = maker;
-	}
+    public void setLockId(long lockId) {
+        this.lockId = lockId;
+    }
 
-	public Long getUserId() {
-		return userId;
-	}
 
-	public void setUserId(Long userId) {
-		this.userId = userId;
-	}
+    public long getBatchId() {
+        return batchId;
+    }
 
-	public String getLockStatus() {
-		return lockStatus;
-	}
+    public void setBatchId(long batchId) {
+        this.batchId = batchId;
+    }
 
-	public void setLockStatus(String lockStatus) {
-		this.lockStatus = lockStatus;
-	}
 
-	private boolean reVerify;
+    public int getTotalCheques() {
+        return totalCheques;
+    }
 
-	public boolean isReVerify() {
-		return reVerify;
-	}
+    public void setTotalCheques(int totalCheques) {
+        this.totalCheques = totalCheques;
+    }
 
-	public void setReVerify(boolean reVerify) {
-		this.reVerify = reVerify;
-	}
+
+    public String getMaker() {
+        return maker;
+    }
+
+    public void setMaker(String maker) {
+        this.maker = maker;
+    }
+
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+
+    public String getCheckerName() {
+        return checkerName;
+    }
+
+    public void setCheckerName(String checkerName) {
+        this.checkerName = checkerName;
+    }
+
+
+    public String getLockStatus() {
+        return lockStatus;
+    }
+
+    public void setLockStatus(String lockStatus) {
+        this.lockStatus = lockStatus;
+    }
+
+
+    public String getBatchStatus() {
+        return batchStatus;
+    }
+
+    public void setBatchStatus(String batchStatus) {
+        this.batchStatus = batchStatus;
+    }
+
+
+    public boolean isReVerify() {
+        return reVerify;
+    }
+
+    public void setReVerify(boolean reVerify) {
+        this.reVerify = reVerify;
+    }
 }

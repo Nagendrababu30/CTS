@@ -37,7 +37,6 @@
                 <label
                     value="Verify Batch"
                     sclass="page-title"/>
- >
 
 <separator height="12px"/>
             </vlayout>
@@ -49,7 +48,6 @@
 
             <vlayout
                 width="100%"
-                vflex="1"
                 spacing="0"
                 sclass="table-panel">
 
@@ -75,7 +73,6 @@
 
                 <div
                     width="100%"
-                    vflex="1"
                     sclass="batch-scroll-area">
 
                     <grid

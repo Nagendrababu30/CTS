@@ -24,12 +24,8 @@
             sclass="micr-repair-layout">
 
             <label
-                value="MICR Repair"
+                value="Micr Repair"
                 sclass="page-title" />
-
-            <label
-                value="Batches requiring MICR verification and repair"
-                sclass="page-description" />
 
             <panel
                 width="100%"
@@ -48,7 +44,7 @@
                             sclass="table-header">
 
                             <label
-                                value="MICR Repair Batches"
+                                value="Micr Repair Batches"
                                 sclass="table-title" />
 
                         </hlayout>
@@ -63,7 +59,7 @@
                             <columns>
                                 <column label="Batch ID" width="20%" />
                                 <column label="Total Cheques" width="25%" />
-                                <column label="MICR Error" width="25%" />
+                                <column label="Micr Error" width="25%" />
                                 <column label="Action" width="30%" />
                             </columns>
 

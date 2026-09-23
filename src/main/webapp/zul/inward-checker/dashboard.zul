@@ -87,9 +87,6 @@
                 spacing="0"
                 sclass="table-panel">
 
-			<vlayout width="100%" vflex="1" spacing="0"
-				sclass="table-panel">
-
 
 				<!-- ==================== TABLE HEADER ==================== -->
 

@@ -52,6 +52,29 @@ public class AuditLogServiceImpl implements AuditLogService {
 		return auditLogDAO.getTotalAuditLogCount();
 	}
 
+	
+	// ================================================================
+	// GET ALL FILTERED AUDIT LOGS - FOR REPORT GENERATION
+	// ================================================================
+
+	@Override
+	public List<AuditLog> getAllAuditLogs(
+	        String searchText,
+	        String roleName,
+	        Date fromDate,
+	        Date toDate) {
+
+	    return auditLogDAO.getAllAuditLogs(
+	            searchText,
+	            roleName,
+	            fromDate,
+	            toDate);
+	}
+	
+	
+	
+	
+	
 	// ================================================================
 	// FILTERED COUNT
 	// ================================================================

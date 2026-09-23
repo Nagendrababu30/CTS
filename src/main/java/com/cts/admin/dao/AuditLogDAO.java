@@ -17,6 +17,12 @@ public interface AuditLogDAO {
             Date fromDate,
             Date toDate);
     
+    public List<AuditLog> getAllAuditLogs(
+            String searchText,
+            String roleName,
+            Date fromDate,
+            Date toDate);
+    
     public int getTotalAuditLogCount();
     
     public int getTotalAuditLogCount(

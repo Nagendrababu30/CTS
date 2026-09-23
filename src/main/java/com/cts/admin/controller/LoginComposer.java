@@ -21,126 +21,125 @@ import com.cts.inward.config.ConnectionPool;
 
 public class LoginComposer extends GenericForwardComposer<Component> {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    private static final java.util.TimeZone IST =
-            java.util.TimeZone.getTimeZone("Asia/Kolkata");
+	private static final java.util.TimeZone IST = java.util.TimeZone.getTimeZone("Asia/Kolkata");
 
-    // Strictly ZUL components
-    private Textbox username;
-    private Textbox password;
-    private Label   loginMessage;
-    private A       togglePasswordBtn;
+	// Strictly ZUL components
+	private Textbox username;
+	private Textbox password;
+	private Label loginMessage;
+	private A togglePasswordBtn;
 
-    private UserService     userService;
-    private AuditLogService auditLogService;
-    
-    private boolean isPasswordVisible = false;
+	private UserService userService;
+	private AuditLogService auditLogService;
 
-    @Override
-    public void doAfterCompose(Component comp) throws Exception {
-        super.doAfterCompose(comp);
-        userService     = new UserServiceImpl();
-        auditLogService = new AuditLogServiceImpl();
-    }
+	private boolean isPasswordVisible = false;
 
-    public void onClick$loginButton(Event event) {
-        
-        loginMessage.setValue(""); // Clear previous errors
+	@Override
+	public void doAfterCompose(Component comp) throws Exception {
+		super.doAfterCompose(comp);
+		userService = new UserServiceImpl();
+		auditLogService = new AuditLogServiceImpl();
+	}
 
-        String usernameValue = username.getValue();
-        String passwordValue = password.getValue();
-        
-        if (usernameValue == null || usernameValue.trim().isEmpty() || passwordValue == null || passwordValue.isEmpty()) {
-            loginMessage.setValue("Please enter both User ID and Password.");
-            return;
-        }
+	public void onClick$loginButton(Event event) {
 
-        User user = userService.authenticate(usernameValue, passwordValue);
+		loginMessage.setValue(""); // Clear previous errors
 
-        if (user == null) {
-            loginMessage.setValue("Invalid username or password.");
-            return;
-        }
+		String usernameValue = username.getValue();
+		String passwordValue = password.getValue();
 
-        /* Insert into user_session via AuditLogService */
-        String auditSessionId = auditLogService.createAuditLog(user.getUserId());
+		if (usernameValue == null || usernameValue.trim().isEmpty() || passwordValue == null
+				|| passwordValue.isEmpty()) {
+			loginMessage.setValue("Please enter both User ID and Password.");
+			return;
+		}
 
-        /* Update last_login in "user" table and set on user object */
-        java.sql.Timestamp nowIST = new java.sql.Timestamp(
-                java.util.Calendar.getInstance(IST).getTimeInMillis());
-        updateLastLogin(user.getUserId(), nowIST);
-        user.setLastLogin(nowIST);
+		User user = userService.authenticate(usernameValue, passwordValue);
 
-        Session session = Executions.getCurrent().getSession();
-        session.setAttribute("loggedInUser",    user);
-        session.setAttribute("userId",          user.getUserId());
-        session.setAttribute("username",        user.getUsername());
-        session.setAttribute("roleId",          user.getRoleId());
-        session.setAttribute("roleName",        user.getRoleName());
-        session.setAttribute("auditSessionId",  auditSessionId);
+		if (user == null) {
+			loginMessage.setValue("Invalid username or password.");
+			return;
+		}
 
-        redirectUser(user);
-    }
-    
-    public void onClick$togglePasswordBtn(Event event) {
-        isPasswordVisible = !isPasswordVisible;
-        
-        if (isPasswordVisible) {
-            password.setType("text");
-            togglePasswordBtn.setIconSclass("z-icon-eye-slash");
-        } else {
-            password.setType("password");
-            togglePasswordBtn.setIconSclass("z-icon-eye");
-        }
-    }
+		/* Insert into user_session via AuditLogService */
+		String auditSessionId = auditLogService.createAuditLog(user.getUserId());
 
-    /* ------------------------------------------------------------------ */
-    /* UPDATE last_login in "user" table                                    */
-    /* ------------------------------------------------------------------ */
+		/* Update last_login in "user" table and set on user object */
+		java.sql.Timestamp nowIST = new java.sql.Timestamp(java.util.Calendar.getInstance(IST).getTimeInMillis());
+		updateLastLogin(user.getUserId(), nowIST);
+		user.setLastLogin(nowIST);
 
-    private void updateLastLogin(Long userId, java.sql.Timestamp nowIST) {
+		Session session = Executions.getCurrent().getSession();
+		session.setAttribute("loggedInUser", user);
+		session.setAttribute("userId", user.getUserId());
+		session.setAttribute("username", user.getUsername());
+		session.setAttribute("roleId", user.getRoleId());
+		session.setAttribute("roleName", user.getRoleName());
+		session.setAttribute("auditSessionId", auditSessionId);
 
-        String sql = "UPDATE \"user\" SET last_login = ? WHERE user_id = ?";
+		redirectUser(user);
+	}
 
-        try (
-                Connection conn = ConnectionPool.getDataSource().getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)
-        ) {
-            stmt.setTimestamp(1, nowIST);
-            stmt.setLong(2, userId);
-            stmt.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+	public void onClick$togglePasswordBtn(Event event) {
+		isPasswordVisible = !isPasswordVisible;
 
-    /* ------------------------------------------------------------------ */
+		if (isPasswordVisible) {
+			password.setType("text");
+			togglePasswordBtn.setIconSclass("z-icon-eye-slash");
+		} else {
+			password.setType("password");
+			togglePasswordBtn.setIconSclass("z-icon-eye");
+		}
+	}
 
-    private void redirectUser(User user) {
+	/* UPDATE last_login in "user" table */
 
-        String roleName = user.getRoleName();
+	private void updateLastLogin(Long userId, java.sql.Timestamp nowIST) {
 
-        if (roleName == null || roleName.isBlank()) {
-            loginMessage.setValue("User role is not configured.");
-            return;
-        }
+		String sql = "UPDATE \"user\" SET last_login = ? WHERE user_id = ?";
 
-        switch (roleName) {
-            case "Admin":
-                Executions.sendRedirect("/zul/admin/admin-dashboard.zul"); break;
-            case "Inward Maker":
-                Executions.sendRedirect("/zul/inward-maker/dashboard.zul"); break;
-            case "Inward Checker":
-                Executions.sendRedirect("/zul/inward-checker/dashboard.zul"); break;
-            case "Outward Maker":
-                Executions.sendRedirect("/zul/outward/outward-maker/outward-maker-dashboard.zul"); break;
-            case "Outward Checker":
-                Executions.sendRedirect("/zul/outward/outward-checker/dashboard.zul"); break;
-            case "Capture Operator":
-                Executions.sendRedirect("/zul/outward/outward-maker/capture-operator-batch-capture.zul"); break;
-            default:
-                loginMessage.setValue("User role is not configured.");
-        }
-    }
+		try (Connection conn = ConnectionPool.getDataSource().getConnection();
+				PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setTimestamp(1, nowIST);
+			stmt.setLong(2, userId);
+			stmt.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void redirectUser(User user) {
+
+		String roleName = user.getRoleName();
+
+		if (roleName == null || roleName.isBlank()) {
+			loginMessage.setValue("User role is not configured.");
+			return;
+		}
+
+		switch (roleName) {
+		case "Admin":
+			Executions.sendRedirect("/zul/admin/admin-dashboard.zul");
+			break;
+		case "Inward Maker":
+			Executions.sendRedirect("/zul/inward-maker/dashboard.zul");
+			break;
+		case "Inward Checker":
+			Executions.sendRedirect("/zul/inward-checker/dashboard.zul");
+			break;
+		case "Outward Maker":
+			Executions.sendRedirect("/zul/outward/outward-maker/outward-maker-dashboard.zul");
+			break;
+		case "Outward Checker":
+			Executions.sendRedirect("/zul/outward/outward-checker/dashboard.zul");
+			break;
+		case "Capture Operator":
+			Executions.sendRedirect("/zul/outward/outward-maker/capture-operator-batch-capture.zul");
+			break;
+		default:
+			loginMessage.setValue("User role is not configured.");
+		}
+	}
 }

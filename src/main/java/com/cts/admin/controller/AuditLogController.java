@@ -31,696 +31,460 @@ import com.cts.admin.service.AuditLogServiceImpl;
 import com.cts.admin.service.RoleService;
 import com.cts.admin.service.RoleServiceImpl;
 
-public class AuditLogController
-        extends GenericForwardComposer<Component> {
+public class AuditLogController extends GenericForwardComposer<Component> {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    private static final int PAGE_SIZE = 10;
+	private static final int PAGE_SIZE = 10;
 
-    private static final java.util.TimeZone IST =
-            java.util.TimeZone.getTimeZone("Asia/Kolkata");
+	private static final java.util.TimeZone IST = java.util.TimeZone.getTimeZone("Asia/Kolkata");
 
-    // ================================================================
-    // ZUL COMPONENTS
-    // ================================================================
+	// ZUL COMPONENTS
 
-    private Listbox auditLogListbox;
+	private Listbox auditLogListbox;
 
-    private Paging auditLogPaging;
+	private Paging auditLogPaging;
 
-    private Textbox auditSearchTextbox;
+	private Textbox auditSearchTextbox;
 
-    private Button auditSearchButton;
+	private Button auditSearchButton;
 
-    private Combobox auditRoleCombobox;
+	private Combobox auditRoleCombobox;
 
-    private Datebox auditFromDate;
+	private Datebox auditFromDate;
 
-    private Datebox auditToDate;
+	private Datebox auditToDate;
 
-    private Button auditDownloadPdfButton;
+	private Button auditDownloadPdfButton;
 
-    // ================================================================
-    // SERVICES
-    // ================================================================
+	// SERVICES
 
-    private AuditLogService auditLogService;
+	private AuditLogService auditLogService;
 
-    private RoleService roleService;
+	private RoleService roleService;
 
-    private AuditLogReportService auditLogReportService;
+	private AuditLogReportService auditLogReportService;
 
-    // ================================================================
-    // INIT
-    // ================================================================
+	// INIT
 
-    @Override
-    public void doAfterCompose(Component comp)
-            throws Exception {
+	@Override
+	public void doAfterCompose(Component comp) throws Exception {
 
-        super.doAfterCompose(comp);
+		super.doAfterCompose(comp);
 
-        auditLogService = new AuditLogServiceImpl();
+		auditLogService = new AuditLogServiceImpl();
 
-        roleService = new RoleServiceImpl();
+		roleService = new RoleServiceImpl();
 
-        auditLogReportService =
-                new AuditLogReportService();
+		auditLogReportService = new AuditLogReportService();
 
-        // Load role filter from database
-        loadRoleFilter();
+		// Load role filter from database
+		loadRoleFilter();
 
-        // Configure pagination
-        auditLogPaging.setPageSize(PAGE_SIZE);
+		// Configure pagination
+		auditLogPaging.setPageSize(PAGE_SIZE);
 
-        auditLogPaging.setTotalSize(
-                auditLogService.getTotalAuditLogCount(
-                        null,
-                        null,
-                        null,
-                        null));
+		auditLogPaging.setTotalSize(auditLogService.getTotalAuditLogCount(null, null, null, null));
 
-        // Load initial records
-        loadAuditLogs(0);
+		// Load initial records
+		loadAuditLogs(0);
 
-        // ============================================================
-        // PAGING EVENT
-        // ============================================================
+		// PAGING EVENT
 
-        auditLogPaging.addEventListener(
-                "onPaging",
-                new EventListener<Event>() {
+		auditLogPaging.addEventListener("onPaging", new EventListener<Event>() {
 
-                    @Override
-                    public void onEvent(Event event)
-                            throws Exception {
+			@Override
+			public void onEvent(Event event) throws Exception {
 
-                        PagingEvent pagingEvent =
-                                (PagingEvent) event;
+				PagingEvent pagingEvent = (PagingEvent) event;
 
-                        loadAuditLogs(
-                                pagingEvent.getActivePage()
-                                        * PAGE_SIZE);
-                    }
-                });
+				loadAuditLogs(pagingEvent.getActivePage() * PAGE_SIZE);
+			}
+		});
 
-        // ============================================================
-        // SEARCH BUTTON
-        // ============================================================
+		// SEARCH BUTTON
 
-        auditSearchButton.addEventListener(
-                "onClick",
-                new EventListener<Event>() {
+		auditSearchButton.addEventListener("onClick", new EventListener<Event>() {
 
-                    @Override
-                    public void onEvent(Event event)
-                            throws Exception {
+			@Override
+			public void onEvent(Event event) throws Exception {
 
-                        refreshAuditLogs();
-                    }
-                });
+				refreshAuditLogs();
+			}
+		});
 
-        // ============================================================
-        // SEARCH TEXTBOX - ENTER KEY
-        // ============================================================
+		// SEARCH TEXTBOX - ENTER KEY
 
-        auditSearchTextbox.addEventListener(
-                "onOK",
-                new EventListener<Event>() {
+		auditSearchTextbox.addEventListener("onOK", new EventListener<Event>() {
 
-                    @Override
-                    public void onEvent(Event event)
-                            throws Exception {
+			@Override
+			public void onEvent(Event event) throws Exception {
 
-                        refreshAuditLogs();
-                    }
-                });
+				refreshAuditLogs();
+			}
+		});
 
-        // ============================================================
-        // ROLE FILTER
-        // ============================================================
+		// ============================================================
+		// ROLE FILTER
+		// ============================================================
 
-        auditRoleCombobox.addEventListener(
-                "onSelect",
-                new EventListener<Event>() {
+		auditRoleCombobox.addEventListener("onSelect", new EventListener<Event>() {
 
-                    @Override
-                    public void onEvent(Event event)
-                            throws Exception {
+			@Override
+			public void onEvent(Event event) throws Exception {
 
-                        refreshAuditLogs();
-                    }
-                });
+				refreshAuditLogs();
+			}
+		});
 
-        // ============================================================
-        // FROM DATE FILTER
-        // ============================================================
+		// ============================================================
+		// FROM DATE FILTER
+		// ============================================================
 
-        auditFromDate.addEventListener(
-                "onChange",
-                new EventListener<Event>() {
+		auditFromDate.addEventListener("onChange", new EventListener<Event>() {
 
-                    @Override
-                    public void onEvent(Event event)
-                            throws Exception {
+			@Override
+			public void onEvent(Event event) throws Exception {
 
-                        refreshAuditLogs();
-                    }
-                });
+				refreshAuditLogs();
+			}
+		});
 
-        // ============================================================
-        // TO DATE FILTER
-        // ============================================================
+		// TO DATE FILTER
 
-        auditToDate.addEventListener(
-                "onChange",
-                new EventListener<Event>() {
+		auditToDate.addEventListener("onChange", new EventListener<Event>() {
 
-                    @Override
-                    public void onEvent(Event event)
-                            throws Exception {
+			@Override
+			public void onEvent(Event event) throws Exception {
 
-                        refreshAuditLogs();
-                    }
-                });
+				refreshAuditLogs();
+			}
+		});
 
-        // ============================================================
-        // PDF DOWNLOAD BUTTON
-        // ============================================================
+		// PDF DOWNLOAD BUTTON
 
-        auditDownloadPdfButton.addEventListener(
-                "onClick",
-                new EventListener<Event>() {
+		auditDownloadPdfButton.addEventListener("onClick", new EventListener<Event>() {
 
-                    @Override
-                    public void onEvent(Event event)
-                            throws Exception {
+			@Override
+			public void onEvent(Event event) throws Exception {
 
-                        exportAuditLogsToPdf();
-                    }
-                });
-    }
+				exportAuditLogsToPdf();
+			}
+		});
+	}
 
-    // ================================================================
-    // LOAD ROLE FILTER FROM DATABASE
-    // ================================================================
+	// LOAD ROLE FILTER FROM DATABASE
 
-    private void loadRoleFilter() {
+	private void loadRoleFilter() {
 
-        auditRoleCombobox.getItems().clear();
+		auditRoleCombobox.getItems().clear();
 
-        Comboitem all =
-                new Comboitem("All Roles");
+		Comboitem all = new Comboitem("All Roles");
 
-        all.setValue(null);
+		all.setValue(null);
 
-        auditRoleCombobox.appendChild(all);
+		auditRoleCombobox.appendChild(all);
 
-        try {
+		try {
 
-            roleService.getAllRoles().forEach(role -> {
+			roleService.getAllRoles().forEach(role -> {
 
-                Comboitem item =
-                        new Comboitem(role.getRoleName());
+				Comboitem item = new Comboitem(role.getRoleName());
 
-                item.setValue(role.getRoleName());
+				item.setValue(role.getRoleName());
 
-                auditRoleCombobox.appendChild(item);
-            });
+				auditRoleCombobox.appendChild(item);
+			});
 
-        } catch (Exception e) {
+		} catch (Exception e) {
 
-            e.printStackTrace();
-        }
+			e.printStackTrace();
+		}
 
-        auditRoleCombobox.setSelectedIndex(0);
-    }
+		auditRoleCombobox.setSelectedIndex(0);
+	}
 
-    // ================================================================
-    // GET SELECTED ROLE
-    // ================================================================
+	// GET SELECTED ROLE
 
-    private String getSelectedRole() {
+	private String getSelectedRole() {
 
-        if (auditRoleCombobox.getSelectedItem() == null) {
-            return null;
-        }
+		if (auditRoleCombobox.getSelectedItem() == null) {
+			return null;
+		}
 
-        String selected =
-                auditRoleCombobox.getSelectedItem().getLabel();
+		String selected = auditRoleCombobox.getSelectedItem().getLabel();
 
-        if (selected == null
-                || selected.equals("All Roles")) {
+		if (selected == null || selected.equals("All Roles")) {
 
-            return null;
-        }
+			return null;
+		}
 
-        return selected;
-    }
+		return selected;
+	}
 
-    // ================================================================
-    // REFRESH FILTERED AUDIT LOGS
-    // ================================================================
+	// REFRESH FILTERED AUDIT LOGS
 
-    private void refreshAuditLogs() {
+	private void refreshAuditLogs() {
 
-        String searchText =
-                auditSearchTextbox.getValue();
+		String searchText = auditSearchTextbox.getValue();
 
-        if (searchText != null) {
-            searchText = searchText.trim();
-        }
+		if (searchText != null) {
+			searchText = searchText.trim();
+		}
 
-        String roleFilter =
-                getSelectedRole();
+		String roleFilter = getSelectedRole();
 
-        Date fromDate =
-                auditFromDate.getValue();
+		Date fromDate = auditFromDate.getValue();
 
-        Date toDate =
-                auditToDate.getValue();
+		Date toDate = auditToDate.getValue();
 
-        // ============================================================
-        // VALIDATE DATE RANGE
-        // ============================================================
+		// VALIDATE DATE RANGE
 
-        if (fromDate != null
-                && toDate != null
-                && fromDate.after(toDate)) {
+		if (fromDate != null && toDate != null && fromDate.after(toDate)) {
 
-            Messagebox.show(
-                    "From Date cannot be later than To Date.",
-                    "Invalid Date Range",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
+			Messagebox.show("From Date cannot be later than To Date.", "Invalid Date Range", Messagebox.OK,
+					Messagebox.EXCLAMATION);
 
-            return;
-        }
+			return;
+		}
 
-        // ============================================================
-        // UPDATE FILTERED PAGINATION COUNT
-        // ============================================================
+		// UPDATE FILTERED PAGINATION COUNT
 
-        auditLogPaging.setTotalSize(
-                auditLogService.getTotalAuditLogCount(
-                        searchText,
-                        roleFilter,
-                        fromDate,
-                        toDate));
+		auditLogPaging.setTotalSize(auditLogService.getTotalAuditLogCount(searchText, roleFilter, fromDate, toDate));
 
-        // ============================================================
-        // RESET TO FIRST PAGE
-        // ============================================================
+		// RESET TO FIRST PAGE
 
-        auditLogPaging.setActivePage(0);
+		auditLogPaging.setActivePage(0);
 
-        // ============================================================
-        // LOAD FIRST PAGE
-        // ============================================================
+		// LOAD FIRST PAGE
 
-        loadAuditLogs(0);
-    }
+		loadAuditLogs(0);
+	}
 
-    // ================================================================
-    // LOAD FILTERED AUDIT LOGS
-    // ================================================================
+	// LOAD FILTERED AUDIT LOGS
 
-    private void loadAuditLogs(int offset) {
+	private void loadAuditLogs(int offset) {
 
-        try {
+		try {
 
-            int page =
-                    (offset / PAGE_SIZE) + 1;
+			int page = (offset / PAGE_SIZE) + 1;
 
-            // ========================================================
-            // GET SEARCH FILTER
-            // ========================================================
+			// GET SEARCH FILTER
 
-            String searchText =
-                    auditSearchTextbox.getValue();
+			String searchText = auditSearchTextbox.getValue();
 
-            if (searchText != null) {
-                searchText = searchText.trim();
-            }
+			if (searchText != null) {
+				searchText = searchText.trim();
+			}
 
-            // ========================================================
-            // GET ROLE FILTER
-            // ========================================================
+			// GET ROLE FILTER
 
-            String roleFilter =
-                    getSelectedRole();
+			String roleFilter = getSelectedRole();
 
-            // ========================================================
-            // GET DATE FILTERS
-            // ========================================================
+			// GET DATE FILTERS
 
-            Date fromDate =
-                    auditFromDate.getValue();
+			Date fromDate = auditFromDate.getValue();
 
-            Date toDate =
-                    auditToDate.getValue();
+			Date toDate = auditToDate.getValue();
 
-            // ========================================================
-            // VALIDATE DATE RANGE
-            // ========================================================
+			// VALIDATE DATE RANGE
 
-            if (fromDate != null
-                    && toDate != null
-                    && fromDate.after(toDate)) {
+			if (fromDate != null && toDate != null && fromDate.after(toDate)) {
 
-                return;
-            }
+				return;
+			}
 
-            // ========================================================
-            // LOAD RECORDS FROM DATABASE
-            // ========================================================
+			// LOAD RECORDS FROM DATABASE
 
-            List<AuditLog> logs =
-                    auditLogService.getAuditLogs(
-                            page,
-                            PAGE_SIZE,
-                            searchText,
-                            roleFilter,
-                            fromDate,
-                            toDate);
+			List<AuditLog> logs = auditLogService.getAuditLogs(page, PAGE_SIZE, searchText, roleFilter, fromDate,
+					toDate);
 
-            auditLogListbox.getItems().clear();
+			auditLogListbox.getItems().clear();
 
-            // ========================================================
-            // DISPLAY RECORDS
-            // ========================================================
+			// DISPLAY RECORDS
 
-            for (AuditLog log : logs) {
+			for (AuditLog log : logs) {
 
-                Listitem item =
-                        new Listitem();
+				Listitem item = new Listitem();
 
-                // ----------------------------------------------------
-                // USER ID
-                // ----------------------------------------------------
+				// USER ID
 
-                Listcell userIdCell =
-                        new Listcell();
+				Listcell userIdCell = new Listcell();
 
-                Label userIdLabel =
-                        new Label(
-                                log.getUserId() != null
-                                        ? String.valueOf(
-                                                log.getUserId())
-                                        : "-");
+				Label userIdLabel = new Label(log.getUserId() != null ? String.valueOf(log.getUserId()) : "-");
 
-                userIdLabel.setSclass(
-                        "audit-user-label");
+				userIdLabel.setSclass("audit-user-label");
 
-                userIdCell.appendChild(
-                        userIdLabel);
+				userIdCell.appendChild(userIdLabel);
 
-                item.appendChild(
-                        userIdCell);
+				item.appendChild(userIdCell);
 
-                // ----------------------------------------------------
-                // ROLE
-                // ----------------------------------------------------
+				// ROLE
 
-                Listcell roleCell =
-                        new Listcell();
+				Listcell roleCell = new Listcell();
 
-                Label roleLabel =
-                        new Label(
-                                log.getRoleName() != null
-                                        ? log.getRoleName()
-                                        : "-");
+				Label roleLabel = new Label(log.getRoleName() != null ? log.getRoleName() : "-");
 
-                roleLabel.setSclass(
-                        "audit-role-label");
+				roleLabel.setSclass("audit-role-label");
 
-                roleCell.appendChild(
-                        roleLabel);
+				roleCell.appendChild(roleLabel);
 
-                item.appendChild(
-                        roleCell);
+				item.appendChild(roleCell);
 
-                // ----------------------------------------------------
-                // LOGIN DATE
-                // ----------------------------------------------------
+				// LOGIN DATE
 
-                Listcell loginDateCell =
-                        new Listcell();
+				Listcell loginDateCell = new Listcell();
 
-                Label loginDateLabel =
-                        new Label(
-                                log.getLoginTime() != null
-                                        ? formatDate(
-                                                log.getLoginTime())
-                                        : "-");
+				Label loginDateLabel = new Label(log.getLoginTime() != null ? formatDate(log.getLoginTime()) : "-");
 
-                loginDateLabel.setSclass(
-                        "audit-datetime-label");
+				loginDateLabel.setSclass("audit-datetime-label");
 
-                loginDateCell.appendChild(
-                        loginDateLabel);
+				loginDateCell.appendChild(loginDateLabel);
 
-                item.appendChild(
-                        loginDateCell);
+				item.appendChild(loginDateCell);
 
-                // ----------------------------------------------------
-                // LOGIN TIME
-                // ----------------------------------------------------
+				// LOGIN TIME
 
-                Listcell loginTimeCell =
-                        new Listcell();
+				Listcell loginTimeCell = new Listcell();
 
-                Label loginTimeLabel =
-                        new Label(
-                                log.getLoginTime() != null
-                                        ? formatTime(
-                                                log.getLoginTime())
-                                        : "-");
+				Label loginTimeLabel = new Label(log.getLoginTime() != null ? formatTime(log.getLoginTime()) : "-");
 
-                loginTimeLabel.setSclass(
-                        "audit-datetime-label");
+				loginTimeLabel.setSclass("audit-datetime-label");
 
-                loginTimeCell.appendChild(
-                        loginTimeLabel);
+				loginTimeCell.appendChild(loginTimeLabel);
 
-                item.appendChild(
-                        loginTimeCell);
+				item.appendChild(loginTimeCell);
 
-                // ----------------------------------------------------
-                // LOGOUT DATE
-                // ----------------------------------------------------
+				// LOGOUT DATE
 
-                Listcell logoutDateCell =
-                        new Listcell();
+				Listcell logoutDateCell = new Listcell();
 
-                Label logoutDateLabel =
-                        new Label(
-                                log.getLogoutTime() != null
-                                        ? formatDate(
-                                                log.getLogoutTime())
-                                        : "-");
+				Label logoutDateLabel = new Label(log.getLogoutTime() != null ? formatDate(log.getLogoutTime()) : "-");
 
-                logoutDateLabel.setSclass(
-                        "audit-datetime-label");
+				logoutDateLabel.setSclass("audit-datetime-label");
 
-                logoutDateCell.appendChild(
-                        logoutDateLabel);
+				logoutDateCell.appendChild(logoutDateLabel);
 
-                item.appendChild(
-                        logoutDateCell);
+				item.appendChild(logoutDateCell);
 
-                // ----------------------------------------------------
-                // LOGOUT TIME
-                // ----------------------------------------------------
+				// LOGOUT TIME
 
-                Listcell logoutTimeCell =
-                        new Listcell();
+				Listcell logoutTimeCell = new Listcell();
 
-                Label logoutTimeLabel =
-                        new Label(
-                                log.getLogoutTime() != null
-                                        ? formatTime(
-                                                log.getLogoutTime())
-                                        : "-");
+				Label logoutTimeLabel = new Label(log.getLogoutTime() != null ? formatTime(log.getLogoutTime()) : "-");
 
-                logoutTimeLabel.setSclass(
-                        "audit-datetime-label");
+				logoutTimeLabel.setSclass("audit-datetime-label");
 
-                logoutTimeCell.appendChild(
-                        logoutTimeLabel);
+				logoutTimeCell.appendChild(logoutTimeLabel);
 
-                item.appendChild(
-                        logoutTimeCell);
+				item.appendChild(logoutTimeCell);
 
-                // ----------------------------------------------------
-                // ADD ROW TO LISTBOX
-                // ----------------------------------------------------
+				// ADD ROW TO LISTBOX
 
-                auditLogListbox.appendChild(
-                        item);
-            }
+				auditLogListbox.appendChild(item);
+			}
 
-        } catch (Exception e) {
+		} catch (Exception e) {
 
-            e.printStackTrace();
+			e.printStackTrace();
 
-            Messagebox.show(
-                    "Unable to load audit logs.",
-                    "Audit Logs",
-                    Messagebox.OK,
-                    Messagebox.ERROR);
-        }
-    }
+			Messagebox.show("Unable to load audit logs.", "Audit Logs", Messagebox.OK, Messagebox.ERROR);
+		}
+	}
 
-    // ================================================================
-    // EXPORT AUDIT LOGS TO PDF
-    // ================================================================
+	// EXPORT AUDIT LOGS TO PDF
 
-    private void exportAuditLogsToPdf() {
+	private void exportAuditLogsToPdf() {
 
-        try {
+		try {
 
-            // ========================================================
-            // GET CURRENT FILTER VALUES
-            // ========================================================
+			// GET CURRENT FILTER VALUES
 
-            String searchText =
-                    auditSearchTextbox.getValue();
+			String searchText = auditSearchTextbox.getValue();
 
-            if (searchText != null) {
-                searchText = searchText.trim();
-            }
+			if (searchText != null) {
+				searchText = searchText.trim();
+			}
 
-            String roleFilter =
-                    getSelectedRole();
+			String roleFilter = getSelectedRole();
 
-            Date fromDate =
-                    auditFromDate.getValue();
+			Date fromDate = auditFromDate.getValue();
 
-            Date toDate =
-                    auditToDate.getValue();
+			Date toDate = auditToDate.getValue();
 
-            // ========================================================
-            // VALIDATE DATE RANGE
-            // ========================================================
+			// VALIDATE DATE RANGE
 
-            if (fromDate != null
-                    && toDate != null
-                    && fromDate.after(toDate)) {
+			if (fromDate != null && toDate != null && fromDate.after(toDate)) {
 
-                Messagebox.show(
-                        "From Date cannot be later than To Date.",
-                        "Invalid Date Range",
-                        Messagebox.OK,
-                        Messagebox.EXCLAMATION);
+				Messagebox.show("From Date cannot be later than To Date.", "Invalid Date Range", Messagebox.OK,
+						Messagebox.EXCLAMATION);
 
-                return;
-            }
+				return;
+			}
 
-            // ========================================================
-            // GET ALL FILTERED AUDIT LOGS
-            // ========================================================
+			// GET ALL FILTERED AUDIT LOGS
 
-            List<AuditLog> auditLogs =
-                    auditLogService.getAllAuditLogs(
-                            searchText,
-                            roleFilter,
-                            fromDate,
-                            toDate);
+			List<AuditLog> auditLogs = auditLogService.getAllAuditLogs(searchText, roleFilter, fromDate, toDate);
 
-            // ========================================================
-            // FORMAT REPORT DATES
-            // ========================================================
+			// FORMAT REPORT DATES
 
-            SimpleDateFormat reportDateFormat =
-                    new SimpleDateFormat("dd/MM/yyyy");
+			SimpleDateFormat reportDateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
-            reportDateFormat.setTimeZone(IST);
+			reportDateFormat.setTimeZone(IST);
 
-            String generatedDate =
-                    reportDateFormat.format(new Date());
+			String generatedDate = reportDateFormat.format(new Date());
 
-            String reportFromDate =
-                    fromDate != null
-                            ? reportDateFormat.format(fromDate)
-                            : "All";
+			String reportFromDate = fromDate != null ? reportDateFormat.format(fromDate) : "All";
 
-            String reportToDate =
-                    toDate != null
-                            ? reportDateFormat.format(toDate)
-                            : "All";
+			String reportToDate = toDate != null ? reportDateFormat.format(toDate) : "All";
 
-            // ========================================================
-            // GENERATE PDF
-            // ========================================================
+			// GENERATE PDF
 
-            byte[] pdfBytes =
-                    auditLogReportService.generateAuditLogPdf(
-                            auditLogs,
-                            generatedDate,
-                            reportFromDate,
-                            reportToDate);
+			byte[] pdfBytes = auditLogReportService.generateAuditLogPdf(auditLogs, generatedDate, reportFromDate,
+					reportToDate);
 
-            // ========================================================
-            // DOWNLOAD PDF
-            // ========================================================
+			// DOWNLOAD PDF
 
-            String fileName =
-                    "Audit_Log_Report_"
-                            + generatedDate.replace("/", "-")
-                            + ".pdf";
+			String fileName = "Audit_Log_Report_" + generatedDate.replace("/", "-") + ".pdf";
 
-            Filedownload.save(
-                    pdfBytes,
-                    "application/pdf",
-                    fileName);
+			Filedownload.save(pdfBytes, "application/pdf", fileName);
 
-        } catch (Exception e) {
+		} catch (Exception e) {
 
-            e.printStackTrace();
+			e.printStackTrace();
 
-            Messagebox.show(
-                    "Unable to generate audit log report.",
-                    "Audit Log Report",
-                    Messagebox.OK,
-                    Messagebox.ERROR);
-        }
-    }
+			Messagebox.show("Unable to generate audit log report.", "Audit Log Report", Messagebox.OK,
+					Messagebox.ERROR);
+		}
+	}
 
-    // ================================================================
-    // FORMAT DATE
-    // ================================================================
+	// FORMAT DATE
 
-    private String formatDate(Timestamp timestamp) {
+	private String formatDate(Timestamp timestamp) {
 
-        if (timestamp == null) {
-            return "-";
-        }
+		if (timestamp == null) {
+			return "-";
+		}
 
-        SimpleDateFormat sdf =
-                new SimpleDateFormat("dd/MM/yyyy");
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
-        sdf.setTimeZone(IST);
+		sdf.setTimeZone(IST);
 
-        return sdf.format(timestamp);
-    }
+		return sdf.format(timestamp);
+	}
 
-    // ================================================================
-    // FORMAT TIME
-    // ================================================================
+	// FORMAT TIME
 
-    private String formatTime(Timestamp timestamp) {
+	private String formatTime(Timestamp timestamp) {
 
-        if (timestamp == null) {
-            return "-";
-        }
+		if (timestamp == null) {
+			return "-";
+		}
 
-        SimpleDateFormat sdf =
-                new SimpleDateFormat("hh:mm a");
+		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
 
-        sdf.setTimeZone(IST);
+		sdf.setTimeZone(IST);
 
-        return sdf.format(timestamp);
-    }
+		return sdf.format(timestamp);
+	}
 }

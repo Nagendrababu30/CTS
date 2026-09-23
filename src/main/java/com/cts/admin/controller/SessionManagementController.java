@@ -61,9 +61,7 @@ public class SessionManagementController
 
     private static final long serialVersionUID = 1L;
 
-    // =========================================================
     // PAGE COMPONENTS
-    // =========================================================
 
     private Vlayout currentSessionCard;
     private Label   sessionStatusBadge;
@@ -77,25 +75,19 @@ public class SessionManagementController
 
     private static final int PAGE_SIZE = 5;
 
-    // =========================================================
     // END SESSION MODAL
-    // =========================================================
 
     private Window endSessionModal;
     private Button modalCloseButton;
     private Button modalCancelButton;
     private Button modalConfirmButton;
 
-    // =========================================================
     // SERVICES
-    // =========================================================
 
     private SessionService         sessionService;
     private InwardIngestionService inwardIngestionService;
 
-    // =========================================================
     // COMPOSE
-    // =========================================================
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
@@ -215,9 +207,7 @@ public class SessionManagementController
         loadSessionHistory(0);
     }
 
-    // =========================================================
     // GET CURRENT USER ID FROM SESSION
-    // =========================================================
 
     private Long getCurrentUserId() {
 
@@ -233,9 +223,7 @@ public class SessionManagementController
         return 1L;
     }
 
-    // =========================================================
     // REGISTER EVENTS
-    // =========================================================
 
     private void registerEvents() {
 
@@ -289,9 +277,7 @@ public class SessionManagementController
                 });
     }
 
-    // =========================================================
     // START SESSION
-    // =========================================================
 
     private void startSession() {
 
@@ -330,9 +316,7 @@ public class SessionManagementController
         }
     }
 
-    // =========================================================
     // OPEN END SESSION MODAL
-    // =========================================================
 
     private void openEndSessionModal() {
 
@@ -355,9 +339,7 @@ public class SessionManagementController
         endSessionModal.doModal();
     }
 
-    // =========================================================
     // CLOSE END SESSION MODAL
-    // =========================================================
 
     private void closeEndSessionModal() {
 
@@ -366,9 +348,7 @@ public class SessionManagementController
         }
     }
 
-    // =========================================================
     // END SESSION
-    // =========================================================
 
     private void endSession() {
 
@@ -441,9 +421,7 @@ public class SessionManagementController
         }
     }
 
-    // =========================================================
     // LOAD CURRENT SESSION STATE
-    // =========================================================
 
     private void loadSessionState() {
 
@@ -470,9 +448,7 @@ public class SessionManagementController
                         : "Clearing Session");
     }
 
-    // =========================================================
     // LOAD SESSION HISTORY
-    // =========================================================
 
     private void loadSessionHistory(int offset) {
 
@@ -520,9 +496,7 @@ public class SessionManagementController
         }
     }
 
-    // =========================================================
     // HELPERS
-    // =========================================================
 
     private Listcell createCell(String value) {
         Listcell cell = new Listcell();

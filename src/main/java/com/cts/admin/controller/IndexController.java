@@ -7,19 +7,17 @@ import org.zkoss.zk.ui.util.GenericForwardComposer;
 
 public class IndexController extends GenericForwardComposer<Component> {
 
+	@Override
+	public void doAfterCompose(Component comp) throws Exception {
 
-    @Override
-    public void doAfterCompose(Component comp) throws Exception {
+		super.doAfterCompose(comp);
 
-        super.doAfterCompose(comp);
+		Session session = Executions.getCurrent().getSession();
 
-        Session session =
-                Executions.getCurrent().getSession();
+		if (session != null) {
+			session.invalidate();
+		}
 
-        if (session != null) {
-            session.invalidate();
-        }
-
-        Executions.sendRedirect("/login.zul");
-    }
+		Executions.sendRedirect("/login.zul");
+	}
 }

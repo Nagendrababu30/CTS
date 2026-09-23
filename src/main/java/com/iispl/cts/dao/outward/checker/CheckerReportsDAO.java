@@ -324,9 +324,7 @@ public class CheckerReportsDAO {
                         + "back_image_path, "
                         + "cheque_status, "
                         + "return_reason_id, "
-                        + "checker_remarks, "
-                        + "created_by, "
-                        + "created_at "
+                        + "checker_remarks "
                         + "FROM public.outward_cheque "
                         + "WHERE batch_number = ? "
                         + "ORDER BY cheque_number";
@@ -403,9 +401,7 @@ public class CheckerReportsDAO {
                         + "oc.back_image_path, "
                         + "oc.cheque_status, "
                         + "oc.return_reason_id, "
-                        + "oc.checker_remarks, "
-                        + "oc.created_by, "
-                        + "oc.created_at "
+                        + "oc.checker_remarks "
                         + "FROM public.outward_cheque oc "
                         + "INNER JOIN public.cheque_processing cp "
                         + "ON cp.batch_number = oc.batch_number "
@@ -824,18 +820,6 @@ public class CheckerReportsDAO {
         cheque.setCheckerRemarks(
                 rs.getString("checker_remarks")
         );
-
-        cheque.setCreatedBy(
-                rs.getString("created_by")
-        );
-
-        if (rs.getTimestamp("created_at") != null) {
-
-            cheque.setCreatedAt(
-                    rs.getTimestamp("created_at")
-                            .toLocalDateTime()
-            );
-        }
 
         return cheque;
     }

@@ -15,395 +15,412 @@ import com.cts.inward.config.ConnectionPool;
 
 public class AuditLogDAOImpl implements AuditLogDAO {
 
-    private static final java.util.TimeZone IST =
-            java.util.TimeZone.getTimeZone("Asia/Kolkata");
+	private static final java.util.TimeZone IST = java.util.TimeZone.getTimeZone("Asia/Kolkata");
 
-    // ================================================================
-    // GET AUDIT LOGS - WITHOUT FILTERS
-    // ================================================================
+	// ================================================================
+	// GET AUDIT LOGS - WITHOUT FILTERS
+	// ================================================================
 
-    @Override
-    public List<AuditLog> getAuditLogs(int page, int pageSize) {
+	@Override
+	public List<AuditLog> getAuditLogs(int page, int pageSize) {
 
-        return getAuditLogs(
-                page,
-                pageSize,
-                null,
-                null,
-                null,
-                null);
-    }
+		return getAuditLogs(page, pageSize, null, null, null, null);
+	}
 
-    // ================================================================
-    // GET FILTERED AUDIT LOGS
-    // ================================================================
+	// ================================================================
+	// GET FILTERED AUDIT LOGS
+	// ================================================================
 
-    @Override
-    public List<AuditLog> getAuditLogs(
-            int page,
-            int pageSize,
-            String searchText,
-            String roleName,
-            Date fromDate,
-            Date toDate) {
+	@Override
+	public List<AuditLog> getAuditLogs(int page, int pageSize, String searchText, String roleName, Date fromDate,
+			Date toDate) {
 
-        List<AuditLog> logs = new ArrayList<>();
+		List<AuditLog> logs = new ArrayList<>();
 
-        int offset = (page - 1) * pageSize;
+		int offset = (page - 1) * pageSize;
 
-        StringBuilder sql = new StringBuilder();
+		StringBuilder sql = new StringBuilder();
 
-        sql.append(
-                "SELECT us.session_id, "
-              + "       us.user_id, "
-              + "       u.username, "
-              + "       r.role_name, "
-              + "       us.login_time, "
-              + "       us.logout_time "
-              + "FROM user_session us "
-              + "JOIN \"user\" u ON us.user_id = u.user_id "
-              + "JOIN \"role\" r ON u.role_id = r.role_id "
-              + "WHERE 1 = 1 ");
+		sql.append("SELECT us.session_id, " + "       us.user_id, " + "       u.username, " + "       r.role_name, "
+				+ "       us.login_time, " + "       us.logout_time " + "FROM user_session us "
+				+ "JOIN \"user\" u ON us.user_id = u.user_id " + "JOIN \"role\" r ON u.role_id = r.role_id "
+				+ "WHERE 1 = 1 ");
 
-        List<Object> parameters = new ArrayList<>();
+		List<Object> parameters = new ArrayList<>();
 
-        // ============================================================
-        // SEARCH BY USERNAME OR USER ID
-        // ============================================================
+		// ============================================================
+		// SEARCH BY USERNAME OR USER ID
+		// ============================================================
 
-        if (searchText != null && !searchText.trim().isEmpty()) {
+		if (searchText != null && !searchText.trim().isEmpty()) {
 
-            sql.append(
-                    "AND (LOWER(u.username) LIKE LOWER(?) "
-                  + "OR CAST(u.user_id AS TEXT) LIKE ?) ");
+			sql.append("AND (LOWER(u.username) LIKE LOWER(?) " + "OR CAST(u.user_id AS TEXT) LIKE ?) ");
 
-            String searchPattern =
-                    "%" + searchText.trim() + "%";
+			String searchPattern = "%" + searchText.trim() + "%";
 
-            parameters.add(searchPattern);
-            parameters.add(searchPattern);
-        }
+			parameters.add(searchPattern);
+			parameters.add(searchPattern);
+		}
 
-        // ============================================================
-        // ROLE FILTER
-        // ============================================================
+		// ============================================================
+		// ROLE FILTER
+		// ============================================================
 
-        if (roleName != null && !roleName.trim().isEmpty()) {
+		if (roleName != null && !roleName.trim().isEmpty()) {
 
-            sql.append("AND r.role_name = ? ");
+			sql.append("AND r.role_name = ? ");
 
-            parameters.add(roleName.trim());
-        }
+			parameters.add(roleName.trim());
+		}
 
-        // ============================================================
-        // FROM DATE
-        // ============================================================
+		// ============================================================
+		// FROM DATE
+		// ============================================================
 
-        if (fromDate != null) {
+		if (fromDate != null) {
 
-            sql.append("AND us.login_time >= ? ");
+			sql.append("AND us.login_time >= ? ");
 
-            parameters.add(
-                    new java.sql.Timestamp(fromDate.getTime()));
-        }
+			parameters.add(new java.sql.Timestamp(fromDate.getTime()));
+		}
 
-        // ============================================================
-        // TO DATE - INCLUSIVE
-        // ============================================================
+		// ============================================================
+		// TO DATE - INCLUSIVE
+		// ============================================================
 
-        if (toDate != null) {
+		if (toDate != null) {
 
-            java.util.Calendar calendar =
-                    java.util.Calendar.getInstance(IST);
+			java.util.Calendar calendar = java.util.Calendar.getInstance(IST);
 
-            calendar.setTime(toDate);
+			calendar.setTime(toDate);
 
-            // Include the complete selected To Date
-            calendar.add(
-                    java.util.Calendar.DAY_OF_MONTH,
-                    1);
+			// Include the complete selected To Date
+			calendar.add(java.util.Calendar.DAY_OF_MONTH, 1);
 
-            sql.append("AND us.login_time < ? ");
+			sql.append("AND us.login_time < ? ");
 
-            parameters.add(
-                    new java.sql.Timestamp(
-                            calendar.getTimeInMillis()));
-        }
+			parameters.add(new java.sql.Timestamp(calendar.getTimeInMillis()));
+		}
 
-        // ============================================================
-        // PAGINATION
-        // ============================================================
+		// ============================================================
+		// PAGINATION
+		// ============================================================
 
-        sql.append(
-                "ORDER BY us.login_time DESC "
-              + "LIMIT ? OFFSET ?");
+		sql.append("ORDER BY us.login_time DESC " + "LIMIT ? OFFSET ?");
 
-        parameters.add(pageSize);
-        parameters.add(offset);
+		parameters.add(pageSize);
+		parameters.add(offset);
 
-        try (
-                Connection conn =
-                        ConnectionPool.getDataSource().getConnection();
+		try (Connection conn = ConnectionPool.getDataSource().getConnection();
 
-                PreparedStatement stmt =
-                        conn.prepareStatement(sql.toString())
-        ) {
+				PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
 
-            for (int i = 0; i < parameters.size(); i++) {
+			for (int i = 0; i < parameters.size(); i++) {
 
-                stmt.setObject(
-                        i + 1,
-                        parameters.get(i));
-            }
+				stmt.setObject(i + 1, parameters.get(i));
+			}
 
-            try (ResultSet rs = stmt.executeQuery()) {
+			try (ResultSet rs = stmt.executeQuery()) {
 
-                while (rs.next()) {
+				while (rs.next()) {
 
-                    AuditLog log = new AuditLog();
+					AuditLog log = new AuditLog();
 
-                    log.setUserId(
-                            rs.getLong("user_id"));
+					log.setUserId(rs.getLong("user_id"));
 
-                    log.setUserName(
-                            rs.getString("username"));
+					log.setUserName(rs.getString("username"));
 
-                    log.setRoleName(
-                            rs.getString("role_name"));
+					log.setRoleName(rs.getString("role_name"));
 
-                    log.setLoginTime(
-                            rs.getTimestamp("login_time"));
+					log.setLoginTime(rs.getTimestamp("login_time"));
 
-                    log.setLogoutTime(
-                            rs.getTimestamp("logout_time"));
+					log.setLogoutTime(rs.getTimestamp("logout_time"));
 
-                    logs.add(log);
-                }
-            }
+					logs.add(log);
+				}
+			}
 
-        } catch (SQLException e) {
+		} catch (SQLException e) {
 
-            throw new RuntimeException(
-                    "Unable to fetch filtered audit logs.",
-                    e);
-        }
+			throw new RuntimeException("Unable to fetch filtered audit logs.", e);
+		}
 
-        return logs;
-    }
+		return logs;
+	}
 
-    // ================================================================
-    // GET TOTAL AUDIT LOG COUNT - WITHOUT FILTERS
-    // ================================================================
+	// ================================================================
+	// GET ALL FILTERED AUDIT LOGS - FOR REPORT GENERATION
+	// ================================================================
 
-    @Override
-    public int getTotalAuditLogCount() {
+	@Override
+	public List<AuditLog> getAllAuditLogs(String searchText, String roleName, Date fromDate, Date toDate) {
 
-        return getTotalAuditLogCount(
-                null,
-                null,
-                null,
-                null);
-    }
+		List<AuditLog> logs = new ArrayList<>();
 
-    // ================================================================
-    // GET FILTERED AUDIT LOG COUNT
-    // ================================================================
+		StringBuilder sql = new StringBuilder();
 
-    @Override
-    public int getTotalAuditLogCount(
-            String searchText,
-            String roleName,
-            Date fromDate,
-            Date toDate) {
+		sql.append("SELECT us.session_id, " + "       us.user_id, " + "       u.username, " + "       r.role_name, "
+				+ "       us.login_time, " + "       us.logout_time " + "FROM user_session us "
+				+ "JOIN \"user\" u ON us.user_id = u.user_id " + "JOIN \"role\" r ON u.role_id = r.role_id "
+				+ "WHERE 1 = 1 ");
 
-        StringBuilder sql = new StringBuilder();
+		List<Object> parameters = new ArrayList<>();
 
-        sql.append(
-                "SELECT COUNT(*) "
-              + "FROM user_session us "
-              + "JOIN \"user\" u ON us.user_id = u.user_id "
-              + "JOIN \"role\" r ON u.role_id = r.role_id "
-              + "WHERE 1 = 1 ");
+		// ============================================================
+		// SEARCH BY USERNAME OR USER ID
+		// ============================================================
 
-        List<Object> parameters = new ArrayList<>();
+		if (searchText != null && !searchText.trim().isEmpty()) {
 
-        // ============================================================
-        // SEARCH BY USERNAME OR USER ID
-        // ============================================================
+			sql.append("AND (LOWER(u.username) LIKE LOWER(?) " + "OR CAST(u.user_id AS TEXT) LIKE ?) ");
 
-        if (searchText != null && !searchText.trim().isEmpty()) {
+			String searchPattern = "%" + searchText.trim() + "%";
 
-            sql.append(
-                    "AND (LOWER(u.username) LIKE LOWER(?) "
-                  + "OR CAST(u.user_id AS TEXT) LIKE ?) ");
+			parameters.add(searchPattern);
+			parameters.add(searchPattern);
+		}
 
-            String searchPattern =
-                    "%" + searchText.trim() + "%";
+		// ============================================================
+		// ROLE FILTER
+		// ============================================================
 
-            parameters.add(searchPattern);
-            parameters.add(searchPattern);
-        }
+		if (roleName != null && !roleName.trim().isEmpty()) {
 
-        // ============================================================
-        // ROLE FILTER
-        // ============================================================
+			sql.append("AND r.role_name = ? ");
 
-        if (roleName != null && !roleName.trim().isEmpty()) {
+			parameters.add(roleName.trim());
+		}
 
-            sql.append("AND r.role_name = ? ");
+		// ============================================================
+		// FROM DATE
+		// ============================================================
 
-            parameters.add(roleName.trim());
-        }
+		if (fromDate != null) {
 
-        // ============================================================
-        // FROM DATE
-        // ============================================================
+			sql.append("AND us.login_time >= ? ");
 
-        if (fromDate != null) {
+			parameters.add(new java.sql.Timestamp(fromDate.getTime()));
+		}
 
-            sql.append("AND us.login_time >= ? ");
+		// ============================================================
+		// TO DATE - INCLUSIVE
+		// ============================================================
 
-            parameters.add(
-                    new java.sql.Timestamp(fromDate.getTime()));
-        }
+		if (toDate != null) {
 
-        // ============================================================
-        // TO DATE - INCLUSIVE
-        // ============================================================
+			java.util.Calendar calendar = java.util.Calendar.getInstance(IST);
 
-        if (toDate != null) {
+			calendar.setTime(toDate);
 
-            java.util.Calendar calendar =
-                    java.util.Calendar.getInstance(IST);
+			// Include the complete selected To Date
+			calendar.add(java.util.Calendar.DAY_OF_MONTH, 1);
 
-            calendar.setTime(toDate);
+			sql.append("AND us.login_time < ? ");
 
-            // Include the complete selected To Date
-            calendar.add(
-                    java.util.Calendar.DAY_OF_MONTH,
-                    1);
+			parameters.add(new java.sql.Timestamp(calendar.getTimeInMillis()));
+		}
 
-            sql.append("AND us.login_time < ? ");
+		// ============================================================
+		// ORDERING - NO PAGINATION
+		// ============================================================
 
-            parameters.add(
-                    new java.sql.Timestamp(
-                            calendar.getTimeInMillis()));
-        }
+		sql.append("ORDER BY us.login_time DESC");
 
-        try (
-                Connection conn =
-                        ConnectionPool.getDataSource().getConnection();
+		try (Connection conn = ConnectionPool.getDataSource().getConnection();
 
-                PreparedStatement stmt =
-                        conn.prepareStatement(sql.toString())
-        ) {
+				PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
 
-            for (int i = 0; i < parameters.size(); i++) {
+			for (int i = 0; i < parameters.size(); i++) {
 
-                stmt.setObject(
-                        i + 1,
-                        parameters.get(i));
-            }
+				stmt.setObject(i + 1, parameters.get(i));
+			}
 
-            try (ResultSet rs = stmt.executeQuery()) {
+			try (ResultSet rs = stmt.executeQuery()) {
 
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
-            }
+				while (rs.next()) {
 
-        } catch (SQLException e) {
+					AuditLog log = new AuditLog();
 
-            throw new RuntimeException(
-                    "Unable to count filtered audit logs.",
-                    e);
-        }
+					log.setUserId(rs.getLong("user_id"));
 
-        return 0;
-    }
+					log.setUserName(rs.getString("username"));
 
-    // ================================================================
-    // CREATE AUDIT LOG - INSERT ON LOGIN
-    // ================================================================
+					log.setRoleName(rs.getString("role_name"));
 
-    @Override
-    public String createAuditLog(Long userId) {
+					log.setLoginTime(rs.getTimestamp("login_time"));
 
-        String sessionId =
-                UUID.randomUUID().toString();
+					log.setLogoutTime(rs.getTimestamp("logout_time"));
 
-        java.sql.Timestamp nowIST =
-                new java.sql.Timestamp(
-                        java.util.Calendar
-                                .getInstance(IST)
-                                .getTimeInMillis());
+					logs.add(log);
+				}
+			}
 
-        String sql =
-                "INSERT INTO user_session "
-              + "(session_id, user_id, login_time, session_status) "
-              + "VALUES (?, ?, ?, 'ACTIVE')";
+		} catch (SQLException e) {
 
-        try (
-                Connection conn =
-                        ConnectionPool.getDataSource().getConnection();
+			throw new RuntimeException("Unable to fetch all audit logs for report.", e);
+		}
 
-                PreparedStatement stmt =
-                        conn.prepareStatement(sql)
-        ) {
+		return logs;
+	}
 
-            stmt.setString(1, sessionId);
-            stmt.setLong(2, userId);
-            stmt.setTimestamp(3, nowIST);
+	// ================================================================
+	// GET TOTAL AUDIT LOG COUNT - WITHOUT FILTERS
+	// ================================================================
 
-            stmt.executeUpdate();
+	@Override
+	public int getTotalAuditLogCount() {
 
-        } catch (SQLException e) {
+		return getTotalAuditLogCount(null, null, null, null);
+	}
 
-            throw new RuntimeException(
-                    "Unable to create audit log entry.",
-                    e);
-        }
+	// ================================================================
+	// GET FILTERED AUDIT LOG COUNT
+	// ================================================================
 
-        return sessionId;
-    }
+	@Override
+	public int getTotalAuditLogCount(String searchText, String roleName, Date fromDate, Date toDate) {
 
-    // ================================================================
-    // END AUDIT LOG - UPDATE ON LOGOUT
-    // ================================================================
+		StringBuilder sql = new StringBuilder();
 
-    @Override
-    public void endAuditLog(String sessionId) {
+		sql.append("SELECT COUNT(*) " + "FROM user_session us " + "JOIN \"user\" u ON us.user_id = u.user_id "
+				+ "JOIN \"role\" r ON u.role_id = r.role_id " + "WHERE 1 = 1 ");
 
-        java.sql.Timestamp nowIST =
-                new java.sql.Timestamp(
-                        java.util.Calendar
-                                .getInstance(IST)
-                                .getTimeInMillis());
+		List<Object> parameters = new ArrayList<>();
 
-        String sql =
-                "UPDATE user_session "
-              + "SET logout_time = ?, "
-              + "    session_status = 'ENDED' "
-              + "WHERE session_id = ?";
+		// ============================================================
+		// SEARCH BY USERNAME OR USER ID
+		// ============================================================
 
-        try (
-                Connection conn =
-                        ConnectionPool.getDataSource().getConnection();
+		if (searchText != null && !searchText.trim().isEmpty()) {
 
-                PreparedStatement stmt =
-                        conn.prepareStatement(sql)
-        ) {
+			sql.append("AND (LOWER(u.username) LIKE LOWER(?) " + "OR CAST(u.user_id AS TEXT) LIKE ?) ");
 
-            stmt.setTimestamp(1, nowIST);
-            stmt.setString(2, sessionId);
+			String searchPattern = "%" + searchText.trim() + "%";
 
-            stmt.executeUpdate();
+			parameters.add(searchPattern);
+			parameters.add(searchPattern);
+		}
 
-        } catch (SQLException e) {
+		// ============================================================
+		// ROLE FILTER
+		// ============================================================
 
-            throw new RuntimeException(
-                    "Unable to end audit log entry.",
-                    e);
-        }
-    }
+		if (roleName != null && !roleName.trim().isEmpty()) {
+
+			sql.append("AND r.role_name = ? ");
+
+			parameters.add(roleName.trim());
+		}
+
+		// ============================================================
+		// FROM DATE
+		// ============================================================
+
+		if (fromDate != null) {
+
+			sql.append("AND us.login_time >= ? ");
+
+			parameters.add(new java.sql.Timestamp(fromDate.getTime()));
+		}
+
+		// ============================================================
+		// TO DATE - INCLUSIVE
+		// ============================================================
+
+		if (toDate != null) {
+
+			java.util.Calendar calendar = java.util.Calendar.getInstance(IST);
+
+			calendar.setTime(toDate);
+
+			// Include the complete selected To Date
+			calendar.add(java.util.Calendar.DAY_OF_MONTH, 1);
+
+			sql.append("AND us.login_time < ? ");
+
+			parameters.add(new java.sql.Timestamp(calendar.getTimeInMillis()));
+		}
+
+		try (Connection conn = ConnectionPool.getDataSource().getConnection();
+
+				PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+			for (int i = 0; i < parameters.size(); i++) {
+
+				stmt.setObject(i + 1, parameters.get(i));
+			}
+
+			try (ResultSet rs = stmt.executeQuery()) {
+
+				if (rs.next()) {
+					return rs.getInt(1);
+				}
+			}
+
+		} catch (SQLException e) {
+
+			throw new RuntimeException("Unable to count filtered audit logs.", e);
+		}
+
+		return 0;
+	}
+
+	// ================================================================
+	// CREATE AUDIT LOG - INSERT ON LOGIN
+	// ================================================================
+
+	@Override
+	public String createAuditLog(Long userId) {
+
+		String sessionId = UUID.randomUUID().toString();
+
+		java.sql.Timestamp nowIST = new java.sql.Timestamp(java.util.Calendar.getInstance(IST).getTimeInMillis());
+
+		String sql = "INSERT INTO user_session " + "(session_id, user_id, login_time, session_status) "
+				+ "VALUES (?, ?, ?, 'ACTIVE')";
+
+		try (Connection conn = ConnectionPool.getDataSource().getConnection();
+
+				PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+			stmt.setString(1, sessionId);
+			stmt.setLong(2, userId);
+			stmt.setTimestamp(3, nowIST);
+
+			stmt.executeUpdate();
+
+		} catch (SQLException e) {
+
+			throw new RuntimeException("Unable to create audit log entry.", e);
+		}
+
+		return sessionId;
+	}
+
+	// ================================================================
+	// END AUDIT LOG - UPDATE ON LOGOUT
+	// ================================================================
+
+	@Override
+	public void endAuditLog(String sessionId) {
+
+		java.sql.Timestamp nowIST = new java.sql.Timestamp(java.util.Calendar.getInstance(IST).getTimeInMillis());
+
+		String sql = "UPDATE user_session " + "SET logout_time = ?, " + "    session_status = 'ENDED' "
+				+ "WHERE session_id = ?";
+
+		try (Connection conn = ConnectionPool.getDataSource().getConnection();
+
+				PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+			stmt.setTimestamp(1, nowIST);
+			stmt.setString(2, sessionId);
+
+			stmt.executeUpdate();
+
+		} catch (SQLException e) {
+
+			throw new RuntimeException("Unable to end audit log entry.", e);
+		}
+	}
 }

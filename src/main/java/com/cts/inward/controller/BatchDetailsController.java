@@ -315,6 +315,7 @@ public class BatchDetailsController
     private Button returnCancelButton;
     private Button returnConfirmButton;
     private boolean cbsPassed = false;
+    private List<String> currentCbsFailedReasonCodes = new ArrayList<>();
 
     // =========================================================
     // MAKER RETURN PANEL (RETURN_BY_MAKER)
@@ -634,6 +635,7 @@ public class BatchDetailsController
         // -----------------------------------------------------
 
         Map<String, Object> cheque = cheques.get(currentChequeIndex);
+        currentCbsFailedReasonCodes.clear();
 
         // =====================================================
         // GET VALUES FROM inward_cheque
@@ -1768,11 +1770,13 @@ public class BatchDetailsController
         } else {
 
             StringBuilder failure = new StringBuilder();
+            currentCbsFailedReasonCodes.clear();
 
             if (!amountPassed) {
 
                 failure.append(
                         "Amount / Funds validation failed.");
+                currentCbsFailedReasonCodes.add("RJ001");
             }
 
             if (!datePassed) {
@@ -1782,6 +1786,7 @@ public class BatchDetailsController
 
                 failure.append(
                         "Cheque date is older than 3 months.");
+                currentCbsFailedReasonCodes.add("RJ003");
             }
 
             if (!accountPassed) {
@@ -1791,6 +1796,7 @@ public class BatchDetailsController
 
                 failure.append(
                         "Account status is not ACTIVE.");
+                currentCbsFailedReasonCodes.add("RJ002");
             }
 
             if (!duplicatePassed) {
@@ -1800,6 +1806,7 @@ public class BatchDetailsController
 
                 failure.append(
                         "Duplicate cheque detected in system.");
+                currentCbsFailedReasonCodes.add("RJ004");
             }
 
             showCbsFailure(
@@ -1849,6 +1856,8 @@ public class BatchDetailsController
     // =========================================================
 
     private void showCbsPassed() {
+        cbsPassed = true;
+        currentCbsFailedReasonCodes.clear();
 
         if (cbsTitle != null) {
 
@@ -2178,15 +2187,29 @@ public class BatchDetailsController
                     batchDetailsService.getCheckerRejectionReasons();
             if (reasons != null) {
                 for (Map<String, String> r : reasons) {
-                    Checkbox cb = new Checkbox();
                     String code = r.get("rejection_reason_code");
                     if (code == null) {
                         code = r.get("code");
                     }
+
+                    // If CBS validation failed, display ONLY the reason(s) that caused CBS failure
+                    if (!cbsPassed && currentCbsFailedReasonCodes != null && !currentCbsFailedReasonCodes.isEmpty()) {
+                        if (!currentCbsFailedReasonCodes.contains(code)) {
+                            continue; // Skip unrelated reasons
+                        }
+                    }
+
+                    Checkbox cb = new Checkbox();
                     String desc = r.get("description");
                     cb.setLabel((code != null ? code : "") + " - " + (desc != null ? desc : ""));
                     cb.setAttribute("reasonCode", code);
                     cb.setSclass("modal-reason-checkbox");
+
+                    // Pre-check the CBS failure reason automatically
+                    if (!cbsPassed && currentCbsFailedReasonCodes != null && currentCbsFailedReasonCodes.contains(code)) {
+                        cb.setChecked(true);
+                    }
+
                     rejectReasonsContainer.appendChild(cb);
                 }
             }

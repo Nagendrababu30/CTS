@@ -1447,7 +1447,7 @@ div.checker-modal,
 .modal-reasons-card {
     width: 100% !important;
     max-height: 190px !important;
-    min-height: 110px !important;
+    min-height: 48px !important;
     overflow-y: auto !important;
     box-sizing: border-box !important;
     border: 1.5px solid #CBD5E1 !important;
@@ -2034,7 +2034,7 @@ div.checker-modal,
         .modal-reasons-card {
             width: 100% !important;
             max-height: 190px !important;
-            min-height: 110px !important;
+            min-height: 48px !important;
             overflow-y: auto !important;
             box-sizing: border-box !important;
             border: 1.5px solid #CBD5E1 !important;

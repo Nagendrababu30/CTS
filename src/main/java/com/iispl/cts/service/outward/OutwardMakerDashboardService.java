@@ -262,7 +262,7 @@ public class OutwardMakerDashboardService {
 
             dao.updateBatchStatus(
                     cleanBatchNumber,
-                    "READY_FOR_CHECKER"
+                    "MICR_VERIFIED"
             );
         }
 

@@ -789,23 +789,16 @@ private OutwardMakerDashboardService service;
                 return;
             }
 
-            if (dataEntry > 0) {
+            else  {
 
                 openDataEntry(
                         cleanBatchNumber
                 );
 
-                return;
+              
             }
 
-            if (amountAccount > 0) {
-
-                openAmountAccount(
-                        cleanBatchNumber
-                );
-
-                return;
-            }
+        
 
             Messagebox.show(
                     "Batch "

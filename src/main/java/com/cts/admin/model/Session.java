@@ -5,37 +5,72 @@ import java.sql.Timestamp;
 
 public class Session implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    private Long sessionId;
-    private String sessionName;
-    private String status;
-    private Timestamp startedAt;
-    private Timestamp endedAt;
-    private Long startedBy;
-    private Long endedBy;
+	private Long sessionId;
+	private String sessionName;
+	private String status;
+	private Timestamp startedAt;
+	private Timestamp endedAt;
+	private Long startedBy;
+	private Long endedBy;
 
-    public Session() {
-    }
+	public Session() {
+	}
 
-    public Long getSessionId() { return sessionId; }
-    public void setSessionId(Long sessionId) { this.sessionId = sessionId; }
+	public Long getSessionId() {
+		return sessionId;
+	}
 
-    public String getSessionName() { return sessionName; }
-    public void setSessionName(String sessionName) { this.sessionName = sessionName; }
+	public void setSessionId(Long sessionId) {
+		this.sessionId = sessionId;
+	}
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+	public String getSessionName() {
+		return sessionName;
+	}
 
-    public Timestamp getStartedAt() { return startedAt; }
-    public void setStartedAt(Timestamp startedAt) { this.startedAt = startedAt; }
+	public void setSessionName(String sessionName) {
+		this.sessionName = sessionName;
+	}
 
-    public Timestamp getEndedAt() { return endedAt; }
-    public void setEndedAt(Timestamp endedAt) { this.endedAt = endedAt; }
+	public String getStatus() {
+		return status;
+	}
 
-    public Long getStartedBy() { return startedBy; }
-    public void setStartedBy(Long startedBy) { this.startedBy = startedBy; }
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
-    public Long getEndedBy() { return endedBy; }
-    public void setEndedBy(Long endedBy) { this.endedBy = endedBy; }
+	public Timestamp getStartedAt() {
+		return startedAt;
+	}
+
+	public void setStartedAt(Timestamp startedAt) {
+		this.startedAt = startedAt;
+	}
+
+	public Timestamp getEndedAt() {
+		return endedAt;
+	}
+
+	public void setEndedAt(Timestamp endedAt) {
+		this.endedAt = endedAt;
+	}
+
+	public Long getStartedBy() {
+		return startedBy;
+	}
+
+	public void setStartedBy(Long startedBy) {
+		this.startedBy = startedBy;
+	}
+
+	public Long getEndedBy() {
+		return endedBy;
+	}
+
+	public void setEndedBy(Long endedBy) {
+		this.endedBy = endedBy;
+	}
 }

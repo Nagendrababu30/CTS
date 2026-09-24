@@ -9,14 +9,10 @@ import com.cts.admin.model.User;
 import com.cts.admin.util.PasswordUtil;
 import com.cts.inward.config.ConnectionPool;
 
-/**
- * UserDao — handles both legacy authentication and CRUD interface.
- */
+
 public class UserDao {
 
-    // ================================================================
     // LEGACY AUTH — used by LoginComposer via UserServiceImpl
-    // ================================================================
 
 	public User authenticate(String username, String password) {
 
@@ -81,9 +77,7 @@ public class UserDao {
 	    return null;
 	}
 
-    // ================================================================
     // CRUD METHODS
-    // ================================================================
 
     public List<User> getUsers(int limit, int offset,
             String searchText, Long roleId, String status) {

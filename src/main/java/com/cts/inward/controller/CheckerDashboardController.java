@@ -411,12 +411,10 @@ public class CheckerDashboardController
             return false;
         }
 
-
         return "ON_HOLD".equalsIgnoreCase(
                 batch.getBatchStatus())
                 || "RETURN_TO_MAKER".equalsIgnoreCase(
-                        batch.getBatchStatus())
-                || batch.isReVerify();
+                        batch.getBatchStatus());
     }
 
 
@@ -427,7 +425,7 @@ public class CheckerDashboardController
     private boolean isAvailable(
             CheckerBatch batch) {
 
-        if (batch == null) {
+        if (batch == null || isOnHold(batch)) {
             return false;
         }
 
@@ -455,7 +453,7 @@ public class CheckerDashboardController
     private boolean isLockedByCurrentUser(
             CheckerBatch batch) {
 
-        if (batch == null) {
+        if (batch == null || isOnHold(batch)) {
             return false;
         }
 

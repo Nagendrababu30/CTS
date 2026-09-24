@@ -1,0 +1,633 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<zk>
+
+    <style>
+
+        /* =========================================================
+           ROOT — Font stack + CSS variables
+           ========================================================= */
+
+        .outward-session-page {
+            --brand-50:  #eef5ff;
+            --brand-100: #dbe9ff;
+            --brand-200: #b8d3ff;
+            --brand-400: #5b9df8;
+            --brand-500: #2f7ae5;
+            --brand-600: #1f63d1;
+            --brand-700: #1850b3;
+            --ink-900:   #0a1f33;
+            --ink-800:   #12293f;
+            --ink-700:   #1e3a56;
+            --ink-500:   #5b7089;
+            --ink-400:   #8b9db3;
+            --ink-300:   #b6c3d4;
+            --danger-500: #ef4444;
+            --danger-600: #dc2626;
+            --danger-700: #b91c1c;
+            --radius-xl: 24px;
+            --radius-lg: 14px;
+            --radius-md: 10px;
+            --ease: cubic-bezier(0.4, 0, 0.2, 1);
+            --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* =========================================================
+           PAGE — Animated Mesh Gradient Background
+           ========================================================= */
+
+        .outward-session-page {
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                         "Helvetica Neue", Arial, sans-serif;
+            position: relative;
+            overflow: hidden;
+            background: #eef3f9;
+            isolation: isolate;
+        }
+
+        /* Animated mesh blob 1 — blue */
+        .outward-session-page::before {
+            content: "";
+            position: absolute;
+            width: 620px;
+            height: 620px;
+            top: -180px;
+            left: -160px;
+            background: radial-gradient(circle,
+                rgba(47, 122, 229, 0.35) 0%,
+                rgba(47, 122, 229, 0.12) 40%,
+                transparent 70%);
+            filter: blur(60px);
+            animation: mesh-drift-1 18s ease-in-out infinite;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Animated mesh blob 2 — cyan */
+        .outward-session-page::after {
+            content: "";
+            position: absolute;
+            width: 680px;
+            height: 680px;
+            bottom: -220px;
+            right: -180px;
+            background: radial-gradient(circle,
+                rgba(123, 177, 240, 0.40) 0%,
+                rgba(123, 177, 240, 0.14) 40%,
+                transparent 70%);
+            filter: blur(70px);
+            animation: mesh-drift-2 22s ease-in-out infinite;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Dot grid overlay for texture */
+        .outward-session-page > * {
+            position: relative;
+        }
+
+        @keyframes mesh-drift-1 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33%      { transform: translate(80px, 60px) scale(1.08); }
+            66%      { transform: translate(-40px, 100px) scale(0.95); }
+        }
+
+        @keyframes mesh-drift-2 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33%      { transform: translate(-90px, -50px) scale(1.1); }
+            66%      { transform: translate(60px, -90px) scale(0.96); }
+        }
+
+        /* =========================================================
+           CARD — Glassmorphism + Animated Border Gradient
+           ========================================================= */
+
+        .outward-session-card {
+            width: 440px;
+            min-height: 380px;
+            box-sizing: border-box;
+            padding: 40px 40px 34px 40px;
+            text-align: center;
+            border-radius: var(--radius-xl);
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+
+            /* Glass effect */
+            background:
+                linear-gradient(180deg,
+                    rgba(255, 255, 255, 0.98) 0%,
+                    rgba(255, 255, 255, 0.92) 100%);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+
+            /* Layered shadows for real depth */
+            box-shadow:
+                0 0 0 1px rgba(255, 255, 255, 0.9) inset,
+                0 1px 1px rgba(15, 23, 42, 0.03),
+                0 4px 12px -4px rgba(15, 23, 42, 0.08),
+                0 24px 60px -16px rgba(15, 23, 42, 0.22),
+                0 48px 100px -40px rgba(47, 122, 229, 0.28);
+
+            animation: card-rise 0.7s var(--ease) both;
+            transition: transform 0.4s var(--ease),
+                        box-shadow 0.4s var(--ease);
+        }
+
+        .outward-session-card:hover {
+            transform: translateY(-3px);
+            box-shadow:
+                0 0 0 1px rgba(255, 255, 255, 0.9) inset,
+                0 1px 1px rgba(15, 23, 42, 0.03),
+                0 6px 18px -4px rgba(15, 23, 42, 0.10),
+                0 32px 72px -16px rgba(15, 23, 42, 0.26),
+                0 56px 120px -40px rgba(47, 122, 229, 0.34);
+        }
+
+        /* Animated top border gradient */
+        .outward-session-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg,
+                #2f7ae5,
+                #7bb1f0,
+                #b8d3ff,
+                #7bb1f0,
+                #2f7ae5);
+            background-size: 200% 100%;
+            animation: border-shimmer 4s linear infinite;
+            border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+            z-index: 2;
+        }
+
+        /* Subtle radial glow inside the card */
+        .outward-session-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 0%,
+                rgba(47, 122, 229, 0.06) 0%,
+                transparent 55%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .outward-session-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes card-rise {
+            from {
+                opacity: 0;
+                transform: translateY(24px) scale(0.96);
+                filter: blur(6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                filter: blur(0);
+            }
+        }
+
+        @keyframes border-shimmer {
+            0%   { background-position: 0% 0%; }
+            100% { background-position: 200% 0%; }
+        }
+
+        /* =========================================================
+           ICON — Neon Glow Ring with Halo + Rotating Conic Border
+           ========================================================= */
+
+        .outward-session-icon {
+            width: 76px;
+            height: 76px;
+            margin: 0 auto 22px auto;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: var(--brand-600);
+            position: relative;
+            isolation: isolate;
+
+            background:
+                radial-gradient(circle at 30% 25%,
+                    #ffffff 0%,
+                    #eaf2ff 45%,
+                    #d6e6ff 100%);
+
+            box-shadow:
+                0 0 0 1px rgba(47, 122, 229, 0.15) inset,
+                0 1px 0 rgba(255, 255, 255, 0.9) inset,
+                0 12px 28px -8px rgba(47, 122, 229, 0.45),
+                0 0 0 8px rgba(47, 122, 229, 0.06),
+                0 0 40px -8px rgba(47, 122, 229, 0.35);
+
+            animation: icon-halo 3s var(--ease) infinite;
+        }
+
+        /* Rotating conic gradient ring */
+        .outward-session-icon::before {
+            content: "";
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            background: conic-gradient(
+                from 0deg,
+                transparent 0deg,
+                rgba(47, 122, 229, 0.55) 90deg,
+                rgba(123, 177, 240, 0.9) 180deg,
+                rgba(47, 122, 229, 0.55) 270deg,
+                transparent 360deg);
+            z-index: -1;
+            animation: icon-spin 6s linear infinite;
+            filter: blur(3px);
+            opacity: 0.7;
+        }
+
+        /* Inner soft glow bubble */
+        .outward-session-icon::after {
+            content: "";
+            position: absolute;
+            inset: 6px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 50% 40%,
+                rgba(47, 122, 229, 0.18) 0%,
+                transparent 60%);
+            pointer-events: none;
+        }
+
+        @keyframes icon-halo {
+            0%, 100% {
+                box-shadow:
+                    0 0 0 1px rgba(47, 122, 229, 0.15) inset,
+                    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+                    0 12px 28px -8px rgba(47, 122, 229, 0.45),
+                    0 0 0 8px rgba(47, 122, 229, 0.06),
+                    0 0 40px -8px rgba(47, 122, 229, 0.35);
+            }
+            50% {
+                box-shadow:
+                    0 0 0 1px rgba(47, 122, 229, 0.18) inset,
+                    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+                    0 14px 32px -8px rgba(47, 122, 229, 0.55),
+                    0 0 0 14px rgba(47, 122, 229, 0.10),
+                    0 0 55px -8px rgba(47, 122, 229, 0.50);
+            }
+        }
+
+        @keyframes icon-spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* =========================================================
+           TITLE — Refined Typography with Gradient Accent
+           ========================================================= */
+
+        .outward-session-title {
+            display: block;
+            margin-bottom: 12px;
+            color: var(--ink-900);
+            font-size: 21px;
+            font-weight: 800;
+            letter-spacing: -0.4px;
+            line-height: 1.3;
+            text-wrap: balance;
+        }
+
+        /* =========================================================
+           MESSAGE — Comfortable, Balanced Reading
+           ========================================================= */
+
+        .outward-session-message {
+            display: block;
+            margin: 0 auto 26px auto;
+            max-width: 340px;
+            color: var(--ink-500);
+            font-size: 13.5px;
+            font-weight: 400;
+            line-height: 1.7;
+            text-wrap: pretty;
+        }
+
+        /* =========================================================
+           STATUS LABEL — Modern Caps + Live Dot
+           ========================================================= */
+
+        .outward-session-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding: 5px 12px;
+            background: rgba(47, 122, 229, 0.08);
+            border: 1px solid rgba(47, 122, 229, 0.16);
+            border-radius: 999px;
+            color: var(--brand-700);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            line-height: 1;
+        }
+
+        /* Live pulsing dot before status */
+        .outward-session-status::before {
+            content: "";
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--brand-500);
+            box-shadow: 0 0 0 0 rgba(47, 122, 229, 0.65);
+            animation: status-dot-pulse 1.6s var(--ease) infinite;
+        }
+
+        @keyframes status-dot-pulse {
+            0%   { box-shadow: 0 0 0 0 rgba(47, 122, 229, 0.65); }
+            70%  { box-shadow: 0 0 0 8px rgba(47, 122, 229, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(47, 122, 229, 0); }
+        }
+
+        /* =========================================================
+           TIMER — Big, Monospace, Gradient Text + Soft Glow
+           ========================================================= */
+
+        .outward-session-timer {
+            display: inline-block;
+            margin-bottom: 30px;
+            font-family: "SF Mono", "JetBrains Mono", "Fira Code",
+                         "Segoe UI Mono", Menlo, Consolas, monospace;
+            font-size: 52px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+            font-feature-settings: "tnum" 1, "zero" 1;
+            background: linear-gradient(180deg,
+                #4a90e2 0%,
+                #2f7ae5 45%,
+                #1850b3 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 4px 16px rgba(47, 122, 229, 0.28));
+            position: relative;
+        }
+
+        /* Subtle reflection under timer */
+        .outward-session-timer::after {
+            content: "";
+            position: absolute;
+            bottom: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 12px;
+            background: radial-gradient(ellipse at center,
+                rgba(47, 122, 229, 0.28) 0%,
+                transparent 70%);
+            filter: blur(6px);
+            pointer-events: none;
+        }
+
+        /* =========================================================
+           BUTTONS — Advanced 3D with Shine Sweep
+           ========================================================= */
+
+        .outward-session-buttons {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        /* ---------- Primary — Try Later ---------- */
+        .outward-session-try-button {
+            height: 44px;
+            min-width: 128px;
+            padding: 0 20px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            color: #ffffff;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+
+            background: linear-gradient(180deg, #3b8bef 0%, #1f63d1 100%);
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.25) inset,
+                0 -2px 0 rgba(0, 0, 0, 0.12) inset,
+                0 4px 12px -2px rgba(31, 99, 209, 0.45),
+                0 0 0 1px rgba(24, 80, 179, 0.8);
+            transition: transform 0.2s var(--ease),
+                        box-shadow 0.2s var(--ease),
+                        background 0.25s var(--ease);
+        }
+
+        /* Shine sweep */
+        .outward-session-try-button::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg,
+                transparent 30%,
+                rgba(255, 255, 255, 0.35) 50%,
+                transparent 70%);
+            transform: translateX(-120%);
+            transition: transform 0.7s var(--ease);
+            pointer-events: none;
+        }
+
+        .outward-session-try-button:hover {
+            background: linear-gradient(180deg, #4b97f5 0%, #2568d6 100%);
+            transform: translateY(-2px);
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.3) inset,
+                0 -2px 0 rgba(0, 0, 0, 0.12) inset,
+                0 10px 22px -4px rgba(31, 99, 209, 0.55),
+                0 0 0 1px rgba(24, 80, 179, 0.9),
+                0 0 0 5px rgba(47, 122, 229, 0.14);
+        }
+
+        .outward-session-try-button:hover::before {
+            transform: translateX(120%);
+        }
+
+        .outward-session-try-button:active {
+            transform: translateY(0);
+            box-shadow:
+                0 2px 4px rgba(0, 0, 0, 0.18) inset,
+                0 0 0 1px rgba(24, 80, 179, 0.9),
+                0 0 0 5px rgba(47, 122, 229, 0.14);
+        }
+
+        /* ---------- Secondary — Logout ---------- */
+        .outward-session-logout-button {
+            height: 44px;
+            min-width: 118px;
+            padding: 0 20px;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            color: var(--danger-600);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+
+            background: linear-gradient(180deg, #ffffff 0%, #fdf2f2 100%);
+            border: 1px solid rgba(239, 68, 68, 0.30);
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.9) inset,
+                0 2px 6px -1px rgba(15, 23, 42, 0.06);
+            transition: transform 0.2s var(--ease),
+                        box-shadow 0.2s var(--ease),
+                        background 0.25s var(--ease),
+                        color 0.2s var(--ease);
+        }
+
+        .outward-session-logout-button:hover {
+            background: linear-gradient(180deg, #fff5f5 0%, #ffe4e4 100%);
+            color: var(--danger-700);
+            border-color: rgba(239, 68, 68, 0.55);
+            transform: translateY(-2px);
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.9) inset,
+                0 8px 20px -4px rgba(220, 38, 38, 0.28),
+                0 0 0 5px rgba(239, 68, 68, 0.10);
+        }
+
+        .outward-session-logout-button:active {
+            transform: translateY(0);
+            box-shadow:
+                0 2px 4px rgba(0, 0, 0, 0.08) inset,
+                0 0 0 5px rgba(239, 68, 68, 0.10);
+        }
+
+        /* =========================================================
+           ACCESSIBILITY — Reduced Motion
+           ========================================================= */
+
+        @media (prefers-reduced-motion: reduce) {
+            .outward-session-page::before,
+            .outward-session-page::after,
+            .outward-session-card,
+            .outward-session-card::before,
+            .outward-session-icon,
+            .outward-session-icon::before,
+            .outward-session-status::before {
+                animation: none !important;
+            }
+
+            .outward-session-card,
+            .outward-session-card:hover,
+            .outward-session-try-button,
+            .outward-session-try-button:hover,
+            .outward-session-logout-button,
+            .outward-session-logout-button:hover {
+                transition: none !important;
+                transform: none !important;
+            }
+        }
+
+        /* =========================================================
+           RESPONSIVE — Small screens
+           ========================================================= */
+
+        @media (max-width: 480px) {
+            .outward-session-card {
+                width: 100%;
+                padding: 32px 24px 28px 24px;
+                border-radius: 20px;
+            }
+
+            .outward-session-timer {
+                font-size: 42px;
+                letter-spacing: 2px;
+            }
+
+            .outward-session-icon {
+                width: 66px;
+                height: 66px;
+                font-size: 28px;
+            }
+        }
+
+    </style>
+
+    <div
+        width="100%"
+        height="100%"
+        sclass="outward-session-page"
+        apply="com.iispl.cts.controller.outward.OutwardClearingSessionWaitController">
+
+        <div sclass="outward-session-card">
+
+            <div sclass="outward-session-icon">
+                <label value="◷"/>
+            </div>
+
+            <label
+                value="Clearing Session Not Started"
+                sclass="outward-session-title"/>
+
+            <label
+                value="The Outward clearing session has not been started by the Admin. Please wait until the session becomes active."
+                sclass="outward-session-message"/>
+
+            <label
+                value="Checking Session In"
+                sclass="outward-session-status"/>
+
+            <label
+                id="timerLabel"
+                value="05:00"
+                sclass="outward-session-timer"/>
+
+            <hlayout
+                id="sessionButtons"
+                width="100%"
+                spacing="10px"
+                sclass="outward-session-buttons">
+
+                <button
+                    id="tryLaterButton"
+                    label="Try Later"
+                    width="128px"
+                    height="44px"
+                    sclass="outward-session-try-button"/>
+
+                <button
+                    id="logoutButton"
+                    label="Logout"
+                    width="118px"
+                    height="44px"
+                    sclass="outward-session-logout-button"/>
+
+            </hlayout>
+
+        </div>
+
+    </div>
+
+</zk>

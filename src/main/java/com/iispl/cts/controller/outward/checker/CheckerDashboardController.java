@@ -18,6 +18,7 @@ import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.ListitemRenderer;
+import org.zkoss.zul.Paging;
 import org.zkoss.zul.Messagebox;
 
 import com.cts.admin.service.SessionService;
@@ -28,10 +29,6 @@ import com.iispl.cts.service.outward.checker.CheckerDashboardService;
 public class CheckerDashboardController extends SelectorComposer<Component> {
 
 	private static final long serialVersionUID = 1L;
-
-	// ============================================================
-	// ZUL COMPONENTS
-	// ============================================================
 
 	@Wire
 	private Listbox batchListbox;
@@ -45,10 +42,6 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 	@Wire
 	private Label readyToSendCount;
 
-	// ============================================================
-	// FILTER COMPONENTS
-	// ============================================================
-
 	@Wire
 	private Button allBtn;
 
@@ -61,63 +54,14 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 	@Wire
 	private Button reVerifyBatchesBtn;
 
-	// ============================================================
-	// PAGINATION COMPONENTS
-	// ============================================================
-
-	@Wire
-	private Button previousPageButton;
-
-	@Wire
-	private Button nextPageButton;
-
-	@Wire
-	private Button page1Button;
-
-	@Wire
-	private Button page2Button;
-
-	@Wire
-	private Button page3Button;
-
-	@Wire
-	private Button page4Button;
-
-	@Wire
-	private Button page5Button;
-
-	@Wire
-	private Label paginationInfo;
-
-	// ============================================================
-	// SERVICE
-	// ============================================================
-
 	private CheckerDashboardService service;
-
-	// ============================================================
-	// CURRENT LOGGED-IN CHECKER USER ID
-	// ============================================================
 
 	private long currentCheckerUser;
 
-	// ============================================================
-	// FILTER
-	// ============================================================
-
 	private String currentFilter = "ALL";
 
-	// ============================================================
-	// PAGINATION
-	// ============================================================
-
-	private int currentPage = 1;
-
-	private static final int PAGE_SIZE = 5;
-
-	// ============================================================
-	// PAGE INITIALIZATION
-	// ============================================================
+	@Wire
+	private Paging batchPaging;
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
@@ -125,17 +69,8 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 		super.doAfterCompose(comp);
 	     SessionService sessionService;
 
-
-		// ========================================================
-		// GET ZK SESSION
-		// ========================================================
-
 		Session session =
 		        Executions.getCurrent().getSession();
-
-		// ========================================================
-		// NO SESSION
-		// ========================================================
 
 		if (session == null) {
 
@@ -144,16 +79,8 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 		    return;
 		}
 
-		// ========================================================
-		// GET USER ID FROM SESSION
-		// ========================================================
-
 		Object sessionUserId =
 		        session.getAttribute("userId");
-
-		// ========================================================
-		// USER ID NOT FOUND
-		// ========================================================
 
 		if (sessionUserId == null) {
 
@@ -161,10 +88,6 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 
 		    return;
 		}
-
-		// ========================================================
-		// CONVERT USER ID
-		// ========================================================
 
 		if (sessionUserId instanceof Number) {
 
@@ -187,27 +110,10 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 		    }
 		}
 
-		// ========================================================
-		// LOG CURRENT CHECKER
-		// ========================================================
-
-		System.out.println(
-		        "CHECKER SESSION: "
-		        + "userId="
-		        + currentCheckerUser);
-
-		// ========================================================
-		// CHECK CLEARING SESSION
-		// ========================================================
-
 		sessionService = new SessionServiceImpl();
 
 		com.cts.admin.model.Session clearingSession =
 		        sessionService.getActiveSession();
-
-		// ========================================================
-		// CLEARING SESSION NOT ACTIVE
-		// ========================================================
 
 		if (clearingSession == null
 		        || clearingSession.getStatus() == null
@@ -233,63 +139,16 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 		    return;
 		}
 
-		// ========================================================
-		// LOG CLEARING SESSION
-		// ========================================================
-
-		System.out.println(
-		        "CHECKER CLEARING SESSION: "
-		        + "sessionName="
-		        + clearingSession.getSessionName()
-		        + ", status="
-		        + clearingSession.getStatus());
-
-		// ========================================================
-		// CREATE SERVICE
-		// ========================================================
-
 		service = new CheckerDashboardService();
-
-		// ========================================================
-		// INITIAL FILTER
-		// ========================================================
 
 		currentFilter = "ALL";
 
-		// ========================================================
-		// INITIAL PAGE
-		// ========================================================
-
-		currentPage = 1;
-
-		// ========================================================
-		// FILTER BUTTON STYLE
-		// ========================================================
-
 		updateFilterButtonStyles();
-
-		// ========================================================
-		// REGISTER FILTER EVENTS
-		// ========================================================
 
 		registerFilterEvents();
 
-		// ========================================================
-		// REGISTER PAGINATION EVENTS
-		// ========================================================
-
-		registerPaginationEvents();
-
-		// ========================================================
-		// LOAD DASHBOARD
-		// ========================================================
-
 		loadDashboard();
 	}
-
-	// ============================================================
-	// REGISTER FILTER EVENTS
-	// ============================================================
 
 	private void registerFilterEvents() {
 
@@ -298,7 +157,6 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 			allBtn.addEventListener(Events.ON_CLICK, event -> {
 
 				currentFilter = "ALL";
-				currentPage = 1;
 
 				updateFilterButtonStyles();
 				loadDashboard();
@@ -310,7 +168,6 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 			availableBtn.addEventListener(Events.ON_CLICK, event -> {
 
 				currentFilter = "AVAILABLE";
-				currentPage = 1;
 
 				updateFilterButtonStyles();
 				loadDashboard();
@@ -322,7 +179,6 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 			myBatchesBtn.addEventListener(Events.ON_CLICK, event -> {
 
 				currentFilter = "MY_BATCHES";
-				currentPage = 1;
 
 				updateFilterButtonStyles();
 				loadDashboard();
@@ -334,78 +190,12 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 			reVerifyBatchesBtn.addEventListener(Events.ON_CLICK, event -> {
 
 				currentFilter = "RE_VERIFY_BATCHES";
-				currentPage = 1;
 
 				updateFilterButtonStyles();
 				loadDashboard();
 			});
 		}
 	}
-
-	// ============================================================
-	// REGISTER PAGINATION EVENTS
-	// ============================================================
-
-	private void registerPaginationEvents() {
-
-		if (previousPageButton != null) {
-
-			previousPageButton.addEventListener(Events.ON_CLICK, event -> {
-
-				if (currentPage > 1) {
-
-					currentPage--;
-					loadDashboard();
-				}
-			});
-		}
-
-		if (nextPageButton != null) {
-
-			nextPageButton.addEventListener(Events.ON_CLICK, event -> {
-
-				int totalPages = getTotalPages();
-
-				if (currentPage < totalPages) {
-
-					currentPage++;
-					loadDashboard();
-				}
-			});
-		}
-
-		registerPageButton(page1Button, 1);
-		registerPageButton(page2Button, 2);
-		registerPageButton(page3Button, 3);
-		registerPageButton(page4Button, 4);
-		registerPageButton(page5Button, 5);
-	}
-
-	// ============================================================
-	// REGISTER PAGE BUTTON
-	// ============================================================
-
-	private void registerPageButton(Button button, int pageNumber) {
-
-		if (button == null) {
-			return;
-		}
-
-		button.addEventListener(Events.ON_CLICK, event -> {
-
-			int totalPages = getTotalPages();
-
-			if (pageNumber <= totalPages) {
-
-				currentPage = pageNumber;
-				loadDashboard();
-			}
-		});
-	}
-
-	// ============================================================
-	// UPDATE FILTER BUTTON STYLES
-	// ============================================================
 
 	private void updateFilterButtonStyles() {
 
@@ -446,10 +236,6 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 		}
 	}
 
-	// ============================================================
-	// LOAD DASHBOARD
-	// ============================================================
-
 	private void loadDashboard() {
 
 		try {
@@ -472,10 +258,6 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 		}
 	}
 
-	// ============================================================
-	// GET DASHBOARD BATCHES
-	// ============================================================
-
 	private List<OutwardBatch> getDashboardBatches() {
 
 		List<OutwardBatch> batches =
@@ -486,18 +268,6 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 
 			batches = new ArrayList<>();
 		}
-
-		/*
-		 * RE-VERIFY eligibility:
-		 *
-		 * 1. checker_id = current Checker
-		 * 2. checker_action = SEND_BACK
-		 * 3. cheque_status = RE_VERIFIED
-		 *
-		 * This is only a UI marker.
-		 *
-		 * outward_batch.batch_status is not changed here.
-		 */
 
 		for (OutwardBatch batch : batches) {
 
@@ -521,10 +291,6 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 		return batches;
 	}
 
-	// ============================================================
-	// SUMMARY COUNTS
-	// ============================================================
-
 	private void loadCounts(List<OutwardBatch> batches) {
 
 	    int pending = 0;
@@ -547,12 +313,6 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 
 	            status = status.trim().toUpperCase();
 
-	            /*
-	             * 1. PENDING VERIFICATION
-	             *
-	             * These are batches which still require
-	             * Checker verification.
-	             */
 	            if ("READY_FOR_CHECKER".equals(status)
 	                    || "SUBMITTED".equals(status)
 	                    || "SUBMITTED_TO_CHECKER".equals(status)
@@ -563,24 +323,10 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 	                pending++;
 	            }
 
-	            /*
-	             * 2. BATCHES COMPLETED
-	             *
-	             * Once the batch has been completely processed
-	             * and sent to NPCI, it is considered completed.
-	             *
-	             * Such batches must NOT be counted as pending.
-	             */
 	            if ("NPCI_SENT".equals(status)) {
 	                completedToday++;
 	            }
 
-	            /*
-	             * 3. READY TO SEND
-	             *
-	             * Checker work is completed, but the batch
-	             * has not yet been sent to NPCI.
-	             */
 	            if ("READY_TO_SEND".equals(status)
 	                    || "READY_FOR_NPCI".equals(status)) {
 
@@ -589,114 +335,49 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 	        }
 	    }
 
-	    /*
-	     * Update Pending Verification KPI
-	     */
 	    if (pendingVerificationCount != null) {
 	        pendingVerificationCount.setValue(
 	                String.valueOf(pending));
 	    }
 
-	    /*
-	     * Update Batches Completed KPI
-	     *
-	     * This label was previously called
-	     * cbsValidationCount.
-	     */
 	    if (cbsValidationCount != null) {
 	        cbsValidationCount.setValue(
 	                String.valueOf(completedToday));
 	    }
 
-	    /*
-	     * Update Ready To Send KPI
-	     */
 	    if (readyToSendCount != null) {
 	        readyToSendCount.setValue(
 	                String.valueOf(readyToSend));
 	    }
 	}
 
-	// ============================================================
-	// LOAD BATCH TABLE
-	// ============================================================
-
 	private void loadBatchList(List<OutwardBatch> batches) {
-
-		List<OutwardBatch> filteredBatches =
-				new ArrayList<>();
+		List<OutwardBatch> filteredBatches = new ArrayList<>();
 
 		if (batches != null) {
-
 			for (OutwardBatch batch : batches) {
-
-				if (batch == null) {
-					continue;
-				}
-
-				if (matchesCurrentFilter(batch)) {
-
+				if (batch != null && matchesCurrentFilter(batch)) {
 					filteredBatches.add(batch);
 				}
 			}
 		}
 
-		System.out.println("======================================");
-		System.out.println("CHECKER BATCH LIST");
-		System.out.println("Filter        : " + currentFilter);
-		System.out.println(
-				"Total Batches : "
-						+ (batches == null ? 0 : batches.size()));
-		System.out.println(
-				"Filtered      : "
-						+ filteredBatches.size());
-
-		int totalPages =
-				calculateTotalPages(
-						filteredBatches.size());
-
-		if (totalPages == 0) {
-
-			currentPage = 1;
-
-		} else if (currentPage > totalPages) {
-
-			currentPage = totalPages;
-		}
-
-		List<OutwardBatch> pageData =
-				getPageData(filteredBatches);
-
-		System.out.println(
-				"Current Page  : "
-						+ currentPage);
-
-		System.out.println(
-				"Total Pages   : "
-						+ totalPages);
-
-		System.out.println(
-				"Page Records  : "
-						+ pageData.size());
-
 		ListModelList<OutwardBatch> model =
 				new ListModelList<>();
 
-		model.addAll(pageData);
+		model.addAll(filteredBatches);
 
 		batchListbox.setItemRenderer(
 				new CheckerBatchRenderer());
 
 		batchListbox.setModel(model);
 
-		updatePagination(
-				filteredBatches.size(),
-				totalPages);
+		if (batchPaging != null) {
+			batchPaging.setPageSize(10);
+			batchPaging.setDetailed(false);
+			batchListbox.setPaginal(batchPaging);
+		}
 	}
-
-	// ============================================================
-	// CHECK CURRENT FILTER
-	// ============================================================
 
 	private boolean matchesCurrentFilter(
 			OutwardBatch batch) {
@@ -729,10 +410,6 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 		return true;
 	}
 
-	// ============================================================
-	// CHECK AVAILABLE BATCH
-	// ============================================================
-
 	private boolean isBatchAvailable(
 			OutwardBatch batch) {
 
@@ -747,10 +424,6 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 		return "AVAILABLE".equalsIgnoreCase(
 				safe(lockStatus));
 	}
-
-	// ============================================================
-	// CHECK MY BATCH
-	// ============================================================
 
 	private boolean isMyBatch(
 			OutwardBatch batch) {
@@ -775,10 +448,6 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 						checkerUser.trim());
 	}
 
-	// ============================================================
-	// CHECK RE-VERIFY BATCH
-	// ============================================================
-
 	private boolean isReVerifyBatch(
 			OutwardBatch batch) {
 
@@ -791,283 +460,6 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 				safe(batch.getLockStatus()));
 	}
 
-	// ============================================================
-	// GET CURRENT PAGE DATA
-	// ============================================================
-
-	private List<OutwardBatch> getPageData(
-			List<OutwardBatch> filteredBatches) {
-
-		List<OutwardBatch> pageData =
-				new ArrayList<>();
-
-		if (filteredBatches == null
-				|| filteredBatches.isEmpty()) {
-
-			return pageData;
-		}
-
-		int startIndex =
-				(currentPage - 1)
-						* PAGE_SIZE;
-
-		if (startIndex >= filteredBatches.size()) {
-
-			return pageData;
-		}
-
-		int endIndex =
-				Math.min(
-						startIndex + PAGE_SIZE,
-						filteredBatches.size());
-
-		pageData.addAll(
-				filteredBatches.subList(
-						startIndex,
-						endIndex));
-
-		return pageData;
-	}
-
-	// ============================================================
-	// CALCULATE TOTAL PAGES
-	// ============================================================
-
-	private int calculateTotalPages(
-			int totalRecords) {
-
-		if (totalRecords <= 0) {
-
-			return 0;
-		}
-
-		return (totalRecords + PAGE_SIZE - 1)
-				/ PAGE_SIZE;
-	}
-
-	// ============================================================
-	// GET TOTAL PAGES
-	// ============================================================
-
-	private int getTotalPages() {
-
-		if (service == null) {
-
-			return 0;
-		}
-
-		try {
-
-			List<OutwardBatch> batches =
-					getDashboardBatches();
-
-			if (batches == null) {
-
-				return 0;
-			}
-
-			int filteredCount = 0;
-
-			for (OutwardBatch batch : batches) {
-
-				if (batch != null
-						&& matchesCurrentFilter(batch)) {
-
-					filteredCount++;
-				}
-			}
-
-			return calculateTotalPages(
-					filteredCount);
-
-		} catch (Exception e) {
-
-			e.printStackTrace();
-
-			return 0;
-		}
-	}
-
-	// ============================================================
-	// UPDATE PAGINATION
-	// ============================================================
-
-	private void updatePagination(
-			int totalRecords,
-			int totalPages) {
-
-		// ========================================================
-		// NO BATCHES
-		// ========================================================
-
-		if (totalRecords == 0) {
-
-			if (previousPageButton != null) {
-
-				previousPageButton.setVisible(false);
-			}
-
-			if (nextPageButton != null) {
-
-				nextPageButton.setVisible(false);
-			}
-
-			if (page1Button != null) {
-
-				page1Button.setVisible(false);
-			}
-
-			if (page2Button != null) {
-
-				page2Button.setVisible(false);
-			}
-
-			if (page3Button != null) {
-
-				page3Button.setVisible(false);
-			}
-
-			if (page4Button != null) {
-
-				page4Button.setVisible(false);
-			}
-
-			if (page5Button != null) {
-
-				page5Button.setVisible(false);
-			}
-
-			if (paginationInfo != null) {
-
-				paginationInfo.setVisible(false);
-			}
-
-			return;
-		}
-
-		// ========================================================
-		// BATCHES EXIST
-		// ========================================================
-
-		if (paginationInfo != null) {
-
-			paginationInfo.setVisible(true);
-		}
-
-		// Previous button
-
-		if (previousPageButton != null) {
-
-			previousPageButton.setVisible(
-					totalPages > 1
-							&& currentPage > 1);
-		}
-
-		// Next button
-
-		if (nextPageButton != null) {
-
-			nextPageButton.setVisible(
-					totalPages > 1
-							&& currentPage < totalPages);
-		}
-
-		// ========================================================
-		// PAGE BUTTONS
-		// ========================================================
-
-		updatePageButton(
-				page1Button,
-				1,
-				totalPages);
-
-		updatePageButton(
-				page2Button,
-				2,
-				totalPages);
-
-		updatePageButton(
-				page3Button,
-				3,
-				totalPages);
-
-		updatePageButton(
-				page4Button,
-				4,
-				totalPages);
-
-		updatePageButton(
-				page5Button,
-				5,
-				totalPages);
-
-		// ========================================================
-		// PAGINATION INFORMATION
-		// ========================================================
-
-		if (paginationInfo != null) {
-
-			int start =
-					((currentPage - 1)
-							* PAGE_SIZE) + 1;
-
-			int end =
-					Math.min(
-							currentPage * PAGE_SIZE,
-							totalRecords);
-
-			paginationInfo.setValue(
-					"Showing "
-							+ start
-							+ "-"
-							+ end
-							+ " of "
-							+ totalRecords);
-		}
-	}
-
-	// ============================================================
-	// UPDATE PAGE BUTTON
-	// ============================================================
-
-	private void updatePageButton(
-			Button button,
-			int pageNumber,
-			int totalPages) {
-
-		if (button == null) {
-
-			return;
-		}
-
-		boolean visible =
-				pageNumber <= totalPages;
-
-		button.setVisible(visible);
-
-		if (!visible) {
-
-			return;
-		}
-
-		button.setDisabled(false);
-
-		if (currentPage == pageNumber) {
-
-			button.setSclass(
-					"pagination-btn pagination-active");
-
-		} else {
-
-			button.setSclass(
-					"pagination-btn");
-		}
-	}
-
-	// ============================================================
-	// BATCH RENDERER
-	// ============================================================
-
 	private class CheckerBatchRenderer
     implements ListitemRenderer<OutwardBatch> {
 
@@ -1077,10 +469,6 @@ public void render(
         OutwardBatch batch,
         int index) throws Exception {
 
-    // ====================================================
-    // BATCH NUMBER
-    // ====================================================
-
     Listcell batchCell =
             new Listcell();
 
@@ -1089,21 +477,12 @@ public void render(
 
     item.appendChild(batchCell);
 
-    // ====================================================
-    // CHEQUE COUNT
-    // ====================================================
-
     Listcell chequeCell =
             new Listcell();
 
     int chequeCount =
             batch.getNumberOfCheques();
 
-    /*
-     * UPDATED:
-     * RE-VERIFIED cheque count is now shown
-     * in ALL as well as RE_VERIFY_BATCHES.
-     */
     if ("RE_VERIFY".equalsIgnoreCase(
             batch.getLockStatus())) {
 
@@ -1119,18 +498,9 @@ public void render(
 
     item.appendChild(chequeCell);
 
-    // ====================================================
-    // STATUS
-    // ====================================================
-
     Listcell statusCell =
             new Listcell();
 
-    /*
-     * UPDATED:
-     * RE-VERIFIED status is now shown in ALL
-     * as well as RE_VERIFY_BATCHES.
-     */
     boolean reVerifyStatus =
             "RE_VERIFY".equalsIgnoreCase(
                     batch.getLockStatus());
@@ -1147,10 +517,6 @@ public void render(
     }
 
     item.appendChild(statusCell);
-
-    // ====================================================
-    // ASSIGNMENT
-    // ====================================================
 
     Listcell assignmentCell =
             new Listcell();
@@ -1197,14 +563,6 @@ public void render(
     }
 
     item.appendChild(assignmentCell);
-
-    // ====================================================
-    // ACTION
-    // ====================================================
-
- // ====================================================
- // ACTION
- // ====================================================
 
  Listcell actionCell =
          new Listcell();
@@ -1302,10 +660,6 @@ public void render(
 }
 }
 
-	// ============================================================
-	// OPEN BATCH
-	// ============================================================
-
 	private void openBatch(
 			OutwardBatch batch) {
 
@@ -1327,10 +681,6 @@ public void render(
 
 		try {
 
-			// ====================================================
-			// RE-CHECK DATABASE
-			// ====================================================
-
 			OutwardBatch latest =
 					service.findBatch(batchNumber);
 
@@ -1348,47 +698,13 @@ public void render(
 				return;
 			}
 
-			// ====================================================
-			// CHECK RE-VERIFY FIRST
-			// ====================================================
-
-			/*
-			 * A corrected cheque must be available for
-			 * re-verification even if another returned cheque
-			 * is still with Maker.
-			 *
-			 * Therefore RE_VERIFIED is checked BEFORE
-			 * pending Maker cheques.
-			 */
-
 			boolean reVerifyAllowed =
 					service.hasReVerifiedCheques(
 							batchNumber,
 							String.valueOf(
 									currentCheckerUser));
 
-			// ====================================================
-			// RE-VERIFY
-			// ====================================================
-
 			if (reVerifyAllowed) {
-
-				/*
-				 * Do NOT:
-				 *
-				 * - create a new assignment
-				 * - call assignBatch()
-				 * - change outward_batch.batch_status
-				 *
-				 * Same Checker continues with the
-				 * existing assignment.
-				 */
-
-				System.out.println(
-						"CHECKER RE-VERIFY OPEN: "
-								+ batchNumber
-								+ " | checker="
-								+ currentCheckerUser);
 
 				List<String> reVerifiedChequeNumbers =
 						service.getReVerifiedChequeNumbers(
@@ -1421,16 +737,10 @@ public void render(
 								+ Executions.encodeURL(
 										chequeNumber);
 
-				System.out.println("CHECKER GENERATED URL = " + url);
-
 				Executions.sendRedirect(url);
 
 				return;
 			}
-
-			// ====================================================
-			// CHECK PENDING MAKER CHEQUES
-			// ====================================================
 
 			boolean pendingMakerCheques =
 					service.hasPendingMakerCheques(
@@ -1450,10 +760,6 @@ public void render(
 				return;
 			}
 
-			// ====================================================
-			// ALREADY ASSIGNED TO CURRENT CHECKER
-			// ====================================================
-
 			boolean assignedToCurrentChecker =
 					service.isAssignedToChecker(
 							batchNumber,
@@ -1471,10 +777,6 @@ public void render(
 				return;
 			}
 
-			// ====================================================
-			// CHECK AVAILABLE
-			// ====================================================
-
 			if (!"AVAILABLE".equalsIgnoreCase(
 					latest.getLockStatus())) {
 
@@ -1489,10 +791,6 @@ public void render(
 
 				return;
 			}
-
-			// ====================================================
-			// ATOMIC ASSIGNMENT
-			// ====================================================
 
 			boolean assigned =
 					service.assignBatch(
@@ -1513,20 +811,12 @@ public void render(
 				return;
 			}
 
-			// ====================================================
-			// SUCCESS
-			// ====================================================
-
 			Clients.showNotification(
 					"Batch assigned successfully.",
 					Clients.NOTIFICATION_TYPE_INFO,
 					null,
 					"top_center",
 					2000);
-
-			// ====================================================
-			// MOVE TO BATCH QUEUE
-			// ====================================================
 
 			Executions.sendRedirect(
 					"/zul/outward/outward-checker/batchesQueue.zul"
@@ -1546,11 +836,6 @@ public void render(
 					4000);
 		}
 	}
-
-	
-	// ============================================================
-	// RELEASE CHECKER BATCH LOCK
-	// ============================================================
 
 	private void releaseBatchLock(
 	        String batchNumber) {
@@ -1611,8 +896,6 @@ public void render(
 
 	                                Messagebox.INFORMATION);
 
-	                        currentPage = 1;
-
 	                        loadDashboard();
 
 	                    } else {
@@ -1649,9 +932,6 @@ public void render(
 	                }
 	            });
 	}
-	// ============================================================
-	// SAFE STRING
-	// ============================================================
 
 	private String safe(String value) {
 

@@ -6,11 +6,6 @@
         sclass="app-header header-container"
         apply="com.cts.admin.controller.LogoutComposer">
 
-
-       
-        <!-- LEFT SECTION -->
-       
-
         <hlayout
             spacing="12px"
             valign="middle">
@@ -24,24 +19,15 @@
 
             </span>
 
-
             <label
                 value="${arg.pageTitle}"
-                sclass="header-title" />
+                sclass="header-title"/>
 
         </hlayout>
-
-
-        
-        <!-- RIGHT SECTION -->
-        
 
         <hlayout
             spacing="25px"
             valign="middle">
-
-
-            <!-- DATE -->
 
             <hlayout
                 spacing="6px"
@@ -53,17 +39,14 @@
 
                 <label
                     value="Date :"
-                    sclass="header-meta-text" />
+                    sclass="header-meta-text"/>
 
                 <label
                     id="headerDate"
                     value=""
-                    sclass="header-meta-val" />
+                    sclass="header-meta-val"/>
 
             </hlayout>
-
-
-            <!-- LAST LOGIN -->
 
             <hlayout
                 spacing="6px"
@@ -75,17 +58,52 @@
 
                 <label
                     value="Last Login :"
-                    sclass="header-meta-text" />
+                    sclass="header-meta-text"/>
 
                 <label
                     id="headerLastLogin"
                     value=""
-                    sclass="header-meta-val" />
+                    sclass="header-meta-val"/>
 
             </hlayout>
 
+            <hlayout
+                spacing="6px"
+                valign="middle">
 
-            <!-- USER ICON -->
+                <n:i
+                    class="fa-regular fa-user header-icon-meta">
+                </n:i>
+
+                <label
+                    value="User :"
+                    sclass="header-meta-text"/>
+
+                <label
+                    id="headerUserName"
+                    value=""
+                    sclass="header-meta-val"/>
+
+            </hlayout>
+
+            <hlayout
+                spacing="6px"
+                valign="middle">
+
+                <n:i
+                    class="fa-solid fa-circle header-icon-meta">
+                </n:i>
+
+                <label
+                    value="Session :"
+                    sclass="header-meta-text"/>
+
+                <label
+                    id="headerSessionStatus"
+                    value=""
+                    sclass="header-meta-val"/>
+
+            </hlayout>
 
             <div
                 id="userWrapper"
@@ -97,11 +115,6 @@
 
             </div>
 
-
-            
-            <!-- LOGOUT POPUP -->
-            
-
             <popup
                 id="logoutPopup"
                 sclass="logout-popup">
@@ -110,10 +123,9 @@
                     id="logoutButton"
                     label="Logout"
                     iconSclass="fa-solid fa-right-from-bracket"
-                    sclass="popup-logout-button" />
+                    sclass="popup-logout-button"/>
 
             </popup>
-
 
         </hlayout>
 

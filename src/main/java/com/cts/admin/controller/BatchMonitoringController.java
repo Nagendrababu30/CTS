@@ -116,7 +116,7 @@ public class BatchMonitoringController extends GenericForwardComposer<Component>
 		}
 	}
 
-	/* BATCH CAPTURE */
+	// BATCH CAPTURE 
 
 	private void loadBatchCapture() {
 
@@ -148,7 +148,7 @@ public class BatchMonitoringController extends GenericForwardComposer<Component>
 		}
 	}
 
-	/* INWARD */
+	// INWARD
 
 	private void loadInward() {
 
@@ -183,7 +183,7 @@ public class BatchMonitoringController extends GenericForwardComposer<Component>
 		}
 	}
 
-	/* OUTWARD */
+	//OUTWARD 
 
 	private void loadOutward() {
 
@@ -218,7 +218,7 @@ public class BatchMonitoringController extends GenericForwardComposer<Component>
 		}
 	}
 
-	/* LISTHEAD BUILDER */
+	//LISTHEAD BUILDER 
 
 	private void rebuildListhead(String... labelWidthPairs) {
 
@@ -238,7 +238,7 @@ public class BatchMonitoringController extends GenericForwardComposer<Component>
 		batchListbox.insertBefore(head, null);
 	}
 
-	/* SEARCH FILTERS */
+	//SEARCH FILTERS 
 
 	private List<Batch> filterCapture(List<Batch> all) {
 
@@ -279,7 +279,7 @@ public class BatchMonitoringController extends GenericForwardComposer<Component>
 		return result;
 	}
 
-	/* CELL BUILDERS */
+	//CELL BUILDERS 
 
 	private Listcell buildIdCell(Long batchId) {
 		Listcell cell = new Listcell();

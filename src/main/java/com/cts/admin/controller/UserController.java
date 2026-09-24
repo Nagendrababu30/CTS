@@ -37,7 +37,6 @@ public class UserController extends GenericForwardComposer<Component> {
 
 	private static final int PAGE_SIZE = 10;
 
-	// ZUL COMPONENTS
 
 	private Listbox userListbox;
 	private Paging userPaging;
@@ -50,12 +49,10 @@ public class UserController extends GenericForwardComposer<Component> {
 	private Combobox roleFilterCombobox;
 	private Combobox statusFilterCombobox;
 
-	// SERVICES
 
 	private UserService userService;
 	private RoleService roleService;
 
-	// INIT
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
@@ -134,21 +131,21 @@ public class UserController extends GenericForwardComposer<Component> {
 
 				Listitem item = new Listitem();
 
-				/* S.No */
+				// S.No
 				Listcell snCell = new Listcell();
 				Label snLabel = new Label(String.valueOf(serial));
 				snLabel.setSclass("user-id-label");
 				snCell.appendChild(snLabel);
 				item.appendChild(snCell);
 
-				/* Username */
+				//Username 
 				Listcell usernameCell = new Listcell();
 				Label usernameLabel = new Label(user.getUsername());
 				usernameLabel.setSclass("username-label");
 				usernameCell.appendChild(usernameLabel);
 				item.appendChild(usernameCell);
 
-				/* Assigned Role */
+				//Assigned Role 
 				Listcell roleCell = new Listcell();
 				String roleName = (user.getRole() != null && user.getRole().getRoleName() != null)
 						? user.getRole().getRoleName()
@@ -161,7 +158,7 @@ public class UserController extends GenericForwardComposer<Component> {
 				roleCell.appendChild(roleBox);
 				item.appendChild(roleCell);
 
-				/* Status */
+				//Status 
 				Listcell statusCell = new Listcell();
 				String userStatus = user.getStatus() != null ? user.getStatus() : "-";
 				String displayStatus = "-".equals(userStatus) ? "-"
@@ -174,7 +171,7 @@ public class UserController extends GenericForwardComposer<Component> {
 				statusCell.appendChild(statusContainer);
 				item.appendChild(statusCell);
 
-				/* Actions */
+				//Actions 
 				Listcell actionCell = new Listcell();
 				Hbox actionBox = new Hbox();
 				actionBox.setSpacing("8px");
@@ -192,7 +189,7 @@ public class UserController extends GenericForwardComposer<Component> {
 				statusBtn.setTooltiptext(
 						"ACTIVE".equalsIgnoreCase(user.getStatus()) ? "Deactivate User" : "Activate User");
 
-				/* Disable edit and status buttons for ADMIN role */
+				//Disable edit and status buttons for ADMIN role 
 				boolean isAdmin = ("ADMIN".equalsIgnoreCase(user.getRoleName()))
 						|| (user.getRole() != null && "ADMIN".equalsIgnoreCase(user.getRole().getRoleName()));
 
@@ -319,7 +316,7 @@ public class UserController extends GenericForwardComposer<Component> {
 		mainBox.setHflex("1");
 		mainBox.setSclass("user-modal-main-box");
 
-		/* ── Header ── */
+		//Header 
 		Div headerDiv = new Div();
 		headerDiv.setHflex("1");
 		headerDiv.setSclass("user-modal-header-container");
@@ -345,7 +342,7 @@ public class UserController extends GenericForwardComposer<Component> {
 		headerLeftDiv.appendChild(iconDiv);
 		headerLeftDiv.appendChild(titleTextDiv);
 
-		/* Close button */
+		//Close button 
 		Button closeBtn = new Button("✕");
 		closeBtn.setSclass("user-modal-close-button-styled");
 		closeBtn.addEventListener("onClick", new EventListener<Event>() {
@@ -359,7 +356,7 @@ public class UserController extends GenericForwardComposer<Component> {
 		headerDiv.appendChild(closeBtn);
 		mainBox.appendChild(headerDiv);
 
-		/* ── Username ── */
+		//Username
 		Label usernameLabel = new Label("Username");
 		usernameLabel.setSclass("user-form-label-styled");
 		Textbox usernameBox = new Textbox();
@@ -379,7 +376,7 @@ public class UserController extends GenericForwardComposer<Component> {
 		usernameGroup.appendChild(usernameBox);
 		mainBox.appendChild(usernameGroup);
 
-		/* ── Password ── */
+		//Password
 		Label passwordLabel = new Label("Password");
 		passwordLabel.setSclass("user-form-label-styled");
 
@@ -390,7 +387,7 @@ public class UserController extends GenericForwardComposer<Component> {
 		passwordBox.setPlaceholder(editMode ? "Leave blank to keep current password" : "Enter password");
 		passwordBox.setSclass("password-field-container");
 
-		/* ── Password Eye Button ── */
+		// Password Eye Button 
 
 		Button passwordEyeButton = new Button();
 
@@ -398,7 +395,7 @@ public class UserController extends GenericForwardComposer<Component> {
 		passwordEyeButton.setTooltiptext("Show password");
 		passwordEyeButton.setSclass("password-eye-button-styled");
 
-		/* ── Password Input Layout ── */
+		//Password Input Layout 
 		Hbox passwordInputLayout = new Hbox();
 		passwordInputLayout.setHflex("1");
 		passwordInputLayout.setAlign("center");
@@ -407,7 +404,7 @@ public class UserController extends GenericForwardComposer<Component> {
 		passwordInputLayout.appendChild(passwordBox);
 		passwordInputLayout.appendChild(passwordEyeButton);
 
-		/* ── Password Group ── */
+		// Password Group
 		Vbox passwordGroup = new Vbox();
 		passwordGroup.setSpacing("0");
 		passwordGroup.setHflex("1");
@@ -415,13 +412,13 @@ public class UserController extends GenericForwardComposer<Component> {
 		passwordGroup.appendChild(passwordLabel);
 		passwordGroup.appendChild(passwordInputLayout);
 
-		/* ── Password Requirements ── */
+		// Password Requirements 
 		Label passwordHint = new Label(
 				"Minimum 8 characters, including uppercase, lowercase, number and special character.");
 		passwordHint.setSclass("password-hint-label");
 		passwordGroup.appendChild(passwordHint);
 
-		/* ── Live Password Validation ── */
+		//Live Password Validation 
 		passwordBox.addEventListener("onChanging", new EventListener<Event>() {
 			@Override
 			public void onEvent(Event event) throws Exception {
@@ -433,7 +430,7 @@ public class UserController extends GenericForwardComposer<Component> {
 
 		mainBox.appendChild(passwordGroup);
 
-		/* ── Eye Button Click Event ── */
+		// Eye Button Click Event
 		passwordEyeButton.addEventListener("onClick", new EventListener<Event>() {
 			@Override
 			public void onEvent(Event event) throws Exception {
@@ -441,7 +438,7 @@ public class UserController extends GenericForwardComposer<Component> {
 			}
 		});
 
-		/* ── Role ── */
+		//Role
 		Label roleLabel = new Label("Role");
 		roleLabel.setSclass("user-form-label-styled");
 		Combobox roleCombo = new Combobox();
@@ -474,7 +471,7 @@ public class UserController extends GenericForwardComposer<Component> {
 		roleGroup.appendChild(roleCombo);
 		mainBox.appendChild(roleGroup);
 
-		/* ── Buttons ── */
+		// Buttons
 		Hbox btnBox = new Hbox();
 		btnBox.setSpacing("10px");
 		btnBox.setAlign("end");
@@ -516,9 +513,8 @@ public class UserController extends GenericForwardComposer<Component> {
 			password = "";
 		}
 
-		/*
-		 * During edit, an empty password means: Keep the existing password.
-		 */
+		//During edit, an empty password means: Keep the existing password.
+		
 		if (editMode && password.isEmpty()) {
 			passwordHint.setValue("Leave blank to keep the current password.");
 			passwordHint.setSclass("password-hint-label");
@@ -594,12 +590,6 @@ public class UserController extends GenericForwardComposer<Component> {
 
 		// PASSWORD STRENGTH VALIDATION
 
-		/*
-		 * During edit, an empty password means: Keep the existing password.
-		 *
-		 * During create, an empty password was already rejected above.
-		 */
-
 		if (password != null && !password.isEmpty()) {
 
 			if (!PasswordUtil.isStrongPassword(password)) {
@@ -662,19 +652,11 @@ public class UserController extends GenericForwardComposer<Component> {
 
 				existingUser.setRole(role);
 
-				/*
-				 * Only send a new password when the password field contains a value.
-				 */
-
 				if (password != null && !password.isEmpty()) {
 
 					existingUser.setPasswordHash(password);
 
 				} else {
-
-					/*
-					 * NULL tells the Service and DAO to preserve the existing password.
-					 */
 
 					existingUser.setPasswordHash(null);
 				}

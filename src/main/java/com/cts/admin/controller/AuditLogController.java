@@ -39,8 +39,6 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 
 	private static final java.util.TimeZone IST = java.util.TimeZone.getTimeZone("Asia/Kolkata");
 
-	// ZUL COMPONENTS
-
 	private Listbox auditLogListbox;
 
 	private Paging auditLogPaging;
@@ -57,7 +55,6 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 
 	private Button auditDownloadPdfButton;
 
-	// SERVICES
 
 	private AuditLogService auditLogService;
 
@@ -65,7 +62,6 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 
 	private AuditLogReportService auditLogReportService;
 
-	// INIT
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
@@ -124,10 +120,7 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 			}
 		});
 
-		// ============================================================
 		// ROLE FILTER
-		// ============================================================
-
 		auditRoleCombobox.addEventListener("onSelect", new EventListener<Event>() {
 
 			@Override
@@ -137,10 +130,7 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 			}
 		});
 
-		// ============================================================
 		// FROM DATE FILTER
-		// ============================================================
-
 		auditFromDate.addEventListener("onChange", new EventListener<Event>() {
 
 			@Override

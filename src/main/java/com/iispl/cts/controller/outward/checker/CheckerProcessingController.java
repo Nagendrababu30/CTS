@@ -11,12 +11,14 @@ import org.zkoss.zk.ui.select.annotation.Wire;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
+import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Div;
 import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Vlayout;
+import org.zkoss.zul.Window;
 
 import com.cts.admin.model.User;
 import com.iispl.cts.model.outward.ChequeProcessing;
@@ -55,10 +57,7 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 	private Image chequeImage;
 
 	@Wire
-	private Button frontButton;
-
-	@Wire
-	private Button backSideButton;
+	private Button toggleSideButton;
 
 	@Wire
 	private Button rotateButton;
@@ -88,7 +87,10 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 	 * RIGHT SIDE fields are Textbox in ZUL.
 	 */
 	@Wire
-	private Textbox accountNumberLabel;
+	private Textbox draweraccountNumberLabel;
+	
+	@Wire
+	private Textbox payeeaccountNumberLabel;
 
 	@Wire
 	private Textbox drawerNameLabel;
@@ -147,6 +149,22 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 	@Wire
 	private Button saveNextButton;
 
+	/* MODAL WINDOW COMPONENTS */
+	@Wire
+	private Window actionModalWindow;
+
+	@Wire
+	private Combobox modalReasonCombobox;
+
+	@Wire
+	private Textbox modalCheckerRemarksTextbox;
+
+	@Wire
+	private Button modalCancelButton;
+
+	@Wire
+	private Button modalSubmitButton;
+
 	private String cbsResult;
 
 	private String chequeDateResult;
@@ -158,6 +176,8 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 	private double imageScale = 1.0;
 
 	private int imageRotation = 0;
+
+	private boolean showingFront = true;
 
 	private CheckerBatchService batchService;
 
@@ -231,12 +251,6 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
 		/*
 		 * Read exact cheque number from URL.
-		 *
-		 * Normal parameter: chequeNumber
-		 *
-		 * Current browser/ZK request is sending: amp;chequeNumber
-		 *
-		 * Therefore use the normal parameter first, and fall back to amp;chequeNumber.
 		 */
 
 		chequeNumber = Executions.getCurrent().getParameter("chequeNumber");
@@ -330,14 +344,9 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 			backButton.addEventListener(Events.ON_CLICK, event -> goBackToQueue());
 		}
 
-		if (frontButton != null) {
+		if (toggleSideButton != null) {
 
-			frontButton.addEventListener(Events.ON_CLICK, event -> showFrontImage());
-		}
-
-		if (backSideButton != null) {
-
-			backSideButton.addEventListener(Events.ON_CLICK, event -> showBackImage());
+			toggleSideButton.addEventListener(Events.ON_CLICK, event -> toggleImageSide());
 		}
 
 		if (rotateButton != null) {
@@ -362,12 +371,12 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
 		if (rejectButton != null) {
 
-			rejectButton.addEventListener(Events.ON_CLICK, event -> selectAction("REJECT"));
+			rejectButton.addEventListener(Events.ON_CLICK, event -> openActionModal("REJECT"));
 		}
 
 		if (sendBackButton != null) {
 
-			sendBackButton.addEventListener(Events.ON_CLICK, event -> selectAction("SEND_BACK"));
+			sendBackButton.addEventListener(Events.ON_CLICK, event -> openActionModal("SEND_BACK"));
 		}
 
 		if (saveNextButton != null) {
@@ -384,6 +393,160 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
 			checkerRemarksTextbox.addEventListener(Events.ON_CHANGE, event -> updateSaveNextButton());
 		}
+
+		/* Modal Button Listeners */
+		if (actionModalWindow != null) {
+		    if (modalCancelButton == null) {
+		        modalCancelButton = (Button) actionModalWindow.getFellowIfAny("modalCancelButton");
+		    }
+		    if (modalSubmitButton == null) {
+		        modalSubmitButton = (Button) actionModalWindow.getFellowIfAny("modalSubmitButton");
+		    }
+		}
+
+		if (modalCancelButton != null) {
+		    modalCancelButton.addEventListener(Events.ON_CLICK, event -> closeActionModal());
+		}
+
+		if (modalSubmitButton != null) {
+		    modalSubmitButton.addEventListener(Events.ON_CLICK, event -> submitModalDecision());
+		}
+	}
+
+	// ============================================================
+	// MODAL WINDOW HANDLING
+	// ============================================================
+
+	private void openActionModal(String action) {
+
+	    selectedAction = action;
+
+	    if (actionModalWindow == null) {
+	        System.out.println("actionModalWindow is NULL");
+	        return;
+	    }
+
+	    // Resolve components if @Wire missed them due to IdSpace
+	    if (modalReasonCombobox == null) {
+	        modalReasonCombobox = (Combobox) actionModalWindow.getFellowIfAny("modalReasonCombobox");
+	    }
+	    if (modalCheckerRemarksTextbox == null) {
+	        modalCheckerRemarksTextbox = (Textbox) actionModalWindow.getFellowIfAny("modalCheckerRemarksTextbox");
+	    }
+	    if (modalCancelButton == null) {
+	        modalCancelButton = (Button) actionModalWindow.getFellowIfAny("modalCancelButton");
+	    }
+	    if (modalSubmitButton == null) {
+	        modalSubmitButton = (Button) actionModalWindow.getFellowIfAny("modalSubmitButton");
+	    }
+
+	    if ("REJECT".equalsIgnoreCase(action)) {
+	        actionModalWindow.setTitle("Reject Cheque");
+	        if (modalSubmitButton != null) {
+	            modalSubmitButton.setStyle("background: #ef233c !important; border-color: #ef233c !important; color: #ffffff !important;");
+	        }
+	    } else if ("SEND_BACK".equalsIgnoreCase(action)) {
+	        actionModalWindow.setTitle("Return Cheque to Maker");
+	        if (modalSubmitButton != null) {
+	            modalSubmitButton.setStyle("background: #7c3aed !important; border-color: #7c3aed !important; color: #ffffff !important;");
+	        }
+	    }
+
+	    loadModalReturnReasons(action);
+
+	    if (modalReasonCombobox != null) {
+	        modalReasonCombobox.setValue("");
+	        modalReasonCombobox.setSelectedItem(null);
+	    }
+
+	    if (modalCheckerRemarksTextbox != null) {
+	        modalCheckerRemarksTextbox.setValue("");
+	    }
+
+	    actionModalWindow.setVisible(true);
+	    actionModalWindow.doModal();
+	}
+
+	private void closeActionModal() {
+
+		if (actionModalWindow != null) {
+			actionModalWindow.setVisible(false);
+		}
+
+		selectedAction = null;
+		updateSaveNextButton();
+	}
+
+	private void loadModalReturnReasons(String action) {
+		System.out.println(">>> 1. Method called with action: [" + action + "]");
+
+		if (modalReasonCombobox == null) {
+			System.out.println(">>> ERROR: modalReasonCombobox is NULL! Wiring failed.");
+			return;
+		}
+
+		modalReasonCombobox.getItems().clear();
+
+		// Fetch reasons using the action string (REJECT or SEND_BACK)
+		List<ReturnReason> reasons = processingService.getReturnReasons(action);
+		System.out.println(">>> 2. Reasons retrieved from service: " + (reasons == null ? "NULL" : reasons.size()));
+
+		if (reasons == null || reasons.isEmpty()) {
+			System.out.println(">>> ERROR: Reasons list is null or empty for action: " + action);
+			return;
+		}
+
+		for (ReturnReason reason : reasons) {
+			System.out.println(">>>reasons "+reason);
+			Comboitem item = modalReasonCombobox.appendItem(reason.getReasonName());
+			item.setValue(reason.getReasonCode());
+		}
+	}
+
+	private void submitModalDecision() {
+
+		if (modalReasonCombobox == null || modalReasonCombobox.getSelectedItem() == null) {
+			Clients.showNotification("Please select a reason.", Clients.NOTIFICATION_TYPE_WARNING, modalReasonCombobox, "middle_center", 2500);
+			return;
+		}
+
+		String reasonCode = modalReasonCombobox.getSelectedItem().getValue() != null
+				? modalReasonCombobox.getSelectedItem().getValue().toString()
+				: null;
+
+		String remarks = modalCheckerRemarksTextbox != null ? modalCheckerRemarksTextbox.getValue() : null;
+
+		if (cheques == null || cheques.isEmpty() || currentChequeIndex < 0 || currentChequeIndex >= cheques.size()) {
+			return;
+		}
+
+		OutwardCheque cheque = cheques.get(currentChequeIndex);
+
+		boolean saved = processingService.saveCheckerDecision(batchNumber, cheque.getChequeNumber(), checkerUserId,
+				selectedAction, reasonCode, remarks);
+
+		if (!saved) {
+			Clients.showNotification("Unable to save checker decision.", Clients.NOTIFICATION_TYPE_ERROR, null, "top_center", 3500);
+			return;
+		}
+		
+		if ("REJECT".equalsIgnoreCase(selectedAction)) {
+			cheque.setChequeStatus("CHECKER_REJECTED");
+		} else if ("SEND_BACK".equalsIgnoreCase(selectedAction)) {
+			cheque.setChequeStatus("CHECKER_RETURNED"); // Or the exact status your system uses (e.g. RETURN_BY_CHECKER)
+		}
+
+		closeActionModal();
+
+		boolean lastCheque = currentChequeIndex >= cheques.size() - 1;
+
+		if (!lastCheque) {
+			currentChequeIndex++;
+			displayCheque();
+			return;
+		}
+
+		finishProcessing();
 	}
 
 	// ============================================================
@@ -475,9 +638,13 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 		int completedCount = 0;
 
 		for (OutwardCheque c : cheques) {
-
-			if ("CHECKER_ACCEPTED".equalsIgnoreCase(c.getChequeStatus())
-					|| "CHECKER_REJECTED".equalsIgnoreCase(c.getChequeStatus())) {
+			String status = c.getChequeStatus();
+			if (status != null && (
+					"CHECKER_ACCEPTED".equalsIgnoreCase(status)
+					|| "CHECKER_REJECTED".equalsIgnoreCase(status)
+					|| "CHECKER_RETURNED".equalsIgnoreCase(status)
+					|| "RETURN_BY_CHECKER".equalsIgnoreCase(status)
+					|| "SEND_BACK".equalsIgnoreCase(status))) {
 
 				completedCount++;
 			}
@@ -495,23 +662,20 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
 		/*
 		 * Display sequence.
-		 *
-		 * Normal processing: Cheque : 01 / 25
-		 *
-		 * Exact re-verification: Cheque : 01 / 01
 		 */
-
 		chequeSequence.setValue("Cheque : " + String.format("%02d", currentChequeIndex + 1) + " / " + cheques.size());
 
 		chequeNumberLabel.setValue(safe(cheque.getChequeNumber()));
 
 		rightChequeNumber.setValue(safe(cheque.getChequeNumber()));
 
-		accountNumberLabel.setValue(safe(cheque.getDrawerAccountNumber()));
+		draweraccountNumberLabel.setValue(safe(cheque.getDrawerAccountNumber()));
 
 		drawerNameLabel.setValue(safe(cheque.getDrawerName()));
 
 		payeeNameLabel.setValue(safe(cheque.getPayeeName()));
+
+		payeeaccountNumberLabel.setValue(safe(cheque.getPayeeAccountNumber()));
 
 		amountLabel.setValue(cheque.getAmount() == null ? "" : cheque.getAmount().toString());
 
@@ -526,27 +690,27 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 		String micr = "";
 
 		if (cheque.getCityCode() != null) {
-		    micr += cheque.getCityCode();
+			micr += cheque.getCityCode();
 		}
 
 		if (cheque.getBankCode() != null) {
-		    if (!micr.isEmpty()) {
-		        micr += " ";
-		    }
-		    micr += cheque.getBankCode();
+			if (!micr.isEmpty()) {
+				micr += " ";
+			}
+			micr += cheque.getBankCode();
 		}
 
 		if (cheque.getBranchCode() != null) {
-		    if (!micr.isEmpty()) {
-		        micr += " ";
-		    }
-		    micr += cheque.getBranchCode();
+			if (!micr.isEmpty()) {
+				micr += " ";
+			}
+			micr += cheque.getBranchCode();
 		}
 
 		micrLabel.setValue(micr);
 
 		/*
-		 * Reset image.
+		 * Reset image and side toggle to front.
 		 */
 
 		resetImageState();
@@ -936,6 +1100,10 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
 			return;
 		}
+		
+		if ("ACCEPT".equalsIgnoreCase(selectedAction)) {
+			cheque.setChequeStatus("CHECKER_ACCEPTED");
+		}
 
 		boolean lastCheque = currentChequeIndex >= cheques.size() - 1;
 
@@ -973,8 +1141,17 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 	}
 
 	// ============================================================
-	// FRONT IMAGE
+	// IMAGE TOGGLE (FRONT / BACK)
 	// ============================================================
+
+	private void toggleImageSide() {
+
+		if (showingFront) {
+			showBackImage();
+		} else {
+			showFrontImage();
+		}
+	}
 
 	private void showFrontImage() {
 
@@ -992,30 +1169,17 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 			return;
 		}
 
-		System.out.println("FRONT IMAGE PATH = " + cheque.getFrontImagePath());
-
 		chequeImage.setSrc(cheque.getFrontImagePath());
-
-		System.out.println("IMAGE SRC AFTER SET = " + chequeImage.getSrc());
-
-		System.out.println("IMAGE COMPONENT = " + chequeImage);
 
 		resetImageState();
 
-		if (frontButton != null) {
+		showingFront = true;
 
-			frontButton.setSclass("image-side-button selected");
-		}
+		if (toggleSideButton != null) {
 
-		if (backSideButton != null) {
-
-			backSideButton.setSclass("image-side-button");
+			toggleSideButton.setLabel("View Back");
 		}
 	}
-
-	// ============================================================
-	// BACK IMAGE
-	// ============================================================
 
 	private void showBackImage() {
 
@@ -1037,14 +1201,11 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
 		resetImageState();
 
-		if (frontButton != null) {
+		showingFront = false;
 
-			frontButton.setSclass("image-side-button");
-		}
+		if (toggleSideButton != null) {
 
-		if (backSideButton != null) {
-
-			backSideButton.setSclass("image-side-button selected");
+			toggleSideButton.setLabel("View Front");
 		}
 	}
 

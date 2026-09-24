@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RejectedChequesReport>
+    <BatchNumber>OUT20260923204319986</BatchNumber>
+    <TotalRejectedCheques>1</TotalRejectedCheques>
+    <Cheques>
+        <Cheque>
+            <ChequeNumber>726304</ChequeNumber>
+            <BatchNumber>OUT20260923204319986</BatchNumber>
+            <ChequeDate>2026-05-09</ChequeDate>
+            <CityCode>117</CityCode>
+            <BankCode>569</BankCode>
+            <BranchCode>384</BranchCode>
+            <DrawerAccountNumber>6640339211875504</DrawerAccountNumber>
+            <DrawerName>RAMESH GUPTA</DrawerName>
+            <PayeeName>ANJALI MEHROTRA</PayeeName>
+            <PayeeAccountNumber>5503771422988861</PayeeAccountNumber>
+            <Amount>175000.00</Amount>
+            <AmountInWords>ONE LAKH SEVENTY FIVE THOUSAND ONLY</AmountInWords>
+            <ChequeStatus>CHECKER_REJECTED</ChequeStatus>
+            <ReturnReasonId></ReturnReasonId>
+            <CheckerRemarks></CheckerRemarks>
+        </Cheque>
+    </Cheques>
+</RejectedChequesReport>

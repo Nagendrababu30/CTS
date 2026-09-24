@@ -385,8 +385,7 @@ public class CheckerReportsController
                             StandardCharsets.UTF_8);
 
             String fileName =
-                    batchNumber + ".xml";
-
+                    batchNumber + "_valid.xml";
             System.out.println(
                     "File name:");
 
@@ -627,7 +626,7 @@ public class CheckerReportsController
                             StandardCharsets.UTF_8);
 
             String fileName =
-                    batchNumber + ".xml";
+                    batchNumber + "_invalid.xml";
 
             // =========================================================
             // STEP 3 - SAVE RRF XML INSIDE PROJECT

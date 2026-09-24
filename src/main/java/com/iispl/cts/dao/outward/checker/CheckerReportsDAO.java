@@ -54,37 +54,30 @@ public class CheckerReportsDAO {
                         new OutwardBatch();
 
                 batch.setBatchNumber(
-                        rs.getString("batch_number")
-                );
+                        rs.getString("batch_number"));
 
                 batch.setBranchCode(
-                        rs.getString("branch_code")
-                );
+                        rs.getString("branch_code"));
 
                 batch.setNumberOfCheques(
-                        rs.getInt("cheque_count")
-                );
+                        rs.getInt("cheque_count"));
 
                 batch.setBatchFolderPath(
-                        rs.getString("batch_folder_path")
-                );
+                        rs.getString("batch_folder_path"));
 
                 batch.setCreatedBy(
                         String.valueOf(
-                                rs.getInt("created_by"))
-                );
+                                rs.getInt("created_by")));
 
                 if (rs.getTimestamp("created_at") != null) {
 
                     batch.setCreatedAt(
                             rs.getTimestamp("created_at")
-                                    .toLocalDateTime()
-                    );
+                                    .toLocalDateTime());
                 }
 
                 batch.setBatchStatus(
-                        rs.getString("batch_status")
-                );
+                        rs.getString("batch_status"));
 
                 batches.add(batch);
             }
@@ -95,8 +88,7 @@ public class CheckerReportsDAO {
 
             throw new RuntimeException(
                     "Error while fetching Checker Reports batches",
-                    e
-            );
+                    e);
         }
 
         return batches;
@@ -122,8 +114,7 @@ public class CheckerReportsDAO {
 
             statement.setString(
                     1,
-                    batchNumber
-            );
+                    batchNumber);
 
             try (ResultSet rs =
                          statement.executeQuery()) {
@@ -141,8 +132,7 @@ public class CheckerReportsDAO {
             throw new RuntimeException(
                     "Error while getting total cheque count for batch: "
                             + batchNumber,
-                    e
-            );
+                    e);
         }
 
         return 0;
@@ -170,8 +160,7 @@ public class CheckerReportsDAO {
 
             statement.setString(
                     1,
-                    batchNumber
-            );
+                    batchNumber);
 
             try (ResultSet rs =
                          statement.executeQuery()) {
@@ -189,8 +178,7 @@ public class CheckerReportsDAO {
             throw new RuntimeException(
                     "Error while getting valid cheque count for batch: "
                             + batchNumber,
-                    e
-            );
+                    e);
         }
 
         return 0;
@@ -228,8 +216,7 @@ public class CheckerReportsDAO {
 
             statement.setString(
                     1,
-                    batchNumber.trim()
-            );
+                    batchNumber.trim());
 
             try (ResultSet rs =
                          statement.executeQuery()) {
@@ -240,37 +227,30 @@ public class CheckerReportsDAO {
                             new OutwardBatch();
 
                     batch.setBatchNumber(
-                            rs.getString("batch_number")
-                    );
+                            rs.getString("batch_number"));
 
                     batch.setBranchCode(
-                            rs.getString("branch_code")
-                    );
+                            rs.getString("branch_code"));
 
                     batch.setNumberOfCheques(
-                            rs.getInt("cheque_count")
-                    );
+                            rs.getInt("cheque_count"));
 
                     batch.setBatchFolderPath(
-                            rs.getString("batch_folder_path")
-                    );
+                            rs.getString("batch_folder_path"));
 
                     batch.setCreatedBy(
                             String.valueOf(
-                                    rs.getInt("created_by"))
-                    );
+                                    rs.getInt("created_by")));
 
                     if (rs.getTimestamp("created_at") != null) {
 
                         batch.setCreatedAt(
                                 rs.getTimestamp("created_at")
-                                        .toLocalDateTime()
-                        );
+                                        .toLocalDateTime());
                     }
 
                     batch.setBatchStatus(
-                            rs.getString("batch_status")
-                    );
+                            rs.getString("batch_status"));
 
                     return batch;
                 }
@@ -283,8 +263,7 @@ public class CheckerReportsDAO {
             throw new RuntimeException(
                     "Error while fetching batch: "
                             + batchNumber,
-                    e
-            );
+                    e);
         }
 
         return null;
@@ -337,8 +316,7 @@ public class CheckerReportsDAO {
 
             statement.setString(
                     1,
-                    batchNumber.trim()
-            );
+                    batchNumber.trim());
 
             try (ResultSet rs =
                          statement.executeQuery()) {
@@ -346,8 +324,7 @@ public class CheckerReportsDAO {
                 while (rs.next()) {
 
                     cheques.add(
-                            mapCheque(rs)
-                    );
+                            mapCheque(rs));
                 }
             }
 
@@ -358,8 +335,7 @@ public class CheckerReportsDAO {
             throw new RuntimeException(
                     "Error while fetching cheques for batch: "
                             + batchNumber,
-                    e
-            );
+                    e);
         }
 
         return cheques;
@@ -418,8 +394,7 @@ public class CheckerReportsDAO {
 
             statement.setString(
                     1,
-                    batchNumber.trim()
-            );
+                    batchNumber.trim());
 
             try (ResultSet rs =
                          statement.executeQuery()) {
@@ -427,8 +402,7 @@ public class CheckerReportsDAO {
                 while (rs.next()) {
 
                     rejectedCheques.add(
-                            mapCheque(rs)
-                    );
+                            mapCheque(rs));
                 }
             }
 
@@ -439,8 +413,7 @@ public class CheckerReportsDAO {
             throw new RuntimeException(
                     "Error while fetching rejected cheques for batch: "
                             + batchNumber,
-                    e
-            );
+                    e);
         }
 
         return rejectedCheques;
@@ -475,8 +448,7 @@ public class CheckerReportsDAO {
 
             statement.setString(
                     1,
-                    batchNumber.trim()
-            );
+                    batchNumber.trim());
 
             try (ResultSet rs =
                          statement.executeQuery()) {
@@ -494,8 +466,7 @@ public class CheckerReportsDAO {
             throw new RuntimeException(
                     "Error while checking RRF availability for batch: "
                             + batchNumber,
-                    e
-            );
+                    e);
         }
 
         return false;
@@ -528,8 +499,7 @@ public class CheckerReportsDAO {
 
             statement.setString(
                     1,
-                    batchNumber.trim()
-            );
+                    batchNumber.trim());
 
             try (ResultSet rs =
                          statement.executeQuery()) {
@@ -547,8 +517,7 @@ public class CheckerReportsDAO {
             throw new RuntimeException(
                     "Error while counting rejected cheques for batch: "
                             + batchNumber,
-                    e
-            );
+                    e);
         }
 
         return 0;
@@ -584,8 +553,7 @@ public class CheckerReportsDAO {
 
             statement.setString(
                     1,
-                    batchNumber.trim()
-            );
+                    batchNumber.trim());
 
             try (ResultSet rs =
                          statement.executeQuery()) {
@@ -603,11 +571,27 @@ public class CheckerReportsDAO {
             throw new RuntimeException(
                     "Error while checking NPCI readiness for batch: "
                             + batchNumber,
-                    e
-            );
+                    e);
         }
 
         return false;
+    }
+
+    // ============================================================
+    // GET VALID XML FILE NAME
+    // ============================================================
+
+    public String getValidXmlFileName(
+            String batchNumber) {
+
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()) {
+
+            return null;
+        }
+
+        return batchNumber.trim()
+                + "_valid.xml";
     }
 
     // ============================================================
@@ -632,11 +616,72 @@ public class CheckerReportsDAO {
             return false;
         }
 
-        if (validXmlPath == null ||
-                validXmlPath.trim().isEmpty()) {
+        String cleanBatchNumber =
+                batchNumber.trim();
 
-            return false;
+        // ========================================================
+        // ALWAYS USE _valid.xml
+        // ========================================================
+
+        String validXmlFileName =
+                cleanBatchNumber + "_valid.xml";
+
+        String finalValidXmlPath;
+
+        if (validXmlPath != null &&
+                !validXmlPath.trim().isEmpty()) {
+
+            try {
+
+                java.nio.file.Path suppliedPath =
+                        java.nio.file.Paths.get(
+                                validXmlPath.trim());
+
+                java.nio.file.Path parent =
+                        suppliedPath.getParent();
+
+                if (parent != null) {
+
+                    finalValidXmlPath =
+                            parent
+                                    .resolve(validXmlFileName)
+                                    .toString();
+
+                } else {
+
+                    finalValidXmlPath =
+                            validXmlFileName;
+                }
+
+            } catch (Exception e) {
+
+                finalValidXmlPath =
+                        validXmlFileName;
+            }
+
+        } else {
+
+            finalValidXmlPath =
+                    "src"
+                            + java.io.File.separator
+                            + "main"
+                            + java.io.File.separator
+                            + "webapp"
+                            + java.io.File.separator
+                            + "css"
+                            + java.io.File.separator
+                            + "outward"
+                            + java.io.File.separator
+                            + "Archive"
+                            + java.io.File.separator
+                            + "ValidCheques"
+                            + java.io.File.separator
+                            + validXmlFileName;
         }
+
+        // ========================================================
+        // SQL
+        // ========================================================
 
         String sql =
                 "INSERT INTO public.outward_npci_submission "
@@ -654,23 +699,19 @@ public class CheckerReportsDAO {
 
             statement.setString(
                     1,
-                    batchNumber.trim()
-            );
+                    cleanBatchNumber);
 
             statement.setInt(
                     2,
-                    validChequeCount
-            );
+                    validChequeCount);
 
             statement.setInt(
                     3,
-                    invalidChequeCount
-            );
+                    invalidChequeCount);
 
             statement.setString(
                     4,
-                    validXmlPath.trim()
-            );
+                    finalValidXmlPath);
 
             return statement.executeUpdate() > 0;
 
@@ -680,9 +721,8 @@ public class CheckerReportsDAO {
 
             throw new RuntimeException(
                     "Error while saving NPCI submission for batch: "
-                            + batchNumber,
-                    e
-            );
+                            + cleanBatchNumber,
+                    e);
         }
     }
 
@@ -714,8 +754,7 @@ public class CheckerReportsDAO {
 
             statement.setString(
                     1,
-                    batchNumber.trim()
-            );
+                    batchNumber.trim());
 
             return statement.executeUpdate() > 0;
 
@@ -726,8 +765,7 @@ public class CheckerReportsDAO {
             throw new RuntimeException(
                     "Error while marking batch as NPCI_SENT: "
                             + batchNumber,
-                    e
-            );
+                    e);
         }
     }
 
@@ -743,40 +781,31 @@ public class CheckerReportsDAO {
                 new OutwardCheque();
 
         cheque.setBatchNumber(
-                rs.getString("batch_number")
-        );
+                rs.getString("batch_number"));
 
         cheque.setChequeNumber(
-                rs.getString("cheque_number")
-        );
+                rs.getString("cheque_number"));
 
         cheque.setCityCode(
-                rs.getString("city_code")
-        );
+                rs.getString("city_code"));
 
         cheque.setBankCode(
-                rs.getString("bank_code")
-        );
+                rs.getString("bank_code"));
 
         cheque.setBranchCode(
-                rs.getString("branch_code")
-        );
+                rs.getString("branch_code"));
 
         cheque.setDrawerAccountNumber(
-                rs.getString("drawer_account_number")
-        );
+                rs.getString("drawer_account_number"));
 
         cheque.setDrawerName(
-                rs.getString("drawer_name")
-        );
+                rs.getString("drawer_name"));
 
         cheque.setPayeeAccountNumber(
-                rs.getString("payee_account_number")
-        );
+                rs.getString("payee_account_number"));
 
         cheque.setPayeeName(
-                rs.getString("payee_name")
-        );
+                rs.getString("payee_name"));
 
         BigDecimal amount =
                 rs.getBigDecimal("amount");
@@ -784,28 +813,23 @@ public class CheckerReportsDAO {
         cheque.setAmount(amount);
 
         cheque.setAmountInWords(
-                rs.getString("amount_in_words")
-        );
+                rs.getString("amount_in_words"));
 
         if (rs.getDate("cheque_date") != null) {
 
             cheque.setChequeDate(
                     rs.getDate("cheque_date")
-                            .toLocalDate()
-            );
+                            .toLocalDate());
         }
 
         cheque.setFrontImagePath(
-                rs.getString("front_image_path")
-        );
+                rs.getString("front_image_path"));
 
         cheque.setBackImagePath(
-                rs.getString("back_image_path")
-        );
+                rs.getString("back_image_path"));
 
         cheque.setChequeStatus(
-                rs.getString("cheque_status")
-        );
+                rs.getString("cheque_status"));
 
         Object reasonObject =
                 rs.getObject("return_reason_id");
@@ -813,13 +837,11 @@ public class CheckerReportsDAO {
         if (reasonObject != null) {
 
             cheque.setReturnReasonId(
-                    ((Number) reasonObject).intValue()
-            );
+                    ((Number) reasonObject).intValue());
         }
 
         cheque.setCheckerRemarks(
-                rs.getString("checker_remarks")
-        );
+                rs.getString("checker_remarks"));
 
         return cheque;
     }

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidChequesReport>
+    <BatchNumber>OUT20260923204319986</BatchNumber>
+    <TotalValidCheques>4</TotalValidCheques>
+    <Cheques>
+        <Cheque>
+            <ChequeNumber>000104</ChequeNumber>
+            <BatchNumber>OUT20260923204319986</BatchNumber>
+            <ChequeDate>2026-08-25</ChequeDate>
+            <CityCode>786</CityCode>
+            <BankCode>024</BankCode>
+            <BranchCode>002</BranchCode>
+            <DrawerAccountNumber>977321649569</DrawerAccountNumber>
+            <DrawerName>RAMANA</DrawerName>
+            <PayeeName>GIRI</PayeeName>
+            <PayeeAccountNumber>990823641020</PayeeAccountNumber>
+            <Amount>73000.00</Amount>
+            <AmountInWords>SEVENTY THREE THOUSAND ONLY</AmountInWords>
+            <ChequeStatus>CHECKER_ACCEPTED</ChequeStatus>
+        </Cheque>
+        <Cheque>
+            <ChequeNumber>10001</ChequeNumber>
+            <BatchNumber>OUT20260923204319986</BatchNumber>
+            <ChequeDate>2026-09-05</ChequeDate>
+            <CityCode>101</CityCode>
+            <BankCode>240</BankCode>
+            <BranchCode>001</BranchCode>
+            <DrawerAccountNumber>2401010001</DrawerAccountNumber>
+            <DrawerName>S AGARWAL</DrawerName>
+            <PayeeName>ABC SUPPLIERS</PayeeName>
+            <PayeeAccountNumber>2401039003</PayeeAccountNumber>
+            <Amount>125000.00</Amount>
+            <AmountInWords>ONE LAKH TWENTY FIVE THOUSAND ONLY</AmountInWords>
+            <ChequeStatus>CHECKER_ACCEPTED</ChequeStatus>
+        </Cheque>
+        <Cheque>
+            <ChequeNumber>230486</ChequeNumber>
+            <BatchNumber>OUT20260923204319986</BatchNumber>
+            <ChequeDate>2026-09-11</ChequeDate>
+            <CityCode>560</CityCode>
+            <BankCode>129</BankCode>
+            <BranchCode>995</BranchCode>
+            <DrawerAccountNumber>123456789012</DrawerAccountNumber>
+            <DrawerName>VEDANSH</DrawerName>
+            <PayeeName>AMIT SHARMA</PayeeName>
+            <PayeeAccountNumber>987654321098</PayeeAccountNumber>
+            <Amount>52300.00</Amount>
+            <AmountInWords>FIFTY TWO THOUSAND THREE HUNDRED ONLY</AmountInWords>
+            <ChequeStatus>CHECKER_ACCEPTED</ChequeStatus>
+        </Cheque>
+        <Cheque>
+            <ChequeNumber>501234</ChequeNumber>
+            <BatchNumber>OUT20260923204319986</BatchNumber>
+            <ChequeDate>2026-08-14</ChequeDate>
+            <CityCode>987</CityCode>
+            <BankCode>654</BankCode>
+            <BranchCode>321</BranchCode>
+            <DrawerAccountNumber>1234567890</DrawerAccountNumber>
+            <DrawerName>SHUBHAM KHAN</DrawerName>
+            <PayeeName>ROHAN</PayeeName>
+            <PayeeAccountNumber>67459337834</PayeeAccountNumber>
+            <Amount>516210.00</Amount>
+            <AmountInWords>FIVE LAKH SIXTEEN THOUSAND TWO HUNDRED AND TEN ONLY</AmountInWords>
+            <ChequeStatus>CHECKER_ACCEPTED</ChequeStatus>
+        </Cheque>
+    </Cheques>
+</ValidChequesReport>

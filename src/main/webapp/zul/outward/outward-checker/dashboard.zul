@@ -12,13 +12,7 @@
 
 <zk>
 
-    <!-- Checker Dashboard CSS -->
     <style src="/css/outward/checker/checker_dashboard.css"/>
-
-
-    <!-- ========================================================= -->
-    <!-- MAIN CONTENT                                               -->
-    <!-- ========================================================= -->
 
     <div
         self="@define(content)"
@@ -34,11 +28,6 @@
             sclass="checker-dashboard-layout"
             apply="com.iispl.cts.controller.outward.checker.CheckerDashboardController">
 
-
-            <!-- ================================================= -->
-            <!-- PAGE HEADER                                        -->
-            <!-- ================================================= -->
-
             <vlayout
                 spacing="5px"
                 sclass="dashboard-header">
@@ -53,18 +42,10 @@
 
             </vlayout>
 
-
-            <!-- ================================================= -->
-            <!-- SUMMARY / KPI CARDS                               -->
-            <!-- ================================================= -->
-
             <hlayout
                 width="100%"
                 spacing="20px"
                 sclass="summary-cards">
-
-
-                <!-- PENDING VERIFICATION -->
 
                 <vlayout
                     hflex="1"
@@ -82,9 +63,6 @@
 
                 </vlayout>
 
-
-                <!-- CBS VALIDATION -->
-
                 <vlayout
                     hflex="1"
                     spacing="8px"
@@ -100,9 +78,6 @@
                         sclass="summary-card-value summary-value-purple"/>
 
                 </vlayout>
-
-
-                <!-- READY TO SEND -->
 
                 <vlayout
                     hflex="1"
@@ -122,18 +97,10 @@
 
             </hlayout>
 
-
-            <!-- ================================================= -->
-            <!-- BATCH QUEUE SECTION                               -->
-            <!-- ================================================= -->
-
             <vlayout
                 width="100%"
                 spacing="0"
                 sclass="batch-section">
-
-
-                <!-- SECTION HEADER -->
 
                 <hlayout
                     width="100%"
@@ -148,39 +115,24 @@
 
                     <space hflex="1"/>
 
-
-                    <!-- FILTER LABEL -->
-
                     <label
                         value="Filter Status:"
                         sclass="filter-label"/>
-
-
-                    <!-- ALL -->
 
                     <button
                         id="allBtn"
                         label="All"
                         sclass="filter-btn active-filter"/>
 
-
-                    <!-- AVAILABLE -->
-
                     <button
                         id="availableBtn"
                         label="Available"
                         sclass="filter-btn"/>
 
-
-                    <!-- MY BATCHES -->
-
                     <button
                         id="myBatchesBtn"
                         label="My Batches"
                         sclass="filter-btn"/>
-
-
-                    <!-- RE-VERIFY BATCHES -->
 
                     <button
                         id="reVerifyBatchesBtn"
@@ -188,11 +140,6 @@
                         sclass="filter-btn"/>
 
                 </hlayout>
-
-
-                <!-- ================================================= -->
-                <!-- BATCH TABLE                                        -->
-                <!-- ================================================= -->
 
                 <listbox
                     id="batchListbox"
@@ -203,38 +150,24 @@
 
                     <listhead>
 
-                        <!-- BATCH NUMBER -->
-
                         <listheader
                             label="Batch Number"
                             width="20%"/>
-
-
-                        <!-- TOTAL CHEQUES -->
 
                         <listheader
                             label="Total Cheques"
                             width="15%"
                             align="center"/>
 
-
-                        <!-- STATUS -->
-
                         <listheader
                             label="Status"
                             width="20%"
                             align="center"/>
 
-
-                        <!-- ASSIGNMENT -->
-
                         <listheader
                             label="Assignment"
                             width="20%"
                             align="center"/>
-
-
-                        <!-- ACTION -->
 
                         <listheader
                             label="Action"
@@ -245,88 +178,11 @@
 
                 </listbox>
 
-
-                <!-- ================================================= -->
-                <!-- PAGINATION                                         -->
-                <!-- ================================================= -->
-
-                <div
-                    width="100%"
-                    sclass="pagination-wrapper">
-
-                    <hlayout
-                        id="paginationLayout"
-                        spacing="6px"
-                        valign="middle"
-                        sclass="pagination-layout">
-
-
-                        <!-- PREVIOUS -->
-
-                        <button
-                            id="previousPageButton"
-                            label="Previous"
-                            sclass="pagination-btn"/>
-
-
-                        <!-- PAGE 1 -->
-
-                        <button
-                            id="page1Button"
-                            label="1"
-                            sclass="pagination-btn pagination-active"/>
-
-
-                        <!-- PAGE 2 -->
-
-                        <button
-                            id="page2Button"
-                            label="2"
-                            sclass="pagination-btn"/>
-
-
-                        <!-- PAGE 3 -->
-
-                        <button
-                            id="page3Button"
-                            label="3"
-                            sclass="pagination-btn"/>
-
-
-                        <!-- PAGE 4 -->
-
-                        <button
-                            id="page4Button"
-                            label="4"
-                            sclass="pagination-btn"/>
-
-
-                        <!-- PAGE 5 -->
-
-                        <button
-                            id="page5Button"
-                            label="5"
-                            sclass="pagination-btn"/>
-
-
-                        <!-- NEXT -->
-
-                        <button
-                            id="nextPageButton"
-                            label="Next"
-                            sclass="pagination-btn"/>
-
-
-                        <!-- PAGINATION INFO -->
-
-                        <label
-                            id="paginationInfo"
-                            value=""
-                            sclass="pagination-info"/>
-
-                    </hlayout>
-
-                </div>
+                <paging
+                    id="batchPaging"
+                    pageSize="10"
+                    detailed="false"
+                    sclass="checker-dashboard-paging"/>
 
             </vlayout>
 

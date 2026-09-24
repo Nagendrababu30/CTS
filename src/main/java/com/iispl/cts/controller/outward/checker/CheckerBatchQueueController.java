@@ -4,6 +4,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import org.zkoss.zhtml.Messagebox;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Sessions;
 import org.zkoss.zk.ui.event.Events;
@@ -19,6 +20,8 @@ import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Vlayout;
 
 import com.cts.admin.model.User;
+import com.cts.admin.service.SessionService;
+import com.cts.admin.service.SessionServiceImpl;
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.model.outward.OutwardCheque;
 import com.iispl.cts.service.outward.checker.CheckerBatchService;
@@ -55,6 +58,7 @@ public class CheckerBatchQueueController extends SelectorComposer<Vlayout> {
     private CheckerBatchService batchService;
 
     private CheckerProcessingService processingService;
+    private SessionService sessionService;
 
     private long checkerUserId;
 
@@ -103,6 +107,40 @@ public class CheckerBatchQueueController extends SelectorComposer<Vlayout> {
             return;
         }
 
+        
+     // ========================================================
+     // CHECK CLEARING SESSION
+     // ========================================================
+
+     sessionService = new SessionServiceImpl();
+
+     com.cts.admin.model.Session clearingSession =
+             sessionService.getActiveSession();
+
+     if (clearingSession == null
+             || clearingSession.getStatus() == null
+             || !"STARTED".equalsIgnoreCase(
+                     clearingSession.getStatus().trim())) {
+
+         Messagebox.show(
+                 "Clearing session is not started.\n\n"
+                         + "Checker operations are currently unavailable.",
+                 "Session Not Started",
+                 Messagebox.OK,
+                 Messagebox.EXCLAMATION,
+                 event -> {
+
+                     if (Messagebox.ON_OK.equals(
+                             event.getName())) {
+
+                         Executions.sendRedirect( "/login.zul");
+                     }
+                 }
+         );
+
+         return;
+     }
+     
         checkerUserId = currentUser.getUserId();
 
         System.out.println(

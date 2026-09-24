@@ -16,11 +16,7 @@ public class User implements Serializable {
 	// passwordHash — used by new CRUD (UserDAOImpl)
 	private String passwordHash;
 
-	// Legacy flat fields — used by LoginComposer / AuthorizationComposer
-	private Long roleId;
-	private String roleName;
-
-	// Role object — used by UserController / UserDAOImpl
+	// Role object — OOP approach
 	private Role role;
 
 	private String status;
@@ -68,19 +64,11 @@ public class User implements Serializable {
 	}
 
 	public Long getRoleId() {
-		return roleId != null ? roleId : (role != null ? role.getRoleId() : null);
-	}
-
-	public void setRoleId(Long roleId) {
-		this.roleId = roleId;
+		return role != null ? role.getRoleId() : null;
 	}
 
 	public String getRoleName() {
-		return roleName != null ? roleName : (role != null ? role.getRoleName() : null);
-	}
-
-	public void setRoleName(String roleName) {
-		this.roleName = roleName;
+		return role != null ? role.getRoleName() : null;
 	}
 
 	public Role getRole() {
@@ -89,10 +77,6 @@ public class User implements Serializable {
 
 	public void setRole(Role role) {
 		this.role = role;
-		if (role != null) {
-			this.roleId = role.getRoleId();
-			this.roleName = role.getRoleName();
-		}
 	}
 
 	public String getStatus() {

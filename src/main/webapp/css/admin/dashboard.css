@@ -105,7 +105,7 @@
     background: #FFFFFF;
     border: 1px solid #E5E7EB !important;
     border-radius: 12px;
-    padding: 20px 22px 24px 22px;
+    padding: 16px 18px 18px 18px;
     box-sizing: border-box;
     overflow: visible !important;
 }
@@ -131,7 +131,7 @@
     flex-direction: row !important;
     align-items: center !important;
     width: 100%;
-    margin-bottom: 18px;
+    margin-bottom: 14px;
     box-sizing: border-box;
 }
 
@@ -191,9 +191,9 @@
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    gap: 14px;
+    gap: 12px;
     width: 100%;
-    margin-top: 6px;
+    margin-top: 8px;
     box-sizing: border-box;
 }
 
@@ -203,9 +203,9 @@
     flex-direction: column !important;
     align-items: center !important;
     justify-content: center !important;
-    border-radius: 8px;
-    padding: 10px 22px;
-    min-width: 76px;
+    border-radius: 10px;
+    padding: 12px 16px;
+    flex: 1 1 0 !important;
     box-sizing: border-box;
     flex-shrink: 0;
 }
@@ -216,7 +216,7 @@
 
 .pill-value-grey {
     color: #18243A;
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 650;
     display: block !important;
     text-align: center;
@@ -225,7 +225,7 @@
 
 .pill-value-green {
     color: #16A34A;
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 650;
     display: block !important;
     text-align: center;
@@ -234,7 +234,7 @@
 
 .pill-value-red {
     color: #DC2626;
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 650;
     display: block !important;
     text-align: center;
@@ -243,7 +243,7 @@
 
 .pill-label-grey {
     color: #6B7280;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 650;
     display: block !important;
     text-align: center;
@@ -252,7 +252,7 @@
 
 .pill-label-green {
     color: #16A34A;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 650;
     display: block !important;
     text-align: center;
@@ -261,7 +261,7 @@
 
 .pill-label-red {
     color: #DC2626;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 650;
     display: block !important;
     text-align: center;
@@ -277,7 +277,7 @@
 .session-status-box {
     width: 100%;
     border-radius: 9px;
-    padding: 10px 14px;
+    padding: 12px 14px;
     box-sizing: border-box;
     overflow: visible !important;
 }
@@ -298,27 +298,27 @@
 
 .session-box-active {
     background: #F0FDF4 !important;
-    border: 1px solid #BBF7D0 !important;
+    border: 2px solid #86EFAC !important;
 }
 
 .session-current-label {
     color: #92400E;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 650;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     display: block !important;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .session-current-label-active {
     color: #15803D;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 650;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     display: block !important;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 /* Name row — div with flex so name + badge sit on one line */

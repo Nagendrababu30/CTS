@@ -1153,62 +1153,65 @@
    PAGINATION
    ============================================================= */
 
+.bottom-row {
+    width: 100% !important;
+    margin-top: 18px !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+    box-sizing: border-box !important;
+}
+
+.bottom-row .z-hlayout-inner {
+    vertical-align: middle !important;
+}
+
+.pagination {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
 .page-button {
-    min-width: 42px;
-
-    height: 40px;
-
-    border:
-        1.5px
-        solid
-        var(--border-mid) !important;
-
+    min-width: 40px !important;
+    height: 36px !important;
+    line-height: 34px !important;
+    border: 1.5px solid var(--border-mid) !important;
     border-radius: var(--radius-md) !important;
-
     background: var(--bg-surface) !important;
-
     color: var(--text-secondary) !important;
-
     font-weight: 700 !important;
-
-    font-size: 13.5px !important;
-
-    cursor: pointer;
-
+    font-size: 13px !important;
+    cursor: pointer !important;
     font-family:
         'Plus Jakarta Sans',
         'Inter',
-        sans-serif;
-
+        sans-serif !important;
     box-shadow: var(--shadow-xs) !important;
-
-    padding: 0 16px !important;
-
-    font-variant-numeric: tabular-nums;
-
+    padding: 0 14px !important;
+    font-variant-numeric: tabular-nums !important;
+    box-sizing: border-box !important;
     transition:
         box-shadow 0.3s var(--ease-out-expo),
-        border-color 0.3s var(--ease);
+        border-color 0.3s var(--ease) !important;
 }
 
 .page-button:hover {
     background: var(--bg-subtle) !important;
-
     border-color: var(--brand-blue) !important;
-
     color: var(--brand-blue) !important;
-
     box-shadow:
         0
         4px
         14px
         rgba(23,92,211,0.20) !important;
 }
- .pagination .page-button-active {
+
+.pagination .page-button-active {
     background: #175cd3 !important;
     background-color: #175cd3 !important;
     color: #ffffff !important;
     border-color: #175cd3 !important;
+    font-weight: 700 !important;
 }
 
 .pagination .page-button-active:hover {
@@ -1219,11 +1222,9 @@
 }
 
 .page-button:disabled {
-    opacity: 0.4;
-
-    cursor: default;
-
-    pointer-events: none;
+    opacity: 0.4 !important;
+    cursor: default !important;
+    pointer-events: none !important;
 }
 
 

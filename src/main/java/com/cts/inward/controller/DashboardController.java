@@ -948,6 +948,9 @@ public class DashboardController
             DashboardBatchDto batch) {
 
         return loggedInUserId != null
+                && batch != null
+                && STATUS_LOCKED.equalsIgnoreCase(
+                        batch.getLockStatus())
                 && batch.getLockUserId() != null
                 && loggedInUserId.equals(
                         batch.getLockUserId());

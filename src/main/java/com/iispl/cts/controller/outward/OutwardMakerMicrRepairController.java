@@ -13,423 +13,457 @@ import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.ListitemRenderer;
+import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Vlayout;
 
+import com.cts.admin.service.SessionService;
+import com.cts.admin.service.SessionServiceImpl;
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.service.outward.OutwardMakerMicrRepairService;
 
 public class OutwardMakerMicrRepairController extends GenericForwardComposer<Component> {
 
-    private static final long serialVersionUID = 1L;
-
-    @Wire
-    private Listbox batchListbox;
-
-    private OutwardMakerMicrRepairService service;
-
-    
-     //=========================================================
-     // RETURNED CHEQUE / MICR REPAIR STATE
-     //=========================================================
-     
-    private boolean returnedMode = false;
-    private String returnedChequeNumber;
-
-     // Dashboard repair type.
-     //For returned batches this is normally MICR.
-     
-    private String repairType;
-
-    @Wire
-    private Vlayout checkerReturnInformationPanel;
-
-    @Wire
-    private Label checkerReasonLabel;
-
-    @Wire
-    private Label checkerRemarksLabel;
-
-    @Override
-    public void doAfterCompose(Component comp) throws Exception {
-
-        super.doAfterCompose(comp);
-
-        service = new OutwardMakerMicrRepairService();
-
-         // =====================================================
-         // CHECK WHETHER THIS IS RETURNED MODE
-         // =====================================================
-
-        String returnMode = Executions.getCurrent().getParameter("returnMode");
- 
-        // Support both: returnMode=RETURNED and: amp;returnMode=RETURNED
-        if (returnMode == null || returnMode.trim().isEmpty()) {
-
-            returnMode =
-                    Executions.getCurrent()
-                            .getParameter("amp;returnMode");
-        }
-
-        returnedMode =
-                "RETURNED".equalsIgnoreCase(
-                        returnMode
-                )
-                || "HOLD".equalsIgnoreCase(
-                        returnMode
-                );
-
-        returnedChequeNumber =
-                Executions.getCurrent()
-                        .getParameter(
-                                "chequeNumber"
-                        );
-
-        /*
-         * =====================================================
-         * RETURNED REPAIR TYPE
-         * =====================================================
-         *
-         * Dashboard sends:
-         *
-         * repairType=MICR
-         *
-         * This is only used for returned repair navigation.
-         * Normal MICR repair is unchanged.
-         */
-        repairType =
-                Executions.getCurrent()
-                        .getParameter("repairType");
-
-        /*
-         * =====================================================
-         * NORMAL MICR REPAIR QUEUE
-         * =====================================================
-         */
-
-        setListItemRenderer();
-
-        loadMicrErrorBatches();
-    }
-
-    private void setListItemRenderer() {
-
-        if (batchListbox == null) {
-            return;
-        }
-
-        batchListbox.setItemRenderer(
-                new ListitemRenderer<OutwardBatch>() {
-
-                    @Override
-                    public void render(
-                            Listitem item,
-                            OutwardBatch batch,
-                            int index) {
+	private static final long serialVersionUID = 1L;
 
-                        item.setValue(batch);
+	@Wire
+	private Listbox batchListbox;
 
-                        // Batch Number
-                        item.appendChild(
-                                new Listcell(
-                                        batch.getBatchNumber()));
+	private SessionService sessionService;
+	private OutwardMakerMicrRepairService service;
 
-                        // Total Cheques
-                        item.appendChild(
-                                new Listcell(
-                                        String.valueOf(
-                                                batch.getNumberOfCheques())));
 
-                        // MICR Error Count
-                        int micrErrorCount =
-                                service.getMicrErrorCount(
-                                        batch.getBatchNumber());
 
-                        item.appendChild(
-                                new Listcell(
-                                        String.valueOf(
-                                                micrErrorCount)));
-                        
 
-                        // Status
-                        Listcell statusCell = new Listcell();
+	//=========================================================
+	// RETURNED CHEQUE / MICR REPAIR STATE
+	//=========================================================
 
-                        Label statusLabel = new Label("MICR REPAIR");
+	private boolean returnedMode = false;
+	private String returnedChequeNumber;
 
-                        statusLabel.setSclass("micr-repair-status");
+	// Dashboard repair type.
+	//For returned batches this is normally MICR.
 
-                        statusCell.appendChild(statusLabel);
-                        item.appendChild(statusCell);
-                        
-                        
-                        // Action
-                        Listcell actionCell =
-                                new Listcell();
+	private String repairType;
 
-                        Button openButton =
-                                new Button("OPEN");
+	@Wire
+	private Vlayout checkerReturnInformationPanel;
 
-                        openButton.addEventListener(
-                                "onClick",
-                                event -> openBatch(batch));
+	@Wire
+	private Label checkerReasonLabel;
 
-                        actionCell.appendChild(
-                                openButton);
+	@Wire
+	private Label checkerRemarksLabel;
 
-                        item.appendChild(actionCell);
-                    }
-                });
-    }
+	@Override
+	public void doAfterCompose(Component comp) throws Exception {
 
-    private void loadMicrErrorBatches() {
+		super.doAfterCompose(comp);
 
-        // =====================================================
-        // GET LOGGED-IN USER FROM SESSION
-        // =====================================================
+		service = new OutwardMakerMicrRepairService();
 
-        Session sessionUser =
-                Executions.getCurrent()
-                        .getSession();
+		// =====================================================
+		// CHECK WHETHER THIS IS RETURNED MODE
+		// =====================================================
 
-        if (sessionUser == null) {
+		String returnMode = Executions.getCurrent().getParameter("returnMode");
 
-            System.out.println(
-                    "No logged-in user session found."
-            );
+		// Support both: returnMode=RETURNED and: amp;returnMode=RETURNED
+		if (returnMode == null || returnMode.trim().isEmpty()) {
 
-            Executions.sendRedirect(
-                    "/zul/login.zul");
+			returnMode =
+					Executions.getCurrent()
+					.getParameter("amp;returnMode");
+		}
 
-            return;
-        }
+		returnedMode =
+				"RETURNED".equalsIgnoreCase(
+						returnMode
+						)
+				|| "HOLD".equalsIgnoreCase(
+						returnMode
+						);
 
-        // =====================================================
-        // GET LOGGED-IN USER ID FROM SESSION
-        // =====================================================
-        //
-        // Existing session design:
-        // session attribute = "userId"
-        //
+		returnedChequeNumber =
+				Executions.getCurrent()
+				.getParameter(
+						"chequeNumber"
+						);
 
-        Object sessionUserId =
-                sessionUser.getAttribute("userId");
+		/*
+		 * =====================================================
+		 * RETURNED REPAIR TYPE
+		 * =====================================================
+		 *
+		 * Dashboard sends:
+		 *
+		 * repairType=MICR
+		 *
+		 * This is only used for returned repair navigation.
+		 * Normal MICR repair is unchanged.
+		 */
+		repairType =
+				Executions.getCurrent()
+				.getParameter("repairType");
 
-        if (sessionUserId == null) {
+		/*
+		 * =====================================================
+		 * NORMAL MICR REPAIR QUEUE
+		 * =====================================================
+		 */
 
-            System.out.println(
-                    "No logged-in user ID found in session."
-            );
+		setListItemRenderer();
 
-            Executions.sendRedirect(
-                    "/zul/login.zul");
+		loadMicrErrorBatches();
+	}
 
-            return;
-        }
+	private void setListItemRenderer() {
 
-        // =====================================================
-        // CONVERT SESSION USER ID TO LONG
-        // =====================================================
+		if (batchListbox == null) {
+			return;
+		}
 
-        long userId;
+		batchListbox.setItemRenderer(
+				new ListitemRenderer<OutwardBatch>() {
 
-        if (sessionUserId instanceof Number) {
+					@Override
+					public void render(
+							Listitem item,
+							OutwardBatch batch,
+							int index) {
 
-            userId =
-                    ((Number) sessionUserId)
-                            .longValue();
+						item.setValue(batch);
 
-        } else {
+						// Batch Number
+						item.appendChild(
+								new Listcell(
+										batch.getBatchNumber()));
 
-            try {
+						// Total Cheques
+						item.appendChild(
+								new Listcell(
+										String.valueOf(
+												batch.getNumberOfCheques())));
 
-                userId =
-                        Long.parseLong(
-                                sessionUserId.toString()
-                        );
+						// MICR Error Count
+						int micrErrorCount =
+								service.getMicrErrorCount(
+										batch.getBatchNumber());
 
-            } catch (NumberFormatException e) {
+						item.appendChild(
+								new Listcell(
+										String.valueOf(
+												micrErrorCount)));
 
-                System.out.println(
-                        "Invalid userId in session: "
-                        + sessionUserId
-                );
 
-                Executions.sendRedirect(
-                        "/zul/login.zul");
+						// Status
+						Listcell statusCell = new Listcell();
 
-                return;
-            }
-        }
+						Label statusLabel = new Label("MICR REPAIR");
 
-        // =====================================================
-        // DYNAMIC LOGGED-IN USER ID
-        // =====================================================
+						statusLabel.setSclass("micr-repair-status");
 
-        String currentUserId =
-                String.valueOf(userId);
+						statusCell.appendChild(statusLabel);
+						item.appendChild(statusCell);
 
-        System.out.println(
-                "======================================"
-        );
 
-        System.out.println(
-                "OUTWARD MAKER MICR REPAIR"
-        );
+						// Action
+						Listcell actionCell =
+								new Listcell();
 
-        System.out.println(
-                "doAfterCompose() START"
-        );
+						Button openButton =
+								new Button("OPEN");
 
-        System.out.println(
-                "Current Maker User : "
-                + currentUserId
-        );
+						openButton.addEventListener(
+								"onClick",
+								event -> openBatch(batch));
 
-        System.out.println(
-                "Returned Mode      : "
-                + returnedMode
-        );
+						actionCell.appendChild(
+								openButton);
 
-        System.out.println(
-                "Returned Cheque    : "
-                + returnedChequeNumber
-        );
+						item.appendChild(actionCell);
+					}
+				});
+	}
 
-        // =====================================================
-        // LOAD MICR ERROR BATCHES FOR LOGGED-IN USER
-        // =====================================================
+	private void loadMicrErrorBatches() {
 
-        List<OutwardBatch> batches =
-                service.getMicrErrorBatches(
-                        userId);
+		// =====================================================
+		// GET LOGGED-IN USER FROM SESSION
+		// =====================================================
 
-        System.out.println(
-                "MICR REPAIR - BATCHES FOUND = "
-                + (batches == null ? 0 : batches.size()));
+		Session sessionUser =
+				Executions.getCurrent()
+				.getSession();
 
-        if (batches != null) {
+		if (sessionUser == null) {
 
-            for (OutwardBatch batch : batches) {
+			System.out.println(
+					"No logged-in user session found."
+					);
 
-                System.out.println(
-                        "MICR REPAIR - BATCH = "
-                        + batch.getBatchNumber());
-            }
-        }
+			Executions.sendRedirect(
+					"/zul/login.zul");
 
-        ListModelList<OutwardBatch> model =
-                new ListModelList<>(
-                        batches);
+			return;
+		}
 
-        if (batchListbox != null) {
+		// =====================================================
+		// GET LOGGED-IN USER ID FROM SESSION
+		// =====================================================
+		//
+		// Existing session design:
+		// session attribute = "userId"
+		//
 
-            batchListbox.setModel(model);
-        }
-    }
+		Object sessionUserId =
+				sessionUser.getAttribute("userId");
 
-    private void openBatch(OutwardBatch batch) {
+		if (sessionUserId == null) {
 
-        if (batch == null
-                || batch.getBatchNumber() == null) {
+			System.out.println(
+					"No logged-in user ID found in session."
+					);
 
-            return;
-        }
+			Executions.sendRedirect(
+					"/zul/login.zul");
 
-        String batchNumber =
-                batch.getBatchNumber().trim();
+			return;
+		}
 
-        /*
-         * =====================================================
-         * RETURNED MICR CHEQUE
-         * =====================================================
-         *
-         * This is used when Maker Dashboard sends a specific
-         * returned MICR cheque to this module.
-         *
-         * The reason is NOT decided from the batch.
-         *
-         * It will be loaded for the specific cheque in the
-         * MICR Repair Detail Controller.
-         * =====================================================
-         */
+		// =====================================================
+		// CONVERT SESSION USER ID TO LONG
+		// =====================================================
 
-        if (returnedMode) {
+		long userId;
 
-            StringBuilder url =
-                    new StringBuilder(
-                            "outward-maker-micr-repair-detail.zul"
-                    );
+		if (sessionUserId instanceof Number) {
 
-            url.append("?batchNumber=")
-                    .append(batchNumber);
+			userId =
+					((Number) sessionUserId)
+					.longValue();
 
-            url.append("&returnMode=HOLD");
+		} else {
 
-            if (repairType != null
-                    && !repairType.trim().isEmpty()) {
+			try {
 
-                url.append("&repairType=")
-                        .append(repairType.trim());
-            }
+				userId =
+						Long.parseLong(
+								sessionUserId.toString()
+								);
 
-            if (returnedChequeNumber != null
-                    && !returnedChequeNumber.trim().isEmpty()) {
+			} catch (NumberFormatException e) {
 
-                url.append("&chequeNumber=")
-                        .append(
-                                returnedChequeNumber.trim()
-                        );
-            }
+				System.out.println(
+						"Invalid userId in session: "
+								+ sessionUserId
+						);
 
-            System.out.println(
-                    "======================================"
-            );
+				Executions.sendRedirect(
+						"/zul/login.zul");
 
-            System.out.println(
-                    "OPENING RETURNED MICR BATCH"
-            );
+				return;
+			}
+		}
+			sessionService = new SessionServiceImpl();
 
-            System.out.println(
-                    "Batch Number : "
-                    + batchNumber
-            );
+			com.cts.admin.model.Session clearingSession =
+					sessionService.getActiveSession();
 
-            System.out.println(
-                    "Return Mode  : RETURNED"
-            );
+			if (clearingSession == null
+					|| clearingSession.getStatus() == null
+					|| !"STARTED".equalsIgnoreCase(
+							clearingSession.getStatus().trim())) {
 
-            System.out.println(
-                    "Cheque       : "
-                    + returnedChequeNumber
-            );
+				Messagebox.show(
+						"Clearing session is not started.\n\n"
+								+ "Micr Repair operations "
+								+ "are currently unavailable.",
+								"Session Not Started",
+								Messagebox.OK,
+								Messagebox.EXCLAMATION,
+								event -> {
 
-            System.out.println(
-                    "URL          : "
-                    + url.toString()
-            );
+									if (Messagebox.ON_OK.equals(
+											event.getName())) {
 
-            System.out.println(
-                    "======================================"
-            );
+										Executions.sendRedirect("/login.zul");
+									}
+								});
 
-            Executions.sendRedirect(
-                    url.toString()
-            );
+				return;
+			}
 
-            return;
-        }
+		// =====================================================
+		// DYNAMIC LOGGED-IN USER ID
+		// =====================================================
 
-        /*
-         * =====================================================
-         * NORMAL MICR REPAIR
-         * =====================================================
-         *
-         * EXISTING LOGIC PRESERVED
-         * =====================================================
-         */
+		String currentUserId =
+				String.valueOf(userId);
 
-        Executions.sendRedirect(
-                "outward-maker-micr-repair-detail.zul"
-                + "?batchNumber="
-                + batchNumber);
-    }
+		System.out.println(
+				"======================================"
+				);
+
+		System.out.println(
+				"OUTWARD MAKER MICR REPAIR"
+				);
+
+		System.out.println(
+				"doAfterCompose() START"
+				);
+
+		System.out.println(
+				"Current Maker User : "
+						+ currentUserId
+				);
+
+		System.out.println(
+				"Returned Mode      : "
+						+ returnedMode
+				);
+
+		System.out.println(
+				"Returned Cheque    : "
+						+ returnedChequeNumber
+				);
+
+		// =====================================================
+		// LOAD MICR ERROR BATCHES FOR LOGGED-IN USER
+		// =====================================================
+
+		List<OutwardBatch> batches =
+				service.getMicrErrorBatches(
+						userId);
+
+		System.out.println(
+				"MICR REPAIR - BATCHES FOUND = "
+						+ (batches == null ? 0 : batches.size()));
+
+		if (batches != null) {
+
+			for (OutwardBatch batch : batches) {
+
+				System.out.println(
+						"MICR REPAIR - BATCH = "
+								+ batch.getBatchNumber());
+			}
+		}
+
+		ListModelList<OutwardBatch> model =
+				new ListModelList<>(
+						batches);
+
+		if (batchListbox != null) {
+
+			batchListbox.setModel(model);
+		}
+	}
+
+	private void openBatch(OutwardBatch batch) {
+
+		if (batch == null
+				|| batch.getBatchNumber() == null) {
+
+			return;
+		}
+
+		String batchNumber =
+				batch.getBatchNumber().trim();
+
+		/*
+		 * =====================================================
+		 * RETURNED MICR CHEQUE
+		 * =====================================================
+		 *
+		 * This is used when Maker Dashboard sends a specific
+		 * returned MICR cheque to this module.
+		 *
+		 * The reason is NOT decided from the batch.
+		 *
+		 * It will be loaded for the specific cheque in the
+		 * MICR Repair Detail Controller.
+		 * =====================================================
+		 */
+
+		if (returnedMode) {
+
+			StringBuilder url =
+					new StringBuilder(
+							"outward-maker-micr-repair-detail.zul"
+							);
+
+			url.append("?batchNumber=")
+			.append(batchNumber);
+
+			url.append("&returnMode=HOLD");
+
+			if (repairType != null
+					&& !repairType.trim().isEmpty()) {
+
+				url.append("&repairType=")
+				.append(repairType.trim());
+			}
+
+			if (returnedChequeNumber != null
+					&& !returnedChequeNumber.trim().isEmpty()) {
+
+				url.append("&chequeNumber=")
+				.append(
+						returnedChequeNumber.trim()
+						);
+			}
+
+			System.out.println(
+					"======================================"
+					);
+
+			System.out.println(
+					"OPENING RETURNED MICR BATCH"
+					);
+
+			System.out.println(
+					"Batch Number : "
+							+ batchNumber
+					);
+
+			System.out.println(
+					"Return Mode  : RETURNED"
+					);
+
+			System.out.println(
+					"Cheque       : "
+							+ returnedChequeNumber
+					);
+
+			System.out.println(
+					"URL          : "
+							+ url.toString()
+					);
+
+			System.out.println(
+					"======================================"
+					);
+
+			Executions.sendRedirect(
+					url.toString()
+					);
+
+			return;
+		}
+
+		/*
+		 * =====================================================
+		 * NORMAL MICR REPAIR
+		 * =====================================================
+		 *
+		 * EXISTING LOGIC PRESERVED
+		 * =====================================================
+		 */
+
+		Executions.sendRedirect(
+				"outward-maker-micr-repair-detail.zul"
+						+ "?batchNumber="
+						+ batchNumber);
+	}
 }

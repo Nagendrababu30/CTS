@@ -19,6 +19,8 @@ import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Messagebox;
 
+import com.cts.admin.service.SessionService;
+import com.cts.admin.service.SessionServiceImpl;
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.model.outward.OutwardCheque;
 import com.iispl.cts.service.outward.checker.CheckerReportsService;
@@ -33,6 +35,8 @@ public class CheckerReportsController
 
     private CheckerReportsService service =
             new CheckerReportsService();
+    
+    private SessionService sessionService;
 
     // ================================================================
     // INIT
@@ -43,6 +47,37 @@ public class CheckerReportsController
             throws Exception {
 
         super.doAfterCompose(component);
+        
+        sessionService =
+                new SessionServiceImpl();
+
+        com.cts.admin.model.Session clearingSession =
+                sessionService.getActiveSession();
+
+        if (clearingSession == null
+                || clearingSession.getStatus() == null
+                || !"STARTED".equalsIgnoreCase(
+                        clearingSession.getStatus().trim())) {
+
+            Messagebox.show(
+                    "Clearing session is not started.\n\n"
+                            + "Checker Reports operations "
+                            + "are currently unavailable.",
+                    "Session Not Started",
+                    Messagebox.OK,
+                    Messagebox.EXCLAMATION,
+                    event -> {
+
+                        if (Messagebox.ON_OK.equals(
+                                event.getName())) {
+
+                            Executions.sendRedirect(
+                                    "/login.zul");
+                        }
+                    });
+
+            return;
+        }
 
         loadReportBatches();
     }
@@ -1031,7 +1066,7 @@ public class CheckerReportsController
                     "            <ReturnReasonId>")
                     .append(
                             xmlValue(
-                                    cheque.getReturnReasonId()))
+                            		service.getCheckerReasonName(cheque.getBatchNumber(), cheque.getChequeNumber())))
                     .append(
                             "</ReturnReasonId>\n");
 

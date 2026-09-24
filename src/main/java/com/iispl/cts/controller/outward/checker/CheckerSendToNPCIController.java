@@ -18,6 +18,8 @@ import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Messagebox;
 
+import com.cts.admin.service.SessionService;
+import com.cts.admin.service.SessionServiceImpl;
 import com.iispl.cts.dao.outward.checker.CheckerReportsDAO;
 import com.iispl.cts.model.outward.OutwardBatch;
 
@@ -105,6 +107,40 @@ public class CheckerSendToNPCIController
 
                 return;
             }
+        }
+        
+     // ========================================================
+        // CHECK CLEARING SESSION
+        // ========================================================
+
+        SessionService sessionService =
+                new SessionServiceImpl();
+
+        com.cts.admin.model.Session clearingSession =
+                sessionService.getActiveSession();
+
+        if (clearingSession == null
+                || clearingSession.getStatus() == null
+                || !"STARTED".equalsIgnoreCase(
+                        clearingSession.getStatus().trim())) {
+
+            Messagebox.show(
+                    "Clearing session is not started.\n\n"
+                            + "Checker operations "
+                            + "are currently unavailable.",
+                    "Session Not Started",
+                    Messagebox.OK,
+                    Messagebox.EXCLAMATION,
+                    event -> {
+
+                        if (Messagebox.ON_OK.equals(
+                                event.getName())) {
+
+                            Executions.sendRedirect( "/login.zul");
+                        }
+                    });
+
+            return;
         }
 
         // ========================================================

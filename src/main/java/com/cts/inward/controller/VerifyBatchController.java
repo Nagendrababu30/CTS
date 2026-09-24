@@ -271,8 +271,7 @@ public class VerifyBatchController
         return "ON_HOLD".equalsIgnoreCase(
                 batch.getBatchStatus())
                 || "RETURN_TO_MAKER".equalsIgnoreCase(
-                        batch.getBatchStatus())
-                || batch.isReVerify();
+                        batch.getBatchStatus());
     }
 
 

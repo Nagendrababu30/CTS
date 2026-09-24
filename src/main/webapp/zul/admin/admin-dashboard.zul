@@ -83,34 +83,7 @@
                     </vlayout>
                 </vlayout>
 
-                <!-- CARD 3 — BATCH OVERVIEW -->
-                <vlayout spacing="0" sclass="overview-card">
-                    <div sclass="card-header-row">
-                        <div sclass="card-icon-wrap card-icon-green">
-                            <label sclass="card-icon" value="&#x1F4C1;"/>
-                        </div>
-                        <div sclass="card-header-middle">
-                            <label sclass="card-title" value="Batch Overview"/>
-                        </div>
-                        <label id="batchTrackLink" sclass="card-link" value="Track &#x2192;"/>
-                    </div>
-                    <div sclass="batch-stats-row">
-                        <div sclass="batch-stat-block">
-                            <label                        sclass="batch-stat-label"     value="Total"/>
-                            <label id="totalBatchesValue" sclass="batch-total-value"    value="0"/>
-                        </div>
-                        <div sclass="batch-stat-divider"/>
-                        <div sclass="batch-stat-block">
-                            <label                              sclass="batch-stat-label"      value="In Progress"/>
-                            <label id="inProgressBatchesValue"  sclass="batch-inprogress-value" value="0"/>
-                        </div>
-                        <div sclass="batch-stat-divider"/>
-                        <div sclass="batch-stat-block">
-                            <label                             sclass="batch-stat-label"     value="Completed"/>
-                            <label id="completedBatchesValue"  sclass="batch-completed-value" value="0"/>
-                        </div>
-                    </div>
-                </vlayout>
+                <!-- CARD 3 — SESSION OVERVIEW (removed BATCH OVERVIEW CARD) -->
 
             </div>
 

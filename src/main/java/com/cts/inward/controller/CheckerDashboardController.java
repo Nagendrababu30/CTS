@@ -672,50 +672,30 @@ public class CheckerDashboardController
         /*
          * ON HOLD
          *
-         * Show Open Verification button.
+         * Batch is on hold (returned to maker). Checker cannot open the batch.
          */
         if (isOnHold(batch)) {
 
-            Button openButton =
-                    new Button(
-                            "Open Verification");
+            Button onHoldButton =
+                    new Button();
 
+            onHoldButton.setLabel(
+                    "On Hold");
 
-            openButton.setSclass(
-                    "btn btn-action");
+            onHoldButton.setIconSclass(
+                    "z-icon-lock");
 
+            onHoldButton.setSclass(
+                    "btn btn-locked");
 
-            openButton.addEventListener(
-                    "onClick",
-                    event -> {
+            onHoldButton.setDisabled(
+                    true);
 
-                        long batchId =
-                                batch.getBatchId();
-
-
-                        boolean locked =
-                                service.lockBatch(
-                                        batchId,
-                                        userId);
-
-
-                        if (locked) {
-
-                            Executions.sendRedirect(
-                                    "/zul/inward-checker/"
-                                    + "batch-details.zul"
-                                    + "?batchId="
-                                    + batchId);
-
-                        } else {
-
-                            loadDashboard();
-                        }
-                    });
-
+            onHoldButton.setTooltiptext(
+                    "Batch is on hold (returned to maker) and cannot be opened.");
 
             row.appendChild(
-                    openButton);
+                    onHoldButton);
         }
 
 

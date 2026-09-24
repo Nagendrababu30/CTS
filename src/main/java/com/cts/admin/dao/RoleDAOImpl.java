@@ -16,7 +16,7 @@ public class RoleDAOImpl implements RoleDAO {
 
         List<Role> roles = new ArrayList<>();
 
-        /* CTS DB uses reserved word "role" — must be quoted */
+        //CTS DB uses reserved word "role" — must be quoted 
         String sql =
                 "SELECT role_id, role_name, description, status, created_at "
                 + "FROM \"role\" "
@@ -71,7 +71,7 @@ public class RoleDAOImpl implements RoleDAO {
         if (role == null) return false;
 
         try {
-            /* Generate next role_id */
+            // Generate next role_id 
             Long nextRoleId = getNextRoleId();
             
             String sql =
@@ -94,7 +94,7 @@ public class RoleDAOImpl implements RoleDAO {
         }
     }
 
-    /* Get next role_id by finding MAX(role_id) + 1 */
+    // Get next role_id by finding MAX(role_id) + 1 
     private Long getNextRoleId() {
         
         String sql = "SELECT COALESCE(MAX(role_id), 0) + 1 AS next_id FROM \"role\"";
@@ -159,7 +159,6 @@ public class RoleDAOImpl implements RoleDAO {
         }
     }
 
-    /* ------------------------------------------------------------------ */
 
     private Role mapRole(ResultSet rs) throws Exception {
         Role role = new Role();

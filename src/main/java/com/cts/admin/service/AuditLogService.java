@@ -13,21 +13,17 @@ public interface AuditLogService {
 	// New filtered method
 	List<AuditLog> getAuditLogs(int page, int pageSize, String searchText, String roleName, Date fromDate, Date toDate);
 
-	List<AuditLog> getAllAuditLogs(
-	        String searchText,
-	        String roleName,
-	        Date fromDate,
-	        Date toDate);
-	
+	List<AuditLog> getAllAuditLogs(String searchText, String roleName, Date fromDate, Date toDate);
+
 	// Existing count method
 	int getTotalAuditLogCount();
 
 	// New filtered count method
 	int getTotalAuditLogCount(String searchText, String roleName, Date fromDate, Date toDate);
 
-	/* Called on login */
+	// Called on login 
 	String createAuditLog(Long userId);
 
-	/* Called on logout */
+	// Called on logout 
 	void endAuditLog(String sessionId);
 }

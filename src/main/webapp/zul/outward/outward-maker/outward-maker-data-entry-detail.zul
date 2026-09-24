@@ -2,7 +2,7 @@
 <?page title="Data Entry Detail"?>
 <?init class="com.cts.admin.controller.LayoutInit" pageTitle="Data Entry Detail" active="dataEntry"?>
 <?init class="org.zkoss.zk.ui.util.Composition" arg0="/zul/common/layout.zul"?>
-<zk>
+<zk xmlns:w="client">
 	<style src="/css/outward/maker/dataentrydetail.css?v=3.9" />
 
 	<!-- =========================================================
@@ -151,7 +151,9 @@
 									<label value="CHEQUE NUMBER" sclass="single-field-label" />
 									<label value="*" sclass="label-star" />
 								</hlayout>
-								<textbox id="chequeNumberTextbox" width="100%" placeholder="Enter cheque number" sclass="single-field-box" />
+								<textbox id="chequeNumberTextbox" width="100%" placeholder="Enter cheque number" sclass="single-field-box" maxlength="6"  
+        w:onKeyPress="var c = event.keyCode || event.which; if (c &lt; 48 || c &gt; 57) { event.stop(); }"
+         w:onInput="var inp = this.getInputNode(); inp.value = inp.value.replace(/[^0-9]/g, ''); this.setValue(inp.value);" />
 							</vlayout>
 
 							<vlayout hflex="1" spacing="4px">
@@ -159,13 +161,13 @@
 									<label value="ACCOUNT NUMBER" sclass="single-field-label" />
 									<label value="*" sclass="label-star" />
 								</hlayout>
-								<textbox id="accountNumberTextbox" width="100%" placeholder="Enter account number" sclass="single-field-box" />
+								<textbox id="accountNumberTextbox" width="100%" maxlength="18" placeholder="Enter account number" sclass="single-field-box"
+								w:onKeyPress="var c = event.keyCode || event.which; if (c &lt; 48 || c &gt; 57) { event.stop(); }"
+         w:onInput="var inp = this.getInputNode(); inp.value = inp.value.replace(/[^0-9]/g, ''); this.setValue(inp.value);" />
 							</vlayout>
 						</hlayout>
 
-				<!-- =============================================
-     ROW 2: CHEQUE DATE (LEFT) + DRAWER NAME (RIGHT)
-     ============================================= -->
+		
 <!-- =============================================
      ROW 2: CHEQUE DATE (LEFT) + DRAWER NAME (RIGHT)
      ============================================= -->
@@ -192,11 +194,14 @@
             <label value="DRAWER NAME" sclass="single-field-label" />
             <label value="*" sclass="label-star" />
         </hlayout>
-        <textbox 
-            id="drawerNameTextbox" 
-            width="100%" 
-            placeholder="Enter drawer name" 
-            sclass="single-field-box" />
+       <textbox 
+    id="drawerNameTextbox" 
+    width="100%" 
+    maxlength="100"
+    placeholder="Enter drawer name" 
+    sclass="single-field-box" 
+    w:onKeyPress="var c = event.keyCode || event.which; if (c == 32 || c == 8 || c == 0) return; var ch = String.fromCharCode(c); if (!/[a-zA-Z\.\&amp;\-]/.test(ch)) { event.stop(); }"
+    w:onInput="var inp = this.getInputNode(); inp.value = inp.value.replace(/[^a-zA-Z\s\.\&amp;\-]/g, ''); this.setValue(inp.value);"/>
     </vlayout>
 </hlayout>
 
@@ -207,15 +212,22 @@
 									<label value="PAYEE NAME" sclass="single-field-label" />
 									<label value="*" sclass="label-star" />
 								</hlayout>
-								<textbox id="payeeNameTextbox" width="100%" placeholder="Enter payee name" sclass="single-field-box" />
-							</vlayout>
+								<textbox id="payeeNameTextbox" 
+         width="100%" 
+         placeholder="Enter payee name" 
+         sclass="single-field-box"
+         w:onKeyPress="var c = event.keyCode || event.which; if (c == 32 || c == 8 || c == 0) return; var ch = String.fromCharCode(c); if (!/[a-zA-Z0-9\.\&amp;\/\-]/.test(ch)) { event.stop(); }"
+         w:onInput="var inp = this.getInputNode(); inp.value = inp.value.replace(/[^a-zA-Z0-9\s\.\&amp;\/\-]/g, ''); this.setValue(inp.value);" />
+</vlayout>
 
 							<vlayout hflex="1" spacing="4px">
 								<hlayout spacing="0" valign="middle">
 									<label value="AMOUNT (₹)" sclass="single-field-label" />
 									<label value="*" sclass="label-star" />
 								</hlayout>
-								<decimalbox id="amountTextbox" width="100%" format="###,##0.00" placeholder="0.00" instant="true" sclass="single-field-box" />
+								<decimalbox id="amountTextbox" width="100%" maxlength="15" format="###,##0.00" placeholder="0.00" instant="true" sclass="single-field-box"
+								w:onKeyPress="var c = event.keyCode || event.which; if (c == 45 || c == 43) { event.stop(); }"
+            w:onInput="var inp = this.getInputNode(); inp.value = inp.value.replace(/[^0-9.]/g, '');" />
 							</vlayout>
 						</hlayout>
 

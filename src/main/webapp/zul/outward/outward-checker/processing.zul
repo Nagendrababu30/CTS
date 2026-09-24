@@ -30,10 +30,14 @@
                 <button id="backButton"
                         label="←"
                         sclass="batch-back-button"/>
-                <label value="Batch Number :" sclass="batch-number-label"/>
-                <label id="verificationBatchId"
-                       value=""
-                       sclass="batch-number-label"/>
+                        
+                 <space hflex="0.5px"/>
+                 
+                <div sclass="summary-pill batch-number-pill">
+				    <label value="Batch Number :"/>
+				    <label id="verificationBatchId"
+				           value="  -"/>
+				</div>
 
                 <space hflex="1"/>
 
@@ -70,7 +74,7 @@
 
             <hlayout width="100%"
                      vflex="1"
-                     spacing="0"
+                     spacing="16px"
                      valign="top"
                      sclass="processing-main-area">
 
@@ -91,26 +95,26 @@
                              valign="middle"
                              sclass="image-toolbar">
 
-                        <button id="frontButton"
-                                label="View Front"
-                                sclass="image-side-button selected"/>
-
-                        <button id="backSideButton"
+                        <button id="toggleSideButton"
                                 label="View Back"
                                 sclass="image-side-button"/>
 
                         <space hflex="1"/>
+                        
+                        <button id="rotateButton"
+                                label="↻"
+                                sclass="image-tool-button"/>
 
                         <button id="zoomInButton"
                                 label="+"
                                 sclass="image-tool-button"/>
 
+                        <label id="zoomLevelLabel"
+                               value="100%"
+                               sclass="zoom-level"/>
+
                         <button id="zoomOutButton"
                                 label="−"
-                                sclass="image-tool-button"/>
-
-                        <button id="rotateButton"
-                                label="↻"
                                 sclass="image-tool-button"/>
 
                     </hlayout>
@@ -137,12 +141,6 @@
                         <label id="chequeNumberLabel"
                                value=""
                                sclass="cheque-number-value"/>
-
-                        <space hflex="1"/>
-
-                        <label id="zoomLevelLabel"
-                               value="100%"
-                               sclass="zoom-level"/>
 
                     </hlayout>
 
@@ -204,9 +202,6 @@
                 </vlayout>
 
 
-                <space width="3%"/>
-
-
                 <!-- RIGHT DETAILS -->
 
                 <vlayout hflex="42"
@@ -214,24 +209,16 @@
                          spacing="0"
                          sclass="processing-card cheque-details-card">
 
+                    <!-- FIXED HEADER -->
+                    <label value="Verification &amp; Corrections"
+                           sclass="verification-title"/>
 
-                    <!-- INDEPENDENT SCROLL -->
-
+                    <!-- INDEPENDENT SCROLL (SCROLLS UNDER FIXED HEADER) -->
                     <div width="100%"
                          vflex="1"
                          sclass="cheque-details-scroll">
 
-
-                        <!-- VERIFICATION & CORRECTIONS -->
-
-                        <label value="Verification &amp; Corrections"
-                               sclass="verification-title"/>
-
-                        <separator height="8px"/>
-
-
                         <!-- MAKER RETURN -->
-
                         <div id="makerRejectionBlock"
                              visible="false"
                              sclass="maker-return-card">
@@ -260,12 +247,7 @@
 
                         </div>
 
-
-                        <separator height="12px"/>
-
-
                         <!-- DATA ENTRY -->
-
                         <vlayout width="100%"
                                  spacing="10px"
                                  sclass="right-section">
@@ -273,79 +255,54 @@
                             <label value="Data Entry Fields"
                                    sclass="right-section-title"/>
 
-
                             <vlayout spacing="4px">
-
                                 <label value="Cheque Number"
                                        sclass="field-label"/>
-
-                            <textbox id="rightChequeNumber"
+                                <textbox id="rightChequeNumber"
                                          value=""
                                          readonly="true"
                                          sclass="field-value"/>
-
                             </vlayout>
 
-
                             <vlayout spacing="4px">
-
                                 <label value="Cheque Date"
                                        sclass="field-label"/>
-
                                 <textbox id="chequeDateLabel"
                                          value=""
                                          readonly="true"
                                          sclass="field-value"/>
-
                             </vlayout>
 
-
                             <vlayout spacing="4px">
-
                                 <label value="MICR"
                                        sclass="field-label"/>
-
                                 <textbox id="micrLabel"
                                          value=""
                                          readonly="true"
                                          sclass="field-value micr-field"/>
-
                             </vlayout>
 
-
                             <vlayout spacing="4px">
-
                                 <label value="Amount"
                                        sclass="field-label"/>
-
                                 <textbox id="amountLabel"
                                          value=""
                                          readonly="true"
                                          sclass="field-value amount-field"/>
-
                             </vlayout>
 
-
                             <vlayout spacing="4px">
-
                                 <label value="Amount In Words"
                                        sclass="field-label"/>
-
                                 <textbox id="amountInWordsLabel"
                                          value=""
                                          readonly="true"
                                          sclass="field-value amount-words-field"/>
-
                             </vlayout>
 
                         </vlayout>
 
-
-                        <separator height="12px"/>
-
-
                         <!-- DRAWER -->
-
                         <vlayout width="100%"
                                  spacing="10px"
                                  sclass="right-section details-box">
@@ -353,40 +310,27 @@
                             <label value="Drawer Details"
                                    sclass="right-section-title"/>
 
-
                             <vlayout spacing="4px">
-
                                 <label value="Drawer Name"
                                        sclass="field-label"/>
-
                                 <textbox id="drawerNameLabel"
                                          value=""
                                          readonly="true"
                                          sclass="field-value plain-value"/>
-
                             </vlayout>
 
-
                             <vlayout spacing="4px">
-
                                 <label value="Drawer Account"
                                        sclass="field-label"/>
-
-                                <textbox id="accountNumberLabel"
+                                <textbox id="draweraccountNumberLabel"
                                          value=""
                                          readonly="true"
                                          sclass="field-value plain-value"/>
-
                             </vlayout>
 
                         </vlayout>
 
-
-                        <separator height="12px"/>
-
-
                         <!-- PAYEE -->
-
                         <vlayout width="100%"
                                  spacing="10px"
                                  sclass="right-section details-box">
@@ -394,27 +338,27 @@
                             <label value="Payee Details"
                                    sclass="right-section-title"/>
 
-
                             <vlayout spacing="4px">
-
                                 <label value="Payee Name"
                                        sclass="field-label"/>
-
                                 <textbox id="payeeNameLabel"
                                          value=""
                                          readonly="true"
                                          sclass="field-value plain-value"/>
-
+                            </vlayout>
+                            
+                            <vlayout spacing="4px">
+                                <label value="Payee Account"
+                                       sclass="field-label"/>
+                                <textbox id="payeeaccountNumberLabel"
+                                         value=""
+                                         readonly="true"
+                                         sclass="field-value plain-value"/>
                             </vlayout>
 
                         </vlayout>
 
-
-                        <separator height="12px"/>
-
-
                         <!-- REASON -->
-
                         <hlayout id="reasonRow"
                                  width="100%"
                                  spacing="10px"
@@ -432,9 +376,7 @@
 
                         </hlayout>
 
-
                         <!-- REMARKS -->
-
                         <hlayout width="100%"
                                  spacing="10px"
                                  valign="top"
@@ -451,9 +393,6 @@
                                      sclass="form-control"/>
 
                         </hlayout>
-
-
-                        <separator height="16px"/>
 
                     </div>
 
@@ -485,6 +424,54 @@
                 </vlayout>
 
             </hlayout>
+
+            <!-- ACTION REASON MODAL WINDOW -->
+            <window id="actionModalWindow"
+                    title="Select Reason"
+                    mode="modal"
+                    visible="false"
+                    closable="true"
+                    onClose="event.stopPropagation(); self.setVisible(false);"
+                    width="460px"
+                    border="normal"
+                    sclass="action-reason-modal">
+
+                <vlayout width="100%" spacing="12px" sclass="modal-body-layout">
+                    
+                    <vlayout width="100%" spacing="4px">
+                        <label value="Reason *" sclass="form-label"/>
+                        <combobox id="modalReasonCombobox"
+                                  width="100%"
+                                  placeholder="Select reason"
+                                  readonly="true"/>
+                    </vlayout>
+
+                    <vlayout width="100%" spacing="4px">
+                        <label value="Remarks" sclass="form-label"/>
+                        <textbox id="modalCheckerRemarksTextbox"
+                                 width="100%"
+                                 rows="3"
+                                 maxlength="1000"
+                                 placeholder="Enter remarks (optional)"
+                                 sclass="form-control"/>
+                    </vlayout>
+
+                    <separator height="10px"/>
+
+                    <hlayout width="100%" spacing="10px" valign="middle">
+                        <space hflex="1"/>
+                        <button id="modalCancelButton"
+                                label="Cancel"
+                                onClick="actionModalWindow.setVisible(false)"
+                                sclass="navigation-button"/>
+                        <button id="modalSubmitButton"
+                                label="Submit"
+                                sclass="complete-button modal-submit-button"/>
+                    </hlayout>
+
+                </vlayout>
+
+            </window>
 
         </vlayout>
 

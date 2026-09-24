@@ -2011,57 +2011,35 @@ public class OutwardMakerDataEntryDetailController
     //
     // EXISTING NORMAL DATA ENTRY FUNCTIONALITY
     // =========================================================
+ // =========================================================
+    // HANDLE NEXT OR COMPLETE
+    // =========================================================
 
     private void handleNextOrComplete() {
 
-        if (currentIndex
-                < cheques.size() - 1) {
+        if (currentIndex < cheques.size() - 1) {
 
             currentIndex++;
-
             loadCheque();
 
         } else {
 
-            int firstPending =
-                    findFirstPendingChequeIndex();
-
-
+            int firstPending = findFirstPendingChequeIndex();
             boolean hasPending = false;
 
+            for (OutwardCheque chq : cheques) {
 
-            for (OutwardCheque chq
-                    : cheques) {
+                String status = chq.getChequeStatus();
 
-                String status =
-                        chq.getChequeStatus();
-
-
-                boolean isDone =
-                        "VERIFIED"
-                                .equalsIgnoreCase(
-                                        status
-                                )
-
-                        || "COMPLETED"
-                                .equalsIgnoreCase(
-                                        status
-                                )
-
-                        || "REJECT_REQUESTED"
-                                .equalsIgnoreCase(
-                                        status
-                                );
-
+                boolean isDone = "VERIFIED".equalsIgnoreCase(status)
+                        || "COMPLETED".equalsIgnoreCase(status)
+                        || "REJECT_REQUESTED".equalsIgnoreCase(status);
 
                 if (!isDone) {
-
                     hasPending = true;
-
                     break;
                 }
             }
-
 
             if (hasPending) {
 
@@ -2074,76 +2052,62 @@ public class OutwardMakerDataEntryDetailController
                         Messagebox.INFORMATION
                 );
 
-
-                currentIndex =
-                        firstPending;
-
-
+                currentIndex = firstPending;
                 loadCheque();
 
             } else {
 
                 // =================================================
-                // GET CURRENT USER
+                // ALL CHEQUES COMPLETED: YES / NO CONFIRMATION
                 // =================================================
+            	// =================================================
+            	// ALL CHEQUES COMPLETED: YES / NO CONFIRMATION
+            	// =================================================
 
-                Object sessionUserIdObj =
-                        Sessions.getCurrent()
-                                .getAttribute(
-                                        "userId"
-                                );
+            	Messagebox.show(
+            	    "All cheques in batch " + batchId + " have been verified.\n\n"
+            	        + "Do you want to finalize and proceed to 'Send to Checker'?",
+            	    "Batch Completed",
+            	    Messagebox.YES | Messagebox.NO,
+            	    Messagebox.QUESTION,
+            	    event -> {
 
+            	        if (Messagebox.ON_YES.equals(event.getName())) {
 
-                int currentUserId =
-                        (sessionUserIdObj
-                                instanceof Number)
-                                ? ((Number)
-                                        sessionUserIdObj)
-                                        .intValue()
-                                : 1;
+            	            // ONLY mark the batch as completed if the user explicitly clicked YES
+            	            Object sessionUserIdObj = Sessions.getCurrent().getAttribute("userId");
+            	            int currentUserId = (sessionUserIdObj instanceof Number)
+            	                    ? ((Number) sessionUserIdObj).intValue()
+            	                    : 1;
 
+            	            boolean completed = service.completeBatchDataEntry(batchId, currentUserId);
 
-                // =================================================
-                // COMPLETE NORMAL BATCH
-                // =================================================
+            	            if (completed) {
+            	                Executions.sendRedirect("outward-maker-send-to-checker.zul");
+            	            } else {
+            	                Messagebox.show(
+            	                    "Failed to update batch status.",
+            	                    "Error",
+            	                    Messagebox.OK,
+            	                    Messagebox.ERROR
+            	                );
+            	            }
 
-                boolean completed =
-                        service.completeBatchDataEntry(
-                                batchId,
-                                currentUserId
-                        );
-
-
-                if (completed) {
-
-                    Messagebox.show(
-                            "All cheques in batch "
-                                    + batchId
-                                    + " have been processed "
-                                    + "and moved to Send to Checker.",
-                            "Batch Completed",
-                            Messagebox.OK,
-                            Messagebox.INFORMATION,
-                            event ->
-                                    Executions.sendRedirect(
-                                            "outward-maker-send-to-checker.zul"
-                                    )
-                    );
-
-                } else {
-
-                    Messagebox.show(
-                            "Cheque saved, but failed to update "
-                                    + "batch status to READY_TO_SUBMIT.",
-                            "Warning",
-                            Messagebox.OK,
-                            Messagebox.ERROR
-                    );
-                }
+            	        } else {
+            	            // User clicked NO: do NOT touch batch status in DB.
+            	            // Stay right here so Maker can review cheques using the "Prev" button.
+            	            Messagebox.show(
+            	                "Batch remains open for review. You can navigate back using the Previous button.",
+            	                "Review Mode",
+            	                Messagebox.OK,
+            	                Messagebox.INFORMATION
+            	            );
+            	        }
+            	    }
+            	);
             }
         }
     }
-
 
     // =========================================================
     // UPDATE BATCH SUMMARY METRICS
@@ -2810,129 +2774,79 @@ public class OutwardMakerDataEntryDetailController
     // =========================================================
     // CONVERT TO INDIAN FORMAT
     // =========================================================
+ // =========================================================
+    // CONVERT TO INDIAN FORMAT (FIXED)
+    // =========================================================
 
-    private static String convertToIndianFormat(
-            long n) {
+    private static String convertToIndianFormat(long n) {
 
         if (n < 0) {
-
-            return "Minus "
-                    + convertToIndianFormat(
-                            -n
-                    );
+            return "Minus " + convertToIndianFormat(-n);
         }
 
-
         if (n == 0) {
-
             return "";
         }
 
-
-        StringBuilder words =
-                new StringBuilder();
-
+        StringBuilder words = new StringBuilder();
 
         // -----------------------------------------------------
-        // CRORE
+        // 1. CRORE (1,00,00,000)
         // -----------------------------------------------------
-
         if (n / 10000000 > 0) {
-
-            words.append(
-                    convertToIndianFormat(
-                            n / 10000000
-                    )
-            ).append(
-                    " Crore "
-            );
-
-
+            words.append(convertToIndianFormat(n / 10000000))
+                 .append(" Crore ");
             n %= 10000000;
         }
 
-
         // -----------------------------------------------------
-        // LAKH
+        // 2. LAKH (1,00,000)
         // -----------------------------------------------------
-
         if (n / 100000 > 0) {
-
-            words.append(
-                    convertToIndianFormat(
-                            n / 100000
-                    )
-            ).append(
-                    " Lakh "
-            );
-
-
+            words.append(convertToIndianFormat(n / 100000))
+                 .append(" Lakh ");
             n %= 100000;
         }
 
+        // -----------------------------------------------------
+        // 3. THOUSAND (1,000) -- THIS WAS MISSING
+        // -----------------------------------------------------
+        if (n / 1000 > 0) {
+            words.append(convertToIndianFormat(n / 1000))
+                 .append(" Thousand ");
+            n %= 1000;
+        }
 
         // -----------------------------------------------------
-        // HUNDRED
+        // 4. HUNDRED (100)
         // -----------------------------------------------------
-
         if (n / 100 > 0) {
-
-            words.append(
-                    convertToIndianFormat(
-                            n / 100
-                    )
-            ).append(
-                    " Hundred "
-            );
-
-
+            words.append(convertToIndianFormat(n / 100))
+                 .append(" Hundred ");
             n %= 100;
         }
 
-
         // -----------------------------------------------------
-        // REMAINING NUMBER
+        // 5. REMAINING TENS & UNITS (under 100)
         // -----------------------------------------------------
-
         if (n > 0) {
-
             if (words.length() > 0) {
-
-                words.append(
-                        "and "
-                );
+                words.append("and ");
             }
 
-
             if (n < 20) {
-
-                words.append(
-                        units[(int) n]
-                );
-
+                words.append(units[(int) n]);
             } else {
-
-                words.append(
-                        tens[(int) (n / 10)]
-                );
-
+                words.append(tens[(int) (n / 10)]);
 
                 if (n % 10 > 0) {
-
-                    words.append(
-                            " "
-                    ).append(
-                            units[(int)
-                                    (n % 10)]
-                    );
+                    words.append(" ")
+                         .append(units[(int) (n % 10)]);
                 }
             }
         }
 
-
-        return words
-                .toString()
-                .trim();
+        return words.toString().trim();
     }
-
+    
 }

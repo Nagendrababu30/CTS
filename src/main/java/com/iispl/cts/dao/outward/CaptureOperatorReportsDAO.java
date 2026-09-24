@@ -45,9 +45,9 @@ public class CaptureOperatorReportsDAO {
                 + "WHERE created_by = ? "
         );
 
-        // -----------------------------------------------------
+        // =====================================================
         // FROM DATE
-        // -----------------------------------------------------
+        // =====================================================
 
         if (fromDate != null) {
 
@@ -56,23 +56,11 @@ public class CaptureOperatorReportsDAO {
             );
         }
 
-        // -----------------------------------------------------
+        // =====================================================
         // TO DATE
-        // -----------------------------------------------------
+        // =====================================================
 
         if (toDate != null) {
-
-            /*
-             * Use the beginning of the next day.
-             *
-             * Example:
-             * To Date = 20/09/2026
-             *
-             * Condition:
-             * created_at < 21/09/2026 00:00:00
-             *
-             * Therefore the complete 20/09/2026 is included.
-             */
 
             sql.append(
                     "AND created_at < ? "
@@ -95,18 +83,18 @@ public class CaptureOperatorReportsDAO {
 
             int parameterIndex = 1;
 
-            // -------------------------------------------------
-            // CURRENT CAPTURE OPERATOR
-            // -------------------------------------------------
+            // =================================================
+            // OPERATOR
+            // =================================================
 
             ps.setLong(
                     parameterIndex++,
                     operatorId
             );
 
-            // -------------------------------------------------
+            // =================================================
             // FROM DATE
-            // -------------------------------------------------
+            // =================================================
 
             if (fromDate != null) {
 
@@ -116,9 +104,9 @@ public class CaptureOperatorReportsDAO {
                 );
             }
 
-            // -------------------------------------------------
+            // =================================================
             // TO DATE
-            // -------------------------------------------------
+            // =================================================
 
             if (toDate != null) {
 
@@ -138,19 +126,11 @@ public class CaptureOperatorReportsDAO {
                     OutwardBatch batch =
                             new OutwardBatch();
 
-                    // -----------------------------------------
-                    // BATCH NUMBER
-                    // -----------------------------------------
-
                     batch.setBatchNumber(
                             rs.getString(
                                     "batch_number"
                             )
                     );
-
-                    // -----------------------------------------
-                    // BRANCH CODE
-                    // -----------------------------------------
 
                     batch.setBranchCode(
                             rs.getString(
@@ -158,29 +138,17 @@ public class CaptureOperatorReportsDAO {
                             )
                     );
 
-                    // -----------------------------------------
-                    // CHEQUE COUNT
-                    // -----------------------------------------
-
                     batch.setNumberOfCheques(
                             rs.getInt(
                                     "cheque_count"
                             )
                     );
 
-                    // -----------------------------------------
-                    // BATCH FOLDER
-                    // -----------------------------------------
-
                     batch.setBatchFolderPath(
                             rs.getString(
                                     "batch_folder_path"
                             )
                     );
-
-                    // -----------------------------------------
-                    // CREATED BY
-                    // -----------------------------------------
 
                     batch.setCreatedBy(
                             String.valueOf(
@@ -189,10 +157,6 @@ public class CaptureOperatorReportsDAO {
                                     )
                             )
                     );
-
-                    // -----------------------------------------
-                    // CREATED AT
-                    // -----------------------------------------
 
                     Timestamp timestamp =
                             rs.getTimestamp(
@@ -205,10 +169,6 @@ public class CaptureOperatorReportsDAO {
                                 timestamp.toLocalDateTime()
                         );
                     }
-
-                    // -----------------------------------------
-                    // BATCH STATUS
-                    // -----------------------------------------
 
                     batch.setBatchStatus(
                             rs.getString(
@@ -231,7 +191,6 @@ public class CaptureOperatorReportsDAO {
         return batches;
     }
 
-
     // =========================================================
     // SAVE DOWNLOAD HISTORY
     // =========================================================
@@ -241,6 +200,38 @@ public class CaptureOperatorReportsDAO {
             Date fromDate,
             Date toDate,
             String format) {
+
+        System.out.println(
+                "================================================="
+        );
+
+        System.out.println(
+                "SAVE DOWNLOAD HISTORY"
+        );
+
+        System.out.println(
+                "Operator ID : "
+                        + operatorId
+        );
+
+        System.out.println(
+                "From Date   : "
+                        + fromDate
+        );
+
+        System.out.println(
+                "To Date     : "
+                        + toDate
+        );
+
+        System.out.println(
+                "Format      : "
+                        + format
+        );
+
+        System.out.println(
+                "================================================="
+        );
 
         String sql =
                 "INSERT INTO capture_operator_download_history "
@@ -256,26 +247,34 @@ public class CaptureOperatorReportsDAO {
                         connection.prepareStatement(sql)
         ) {
 
-            // -------------------------------------------------
-            // CURRENT CAPTURE OPERATOR
-            // -------------------------------------------------
+            // =================================================
+            // OPERATOR ID
+            // =================================================
 
             ps.setLong(
                     1,
                     operatorId
             );
 
-            // -------------------------------------------------
+            // =================================================
             // FROM DATE
-            // -------------------------------------------------
+            // =================================================
 
             if (fromDate != null) {
 
-                ps.setDate(
-                        2,
+                java.sql.Date sqlFromDate =
                         new java.sql.Date(
                                 fromDate.getTime()
-                        )
+                        );
+
+                ps.setDate(
+                        2,
+                        sqlFromDate
+                );
+
+                System.out.println(
+                        "DB From Date : "
+                                + sqlFromDate
                 );
 
             } else {
@@ -284,19 +283,31 @@ public class CaptureOperatorReportsDAO {
                         2,
                         java.sql.Types.DATE
                 );
+
+                System.out.println(
+                        "DB From Date : NULL"
+                );
             }
 
-            // -------------------------------------------------
+            // =================================================
             // TO DATE
-            // -------------------------------------------------
+            // =================================================
 
             if (toDate != null) {
 
-                ps.setDate(
-                        3,
+                java.sql.Date sqlToDate =
                         new java.sql.Date(
                                 toDate.getTime()
-                        )
+                        );
+
+                ps.setDate(
+                        3,
+                        sqlToDate
+                );
+
+                System.out.println(
+                        "DB To Date   : "
+                                + sqlToDate
                 );
 
             } else {
@@ -305,20 +316,36 @@ public class CaptureOperatorReportsDAO {
                         3,
                         java.sql.Types.DATE
                 );
+
+                System.out.println(
+                        "DB To Date   : NULL"
+                );
             }
 
-            // -------------------------------------------------
+            // =================================================
             // FORMAT
-            // -------------------------------------------------
+            // =================================================
 
             ps.setString(
                     4,
                     format
             );
 
-            ps.executeUpdate();
+            // =================================================
+            // EXECUTE
+            // =================================================
+
+            int rows =
+                    ps.executeUpdate();
+
+            System.out.println(
+                    "History rows inserted : "
+                            + rows
+            );
 
         } catch (Exception e) {
+
+            e.printStackTrace();
 
             throw new RuntimeException(
                     "Unable to save download history.",
@@ -326,7 +353,6 @@ public class CaptureOperatorReportsDAO {
             );
         }
     }
-
 
     // =========================================================
     // GET DOWNLOAD HISTORY
@@ -356,10 +382,6 @@ public class CaptureOperatorReportsDAO {
                         connection.prepareStatement(sql)
         ) {
 
-            // -------------------------------------------------
-            // CURRENT CAPTURE OPERATOR
-            // -------------------------------------------------
-
             ps.setLong(
                     1,
                     operatorId
@@ -375,36 +397,36 @@ public class CaptureOperatorReportsDAO {
                     Object[] row =
                             new Object[4];
 
-                    // -----------------------------------------
+                    // =========================================
                     // DOWNLOAD DATE
-                    // -----------------------------------------
+                    // =========================================
 
                     row[0] =
                             rs.getTimestamp(
                                     "download_date"
                             );
 
-                    // -----------------------------------------
+                    // =========================================
                     // FROM DATE
-                    // -----------------------------------------
+                    // =========================================
 
                     row[1] =
                             rs.getDate(
                                     "from_date"
                             );
 
-                    // -----------------------------------------
+                    // =========================================
                     // TO DATE
-                    // -----------------------------------------
+                    // =========================================
 
                     row[2] =
                             rs.getDate(
                                     "to_date"
                             );
 
-                    // -----------------------------------------
+                    // =========================================
                     // FORMAT
-                    // -----------------------------------------
+                    // =========================================
 
                     row[3] =
                             rs.getString(
@@ -425,7 +447,6 @@ public class CaptureOperatorReportsDAO {
 
         return history;
     }
-
 
     // =========================================================
     // START OF DAY
@@ -463,7 +484,6 @@ public class CaptureOperatorReportsDAO {
                 calendar.getTimeInMillis()
         );
     }
-
 
     // =========================================================
     // START OF NEXT DAY

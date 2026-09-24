@@ -1,8 +1,9 @@
 package com.cts.admin.controller;
 
 import java.util.HashMap;
-import java.util.Map;
 
+import java.util.Map;
+import org.zkoss.zk.ui.util.Composer;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Execution;
 import org.zkoss.zk.ui.Executions;
@@ -38,34 +39,22 @@ public class AuthorizationComposer extends GenericForwardComposer<Component> {
 
 		PAGE_PERMISSIONS.put("/zul/inward-maker/dashboard.zul", "Inward Maker");
 
-		/*
-		 * MICR Repair queue page.
-		 *
-		 * This was missing previously and caused:
-		 *
-		 * /zul/inward-maker/micr-repair-list.zul ↓ Access Denied
-		 */
+		// MICR Repair queue page.		 *
 		
 		PAGE_PERMISSIONS.put("/zul/inward-maker/micr-repair-l+ist.zul", "Inward Maker");
 
-		/*
-		 * MICR Repair detail page.
-		 */
+		 // MICR Repair detail page.
 
 		PAGE_PERMISSIONS.put("/zul/inward-maker/micr-repair-list.zul", "Inward Maker");
 
 		PAGE_PERMISSIONS.put("/zul/inward-maker/micr-repair.zul", "Inward Maker");
 
-		/*
-		 * Data Entry page.
-		 */
+		 // Data Entry page.
+		
 		PAGE_PERMISSIONS.put("/zul/inward-maker/data-entry.zul", "Inward Maker");
+		
 		PAGE_PERMISSIONS.put("/zul/inward-maker/data-entryform.zul", "Inward Maker");
-
-		/*
-		 * These pages can remain protected if they still exist, but they are no longer
-		 * displayed in the Maker sidebar.
-		 */
+		 
 		PAGE_PERMISSIONS.put("/zul/inward-maker/send-to-checker.zul", "Inward Maker");
 
 		PAGE_PERMISSIONS.put("/zul/inward-maker/reports.zul", "Inward Maker");
@@ -100,6 +89,7 @@ public class AuthorizationComposer extends GenericForwardComposer<Component> {
 			    "/zul/outward/outward-maker/outward-clearing-session-wait.zul",
 			    "Capture Operator"
 			);
+			
 		// CAPTURE OPERATOR
 
 		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/capture-operator-batch-capture.zul", "Capture Operator");
@@ -116,7 +106,6 @@ public class AuthorizationComposer extends GenericForwardComposer<Component> {
 
 		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-send-to-checker.zul", "Outward Maker");
 
-		// OUTWARD CHECKER
 
 		// OUTWARD CHECKER PAGES
 

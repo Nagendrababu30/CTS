@@ -2,9 +2,11 @@
 package com.cts.admin.controller;
 
 import java.sql.Timestamp;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
 
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
@@ -39,8 +41,6 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 
 	private static final java.util.TimeZone IST = java.util.TimeZone.getTimeZone("Asia/Kolkata");
 
-	// ZUL COMPONENTS
-
 	private Listbox auditLogListbox;
 
 	private Paging auditLogPaging;
@@ -57,7 +57,6 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 
 	private Button auditDownloadPdfButton;
 
-	// SERVICES
 
 	private AuditLogService auditLogService;
 
@@ -65,7 +64,6 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 
 	private AuditLogReportService auditLogReportService;
 
-	// INIT
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
@@ -124,10 +122,7 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 			}
 		});
 
-		// ============================================================
 		// ROLE FILTER
-		// ============================================================
-
 		auditRoleCombobox.addEventListener("onSelect", new EventListener<Event>() {
 
 			@Override
@@ -137,10 +132,7 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 			}
 		});
 
-		// ============================================================
 		// FROM DATE FILTER
-		// ============================================================
-
 		auditFromDate.addEventListener("onChange", new EventListener<Event>() {
 
 			@Override

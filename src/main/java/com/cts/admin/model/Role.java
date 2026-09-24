@@ -5,48 +5,78 @@ import java.sql.Timestamp;
 
 public class Role implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    private Long      roleId;
-    private String    roleName;
-    private String    description;
-    private String    status;
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
+	private Long roleId;
+	private String roleName;
+	private String description;
+	private String status;
+	private Timestamp createdAt;
+	private Timestamp updatedAt;
 
-    public Role() {}
+	public Role() {
+	}
 
-    public Role(Long roleId, String roleName, String description,
-                String status, Timestamp createdAt, Timestamp updatedAt) {
-        this.roleId      = roleId;
-        this.roleName    = roleName;
-        this.description = description;
-        this.status      = status;
-        this.createdAt   = createdAt;
-        this.updatedAt   = updatedAt;
-    }
+	public Role(Long roleId, String roleName, String description, String status, Timestamp createdAt,
+			Timestamp updatedAt) {
+		this.roleId = roleId;
+		this.roleName = roleName;
+		this.description = description;
+		this.status = status;
+		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
+	}
 
-    public Long      getRoleId()                        { return roleId; }
-    public void      setRoleId(Long roleId)             { this.roleId = roleId; }
+	public Long getRoleId() {
+		return roleId;
+	}
 
-    public String    getRoleName()                      { return roleName; }
-    public void      setRoleName(String roleName)       { this.roleName = roleName; }
+	public void setRoleId(Long roleId) {
+		this.roleId = roleId;
+	}
 
-    public String    getDescription()                   { return description; }
-    public void      setDescription(String description) { this.description = description; }
+	public String getRoleName() {
+		return roleName;
+	}
 
-    public String    getStatus()                        { return status; }
-    public void      setStatus(String status)           { this.status = status; }
+	public void setRoleName(String roleName) {
+		this.roleName = roleName;
+	}
 
-    public Timestamp getCreatedAt()                     { return createdAt; }
-    public void      setCreatedAt(Timestamp createdAt)  { this.createdAt = createdAt; }
+	public String getDescription() {
+		return description;
+	}
 
-    public Timestamp getUpdatedAt()                     { return updatedAt; }
-    public void      setUpdatedAt(Timestamp updatedAt)  { this.updatedAt = updatedAt; }
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
-    @Override
-    public String toString() {
-        return "Role [roleId=" + roleId + ", roleName=" + roleName
-                + ", status=" + status + "]";
-    }
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public Timestamp getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(Timestamp createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public Timestamp getUpdatedAt() {
+		return updatedAt;
+	}
+
+	public void setUpdatedAt(Timestamp updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+
+	@Override
+	public String toString() {
+		return "Role [roleId=" + roleId + ", roleName=" + roleName + ", status=" + status + "]";
+	}
 }

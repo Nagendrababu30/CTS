@@ -6,13 +6,13 @@ import com.cts.admin.model.Role;
 
 public interface RoleService {
 
-    List<Role> getAllRoles();
+	List<Role> getAllRoles();
 
-    Role getRoleById(Long roleId);
+	Role getRoleById(Long roleId);
 
-    boolean createRole(Role role);
+	boolean createRole(Role role);
 
-    boolean updateRole(Role role);
+	boolean updateRole(Role role);
 
-    boolean updateRoleStatus(Long roleId, String status);
+	boolean updateRoleStatus(Long roleId, String status);
 }

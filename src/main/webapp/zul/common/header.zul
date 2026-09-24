@@ -29,6 +29,10 @@
             spacing="25px"
             valign="middle">
 
+            <!-- =========================
+                 DATE
+            ========================== -->
+
             <hlayout
                 spacing="6px"
                 valign="middle">
@@ -47,6 +51,11 @@
                     sclass="header-meta-val"/>
 
             </hlayout>
+
+
+            <!-- =========================
+                 LAST LOGIN
+            ========================== -->
 
             <hlayout
                 spacing="6px"
@@ -67,6 +76,11 @@
 
             </hlayout>
 
+
+            <!-- =========================
+                 USER
+            ========================== -->
+
             <hlayout
                 spacing="6px"
                 valign="middle">
@@ -86,9 +100,27 @@
 
             </hlayout>
 
+
+            <!-- =========================
+                 SESSION
+                 
+                 SHOW ONLY FOR:
+                 - Outward Maker
+                 - Outward Checker
+                 - Capture Operator
+                 
+                 HIDDEN FOR:
+                 - Admin
+                 - Inward Maker
+                 - Inward Checker
+            ========================== -->
+
             <hlayout
                 spacing="6px"
-                valign="middle">
+                valign="middle"
+                visible="${sessionScope.roleName eq 'Outward Maker'
+                          or sessionScope.roleName eq 'Outward Checker'
+                          or sessionScope.roleName eq 'Capture Operator'}">
 
                 <n:i
                     class="fa-solid fa-circle header-icon-meta">
@@ -105,6 +137,11 @@
 
             </hlayout>
 
+
+            <!-- =========================
+                 USER ICON
+            ========================== -->
+
             <div
                 id="userWrapper"
                 sclass="user-wrapper">
@@ -114,6 +151,11 @@
                 </n:i>
 
             </div>
+
+
+            <!-- =========================
+                 LOGOUT POPUP
+            ========================== -->
 
             <popup
                 id="logoutPopup"

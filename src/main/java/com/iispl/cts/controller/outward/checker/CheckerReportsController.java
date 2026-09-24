@@ -38,6 +38,10 @@ public class CheckerReportsController
     
     private SessionService sessionService;
 
+    // ================================================================
+    // INIT
+    // ================================================================
+
     @Override
     public void doAfterCompose(Component component)
             throws Exception {
@@ -93,18 +97,23 @@ public class CheckerReportsController
          * .plugins\org.eclipse.wst.server.core\tmp1\
          * wtpwebapps\CTS_OUTWARD
          */
-        String deployedPath = Executions.getCurrent()
-                .getDesktop()
-                .getWebApp()
-                .getRealPath("/");
+
+        String deployedPath =
+                Executions.getCurrent()
+                        .getDesktop()
+                        .getWebApp()
+                        .getRealPath("/");
 
         if (deployedPath == null) {
+
             throw new Exception(
                     "Unable to determine deployed application path.");
         }
 
         Path deployedRoot =
-                Paths.get(deployedPath).toAbsolutePath().normalize();
+                Paths.get(deployedPath)
+                        .toAbsolutePath()
+                        .normalize();
 
         System.out.println();
         System.out.println("========================================");
@@ -146,6 +155,7 @@ public class CheckerReportsController
         }
 
         if (workspaceRoot == null) {
+
             throw new Exception(
                     "Unable to locate Eclipse workspace.");
         }
@@ -156,10 +166,12 @@ public class CheckerReportsController
         /*
          * Get project name from deployed application.
          */
+
         Path projectNamePath =
                 deployedRoot.getFileName();
 
         if (projectNamePath == null) {
+
             throw new Exception(
                     "Unable to determine project name.");
         }
@@ -175,6 +187,7 @@ public class CheckerReportsController
          *
          * <workspace>\<project>
          */
+
         Path projectRoot =
                 workspaceRoot.resolve(projectName);
 
@@ -193,6 +206,7 @@ public class CheckerReportsController
          *             \Archive
          *               \<folderName>
          */
+
         Path archiveDirectory =
                 projectRoot.resolve(
                         Paths.get(
@@ -421,6 +435,7 @@ public class CheckerReportsController
 
             String fileName =
                     batchNumber + "_valid.xml";
+
             System.out.println(
                     "File name:");
 
@@ -1038,6 +1053,13 @@ public class CheckerReportsController
                 .append(
                         "</ChequeStatus>\n");
 
+        // ============================================================
+        // REJECTED CHEQUE INFORMATION
+        //
+        // return_reason_id and checker_remarks are loaded from
+        // cheque_processing by CheckerReportsDAO.
+        // ============================================================
+
         if (rejected) {
 
             xml.append(
@@ -1068,6 +1090,7 @@ public class CheckerReportsController
     private String xmlValue(Object value) {
 
         if (value == null) {
+
             return "";
         }
 

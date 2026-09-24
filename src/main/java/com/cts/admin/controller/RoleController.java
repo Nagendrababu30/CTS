@@ -60,21 +60,21 @@ public class RoleController extends GenericForwardComposer<Component> {
 
 				Listitem item = new Listitem();
 
-				/* ── Role Name ── */
+				// Role Name
 				Listcell nameCell = new Listcell();
 				Label nameLabel = new Label(role.getRoleName());
 				nameLabel.setSclass("role-name-label");
 				nameCell.appendChild(nameLabel);
 				item.appendChild(nameCell);
 
-				/* ── Description ── */
+				// Description
 				Listcell descCell = new Listcell();
 				Label descLabel = new Label(role.getDescription() == null ? "-" : role.getDescription());
 				descLabel.setSclass("role-description-label");
 				descCell.appendChild(descLabel);
 				item.appendChild(descCell);
 
-				/* ── Status badge ── */
+				// Status badge
 				Listcell statusCell = new Listcell();
 				Hbox badge = new Hbox();
 				boolean isActive = "ACTIVE".equalsIgnoreCase(role.getStatus());
@@ -87,7 +87,7 @@ public class RoleController extends GenericForwardComposer<Component> {
 				statusCell.appendChild(badge);
 				item.appendChild(statusCell);
 
-				/* ── Actions ── */
+				// Actions
 				Listcell actionCell = new Listcell();
 				actionCell.setSclass("role-action-cell");
 
@@ -133,7 +133,7 @@ public class RoleController extends GenericForwardComposer<Component> {
 		mainBox.setHflex("1");
 		mainBox.setSclass("role-modal-main-box");
 
-		/* ── Header ── */
+		// Header
 		Div headerDiv = new Div();
 		headerDiv.setHflex("1");
 		headerDiv.setSclass("role-modal-header");
@@ -158,7 +158,7 @@ public class RoleController extends GenericForwardComposer<Component> {
 		headerLeftDiv.appendChild(iconDiv);
 		headerLeftDiv.appendChild(titleTextDiv);
 
-		/* Close button */
+		//Close button
 		Button closeBtn = new Button("✕");
 		closeBtn.setSclass("role-modal-close-button");
 		closeBtn.addEventListener("onClick", new EventListener<Event>() {
@@ -172,13 +172,13 @@ public class RoleController extends GenericForwardComposer<Component> {
 		headerDiv.appendChild(closeBtn);
 		mainBox.appendChild(headerDiv);
 
-		/* ── Form ── */
+		// Form
 		Vbox formBox = new Vbox();
 		formBox.setSpacing("16px");
 		formBox.setHflex("1");
 		formBox.setSclass("role-form-box");
 
-		/* Role Name Field */
+		//Role Name Field
 		Label roleNameLabelField = new Label("Role Name");
 		roleNameLabelField.setSclass("role-form-label");
 
@@ -194,7 +194,7 @@ public class RoleController extends GenericForwardComposer<Component> {
 		roleNameFieldBox.appendChild(roleNameInput);
 		formBox.appendChild(roleNameFieldBox);
 
-		/* Description Field */
+		//Description Field
 		Label descriptionLabelField = new Label("Description");
 		descriptionLabelField.setSclass("role-form-label");
 
@@ -214,7 +214,7 @@ public class RoleController extends GenericForwardComposer<Component> {
 
 		mainBox.appendChild(formBox);
 
-		/* ── Footer ── */
+		//Footer
 		Div footerDiv = new Div();
 		footerDiv.setSclass("role-modal-footer");
 

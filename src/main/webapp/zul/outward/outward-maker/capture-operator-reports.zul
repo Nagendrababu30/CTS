@@ -18,16 +18,24 @@
         self="@define(content)"
         width="100%"
         height="100%"
-        sclass="reports-page">
+        sclass="reports-page"
+        style="overflow:visible;">
 
         <vlayout
             apply="com.iispl.cts.controller.outward.CaptureOperatorReportsController"
             width="100%"
             height="100%"
             spacing="0px"
-            sclass="reports-content">
+            sclass="reports-content"
+            style="overflow:visible;">
 
-            <div sclass="reports-header">
+            <!-- =========================
+                 PAGE HEADER
+            ========================== -->
+
+            <div
+                sclass="reports-header"
+                style="overflow:visible;">
 
                 <label
                     value="Batch Capture Reports"
@@ -35,9 +43,18 @@
 
             </div>
 
-            <div sclass="reports-card">
 
-                <div sclass="reports-card-title">
+            <!-- =========================
+                 EXPORT REPORT CARD
+            ========================== -->
+
+            <div
+                sclass="reports-card"
+                style="overflow:visible;">
+
+                <div
+                    sclass="reports-card-title"
+                    style="overflow:visible;">
 
                     <div sclass="reports-section-line"/>
 
@@ -47,44 +64,66 @@
 
                 </div>
 
+
+                <!-- =========================
+                     FILTER ROW
+                ========================== -->
+
                 <hlayout
                     width="100%"
                     spacing="18px"
-                    sclass="reports-filter-row">
+                    sclass="reports-filter-row"
+                    style="overflow:visible;">
+
+                    <!-- =========================
+                         FROM DATE
+                    ========================== -->
 
                     <vlayout
                         width="220px"
-                        spacing="5px">
+                        spacing="5px"
+                        style="overflow:visible;">
 
                         <label
                             value="From Date"
                             sclass="reports-field-label"/>
 
-                        <datebox
+                        <textbox
                             id="fromDate"
                             width="100%"
-                            format="dd/MM/yyyy"
+                            height="36px"
                             placeholder="DD/MM/YYYY"
                             sclass="reports-datebox"/>
 
                     </vlayout>
 
+
+                    <!-- =========================
+                         TO DATE
+                    ========================== -->
+
                     <vlayout
                         width="220px"
-                        spacing="5px">
+                        spacing="5px"
+                        style="overflow:visible;">
 
                         <label
                             value="To Date"
                             sclass="reports-field-label"/>
 
-                        <datebox
+                        <textbox
                             id="toDate"
                             width="100%"
-                            format="dd/MM/yyyy"
+                            height="36px"
                             placeholder="DD/MM/YYYY"
                             sclass="reports-datebox"/>
 
                     </vlayout>
+
+
+                    <!-- =========================
+                         EXPORT FORMAT
+                    ========================== -->
 
                     <vlayout
                         width="180px"
@@ -113,14 +152,17 @@
 
                     </vlayout>
 
+
+                    <!-- =========================
+                         SPACE
+                    ========================== -->
+
                     <div hflex="1"/>
 
-                    <button
-                        id="viewDataButton"
-                        label="View Data"
-                        width="95px"
-                        height="36px"
-                        sclass="reports-view-button"/>
+
+                    <!-- =========================
+                         EXPORT BUTTON
+                    ========================== -->
 
                     <button
                         id="exportButton"
@@ -131,16 +173,28 @@
 
                 </hlayout>
 
+
+                <!-- =========================
+                     DATE HINT
+                ========================== -->
+
                 <label
-                    value="From Date and To Date are optional."
+                    value="From Date and To Date are optional. Format: DD/MM/YYYY"
                     sclass="reports-hint"/>
 
             </div>
 
-            <div
-                sclass="reports-history-card">
 
-                <div sclass="reports-card-title">
+            <!-- =========================
+                 DOWNLOAD HISTORY CARD
+            ========================== -->
+
+            <div
+                sclass="reports-history-card"
+                style="overflow:visible;">
+
+                <div
+                    sclass="reports-card-title">
 
                     <div sclass="reports-section-line"/>
 
@@ -150,15 +204,22 @@
 
                 </div>
 
+
+                <!-- =========================
+                     HISTORY TABLE
+                ========================== -->
+
                 <div
                     sclass="reports-history-table-container"
-                    vflex="min">
+                    vflex="min"
+                    style="overflow:visible;">
 
                     <listbox
                         id="downloadHistoryList"
                         width="100%"
                         height="auto"
                         vflex="min"
+                        mold="paging"
                         emptyMessage="No download history available."
                         sclass="reports-history-listbox">
 
@@ -169,28 +230,22 @@
 
                             <listheader
                                 label="Download Date"
-                                width="22%"
+                                width="25%"
                                 sclass="reports-listheader"/>
 
                             <listheader
                                 label="From Date"
-                                width="18%"
+                                width="25%"
                                 sclass="reports-listheader"/>
 
                             <listheader
                                 label="To Date"
-                                width="18%"
+                                width="25%"
                                 sclass="reports-listheader"/>
 
                             <listheader
                                 label="Format"
-                                width="15%"
-                                align="center"
-                                sclass="reports-listheader"/>
-
-                            <listheader
-                                label="Action"
-                                width="27%"
+                                width="25%"
                                 align="center"
                                 sclass="reports-listheader"/>
 
@@ -198,15 +253,26 @@
 
                     </listbox>
 
+
+                    <!-- =========================
+                         PAGINATION
+                    ========================== -->
+
                     <paging
                         id="historyPaging"
-                        pageSize="10"
+                        pageSize="5"
                         detailed="false"
                         sclass="reports-history-paging"/>
 
                 </div>
 
-                <div sclass="reports-record-footer">
+
+                <!-- =========================
+                     RECORD COUNT
+                ========================== -->
+
+                <div
+                    sclass="reports-record-footer">
 
                     <label
                         id="historyCountLabel"

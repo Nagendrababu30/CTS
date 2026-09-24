@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?page title="Outward Maker Dashboard"
+    contentType="text/html;charset=UTF-8"?>
+
 <?init class="com.cts.admin.controller.LayoutInit"
-        pageTitle="Outward Maker Dashboard"
-        active="dashboard"?>
+    pageTitle="Outward Maker Dashboard"
+    active="dashboard"?>
 
 <?init class="org.zkoss.zk.ui.util.Composition"
-        arg0="/zul/common/layout.zul"?>
+    arg0="/zul/common/layout.zul"?>
 
 <zk>
 
     <style src="/css/outward/maker/dashboard.css"/>
+
 
     <!-- =========================================================
          CONTENT FOR COMMON LAYOUT
@@ -21,9 +25,6 @@
         height="100%"
         sclass="outward-dashboard-content">
 
-        <!-- =====================================================
-             OUTWARD MAKER DASHBOARD
-             ===================================================== -->
 
         <vlayout
             apply="com.iispl.cts.controller.outward.OutwardMakerDashboardController"
@@ -31,9 +32,10 @@
             sclass="outward-dashboard-layout"
             hflex="1">
 
-            <!-- =================================================
+
+            <!-- =====================================================
                  PAGE TITLE
-                 ================================================= -->
+                 ===================================================== -->
 
             <label
                 value="Outward Maker Dashboard"
@@ -44,13 +46,14 @@
                 "/>
 
 
-            <!-- =================================================
+            <!-- =====================================================
                  SUMMARY CARDS
-                 ================================================= -->
+                 ===================================================== -->
 
             <hlayout
                 spacing="20px"
                 width="100%">
+
 
                 <!-- =============================================
                      PENDING DATA ENTRY
@@ -204,6 +207,7 @@
                 spacing="0"
                 width="100%">
 
+
                 <!-- =============================================
                      TABLE HEADER
                      ============================================= -->
@@ -218,6 +222,7 @@
                         sclass="table-title"/>
 
                     <space hflex="1"/>
+
 
                     <label
                         value="Filter Status:"
@@ -256,7 +261,6 @@
 
                     <!-- =========================================
                          RE-VERIFY BATCHES FILTER
-                         ADDED ONLY
                          ========================================= -->
 
                     <button
@@ -283,6 +287,7 @@
                         border-radius:6px;
                     ">
 
+
                     <!-- =========================================
                          COLUMNS
                          ========================================= -->
@@ -291,26 +296,26 @@
 
                         <listheader
                             label="Batch ID"
-                            width="30%"/>
+                            width="27%"/>
 
                         <listheader
                             label="Total Cheques"
-                            width="20%"
+                            width="15%"
                             align="center"/>
 
                         <listheader
                             label="Status"
-                            width="25%"
+                            width="23%"
                             align="center"/>
 
                         <listheader
                             label="Action"
-                            width="17%"
+                            width="20%"
                             align="center"/>
 
                         <listheader
                             label="Assignment"
-                            width="18%"
+                            width="15%"
                             align="center"/>
 
                     </listhead>

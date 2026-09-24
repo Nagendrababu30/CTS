@@ -305,6 +305,24 @@ public class CheckerDashboardController
         }
 
 
+        /*
+         * Update Summary Card counts so they always match the loaded batches
+         */
+        int availCount = 0;
+        int myCount = 0;
+        for (CheckerBatch b : batches) {
+            if (isAvailable(b)) {
+                availCount++;
+            }
+            if (isLockedByCurrentUser(b)) {
+                myCount++;
+            }
+        }
+        receivedCount.setValue(String.valueOf(batches.size()));
+        availableCount.setValue(String.valueOf(availCount));
+        myBatchCount.setValue(String.valueOf(myCount));
+
+
         filteredBatches =
                 new ArrayList<>();
 
@@ -395,7 +413,10 @@ public class CheckerDashboardController
 
 
         return "ON_HOLD".equalsIgnoreCase(
-                batch.getBatchStatus());
+                batch.getBatchStatus())
+                || "RETURN_TO_MAKER".equalsIgnoreCase(
+                        batch.getBatchStatus())
+                || batch.isReVerify();
     }
 
 
@@ -585,7 +606,7 @@ public class CheckerDashboardController
                     "On Hold");
 
             statusLabel.setSclass(
-                    "status-badge");
+                    "status-badge badge-micr-repair");
         }
 
 

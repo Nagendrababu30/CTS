@@ -481,16 +481,20 @@ private OutwardMakerDashboardService service;
 
             Button openButton = new Button("Open");
 
-            openButton.setWidth("75px");
-            openButton.setHeight("32px");
+            openButton.setHeight("36px");
 
             openButton.setStyle(
-                    "background:#12B76A;"
-                            + "color:white;"
-                            + "border:none;"
-                            + "border-radius:5px;"
-                            + "font-weight:bold;"
-                            + "cursor:pointer;"
+                    "background:#175CD3;"
+                    + "color:#FFFFFF;"
+                    + "border:1px solid #175CD3;"
+                    + "border-radius:6px;"
+                    + "font-family:'Inter','Segoe UI',Arial,sans-serif;"
+                    + "font-size:13px;"
+                    + "font-weight:600;"
+                    + "line-height:1;"
+                    + "cursor:pointer;"
+                    + "padding:0 14px;"
+                    + "white-space:nowrap;"
             );
 
             openButton.addEventListener(
@@ -500,19 +504,22 @@ private OutwardMakerDashboardService service;
                     )
             );
 
-            Button releaseButton = new Button("Release Lock");
+Button releaseButton = new Button("Release");
 
-            releaseButton.setWidth("105px");
-            releaseButton.setHeight("32px");
+releaseButton.setWidth("65px");
+releaseButton.setHeight("36px");
 
-            releaseButton.setStyle(
-                    "background:#F04438;"
-                            + "color:white;"
-                            + "border:none;"
-                            + "border-radius:5px;"
-                            + "font-weight:bold;"
-                            + "cursor:pointer;"
-            );
+releaseButton.setStyle(
+        "background:#175CD3;"
+        + "color:#FFFFFF;"
+        + "border:1px solid #175CD3;"
+        + "border-radius:6px;"
+        + "font-family:'Inter','Segoe UI',Arial,sans-serif;"
+        + "font-size:13px;"
+        + "font-weight:600;"
+        + "line-height:1;"
+        + "cursor:pointer;"
+);
 
             releaseButton.addEventListener(
                     Events.ON_CLICK,

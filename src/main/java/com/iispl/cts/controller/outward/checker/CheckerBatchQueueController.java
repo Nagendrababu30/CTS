@@ -512,6 +512,8 @@ public class CheckerBatchQueueController extends SelectorComposer<Vlayout> {
                             + "No RE_VERIFIED cheque found for checker "
                             + checkerUserId
                             + " in batch "
+              
+                            
                             + batchNumber);
 
                     return;

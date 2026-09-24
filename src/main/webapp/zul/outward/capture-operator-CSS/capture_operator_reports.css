@@ -1,3 +1,7 @@
+/* =====================================================
+   REPORTS PAGE
+   ===================================================== */
+
 .reports-page {
     width: 100%;
     height: 100%;
@@ -6,6 +10,11 @@
     overflow: visible !important;
 }
 
+
+/* =====================================================
+   REPORTS CONTENT
+   ===================================================== */
+
 .reports-content {
     width: 100%;
     min-height: 100%;
@@ -13,6 +22,11 @@
     padding: 18px 22px 24px 22px;
     overflow: visible !important;
 }
+
+
+/* =====================================================
+   PAGE HEADER
+   ===================================================== */
 
 .reports-header {
     width: 100%;
@@ -32,6 +46,11 @@
     padding-top: 1px;
 }
 
+
+/* =====================================================
+   EXPORT REPORT CARD
+   ===================================================== */
+
 .reports-card {
     width: 100%;
     box-sizing: border-box;
@@ -42,9 +61,14 @@
     margin-bottom: 16px;
     box-shadow: 0 1px 3px rgba(31, 55, 80, 0.08);
     position: relative;
-    z-index: 1;
+    z-index: 10;
     overflow: visible !important;
 }
+
+
+/* =====================================================
+   CARD TITLE
+   ===================================================== */
 
 .reports-card-title {
     width: 100%;
@@ -68,14 +92,24 @@
     color: #173b73;
 }
 
+
+/* =====================================================
+   FILTER ROW
+   ===================================================== */
+
 .reports-filter-row {
     width: 100%;
     display: flex;
     align-items: flex-end;
     position: relative;
-    z-index: 2;
+    z-index: 20;
     overflow: visible !important;
 }
+
+
+/* =====================================================
+   FIELD LABEL
+   ===================================================== */
 
 .reports-field-label {
     font-family: Arial, sans-serif;
@@ -84,102 +118,232 @@
     color: #334155;
 }
 
+
+/* =====================================================
+   DATE TEXTBOX
+   ===================================================== */
+
 .reports-datebox {
+    width: 100%;
     height: 36px;
     box-sizing: border-box;
+
     border: 1px solid #b9c7dc;
     border-radius: 4px;
+
     background: #ffffff;
+
     font-family: Arial, sans-serif;
     font-size: 12px;
+    color: #334155;
+
+    padding: 7px 10px;
+
+    outline: none;
 }
+
+
+/* =====================================================
+   DATE TEXTBOX FOCUS
+   ===================================================== */
+
+.reports-datebox:focus {
+    border: 1px solid #2166d1;
+    box-shadow: 0 0 0 1px rgba(33, 102, 209, 0.15);
+}
+
+
+/* =====================================================
+   DATE TEXTBOX PLACEHOLDER
+   ===================================================== */
+
+.reports-datebox::placeholder {
+    color: #9aa7b8;
+    opacity: 1;
+}
+
+
+/* =====================================================
+   COMBOBOX
+   ===================================================== */
 
 .reports-combobox {
     height: 36px;
     box-sizing: border-box;
+
     border: 1px solid #b9c7dc;
     border-radius: 4px;
+
     background: #ffffff;
+
     font-family: Arial, sans-serif;
     font-size: 12px;
 }
 
-.reports-view-button {
-    background: #ffffff;
-    color: #2166d1;
-    border: 1px solid #2166d1;
-    border-radius: 4px;
-    font-family: Arial, sans-serif;
-    font-size: 11px;
-    font-weight: 600;
-    cursor: pointer;
-}
 
-.reports-view-button:hover {
-    background: #eef5ff;
-}
+/* =====================================================
+   EXPORT BUTTON
+   ===================================================== */
 
 .reports-export-button {
     background: #2166d1;
     color: #ffffff;
+
     border: 1px solid #2166d1;
     border-radius: 4px;
+
     font-family: Arial, sans-serif;
     font-size: 11px;
     font-weight: 600;
+
     cursor: pointer;
 }
+
+
+/* =====================================================
+   EXPORT BUTTON HOVER
+   ===================================================== */
 
 .reports-export-button:hover {
     background: #1557b8;
 }
 
+
+/* =====================================================
+   EXPORT BUTTON ACTIVE
+   ===================================================== */
+
+.reports-export-button:active {
+    background: #104a9e;
+}
+
+
+/* =====================================================
+   HINT
+   ===================================================== */
+
 .reports-hint {
     display: block;
     margin-top: 12px;
+
     font-family: Arial, sans-serif;
     font-size: 10px;
     color: #718096;
 }
 
+
+/* =====================================================
+   DOWNLOAD HISTORY CARD
+   ===================================================== */
+
 .reports-history-card {
     width: 100%;
     box-sizing: border-box;
+
     background: #ffffff;
+
     border: 1px solid #d5deec;
     border-radius: 6px;
+
     padding: 15px 16px 8px 16px;
+
     box-shadow: 0 1px 3px rgba(31, 55, 80, 0.08);
+
     position: relative;
     z-index: 1;
+
     overflow: visible !important;
 }
+
+
+/* =====================================================
+   HISTORY TABLE CONTAINER
+   ===================================================== */
 
 .reports-history-table-container {
     width: 100%;
     box-sizing: border-box;
+
+    position: relative;
+    z-index: 1;
+
     overflow: visible !important;
 }
 
+
+/* =====================================================
+   HISTORY LISTBOX
+   ===================================================== */
+
 .reports-history-listbox {
     width: 100%;
+
     border: 1px solid #d4dce8;
+
     box-sizing: border-box;
+
     background: #ffffff;
 }
+
+
+/* =====================================================
+   LIST HEADER
+   ===================================================== */
 
 .reports-listhead {
     background: #2166d1;
 }
 
+
+/* =====================================================
+   LIST HEADER CELLS
+   ===================================================== */
+
 .reports-listheader {
     background: #2166d1;
+
     color: #ffffff;
+
     border-right: 1px solid #4a82d6;
+
     font-family: Arial, sans-serif;
     font-size: 11px;
     font-weight: 600;
 }
+
+
+/* =====================================================
+   HISTORY ROWS
+   ===================================================== */
+
+.reports-history-listbox .z-listitem {
+    background: #ffffff;
+}
+
+
+/* =====================================================
+   HISTORY ROW HOVER
+   ===================================================== */
+
+.reports-history-listbox .z-listitem:hover {
+    background: #f4f8fd;
+}
+
+
+/* =====================================================
+   HISTORY CELL
+   ===================================================== */
+
+.reports-history-listbox .z-listcell {
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    color: #1f2937;
+}
+
+
+/* =====================================================
+   PAGINATION
+   ===================================================== */
 
 .reports-history-paging {
     width: 100%;
@@ -187,15 +351,28 @@
     box-sizing: border-box;
 }
 
+
+/* =====================================================
+   RECORD FOOTER
+   ===================================================== */
+
 .reports-record-footer {
     width: 100%;
     height: 25px;
+
     box-sizing: border-box;
+
     display: flex;
     justify-content: flex-end;
     align-items: center;
+
     padding-right: 4px;
 }
+
+
+/* =====================================================
+   RECORD COUNT
+   ===================================================== */
 
 .reports-record-count {
     font-family: Arial, sans-serif;

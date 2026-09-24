@@ -1,6 +1,6 @@
 .checker-processing-page{width:100% !important;height:100% !important;margin:0 !important;padding:0 !important;overflow:hidden !important;background:#f2f6fb !important;color:#10233f !important;font-family:"Inter","Segoe UI",Arial,sans-serif !important;font-size:13px !important;box-sizing:border-box !important;}
 
-.checker-processing-page *,.checker-processing-page *::before,.checker-processing-page *::after{box-sizing:border-box !important;}
+.checker-processing-page ,.checker-processing-page::before,.checker-processing-page::after{box-sizing:border-box !important;}
 
 .checker-processing-page .z-vlayout{min-width:0 !important;min-height:0 !important;}
 
@@ -14,19 +14,27 @@
 
 .checker-processing-page #processingPage>.z-vlayout-inner{padding:0 !important;}
 
-.checker-processing-page .batch-summary-bar{width:calc(100% - 34px) !important;height:54px !important;min-height:54px !important;max-height:54px !important;margin:14px 17px 0 17px !important;padding:7px 16px !important;background:#ffffff !important;border:1px solid #d7e1eb !important;border-radius:14px !important;box-shadow:0 2px 8px rgba(20,50,80,0.07) !important;overflow:hidden !important;box-sizing:border-box !important;}
+.checker-processing-page .batch-summary-bar{width:calc(100% - 34px) !important;height:54px !important;min-height:54px !important;max-height:54px !important;margin:14px 17px 0 17px !important;padding:7px 16px !important;background:#ffffff !important;border:1px solid #d7e1eb !important;border-radius:14px !important;box-shadow:0 2px 8px rgba(20,50,80,0.07) !important;overflow:hidden !important;box-sizing:border-box !important;display:flex !important;align-items:center !important;}
 
-.checker-processing-page .batch-summary-bar>.z-hlayout-inner{height:100% !important;padding:0 !important;}
+.checker-processing-page .batch-summary-bar>.z-hlayout-inner{height:100% !important;padding:0 !important;display:flex !important;align-items:center !important;box-sizing:border-box !important;}
 
-.checker-processing-page .batch-back-button{width:42px !important;min-width:42px !important;max-width:42px !important;height:38px !important;min-height:38px !important;margin:0 !important;padding:0 !important;background:#ffffff !important;border:1px solid #cbd8e5 !important;border-radius:7px !important;color:#23364d !important;font-size:17px !important;font-weight:600 !important;text-shadow:none !important;box-shadow:0 1px 3px rgba(15,23,42,0.05) !important;}
+.checker-processing-page .batch-summary-bar .z-hlayout-inner>*{display:flex !important;align-items:center !important;box-sizing:border-box !important;}
+
+.checker-processing-page .batch-back-button{width:42px !important;min-width:42px !important;max-width:42px !important;height:38px !important;min-height:38px !important;margin:0 !important;padding:0 !important;background:#ffffff !important;border:1px solid #cbd8e5 !important;border-radius:7px !important;color:#23364d !important;font-size:17px !important;font-weight:600 !important;text-shadow:none !important;box-shadow:0 1px 3px rgba(15,23,42,0.05) !important;display:flex !important;align-items:center !important;justify-content:center !important;}
 
 .checker-processing-page .batch-back-button:hover{background:#f2f7fc !important;border-color:#8eabc7 !important;color:#0569ca !important;}
 
 .checker-processing-page .batch-back-button .z-button-content{color:inherit !important;font-size:17px !important;font-weight:600 !important;text-shadow:none !important;}
 
-.checker-processing-page .batch-number-label{height:38px !important;min-height:38px !important;padding:0 13px !important;background:#f1f7ff !important;border:1px solid #bfd7f2 !important;border-radius:5px !important;color:#096bd2 !important;font-size:12px !important;font-weight:700 !important;line-height:36px !important;white-space:nowrap !important;}
+.checker-processing-page .batch-number-label{height:38px !important;min-height:38px !important;padding:0 13px !important;background:#f1f7ff !important;border:1px solid #bfd7f2 !important;border-radius:5px !important;color:#096bd2 !important;font-size:12px !important;font-weight:700 !important;line-height:normal !important;white-space:nowrap !important;display:flex !important;align-items:center !important;}
 
-.checker-processing-page .summary-pill{height:36px !important;min-height:36px !important;padding:0 18px !important;border-radius:20px !important;font-size:12px !important;font-weight:600 !important;white-space:nowrap !important;display:flex !important;align-items:center !important;}
+.checker-processing-page .summary-pill{height:36px !important;min-height:36px !important;padding:0 18px !important;border-radius:20px !important;font-size:12px !important;font-weight:600 !important;white-space:nowrap !important;display:flex !important;align-items:center !important;justify-content:center !important;}
+
+/* BATCH NUMBER PILL */
+
+.checker-processing-page .batch-number-pill {
+    background:#f4f7fa !important;border:1px solid #d2dce7 !important;color:#5d7085 !important;
+}
 
 .checker-processing-page .total-pill{background:#f4f7fa !important;border:1px solid #d2dce7 !important;color:#5d7085 !important;}
 
@@ -42,7 +50,7 @@
 
 .checker-processing-page .cheque-image-card{padding:16px !important;background:#ffffff !important;border:1px solid #d1dce8 !important;border-radius:9px !important;overflow:hidden !important;}
 
-.checker-processing-page .cheque-image-card>.z-vlayout-inner{padding:0 !important;}
+.checker-processing-page .cheque-image-card>.z-vlayout-inner{padding:0 !important;overflow:hidden !important;}
 
 .checker-processing-page .section-title{width:100% !important;margin:0 !important;padding:0 !important;color:#102b4b !important;font-size:15px !important;line-height:21px !important;font-weight:700 !important;}
 
@@ -65,107 +73,61 @@
 /* CHEQUE IMAGE CONTAINER */
 
 .checker-processing-page .cheque-image-container{
-
     width:100% !important;
-
     min-width:0 !important;
-
     min-height:0 !important;
-
     position:relative !important;
-
     display:flex !important;
-
     align-items:center !important;
-
     justify-content:center !important;
-
     overflow:hidden !important;
-
     padding:17px !important;
-
     background:#fff9e8 !important;
-
     border:1px solid #d8cfb7 !important;
-
     border-radius:7px !important;
-
     box-shadow:inset 0 0 0 1px rgba(255,255,255,0.55) !important;
-
 }
 
 /* BACKEND CHEQUE IMAGE - CENTERED */
 
 .checker-processing-page .cheque-image-container .z-image{
-
     width:auto !important;
-
     height:auto !important;
-
     max-width:100% !important;
-
     max-height:100% !important;
-
     display:block !important;
-
     margin:auto !important;
-
     padding:0 !important;
-
     border:0 !important;
-
     background:transparent !important;
-
     object-fit:contain !important;
-
     object-position:center center !important;
-
 }
 
 .checker-processing-page .cheque-image-container img{
-
     width:auto !important;
-
     height:auto !important;
-
     max-width:100% !important;
-
     max-height:100% !important;
-
     display:block !important;
-
     margin:auto !important;
-
     object-fit:contain !important;
-
     object-position:center center !important;
-
     border:0 !important;
-
 }
 
 /* INNER BORDER */
 
 .checker-processing-page .cheque-image-container::after{
-
     content:"" !important;
-
     position:absolute !important;
-
     top:16px !important;
-
     right:16px !important;
-
     bottom:16px !important;
-
     left:16px !important;
-
     border:1px solid rgba(190,178,145,0.28) !important;
-
     border-radius:5px !important;
-
     pointer-events:none !important;
-
 }
 
 .checker-processing-page .cheque-number-prefix{color:#60758d !important;font-size:12px !important;line-height:18px !important;font-weight:500 !important;}
@@ -184,2127 +146,563 @@
 
 .checker-processing-page .cheque-date-validation-message{width:100% !important;padding:7px 9px !important;background:#fff1f3 !important;border:1px solid #efb2bb !important;border-radius:5px !important;color:#c51d34 !important;font-size:11px !important;font-weight:600 !important;line-height:16px !important;}
 
-.checker-processing-page .z-separator-horizontal{height:1px !important;min-height:1px !important;width:100% !important;background:#dce5ee !important;border:0 !important;}
+/* HIDE SEPARATORS TO AVOID OFFSET LINES */
+.checker-processing-page .z-separator,
+.checker-processing-page .z-separator-horizontal {
+    display: none !important;
+}
 
 .checker-processing-page .left-action-buttons{width:100% !important;height:42px !important;min-height:42px !important;overflow:visible !important;}
 
 .checker-processing-page .accept-button,
-
 .checker-processing-page .return-button,
-
 .checker-processing-page .reject-button{
-
     height:42px !important;
-
     min-height:42px !important;
-
     padding:0 14px !important;
-
     border-radius:7px !important;
-
     font-family:"Inter","Segoe UI",Arial,sans-serif !important;
-
     font-size:13px !important;
-
     font-weight:700 !important;
-
     text-shadow:none !important;
-
     cursor:pointer !important;
-
     background-image:none !important;
-
 }
 
 .checker-processing-page button.accept-button,
-
 .checker-processing-page .accept-button.z-button{
-
     background:#20a447 !important;
-
     background-image:none !important;
-
     border:1px solid #20a447 !important;
-
     color:#ffffff !important;
-
     box-shadow:0 2px 5px rgba(32,164,71,0.17) !important;
-
 }
 
 .checker-processing-page button.accept-button:hover,
-
 .checker-processing-page .accept-button.z-button:hover{
-
     background:#178d3c !important;
-
     border-color:#178d3c !important;
-
     color:#ffffff !important;
-
 }
 
 .checker-processing-page .accept-button .z-button-content{color:#ffffff !important;font-weight:700 !important;text-shadow:none !important;}
 
 .checker-processing-page button.return-button,
-
 .checker-processing-page .return-button.z-button{
-
     background:#ffffff !important;
-
     background-image:none !important;
-
     border:1px solid #7c3aed !important;
-
     color:#6d28d9 !important;
-
     box-shadow:none !important;
-
 }
 
 .checker-processing-page button.return-button:hover,
-
 .checker-processing-page .return-button.z-button:hover{
-
     background:#f6f1ff !important;
-
     border-color:#6d28d9 !important;
-
     color:#6d28d9 !important;
-
     box-shadow:0 2px 5px rgba(124,58,237,0.10) !important;
-
 }
 
 .checker-processing-page .return-button .z-button-content{color:#6d28d9 !important;font-weight:700 !important;text-shadow:none !important;}
 
 .checker-processing-page button.reject-button,
-
 .checker-processing-page .reject-button.z-button{
-
     background:#ffffff !important;
-
     background-image:none !important;
-
     border:1px solid #ef233c !important;
-
     color:#d71932 !important;
-
     box-shadow:none !important;
-
 }
 
 .checker-processing-page button.reject-button:hover,
-
 .checker-processing-page .reject-button.z-button:hover{
-
     background:#fff1f3 !important;
-
     border-color:#d71932 !important;
-
     color:#d71932 !important;
-
     box-shadow:0 2px 5px rgba(239,35,60,0.10) !important;
-
 }
 
 .checker-processing-page .reject-button .z-button-content{color:#d71932 !important;font-weight:700 !important;text-shadow:none !important;}
 
+/* RIGHT CONTAINER */
 .checker-processing-page .cheque-details-card{
-
     padding:0 !important;
-
     background:#ffffff !important;
-
     border:1px solid #d1dce8 !important;
-
     border-radius:9px !important;
-
     overflow:hidden !important;
-
     display:flex !important;
-
     flex-direction:column !important;
-
     min-height:0 !important;
-
 }
 
 .checker-processing-page .cheque-details-card>.z-vlayout-inner{padding:0 !important;}
 
+/* FIXED HEADER OUTSIDE SCROLLBAR */
 .checker-processing-page .verification-title{
-
+    display:block !important;
     width:100% !important;
-
-    height:43px !important;
-
-    min-height:43px !important;
-
-    padding:12px 17px 9px 17px !important;
-
+    height:46px !important;
+    min-height:46px !important;
+    line-height:46px !important;
+    padding:0 18px !important;
     background:#ffffff !important;
-
     border:0 !important;
-
-    border-bottom:1px solid #e0e7ef !important;
-
+    border-bottom:1px solid #e2e8f0 !important;
     color:#111827 !important;
-
     font-size:15px !important;
-
-    line-height:20px !important;
-
     font-weight:700 !important;
-
-    position:static !important;
-
-    top:auto !important;
-
-    z-index:auto !important;
-
+    box-sizing:border-box !important;
+    flex-shrink:0 !important;
 }
 
+/* SCROLL CONTAINER */
 .checker-processing-page .cheque-details-scroll{
-
     width:100% !important;
-
     flex:1 1 auto !important;
-
     min-width:0 !important;
-
     min-height:0 !important;
-
-    padding:14px 15px 16px 15px !important;
-
+    padding:16px !important;
     background:#ffffff !important;
-
     overflow-x:hidden !important;
-
     overflow-y:auto !important;
-
+    box-sizing:border-box !important;
 }
 
-.checker-processing-page .cheque-details-scroll::-webkit-scrollbar{width:9px !important;}
-
+.checker-processing-page .cheque-details-scroll::-webkit-scrollbar{width:8px !important;}
 .checker-processing-page .cheque-details-scroll::-webkit-scrollbar-track{background:#f5f7fa !important;border-left:1px solid #edf1f5 !important;}
-
 .checker-processing-page .cheque-details-scroll::-webkit-scrollbar-thumb{background:#aeb8c4 !important;border:2px solid #f5f7fa !important;border-radius:8px !important;}
-
 .checker-processing-page .cheque-details-scroll::-webkit-scrollbar-thumb:hover{background:#8d99a7 !important;}
 
-.checker-processing-page .right-section{
-
-    width:100% !important;
-
-    min-width:0 !important;
-
-    margin:0 0 12px 0 !important;
-
-    padding:12px 13px 13px 13px !important;
-
-    background:#ffffff !important;
-
-    border:1px solid #d5dfe9 !important;
-
-    border-radius:7px !important;
-
-    box-shadow:none !important;
-
+/* RIGHT CARD SECTIONS: ALL UNIFIED TO LIGHT BACKGROUND (#f8fbfe) */
+.checker-processing-page .right-section,
+.checker-processing-page .details-box {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 0 16px 0 !important;
+    padding: 14px !important;
+    background: #f8fbfe !important;
+    border: 1px solid #cbd9e7 !important;
+    border-radius: 7px !important;
+    box-shadow: 0 1px 3px rgba(30, 60, 90, 0.035) !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
 }
 
-/* KEEP DRAWER AND PAYEE COLORED BOX */
-
-.checker-processing-page .details-box{
-
-    background:#f8fbfe !important;
-
-    border:1px solid #cbd9e7 !important;
-
-    border-radius:7px !important;
-
-    padding:13px !important;
-
-    box-shadow:0 1px 3px rgba(30,60,90,0.035) !important;
-
+.checker-processing-page .right-section > .z-vlayout-inner {
+    width: 100% !important;
+    display: block !important;
+    padding: 0 !important;
 }
 
 .checker-processing-page .right-section-title{
-
-    width:100% !important;
-
-    margin:0 0 10px 0 !important;
-
-    padding:0 0 7px 0 !important;
-
-    background:transparent !important;
-
-    border:0 !important;
-
-    border-bottom:1px solid #dfe7ef !important;
-
-    color:#111827 !important;
-
-    font-size:11px !important;
-
-    line-height:16px !important;
-
-    font-weight:700 !important;
-
-
-    letter-spacing:0.01em !important;
-
+    display: block !important;
+    width: 100% !important;
+    margin: 0 0 12px 0 !important;
+    padding: 0 0 8px 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 1px solid #dfe7ef !important;
+    color: #111827 !important;
+    font-size: 12px !important;
+    line-height: 16px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.01em !important;
+    box-sizing: border-box !important;
 }
 
 .checker-processing-page .field-label{
-
     width:100% !important;
-
-    margin:0 0 3px 0 !important;
-
+    margin:0 0 4px 0 !important;
     padding:0 !important;
-
     color:#111827 !important;
-
     font-size:10px !important;
-
     line-height:15px !important;
-
     font-weight:700 !important;
-
-
 }
 
-.checker-processing-page .field-value{
-
-    width:100% !important;
-
-    max-width:100% !important;
-
-    height:36px !important;
-
-    min-height:36px !important;
-
-    margin:0 !important;
-
-    background:#ffffff !important;
-
-    border:1px solid #d1dce7 !important;
-
-    border-radius:5px !important;
-
-    box-shadow:none !important;
-
-    box-sizing:border-box !important;
-
+/* INPUT BOXES: LIGHT SOFT TINT TO BLEND BEAUTIFULLY */
+.checker-processing-page .field-value,
+.checker-processing-page .field-value.z-textbox,
+.checker-processing-page input.field-value,
+.checker-processing-page textarea.field-value,
+.checker-processing-page #amountInWordsLabel,
+.checker-processing-page .amount-words-field,
+.checker-processing-page .plain-value {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+    margin: 0 !important;
+    padding: 7px 10px !important;
+    background: #ffffff !important;
+    border: 1px solid #d1dce7 !important;
+    border-radius: 5px !important;
+    color: #111827 !important;
+    font-family: "Inter","Segoe UI",Arial,sans-serif !important;
+    font-size: 12px !important;
+    line-height: 20px !important;
+    font-weight: 500 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    resize: none !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+    vertical-align: middle !important;
 }
 
-.checker-processing-page .field-value .z-textbox-input{
-
-    width:100% !important;
-
-    height:34px !important;
-
-    min-height:34px !important;
-
-    padding:7px 10px !important;
-
-    border:0 !important;
-
-    outline:none !important;
-
-    background:transparent !important;
-
-    color:#111827 !important;
-
-    font-family:"Inter","Segoe UI",Arial,sans-serif !important;
-
-    font-size:12px !important;
-
-    line-height:20px !important;
-
-    font-weight:500 !important;
-
-    box-shadow:none !important;
-
-    box-sizing:border-box !important;
-
-    vertical-align:middle !important;
-
+/* MICR INPUT BOX: DISTINCT CLEAN WHITE BACKGROUND */
+.checker-processing-page .micr-field,
+.checker-processing-page .micr-field.z-textbox,
+.checker-processing-page #micrLabel {
+    background: #ffffff !important;
+    border: 1px solid #c0d3e5 !important;
+    font-family: "Consolas", "Courier New", monospace !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em !important;
 }
 
-.checker-processing-page .field-value:focus-within{
-
-    border-color:#94b5d4 !important;
-
-    box-shadow:0 0 0 2px rgba(8,123,232,0.055) !important;
-
+/* INNER INPUT WRAPPERS IF APPLICABLE */
+.checker-processing-page .field-value .z-textbox-input {
+    width: 100% !important;
+    height: 100% !important;
+    border: 0 !important;
+    outline: none !important;
+    background: transparent !important;
+    color: #111827 !important;
+    font-family: inherit !important;
+    font-size: inherit !important;
+    line-height: inherit !important;
+    font-weight: inherit !important;
+    padding: 0 !important;
 }
 
-.checker-processing-page .micr-field{background:#f8fafc !important;}
-
-.checker-processing-page .micr-field .z-textbox-input{
-
-    font-family:"Consolas","Courier New",monospace !important;
-
-    font-size:11px !important;
-
-    font-weight:700 !important;
-
-    letter-spacing:0.02em !important;
-
+.checker-processing-page .field-value:focus,
+.checker-processing-page .field-value:focus-within {
+    border-color: #087be8 !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 0 2px rgba(8,123,232,0.08) !important;
+    outline: none !important;
 }
 
-.checker-processing-page .amount-field .z-textbox-input{
-
-    font-size:12px !important;
-
-    font-weight:700 !important;
-
+.checker-processing-page .amount-field {
+    font-size: 12px !important;
+    font-weight: 700 !important;
 }
 
-.checker-processing-page .amount-words-field{
-
-    height:58px !important;
-
-    min-height:58px !important;
-
-}
-
-.checker-processing-page .amount-words-field .z-textbox-input{
-
-    width:100% !important;
-
-    height:54px !important;
-
-    min-height:54px !important;
-
-    padding:8px 10px !important;
-
-    line-height:17px !important;
-
-    white-space:normal !important;
-
-    overflow:auto !important;
-
-    resize:none !important;
-
-}
-
-.checker-processing-page .plain-value{
-
-    height:36px !important;
-
-    min-height:36px !important;
-
-}
-
-.checker-processing-page .plain-value .z-textbox-input{
-
-    width:100% !important;
-
-    height:34px !important;
-
-    min-height:34px !important;
-
-    padding:7px 10px !important;
-
-    white-space:normal !important;
-
-    overflow:hidden !important;
-
-    color:#111827 !important;
-
-}
-
-.checker-processing-page #accountNumberLabel .z-textbox-input{
-
-    font-weight:600 !important;
-
-    letter-spacing:0.01em !important;
-
+.checker-processing-page #accountNumberLabel {
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
 }
 
 .checker-processing-page .maker-return-card{
-
     width:100% !important;
-
-    margin:0 0 12px 0 !important;
-
+    margin:0 0 16px 0 !important;
     padding:11px 12px !important;
-
     background:#fff2f4 !important;
-
     border:1px solid #efb1ba !important;
-
+    border-left: 4px solid #dc2626 !important;
     border-radius:7px !important;
-
+    box-sizing:border-box !important;
 }
 
 .checker-processing-page .maker-return-icon{
-
     width:22px !important;
-
     min-width:22px !important;
-
     height:22px !important;
-
     min-height:22px !important;
-
     background:#ef233c !important;
-
     border-radius:50% !important;
-
     color:#ffffff !important;
-
     line-height:22px !important;
-
     text-align:center !important;
-
+    font-weight:700 !important;
 }
 
 .checker-processing-page .maker-return-title{
-
     color:#b91c2c !important;
-
     font-size:12px !important;
-
     font-weight:700 !important;
-
 }
 
 .checker-processing-page .maker-return-tag{
-
     padding:3px 7px !important;
-
-    background:#ffffff !important;
-
+    background:#fee2e2 !important;
     border:1px solid #efb6be !important;
-
     border-radius:10px !important;
-
     color:#c91f36 !important;
-
     font-size:9px !important;
-
     font-weight:700 !important;
-
 }
 
 .checker-processing-page .maker-return-reason{
-
     color:#8f2834 !important;
-
     font-size:11px !important;
-
     line-height:16px !important;
-
     overflow-wrap:anywhere !important;
-
-}
-
-.checker-processing-page .reason-row{
-
-    width:100% !important;
-
-    margin:0 0 10px 0 !important;
-
 }
 
 .checker-processing-page .form-label{
-
     color:#111827 !important;
-
     font-size:11px !important;
-
     font-weight:700 !important;
-
 }
 
 .checker-processing-page .form-control{
-
     min-height:37px !important;
-
     background:#ffffff !important;
-
     border:1px solid #cbd5e1 !important;
-
     border-radius:5px !important;
-
     color:#10233f !important;
-
     font-size:12px !important;
-
 }
 
 .checker-processing-page .z-combobox.form-control{
-
     height:37px !important;
-
     min-height:37px !important;
-
     border:1px solid #cbd5e1 !important;
-
     border-radius:5px !important;
-
     background:#ffffff !important;
-
 }
 
 .checker-processing-page .z-combobox-input{
-
     height:35px !important;
-
     padding:0 10px !important;
-
     border:0 !important;
-
     background:transparent !important;
-
     color:#24364d !important;
-
     font-size:12px !important;
-
     outline:none !important;
-
 }
 
 .checker-processing-page .z-combobox-button{
-
     width:32px !important;
-
     height:35px !important;
-
     background:#ffffff !important;
-
     border:0 !important;
-
     border-left:1px solid #e1e7ee !important;
-
-}
-
-.checker-processing-page .remarks-row{
-
-    width:100% !important;
-
-    margin:0 !important;
-
-}
-
-.checker-processing-page #checkerRemarksTextbox{
-
-    width:100% !important;
-
-    min-height:70px !important;
-
-    height:70px !important;
-
-    background:#ffffff !important;
-
-    border:1px solid #cbd5e1 !important;
-
-    border-radius:5px !important;
-
-}
-
-.checker-processing-page #checkerRemarksTextbox .z-textbox-input{
-
-    width:100% !important;
-
-    height:66px !important;
-
-    min-height:66px !important;
-
-    padding:8px 10px !important;
-
-    background:transparent !important;
-
-    border:0 !important;
-
-    outline:none !important;
-
-    resize:none !important;
-
-    color:#10233f !important;
-
-    font-size:12px !important;
-
-    line-height:17px !important;
-
 }
 
 .checker-processing-page .right-bottom-actions{
-
     width:100% !important;
-
     height:48px !important;
-
     min-height:48px !important;
-
     max-height:48px !important;
-
     flex:0 0 auto !important;
-
     padding:0 16px !important;
-
     background:#ffffff !important;
-
     border:0 !important;
-
     border-top:1px solid #d5dfe9 !important;
-
     box-shadow:0 -2px 5px rgba(30,60,90,0.035) !important;
-
     overflow:hidden !important;
-
 }
 
 .checker-processing-page .navigation-button{
-
     height:35px !important;
-
     min-height:35px !important;
-
     min-width:82px !important;
-
     padding:0 13px !important;
-
     background:#ffffff !important;
-
     border:1px solid #cbd7e3 !important;
-
     border-radius:6px !important;
-
     color:#2d435d !important;
-
     font-size:12px !important;
-
     font-weight:600 !important;
-
     text-shadow:none !important;
-
     box-shadow:none !important;
-
 }
 
 .checker-processing-page .navigation-button:hover{
-
     background:#f3f8fd !important;
-
     border-color:#9bb5cf !important;
-
     color:#0569ca !important;
-
 }
 
 .checker-processing-page .navigation-button .z-button-content{
-
     color:inherit !important;
-
     font-weight:600 !important;
-
     text-shadow:none !important;
-
 }
 
 .checker-processing-page .complete-button{
-
     height:36px !important;
-
     min-height:36px !important;
-
     min-width:158px !important;
-
     padding:0 16px !important;
-
     background:#087be8 !important;
-
     border:1px solid #087be8 !important;
-
     border-radius:6px !important;
-
     color:#ffffff !important;
-
     font-size:12px !important;
-
     font-weight:700 !important;
-
     text-shadow:none !important;
-
     box-shadow:0 2px 5px rgba(8,123,232,0.17) !important;
-
 }
 
 .checker-processing-page .complete-button:hover{
-
     background:#066fd2 !important;
-
     border-color:#066fd2 !important;
-
     color:#ffffff !important;
-
 }
 
 .checker-processing-page .complete-button .z-button-content{
-
     color:#ffffff !important;
-
     font-weight:700 !important;
-
     text-shadow:none !important;
-
 }
 
 .checker-processing-page .accept-button:disabled,
-
 .checker-processing-page .return-button:disabled,
-
 .checker-processing-page .reject-button:disabled,
-
 .checker-processing-page .complete-button:disabled,
-
 .checker-processing-page .navigation-button:disabled{
-
     cursor:not-allowed !important;
-
     opacity:0.55 !important;
-
     box-shadow:none !important;
-
 }
 
 .checker-processing-page .accept-button:disabled{
-
     background:#9bd7aa !important;
-
     border-color:#9bd7aa !important;
-
     color:#ffffff !important;
-
 }
 
 .checker-processing-page .return-button:disabled{
-
     background:#f5f1ff !important;
-
     border-color:#cfc0fa !important;
-
     color:#9b83d5 !important;
-
 }
 
 .checker-processing-page .reject-button:disabled{
-
     background:#fff1f3 !important;
-
     border-color:#efb0ba !important;
-
     color:#db7180 !important;
-
 }
 
 .checker-processing-page .complete-button:disabled{
-
     background:#8cb8e2 !important;
-
     border-color:#8cb8e2 !important;
-
     color:#ffffff !important;
-
 }
 
 .checker-processing-page .z-button{
-
     background-image:none !important;
-
     text-shadow:none !important;
-
     font-family:"Inter","Segoe UI",Arial,sans-serif !important;
-
 }
 
 .checker-processing-page .z-button:focus{outline:none !important;}
 
-.checker-processing-page .cheque-image-card,
-
-.checker-processing-page .cheque-image-card>.z-vlayout-inner{
-
-    overflow:hidden !important;
-
+/* MODAL WINDOW STYLING */
+.action-reason-modal {
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2) !important;
 }
 
-.checker-processing-page .cheque-details-card,
-
-.checker-processing-page .cheque-details-card>.z-vlayout-inner{
-
-    overflow:hidden !important;
-
+.action-reason-modal .z-window-header {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+    font-weight: 700 !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding: 12px 16px !important;
 }
 
-.checker-processing-page .cheque-details-scroll{
+.action-reason-modal .modal-body-layout {
+    padding: 16px !important;
+    background: #ffffff !important;
+    box-sizing: border-box !important;
+}
 
-    overflow-x:hidden !important;
+.action-reason-modal .modal-combobox {
+    width: 100% !important;
+}
 
-    overflow-y:auto !important;
+.action-reason-modal .modal-remarks-textbox {
+    width: 100% !important;
+    min-height: 75px !important;
+    padding: 8px 10px !important;
+    resize: none !important;
+}
 
+.action-reason-modal .modal-submit-button {
+    min-width: 110px !important;
 }
 
 .checker-processing-page input::placeholder,
-
 .checker-processing-page textarea::placeholder{
-
-    color:#98a6b5 !important;
-
+    color:#94a3b8 !important;
     opacity:1 !important;
-
-/* ============================================================
-
-   CHECKER PROCESSING
-
-   Enterprise Banking / CTS Checker Review
-
-   Responsive / Dynamic Layout
-
-   \============================================================ */
-
-
-
-/* ============================================================
-
-   PAGE
-
-   \============================================================ */
-
-.checker-processing-page {
-
-    width: 100%;
-
-    height: 100%;
-
-    min-height: 0;
-
-    padding: clamp(16px, 2vw, 24px);
-
-    box-sizing: border-box;
-
-    overflow: auto;
-
-    background: #f5f7fa;
-
 }
 
-
-
-/* ============================================================
-
-   MAIN PROCESSING PAGE
-
-   ============================================================ */
-
-#processingPage {
-
-    width: 100%;
-
-    height: 100%;
-
-    min-height: 0;
-
-}
-
-
-
-/* ============================================================
-
-   PAGE HEADER
-
-   ============================================================ */
-
-.processing-header {
-
-    width: 100%;
-
-    min-height: 54px;
-
-    box-sizing: border-box;
-
-}
-
-.page-title {
-
-    font-family: 'Times New Roman', serif;
-
-    font-size: 30px; font-weight: 650; letter-spacing: -0.035em;
-
-    position: relative; display: inline-block;
-
-    animation: none;
-
-    background: transparent !important;
-
-    color: var(--text-primary) !important;
-
-    -webkit-text-fill-color: var(--text-primary) !important;
-
-    -webkit-background-clip: initial;
-
-    background-clip: initial;
-
-    margin-bottom: 4px;
-
-}
-
-.page-title::after {
-
-    content: '';
-
-    position: absolute; bottom: -10px; left: 0;
-
-    width: 56px; height: 3px;
-
-    background: #175CD3;
-
-    background-size: auto;
-
-    border-radius: 2px;
-
-    box-shadow: none;
-
-    animation: none;
-
-}
-
-.page-subtitle {
-
-    font-size: 13px;
-
-    color: #66778d;
-
-    line-height: 20px;
-
-}
-
-.page-subtitle-separator {
-
-    font-size: 13px;
-
-    color: #a5afbb;
-
-}
-
-
-
-/* ============================================================
-
-   CHEQUE REVIEW AREA
-
-   55% IMAGE | 3% GAP | 42% DETAILS
-
-   ============================================================ */
-
-.cheque-information-row {
-
-    width: 100%;
-
-    min-height: 0;
-
-    align-items: stretch;
-
-    box-sizing: border-box;
-
-}
-
-
-
-/* ============================================================
-
-   COMMON CARD
-
-   ============================================================ */
-
-.processing-card {
-
-    min-width: 0;
-
-    min-height: 0;
-
-    background: #ffffff;
-
-    border: 1px solid #dce3ec;
-
-    border-radius: 8px;
-
-    padding: clamp(16px, 1.5vw, 20px);
-
-    box-sizing: border-box;
-
-    overflow: hidden;
-
-}
-
-
-
-/* ============================================================
-
-   CHEQUE IMAGE CARD
-
-   55%
-
-   IMPORTANT:
-
-   No fixed height here.
-
-   ZK vflex="1" controls the available height.
-
-   ============================================================ */
-
-.cheque-image-card {
-
-    width: 55%;
-
-    min-width: 0;
-
-    min-height: 0;
-
-    height: auto;
-
-    box-sizing: border-box;
-
-}
-
-
-
-/* ============================================================
-
-   CHEQUE DETAILS CARD
-
-   42%
-
-   IMPORTANT:
-
-   No fixed height here.
-
-   ZK vflex="1" controls the available height.
-
-   ============================================================ */
-
-.cheque-details-card {
-
-    width: 42%;
-
-    min-width: 0;
-
-    min-height: 0;
-
-    height: auto;
-
-    box-sizing: border-box;
-
-}
-
-
-
-/* ============================================================
-
-   CARD SECTION TITLE
-
-   ============================================================ */
-
-.section-title {
-
-    font-size: 16px;
-
-    font-weight: 650;
-
-    color: #1d2d42;
-
-    line-height: 22px;
-
-}
-
-
-
-/* ============================================================
-
-   ZK SEPARATOR
-
-   ============================================================ */
-
-.processing-card > .z-separator {
-
-    margin: 0;
-
-}
-
-
-
-/* ============================================================
-
-   CHEQUE IMAGE
-
-   ============================================================ */
-
-
-
-/* ------------------------------------------------------------
-
-   FRONT / BACK CONTROLS
-
-   ------------------------------------------------------------ */
-
-.image-side-controls {
-
-    width: 100%;
-
-    min-height: 32px;
-
-    box-sizing: border-box;
-
-}
-
-.image-side-button {
-
-    min-width: 74px;
-
-    height: 32px;
-
-    padding: 0 14px;
-
-    border: 1px solid #cbd5e1;
-
-    border-radius: 5px;
-
-    background: #ffffff;
-
-    color: #526275;
-
-    font-size: 12px;
-
-    font-weight: 500;
-
-    box-sizing: border-box;
-
-}
-
-.image-side-button:hover {
-
-    background: #f4f7fa;
-
-}
-
-.image-side-button.selected {
-
-    background: #edf3fa;
-
-    border-color: #8ea9c4;
-
-    color: #1d4f7a;
-
-    font-weight: 650;
-
-}
-
-
-
-/* ============================================================
-
-   CHEQUE IMAGE CONTAINER
-
-   IMPORTANT:
-
-   Do NOT give this a fixed height.
-
-   The ZUL already has:
-
-       vflex="1"
-
-   Therefore ZK will allocate the remaining space here.
-
-   ============================================================ */
-
-.cheque-image-container {
-
-    width: 100%;
-
-    min-width: 0;
-
-    min-height: 0;
-
-    height: auto;
-
-    background: #f8fafc;
-
-    border: 1px solid #dfe5ed;
-
-    border-radius: 6px;
-
-    box-sizing: border-box;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    overflow: hidden;
-
-}
-
-
-
-/* ------------------------------------------------------------
-
-   ACTUAL CHEQUE IMAGE
-
-   \------------------------------------------------------------ */
-
-.cheque-image-container .z-image,
-
-.cheque-image-container img {
-
-    display: block;
-
-    max-width: 100%;
-
-    max-height: 100%;
-
-    width: auto;
-
-    height: auto;
-
-    object-fit: contain;
-
-}
-
-
-
-/* ============================================================
-
-   IMAGE CONTROLS
-
-   ============================================================ */
-
-.image-controls {
-
-    width: 100%;
-
-    min-height: 34px;
-
-    box-sizing: border-box;
-
-}
-
-.image-control-button,
-
-.image-zoom-button {
-
-    height: 30px;
-
-    border: 1px solid #cbd5e1;
-
-    border-radius: 5px;
-
-    background: #ffffff;
-
-    color: #526275;
-
-    font-size: 12px;
-
-    box-sizing: border-box;
-
-}
-
-.image-control-button {
-
-    padding: 0 12px;
-
-}
-
-.image-zoom-button {
-
-    min-width: 32px;
-
-    padding: 0 8px;
-
-    font-size: 15px;
-
-}
-
-.image-control-button:hover,
-
-.image-zoom-button:hover {
-
-    background: #f4f7fa;
-
-}
-
-.zoom-level {
-
-    min-width: 42px;
-
-    text-align: center;
-
-    font-size: 12px;
-
-    color: #526275;
-
-}
-
-
-
-/* ============================================================
-
-   CHEQUE DETAILS
-
-   ============================================================ */
-
-.cheque-details-scroll {
-
-    width: 100%;
-
-    min-width: 0;
-
-    min-height: 0;
-
-    overflow-y: auto;
-
-    overflow-x: hidden;
-
-    padding-right: 8px;
-
-    box-sizing: border-box;
-
-}
-
-
-
-/* ============================================================
-
-   DETAIL SECTION
-
-   ============================================================ */
-
-.detail-section {
-
-    width: 100%;
-
-    margin-bottom: clamp(16px, 2vh, 22px);
-
-    box-sizing: border-box;
-
-}
-
-.detail-section-title {
-
-    font-size: 13px;
-
-    font-weight: 650;
-
-    color: #34475d;
-
-    text-transform: none;
-
-    letter-spacing: 0.4px;
-
-    line-height: 20px;
-
-}
-
-
-
-/* ============================================================
-
-   SECTION DIVIDER
-
-   ============================================================ */
-
-.section-divider {
-
-    width: 100%;
-
-    height: 1px;
-
-    background: #e2e7ed;
-
-    margin-bottom: 4px;
-
-    box-sizing: border-box;
-
-}
-
-
-
-/* ============================================================
-
-   DETAIL ROW
-
-   ============================================================ */
-
-.detail-row {
-
-    width: 100%;
-
-    min-width: 0;
-
-    min-height: 30px;
-
-    padding: 5px 0;
-
-    box-sizing: border-box;
-
-}
-
-
-
-/* ============================================================
-
-   DETAIL LABEL
-
-   ============================================================ */
-
-.detail-label {
-
-    width: clamp(130px, 12vw, 190px);
-
-    flex-shrink: 0;
-
-    font-size: 13px;
-
-    color: #68788b;
-
-    line-height: 20px;
-
-    box-sizing: border-box;
-
-}
-
-
-
-/* ============================================================
-
-   DETAIL VALUE
-
-   ============================================================ */
-
-.detail-value {
-
-    min-width: 0;
-
-    font-size: 14px;
-
-    font-weight: 500;
-
-    color: #17283d;
-
-    line-height: 20px;
-
-    overflow-wrap: anywhere;
-
-    word-break: break-word;
-
-}
-
-
-
-/* ============================================================
-
-   AMOUNT
-
-   \============================================================ */
-
-.amount-value {
-
-    min-width: 0;
-
-    font-size: 14px;
-
-    font-weight: 650;
-
-    color: #17283d;
-
-    line-height: 20px;
-
-    overflow-wrap: anywhere;
-
-}
-
-
-
-/* ============================================================
-
-   MICR
-
-   ============================================================ */
-
-.micr-value {
-
-    min-width: 0;
-
-    font-size: 13px;
-
-    font-weight: 500;
-
-    color: #17283d;
-
-    letter-spacing: 0.6px;
-
-    line-height: 20px;
-
-    overflow-wrap: anywhere;
-
-}
-
-
-
-/* ============================================================
-
-   AMOUNT IN WORDS
-
-   ============================================================ */
-
-.amount-words-row {
-
-    align-items: flex-start;
-
-}
-
-.amount-words-row .detail-value {
-
-    white-space: normal;
-
-}
-
-
-
-/* ============================================================
-
-   CBS VALIDATION
-
-   ============================================================ */
-
-.cbs-validation-row {
-
-    width: 100%;
-
-    margin-top: 2px;
-
-    padding: 8px 10px;
-
-    border-radius: 5px;
-
-    box-sizing: border-box;
-
-}
-
-.cbs-validation-icon {
-
-    min-width: 18px;
-
-    font-size: 14px;
-
-    font-weight: 650;
-
-}
-
-.cbs-validation-message {
-
-    min-width: 0;
-
-    font-size: 12px;
-
-    font-weight: 500;
-
-    color: #526b82;
-
-    overflow-wrap: anywhere;
-
-}
-
-.cbs-validation-reason {
-
-    font-size: 12px;
-
-    line-height: 18px;
-
-}
-
-
-
-/* ============================================================
-
-   DETAILS SCROLLBAR
-
-   ============================================================ */
-
-.cheque-details-scroll::-webkit-scrollbar {
-
-    width: 6px;
-
-}
-
-.cheque-details-scroll::-webkit-scrollbar-thumb {
-
-    background: #c7d0dc;
-
-    border-radius: 10px;
-
-}
-
-.cheque-details-scroll::-webkit-scrollbar-track {
-
-    background: transparent;
-
-}
-
-
-
-/* ============================================================
-
-   ACTION AREA
-
-   Outside the image/details cards
-
-   ============================================================ */
-
-.decision-area {
-
-    width: 100%;
-
-    padding: 2px 2px 8px 2px;
-
-    box-sizing: border-box;
-
-}
-
-
-
-/* ============================================================
-
-   ACTION TITLE
-
-   ============================================================ */
-
-.action-title {
-
-    font-size: 12px;
-
-    font-weight: 650;
-
-    color: #6a798a;
-
-    text-transform: none;
-
-    letter-spacing: 0.7px;
-
-    line-height: 18px;
-
-}
-
-
-
-/* ============================================================
-
-   DECISION BUTTONS
-
-   ============================================================ */
-
-.decision-buttons {
-
-    width: 100%;
-
-    min-height: 40px;
-
-    box-sizing: border-box;
-
-}
-
+/* RESPONSIVE MEDIA QUERIES */
 @media (max-width:1400px){
-
     .checker-processing-page .processing-main-area{
-
         padding:12px 14px 15px 14px !important;
-
     }
-
     .checker-processing-page .cheque-image-card{
-
         padding:14px !important;
-
     }
-
-    .checker-processing-page .cheque-details-scroll{
-
-        padding-left:13px !important;
-
-        padding-right:13px !important;
-
-    }
-
+    .checker-processing-page .cheque-details-scroll,
     .checker-processing-page .right-bottom-actions{
-
         padding-left:13px !important;
-
         padding-right:13px !important;
-
     }
-
 }
 
 @media (max-width:1200px){
-
     .checker-processing-page .cheque-image-card{
-
         padding:11px !important;
-
     }
-
     .checker-processing-page .cheque-details-scroll{
-
         padding-left:10px !important;
-
         padding-right:10px !important;
-
     }
-
     .checker-processing-page .image-side-button{
-
         width:94px !important;
-
         min-width:94px !important;
-
     }
-
     .checker-processing-page .image-tool-button{
-
         width:38px !important;
-
         min-width:38px !important;
-
     }
-
 }
 
 @media (max-height:760px){
-
     .checker-processing-page .batch-summary-bar{
-
         height:48px !important;
-
         min-height:48px !important;
-
         max-height:48px !important;
-
     }
-
     .checker-processing-page .processing-main-area{
-
         padding-top:10px !important;
-
         padding-bottom:11px !important;
-
     }
-
     .checker-processing-page .right-bottom-actions{
-
         height:45px !important;
-
         min-height:45px !important;
-
         max-height:45px !important;
-
     }
-
 }
-
-
-
-/* CENTER CONTENT INSIDE BATCH SUMMARY BAR */
-
-.checker-processing-page .batch-summary-bar{
-
-    display:flex !important;
-
-    align-items:center !important;
-
-    box-sizing:border-box !important;
-
-}
-
-.checker-processing-page .batch-summary-bar>.z-hlayout-inner{
-
-    height:100% !important;
-
-    display:flex !important;
-
-    align-items:center !important;
-
-    box-sizing:border-box !important;
-
-}
-
-.checker-processing-page .batch-summary-bar .z-hlayout-inner>*{
-
-    display:flex !important;
-
-    align-items:center !important;
-
-    box-sizing:border-box !important;
-
-}
-
-.checker-processing-page .batch-summary-bar .summary-pill{
-
-    display:flex !important;
-
-    align-items:center !important;
-
-    justify-content:center !important;
-
-    margin-top:0 !important;
-
-    margin-bottom:0 !important;
-
-}
-
-.checker-processing-page .batch-summary-bar .batch-number-label{
-
-    display:flex !important;
-
-    align-items:center !important;
-
-    line-height:normal !important;
-
-    margin-top:0 !important;
-
-    margin-bottom:0 !important;
-
-}
-
-.checker-processing-page .batch-summary-bar .batch-back-button{
-
-    display:flex !important;
-
-    align-items:center !important;
-
-    justify-content:center !important;
-
-    margin-top:0 !important;
-
-    margin-bottom:0 !important;
-
-}
-
-/* FINAL RIGHT PANEL OVERRIDES */
-
-.checker-processing-page .cheque-details-card{
-
-    display:flex !important;
-
-    flex-direction:column !important;
-
-    min-height:0 !important;
-
-    overflow:hidden !important;
-
-}
-
-.checker-processing-page .cheque-details-scroll{
-
-    flex:1 1 auto !important;
-
-    min-height:0 !important;
-
-    overflow-x:hidden !important;
-
-    overflow-y:auto !important;
-
-}
-
-.checker-processing-page .verification-title,
-
-.checker-processing-page .right-section-title,
-
-.checker-processing-page .field-label,
-
-.checker-processing-page .form-label{
-
-    color:#111827 !important;
-
-}
-
-.checker-processing-page .verification-title{
-
-    position:static !important;
-
-    top:auto !important;
-
-    z-index:auto !important;
-
-}
-
-.checker-processing-page .field-value,
-
-.checker-processing-page .field-value .z-textbox-input,
-
-.checker-processing-page .plain-value .z-textbox-input,
-
-.checker-processing-page .micr-field .z-textbox-input,
-
-.checker-processing-page .amount-field .z-textbox-input{
-
-    color:#111827 !important;
-
-}
-
-.checker-processing-page .field-value .z-textbox-input{
-
-    box-sizing:border-box !important;
-
-    vertical-align:middle !important;
-
-}
-
-.checker-processing-page .field-value:not(.amount-words-field) .z-textbox-input{
-
-    height:34px !important;
-
-    min-height:34px !important;
-
-    padding:7px 10px !important;
-
-    line-height:20px !important;
-
-}
-
-.checker-processing-page .amount-words-field .z-textbox-input{
-
-    height:54px !important;
-
-    min-height:54px !important;
-
-    padding:8px 10px !important;
-
-    line-height:17px !important;
-
-}
-
-.checker-processing-page .plain-value .z-textbox-input{
-
-    height:34px !important;
-
-    min-height:34px !important;
-
-    padding:7px 10px !important;
-
-    line-height:20px !important;
-
-}
-
-.checker-processing-page .right-bottom-actions{
-
-    flex:0 0 auto !important;
-
-    height:48px !important;
-
-    min-height:48px !important;
-
-    max-height:48px !important;
-
-}
-
-
-
-/* ============================================================
-
-   VERY SMALL MOBILE
-
-   max-width: 400px
-
-   \============================================================ */
 
 @media screen and (max-width: 400px) {
-
     .checker-processing-page {
-
         padding: 10px;
-
     }
-
     .processing-card {
-
         padding: 12px;
-
     }
-
-    .detail-label {
-
-        width: 115px;
-
-        font-size: 12px;
-
-    }
-
-    .detail-value,
-
-    .amount-value {
-
-        font-size: 12px;
-
-    }
-
     .cheque-image-card {
-
         min-height: 340px;
-
     }
-
     .cheque-details-card {
-
         min-height: 300px;
-
     }
-
-}
-
     #saveNextButton {
-
-        width: 100%;
-
+        width: 100% !important;
     }
-
-}
-
-.maker-return-card {
-    width: 90%;
-    margin: 0 auto;
-    padding: 10px 12px;
-    background: #fff1f2;
-    border: 1px solid #fca5a5;
-    border-left: 4px solid #dc2626;
-    border-radius: 6px;
-    text-align: center;
-}
-
-.maker-return-icon {
-    color: #dc2626;
-    font-weight: 700;
-}
-
-.maker-return-title {
-    color: #b91c1c;
-    font-weight: 600;
-}
-
-.maker-return-tag {
-    color: #b91c1c;
-    background: #fee2e2;
-    padding: 3px 7px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
-}
-
-.maker-return-reason {
-    width: 100%;
-    color: #991b1b;
-    font-weight: 500;
-    text-align: center;
 }

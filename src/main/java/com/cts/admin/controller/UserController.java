@@ -190,8 +190,7 @@ public class UserController extends GenericForwardComposer<Component> {
 						"ACTIVE".equalsIgnoreCase(user.getStatus()) ? "Deactivate User" : "Activate User");
 
 				//Disable edit and status buttons for ADMIN role 
-				boolean isAdmin = ("ADMIN".equalsIgnoreCase(user.getRoleName()))
-						|| (user.getRole() != null && "ADMIN".equalsIgnoreCase(user.getRole().getRoleName()));
+				boolean isAdmin = (user.getRole() != null && "ADMIN".equalsIgnoreCase(user.getRole().getRoleName()));
 
 				if (isAdmin) {
 					editBtn.setDisabled(true);

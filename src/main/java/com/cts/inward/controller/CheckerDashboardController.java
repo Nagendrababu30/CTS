@@ -305,6 +305,24 @@ public class CheckerDashboardController
         }
 
 
+        /*
+         * Update Summary Card counts so they always match the loaded batches
+         */
+        int availCount = 0;
+        int myCount = 0;
+        for (CheckerBatch b : batches) {
+            if (isAvailable(b)) {
+                availCount++;
+            }
+            if (isLockedByCurrentUser(b)) {
+                myCount++;
+            }
+        }
+        receivedCount.setValue(String.valueOf(batches.size()));
+        availableCount.setValue(String.valueOf(availCount));
+        myBatchCount.setValue(String.valueOf(myCount));
+
+
         filteredBatches =
                 new ArrayList<>();
 
@@ -393,9 +411,10 @@ public class CheckerDashboardController
             return false;
         }
 
-
         return "ON_HOLD".equalsIgnoreCase(
-                batch.getBatchStatus());
+                batch.getBatchStatus())
+                || "RETURN_TO_MAKER".equalsIgnoreCase(
+                        batch.getBatchStatus());
     }
 
 
@@ -406,7 +425,7 @@ public class CheckerDashboardController
     private boolean isAvailable(
             CheckerBatch batch) {
 
-        if (batch == null) {
+        if (batch == null || isOnHold(batch)) {
             return false;
         }
 
@@ -434,7 +453,7 @@ public class CheckerDashboardController
     private boolean isLockedByCurrentUser(
             CheckerBatch batch) {
 
-        if (batch == null) {
+        if (batch == null || isOnHold(batch)) {
             return false;
         }
 
@@ -585,7 +604,7 @@ public class CheckerDashboardController
                     "On Hold");
 
             statusLabel.setSclass(
-                    "status-badge");
+                    "status-badge badge-micr-repair");
         }
 
 
@@ -651,50 +670,30 @@ public class CheckerDashboardController
         /*
          * ON HOLD
          *
-         * Show Open Verification button.
+         * Batch is on hold (returned to maker). Checker cannot open the batch.
          */
         if (isOnHold(batch)) {
 
-            Button openButton =
-                    new Button(
-                            "Open Verification");
+            Button onHoldButton =
+                    new Button();
 
+            onHoldButton.setLabel(
+                    "On Hold");
 
-            openButton.setSclass(
-                    "btn btn-action");
+            onHoldButton.setIconSclass(
+                    "z-icon-lock");
 
+            onHoldButton.setSclass(
+                    "btn btn-locked");
 
-            openButton.addEventListener(
-                    "onClick",
-                    event -> {
+            onHoldButton.setDisabled(
+                    true);
 
-                        long batchId =
-                                batch.getBatchId();
-
-
-                        boolean locked =
-                                service.lockBatch(
-                                        batchId,
-                                        userId);
-
-
-                        if (locked) {
-
-                            Executions.sendRedirect(
-                                    "/zul/inward-checker/"
-                                    + "batch-details.zul"
-                                    + "?batchId="
-                                    + batchId);
-
-                        } else {
-
-                            loadDashboard();
-                        }
-                    });
-
+            onHoldButton.setTooltiptext(
+                    "Batch is on hold (returned to maker) and cannot be opened.");
 
             row.appendChild(
-                    openButton);
+                    onHoldButton);
         }
 
 

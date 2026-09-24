@@ -31,9 +31,9 @@ public interface AuditLogDAO {
             Date fromDate,
             Date toDate);
 
-    /* Inserts a row into user_session on login — returns generated session_id */
+    // Inserts a row into user_session on login — returns generated session_id 
     public String createAuditLog(Long userId);
 
-    /* Updates logout_time and status on logout */
+    // Updates logout_time and status on logout 
     public void endAuditLog(String sessionId);
 }

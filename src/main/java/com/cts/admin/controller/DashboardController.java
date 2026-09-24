@@ -39,15 +39,15 @@ public class DashboardController extends GenericForwardComposer<Component> {
 
 	private static final SimpleDateFormat DATE_FMT = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
 
-	/* ZUL COMPONENTS */
+	//ZUL COMPONENTS
 
-	/* User card */
+	//User card
 	private Label totalUsersValue;
 	private Label activeUsersValue;
 	private Label inactiveUsersValue;
 	private Label userManageLink;
 
-	/* Session card */
+	//Session card
 	private Vlayout sessionStatusBox;
 	private Label sessionCurrentLbl;
 	private Label sessionNameLbl;
@@ -55,22 +55,16 @@ public class DashboardController extends GenericForwardComposer<Component> {
 	private Label sessionBadgeLbl;
 	private Label sessionManageLink;
 
-	/* Batch card */
-	private Label totalBatchesValue;
-	private Label inProgressBatchesValue;
-	private Label completedBatchesValue;
-	private Label batchTrackLink;
-
-	/* Recent logs */
+	//Recent logs
 	private Button viewAuditLogsBtn;
 	private Listbox recentAuditListbox;
 
-	/* SERVICES */
+	//SERVICES
 
 	private AuditLogService auditLogService;
 	private SessionService sessionService;
 
-	/* LIFECYCLE */
+	//LIFECYCLE
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
@@ -82,7 +76,7 @@ public class DashboardController extends GenericForwardComposer<Component> {
 		auditLogService = new AuditLogServiceImpl();
 		sessionService = new SessionServiceImpl();
 
-		/* Navigation links */
+		//Navigation links
 		userManageLink.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
 			@Override
 			public void onEvent(Event e) throws Exception {
@@ -97,13 +91,6 @@ public class DashboardController extends GenericForwardComposer<Component> {
 			}
 		});
 
-		batchTrackLink.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
-			@Override
-			public void onEvent(Event e) throws Exception {
-				Executions.sendRedirect("/zul/admin/admin-batch-monitoring.zul");
-			}
-		});
-
 		viewAuditLogsBtn.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
 			@Override
 			public void onEvent(Event e) throws Exception {
@@ -111,14 +98,13 @@ public class DashboardController extends GenericForwardComposer<Component> {
 			}
 		});
 
-		/* Load all dashboard data */
+		//Load all dashboard data
 		loadUserCounts();
 		loadSessionState();
-		loadBatchCounts();
 		loadRecentAuditLogs();
 	}
 
-	/* USER COUNTS */
+	//USER COUNTS
 
 	private void loadUserCounts() {
 
@@ -137,7 +123,7 @@ public class DashboardController extends GenericForwardComposer<Component> {
 		}
 	}
 
-	/* SESSION STATE */
+	//SESSION STATE 
 
 	private void loadSessionState() {
 
@@ -170,71 +156,7 @@ public class DashboardController extends GenericForwardComposer<Component> {
 		}
 	}
 
-	/* BATCH COUNTS */
-	/*
-	 * Combines inward_batch (via inward_batch_history) + outward_batch for total /
-	 * in-progress / completed counts
-	 */
-
-	private void loadBatchCounts() {
-
-		try (Connection conn = ConnectionPool.getDataSource().getConnection()) {
-
-			/* Count outward batches by status */
-			int outwardTotal = 0, outwardInProgress = 0, outwardCompleted = 0;
-
-			try (PreparedStatement stmt = conn.prepareStatement(
-					"SELECT batch_status, COUNT(*) AS cnt " + "FROM outward_batch " + "GROUP BY batch_status");
-					ResultSet rs = stmt.executeQuery()) {
-				while (rs.next()) {
-					String s = rs.getString("batch_status");
-					int cnt = rs.getInt("cnt");
-					outwardTotal += cnt;
-					if (s != null) {
-						String upper = s.toUpperCase();
-						if (upper.contains("COMPLET") || upper.contains("VERIFIED")) {
-							outwardCompleted += cnt;
-						} else if (!upper.contains("CANCEL")) {
-							outwardInProgress += cnt;
-						}
-					}
-				}
-			}
-
-			/* Count inward batches via latest history status */
-			int inwardTotal = 0, inwardInProgress = 0, inwardCompleted = 0;
-
-			try (PreparedStatement stmt = conn.prepareStatement("SELECT DISTINCT ON (batch_id) batch_id, batch_status "
-					+ "FROM inward_batch_history " + "ORDER BY batch_id, changed_on DESC");
-					ResultSet rs = stmt.executeQuery()) {
-				while (rs.next()) {
-					String s = rs.getString("batch_status");
-					inwardTotal++;
-					if (s != null) {
-						String upper = s.toUpperCase();
-						if (upper.contains("COMPLET") || upper.contains("ACCEPT")) {
-							inwardCompleted++;
-						} else {
-							inwardInProgress++;
-						}
-					}
-				}
-			}
-
-			int total = outwardTotal + inwardTotal;
-			int inProgress = outwardInProgress + inwardInProgress;
-			int completed = outwardCompleted + inwardCompleted;
-
-			totalBatchesValue.setValue(String.valueOf(total));
-			inProgressBatchesValue.setValue(String.valueOf(inProgress));
-			completedBatchesValue.setValue(String.valueOf(completed));
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	/* RECENT AUDIT LOGS — top 5 from user_session */
+	//RECENT AUDIT LOGS - top 5 from user_session 
 
 	private void loadRecentAuditLogs() {
 
@@ -248,28 +170,28 @@ public class DashboardController extends GenericForwardComposer<Component> {
 
 				Listitem item = new Listitem();
 
-				/* User ID */
+				//User ID
 				Listcell userIdCell = new Listcell();
 				Label userIdLabel = new Label(log.getUserId() == null ? "-" : String.valueOf(log.getUserId()));
 				userIdLabel.setSclass("audit-user-label");
 				userIdCell.appendChild(userIdLabel);
 				item.appendChild(userIdCell);
 
-				/* Role */
+				//Role
 				Listcell roleCell = new Listcell();
 				Label roleLabel = new Label(log.getRoleName() == null ? "-" : log.getRoleName());
 				roleLabel.setSclass("audit-module-label");
 				roleCell.appendChild(roleLabel);
 				item.appendChild(roleCell);
 
-				/* Login */
+				//Login
 				Listcell loginCell = new Listcell();
 				Label loginLabel = new Label(log.getLoginTime() == null ? "-" : DATE_FMT.format(log.getLoginTime()));
 				loginLabel.setSclass("audit-datetime-label");
 				loginCell.appendChild(loginLabel);
 				item.appendChild(loginCell);
 
-				/* Logout */
+				//Logout
 				Listcell logoutCell = new Listcell();
 				Label logoutLabel = new Label(log.getLogoutTime() == null ? "-" : DATE_FMT.format(log.getLogoutTime()));
 				logoutLabel.setSclass("audit-datetime-label");

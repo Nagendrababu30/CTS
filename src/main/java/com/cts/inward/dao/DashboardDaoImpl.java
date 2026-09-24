@@ -43,7 +43,8 @@ public class DashboardDaoImpl implements DashboardDao {
 	                ON b.batch_id = h.batch_id
 
 	            /*
-	             * Get latest lock record for each batch.
+	             * Get active lock record for each batch (prioritize LOCKED),
+	             * or latest lock record if none is currently LOCKED.
 	             */
 	            LEFT JOIN (
 	                SELECT DISTINCT ON (batch_id)
@@ -55,6 +56,7 @@ public class DashboardDaoImpl implements DashboardDao {
 	                FROM public.inward_batch_lock
 	                ORDER BY
 	                    batch_id,
+	                    CASE WHEN lock_status = 'LOCKED' THEN 1 ELSE 2 END,
 	                    locked_time DESC,
 	                    lock_id DESC
 	            ) l

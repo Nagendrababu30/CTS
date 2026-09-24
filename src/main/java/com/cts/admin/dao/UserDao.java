@@ -5,24 +5,21 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.List;
 
+import com.cts.admin.model.Role;
 import com.cts.admin.model.User;
 import com.cts.admin.util.PasswordUtil;
 import com.cts.inward.config.ConnectionPool;
 
-/**
- * UserDao — handles both legacy authentication and CRUD interface.
- */
+
 public class UserDao {
 
-    // ================================================================
     // LEGACY AUTH — used by LoginComposer via UserServiceImpl
-    // ================================================================
 
 	public User authenticate(String username, String password) {
 
 	    String sql =
 	            "SELECT u.user_id, u.username, u.password, "
-	            + "u.role_id, r.role_name, u.status, u.last_login "
+	            + "u.role_id, r.role_name, r.description, r.status as role_status, u.status, u.last_login "
 	            + "FROM \"user\" u "
 	            + "JOIN \"role\" r ON u.role_id = r.role_id "
 	            + "WHERE u.username = ? "
@@ -53,10 +50,16 @@ public class UserDao {
 	                user.setUserId(rs.getLong("user_id"));
 	                user.setUsername(rs.getString("username"));
 	                user.setPasswordHash(storedHash);
-	                user.setRoleId(rs.getLong("role_id"));
-	                user.setRoleName(rs.getString("role_name"));
 	                user.setStatus(rs.getString("status"));
 	                user.setLastLogin(rs.getTimestamp("last_login"));
+
+	                // Create and set Role object
+	                Role role = new Role();
+	                role.setRoleId(rs.getLong("role_id"));
+	                role.setRoleName(rs.getString("role_name"));
+	                role.setDescription(rs.getString("description"));
+	                role.setStatus(rs.getString("role_status"));
+	                user.setRole(role);
 
 	                System.out.println(
 	                        "AUTH SUCCESS: userId=" + rs.getLong("user_id")
@@ -81,9 +84,7 @@ public class UserDao {
 	    return null;
 	}
 
-    // ================================================================
     // CRUD METHODS
-    // ================================================================
 
     public List<User> getUsers(int limit, int offset,
             String searchText, Long roleId, String status) {

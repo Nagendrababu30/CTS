@@ -46,9 +46,9 @@ public class OutwardMakerMicrRepairDetailDAO {
 
                 while (rs.next()) {
 
-                    OutwardCheque cheque = new OutwardCheque();
+               OutwardCheque cheque = new OutwardCheque();
 
-                    cheque.setBatchNumber(
+                cheque.setBatchNumber(
                             rs.getString("batch_number"));
 
                     cheque.setChequeNumber(
@@ -163,22 +163,6 @@ public class OutwardMakerMicrRepairDetailDAO {
                 if (rowsUpdated > 0) {
 
                     connection.commit();
-
-                    System.out.println(
-                            "======================================");
-                    System.out.println(
-                            "MICR REPAIR STATUS UPDATED");
-                    System.out.println(
-                            "Batch Number  : " + batchNumber);
-                    System.out.println(
-                            "Cheque Number : " + chequeNumber);
-                    System.out.println(
-                            "Returned Mode : " + returnedMode);
-                    System.out.println(
-                            "New Status    : " + verificationStatus);
-                    System.out.println(
-                            "======================================");
-
                     return true;
                 }
 
@@ -253,7 +237,7 @@ public class OutwardMakerMicrRepairDetailDAO {
 
         String sql =
                 "UPDATE outward_batch "
-                + "SET batch_status = 'MICR_REPAIR_COMPLETED' "
+                + "SET batch_status = 'MICR Repaired' "
                 + "WHERE batch_number = ? "
                 + "AND batch_status = 'MICR_REPAIR'";
 

@@ -1,6 +1,7 @@
 package com.iispl.cts.controller.outward;
 
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -12,10 +13,8 @@ import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Wire;
-import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
-import org.zkoss.zul.Datebox;
 import org.zkoss.zul.Filedownload;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Listbox;
@@ -23,6 +22,7 @@ import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Paging;
+import org.zkoss.zul.Textbox;
 
 import com.cts.admin.service.SessionService;
 import com.cts.admin.service.SessionServiceImpl;
@@ -618,231 +618,180 @@ extends SelectorComposer<Component> {
 					new SimpleDateFormat(
 							"dd/MM/yyyy");
 
-			for (Object[] row : history) {
+                if (row.length > 0
+                        && row[0] != null) {
 
-				Listitem item = new Listitem();
+                    downloadDateCell.setLabel(
+                            dateTimeFormat.format(
+                                    (Date) row[0]
+                            )
+                    );
 
-				Listcell downloadDateCell =
-						new Listcell();
+                } else {
 
-				if (row[0] != null) {
-					downloadDateCell.setLabel(
-							dateTimeFormat.format(
-									(Date) row[0]));
-				} else {
-					downloadDateCell.setLabel("-");
-				}
+                    downloadDateCell.setLabel("-");
+                }
 
-				item.appendChild(downloadDateCell);
+                item.appendChild(
+                        downloadDateCell
+                );
 
-				Listcell fromDateCell =
-						new Listcell();
+                /*
+                 * ---------------------------------------------
+                 * FROM DATE
+                 * ---------------------------------------------
+                 */
 
-				if (row[1] != null) {
-					fromDateCell.setLabel(
-							dateFormat.format(
-									(Date) row[1]));
-				} else {
-					fromDateCell.setLabel("-");
-				}
+                Listcell fromDateCell =
+                        new Listcell();
 
-				item.appendChild(fromDateCell);
+                if (row.length > 1
+                        && row[1] != null) {
 
-				Listcell toDateCell =
-						new Listcell();
+                    fromDateCell.setLabel(
+                            dateFormat.format(
+                                    (Date) row[1]
+                            )
+                    );
 
-				if (row[2] != null) {
-					toDateCell.setLabel(
-							dateFormat.format(
-									(Date) row[2]));
-				} else {
-					toDateCell.setLabel("-");
-				}
+                } else {
 
-				item.appendChild(toDateCell);
+                    fromDateCell.setLabel("-");
+                }
 
-				Listcell formatCell =
-						new Listcell();
+                item.appendChild(
+                        fromDateCell
+                );
 
-				formatCell.setLabel(
-						row[3] != null
-						? row[3].toString()
-								: "-");
+                /*
+                 * ---------------------------------------------
+                 * TO DATE
+                 * ---------------------------------------------
+                 */
 
-				item.appendChild(formatCell);
+                Listcell toDateCell =
+                        new Listcell();
 
-				Listcell actionCell =
-						new Listcell();
+                if (row.length > 2
+                        && row[2] != null) {
 
-				Button viewButton =
-						new Button("View");
+                    toDateCell.setLabel(
+                            dateFormat.format(
+                                    (Date) row[2]
+                            )
+                    );
 
-				viewButton.setWidth("60px");
-				viewButton.setHeight("28px");
-				viewButton.setSclass(
-						"reports-view-button");
+                } else {
 
-				Date historyFrom = null;
-				Date historyTo = null;
+                    toDateCell.setLabel("-");
+                }
 
-				if (row[1] != null) {
-					historyFrom = (Date) row[1];
-				}
+                item.appendChild(
+                        toDateCell
+                );
 
-				if (row[2] != null) {
-					historyTo = (Date) row[2];
-				}
+                /*
+                 * ---------------------------------------------
+                 * FORMAT
+                 * ---------------------------------------------
+                 */
 
-				final Date selectedFrom =
-						historyFrom;
+                Listcell formatCell =
+                        new Listcell();
 
-				final Date selectedTo =
-						historyTo;
+                if (row.length > 3
+                        && row[3] != null) {
 
-				viewButton.addEventListener(
-						Events.ON_CLICK,
-						event -> showHistoryData(
-								selectedFrom,
-								selectedTo));
+                    formatCell.setLabel(
+                            row[3].toString()
+                    );
 
-				actionCell.appendChild(
-						viewButton);
+                } else {
 
-				item.appendChild(actionCell);
+                    formatCell.setLabel("-");
+                }
 
-				downloadHistoryList.appendChild(
-						item);
-			}
+                item.appendChild(
+                        formatCell
+                );
 
-			if (historyCountLabel != null) {
-				historyCountLabel.setValue(
-						"Showing "
-								+ history.size()
-								+ " records");
-			}
+                /*
+                 * ---------------------------------------------
+                 * ADD ROW
+                 * ---------------------------------------------
+                 */
 
-		} catch (Exception e) {
-			e.printStackTrace();
+                downloadHistoryList
+                        .appendChild(item);
+            }
 
-			if (historyCountLabel != null) {
-				historyCountLabel.setValue(
-						"Unable to load history");
-			}
+            /*
+             * -------------------------------------------------
+             * RECORD COUNT
+             * -------------------------------------------------
+             */
 
-			Messagebox.show(
-					"Unable to load download history.",
-					"Download History",
-					Messagebox.OK,
-					Messagebox.ERROR);
-		}
-	}
+            if (historyCountLabel != null) {
 
-	private void showHistoryData(
-			Date from,
-			Date to) {
+                historyCountLabel.setValue(
+                        "Showing "
+                                + history.size()
+                                + " records"
+                );
+            }
 
-		try {
-			List<OutwardBatch> batches =
-					service.getReportData(
-							currentUserId,
-							from,
-							to);
+        } catch (Exception e) {
 
-			if (batches == null || batches.isEmpty()) {
-				Messagebox.show(
-						"No batch data found for this download range.",
-						"Download History",
-						Messagebox.OK,
-						Messagebox.INFORMATION);
+            e.printStackTrace();
 
-				return;
-			}
+            if (historyCountLabel != null) {
 
-			SimpleDateFormat dateFormat =
-					new SimpleDateFormat(
-							"dd/MM/yyyy HH:mm:ss");
+                historyCountLabel.setValue(
+                        "Unable to load history"
+                );
+            }
 
-			StringBuilder report =
-					new StringBuilder();
+            Messagebox.show(
+                    "Unable to load download history.",
+                    "Download History",
+                    Messagebox.OK,
+                    Messagebox.ERROR
+            );
+        }
+    }
 
-			report.append(
-					"Capture Operator Report\n\n")
-			.append("Operator ID : ")
-			.append(currentUserId)
-			.append("\n")
-			.append("From Date : ")
-			.append(formatDate(from))
-			.append("\n")
-			.append("To Date : ")
-			.append(formatDate(to))
-			.append("\n\n")
-			.append("Total Batches : ")
-			.append(batches.size())
-			.append("\n\n")
-			.append(
-					"------------------------------------------------------------\n")
-			.append(
-					"Batch Number | Date | Total Cheques | Batch Status\n")
-			.append(
-					"------------------------------------------------------------\n");
+    /*
+     * =========================================================
+     * FORMAT DATE
+     * =========================================================
+     */
 
-			for (OutwardBatch batch : batches) {
+    private String formatDate(Date date) {
 
-				report.append(
-						safeValue(
-								batch.getBatchNumber()))
-				.append(" | ");
+        if (date == null) {
 
-				if (batch.getCreatedAt() != null) {
-					report.append(
-							dateFormat.format(
-									java.sql.Timestamp.valueOf(
-											batch.getCreatedAt())));
-				} else {
-					report.append("-");
-				}
+            return "-";
+        }
 
-				report.append(" | ")
-				.append(batch.getNumberOfCheques())
-				.append(" | ")
-				.append(
-						safeValue(
-								batch.getBatchStatus()))
-				.append("\n");
-			}
+        return new SimpleDateFormat(
+                DATE_FORMAT
+        ).format(date);
+    }
 
-			Messagebox.show(
-					report.toString(),
-					"Download History - Report Data",
-					Messagebox.OK,
-					Messagebox.INFORMATION);
+    /*
+     * =========================================================
+     * SAFE VALUE
+     * =========================================================
+     */
 
-		} catch (Exception e) {
-			e.printStackTrace();
+    private String safeValue(String value) {
 
-			Messagebox.show(
-					"Unable to load report data.",
-					"Download History",
-					Messagebox.OK,
-					Messagebox.ERROR);
-		}
-	}
+        if (value == null
+                || value.trim().isEmpty()) {
 
-	private String formatDate(Date date) {
-		if (date == null) {
-			return "-";
-		}
+            return "-";
+        }
 
-		return new SimpleDateFormat(
-				"dd/MM/yyyy").format(date);
-	}
-
-	private String safeValue(String value) {
-		if (value == null
-				|| value.trim().isEmpty()) {
-			return "-";
-		}
-
-		return value;
-	}
+        return value;
+    }
 }

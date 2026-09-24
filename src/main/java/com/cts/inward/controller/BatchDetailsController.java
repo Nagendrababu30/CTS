@@ -36,259 +36,147 @@ public class BatchDetailsController
         extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
-
-    // =========================================================
+    
     // BATCH
-    // =========================================================
 
     private Long batchId;
-
     private List<Map<String, Object>> cheques = new ArrayList<>();
-
     private int currentChequeIndex = 0;
-
     private BatchDetailsService batchDetailsService;
 
-    // =========================================================
     // CHEQUE IMAGE & CONTROLS (Image 2)
-    // =========================================================
 
     private Image chequeImage;
-
     private Component chequeImageContainer;
-
     private Component chequePreview;
-
     private Button toggleImageButton;
-
     private Button zoomInButton;
-
     private Button zoomOutButton;
-
     private Button rotateButton;
-
     private Button resetViewButton;
-
     private Button btnFront;
-
     private Button btnBack;
-
     private String currentFrontImagePath;
-
     private String currentBackImagePath;
-
     private boolean showingFront = true;
-
     private double currentScale = 1.0;
-
     private int currentRotation = 0;
-
     private ChequeImageDaoImpl chequeImageDao;
-
-    // =========================================================
+    
     // HEADER & METRICS (Image 4)
-    // =========================================================
 
     private Label pageTitle;
-
     private Button backToList;
-
     private Label batchLabel;
-
     private Label totalCountLabel;
-
     private Label completedCountLabel;
-
     private Label pendingCountLabel;
-
     private Label chequeCounter;
-
     private Label makerId;
 
-    // =========================================================
     // LEFT CHEQUE PREVIEW
-    // =========================================================
 
     private Label bankName;
-
     private Label branchName;
-
     private Label imageChequeNumber;
-
     private Label imageChequeDate;
-
     private Label payeeImage;
-
     private Label amountWordsImage;
-
     private Label amountImage;
-
     private Label micrImage;
-
     private Label chequeNumberLabel;
-
     private Label leftCbsStatus;
 
-    // =========================================================
+
     // RIGHT VERIFICATION HEADER
-    // =========================================================
 
     private Label rightChequeNumber;
-
     private Label chequePosition;
-
     private Label rightBankName;
 
-    // =========================================================
     // MICR SECTION
-    // =========================================================
 
     private Vlayout micrUnchanged;
-
     private Label micrValue;
-
     private Hlayout micrCorrection;
-
     private Label oldMicrValue;
-
     private Label correctedMicrValue;
-
     private Label micrStatus;
 
-    // =========================================================
     // DATA ENTRY - ACCOUNT NUMBER
-    // =========================================================
 
     private Label accountStatus;
-
     private Hlayout accountCorrection;
-
     private Label oldAccountNumber;
-
     private Label correctedAccountNumber;
-
     private Hlayout accountUnchanged;
-
     private Label accountNumber;
 
-    // =========================================================
     // DATA ENTRY - AMOUNT
-    // =========================================================
 
     private Label amountStatus;
-
     private Hlayout amountCorrection;
-
     private Label oldAmount;
-
     private Label correctedAmount;
-
     private Hlayout amountUnchanged;
-
     private Label amount;
 
-    // =========================================================
+
     // DATA ENTRY - CHEQUE DATE
-    // =========================================================
 
     private Label dateStatus;
-
     private Hlayout dateCorrection;
-
     private Label oldChequeDate;
-
     private Label correctedChequeDate;
-
     private Hlayout dateUnchanged;
-
     private Label chequeDate;
-
     private Label dataEntrySummary;
 
-    // =========================================================
     // DATA ENTRY - CHEQUE NUMBER
     // DB FIELD = cheque_number
-    // =========================================================
 
     private Label chequeNoStatus;
-
     private Hlayout chequeNoCorrection;
-
     private Label oldChequeNumber;
-
     private Label correctedChequeNumber;
-
     private Hlayout chequeNoUnchanged;
-
     private Label chequeNumberVal;
 
-    // =========================================================
     // CBS VALIDATION
-    // =========================================================
 
     private Label cbsTitle;
-
     private Label cbsActionStatus;
-
     private Hlayout cbsFailure;
-
     private Label cbsFailureText;
-
     private Label cbsAmountResult;
-
     private Label cbsDateResult;
-
     private Label cbsAccountResult;
 
-    // =========================================================
     // CHEQUE NAVIGATION
-    // =========================================================
 
     private Button cheque1;
-
     private Button cheque2;
-
     private Button cheque3;
-
     private Button cheque4;
-
     private Button cheque5;
-
     private Button cheque6;
-
     private Button cheque7;
-
     private Button cheque8;
-
     private Button cheque9;
-
     private Button cheque10;
-
     private Button cheque11;
-
     private Button cheque12;
-
     private Button cheque13;
-
     private Button cheque14;
-
     private Button cheque15;
-
     private Button nextChequeArrow;
-
     private Button previousCheque;
-
     private Button nextCheque;
-
     private Button completeVerification;
 
-    // =========================================================
     // INIT
-    // =========================================================
 
-    // =========================================================
     // CHECKER DECISION
-    // =========================================================
 
     private Integer userId;
 
@@ -317,9 +205,8 @@ public class BatchDetailsController
     private boolean cbsPassed = false;
     private List<String> currentCbsFailedReasonCodes = new ArrayList<>();
 
-    // =========================================================
     // MAKER RETURN PANEL (RETURN_BY_MAKER)
-    // =========================================================
+    
     private Vlayout makerReturnPanel;
     private Vlayout verificationFormContainer;
     private Vlayout makerReturnReasonsList;
@@ -340,80 +227,48 @@ public class BatchDetailsController
 
         super.doAfterCompose(component);
 
-        // =========================================================
         // POPUP CONTROLS
-        //
-        // IMPORTANT:
-        // Each Window is its own ZK ID space. Therefore controls
-        // inside the popup windows cannot reliably be wired by the
-        // outer GenericForwardComposer. Get them from their own
-        // Window ID space and register the events explicitly.
-        // =========================================================
+        
 
         if (acceptConfirmWindow != null) {
-            acceptCancelButton = (Button) acceptConfirmWindow.getFellow(
-                    "acceptCancelButton");
+            acceptCancelButton = (Button) acceptConfirmWindow.getFellow("acceptCancelButton");
 
-            acceptConfirmButton = (Button) acceptConfirmWindow.getFellow(
-                    "acceptConfirmButton");
+            acceptConfirmButton = (Button) acceptConfirmWindow.getFellow("acceptConfirmButton");
 
-            acceptCancelButton.addEventListener(
-                    Events.ON_CLICK,
-                    event -> handleAcceptCancelButton());
+            acceptCancelButton.addEventListener(Events.ON_CLICK, event -> handleAcceptCancelButton());
 
-            acceptConfirmButton.addEventListener(
-                    Events.ON_CLICK,
-                    event -> handleAcceptConfirmButton());
+            acceptConfirmButton.addEventListener(Events.ON_CLICK, event -> handleAcceptConfirmButton());
         }
 
         if (rejectWindow != null) {
-            rejectReasonsContainer =
-                    (Vlayout) rejectWindow.getFellowIfAny(
-                            "rejectReasonsContainer");
-
-            rejectRemark = (Textbox) rejectWindow.getFellow(
-                    "rejectRemark");
-
-            rejectCancelButton = (Button) rejectWindow.getFellow(
-                    "rejectCancelButton");
-
-            rejectConfirmButton = (Button) rejectWindow.getFellow(
-                    "rejectConfirmButton");
-
-            rejectCancelButton.addEventListener(
-                    Events.ON_CLICK,
-                    event -> handleRejectCancelButton());
-
-            rejectConfirmButton.addEventListener(
-                    Events.ON_CLICK,
-                    event -> handleRejectConfirmButton());
+            rejectReasonsContainer =(Vlayout) rejectWindow.getFellowIfAny("rejectReasonsContainer");
+            
+            rejectRemark = (Textbox) rejectWindow.getFellow("rejectRemark");
+            
+            rejectCancelButton = (Button) rejectWindow.getFellow("rejectCancelButton");
+            
+            rejectConfirmButton = (Button) rejectWindow.getFellow("rejectConfirmButton");
+            
+            rejectCancelButton.addEventListener(Events.ON_CLICK, event -> handleRejectCancelButton());
+            
+            rejectConfirmButton.addEventListener(Events.ON_CLICK, event -> handleRejectConfirmButton());
         }
 
         if (returnWindow != null) {
-            returnReasonsContainer =
-                    (Vlayout) returnWindow.getFellowIfAny(
-                            "returnReasonsContainer");
+        	returnReasonsContainer = (Vlayout) returnWindow.getFellowIfAny("returnReasonsContainer");
 
-            returnRemark = (Textbox) returnWindow.getFellow(
-                    "returnRemark");
+            returnRemark = (Textbox) returnWindow.getFellow("returnRemark");
 
-            returnCancelButton = (Button) returnWindow.getFellow(
-                    "returnCancelButton");
+            returnCancelButton = (Button) returnWindow.getFellow("returnCancelButton");
 
-            returnConfirmButton = (Button) returnWindow.getFellow(
-                    "returnConfirmButton");
+            returnConfirmButton = (Button) returnWindow.getFellow("returnConfirmButton");
 
-            returnCancelButton.addEventListener(
-                    Events.ON_CLICK,
-                    event -> handleReturnCancelButton());
+            returnCancelButton.addEventListener(Events.ON_CLICK,event -> handleReturnCancelButton());
 
-            returnConfirmButton.addEventListener(
-                    Events.ON_CLICK,
-                    event -> handleReturnConfirmButton());
+            returnConfirmButton.addEventListener(Events.ON_CLICK,event -> handleReturnConfirmButton());
         }
-
-        // Keep all decision popups hidden when the page is first created.
-        // They are opened explicitly only from their corresponding buttons.
+        
+         
         if (acceptConfirmWindow != null) {
             acceptConfirmWindow.setVisible(false);
         }

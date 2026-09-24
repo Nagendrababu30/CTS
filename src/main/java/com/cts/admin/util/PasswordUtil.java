@@ -7,12 +7,10 @@ public class PasswordUtil {
 	private static final int BCRYPT_ROUNDS = 12;
 
 	private PasswordUtil() {
-		// Utility class
+
 	}
 
-	// ================================================================
 	// PASSWORD STRENGTH VALIDATION
-	// ================================================================
 
 	public static boolean isStrongPassword(String password) {
 
@@ -29,9 +27,7 @@ public class PasswordUtil {
 		return hasMinimumLength && hasUppercase && hasLowercase && hasNumber && hasSpecial;
 	}
 
-	// ================================================================
 	// HASH PASSWORD
-	// ================================================================
 
 	public static String hashPassword(String plainPassword) {
 
@@ -44,9 +40,7 @@ public class PasswordUtil {
 		return BCrypt.hashpw(plainPassword, BCrypt.gensalt(BCRYPT_ROUNDS));
 	}
 
-	// ================================================================
 	// VERIFY PASSWORD
-	// ================================================================
 
 	public static boolean verifyPassword(String plainPassword, String storedHash) {
 

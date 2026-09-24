@@ -31,12 +31,16 @@ import com.cts.admin.service.SessionServiceImpl;
 import com.cts.inward.config.ApplicationConfiguration;
 import com.cts.inward.config.FileConfiguration;
 import com.cts.inward.config.FileSystemInitializer;
+import com.cts.inward.dao.BatchDao;
 import com.cts.inward.dao.BatchDaoImpl;
-import com.cts.inward.dao.ChequeImageDaoImpl;
+import com.cts.inward.dao.ChequeDao;
 import com.cts.inward.dao.ChequeDaoImpl;
+import com.cts.inward.dao.ChequeImageDaoImpl;
 import com.cts.inward.dao.FileSummaryDaoImpl;
 import com.cts.inward.dao.InwardFileDaoImpl;
+import com.cts.inward.dao.OcrBatchDao;
 import com.cts.inward.dao.OcrBatchDaoImpl;
+import com.cts.inward.dao.OcrChequeDao;
 import com.cts.inward.dao.OcrChequeDaoImpl;
 import com.cts.inward.file.FileProcessingExecutorImpl;
 import com.cts.inward.file.IncomingFileWatcherImpl;
@@ -75,19 +79,13 @@ public class SessionManagementController
 
     private static final int PAGE_SIZE = 5;
 
-    // END SESSION MODAL
-
     private Window endSessionModal;
     private Button modalCloseButton;
     private Button modalCancelButton;
     private Button modalConfirmButton;
 
-    // SERVICES
-
     private SessionService         sessionService;
     private InwardIngestionService inwardIngestionService;
-
-    // COMPOSE
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
@@ -97,9 +95,9 @@ public class SessionManagementController
         sessionService = new SessionServiceImpl();
 
         /* --------------------------------------------------------
-         * Build the full inward processing object graph.
-         * This is manual DI since there is no IoC container.
-         * -------------------------------------------------------- */
+          Build the full inward processing object graph.
+          This is manual DI since there is no IoC container.
+          -------------------------------------------------------- */
 
         // 1. Config
         ApplicationConfiguration appConfig =
@@ -126,13 +124,13 @@ public class SessionManagementController
         PibfProcessorImpl pibfProcessor = PibfProcessorImpl.of();
 
         // 3. DAOs
-        com.cts.inward.dao.BatchDao        batchDao       = BatchDaoImpl.of();
-        com.cts.inward.dao.ChequeDao       chequeDao      = ChequeDaoImpl.of();
-        com.cts.inward.dao.OcrBatchDao     ocrBatchDao    = OcrBatchDaoImpl.of();
-        com.cts.inward.dao.OcrChequeDao    ocrChequeDao   = OcrChequeDaoImpl.of();
-        ChequeImageDaoImpl                 chequeImageDao = ChequeImageDaoImpl.of();
-        FileSummaryDaoImpl                 fileSummaryDao = FileSummaryDaoImpl.of();
-        InwardFileDaoImpl                  inwardFileDao  = InwardFileDaoImpl.of();
+        BatchDao               batchDao       = BatchDaoImpl.of();
+        ChequeDao              chequeDao      = ChequeDaoImpl.of();
+        OcrBatchDao            ocrBatchDao    = OcrBatchDaoImpl.of();
+        OcrChequeDao           ocrChequeDao   = OcrChequeDaoImpl.of();
+        ChequeImageDaoImpl      chequeImageDao = ChequeImageDaoImpl.of();
+        FileSummaryDaoImpl      fileSummaryDao = FileSummaryDaoImpl.of();
+        InwardFileDaoImpl       inwardFileDao  = InwardFileDaoImpl.of();
 
         // 4. Services
         BatchServiceImpl      batchService      = BatchServiceImpl.of(batchDao);
@@ -182,9 +180,7 @@ public class SessionManagementController
                         fileConfig);
 
 
-        /* --------------------------------------------------------
-         * Wire ZUL components
-         * -------------------------------------------------------- */
+        // Wire ZUL components
 
         currentSessionCard    = (Vlayout) comp.getFellow("currentSessionCard");
         sessionStatusBadge    = (Label)   comp.getFellow("sessionStatusBadge");
@@ -386,14 +382,13 @@ public class SessionManagementController
                         Messagebox.OK,
                         Messagebox.INFORMATION);
 
-                /* ------------------------------------------------
-                 * Trigger inward file processing:
+                /* Trigger inward file processing:
                  *  1. getCHIFilePaths() — get files from inward_file table
                  *  2. moveFilesToIncoming() — move to incoming/{type}/ dirs
                  *  3. startWatching() — NIO watcher detects files
                  *  4. FileProcessingExecutor submits each file
-                 *  5. processFile() parses and saves to DB
-                 * ------------------------------------------------ */
+                 *  5. processFile() parses and saves to DB */
+                
                 inwardIngestionService.processSessionFiles();
 
             } else {

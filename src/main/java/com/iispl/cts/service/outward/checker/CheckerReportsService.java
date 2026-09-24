@@ -269,4 +269,12 @@ public class CheckerReportsService {
             );
         }
     }
+    public String getCheckerReasonName(
+            String batchNumber,
+            String chequeNumber) {
+
+        return dao.getCheckerReasonName(
+                batchNumber,
+                chequeNumber);
+    }
 }

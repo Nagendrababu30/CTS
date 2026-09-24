@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RejectedChequesReport>
+    <BatchNumber>OUT20260924162217213</BatchNumber>
+    <TotalRejectedCheques>2</TotalRejectedCheques>
+    <Cheques>
+        <Cheque>
+            <ChequeNumber>000101</ChequeNumber>
+            <BatchNumber>OUT20260924162217213</BatchNumber>
+            <ChequeDate>2024-07-15</ChequeDate>
+            <CityCode>560</CityCode>
+            <BankCode>240</BankCode>
+            <BranchCode>012</BranchCode>
+            <DrawerAccountNumber>01010345678</DrawerAccountNumber>
+            <DrawerName>S R DESAI</DrawerName>
+            <PayeeName>BALAJI DISTRIBUTORS</PayeeName>
+            <PayeeAccountNumber></PayeeAccountNumber>
+            <Amount>15450.00</Amount>
+            <AmountInWords>FIFTEEN THOUSAND FOUR HUNDRED AND FIFTY ONLY</AmountInWords>
+            <ChequeStatus>CHECKER_REJECTED</ChequeStatus>
+            <ReturnReasonId>CBS validation failed</ReturnReasonId>
+            <CheckerRemarks></CheckerRemarks>
+        </Cheque>
+        <Cheque>
+            <ChequeNumber>123456</ChequeNumber>
+            <BatchNumber>OUT20260924162217213</BatchNumber>
+            <ChequeDate>2026-07-18</ChequeDate>
+            <CityCode>567</CityCode>
+            <BankCode>890</BankCode>
+            <BranchCode>123</BranchCode>
+            <DrawerAccountNumber>234567890</DrawerAccountNumber>
+            <DrawerName>ANTONY THOMAS</DrawerName>
+            <PayeeName>COCHIN SEAFOODS</PayeeName>
+            <PayeeAccountNumber></PayeeAccountNumber>
+            <Amount>70000.00</Amount>
+            <AmountInWords>SEVENTY THOUSAND RUPEES ONLY</AmountInWords>
+            <ChequeStatus>CHECKER_REJECTED</ChequeStatus>
+            <ReturnReasonId>CBS validation failed</ReturnReasonId>
+            <CheckerRemarks></CheckerRemarks>
+        </Cheque>
+    </Cheques>
+</RejectedChequesReport>

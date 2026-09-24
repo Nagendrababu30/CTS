@@ -16,6 +16,8 @@ import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Messagebox;
 
+import com.cts.admin.service.SessionService;
+import com.cts.admin.service.SessionServiceImpl;
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.service.outward.OutwardMakerSendCheckerService;
 
@@ -28,6 +30,7 @@ public class OutwardMakerSendCheckerController
     private Listbox batchListbox;
 
     private OutwardMakerSendCheckerService service;
+    private SessionService sessionService;
 
     private long currentUserId;
 
@@ -110,6 +113,35 @@ public class OutwardMakerSendCheckerController
             }
         }
 
+        sessionService = new SessionServiceImpl();
+
+		com.cts.admin.model.Session clearingSession =
+				sessionService.getActiveSession();
+        
+
+		if (clearingSession == null
+				|| clearingSession.getStatus() == null
+				|| !"STARTED".equalsIgnoreCase(
+						clearingSession.getStatus().trim())) {
+
+			Messagebox.show(
+					"Clearing session is not started.\n\n"
+							+ "Sent to checker operations "
+							+ "are currently unavailable.",
+							"Session Not Started",
+							Messagebox.OK,
+							Messagebox.EXCLAMATION,
+							event -> {
+
+								if (Messagebox.ON_OK.equals(
+										event.getName())) {
+
+									Executions.sendRedirect("/login.zul");
+								}
+							});
+
+			return;
+		}
         // =====================================================
         // LOG CURRENT USER
         // =====================================================

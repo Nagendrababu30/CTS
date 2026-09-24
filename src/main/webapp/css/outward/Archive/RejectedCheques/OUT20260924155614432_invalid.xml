@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RejectedChequesReport>
+    <BatchNumber>OUT20260924155614432</BatchNumber>
+    <TotalRejectedCheques>3</TotalRejectedCheques>
+    <Cheques>
+        <Cheque>
+            <ChequeNumber>123456</ChequeNumber>
+            <BatchNumber>OUT20260924155614432</BatchNumber>
+            <ChequeDate>2026-10-15</ChequeDate>
+            <CityCode>987</CityCode>
+            <BankCode>654</BankCode>
+            <BranchCode>387</BranchCode>
+            <DrawerAccountNumber>7896532164956078</DrawerAccountNumber>
+            <DrawerName>TANVEER</DrawerName>
+            <PayeeName>B.NAGA VISHNU</PayeeName>
+            <PayeeAccountNumber>995498236410235</PayeeAccountNumber>
+            <Amount>50000.00</Amount>
+            <AmountInWords>FIFTY THOUSAND RUPEES ONLY</AmountInWords>
+            <ChequeStatus>CHECKER_REJECTED</ChequeStatus>
+            <ReturnReasonId></ReturnReasonId>
+            <CheckerRemarks></CheckerRemarks>
+        </Cheque>
+        <Cheque>
+            <ChequeNumber>301234</ChequeNumber>
+            <BatchNumber>OUT20260924155614432</BatchNumber>
+            <ChequeDate>2026-08-10</ChequeDate>
+            <CityCode>400</CityCode>
+            <BankCode>211</BankCode>
+            <BranchCode>012</BranchCode>
+            <DrawerAccountNumber>8896532164956838</DrawerAccountNumber>
+            <DrawerName>RAMYA</DrawerName>
+            <PayeeName>ALA NANDU</PayeeName>
+            <PayeeAccountNumber>549823641023598</PayeeAccountNumber>
+            <Amount>51000.00</Amount>
+            <AmountInWords>FIFTY ONE THOUSAND RUPEES ONLY</AmountInWords>
+            <ChequeStatus>CHECKER_REJECTED</ChequeStatus>
+            <ReturnReasonId></ReturnReasonId>
+            <CheckerRemarks></CheckerRemarks>
+        </Cheque>
+        <Cheque>
+            <ChequeNumber>789012</ChequeNumber>
+            <BatchNumber>OUT20260924155614432</BatchNumber>
+            <ChequeDate>2026-10-20</ChequeDate>
+            <CityCode>657</CityCode>
+            <BankCode>321</BankCode>
+            <BranchCode>098</BranchCode>
+            <DrawerAccountNumber>8896532164956784</DrawerAccountNumber>
+            <DrawerName>NAGESWARA RAO</DrawerName>
+            <PayeeName>B.SARASWATHI</PayeeName>
+            <PayeeAccountNumber>995498236410235</PayeeAccountNumber>
+            <Amount>100000.00</Amount>
+            <AmountInWords>One LAKH RUPEES ONLY</AmountInWords>
+            <ChequeStatus>CHECKER_REJECTED</ChequeStatus>
+            <ReturnReasonId></ReturnReasonId>
+            <CheckerRemarks></CheckerRemarks>
+        </Cheque>
+    </Cheques>
+</RejectedChequesReport>

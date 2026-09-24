@@ -118,6 +118,38 @@ private OutwardMakerDashboardService service;
                 return;
             }
         }
+     // =====================================================
+     // CHECK CLEARING SESSION
+     // =====================================================
+
+     sessionService = new SessionServiceImpl();
+
+     com.cts.admin.model.Session clearingSession =
+             sessionService.getActiveSession();
+
+     if (clearingSession == null
+             || clearingSession.getStatus() == null
+             || !"STARTED".equalsIgnoreCase(
+                     clearingSession.getStatus().trim())) {
+
+         Messagebox.show(
+                 "Clearing session is not started.\n\n"
+                         + "Outward Maker operations "
+                         + "are currently unavailable.",
+                 "Session Not Started",
+                 Messagebox.OK,
+                 Messagebox.EXCLAMATION,
+                 event -> {
+
+						if (Messagebox.ON_OK.equals(
+								event.getName())) {
+
+							Executions.sendRedirect("/login.zul");
+						}
+					});
+
+         return;
+     }
 
         currentUserId =
                 String.valueOf(userId);

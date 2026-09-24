@@ -10,6 +10,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import com.cts.inward.config.ConnectionPool;
+import com.iispl.cts.data.CTSStaticData;
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.model.outward.OutwardCheque;
 
@@ -844,5 +845,49 @@ public class CheckerReportsDAO {
                 rs.getString("checker_remarks"));
 
         return cheque;
+    }
+    
+    
+    /*fpublicor xml to get reject reason*/
+    public String getCheckerReasonName(
+            String batchNumber,
+            String chequeNumber) {
+
+        String sql =
+                "SELECT r.reason_name "
+                + "FROM cheque_processing cp "
+                + "INNER JOIN return_reason_master r "
+                + "ON r.reason_code = cp.checker_reason_code "
+                + "WHERE cp.batch_number = ? "
+                + "AND cp.cheque_number = ? "
+                + "AND UPPER(TRIM(cp.checker_action)) = 'REJECT' "
+                + "AND r.active = true";
+
+        try (Connection connection =
+                     CTSStaticData.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
+
+            statement.setString(1, batchNumber);
+            statement.setString(2, chequeNumber);
+
+            try (ResultSet rs =
+                         statement.executeQuery()) {
+
+                if (rs.next()) {
+                    return rs.getString("reason_name");
+                }
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            throw new RuntimeException(
+                    "Error while fetching Checker rejection reason",
+                    e);
+        }
+
+        return null;
     }
 }

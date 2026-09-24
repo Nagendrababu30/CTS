@@ -16,6 +16,8 @@ import org.zkoss.zul.ListitemRenderer;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Paging;
 
+import com.cts.admin.service.SessionService;
+import com.cts.admin.service.SessionServiceImpl;
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.service.outward.CaptureOperatorBatchService;
 
@@ -31,6 +33,8 @@ public class CaptureOperatorCapturedBatchesController
     private Paging batchPaging;
 
     private CaptureOperatorBatchService service;
+    
+    private SessionService sessionService;
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
@@ -49,9 +53,9 @@ public class CaptureOperatorCapturedBatchesController
             Executions.sendRedirect("/login.zul");
             return;
         }
-
+        
         long userId;
-
+        
         if (sessionUserId instanceof Number) {
             userId = ((Number) sessionUserId).longValue();
         } else {
@@ -62,8 +66,39 @@ public class CaptureOperatorCapturedBatchesController
                 return;
             }
         }
+        
+        
+        sessionService = new SessionServiceImpl();
+
+		com.cts.admin.model.Session clearingSession =
+				sessionService.getActiveSession();
 
         service = new CaptureOperatorBatchService();
+        
+
+		if (clearingSession == null
+				|| clearingSession.getStatus() == null
+				|| !"STARTED".equalsIgnoreCase(
+						clearingSession.getStatus().trim())) {
+
+			Messagebox.show(
+					"Clearing session is not started.\n\n"
+							+ "Capture Operator operations "
+							+ "are currently unavailable.",
+							"Session Not Started",
+							Messagebox.OK,
+							Messagebox.EXCLAMATION,
+							event -> {
+
+								if (Messagebox.ON_OK.equals(
+										event.getName())) {
+
+									Executions.sendRedirect("/zul/login.zul");
+								}
+							});
+
+			return;
+		}
 
         loadCapturedBatches();
     }

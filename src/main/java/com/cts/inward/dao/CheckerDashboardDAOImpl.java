@@ -41,7 +41,10 @@ public class CheckerDashboardDAOImpl
                 + "        changed_on DESC, "
                 + "        batch_history_id DESC "
                 + ") hs "
-                + "WHERE hs.batch_status = 'SENT_TO_CHECKER'";
+                + "WHERE hs.batch_status IN "
+                + "('SENT_TO_CHECKER', "
+                + " 'RETURN_TO_MAKER', "
+                + " 'ON_HOLD')";
 
 
         try (
@@ -232,6 +235,7 @@ public class CheckerDashboardDAOImpl
                 + "    FROM inward_batch_lock "
                 + "    ORDER BY "
                 + "        batch_id, "
+                + "        CASE WHEN lock_status = 'LOCKED' THEN 1 ELSE 2 END, "
                 + "        locked_time DESC, "
                 + "        lock_id DESC "
                 + ") l "

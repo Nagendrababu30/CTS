@@ -10,6 +10,7 @@
 <zk>
 
     <style src="/css/inward/checker/batch-details.css"/>
+    <style src="/css/common/loader.css?v=3"/>
 
     <!-- =========================================================
          PAGE CONTENT

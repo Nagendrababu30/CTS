@@ -7,7 +7,7 @@
 
 <zk>
 
-    <style src="/css/inward/maker/dashboard.css"/>
+    <style src="/css/inward/checker/checkerDashboard.css"/>
 
 
     <div
@@ -115,10 +115,10 @@
 
                 <hlayout
                     width="100%"
-                    height="48px"
                     spacing="0"
                     valign="middle"
-                    sclass="bottom-row">
+                    sclass="bottom-row"
+                    style="margin-top: 18px; padding-top: 6px;">
 
 
                   
@@ -132,7 +132,6 @@
 
                     <hlayout
                         id="pagination"
-                        height="32px"
                         spacing="6px"
                         valign="middle"
                         sclass="pagination">

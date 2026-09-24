@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Candy Loader Test</title>
+<style>
+/* Method 1: Robust ::before progress bar */
+.test-container {
+    padding: 30px;
+    background: #fff;
+    border-radius: 12px;
+    display: inline-block;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    text-align: center;
+    font-family: sans-serif;
+}
+
+.loader-bar {
+    width: 120px;
+    height: 20px;
+    border-radius: 20px;
+    background: repeating-linear-gradient(135deg, #ddd 0 10px, #eee 0 20px);
+    overflow: hidden;
+    position: relative;
+    margin: 0 auto 12px auto;
+}
+
+.loader-bar::before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0%;
+    border-radius: 20px;
+    background: repeating-linear-gradient(135deg, #f03355 0 10px, #ffa516 0 20px);
+    animation: candyLoad 2s infinite ease-in-out;
+}
+
+@keyframes candyLoad {
+    0% {
+        width: 0%;
+    }
+    100% {
+        width: 100%;
+    }
+}
+</style>
+</head>
+<body style="background: #e2e8f0; display: flex; justify-content: center; align-items: center; min-height: 100vh;">
+    <div class="test-container">
+        <div class="loader-bar"></div>
+        <div style="font-size: 13.5px; font-weight: 600; color: #475569;">Processing...</div>
+    </div>
+</body>
+</html>

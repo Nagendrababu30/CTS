@@ -86,6 +86,20 @@ public class AuthorizationComposer extends GenericForwardComposer<Component> {
 
 		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-micr-repair.zul", "Outward Maker");
 		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-data-entry-detail.zul", "Outward Maker");
+		PAGE_PERMISSIONS.put(
+			    "/zul/outward/outward-maker/outward-clearing-session-wait.zul",
+			    "Outward Maker"
+			);
+
+			PAGE_PERMISSIONS.put(
+			    "/zul/outward/outward-maker/outward-clearing-session-wait.zul",
+			    "Outward Checker"
+			);
+
+			PAGE_PERMISSIONS.put(
+			    "/zul/outward/outward-maker/outward-clearing-session-wait.zul",
+			    "Capture Operator"
+			);
 		// CAPTURE OPERATOR
 
 		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/capture-operator-batch-capture.zul", "Capture Operator");

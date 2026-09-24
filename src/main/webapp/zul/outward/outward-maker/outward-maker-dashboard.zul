@@ -8,8 +8,9 @@
         arg0="/zul/common/layout.zul"?>
 
 <zk>
-	<style src="/css/outward/maker/dashboard.css"/>
-   
+
+    <style src="/css/outward/maker/dashboard.css"/>
+
     <!-- =========================================================
          CONTENT FOR COMMON LAYOUT
          ========================================================= -->
@@ -20,7 +21,6 @@
         height="100%"
         sclass="outward-dashboard-content">
 
-
         <!-- =====================================================
              OUTWARD MAKER DASHBOARD
              ===================================================== -->
@@ -30,7 +30,6 @@
             spacing="20px"
             sclass="outward-dashboard-layout"
             hflex="1">
-
 
             <!-- =================================================
                  PAGE TITLE
@@ -52,7 +51,6 @@
             <hlayout
                 spacing="20px"
                 width="100%">
-
 
                 <!-- =============================================
                      PENDING DATA ENTRY
@@ -206,7 +204,6 @@
                 spacing="0"
                 width="100%">
 
-
                 <!-- =============================================
                      TABLE HEADER
                      ============================================= -->
@@ -286,7 +283,6 @@
                         border-radius:6px;
                     ">
 
-
                     <!-- =========================================
                          COLUMNS
                          ========================================= -->
@@ -323,82 +319,14 @@
 
 
                 <!-- =================================================
-                     PAGINATION
+                     DYNAMIC PAGINATION
                      ================================================= -->
 
-                <div
-                    width="100%"
-                    style="
-                        text-align:center;
-                        padding:15px 0 5px 0;
-                    ">
-
-                    <hlayout
-                        id="paginationLayout"
-                        spacing="6px"
-                        valign="middle"
-                        style="
-                            display:inline-flex;
-                            align-items:center;
-                        ">
-
-
-                        <button
-                            id="previousPageButton"
-                            label="Previous"
-                            sclass="pagination-btn"/>
-
-
-                        <button
-                            id="page1Button"
-                            label="1"
-                            sclass="pagination-btn pagination-active"/>
-
-
-                        <button
-                            id="page2Button"
-                            label="2"
-                            sclass="pagination-btn"/>
-
-
-                        <button
-                            id="page3Button"
-                            label="3"
-                            sclass="pagination-btn"/>
-
-
-                        <button
-                            id="page4Button"
-                            label="4"
-                            sclass="pagination-btn"/>
-
-
-                        <button
-                            id="page5Button"
-                            label="5"
-                            sclass="pagination-btn"/>
-
-
-                        <button
-                            id="nextPageButton"
-                            label="Next"
-                            sclass="pagination-btn"/>
-
-
-                        <label
-                            id="paginationInfo"
-                            value=""
-                            style="
-                                margin-left:15px;
-                                font-size:13px;
-                                color:#667085;
-                                font-weight:600;
-                                white-space:nowrap;
-                            "/>
-
-                    </hlayout>
-
-                </div>
+                <paging
+                    id="batchPaging"
+                    pageSize="10"
+                    detailed="false"
+                    sclass="dashboard-paging"/>
 
             </vlayout>
 

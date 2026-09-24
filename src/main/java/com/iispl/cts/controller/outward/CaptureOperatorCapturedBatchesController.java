@@ -14,6 +14,7 @@ import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.ListitemRenderer;
 import org.zkoss.zul.Messagebox;
+import org.zkoss.zul.Paging;
 
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.service.outward.CaptureOperatorBatchService;
@@ -23,251 +24,74 @@ public class CaptureOperatorCapturedBatchesController
 
     private static final long serialVersionUID = 1L;
 
-    // =========================================================
-    // ZUL COMPONENT
-    // =========================================================
-
     @Wire
     private Listbox capturedBatchesList;
 
-    // =========================================================
-    // SERVICE
-    // =========================================================
+    @Wire
+    private Paging batchPaging;
 
     private CaptureOperatorBatchService service;
 
-    // =========================================================
-    // AFTER COMPOSE
-    // =========================================================
-
     @Override
-    public void doAfterCompose(Component comp)
-            throws Exception {
-
+    public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
 
-        System.out.println(
-                "======================================");
-
-        System.out.println(
-                "CAPTURED BATCHES SCREEN");
-
-        System.out.println(
-                "doAfterCompose() START");
-
-        System.out.println(
-                "======================================");
-
-
-        // =====================================================
-        // CURRENT LOGGED-IN USER
-        // =====================================================
-
-        Session session =
-                Executions.getCurrent().getSession();
+        Session session = Executions.getCurrent().getSession();
 
         if (session == null) {
-
-            System.out.println(
-                    "ERROR: ZK session is NULL.");
-
-            Executions.sendRedirect(
-                    "/login.zul");
-
+            Executions.sendRedirect("/login.zul");
             return;
         }
 
-
-        Object sessionUserId =
-                session.getAttribute("userId");
+        Object sessionUserId = session.getAttribute("userId");
 
         if (sessionUserId == null) {
-
-            System.out.println(
-                    "ERROR: userId not found in session.");
-
-            Executions.sendRedirect(
-                    "/login.zul");
-
+            Executions.sendRedirect("/login.zul");
             return;
         }
-
 
         long userId;
 
-
         if (sessionUserId instanceof Number) {
-
-            userId =
-                    ((Number) sessionUserId)
-                            .longValue();
-
+            userId = ((Number) sessionUserId).longValue();
         } else {
-
             try {
-
-                userId =
-                        Long.parseLong(
-                                sessionUserId.toString());
-
+                userId = Long.parseLong(sessionUserId.toString());
             } catch (NumberFormatException e) {
-
-                System.out.println(
-                        "ERROR: Invalid userId in session: "
-                        + sessionUserId);
-
-                Executions.sendRedirect(
-                        "/login.zul");
-
+                Executions.sendRedirect("/login.zul");
                 return;
             }
         }
 
-
-        System.out.println(
-                "CAPTURE OPERATOR SESSION: "
-                + "userId=" + userId);
-
-
-        // =====================================================
-        // SERVICE
-        // =====================================================
-
-        service =
-                new CaptureOperatorBatchService();
-
-
-        // =====================================================
-        // LOAD CAPTURED BATCHES
-        // =====================================================
+        service = new CaptureOperatorBatchService();
 
         loadCapturedBatches();
-
-
-        System.out.println(
-                "======================================");
-
-        System.out.println(
-                "CAPTURED BATCHES SCREEN");
-
-        System.out.println(
-                "doAfterCompose() END");
-
-        System.out.println(
-                "======================================");
     }
 
-
-    // =========================================================
-    // LOAD CAPTURED BATCHES
-    // =========================================================
-
     private void loadCapturedBatches() {
-
         if (capturedBatchesList == null) {
-
-            System.out.println(
-                    "ERROR: capturedBatchesList is NULL.");
-
             return;
         }
-
 
         if (service == null) {
-
-            System.out.println(
-                    "ERROR: CaptureOperatorBatchService is NULL.");
-
             return;
         }
 
-
         try {
-
-            System.out.println(
-                    "Calling service.getCapturedBatches()...");
-
-
             List<OutwardBatch> batches =
                     service.getCapturedBatches();
 
-
             if (batches == null) {
-
-                batches =
-                        new ArrayList<>();
+                batches = new ArrayList<>();
             }
-
-
-            System.out.println(
-                    "Captured batches returned = "
-                    + batches.size());
-
-
-            // =================================================
-            // DEBUG
-            // =================================================
-
-            for (OutwardBatch batch : batches) {
-
-                if (batch == null) {
-                    continue;
-                }
-
-
-                System.out.println(
-                        "--------------------------------------");
-
-
-                System.out.println(
-                        "Batch Number      : "
-                        + batch.getBatchNumber());
-
-
-                System.out.println(
-                        "Number Of Cheques : "
-                        + batch.getNumberOfCheques());
-
-
-                System.out.println(
-                        "Batch Status      : "
-                        + batch.getBatchStatus());
-
-
-                System.out.println(
-                        "Branch Code       : "
-                        + batch.getBranchCode());
-
-
-                System.out.println(
-                        "Created By        : "
-                        + batch.getCreatedBy());
-
-
-                System.out.println(
-                        "Created At        : "
-                        + batch.getCreatedAt());
-            }
-
-
-            // =================================================
-            // CREATE LIST MODEL
-            // =================================================
 
             ListModelList<OutwardBatch> model =
                     new ListModelList<>();
 
-
             model.addAll(batches);
-
-
-            // =================================================
-            // RENDER LIST
-            // =================================================
 
             capturedBatchesList.setItemRenderer(
                     new ListitemRenderer<OutwardBatch>() {
-
                         @Override
                         public void render(
                                 Listitem item,
@@ -278,26 +102,12 @@ public class CaptureOperatorCapturedBatchesController
                                 return;
                             }
 
-
-                            // ---------------------------------
-                            // BATCH NUMBER
-                            // ---------------------------------
-
                             Listcell batchNumberCell =
                                     new Listcell(
-                                            safe(
-                                                    batch.getBatchNumber()
-                                            )
+                                            safe(batch.getBatchNumber())
                                     );
 
-                            item.appendChild(
-                                    batchNumberCell
-                            );
-
-
-                            // ---------------------------------
-                            // TOTAL CHEQUES
-                            // ---------------------------------
+                            item.appendChild(batchNumberCell);
 
                             Listcell chequeCountCell =
                                     new Listcell(
@@ -306,54 +116,33 @@ public class CaptureOperatorCapturedBatchesController
                                             )
                                     );
 
-                            item.appendChild(
-                                    chequeCountCell
-                            );
-
-
-                            // ---------------------------------
-                            // STATUS
-                            // ---------------------------------
+                            item.appendChild(chequeCountCell);
 
                             Listcell statusCell =
                                     new Listcell(
-                                            safe(
-                                                    batch.getBatchStatus()
-                                            )
+                                            safe(batch.getBatchStatus())
                                     );
 
-                            item.appendChild(
-                                    statusCell
-                            );
+                            item.appendChild(statusCell);
                         }
                     }
             );
 
+            capturedBatchesList.setModel(model);
 
-            capturedBatchesList.setModel(
-                    model
-            );
-
-
-            System.out.println(
-                    "Captured batches successfully loaded into ZUL."
-            );
-
+            if (batchPaging != null) {
+                batchPaging.setPageSize(10);
+                batchPaging.setDetailed(false);
+                capturedBatchesList.setPaginal(batchPaging);
+            }
 
         } catch (Exception e) {
-
             e.printStackTrace();
-
-
-            System.out.println(
-                    "ERROR: Unable to load captured batches."
-            );
-
 
             Messagebox.show(
                     "Unable to load captured batches from database.\n\n"
-                    + "Error: "
-                    + e.getMessage(),
+                            + "Error: "
+                            + e.getMessage(),
                     "Captured Batches",
                     Messagebox.OK,
                     Messagebox.ERROR
@@ -361,15 +150,7 @@ public class CaptureOperatorCapturedBatchesController
         }
     }
 
-
-    // =========================================================
-    // SAFE STRING
-    // =========================================================
-
     private String safe(String value) {
-
-        return value == null
-                ? ""
-                : value;
+        return value == null ? "" : value;
     }
 }

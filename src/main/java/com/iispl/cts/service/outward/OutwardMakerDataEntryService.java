@@ -19,4 +19,9 @@ public class OutwardMakerDataEntryService {
 
         return dao.getAllBatches();
     }
+
+	public List<OutwardBatch> getBatchesForMaker(long userId) {
+		// TODO Auto-generated method stub
+		return dao.getBatchesForMaker(userId);
+	}
 }

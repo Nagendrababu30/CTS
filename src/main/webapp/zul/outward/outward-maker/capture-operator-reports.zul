@@ -12,17 +12,7 @@
 
 <zk>
 
-    <!-- =====================================================
-         REPORT CSS
-         ===================================================== -->
-
-    <style
-        src="/zul/outward/capture-operator-CSS/capture_operator_reports.css"/>
-
-
-    <!-- =====================================================
-         REPORT CONTENT
-         ===================================================== -->
+    <style src="/zul/outward/capture-operator-CSS/capture_operator_reports.css"/>
 
     <div
         self="@define(content)"
@@ -37,13 +27,7 @@
             spacing="0px"
             sclass="reports-content">
 
-
-            <!-- =================================================
-                 PAGE HEADER
-                 ================================================= -->
-
-            <div
-                sclass="reports-header">
+            <div sclass="reports-header">
 
                 <label
                     value="Batch Capture Reports"
@@ -51,23 +35,11 @@
 
             </div>
 
+            <div sclass="reports-card">
 
-            <!-- =================================================
-                 EXPORT CARD
-                 ================================================= -->
+                <div sclass="reports-card-title">
 
-            <div
-                sclass="reports-card"
-                style="position:relative; z-index:100000; overflow:visible;">
-
-
-                <!-- CARD TITLE -->
-
-                <div
-                    sclass="reports-card-title">
-
-                    <div
-                        sclass="reports-section-line"/>
+                    <div sclass="reports-section-line"/>
 
                     <label
                         value="Export Report"
@@ -75,26 +47,14 @@
 
                 </div>
 
-
-                <!-- =================================================
-                     FILTER ROW
-                     ================================================= -->
-
                 <hlayout
                     width="100%"
                     spacing="18px"
-                    sclass="reports-filter-row"
-                    style="position:relative; z-index:100000; overflow:visible;">
-
-
-                    <!-- =================================================
-                         FROM DATE
-                         ================================================= -->
+                    sclass="reports-filter-row">
 
                     <vlayout
                         width="220px"
-                        spacing="5px"
-                        style="position:relative; z-index:100001; overflow:visible;">
+                        spacing="5px">
 
                         <label
                             value="From Date"
@@ -109,15 +69,9 @@
 
                     </vlayout>
 
-
-                    <!-- =================================================
-                         TO DATE
-                         ================================================= -->
-
                     <vlayout
                         width="220px"
-                        spacing="5px"
-                        style="position:relative; z-index:100001; overflow:visible;">
+                        spacing="5px">
 
                         <label
                             value="To Date"
@@ -131,11 +85,6 @@
                             sclass="reports-datebox"/>
 
                     </vlayout>
-
-
-                    <!-- =================================================
-                         EXPORT FORMAT
-                         ================================================= -->
 
                     <vlayout
                         width="180px"
@@ -164,15 +113,7 @@
 
                     </vlayout>
 
-
-                    <!-- SPACE -->
-
                     <div hflex="1"/>
-
-
-                    <!-- =================================================
-                         VIEW DATA
-                         ================================================= -->
 
                     <button
                         id="viewDataButton"
@@ -180,11 +121,6 @@
                         width="95px"
                         height="36px"
                         sclass="reports-view-button"/>
-
-
-                    <!-- =================================================
-                         EXPORT
-                         ================================================= -->
 
                     <button
                         id="exportButton"
@@ -195,32 +131,18 @@
 
                 </hlayout>
 
-
-                <!-- HINT -->
-
                 <label
                     value="From Date and To Date are optional."
                     sclass="reports-hint"/>
 
             </div>
 
-
-            <!-- =================================================
-                 DOWNLOAD HISTORY
-                 ================================================= -->
-
             <div
-                sclass="reports-history-card"
-                style="position:relative; z-index:1;">
+                sclass="reports-history-card">
 
+                <div sclass="reports-card-title">
 
-                <!-- CARD TITLE -->
-
-                <div
-                    sclass="reports-card-title">
-
-                    <div
-                        sclass="reports-section-line"/>
+                    <div sclass="reports-section-line"/>
 
                     <label
                         value="Download History"
@@ -228,20 +150,15 @@
 
                 </div>
 
-
-                <!-- =================================================
-                     HISTORY TABLE
-                     ================================================= -->
-
                 <div
-                    sclass="reports-history-table-container">
+                    sclass="reports-history-table-container"
+                    vflex="min">
 
                     <listbox
                         id="downloadHistoryList"
                         width="100%"
-                        height="360px"
-                        mold="paging"
-                        pageSize="10"
+                        height="auto"
+                        vflex="min"
                         emptyMessage="No download history available."
                         sclass="reports-history-listbox">
 
@@ -281,13 +198,15 @@
 
                     </listbox>
 
+                    <paging
+                        id="historyPaging"
+                        pageSize="10"
+                        detailed="false"
+                        sclass="reports-history-paging"/>
+
                 </div>
 
-
-                <!-- RECORD COUNT -->
-
-                <div
-                    sclass="reports-record-footer">
+                <div sclass="reports-record-footer">
 
                     <label
                         id="historyCountLabel"
@@ -298,39 +217,8 @@
 
             </div>
 
-
         </vlayout>
 
     </div>
-
-
-    <!-- =========================================================
-         DATEBOX POPUP ZK OVERRIDE
-         ========================================================= -->
-
-    <style>
-
-        .z-datebox-popup {
-            z-index: 9999999 !important;
-            overflow: visible !important;
-            height: auto !important;
-        }
-
-        .z-datebox-popup .z-calendar {
-            z-index: 9999999 !important;
-            overflow: visible !important;
-            height: auto !important;
-            min-height: 220px !important;
-        }
-
-        .z-datebox-popup .z-calendar-body {
-            display: block !important;
-            visibility: visible !important;
-            overflow: visible !important;
-            height: auto !important;
-            min-height: 160px !important;
-        }
-
-    </style>
 
 </zk>

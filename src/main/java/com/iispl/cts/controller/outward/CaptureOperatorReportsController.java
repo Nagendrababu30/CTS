@@ -12,6 +12,7 @@ import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.select.SelectorComposer;
 import org.zkoss.zk.ui.select.annotation.Wire;
+import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Datebox;
@@ -21,6 +22,7 @@ import org.zkoss.zul.Listbox;
 import org.zkoss.zul.Listcell;
 import org.zkoss.zul.Listitem;
 import org.zkoss.zul.Messagebox;
+import org.zkoss.zul.Paging;
 
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.service.outward.CaptureOperatorReportsService;
@@ -29,10 +31,6 @@ public class CaptureOperatorReportsController
         extends SelectorComposer<Component> {
 
     private static final long serialVersionUID = 1L;
-
-    // =========================================================
-    // WIRED COMPONENTS
-    // =========================================================
 
     @Wire
     private Datebox fromDate;
@@ -49,1033 +47,436 @@ public class CaptureOperatorReportsController
     @Wire
     private Button exportButton;
 
-    // ONLY DOWNLOAD HISTORY LIST
     @Wire
     private Listbox downloadHistoryList;
 
     @Wire
+    private Paging historyPaging;
+
+    @Wire
     private Label historyCountLabel;
 
-
-    // =========================================================
-    // VARIABLES
-    // =========================================================
-
     private long currentUserId;
-
     private CaptureOperatorReportsService service;
 
-
-    // =========================================================
-    // AFTER COMPOSE
-    // =========================================================
-
     @Override
-    public void doAfterCompose(Component comp)
-            throws Exception {
-
+    public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
 
-        // -----------------------------------------------------
-        // GET SESSION
-        // -----------------------------------------------------
+        Session session = Executions.getCurrent().getSession();
 
-        Session session =
-                Executions.getCurrent().getSession();
-
-        if (session == null) {
-
-            Executions.sendRedirect(
-                    "/zul/login.zul"
-            );
-
+        if (session == null
+                || session.getAttribute("userId") == null) {
+            Executions.sendRedirect("/zul/login.zul");
             return;
         }
 
+        Object sessionUserId = session.getAttribute("userId");
 
-        // -----------------------------------------------------
-        // GET LOGGED-IN USER ID
-        // -----------------------------------------------------
-
-        Object sessionUserId =
-                session.getAttribute("userId");
-
-        if (sessionUserId == null) {
-
-            Executions.sendRedirect(
-                    "/zul/login.zul"
-            );
-
+        try {
+            currentUserId = sessionUserId instanceof Number
+                    ? ((Number) sessionUserId).longValue()
+                    : Long.parseLong(sessionUserId.toString().trim());
+        } catch (NumberFormatException e) {
+            Executions.sendRedirect("/zul/login.zul");
             return;
         }
 
-
-        // -----------------------------------------------------
-        // CONVERT USER ID
-        // -----------------------------------------------------
-
-        if (sessionUserId instanceof Number) {
-
-            currentUserId =
-                    ((Number) sessionUserId).longValue();
-
-        } else {
-
-            try {
-
-                currentUserId =
-                        Long.parseLong(
-                                sessionUserId
-                                        .toString()
-                                        .trim()
-                        );
-
-            } catch (NumberFormatException e) {
-
-                Executions.sendRedirect(
-                        "/zul/login.zul"
-                );
-
-                return;
-            }
-        }
-
-
-        // -----------------------------------------------------
-        // DEBUG
-        // -----------------------------------------------------
-
-        System.out.println(
-                "========================================"
-        );
-
-        System.out.println(
-                "CAPTURE OPERATOR REPORTS"
-        );
-
-        System.out.println(
-                "CURRENT USER ID = "
-                + currentUserId
-        );
-
-        System.out.println(
-                "========================================"
-        );
-
-
-        // -----------------------------------------------------
-        // CREATE SERVICE
-        // -----------------------------------------------------
-
-        service =
-                new CaptureOperatorReportsService();
-
-
-        // -----------------------------------------------------
-        // REGISTER EVENTS
-        // -----------------------------------------------------
+        service = new CaptureOperatorReportsService();
 
         registerEvents();
-
-
-        // -----------------------------------------------------
-        // LOAD DOWNLOAD HISTORY
-        // -----------------------------------------------------
-
+        registerDateboxEvents();
         loadDownloadHistory();
     }
 
-
-    // =========================================================
-    // REGISTER EVENTS
-    // =========================================================
-
     private void registerEvents() {
-
         if (viewDataButton != null) {
-
             viewDataButton.addEventListener(
                     Events.ON_CLICK,
-                    event -> viewReportData()
-            );
+                    event -> viewReportData());
         }
 
-
         if (exportButton != null) {
-
             exportButton.addEventListener(
                     Events.ON_CLICK,
-                    event -> exportReport()
-            );
+                    event -> exportReport());
         }
     }
 
+    private void registerDateboxEvents() {
+        if (fromDate != null) {
+            fromDate.addEventListener(
+                    Events.ON_OPEN,
+                    event -> repositionDatePopup(fromDate));
+        }
 
-    // =========================================================
-    // VIEW REPORT DATA
-    // =========================================================
+        if (toDate != null) {
+            toDate.addEventListener(
+                    Events.ON_OPEN,
+                    event -> repositionDatePopup(toDate));
+        }
+    }
 
-    private void viewReportData() {
-
-        Date from =
-                getFromDate();
-
-        Date to =
-                getToDate();
-
-
-        // -----------------------------------------------------
-        // VALIDATE DATE RANGE
-        // -----------------------------------------------------
-
-        if (!isValidDateRange(
-                from,
-                to)) {
-
+    private void repositionDatePopup(Datebox datebox) {
+        if (datebox == null) {
             return;
         }
 
+        String uuid = datebox.getUuid();
 
-        // -----------------------------------------------------
-        // GET DATA FOR CURRENT OPERATOR
-        // -----------------------------------------------------
+        Clients.evalJavaScript(
+                "setTimeout(function(){"
+                + "var widget=zk.Widget.$('" + uuid + "');"
+                + "var input=widget ? widget.$n() : null;"
+                + "var popup=document.querySelector('.z-datebox-popup');"
+                + "if(!input || !popup){return;}"
+                + "var rect=input.getBoundingClientRect();"
+                + "var popupHeight=popup.offsetHeight;"
+                + "var popupWidth=popup.offsetWidth;"
+                + "var top=rect.bottom+2;"
+                + "var left=rect.left;"
+                + "if(top+popupHeight>window.innerHeight){"
+                + "top=rect.top-popupHeight-2;"
+                + "}"
+                + "if(left+popupWidth>window.innerWidth){"
+                + "left=window.innerWidth-popupWidth-5;"
+                + "}"
+                + "if(left<5){left=5;}"
+                + "if(top<5){top=5;}"
+                + "popup.style.position='fixed';"
+                + "popup.style.left=left+'px';"
+                + "popup.style.top=top+'px';"
+                + "popup.style.zIndex='9999999';"
+                + "},50);"
+        );
+    }
+
+    private void viewReportData() {
+        Date from = getFromDate();
+        Date to = getToDate();
+
+        if (!isValidDateRange(from, to)) {
+            return;
+        }
 
         List<OutwardBatch> batches;
 
         try {
-
-            batches =
-                    service.getReportData(
-                            currentUserId,
-                            from,
-                            to
-                    );
-
+            batches = service.getReportData(
+                    currentUserId,
+                    from,
+                    to);
         } catch (Exception e) {
-
             e.printStackTrace();
 
             Messagebox.show(
                     "Unable to load report data.",
                     "Report Data",
                     Messagebox.OK,
-                    Messagebox.ERROR
-            );
+                    Messagebox.ERROR);
 
             return;
         }
 
-
-        // -----------------------------------------------------
-        // NO DATA
-        // -----------------------------------------------------
-
-        if (batches == null ||
-                batches.isEmpty()) {
-
+        if (batches == null || batches.isEmpty()) {
             Messagebox.show(
-                    "No batches found for the current "
-                    + "Capture Operator.",
+                    "No batches found for the current Capture Operator.",
                     "Report Data",
                     Messagebox.OK,
-                    Messagebox.INFORMATION
-            );
+                    Messagebox.INFORMATION);
 
             return;
         }
 
-
-        // -----------------------------------------------------
-        // BUILD REPORT TEXT
-        // -----------------------------------------------------
-
         SimpleDateFormat dateFormat =
-                new SimpleDateFormat(
-                        "dd/MM/yyyy HH:mm:ss"
-                );
+                new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
-        StringBuilder report =
-                new StringBuilder();
+        StringBuilder report = new StringBuilder();
 
+        report.append("Capture Operator Report\n\n")
+              .append("Operator ID : ")
+              .append(currentUserId)
+              .append("\n")
+              .append("From Date : ")
+              .append(formatDate(from))
+              .append("\n")
+              .append("To Date : ")
+              .append(formatDate(to))
+              .append("\n\n")
+              .append("Total Batches : ")
+              .append(batches.size())
+              .append("\n\n")
+              .append("------------------------------------------------------------\n")
+              .append("Batch Number | Date | Total Cheques | Batch Status\n")
+              .append("------------------------------------------------------------\n");
 
-        report.append(
-                "Capture Operator Report"
-        );
-
-        report.append("\n\n");
-
-
-        report.append(
-                "Operator ID : "
-        );
-
-        report.append(
-                currentUserId
-        );
-
-        report.append("\n");
-
-
-        report.append(
-                "From Date : "
-        );
-
-        report.append(
-                formatDate(from)
-        );
-
-        report.append("\n");
-
-
-        report.append(
-                "To Date : "
-        );
-
-        report.append(
-                formatDate(to)
-        );
-
-        report.append("\n\n");
-
-
-        report.append(
-                "Total Batches : "
-        );
-
-        report.append(
-                batches.size()
-        );
-
-        report.append("\n\n");
-
-
-        report.append(
-                "------------------------------------------------------------"
-        );
-
-        report.append("\n");
-
-
-        report.append(
-                "Batch Number | Date | Total Cheques | Batch Status"
-        );
-
-        report.append("\n");
-
-
-        report.append(
-                "------------------------------------------------------------"
-        );
-
-        report.append("\n");
-
-
-        // -----------------------------------------------------
-        // ADD BATCHES
-        // -----------------------------------------------------
-
-        for (OutwardBatch batch :
-                batches) {
+        for (OutwardBatch batch : batches) {
 
             report.append(
-                    safeValue(
-                            batch.getBatchNumber()
-                    )
-            );
-
-            report.append(
-                    " | "
-            );
-
-
-            // DATE
+                    safeValue(batch.getBatchNumber()))
+                  .append(" | ");
 
             if (batch.getCreatedAt() != null) {
-
                 report.append(
                         dateFormat.format(
                                 java.sql.Timestamp.valueOf(
-                                        batch.getCreatedAt()
-                                )
-                        )
-                );
-
+                                        batch.getCreatedAt())));
             } else {
-
                 report.append("-");
             }
 
-
-            report.append(
-                    " | "
-            );
-
-
-            // TOTAL CHEQUES
-
-            report.append(
-                    batch.getNumberOfCheques()
-            );
-
-
-            report.append(
-                    " | "
-            );
-
-
-            // STATUS
-
-            report.append(
-                    safeValue(
-                            batch.getBatchStatus()
-                    )
-            );
-
-
-            report.append("\n");
+            report.append(" | ")
+                  .append(batch.getNumberOfCheques())
+                  .append(" | ")
+                  .append(safeValue(batch.getBatchStatus()))
+                  .append("\n");
         }
-
-
-        // -----------------------------------------------------
-        // SHOW DATA
-        // -----------------------------------------------------
 
         Messagebox.show(
                 report.toString(),
                 "Report Data",
                 Messagebox.OK,
-                Messagebox.INFORMATION
-        );
+                Messagebox.INFORMATION);
     }
 
-
-    // =========================================================
-    // EXPORT REPORT
-    // =========================================================
-
     private void exportReport() {
+        Date from = getFromDate();
+        Date to = getToDate();
 
-        Date from =
-                getFromDate();
-
-        Date to =
-                getToDate();
-
-
-        // -----------------------------------------------------
-        // VALIDATE DATE RANGE
-        // -----------------------------------------------------
-
-        if (!isValidDateRange(
-                from,
-                to)) {
-
+        if (!isValidDateRange(from, to)) {
             return;
         }
 
+        String format = getSelectedFormat();
 
-        // -----------------------------------------------------
-        // GET FORMAT
-        // -----------------------------------------------------
-
-        String format =
-                getSelectedFormat();
-
-
-        if (format == null ||
-                format.trim().isEmpty()) {
-
+        if (format == null || format.trim().isEmpty()) {
             Messagebox.show(
                     "Please select XML or CSV format.",
                     "Export Report",
                     Messagebox.OK,
-                    Messagebox.EXCLAMATION
-            );
+                    Messagebox.EXCLAMATION);
 
             return;
         }
 
+        format = format.trim().toUpperCase();
 
-        format =
-                format.trim()
-                        .toUpperCase();
-
-
-        // -----------------------------------------------------
-        // ONLY XML / CSV
-        // -----------------------------------------------------
-
-        if (!"XML".equals(format)
-                && !"CSV".equals(format)) {
-
+        if (!"XML".equals(format) && !"CSV".equals(format)) {
             Messagebox.show(
                     "Only XML and CSV formats are supported.",
                     "Export Report",
                     Messagebox.OK,
-                    Messagebox.EXCLAMATION
-            );
+                    Messagebox.EXCLAMATION);
 
             return;
         }
 
-
-        // -----------------------------------------------------
-        // GET REPORT DATA
-        // -----------------------------------------------------
-
         List<OutwardBatch> batches;
 
         try {
-
-            batches =
-                    service.getReportData(
-                            currentUserId,
-                            from,
-                            to
-                    );
-
+            batches = service.getReportData(
+                    currentUserId,
+                    from,
+                    to);
         } catch (Exception e) {
-
             e.printStackTrace();
 
             Messagebox.show(
                     "Unable to load report data for export.",
                     "Export Report",
                     Messagebox.OK,
-                    Messagebox.ERROR
-            );
+                    Messagebox.ERROR);
 
             return;
         }
 
-
-        // -----------------------------------------------------
-        // NO DATA
-        // -----------------------------------------------------
-
-        if (batches == null ||
-                batches.isEmpty()) {
-
+        if (batches == null || batches.isEmpty()) {
             Messagebox.show(
                     "No data available for export.",
                     "Export Report",
                     Messagebox.OK,
-                    Messagebox.INFORMATION
-            );
+                    Messagebox.INFORMATION);
 
             return;
         }
 
-
-        // -----------------------------------------------------
-        // GENERATE FILE
-        // -----------------------------------------------------
-
         try {
-
             if ("CSV".equals(format)) {
-
-                downloadCSV(
-                        batches,
-                        from,
-                        to
-                );
-
+                downloadCSV(batches, from, to);
             } else {
-
-                downloadXML(
-                        batches,
-                        from,
-                        to
-                );
+                downloadXML(batches, from, to);
             }
-
         } catch (Exception e) {
-
             e.printStackTrace();
 
             Messagebox.show(
                     "Unable to generate report file.",
                     "Export Report",
                     Messagebox.OK,
-                    Messagebox.ERROR
-            );
+                    Messagebox.ERROR);
         }
     }
-
-
-    // =========================================================
-    // DOWNLOAD CSV
-    // =========================================================
 
     private void downloadCSV(
             List<OutwardBatch> batches,
             Date from,
-            Date to)
-            throws Exception {
+            Date to) throws Exception {
 
-        StringBuilder csv =
-                new StringBuilder();
-
-
-        // -----------------------------------------------------
-        // HEADER
-        // -----------------------------------------------------
+        StringBuilder csv = new StringBuilder();
 
         csv.append(
-                "Batch Number,Date,Total Cheques,Batch Status"
-        );
-
-        csv.append("\r\n");
-
+                "Batch Number,Date,Total Cheques,Batch Status\r\n");
 
         SimpleDateFormat dateFormat =
-                new SimpleDateFormat(
-                        "dd/MM/yyyy HH:mm:ss"
-                );
+                new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
+        for (OutwardBatch batch : batches) {
 
-        // -----------------------------------------------------
-        // DATA
-        // -----------------------------------------------------
+            String createdDate =
+                    batch.getCreatedAt() != null
+                            ? dateFormat.format(
+                                    java.sql.Timestamp.valueOf(
+                                            batch.getCreatedAt()))
+                            : "";
 
-        for (OutwardBatch batch :
-                batches) {
-
-            csv.append(
-                    csvValue(
-                            batch.getBatchNumber()
-                    )
-            );
-
-            csv.append(",");
-
-
-            String createdDate = "";
-
-            if (batch.getCreatedAt() != null) {
-
-                createdDate =
-                        dateFormat.format(
-                                java.sql.Timestamp.valueOf(
-                                        batch.getCreatedAt()
-                                )
-                        );
-            }
-
-
-            csv.append(
-                    csvValue(
-                            createdDate
-                    )
-            );
-
-            csv.append(",");
-
-
-            csv.append(
-                    batch.getNumberOfCheques()
-            );
-
-            csv.append(",");
-
-
-            csv.append(
-                    csvValue(
-                            batch.getBatchStatus()
-                    )
-            );
-
-            csv.append("\r\n");
+            csv.append(csvValue(batch.getBatchNumber()))
+               .append(",")
+               .append(csvValue(createdDate))
+               .append(",")
+               .append(batch.getNumberOfCheques())
+               .append(",")
+               .append(csvValue(batch.getBatchStatus()))
+               .append("\r\n");
         }
 
+        byte[] data = csv.toString()
+                .getBytes(StandardCharsets.UTF_8);
 
-        // -----------------------------------------------------
-        // BYTES
-        // -----------------------------------------------------
-
-        byte[] data =
-                csv.toString()
-                        .getBytes(
-                                StandardCharsets.UTF_8
-                        );
-
-
-        // -----------------------------------------------------
-        // FILE NAME
-        // -----------------------------------------------------
-
-        String fileName =
-                createFileName(
-                        "capture_operator_report",
-                        "csv"
-                );
-
-
-        // -----------------------------------------------------
-        // DOWNLOAD
-        // -----------------------------------------------------
+        String fileName = createFileName(
+                "capture_operator_report",
+                "csv");
 
         downloadFile(
                 data,
                 fileName,
-                "text/csv"
-        );
-
-
-        // -----------------------------------------------------
-        // SAVE DOWNLOAD HISTORY
-        // -----------------------------------------------------
+                "text/csv");
 
         service.saveDownloadHistory(
                 currentUserId,
                 from,
                 to,
-                "CSV"
-        );
-
-
-        // -----------------------------------------------------
-        // REFRESH DOWNLOAD HISTORY
-        // -----------------------------------------------------
+                "CSV");
 
         loadDownloadHistory();
     }
-
-
-    // =========================================================
-    // DOWNLOAD XML
-    // =========================================================
 
     private void downloadXML(
             List<OutwardBatch> batches,
             Date from,
-            Date to)
-            throws Exception {
+            Date to) throws Exception {
 
-        StringBuilder xml =
-                new StringBuilder();
-
-
-        // -----------------------------------------------------
-        // XML HEADER
-        // -----------------------------------------------------
+        StringBuilder xml = new StringBuilder();
 
         xml.append(
-                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-        );
-
-        xml.append("\r\n");
-
-
-        // -----------------------------------------------------
-        // ROOT
-        // -----------------------------------------------------
-
-        xml.append(
-                "<captureOperatorReport>"
-        );
-
-        xml.append("\r\n");
-
-
-        // -----------------------------------------------------
-        // OPERATOR ID
-        // -----------------------------------------------------
-
-        xml.append(
-                "    <operatorId>"
-        );
-
-        xml.append(
-                escapeXml(
-                        String.valueOf(
-                                currentUserId
-                        )
-                )
-        );
-
-        xml.append(
-                "</operatorId>"
-        );
-
-        xml.append("\r\n");
-
-
-        // -----------------------------------------------------
-        // DATE FORMAT
-        // -----------------------------------------------------
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n")
+           .append("<captureOperatorReport>\r\n")
+           .append("    <operatorId>")
+           .append(
+                   escapeXml(
+                           String.valueOf(currentUserId)))
+           .append("</operatorId>\r\n");
 
         SimpleDateFormat dateFormat =
-                new SimpleDateFormat(
-                        "dd/MM/yyyy HH:mm:ss"
-                );
+                new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
+        for (OutwardBatch batch : batches) {
 
-        // -----------------------------------------------------
-        // BATCHES
-        // -----------------------------------------------------
-
-        for (OutwardBatch batch :
-                batches) {
-
-            xml.append(
-                    "    <batch>"
-            );
-
-            xml.append("\r\n");
-
-
-            // -------------------------------------------------
-            // BATCH NUMBER
-            // -------------------------------------------------
-
-            xml.append(
-                    "        <batchNumber>"
-            );
-
-            xml.append(
-                    escapeXml(
-                            batch.getBatchNumber()
-                    )
-            );
-
-            xml.append(
-                    "</batchNumber>"
-            );
-
-            xml.append("\r\n");
-
-
-            // -------------------------------------------------
-            // DATE
-            // -------------------------------------------------
-
-            xml.append(
-                    "        <date>"
-            );
+            xml.append("    <batch>\r\n")
+               .append("        <batchNumber>")
+               .append(
+                       escapeXml(
+                               batch.getBatchNumber()))
+               .append("</batchNumber>\r\n")
+               .append("        <date>");
 
             if (batch.getCreatedAt() != null) {
-
                 xml.append(
                         dateFormat.format(
                                 java.sql.Timestamp.valueOf(
-                                        batch.getCreatedAt()
-                                )
-                        )
-                );
+                                        batch.getCreatedAt())));
             }
 
-            xml.append(
-                    "</date>"
-            );
-
-            xml.append("\r\n");
-
-
-            // -------------------------------------------------
-            // TOTAL CHEQUES
-            // -------------------------------------------------
-
-            xml.append(
-                    "        <totalCheques>"
-            );
-
-            xml.append(
-                    batch.getNumberOfCheques()
-            );
-
-            xml.append(
-                    "</totalCheques>"
-            );
-
-            xml.append("\r\n");
-
-
-            // -------------------------------------------------
-            // BATCH STATUS
-            // -------------------------------------------------
-
-            xml.append(
-                    "        <batchStatus>"
-            );
-
-            xml.append(
-                    escapeXml(
-                            batch.getBatchStatus()
-                    )
-            );
-
-            xml.append(
-                    "</batchStatus>"
-            );
-
-            xml.append("\r\n");
-
-
-            // -------------------------------------------------
-            // CLOSE BATCH
-            // -------------------------------------------------
-
-            xml.append(
-                    "    </batch>"
-            );
-
-            xml.append("\r\n");
+            xml.append("</date>\r\n")
+               .append("        <totalCheques>")
+               .append(batch.getNumberOfCheques())
+               .append("</totalCheques>\r\n")
+               .append("        <batchStatus>")
+               .append(
+                       escapeXml(
+                               batch.getBatchStatus()))
+               .append("</batchStatus>\r\n")
+               .append("    </batch>\r\n");
         }
 
+        xml.append("</captureOperatorReport>\r\n");
 
-        // -----------------------------------------------------
-        // CLOSE ROOT
-        // -----------------------------------------------------
+        byte[] data = xml.toString()
+                .getBytes(StandardCharsets.UTF_8);
 
-        xml.append(
-                "</captureOperatorReport>"
-        );
-
-        xml.append("\r\n");
-
-
-        // -----------------------------------------------------
-        // BYTES
-        // -----------------------------------------------------
-
-        byte[] data =
-                xml.toString()
-                        .getBytes(
-                                StandardCharsets.UTF_8
-                        );
-
-
-        // -----------------------------------------------------
-        // FILE NAME
-        // -----------------------------------------------------
-
-        String fileName =
-                createFileName(
-                        "capture_operator_report",
-                        "xml"
-                );
-
-
-        // -----------------------------------------------------
-        // DOWNLOAD
-        // -----------------------------------------------------
+        String fileName = createFileName(
+                "capture_operator_report",
+                "xml");
 
         downloadFile(
                 data,
                 fileName,
-                "application/xml"
-        );
-
-
-        // -----------------------------------------------------
-        // SAVE DOWNLOAD HISTORY
-        // -----------------------------------------------------
+                "application/xml");
 
         service.saveDownloadHistory(
                 currentUserId,
                 from,
                 to,
-                "XML"
-        );
-
-
-        // -----------------------------------------------------
-        // REFRESH DOWNLOAD HISTORY
-        // -----------------------------------------------------
+                "XML");
 
         loadDownloadHistory();
     }
 
-
-    // =========================================================
-    // DOWNLOAD FILE
-    // =========================================================
-
     private void downloadFile(
             byte[] data,
             String fileName,
-            String contentType)
-            throws Exception {
+            String contentType) throws Exception {
 
-        AMedia media =
-                new AMedia(
-                        fileName,
-                        null,
-                        contentType,
-                        data
-                );
+        AMedia media = new AMedia(
+                fileName,
+                null,
+                contentType,
+                data);
 
-        Filedownload.save(
-                media
-        );
+        Filedownload.save(media);
     }
 
-
-    // =========================================================
-    // CSV VALUE
-    // =========================================================
-
-    private String csvValue(
-            String value) {
-
+    private String csvValue(String value) {
         if (value == null) {
-
             return "";
         }
 
-        String escaped =
-                value.replace(
-                        "\"",
-                        "\"\""
-                );
-
         return "\""
-                + escaped
+                + value.replace("\"", "\"\"")
                 + "\"";
     }
 
-
-    // =========================================================
-    // XML ESCAPE
-    // =========================================================
-
-    private String escapeXml(
-            String value) {
-
+    private String escapeXml(String value) {
         if (value == null) {
-
             return "";
         }
 
         return value
-                .replace(
-                        "&",
-                        "&amp;"
-                )
-                .replace(
-                        "<",
-                        "&lt;"
-                )
-                .replace(
-                        ">",
-                        "&gt;"
-                )
-                .replace(
-                        "\"",
-                        "&quot;"
-                )
-                .replace(
-                        "'",
-                        "&apos;"
-                );
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&apos;");
     }
-
-
-    // =========================================================
-    // CREATE FILE NAME
-    // =========================================================
 
     private String createFileName(
             String prefix,
@@ -1083,10 +484,8 @@ public class CaptureOperatorReportsController
 
         String timestamp =
                 new SimpleDateFormat(
-                        "yyyyMMdd_HHmmss"
-                ).format(
-                        new Date()
-                );
+                        "yyyyMMdd_HHmmss")
+                        .format(new Date());
 
         return prefix
                 + "_"
@@ -1095,46 +494,25 @@ public class CaptureOperatorReportsController
                 + extension;
     }
 
-
-    // =========================================================
-    // GET FROM DATE
-    // =========================================================
-
     private Date getFromDate() {
-
         if (fromDate == null) {
-
             return null;
         }
 
         return fromDate.getValue();
     }
 
-
-    // =========================================================
-    // GET TO DATE
-    // =========================================================
-
     private Date getToDate() {
-
         if (toDate == null) {
-
             return null;
         }
 
         return toDate.getValue();
     }
 
-
-    // =========================================================
-    // GET SELECTED FORMAT
-    // =========================================================
-
     private String getSelectedFormat() {
-
-        if (formatCombo == null ||
-                formatCombo.getSelectedItem() == null) {
-
+        if (formatCombo == null
+                || formatCombo.getSelectedItem() == null) {
             return null;
         }
 
@@ -1143,60 +521,28 @@ public class CaptureOperatorReportsController
                 .getValue();
     }
 
-
-    // =========================================================
-    // VALIDATE DATE RANGE
-    // =========================================================
-
     private boolean isValidDateRange(
             Date from,
             Date to) {
 
-        // -----------------------------------------------------
-        // BOTH EMPTY
-        // -----------------------------------------------------
-
-        if (from == null &&
-                to == null) {
-
+        if (from == null && to == null) {
             return true;
         }
 
-
-        // -----------------------------------------------------
-        // ONLY FROM
-        // -----------------------------------------------------
-
-        if (from != null &&
-                to == null) {
-
+        if (from != null && to == null) {
             return true;
         }
 
-
-        // -----------------------------------------------------
-        // ONLY TO
-        // -----------------------------------------------------
-
-        if (from == null &&
-                to != null) {
-
+        if (from == null && to != null) {
             return true;
         }
-
-
-        // -----------------------------------------------------
-        // BOTH PRESENT
-        // -----------------------------------------------------
 
         if (from.after(to)) {
-
             Messagebox.show(
                     "From Date cannot be later than To Date.",
                     "Invalid Date Range",
                     Messagebox.OK,
-                    Messagebox.EXCLAMATION
-            );
+                    Messagebox.EXCLAMATION);
 
             return false;
         }
@@ -1204,160 +550,84 @@ public class CaptureOperatorReportsController
         return true;
     }
 
-
-    // =========================================================
-    // DOWNLOAD HISTORY
-    // =========================================================
-
     private void loadDownloadHistory() {
-
         if (downloadHistoryList == null) {
-
             return;
         }
 
-
         try {
-
-            // -------------------------------------------------
-            // CLEAR OLD DATA
-            // -------------------------------------------------
-
             downloadHistoryList.getItems().clear();
 
-
-            // -------------------------------------------------
-            // GET HISTORY FOR CURRENT OPERATOR
-            // -------------------------------------------------
+            if (historyPaging != null) {
+                historyPaging.setPageSize(5);
+                historyPaging.setDetailed(false);
+                downloadHistoryList.setPaginal(historyPaging);
+            }
 
             List<Object[]> history =
                     service.getDownloadHistory(
-                            currentUserId
-                    );
+                            currentUserId);
 
-
-            // -------------------------------------------------
-            // NO HISTORY
-            // -------------------------------------------------
-
-            if (history == null ||
-                    history.isEmpty()) {
+            if (history == null || history.isEmpty()) {
 
                 if (historyCountLabel != null) {
-
                     historyCountLabel.setValue(
-                            "Showing 0 records"
-                    );
+                            "Showing 0 records");
                 }
 
                 return;
             }
 
-
-            // -------------------------------------------------
-            // DATE FORMAT
-            // -------------------------------------------------
-
             SimpleDateFormat dateTimeFormat =
                     new SimpleDateFormat(
-                            "dd/MM/yyyy HH:mm:ss"
-                    );
+                            "dd/MM/yyyy HH:mm:ss");
 
             SimpleDateFormat dateFormat =
                     new SimpleDateFormat(
-                            "dd/MM/yyyy"
-                    );
+                            "dd/MM/yyyy");
 
+            for (Object[] row : history) {
 
-            // -------------------------------------------------
-            // CREATE LIST ITEMS
-            // -------------------------------------------------
-
-            for (Object[] row :
-                    history) {
-
-                Listitem item =
-                        new Listitem();
-
-
-                // ---------------------------------------------
-                // DOWNLOAD DATE
-                // ---------------------------------------------
+                Listitem item = new Listitem();
 
                 Listcell downloadDateCell =
                         new Listcell();
 
                 if (row[0] != null) {
-
                     downloadDateCell.setLabel(
                             dateTimeFormat.format(
-                                    (Date) row[0]
-                            )
-                    );
-
+                                    (Date) row[0]));
                 } else {
-
                     downloadDateCell.setLabel("-");
                 }
 
-                item.appendChild(
-                        downloadDateCell
-                );
-
-
-                // ---------------------------------------------
-                // FROM DATE
-                // ---------------------------------------------
+                item.appendChild(downloadDateCell);
 
                 Listcell fromDateCell =
                         new Listcell();
 
                 if (row[1] != null) {
-
                     fromDateCell.setLabel(
                             dateFormat.format(
-                                    (Date) row[1]
-                            )
-                    );
-
+                                    (Date) row[1]));
                 } else {
-
                     fromDateCell.setLabel("-");
                 }
 
-                item.appendChild(
-                        fromDateCell
-                );
-
-
-                // ---------------------------------------------
-                // TO DATE
-                // ---------------------------------------------
+                item.appendChild(fromDateCell);
 
                 Listcell toDateCell =
                         new Listcell();
 
                 if (row[2] != null) {
-
                     toDateCell.setLabel(
                             dateFormat.format(
-                                    (Date) row[2]
-                            )
-                    );
-
+                                    (Date) row[2]));
                 } else {
-
                     toDateCell.setLabel("-");
                 }
 
-                item.appendChild(
-                        toDateCell
-                );
-
-
-                // ---------------------------------------------
-                // FORMAT
-                // ---------------------------------------------
+                item.appendChild(toDateCell);
 
                 Listcell formatCell =
                         new Listcell();
@@ -1365,59 +635,31 @@ public class CaptureOperatorReportsController
                 formatCell.setLabel(
                         row[3] != null
                                 ? row[3].toString()
-                                : "-"
-                );
+                                : "-");
 
-                item.appendChild(
-                        formatCell
-                );
-
-
-                // ---------------------------------------------
-                // ACTION
-                // ---------------------------------------------
+                item.appendChild(formatCell);
 
                 Listcell actionCell =
                         new Listcell();
 
                 Button viewButton =
-                        new Button(
-                                "View"
-                        );
+                        new Button("View");
 
-                viewButton.setWidth(
-                        "60px"
-                );
-
-                viewButton.setHeight(
-                        "28px"
-                );
-
+                viewButton.setWidth("60px");
+                viewButton.setHeight("28px");
                 viewButton.setSclass(
-                        "reports-view-button"
-                );
-
-
-                // Save dates for this history row
+                        "reports-view-button");
 
                 Date historyFrom = null;
-
                 Date historyTo = null;
 
-
                 if (row[1] != null) {
-
-                    historyFrom =
-                            (Date) row[1];
+                    historyFrom = (Date) row[1];
                 }
-
 
                 if (row[2] != null) {
-
-                    historyTo =
-                            (Date) row[2];
+                    historyTo = (Date) row[2];
                 }
-
 
                 final Date selectedFrom =
                         historyFrom;
@@ -1425,303 +667,147 @@ public class CaptureOperatorReportsController
                 final Date selectedTo =
                         historyTo;
 
-
                 viewButton.addEventListener(
                         Events.ON_CLICK,
-                        event -> {
-
-                            showHistoryData(
-                                    selectedFrom,
-                                    selectedTo
-                            );
-                        }
-                );
-
+                        event -> showHistoryData(
+                                selectedFrom,
+                                selectedTo));
 
                 actionCell.appendChild(
-                        viewButton
-                );
+                        viewButton);
 
-                item.appendChild(
-                        actionCell
-                );
-
-
-                // ---------------------------------------------
-                // ADD ROW
-                // ---------------------------------------------
+                item.appendChild(actionCell);
 
                 downloadHistoryList.appendChild(
-                        item
-                );
+                        item);
             }
 
-
-            // -------------------------------------------------
-            // UPDATE COUNT
-            // -------------------------------------------------
-
             if (historyCountLabel != null) {
-
                 historyCountLabel.setValue(
                         "Showing "
                         + history.size()
-                        + " records"
-                );
+                        + " records");
             }
 
-
         } catch (Exception e) {
-
             e.printStackTrace();
 
             if (historyCountLabel != null) {
-
                 historyCountLabel.setValue(
-                        "Unable to load history"
-                );
+                        "Unable to load history");
             }
 
             Messagebox.show(
                     "Unable to load download history.",
                     "Download History",
                     Messagebox.OK,
-                    Messagebox.ERROR
-            );
+                    Messagebox.ERROR);
         }
     }
-
-
-    // =========================================================
-    // SHOW HISTORY DATA
-    // =========================================================
 
     private void showHistoryData(
             Date from,
             Date to) {
 
         try {
-
             List<OutwardBatch> batches =
                     service.getReportData(
                             currentUserId,
                             from,
-                            to
-                    );
+                            to);
 
-
-            // -------------------------------------------------
-            // NO DATA
-            // -------------------------------------------------
-
-            if (batches == null ||
-                    batches.isEmpty()) {
-
+            if (batches == null || batches.isEmpty()) {
                 Messagebox.show(
                         "No batch data found for this download range.",
                         "Download History",
                         Messagebox.OK,
-                        Messagebox.INFORMATION
-                );
+                        Messagebox.INFORMATION);
 
                 return;
             }
 
-
-            // -------------------------------------------------
-            // BUILD DATA
-            // -------------------------------------------------
-
             SimpleDateFormat dateFormat =
                     new SimpleDateFormat(
-                            "dd/MM/yyyy HH:mm:ss"
-                    );
+                            "dd/MM/yyyy HH:mm:ss");
 
             StringBuilder report =
                     new StringBuilder();
 
-
             report.append(
-                    "Capture Operator Report"
-            );
+                    "Capture Operator Report\n\n")
+                  .append("Operator ID : ")
+                  .append(currentUserId)
+                  .append("\n")
+                  .append("From Date : ")
+                  .append(formatDate(from))
+                  .append("\n")
+                  .append("To Date : ")
+                  .append(formatDate(to))
+                  .append("\n\n")
+                  .append("Total Batches : ")
+                  .append(batches.size())
+                  .append("\n\n")
+                  .append(
+                          "------------------------------------------------------------\n")
+                  .append(
+                          "Batch Number | Date | Total Cheques | Batch Status\n")
+                  .append(
+                          "------------------------------------------------------------\n");
 
-            report.append("\n\n");
-
-
-            report.append(
-                    "Operator ID : "
-            );
-
-            report.append(
-                    currentUserId
-            );
-
-            report.append("\n");
-
-
-            report.append(
-                    "From Date : "
-            );
-
-            report.append(
-                    formatDate(from)
-            );
-
-            report.append("\n");
-
-
-            report.append(
-                    "To Date : "
-            );
-
-            report.append(
-                    formatDate(to)
-            );
-
-            report.append("\n\n");
-
-
-            report.append(
-                    "Total Batches : "
-            );
-
-            report.append(
-                    batches.size()
-            );
-
-            report.append("\n\n");
-
-
-            report.append(
-                    "------------------------------------------------------------"
-            );
-
-            report.append("\n");
-
-
-            report.append(
-                    "Batch Number | Date | Total Cheques | Batch Status"
-            );
-
-            report.append("\n");
-
-
-            report.append(
-                    "------------------------------------------------------------"
-            );
-
-            report.append("\n");
-
-
-            for (OutwardBatch batch :
-                    batches) {
+            for (OutwardBatch batch : batches) {
 
                 report.append(
                         safeValue(
-                                batch.getBatchNumber()
-                        )
-                );
-
-                report.append(
-                        " | "
-                );
-
+                                batch.getBatchNumber()))
+                      .append(" | ");
 
                 if (batch.getCreatedAt() != null) {
-
                     report.append(
                             dateFormat.format(
                                     java.sql.Timestamp.valueOf(
-                                            batch.getCreatedAt()
-                                    )
-                            )
-                    );
-
+                                            batch.getCreatedAt())));
                 } else {
-
                     report.append("-");
                 }
 
-
-                report.append(
-                        " | "
-                );
-
-
-                report.append(
-                        batch.getNumberOfCheques()
-                );
-
-
-                report.append(
-                        " | "
-                );
-
-
-                report.append(
-                        safeValue(
-                                batch.getBatchStatus()
-                        )
-                );
-
-                report.append("\n");
+                report.append(" | ")
+                      .append(batch.getNumberOfCheques())
+                      .append(" | ")
+                      .append(
+                              safeValue(
+                                      batch.getBatchStatus()))
+                      .append("\n");
             }
-
-
-            // -------------------------------------------------
-            // SHOW
-            // -------------------------------------------------
 
             Messagebox.show(
                     report.toString(),
                     "Download History - Report Data",
                     Messagebox.OK,
-                    Messagebox.INFORMATION
-            );
-
+                    Messagebox.INFORMATION);
 
         } catch (Exception e) {
-
             e.printStackTrace();
 
             Messagebox.show(
                     "Unable to load report data.",
                     "Download History",
                     Messagebox.OK,
-                    Messagebox.ERROR
-            );
+                    Messagebox.ERROR);
         }
     }
 
-
-    // =========================================================
-    // FORMAT DATE
-    // =========================================================
-
-    private String formatDate(
-            Date date) {
-
+    private String formatDate(Date date) {
         if (date == null) {
-
             return "-";
         }
 
         return new SimpleDateFormat(
-                "dd/MM/yyyy"
-        ).format(date);
+                "dd/MM/yyyy").format(date);
     }
 
-
-    // =========================================================
-    // SAFE VALUE
-    // =========================================================
-
-    private String safeValue(
-            String value) {
-
-        if (value == null ||
-                value.trim().isEmpty()) {
-
+    private String safeValue(String value) {
+        if (value == null
+                || value.trim().isEmpty()) {
             return "-";
         }
 

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidChequesReport>
+    <BatchNumber>OUT20260923185828814</BatchNumber>
+    <TotalValidCheques>3</TotalValidCheques>
+    <Cheques>
+        <Cheque>
+            <ChequeNumber>000123</ChequeNumber>
+            <BatchNumber>OUT20260923185828814</BatchNumber>
+            <ChequeDate>2026-07-15</ChequeDate>
+            <CityCode>560</CityCode>
+            <BankCode>289</BankCode>
+            <BranchCode>123</BranchCode>
+            <DrawerAccountNumber>50100234567890</DrawerAccountNumber>
+            <DrawerName>SUSHANTH</DrawerName>
+            <PayeeName>PRIYA N</PayeeName>
+            <PayeeAccountNumber>5020187654321</PayeeAccountNumber>
+            <Amount>25000.00</Amount>
+            <AmountInWords>TWENTY FIVE THOUSAND ONLY</AmountInWords>
+            <ChequeStatus>CHECKER_ACCEPTED</ChequeStatus>
+        </Cheque>
+        <Cheque>
+            <ChequeNumber>100002</ChequeNumber>
+            <BatchNumber>OUT20260923185828814</BatchNumber>
+            <ChequeDate>2026-09-05</ChequeDate>
+            <CityCode>102</CityCode>
+            <BankCode>240</BankCode>
+            <BranchCode>002</BranchCode>
+            <DrawerAccountNumber>240102002</DrawerAccountNumber>
+            <DrawerName>PRIYA TEXTILES</DrawerName>
+            <PayeeName>METRO TRADERS</PayeeName>
+            <PayeeAccountNumber>2401029002</PayeeAccountNumber>
+            <Amount>87500.00</Amount>
+            <AmountInWords>EIGHTY SEVEN THOUSAND FIVE HUNDRED ONLY</AmountInWords>
+            <ChequeStatus>CHECKER_ACCEPTED</ChequeStatus>
+        </Cheque>
+        <Cheque>
+            <ChequeNumber>501234</ChequeNumber>
+            <BatchNumber>OUT20260923185828814</BatchNumber>
+            <ChequeDate>2026-08-27</ChequeDate>
+            <CityCode>125</CityCode>
+            <BankCode>456</BankCode>
+            <BranchCode>789</BranchCode>
+            <DrawerAccountNumber>456789123456</DrawerAccountNumber>
+            <DrawerName>DAVID LEVY</DrawerName>
+            <PayeeName>SARAH KHAN</PayeeName>
+            <PayeeAccountNumber>456789123456</PayeeAccountNumber>
+            <Amount>350000.00</Amount>
+            <AmountInWords>THREE LAKH FIFTY THOUSAND ONLY</AmountInWords>
+            <ChequeStatus>CHECKER_ACCEPTED</ChequeStatus>
+        </Cheque>
+    </Cheques>
+</ValidChequesReport>

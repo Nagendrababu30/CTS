@@ -12,7 +12,6 @@
 
 <zk>
 
-    <!-- Page CSS -->
     <style src="/zul/outward/capture-operator-CSS/capture_operator_captured_batches.css"/>
 
     <div
@@ -27,67 +26,63 @@
             spacing="0px"
             sclass="captured-batches-content">
 
-            <!-- Page Header -->
-            <div
-                sclass="captured-batches-header">
-
+            <div sclass="captured-batches-header">
                 <label
                     value="Captured Batches"
                     sclass="captured-batches-page-title"/>
-
             </div>
 
-            <!-- Main Card -->
-          <div
-    width="100%"
-    sclass="captured-batches-groupbox">
+            <div
+                width="100%"
+                sclass="captured-batches-groupbox">
 
-    <div
-        sclass="captured-batches-caption">
+                <div sclass="captured-batches-caption">
+                    <label value="Batches"/>
+                </div>
 
-        <label
-            value="Batches"/>
+                <div
+                    width="100%"
+                    sclass="captured-batches-table-container">
 
-    </div>
+                    <listbox
+                        id="capturedBatchesList"
+                        width="100%"
+                        emptyMessage="No captured batches available."
+                        sclass="captured-batches-listbox">
 
-    <div
-        sclass="captured-batches-table-container">
+                        <listhead
+                            sizable="true"
+                            height="52px"
+                            sclass="captured-batches-listhead">
 
-        <listbox
-            id="capturedBatchesList"
-            width="100%"
-            mold="paging"
-            pageSize="10"
-            emptyMessage="No captured batches available."
-            sclass="captured-batches-listbox">
+                            <listheader
+                                label="Batch No"
+                                width="35%"
+                                sclass="captured-batches-listheader"/>
 
-            <listhead
-                sizable="true"
-                height="52px"
-                sclass="captured-batches-listhead">
+                            <listheader
+                                label="Total Cheques"
+                                width="25%"
+                                sclass="captured-batches-listheader"/>
 
-                <listheader
-                    label="Batch No"
-                    width="35%"
-                    sclass="captured-batches-listheader"/>
+                            <listheader
+                                label="Status"
+                                width="40%"
+                                sclass="captured-batches-listheader"/>
 
-                <listheader
-                    label="Total Cheques"
-                    width="25%"
-                    sclass="captured-batches-listheader"/>
+                        </listhead>
 
-                <listheader
-                    label="Status"
-                    width="40%"
-                    sclass="captured-batches-listheader"/>
+                    </listbox>
 
-            </listhead>
+                    <paging
+                        id="batchPaging"
+                        pageSize="10"
+                        detailed="false"
+                        sclass="captured-batches-paging"/>
 
-        </listbox>
+                </div>
 
-    </div>
-
-</div>
+            </div>
 
         </vlayout>
 

@@ -25,36 +25,78 @@ public class LoginComposer extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
 
+    // =====================================================
+    // TIME ZONE
+    // =====================================================
+
     private static final java.util.TimeZone IST =
             java.util.TimeZone.getTimeZone("Asia/Kolkata");
+
+
+    // =====================================================
+    // LOGIN COMPONENTS
+    // =====================================================
 
     private Textbox username;
     private Textbox password;
     private Label loginMessage;
     private A togglePasswordBtn;
 
+
+    // =====================================================
+    // SERVICES
+    // =====================================================
+
     private UserService userService;
     private AuditLogService auditLogService;
     private SessionService sessionService;
 
+
+    // =====================================================
+    // PASSWORD VISIBILITY
+    // =====================================================
+
     private boolean isPasswordVisible = false;
+
+
+    // =====================================================
+    // INITIALIZATION
+    // =====================================================
 
     @Override
     public void doAfterCompose(Component comp) throws Exception {
 
         super.doAfterCompose(comp);
 
-        userService = new UserServiceImpl();
-        auditLogService = new AuditLogServiceImpl();
-        sessionService = new SessionServiceImpl();
+        userService =
+                new UserServiceImpl();
+
+        auditLogService =
+                new AuditLogServiceImpl();
+
+        sessionService =
+                new SessionServiceImpl();
     }
+
+
+    // =====================================================
+    // LOGIN
+    // =====================================================
 
     public void onClick$loginButton(Event event) {
 
         loginMessage.setValue("");
 
-        String usernameValue = username.getValue();
-        String passwordValue = password.getValue();
+        String usernameValue =
+                username.getValue();
+
+        String passwordValue =
+                password.getValue();
+
+
+        // =================================================
+        // VALIDATE INPUT
+        // =================================================
 
         if (usernameValue == null
                 || usernameValue.trim().isEmpty()
@@ -68,11 +110,17 @@ public class LoginComposer extends GenericForwardComposer<Component> {
             return;
         }
 
+
+        // =================================================
+        // AUTHENTICATE USER
+        // =================================================
+
         User user =
                 userService.authenticate(
                         usernameValue,
                         passwordValue
                 );
+
 
         if (user == null) {
 
@@ -83,10 +131,20 @@ public class LoginComposer extends GenericForwardComposer<Component> {
             return;
         }
 
+
+        // =================================================
+        // CREATE AUDIT SESSION
+        // =================================================
+
         String auditSessionId =
                 auditLogService.createAuditLog(
                         user.getUserId()
                 );
+
+
+        // =================================================
+        // UPDATE LAST LOGIN
+        // =================================================
 
         java.sql.Timestamp nowIST =
                 new java.sql.Timestamp(
@@ -95,52 +153,79 @@ public class LoginComposer extends GenericForwardComposer<Component> {
                                 .getTimeInMillis()
                 );
 
+
         updateLastLogin(
                 user.getUserId(),
                 nowIST
         );
 
+
         user.setLastLogin(nowIST);
 
+
+        // =================================================
+        // CREATE USER SESSION
+        // =================================================
+
         Session session =
-                Executions.getCurrent().getSession();
+                Executions
+                        .getCurrent()
+                        .getSession();
+
 
         session.setAttribute(
                 "loggedInUser",
                 user
         );
 
+
         session.setAttribute(
                 "userId",
                 user.getUserId()
         );
+
 
         session.setAttribute(
                 "username",
                 user.getUsername()
         );
 
+
         session.setAttribute(
                 "roleId",
                 user.getRoleId()
         );
+
 
         session.setAttribute(
                 "roleName",
                 user.getRoleName()
         );
 
+
         session.setAttribute(
                 "auditSessionId",
                 auditSessionId
         );
 
+
+        // =================================================
+        // REDIRECT USER BASED ON ROLE
+        // =================================================
+
         redirectUser(user);
     }
 
+
+    // =====================================================
+    // TOGGLE PASSWORD VISIBILITY
+    // =====================================================
+
     public void onClick$togglePasswordBtn(Event event) {
 
-        isPasswordVisible = !isPasswordVisible;
+        isPasswordVisible =
+                !isPasswordVisible;
+
 
         if (isPasswordVisible) {
 
@@ -160,6 +245,11 @@ public class LoginComposer extends GenericForwardComposer<Component> {
         }
     }
 
+
+    // =====================================================
+    // UPDATE LAST LOGIN
+    // =====================================================
+
     private void updateLastLogin(
             Long userId,
             java.sql.Timestamp nowIST) {
@@ -168,6 +258,7 @@ public class LoginComposer extends GenericForwardComposer<Component> {
                 "UPDATE \"user\" "
                 + "SET last_login = ? "
                 + "WHERE user_id = ?";
+
 
         try (
                 Connection conn =
@@ -179,8 +270,15 @@ public class LoginComposer extends GenericForwardComposer<Component> {
                         conn.prepareStatement(sql)
         ) {
 
-            stmt.setTimestamp(1, nowIST);
-            stmt.setLong(2, userId);
+            stmt.setTimestamp(
+                    1,
+                    nowIST
+            );
+
+            stmt.setLong(
+                    2,
+                    userId
+            );
 
             stmt.executeUpdate();
 
@@ -190,11 +288,23 @@ public class LoginComposer extends GenericForwardComposer<Component> {
         }
     }
 
+
+    // =====================================================
+    // REDIRECT USER BASED ON ROLE
+    // =====================================================
+
     private void redirectUser(User user) {
 
-        String roleName = user.getRoleName();
+        String roleName =
+                user.getRoleName();
 
-        if (roleName == null || roleName.isBlank()) {
+
+        // =================================================
+        // ROLE VALIDATION
+        // =================================================
+
+        if (roleName == null
+                || roleName.isBlank()) {
 
             loginMessage.setValue(
                     "User role is not configured."
@@ -203,7 +313,19 @@ public class LoginComposer extends GenericForwardComposer<Component> {
             return;
         }
 
+
+        // =================================================
+        // ROLE-BASED REDIRECTION
+        // =================================================
+
         switch (roleName) {
+
+
+        // =================================================
+        // ADMIN
+        //
+        // NO OUTWARD SESSION CHECK
+        // =================================================
 
         case "Admin":
 
@@ -213,6 +335,13 @@ public class LoginComposer extends GenericForwardComposer<Component> {
 
             break;
 
+
+        // =================================================
+        // INWARD MAKER
+        //
+        // NO OUTWARD SESSION CHECK
+        // =================================================
+
         case "Inward Maker":
 
             Executions.sendRedirect(
@@ -221,6 +350,13 @@ public class LoginComposer extends GenericForwardComposer<Component> {
 
             break;
 
+
+        // =================================================
+        // INWARD CHECKER
+        //
+        // NO OUTWARD SESSION CHECK
+        // =================================================
+
         case "Inward Checker":
 
             Executions.sendRedirect(
@@ -228,6 +364,13 @@ public class LoginComposer extends GenericForwardComposer<Component> {
             );
 
             break;
+
+
+        // =================================================
+        // OUTWARD MAKER
+        //
+        // OUTWARD SESSION CHECK REQUIRED
+        // =================================================
 
         case "Outward Maker":
 
@@ -238,6 +381,13 @@ public class LoginComposer extends GenericForwardComposer<Component> {
 
             break;
 
+
+        // =================================================
+        // OUTWARD CHECKER
+        //
+        // OUTWARD SESSION CHECK REQUIRED
+        // =================================================
+
         case "Outward Checker":
 
             redirectOutwardUser(
@@ -246,6 +396,15 @@ public class LoginComposer extends GenericForwardComposer<Component> {
             );
 
             break;
+
+
+        // =================================================
+        // CAPTURE OPERATOR
+        //
+        // BATCH CAPTURE
+        //
+        // OUTWARD SESSION CHECK REQUIRED
+        // =================================================
 
         case "Capture Operator":
 
@@ -256,23 +415,61 @@ public class LoginComposer extends GenericForwardComposer<Component> {
 
             break;
 
+
+        // =================================================
+        // UNKNOWN ROLE
+        // =================================================
+
         default:
 
             loginMessage.setValue(
                     "User role is not configured."
             );
+
+            break;
         }
     }
 
-    private void redirectOutwardUser(String dashboardPath) {
+
+    // =====================================================
+    // OUTWARD USER REDIRECTION
+    //
+    // THIS METHOD IS CALLED ONLY FOR:
+    //
+    // 1. Outward Maker
+    // 2. Outward Checker
+    // 3. Capture Operator
+    // =====================================================
+
+    private void redirectOutwardUser(
+            String dashboardPath) {
+
+
+        // =================================================
+        // CHECK OUTWARD CLEARING SESSION
+        // =================================================
 
         if (isOutwardSessionActive()) {
+
+
+            // =============================================
+            // SESSION STARTED
+            //
+            // GO TO REQUESTED OUTWARD PAGE
+            // =============================================
 
             Executions.sendRedirect(
                     dashboardPath
             );
 
         } else {
+
+
+            // =============================================
+            // SESSION NOT STARTED
+            //
+            // GO TO WAITING PAGE
+            // =============================================
 
             Executions.sendRedirect(
                     "/zul/outward/outward-maker/"
@@ -281,24 +478,51 @@ public class LoginComposer extends GenericForwardComposer<Component> {
         }
     }
 
+
+    // =====================================================
+    // CHECK OUTWARD CLEARING SESSION
+    // =====================================================
+
     private boolean isOutwardSessionActive() {
 
         try {
 
+
+            // =================================================
+            // GET ACTIVE SESSION
+            // =================================================
+
             com.cts.admin.model.Session activeSession =
                     sessionService.getActiveSession();
 
+
+            // =================================================
+            // NO ACTIVE SESSION
+            // =================================================
+
             if (activeSession == null) {
+
                 return false;
             }
 
+
+            // =================================================
+            // GET SESSION STATUS
+            // =================================================
+
             String status =
                     activeSession.getStatus();
+
+
+            // =================================================
+            // SESSION IS ACTIVE ONLY WHEN STATUS = STARTED
+            // =================================================
 
             return status != null
                     && "STARTED".equalsIgnoreCase(
                             status.trim()
                     );
+
 
         } catch (Exception e) {
 

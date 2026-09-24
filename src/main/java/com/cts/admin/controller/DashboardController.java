@@ -55,12 +55,6 @@ public class DashboardController extends GenericForwardComposer<Component> {
 	private Label sessionBadgeLbl;
 	private Label sessionManageLink;
 
-	/* Batch card */
-	private Label totalBatchesValue;
-	private Label inProgressBatchesValue;
-	private Label completedBatchesValue;
-	private Label batchTrackLink;
-
 	/* Recent logs */
 	private Button viewAuditLogsBtn;
 	private Listbox recentAuditListbox;
@@ -97,13 +91,6 @@ public class DashboardController extends GenericForwardComposer<Component> {
 			}
 		});
 
-		batchTrackLink.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
-			@Override
-			public void onEvent(Event e) throws Exception {
-				Executions.sendRedirect("/zul/admin/admin-batch-monitoring.zul");
-			}
-		});
-
 		viewAuditLogsBtn.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
 			@Override
 			public void onEvent(Event e) throws Exception {
@@ -114,7 +101,6 @@ public class DashboardController extends GenericForwardComposer<Component> {
 		/* Load all dashboard data */
 		loadUserCounts();
 		loadSessionState();
-		loadBatchCounts();
 		loadRecentAuditLogs();
 	}
 
@@ -164,70 +150,6 @@ public class DashboardController extends GenericForwardComposer<Component> {
 				sessionBadgeLbl.setValue("Active");
 
 			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	/* BATCH COUNTS */
-	/*
-	 * Combines inward_batch (via inward_batch_history) + outward_batch for total /
-	 * in-progress / completed counts
-	 */
-
-	private void loadBatchCounts() {
-
-		try (Connection conn = ConnectionPool.getDataSource().getConnection()) {
-
-			/* Count outward batches by status */
-			int outwardTotal = 0, outwardInProgress = 0, outwardCompleted = 0;
-
-			try (PreparedStatement stmt = conn.prepareStatement(
-					"SELECT batch_status, COUNT(*) AS cnt " + "FROM outward_batch " + "GROUP BY batch_status");
-					ResultSet rs = stmt.executeQuery()) {
-				while (rs.next()) {
-					String s = rs.getString("batch_status");
-					int cnt = rs.getInt("cnt");
-					outwardTotal += cnt;
-					if (s != null) {
-						String upper = s.toUpperCase();
-						if (upper.contains("COMPLET") || upper.contains("VERIFIED")) {
-							outwardCompleted += cnt;
-						} else if (!upper.contains("CANCEL")) {
-							outwardInProgress += cnt;
-						}
-					}
-				}
-			}
-
-			/* Count inward batches via latest history status */
-			int inwardTotal = 0, inwardInProgress = 0, inwardCompleted = 0;
-
-			try (PreparedStatement stmt = conn.prepareStatement("SELECT DISTINCT ON (batch_id) batch_id, batch_status "
-					+ "FROM inward_batch_history " + "ORDER BY batch_id, changed_on DESC");
-					ResultSet rs = stmt.executeQuery()) {
-				while (rs.next()) {
-					String s = rs.getString("batch_status");
-					inwardTotal++;
-					if (s != null) {
-						String upper = s.toUpperCase();
-						if (upper.contains("COMPLET") || upper.contains("ACCEPT")) {
-							inwardCompleted++;
-						} else {
-							inwardInProgress++;
-						}
-					}
-				}
-			}
-
-			int total = outwardTotal + inwardTotal;
-			int inProgress = outwardInProgress + inwardInProgress;
-			int completed = outwardCompleted + inwardCompleted;
-
-			totalBatchesValue.setValue(String.valueOf(total));
-			inProgressBatchesValue.setValue(String.valueOf(inProgress));
-			completedBatchesValue.setValue(String.valueOf(completed));
 
 		} catch (Exception e) {
 			e.printStackTrace();

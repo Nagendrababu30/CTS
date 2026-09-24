@@ -215,11 +215,13 @@ public class VerifyBatchController
 
                     /*
                      * =================================================
-                     * ONLY CURRENT CHECKER'S BATCHES
+                     * ONLY CURRENT CHECKER'S BATCHES THAT ARE NOT ON HOLD
+                     * Batches on hold (returned to maker) should not be displayed.
                      * =================================================
                      */
 
-                    if ("LOCKED".equals(
+                    if (!isOnHold(batch)
+                            && "LOCKED".equals(
                             batch.getLockStatus())
 
                             && batch.getUserId() != null
@@ -251,6 +253,26 @@ public class VerifyBatchController
 
             updatePagination();
         }
+    }
+
+
+    /*
+     * =========================================================
+     * IS ON HOLD
+     * =========================================================
+     */
+    private boolean isOnHold(
+            CheckerBatch batch) {
+
+        if (batch == null) {
+            return false;
+        }
+
+        return "ON_HOLD".equalsIgnoreCase(
+                batch.getBatchStatus())
+                || "RETURN_TO_MAKER".equalsIgnoreCase(
+                        batch.getBatchStatus())
+                || batch.isReVerify();
     }
 
 

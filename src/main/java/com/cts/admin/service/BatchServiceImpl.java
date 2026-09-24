@@ -7,24 +7,24 @@ import com.cts.admin.model.Batch;
 
 public class BatchServiceImpl implements BatchService {
 
-    private final BatchDAO batchDAO;
+	private final BatchDAO batchDAO;
 
-    public BatchServiceImpl() {
-        batchDAO = new BatchDAOImpl();
-    }
+	public BatchServiceImpl() {
+		batchDAO = new BatchDAOImpl();
+	}
 
-    @Override
-    public List<Batch> getBatchCaptureBatches() {
-        return batchDAO.getBatchCaptureBatches();
-    }
+	@Override
+	public List<Batch> getBatchCaptureBatches() {
+		return batchDAO.getBatchCaptureBatches();
+	}
 
-    @Override
-    public List<Batch> getInwardBatches() {
-        return batchDAO.getInwardBatches();
-    }
+	@Override
+	public List<Batch> getInwardBatches() {
+		return batchDAO.getInwardBatches();
+	}
 
-    @Override
-    public List<Batch> getOutwardBatches() {
-        return batchDAO.getOutwardBatches();
-    }
+	@Override
+	public List<Batch> getOutwardBatches() {
+		return batchDAO.getOutwardBatches();
+	}
 }

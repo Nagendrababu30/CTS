@@ -6,13 +6,13 @@ import com.cts.admin.model.Session;
 
 public interface SessionService {
 
-    boolean startSession(Long userId);
+	boolean startSession(Long userId);
 
-    boolean endSession(Long sessionId, Long userId);
+	boolean endSession(Long sessionId, Long userId);
 
-    Session getActiveSession();
+	Session getActiveSession();
 
-    List<Session> getAllSessions(int limit, int offset);
+	List<Session> getAllSessions(int limit, int offset);
 
-    int getSessionCount();
+	int getSessionCount();
 }

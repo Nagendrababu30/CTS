@@ -19,7 +19,6 @@ public class UserDAOImpl {
 
 		StringBuilder sql = new StringBuilder();
 
-		/* CTS DB uses reserved words "user" and "role" — must be quoted */
 		sql.append("SELECT u.user_id, " + "       u.username, " + "       u.role_id, " + "       r.role_name, "
 				+ "       r.description AS role_description, " + "       r.status      AS role_status, "
 				+ "       u.status, " + "       u.last_login " + "FROM   \"user\" u "
@@ -131,10 +130,7 @@ public class UserDAOImpl {
 
 	public boolean createUser(User user) {
 
-		/*
-		 * CTS "user" table columns: user_id, username, password, role_id, status,
-		 * last_login
-		 */
+		
 		String sql = "INSERT INTO \"user\" " + "(username, password, role_id, status) " + "VALUES (?, ?, ?, ?)";
 
 		try (Connection conn = ConnectionPool.getDataSource().getConnection();
@@ -164,10 +160,8 @@ public class UserDAOImpl {
 
 			stmt.setLong(2, user.getRole().getRoleId());
 
-			/*
-			 * NULL means preserve the existing password. A new BCrypt hash updates the
-			 * password.
-			 */
+			// NULL means preserve the existing password. A new BCrypt hash updates the password.
+			
 			stmt.setString(3, user.getPasswordHash());
 
 			stmt.setLong(4, user.getUserId());
@@ -210,9 +204,7 @@ public class UserDAOImpl {
 		}
 	}
 
-	/* ------------------------------------------------------------------ */
-	/* MAPPER */
-	/* ------------------------------------------------------------------ */
+	// MAPPER 
 
 	private User mapUser(ResultSet rs) throws SQLException {
 
@@ -222,7 +214,7 @@ public class UserDAOImpl {
 		user.setUsername(rs.getString("username"));
 		user.setStatus(rs.getString("status"));
 
-		/* password column — only present in getUserById query */
+		// password column — only present in getUserById query 
 		try {
 			String pwd = rs.getString("password");
 			if (pwd != null) {
@@ -231,13 +223,13 @@ public class UserDAOImpl {
 		} catch (SQLException ignored) {
 		}
 
-		/* last_login */
+		// last_login 
 		try {
 			user.setLastLoginAt(rs.getTimestamp("last_login"));
 		} catch (SQLException ignored) {
 		}
 
-		/* Role */
+		// Role 
 		long roleIdValue = rs.getLong("role_id");
 		if (!rs.wasNull()) {
 			Role role = new Role();

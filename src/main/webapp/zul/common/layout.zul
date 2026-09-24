@@ -3,6 +3,7 @@
 <zk xmlns:n="native">
 
     <style src="/css/common/common.css" />
+    <style src="/css/common/loader.css?v=3" />
 
     <n:link
         rel="stylesheet"

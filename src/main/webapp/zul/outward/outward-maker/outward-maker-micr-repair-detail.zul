@@ -1,923 +1,215 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-
-
 <?page title="Micr Repair Detail"?>
-
-
-
-<?init class="com.cts.admin.controller.LayoutInit"
-
-        pageTitle="Micr Repair Detail"
-
-        active="micrRepair"?>
-
-
-
-<?init class="org.zkoss.zk.ui.util.Composition"
-
-        arg0="/zul/common/layout.zul"?>
-
-
+<?init class="com.cts.admin.controller.LayoutInit" pageTitle="Micr Repair Detail" active="micrRepair"?>
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/zul/common/layout.zul"?>
 
 <zk>
-	   <style src="/css/outward/maker/micrdetail.css"/>
-    <!-- =========================================================
-
-         CONTENT ROOT
-
-         ========================================================= -->
-
-
-
-    <div
-
-        self="@define(content)"
-
-        width="100%"
-
-        height="100%"
-
-        sclass="micr-repair-detail-wrapper">
-
-
-
-        <vlayout
-
-            apply="com.iispl.cts.controller.outward.OutwardMakerMicrRepairDetailController"
-
-            spacing="12px"
-
-            width="100%"
-
-            height="100%"
-
-            sclass="micr-repair-detail-vlayout">
-
-
-
-
-
-            <!-- =================================================
-
-                 BATCH HEADER STRIP & METRICS PILLS
-
-                 ================================================= -->
-
-
-
-            <div
-
-                width="100%"
-
-                sclass="micr-batch-header-strip">
-
-
-
-                <hlayout
-
-                    width="100%"
-
-                    valign="middle"
-
-                    spacing="12px">
-
-
-
-                    <!-- Back Button -->
-
-
-
-                    <button
-
-                        id="btnBackToQueue"
-
-                        label="←"
-
-                        tooltiptext="Back to Batch Queue"
-
-                        sclass="btn-back-to-queue" />
-
-
-
-
-
-                    <!-- Batch ID -->
-
-
-
-                    <label
-
-                        value="Batch No : "
-
-                        sclass="batch-label" />
-
-
-
-                    <label
-
-                        id="batchIdLabel"
-
-                        value=""
-
-                        sclass="batch-id-label" />
-
-
-
-                    <space hflex="1" />
-
-
-
-
-
-                    <!-- Metric Status Pills -->
-
-
-
-                    <div sclass="metric-pill pill-total">
-
-
-
-                        <label
-
-                            value="Total: "
-
-                            sclass="metric-label" />
-
-
-
-                        <label
-
-                            id="totalPillLabel"
-
-                            value="0"
-
-                            sclass="metric-value" />
-
-
-
-                    </div>
-
-
-
-                    <div sclass="metric-pill pill-completed">
-
-
-
-                        <label
-
-                            value="Completed: "
-
-                            sclass="metric-label" />
-
-
-
-                        <label
-
-                            id="completedPillLabel"
-
-                            value="0"
-
-                            sclass="metric-value" />
-
-
-
-                    </div>
-
-
-
-                    <div sclass="metric-pill pill-pending">
-
-
-
-                        <label
-
-                            value="Pending: "
-
-                            sclass="metric-label" />
-
-
-
-                        <label
-
-                            id="pendingPillLabel"
-
-                            value="0"
-
-                            sclass="metric-value" />
-
-
-
-                    </div>
-
-
-
-                    <space width="10px" />
-
-
-
-                    <!-- Cheque Progress Counter -->
-
-
-
-                    <label
-
-                        id="chequeProgressLabel"
-
-                        value=""
-
-                        sclass="cheque-progress-label" />
-
-
-
-                </hlayout>
-
-
-
-            </div>
-
-
-
-
-
-            <!-- =================================================
-
-                 CHECKER RETURN INFORMATION
-
-
-
-                 Hidden automatically by Controller for normal
-
-                 MICR Repair.
-
-
-
-                 Visible only when this cheque was returned by
-
-                 Checker with SEND_BACK.
-
-                 ================================================= -->
-
-<vlayout id="checkerReturnInformationPanel" visible="false" width="100%" spacing="6px" sclass="checker-return-card"> <label value="CHECKER RETURN INFORMATION" sclass="checker-return-title" /> <hlayout width="100%" spacing="12px" valign="top"> <vlayout hflex="1" spacing="4px"> <label value="RETURN REASON" sclass="checker-return-label" /> <label id="checkerReasonLabel" value="" sclass="checker-return-value" /> </vlayout> <vlayout hflex="2" spacing="4px"> <label value="CHECKER REMARKS" sclass="checker-return-label" /> <label id="checkerRemarksLabel" value="" sclass="checker-return-value" /> </vlayout> </hlayout> </vlayout>
-
-
-
-            <!-- =================================================
-
-                 MAIN SPLIT ROW
-
-                 ================================================= -->
-
-
-
-            <hlayout
-
-                width="100%"
-
-                spacing="16px"
-
-                valign="top">
-
-
-
-
-
-                <!-- =================================================
-
-                     LEFT CARD: SCANNED CHEQUE VIEW
-
-                     ================================================= -->
-
-
-
-                <groupbox
-
-                    hflex="1"
-
-                    height="465px"
-
-                    sclass="template-card">
-
-
-
-                    <vlayout
-
-                        width="100%"
-
-                        height="100%"
-
-                        spacing="10px">
-
-
-
-
-
-                        <!-- Header Badge -->
-
-
-
-                        <hlayout
-
-                            width="100%">
-
-
-
-                            <div sclass="section-title-badge">
-
-
-
-                                <label
-
-                                    value="Scanned Cheque" />
-
-
-
-                            </div>
-
-
-
-                        </hlayout>
-
-
-
-
-
-                        <!-- Cheque Image Viewport -->
-
-
-
-                        <div
-
-                            width="100%"
-
-                            vflex="1"
-
-                            sclass="cheque-image-viewport">
-
-
-
-                            <image
-
-                                id="frontImage"
-
-                                sclass="cheque-image"
-
-                                visible="true"
-
-                                src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Subcheck_FRONT.png"
-
-                                width="100%"
-
-                                height="100%" />
-
-
-
-                            <image
-
-                                id="backImage"
-
-                                sclass="cheque-image"
-
-                                visible="false"
-
-                                src="https://placehold.co/900x400?text=Cheque+Back"
-
-                                width="100%"
-
-                                height="100%" />
-
-
-
-                        </div>
-
-
-
-
-
-                        <!-- Image Tools Toolbar -->
-
-
-
-                        <hlayout
-
-                            width="100%"
-
-                            spacing="8px"
-
-                            valign="middle">
-
-
-
-                            <button
-
-                                id="frontImageButton"
-
-                                label="Front"
-
-                                width="85px"
-
-                                height="32px"
-
-                                sclass="btn-cyan" />
-
-
-
-                            <button
-
-                                id="backImageButton"
-
-                                label="View Back"
-
-                                width="95px"
-
-                                height="32px"
-
-                                sclass="btn-cyan-outline" />
-
-
-
-                            <space width="4px" />
-
-
-
-                            <button
-
-                                id="zoomInButton"
-
-                                label="+"
-
-                                tooltiptext="Zoom In"
-
-                                sclass="icon-symbol-btn" />
-
-
-
-                            <button
-
-                                id="zoomOutButton"
-
-                                label="−"
-
-                                tooltiptext="Zoom Out"
-
-                                sclass="icon-symbol-btn" />
-
-
-
-                            <button
-
-                                id="rotateButton"
-
-                                label="↻"
-
-                                tooltiptext="Rotate"
-
-                                sclass="icon-symbol-btn" />
-
-
-
-                        </hlayout>
-
-
-
-                    </vlayout>
-
-
-
-                </groupbox>
-
-
-
-
-
-                <!-- =================================================
-
-                     RIGHT CARD: MICR REPAIR FORM
-
-                     ================================================= -->
-
-
-
-                <groupbox
-
-                    hflex="1"
-
-                    height="465px"
-
-                    sclass="template-card">
-
-
-
-                    <vlayout
-
-                        width="100%"
-
-                        vflex="1"
-
-                        spacing="12px">
-
-
-
-
-
-                        <!-- Header Badge -->
-
-
-
-                        <hlayout
-
-                            width="100%">
-
-
-
-                            <div sclass="section-title-badge">
-
-
-
-                                <label
-
-                                    value="Cheque Data Verification" />
-
-
-
-                            </div>
-
-
-
-                        </hlayout>
-
-
-
-
-
-                        <!-- Row 1: Cheque Number & Current Status -->
-
-
-
-                        <hlayout
-
-                            width="100%"
-
-                            spacing="12px">
-
-
-
-                            <vlayout
-
-                                hflex="1"
-
-                                spacing="4px">
-
-
-
-                                <label
-
-                                    value="CHEQUE NUMBER"
-
-                                    sclass="single-field-label" />
-
-
-
-                                <textbox
-
-                                    id="chequeNumberTextbox"
-
-                                    width="100%"
-
-                                    readonly="true"
-
-                                    sclass="single-field-box" />
-
-
-
-                            </vlayout>
-
-
-
-
-
-                            <vlayout
-
-                                hflex="1"
-
-                                spacing="4px">
-
-
-
-                                <label
-
-                                    value="CURRENT STATUS"
-
-                                    sclass="single-field-label" />
-
-
-
-                                <label
-
-                                    id="currentStatusLabel"
-
-                                    value="MICR_ERROR"
-
-                                    sclass="current-status-label" />
-
-
-
-                            </vlayout>
-
-
-
-                        </hlayout>
-
-
-
-
-
-                        <!-- Row 2: City Code & Bank Code -->
-
-
-
-                        <hlayout
-
-                            width="100%"
-
-                            spacing="12px">
-
-
-
-                            <vlayout
-
-                                hflex="1"
-
-                                spacing="4px">
-
-
-
-                                <hlayout
-
-                                    spacing="0"
-
-                                    valign="middle">
-
-
-
-                                    <label
-
-                                        id="cityCodeLabel"
-
-                                        value="CITY CODE"
-
-                                        sclass="single-field-label" />
-
-
-
-                                    <label
-
-                                        value="*"
-
-                                        sclass="label-star" />
-
-
-
-                                </hlayout>
-
-
-
-                                <textbox
-
-                                    id="cityCodeTextbox"
-
-                                    width="100%"
-
-                                    placeholder="Enter city code"
-
-                                    sclass="corrected-micr-box" />
-
-
-
-                            </vlayout>
-
-
-
-
-
-                            <vlayout
-
-                                hflex="1"
-
-                                spacing="4px">
-
-
-
-                                <hlayout
-
-                                    spacing="0"
-
-                                    valign="middle">
-
-
-
-                                    <label
-
-                                        id="bankCodeLabel"
-
-                                        value="BANK CODE"
-
-                                        sclass="single-field-label" />
-
-
-
-                                    <label
-
-                                        value="*"
-
-                                        sclass="label-star" />
-
-
-
-                                </hlayout>
-
-
-
-                                <textbox
-
-                                    id="bankCodeTextbox"
-
-                                    width="100%"
-
-                                    placeholder="Enter bank code"
-
-                                    sclass="corrected-micr-box" />
-
-
-
-                            </vlayout>
-
-
-
-                        </hlayout>
-
-
-
-
-
-                        <!-- Row 3: Branch Code -->
-
-
-
-                        <hlayout
-
-                            width="100%"
-
-                            spacing="12px">
-
-
-
-                            <vlayout
-
-                                hflex="1"
-
-                                spacing="4px">
-
-
-
-                                <hlayout
-
-                                    spacing="0"
-
-                                    valign="middle">
-
-
-
-                                    <label
-
-                                        id="branchCodeLabel"
-
-                                        value="BRANCH CODE"
-
-                                        sclass="single-field-label" />
-
-
-
-                                    <label
-
-                                        value="*"
-
-                                        sclass="label-star" />
-
-
-
-                                </hlayout>
-
-
-
-                                <textbox
-
-                                    id="branchCodeTextbox"
-
-                                    width="100%"
-
-                                    placeholder="Enter branch code"
-
-                                    sclass="corrected-micr-box" />
-
-
-
-                            </vlayout>
-
-
-
-                            <vlayout hflex="1" />
-
-
-
-                        </hlayout>
-
-
-
-
-
-                        <!-- Flexible spacer pushes bottom actions -->
-
-
-
-                        <space vflex="1" />
-
-
-
-
-
-                        <!-- Actions Row -->
-
-
-
-                        <hlayout
-
-                            width="100%"
-
-                            valign="middle"
-
-                            spacing="10px">
-
-
-
-                            <button
-
-                                id="prevButton"
-
-                                label="Prev"
-
-                                width="85px"
-
-                                height="36px"
-
-                                sclass="btn-cyan-outline" />
-
-
-
-                            <button
-
-                                id="saveNextButton"
-
-                                label="💾 Save &amp; Next"
-
-                                width="130px"
-
-                                height="36px"
-
-                                sclass="btn-cyan" />
-
-
-
-                            <button
-
-                                id="nextButton"
-
-                                visible="false" />
-
-
-
-                        </hlayout>
-
-
-
-                    </vlayout>
-
-
-
-                </groupbox>
-
-
-
-            </hlayout>
-
-
-
-        </vlayout>
-
-
-
-    </div>
-
-
-
+	<style src="/css/outward/maker/micrdetail.css" />
+
+	<!--  CONTENT ROOT -->
+	<div self="@define(content)" width="100%" height="100%"
+		sclass="micr-repair-detail-wrapper">
+		<vlayout
+			apply="com.iispl.cts.controller.outward.OutwardMakerMicrRepairDetailController"
+			spacing="12px" width="100%" height="100%"
+			sclass="micr-repair-detail-vlayout">
+
+			<!-- BATCH HEADER STRIP & METRICS PILLS -->
+			<div width="100%" sclass="micr-batch-header-strip">
+				<hlayout width="100%" valign="middle" spacing="12px">
+
+					<!-- Back Button -->
+					<button id="btnBackToQueue" label="←"
+						tooltiptext="Back to Batch Queue" sclass="btn-back-to-queue" />
+
+					<!-- Batch ID -->
+					<label value="Batch No : " sclass="batch-label" />
+					<label id="batchIdLabel" value=""
+						sclass="batch-id-label" />
+					<space hflex="1" />
+
+					<!-- Metric Status Pills -->
+					<div sclass="metric-pill pill-total">
+						<label value="Total: " sclass="metric-label" />
+						<label id="totalPillLabel" value="0"
+							sclass="metric-value" />
+					</div>
+
+					<div sclass="metric-pill pill-completed">
+						<label value="Completed: "
+							sclass="metric-label" />
+						<label id="completedPillLabel" value="0"
+							sclass="metric-value" />
+					</div>
+
+					<div sclass="metric-pill pill-pending">
+						<label value="Pending: " sclass="metric-label" />
+						<label id="pendingPillLabel" value="0"
+							sclass="metric-value" />
+					</div>
+					<space width="10px" />
+
+					<!-- Cheque Progress Counter -->
+					<label id="chequeProgressLabel" value=""
+						sclass="cheque-progress-label" />
+				</hlayout>
+			</div>
+
+			<!-- CHECKER RETURN INFORMATION -->
+			<vlayout id="checkerReturnInformationPanel" visible="false"
+				width="100%" spacing="6px" sclass="checker-return-card">
+				<label value="CHECKER RETURN INFORMATION"
+					sclass="checker-return-title" />
+				<hlayout width="100%" spacing="12px" valign="top">
+					<vlayout hflex="1" spacing="4px">
+						<label value="RETURN REASON"
+							sclass="checker-return-label" />
+						<label id="checkerReasonLabel" value=""
+							sclass="checker-return-value" />
+					</vlayout>
+					<vlayout hflex="2" spacing="4px">
+						<label value="CHECKER REMARKS"
+							sclass="checker-return-label" />
+						<label id="checkerRemarksLabel" value=""
+							sclass="checker-return-value" />
+					</vlayout>
+				</hlayout>
+			</vlayout>
+
+			<!--  MAIN SPLIT ROW -->
+			<hlayout width="100%" spacing="16px" valign="top">
+
+				<!-- LEFT CARD: SCANNED CHEQUE VIEW -->
+				<groupbox hflex="1" height="465px"
+					sclass="template-card">
+					<vlayout width="100%" height="100%"
+						spacing="10px">
+
+						<!-- Header Badge -->
+						<hlayout width="100%">
+							<div sclass="section-title-badge">
+								<label value="Scanned Cheque" />
+							</div>
+						</hlayout>
+
+						<!-- Cheque Image Viewport -->
+						<div width="100%" vflex="1"
+							sclass="cheque-image-viewport">
+							<image id="frontImage" sclass="cheque-image"
+								visible="true"
+								src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Subcheck_FRONT.png"
+								width="100%" height="100%" />
+							<image id="backImage" sclass="cheque-image"
+								visible="false"
+								src="https://placehold.co/900x400?text=Cheque+Back" width="100%"
+								height="100%" />
+						</div>
+
+						<!-- Image Tools Toolbar -->
+						<hlayout width="100%" spacing="8px"
+							valign="middle">
+							<button id="frontImageButton" label="Front"
+								width="85px" height="32px" sclass="btn-cyan" />
+							<button id="backImageButton"
+								label="View Back" width="95px" height="32px"
+								sclass="btn-cyan-outline" />
+							<space width="4px" />
+							<button id="zoomInButton" label="+"
+								tooltiptext="Zoom In" sclass="icon-symbol-btn" />
+							<button id="zoomOutButton" label="−"
+								tooltiptext="Zoom Out" sclass="icon-symbol-btn" />
+							<button id="rotateButton" label="↻"
+								tooltiptext="Rotate" sclass="icon-symbol-btn" />
+						</hlayout>
+					</vlayout>
+				</groupbox>
+
+				<!--  RIGHT CARD: MICR REPAIR FORM -->
+				<groupbox hflex="1" height="465px"
+					sclass="template-card">
+					<vlayout width="100%" vflex="1" spacing="12px">
+
+						<!-- Header Badge -->
+						<hlayout width="100%">
+							<div sclass="section-title-badge">
+								<label value="Cheque Data Verification" />
+							</div>
+						</hlayout>
+
+						<!-- Row 1: Cheque Number & Current Status -->
+						<hlayout width="100%" spacing="12px">
+							<vlayout hflex="1" spacing="4px">
+								<label value="CHEQUE NUMBER"
+									sclass="single-field-label" />
+								<textbox id="chequeNumberTextbox"
+									width="100%" readonly="true" sclass="single-field-box" />
+							</vlayout>
+							<vlayout hflex="1" spacing="4px">
+								<label value="CURRENT STATUS"
+									sclass="single-field-label" />
+								<label id="currentStatusLabel"
+									value="MICR_ERROR" sclass="current-status-label" />
+							</vlayout>
+						</hlayout>
+
+						<!-- Row 2: City Code & Bank Code -->
+						<hlayout width="100%" spacing="12px">
+							<vlayout hflex="1" spacing="4px">
+								<hlayout spacing="0" valign="middle">
+									<label id="cityCodeLabel"
+										value="CITY CODE" sclass="single-field-label" />
+									<label value="*"
+										sclass="label-star" />
+								</hlayout>
+								<textbox id="cityCodeTextbox"
+									width="100%" placeholder="Enter city code"
+									sclass="corrected-micr-box" />
+							</vlayout>
+							<vlayout hflex="1" spacing="4px">
+								<hlayout spacing="0" valign="middle">
+									<label id="bankCodeLabel"
+										value="BANK CODE" sclass="single-field-label" />
+									<label value="*"
+										sclass="label-star" />
+								</hlayout>
+								<textbox id="bankCodeTextbox"
+									width="100%" placeholder="Enter bank code"
+									sclass="corrected-micr-box" />
+							</vlayout>
+						</hlayout>
+
+						<!-- Row 3: Branch Code -->
+						<hlayout width="100%" spacing="12px">
+							<vlayout hflex="1" spacing="4px">
+								<hlayout spacing="0" valign="middle">
+									<label id="branchCodeLabel"
+										value="BRANCH CODE" sclass="single-field-label" />
+									<label value="*"
+										sclass="label-star" />
+								</hlayout>
+								<textbox id="branchCodeTextbox"
+									width="100%" placeholder="Enter branch code"
+									sclass="corrected-micr-box" />
+							</vlayout>
+							<vlayout hflex="1" />
+						</hlayout>
+
+						<!-- Flexible spacer pushes bottom actions -->
+						<space vflex="1" />
+
+						<!-- Actions Row -->
+						<hlayout width="100%" valign="middle"
+							spacing="10px">
+							<button id="prevButton" label="Prev"
+								width="85px" height="36px" sclass="btn-cyan-outline" />
+							<button id="saveNextButton"
+								label="💾 Save &amp; Next" width="130px" height="36px"
+								sclass="btn-cyan" />
+							<button id="nextButton" visible="false" />
+						</hlayout>
+					</vlayout>
+				</groupbox>
+			</hlayout>
+		</vlayout>
+	</div>
 </zk>

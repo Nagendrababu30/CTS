@@ -1,107 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?page title="MICR Repair"?>
-
-<?init class="com.cts.admin.controller.LayoutInit"
-        pageTitle="MICR Repair"
-        active="micrRepair"?>
-
-<?init class="org.zkoss.zk.ui.util.Composition"
-        arg0="/zul/common/layout.zul"?>
+<?init class="com.cts.admin.controller.LayoutInit" pageTitle="MICR Repair" active="micrRepair"?>
+<?init class="org.zkoss.zk.ui.util.Composition" arg0="/zul/common/layout.zul"?>
 
 <zk>
-<style src="/css/outward/maker/micr-repair.css?v=25"/>
-    <!-- =========================================================
-         PAGE STYLING
-         ========================================================= -->
+	<style src="/css/outward/maker/micr-repair.css?v=25" />
 
-   
-    <!-- =========================================================
-         CONTENT
-         Header + Sidebar are provided by:
+	<!-- PAGE STYLING -->
+	<div self="@define(content)" width="100%" height="100%"
+		sclass="micr-page-wrapper">
 
-             /zul/common/layout.zul
+		<!-- MICR REPAIR CONTENT -->
+		<vlayout
+			apply="com.iispl.cts.controller.outward.OutwardMakerMicrRepairController"
+			spacing="18px" width="100%" height="100%"
+			sclass="micr-repair-vlayout">
 
-         ========================================================= -->
+			<!-- PAGE TITLE -->
+			<label value="MICR Repair" sclass="micr-repair-title" />
 
-    <div
-        self="@define(content)"
-        width="100%"
-        height="100%"
-        sclass="micr-page-wrapper">
+			<!-- BATCH TABLE CARD -->
+			<div width="100%" sclass="micr-repair-card">
 
-        <!-- =====================================================
-             MICR REPAIR CONTENT
-             ===================================================== -->
-
-        <vlayout
-            apply="com.iispl.cts.controller.outward.OutwardMakerMicrRepairController"
-            spacing="18px"
-            width="100%"
-            height="100%"
-            sclass="micr-repair-vlayout">
-
-            <!-- =================================================
-                 PAGE TITLE
-                 ================================================= -->
-
-            <label
-                value="MICR Repair"
-                sclass="micr-repair-title"/>
-
-
-            <!-- =================================================
-                 BATCH TABLE CARD
-                 ================================================= -->
-
-            <div
-                width="100%"
-                sclass="micr-repair-card">
-
-                <!-- =============================================
-                     BATCH LIST
-                     ============================================= -->
-
-                <listbox
-                    id="batchListbox"
-                    width="100%"
-                    sclass="micr-repair-listbox"
-                    emptyMessage="No batches available for MICR Repair."
-                    mold="paging"
-                    pageSize="10">
-
-                    <listhead>
-
-                        <listheader
-                            label="Batch ID"
-                            width="20%"/>
-
-                        <listheader
-                            label="Total Cheques"
-                            width="20%"/>
-
-                       
-                          <listheader
-                            label="MICR Error"
-                            width="20%"/>
-                           
-                           <listheader
-                            label="Status"
-                            width="20%"/>
-                           
-
-                        <listheader
-                            label="Action"
-                            width="20%"/>
-
-                    </listhead>
-
-                </listbox>
-
-            </div>
-
-        </vlayout>
-
-    </div>
-
+				<!-- BATCH LIST -->
+				<listbox id="batchListbox" width="100%"
+					sclass="micr-repair-listbox"
+					emptyMessage="No batches available for MICR Repair." mold="paging"
+					pageSize="10">
+					<listhead>
+						<listheader label="Batch ID" width="20%" />
+						<listheader label="Total Cheques" width="20%" />
+						<listheader label="MICR Error" width="20%" />
+						<listheader label="Status" width="20%" />
+						<listheader label="Action" width="20%" />
+					</listhead>
+				</listbox>
+			</div>
+		</vlayout>
+	</div>
 </zk>

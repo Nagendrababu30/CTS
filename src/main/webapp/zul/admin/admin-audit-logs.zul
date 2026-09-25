@@ -68,6 +68,13 @@
                     sclass="audit-search-btn"
                     label="Search"
                     iconSclass="z-icon-search"/>
+                
+                 <!-- CLEAR BUTTON -->
+                <button
+                    id="auditClearButton"
+                    sclass="audit-clear-btn"
+                    label="Clear"
+                    iconSclass="z-icon-undo"/>
 
 
                 <!-- ROLE FILTER -->

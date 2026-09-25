@@ -48,6 +48,8 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 	private Textbox auditSearchTextbox;
 
 	private Button auditSearchButton;
+	
+	private Button auditClearButton;
 
 	private Combobox auditRoleCombobox;
 
@@ -121,6 +123,19 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 				refreshAuditLogs();
 			}
 		});
+		
+		
+		// CLEAR BUTTON EVENT
+		if (auditClearButton != null) {
+			auditClearButton.addEventListener("onClick", new EventListener<Event>() {
+
+				@Override
+				public void onEvent(Event event) throws Exception {
+
+					clearAuditFilters();
+				}
+			});
+		}
 
 		// ROLE FILTER
 		auditRoleCombobox.addEventListener("onSelect", new EventListener<Event>() {
@@ -163,6 +178,35 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 				exportAuditLogsToPdf();
 			}
 		});
+	}
+	
+	// CLEAR ALL FILTERS AND RESET TABLE
+	private void clearAuditFilters() {
+
+		if (auditSearchTextbox != null) {
+			auditSearchTextbox.setValue("");
+		}
+
+		if (auditRoleCombobox != null) {
+			auditRoleCombobox.setSelectedIndex(0);
+		}
+
+		if (auditFromDate != null) {
+			auditFromDate.setValue(null);
+			auditFromDate.setRawValue(null);
+		}
+
+		if (auditToDate != null) {
+			auditToDate.setValue(null);
+			auditToDate.setRawValue(null);
+		}
+
+		// Reset total size and page to initial unfiltered state
+		auditLogPaging.setTotalSize(auditLogService.getTotalAuditLogCount(null, null, null, null));
+		auditLogPaging.setActivePage(0);
+
+		// Reload default first page
+		loadAuditLogs(0);
 	}
 
 	// LOAD ROLE FILTER FROM DATABASE

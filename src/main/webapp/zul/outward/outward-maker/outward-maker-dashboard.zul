@@ -310,7 +310,7 @@
 
                         <listheader
                             label="Action"
-                            width="20%"
+                            width="30%"
                             align="center"/>
 
                         <listheader

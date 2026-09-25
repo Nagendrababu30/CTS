@@ -489,12 +489,18 @@ private OutwardMakerDashboardService service;
             openButton.setHeight("32px");
 
             openButton.setStyle(
-                    "background:#12B76A;"
-                            + "color:white;"
-                            + "border:none;"
-                            + "border-radius:5px;"
-                            + "font-weight:bold;"
+                    "background:#175CD3;"
+                            + "color:#FFFFFF;"
+                            + "border:1px solid #175CD3;"
+                            + "border-radius:6px;"
+                            + "font-family:'Inter','Segoe UI',Arial,sans-serif;"
+                            + "font-size:13px;"
+                            + "font-weight:600;"
+                            + "line-height:1;"
                             + "cursor:pointer;"
+                            + "padding:0;"
+                            + "white-space:nowrap;"
+
             );
 
             openButton.addEventListener(
@@ -517,16 +523,17 @@ private OutwardMakerDashboardService service;
 
             openButton.setStyle(
                     "background:#175CD3;"
-                    + "color:#FFFFFF;"
-                    + "border:1px solid #175CD3;"
-                    + "border-radius:6px;"
-                    + "font-family:'Inter','Segoe UI',Arial,sans-serif;"
-                    + "font-size:13px;"
-                    + "font-weight:600;"
-                    + "line-height:1;"
-                    + "cursor:pointer;"
-                    + "padding:0 14px;"
-                    + "white-space:nowrap;"
+                            + "color:#FFFFFF;"
+                            + "border:1px solid #175CD3;"
+                            + "border-radius:6px;"
+                            + "font-family:'Inter','Segoe UI',Arial,sans-serif;"
+                            + "font-size:13px;"
+                            + "font-weight:600;"
+                            + "line-height:1;"
+                            + "cursor:pointer;"
+                            + "padding:0;"
+                            + "white-space:nowrap;"
+
             );
 
             openButton.addEventListener(
@@ -538,19 +545,21 @@ private OutwardMakerDashboardService service;
 
 Button releaseButton = new Button("Release");
 
-releaseButton.setWidth("65px");
+releaseButton.setWidth("75px");
 releaseButton.setHeight("36px");
 
 releaseButton.setStyle(
-        "background:#175CD3;"
-        + "color:#FFFFFF;"
-        + "border:1px solid #175CD3;"
-        + "border-radius:6px;"
-        + "font-family:'Inter','Segoe UI',Arial,sans-serif;"
-        + "font-size:13px;"
-        + "font-weight:600;"
-        + "line-height:1;"
-        + "cursor:pointer;"
+		   "background:#175CD3;"
+			        + "color:#FFFFFF;"
+			        + "border:1px solid #175CD3;"
+			        + "border-radius:6px;"
+			        + "font-family:'Inter','Segoe UI',Arial,sans-serif;"
+			        + "font-size:13px;"
+			        + "font-weight:600;"
+			        + "line-height:1;"
+			        + "cursor:pointer;"
+			        + "padding:0;"
+			        + "white-space:nowrap;"
 );
 
             releaseButton.addEventListener(

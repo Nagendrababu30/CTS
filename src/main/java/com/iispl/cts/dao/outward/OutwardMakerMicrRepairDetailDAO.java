@@ -237,7 +237,7 @@ public class OutwardMakerMicrRepairDetailDAO {
 
         String sql =
                 "UPDATE outward_batch "
-                + "SET batch_status = 'MICR Repaired' "
+                + "SET batch_status = 'MICR_REPAIR_COMPLETED' "
                 + "WHERE batch_number = ? "
                 + "AND batch_status = 'MICR_REPAIR'";
 

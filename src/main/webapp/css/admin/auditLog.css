@@ -192,7 +192,7 @@
     flex-shrink: 0;
     height: 42px;
     padding: 0 18px;
-    background: #2454D6;
+    background: #175CD3;
     border: none;
     border-radius: 7px;
     color: #FFFFFF;
@@ -200,24 +200,24 @@
     font-weight: 650;
     white-space: nowrap;
     cursor: pointer;
-    box-shadow: 0 1px 3px rgba(36, 84, 214, 0.25);
+    box-shadow: 0 1px 3px rgba(23, 92, 211, 0.25);
     transition: background 0.15s ease;
 }
 
 .audit-search-btn:hover {
-    background: #1B44C8;
+    background: #1349B8;
 }
 
 .audit-clear-btn {
-    background-color: #6c757d !important;
-    border-color: #6c757d !important;
+    background-color: #175CD3 !important;
+    border-color: #175CD3 !important;
     color: #ffffff !important;
     cursor: pointer;
 }
 
 .audit-clear-btn:hover {
-    background-color: #5a6268 !important;
-    border-color: #545b62 !important;
+    background-color: #1349B8 !important;
+    border-color: #1349B8 !important;
 }
 
 
@@ -532,7 +532,7 @@
     margin: 0 !important;
     padding: 0 18px !important;
 
-    background: #1683E8 !important;
+    background: #175CD3 !important;
     border: none !important;
     border-radius: 7px !important;
 
@@ -545,5 +545,5 @@
 }
 
 .audit-trail-header .audit-download-btn:hover {
-    background: #126FCC !important;
+    background: #1349B8 !important;
 }

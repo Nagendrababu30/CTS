@@ -43,11 +43,16 @@ public class InwardSessionFileServiceImpl
     @Override
     public void moveFilesToIncoming(Map<FileType, List<InwardFile>> files) {
 
+    	// Move each CHI file to its respective incoming folder.
         for (Map.Entry<FileType, List<InwardFile>> entry : files.entrySet()) {
             for (InwardFile file : entry.getValue()) {
+            	
+            	// Move the file to the incoming folder.
                 moveFileToIncoming(file);
+                
             }
         }
+        
     }
 
     @Override
@@ -55,44 +60,50 @@ public class InwardSessionFileServiceImpl
 
         try {
 
+        	// Resolve the source path of the CHI file.
             Path sourceFile = resolveSourcePath(file.getFilePath());
 
+            // Get the target incoming folder based on the file type.
             Path targetDirectory =
                     fileConfiguration
                             .getIncomingPath()
                             .resolve(file.getFileType().name().toLowerCase());
 
+            //  Create the target directory if it does not exist.
             Files.createDirectories(targetDirectory);
 
+            // Create the target path using the original file name.
             Path targetFile =
                     targetDirectory.resolve(sourceFile.getFileName());
 
+            // Move the file from the CHI folder to the incoming folder.
             Files.move(sourceFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
 
-            /*
-             * File physically moved — mark as PROCESSED in inward_file
-             * so it is never picked up again in future sessions.
-             */
+            // Mark the file as PROCESSED so it is not picked up again in future sessions. 
             inwardFileDao.markAsProcessed(file.getFileId());
 
-            /*
-             * INSERT into inward_file_summary for the first time —
-             * file_stage = INCOMING. Subsequent stage updates
-             * (PROCESSING, ARCHIVE) are done by FileProcessingServiceImpl.
-             */
+            // Record the file movement in the file summary table.
             fileSummaryService.insertFileSummary(
                     file.getFileId(),
                     file.getFileName());
 
         } catch (IOException e) {
+        	
             throw new IllegalStateException(
                     "Failed to move CHI file to incoming: "
                             + file.getFilePath(), e);
+            
         }
+        
     }
 
     private Path resolveSourcePath(String filePath) {
-        if (filePath == null || filePath.isBlank()) return null;
+    	
+        if (filePath == null || filePath.isBlank()) {
+        	return null;
+        }
+        
+        // Return the path if it is an existing absolute path.
         Path path = Path.of(filePath);
         if (path.isAbsolute() && Files.exists(path)) {
             return path.normalize();
@@ -100,31 +111,38 @@ public class InwardSessionFileServiceImpl
 
         String normalized = filePath.replace("\\", "/").trim();
         if (normalized.startsWith("/")) {
+        	
             normalized = normalized.substring(1);
+            
         }
 
-        // 1. Direct path relative to working directory
+        // 1. Try the path relative to the current working directory.
         Path direct = Path.of(normalized);
         if (Files.exists(direct)) {
+        	
             return direct.toAbsolutePath().normalize();
+            
         }
 
-        // 2. Direct path relative to workspace src/main/webapp/
+        // 2. Try the path relative to the workspace src/main/webapp directory.
         String cleanSub = normalized.startsWith("src/main/webapp/")
                 ? normalized.substring("src/main/webapp/".length())
                 : normalized;
 
         Path workspaceCandidate = Path.of("src/main/webapp", cleanSub);
         if (Files.exists(workspaceCandidate)) {
+        	
             return workspaceCandidate.toAbsolutePath().normalize();
+            
         }
 
-        // 3. Resolve using rootPath and webAppRoot
+        // 3. Try resolving the path using the configured inward root path.
         Path rootPath = fileConfiguration.getInwardRootPath();
         if (rootPath != null) {
+        	
             Path webAppRoot = rootPath.getParent();
 
-            // Sibling folder under webAppRoot (e.g. inward-chi-files/...)
+            // Try the path as a sibling folder under the web application root.
             if (webAppRoot != null) {
                 Path candidate = webAppRoot.resolve(cleanSub);
                 if (Files.exists(candidate)) {
@@ -132,7 +150,7 @@ public class InwardSessionFileServiceImpl
                 }
             }
 
-            // Folder inside inward-files/
+            // Try the path inside the inward-files folder.
             if (cleanSub.startsWith("inward-files/")) {
                 String afterInward = cleanSub.substring("inward-files/".length());
                 Path inwardCandidate = rootPath.resolve(afterInward);
@@ -142,14 +160,18 @@ public class InwardSessionFileServiceImpl
                 return inwardCandidate.normalize();
             }
 
-            // If path is a sibling like inward-chi-files/
+            // Handle a path pointing to the inward-chi-files sibling folder.
             if (webAppRoot != null && cleanSub.startsWith("inward-chi-files/")) {
                 return webAppRoot.resolve(cleanSub).normalize();
             }
 
+         // Resolve the path relative to the configured inward root folder.
             return rootPath.resolve(cleanSub).normalize();
+            
         }
 
+        // Fall back to the absolute path of the original input.
         return path.toAbsolutePath().normalize();
+        
     }
 }

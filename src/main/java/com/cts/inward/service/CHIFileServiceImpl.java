@@ -29,19 +29,23 @@ public class CHIFileServiceImpl implements CHIFileService {
     @Override
     public Map<FileType, List<InwardFile>> getCHIFilePaths() { 
 
+    	// Get file paths received from NPCI and stored in inward-chi-files.
         List<InwardFile> chiFiles =
                 inwardFileDao.getChiFiles();
 
+        // Group the files by their file type using EnumMap.
         Map<FileType, List<InwardFile>> filesByType =
                 new EnumMap<>(FileType.class);
 
         for (InwardFile file : chiFiles) {
 
+        	// Add a new file type key with an empty list if absent; otherwise, add the file to the existing list.   
             filesByType
                     .computeIfAbsent(
                             file.getFileType(),
                             key -> new ArrayList<>())
                     .add(file);
+            
         }
 
         return filesByType;

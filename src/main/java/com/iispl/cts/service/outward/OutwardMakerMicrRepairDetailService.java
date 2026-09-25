@@ -7,78 +7,22 @@ import com.iispl.cts.model.outward.OutwardCheque;
 
 public class OutwardMakerMicrRepairDetailService {
 
-    private OutwardMakerMicrRepairDetailDAO dao;
+    private OutwardMakerMicrRepairDetailDAO dao = new OutwardMakerMicrRepairDetailDAO();
 
-    public OutwardMakerMicrRepairDetailService() {
-
-        dao = new OutwardMakerMicrRepairDetailDAO();
-
-    }
-
-
-    public List<OutwardCheque> getMicrErrorCheques(
-            String batchNumber) {
-
+    public List<OutwardCheque> getMicrErrorCheques( String batchNumber) {
         return dao.getMicrErrorCheques(batchNumber);
-
     }
 
-
-    /**
-     * Updates corrected MICR details.
-     *
-     * Normal MICR repair:
-     *     returnedMode = false
-     *     -> MICR_REPAIRED
-     *
-     * Checker returned MICR repair:
-     *     returnedMode = true
-     *     -> RE_VERIFIED
-     */
-    public boolean updateCorrectedMicr(
-
-            String batchNumber,
-
-            String chequeNumber,
-
-            String cityCode,
-
-            String bankCode,
-
-            String branchCode,
-
-            boolean returnedMode) {
-
-        return dao.updateCorrectedMicr(
-
-                batchNumber,
-
-                chequeNumber,
-
-                cityCode,
-
-                bankCode,
-
-                branchCode,
-
-                returnedMode);
-
+    public boolean updateCorrectedMicr(String batchNumber,String chequeNumber,String cityCode,String bankCode,String branchCode,boolean returnedMode) {
+        return dao.updateCorrectedMicr(batchNumber,chequeNumber,cityCode,bankCode,branchCode,returnedMode);
     }
 
-
-    public boolean hasRemainingMicrErrors(
-            String batchNumber) {
-
+    public boolean hasRemainingMicrErrors(String batchNumber) {
         return dao.hasRemainingMicrErrors(batchNumber);
-
     }
 
-
-    public boolean updateBatchStatus(
-            String batchNumber) {
-
+    public boolean updateBatchStatus(String batchNumber) {
         return dao.updateBatchStatus(batchNumber);
-
     }
 
 }

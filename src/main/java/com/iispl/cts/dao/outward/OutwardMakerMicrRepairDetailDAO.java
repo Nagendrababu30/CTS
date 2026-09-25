@@ -11,15 +11,12 @@ import com.iispl.cts.model.outward.OutwardCheque;
 
 public class OutwardMakerMicrRepairDetailDAO {
 
-    private final javax.sql.DataSource dataSource =
-            ConnectionPool.getDataSource();
+    private final javax.sql.DataSource dataSource = ConnectionPool.getDataSource();
 
     public List<OutwardCheque> getMicrErrorCheques(String batchNumber) {
 
         List<OutwardCheque> cheques = new ArrayList<>();
-
-        String sql =
-                "SELECT batch_number, "
+        String sql = "SELECT batch_number, "
                 + "       cheque_number, "
                 + "       city_code, "
                 + "       bank_code, "
@@ -48,48 +45,23 @@ public class OutwardMakerMicrRepairDetailDAO {
 
                OutwardCheque cheque = new OutwardCheque();
 
-                cheque.setBatchNumber(
-                            rs.getString("batch_number"));
-
-                    cheque.setChequeNumber(
-                            rs.getString("cheque_number"));
-
-                    cheque.setCityCode(
-                            rs.getString("city_code"));
-
-                    cheque.setBankCode(
-                            rs.getString("bank_code"));
-
-                    cheque.setBranchCode(
-                            rs.getString("branch_code"));
-
-                    cheque.setDrawerAccountNumber(
-                            rs.getString("drawer_account_number"));
-
-                    cheque.setDrawerName(
-                            rs.getString("drawer_name"));
-
-                    cheque.setAmount(
-                            rs.getBigDecimal("amount"));
-
-                    cheque.setAmountInWords(
-                            rs.getString("amount_in_words"));
+                    cheque.setBatchNumber(rs.getString("batch_number"));
+                    cheque.setChequeNumber(rs.getString("cheque_number"));
+                    cheque.setCityCode(rs.getString("city_code"));
+                    cheque.setBankCode(rs.getString("bank_code"));
+                    cheque.setBranchCode(rs.getString("branch_code"));
+                    cheque.setDrawerAccountNumber(rs.getString("drawer_account_number"));
+                    cheque.setDrawerName(rs.getString("drawer_name"));
+                    cheque.setAmount(rs.getBigDecimal("amount"));
+                    cheque.setAmountInWords(rs.getString("amount_in_words"));
 
                     if (rs.getDate("cheque_date") != null) {
-                        cheque.setChequeDate(
-                                rs.getDate("cheque_date")
-                                        .toLocalDate());
+                        cheque.setChequeDate(rs.getDate("cheque_date").toLocalDate());
                     }
 
-                    cheque.setFrontImagePath(
-                            rs.getString("front_image_path"));
-
-                    cheque.setBackImagePath(
-                            rs.getString("back_image_path"));
-
-                    cheque.setChequeStatus(
-                            rs.getString("cheque_status"));
-
+                    cheque.setFrontImagePath(rs.getString("front_image_path"));
+                    cheque.setBackImagePath(rs.getString("back_image_path"));
+                    cheque.setChequeStatus(rs.getString("cheque_status"));
                     cheques.add(cheque);
                 }
             }
@@ -97,37 +69,12 @@ public class OutwardMakerMicrRepairDetailDAO {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return cheques;
     }
 
-
-    /**
-     * Updates corrected MICR details.
-     *
-     * Normal MICR repair:
-     *     returnedMode = false
-     *     -> MICR_REPAIRED
-     *
-     * Checker returned MICR repair:
-     *     returnedMode = true
-     *     -> RE_VERIFIED
-     */
-    public boolean updateCorrectedMicr(
-            String batchNumber,
-            String chequeNumber,
-            String cityCode,
-            String bankCode,
-            String branchCode,
-            boolean returnedMode) {
-
-        String verificationStatus =
-                returnedMode
-                        ? "RE_VERIFIED"
-                        : "MICR_REPAIRED";
-
-        String sql =
-                "UPDATE outward_cheque "
+    public boolean updateCorrectedMicr(String batchNumber,String chequeNumber,String cityCode,String bankCode,String branchCode,boolean returnedMode) {
+        String verificationStatus = returnedMode ? "RE_VERIFIED" : "MICR_REPAIRED";
+        String sql = "UPDATE outward_cheque "
                 + "SET city_code = ?, "
                 + "    bank_code = ?, "
                 + "    branch_code = ?, "
@@ -144,12 +91,10 @@ public class OutwardMakerMicrRepairDetailDAO {
         Connection connection = null;
 
         try {
-
             connection = dataSource.getConnection();
             connection.setAutoCommit(false);
 
-            try (PreparedStatement ps =
-                         connection.prepareStatement(sql)) {
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
                 ps.setString(1, cityCode);
                 ps.setString(2, bankCode);
@@ -161,19 +106,12 @@ public class OutwardMakerMicrRepairDetailDAO {
                 int rowsUpdated = ps.executeUpdate();
 
                 if (rowsUpdated > 0) {
-
                     connection.commit();
                     return true;
                 }
 
                 connection.rollback();
-
-                System.out.println(
-                        "No cheque updated for batch "
-                        + batchNumber
-                        + ", cheque "
-                        + chequeNumber);
-
+                System.out.println("No cheque updated for batch " + batchNumber + ", cheque " + chequeNumber);
                 return false;
             }
 
@@ -206,15 +144,13 @@ public class OutwardMakerMicrRepairDetailDAO {
 
     public boolean hasRemainingMicrErrors(String batchNumber) {
 
-        String sql =
-                "SELECT COUNT(*) "
+        String sql = "SELECT COUNT(*) "
                 + "FROM outward_cheque "
                 + "WHERE batch_number = ? "
                 + "AND cheque_status = 'MICR_ERROR'";
 
         try (Connection connection = dataSource.getConnection();
-             PreparedStatement ps =
-                     connection.prepareStatement(sql)) {
+             PreparedStatement ps = connection.prepareStatement(sql)) {
 
             ps.setString(1, batchNumber);
 
@@ -235,8 +171,7 @@ public class OutwardMakerMicrRepairDetailDAO {
 
     public boolean updateBatchStatus(String batchNumber) {
 
-        String sql =
-                "UPDATE outward_batch "
+        String sql = "UPDATE outward_batch "
                 + "SET batch_status = 'MICR_REPAIR_COMPLETED' "
                 + "WHERE batch_number = ? "
                 + "AND batch_status = 'MICR_REPAIR'";
@@ -248,8 +183,7 @@ public class OutwardMakerMicrRepairDetailDAO {
             connection = dataSource.getConnection();
             connection.setAutoCommit(false);
 
-            try (PreparedStatement ps =
-                         connection.prepareStatement(sql)) {
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
                 ps.setString(1, batchNumber);
 

@@ -25,12 +25,7 @@ public class InwardFileDaoImpl
     public static InwardFileDaoImpl of() {
         return new InwardFileDaoImpl(ConnectionPool.getDataSource());
     }
-
-    /*
-     * Only fetch files that have not been moved to incoming yet.
-     * Once a file is moved, it is marked PROCESSED and never
-     * picked up again in future sessions.
-     */
+    
     @Override
     public List<InwardFile> getChiFiles() {
 
@@ -67,10 +62,6 @@ public class InwardFileDaoImpl
         }
     }
 
-    /*
-     * Called immediately after the file is moved to incoming/.
-     * Prevents re-processing in future sessions.
-     */
     @Override
     public void markAsProcessed(long fileId) {
 
@@ -91,12 +82,6 @@ public class InwardFileDaoImpl
         }
     }
 
-    /*
-     * Resolves file_id from the file_path stored in inward_file.
-     * Used by FileProcessingServiceImpl to update inward_file_summary
-     * when a file moves to PROCESSING or ARCHIVE.
-     * Returns -1 if not found.
-     */
     @Override
     public long getFileIdByPath(String filePath) {
 

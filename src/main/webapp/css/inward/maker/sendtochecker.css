@@ -231,26 +231,57 @@
     box-shadow: inset 4px 0 0 var(--brand-blue) !important;
 }
 
-/* ---------- Grid cells — same as listbox cells ---------- */
-.custom-grid .z-cell {
+/* ---------- Grid cells — center alignment for all content ---------- */
+.custom-grid .z-cell,
+.custom-grid .z-row-inner {
     border-left: none !important;
     border-right: none !important;
     border-top: none !important;
+    text-align: center !important;
+    vertical-align: middle !important;
 }
 
-.custom-grid .z-cell-content {
+.custom-grid .z-cell-content,
+.custom-grid .z-row-content {
     font-family: 'Inter', sans-serif;
     font-size: 14px !important;
     color: #1D2939 !important;
     font-weight: 500 !important;
-    padding: 12px 14px !important;
-    line-height: 2;
+    padding: 14px 14px !important;
+    line-height: 1.5;
     text-align: center !important;
     vertical-align: middle !important;
     -webkit-font-smoothing: antialiased;
 }
 
+/* ---------- Status Badge ---------- */
+.status-badge-ready {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #ECFDF3 !important;
+    border: 1px solid #D1FADF !important;
+    border-radius: var(--radius-pill) !important;
+    padding: 4px 12px !important;
+    margin: 0 auto !important;
+    gap: 6px !important;
+}
+
+.status-icon-ready {
+    color: #12B76A !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+}
+
+.status-text-ready {
+    color: #027A48 !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.02em;
+}
+
 /* ---------- Action buttons — same as dashboard .btn-action ---------- */
+.btn-action-send,
 .custom-grid .z-button {
     background: #175CD3 !important;
     color: #FFFFFF !important;
@@ -262,8 +293,11 @@
     font-weight: 700 !important;
     box-shadow: 0 2px 6px rgba(23,92,211,0.18) !important;
     cursor: pointer;
+    margin: 0 auto !important;
+    display: inline-block !important;
 }
 
+.btn-action-send:hover,
 .custom-grid .z-button:hover {
     background: #164EB6 !important;
     box-shadow: 0 3px 8px rgba(23,92,211,0.22) !important;

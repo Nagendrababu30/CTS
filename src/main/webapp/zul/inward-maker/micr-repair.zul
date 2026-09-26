@@ -9,7 +9,233 @@
 
 <zk xmlns:w="client">
 
-    <style src="/css/inward/maker/micr-repair.css"/>
+    <style src="/css/inward/maker/micr-repair.css?v=20260926_6"/>
+    <style src="/css/inward/checker/batch-details.css?v=20260926_6"/>
+
+    <style>
+        /* Guarantee Modal Styling for Send Back / Return Dialog */
+        .z-window-modal.checker-modal,
+        div.checker-modal,
+        *.checker-modal,
+        .z-window-modal.return-window,
+        div.return-window,
+        *.return-window {
+            background: #FFFFFF !important;
+            border-radius: 16px !important;
+            box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(15, 23, 42, 0.08) !important;
+            border: none !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+        }
+
+        .z-window-modal.checker-modal > .z-window-header,
+        .checker-modal > .z-window-header,
+        .z-window-modal.return-window > .z-window-header,
+        .return-window > .z-window-header {
+            display: none !important;
+        }
+
+        .z-window-modal.checker-modal > .z-window-content,
+        .checker-modal > .z-window-content,
+        .z-window-modal.return-window > .z-window-content,
+        .return-window > .z-window-content {
+            background: #FFFFFF !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border-radius: 16px !important;
+            overflow: hidden !important;
+        }
+
+        .custom-modal-header {
+            width: 100% !important;
+            padding: 16px 22px !important;
+            box-sizing: border-box !important;
+            display: flex !important;
+            align-items: center !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+        }
+
+        .custom-modal-header.header-purple {
+            background: linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%) !important;
+        }
+
+        .modal-header-icon-circle {
+            width: 40px !important;
+            height: 40px !important;
+            min-width: 40px !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background: rgba(255, 255, 255, 0.2) !important;
+            backdrop-filter: blur(4px) !important;
+            border: 1.5px solid rgba(255, 255, 255, 0.3) !important;
+        }
+
+        .modal-header-icon {
+            font-size: 18px !important;
+            font-weight: 800 !important;
+            color: #FFFFFF !important;
+            line-height: 1 !important;
+        }
+
+        .custom-modal-title {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+            font-size: 16.5px !important;
+            font-weight: 800 !important;
+            color: #FFFFFF !important;
+            letter-spacing: -0.01em !important;
+            display: block !important;
+        }
+
+        .custom-modal-subtitle {
+            font-size: 12.5px !important;
+            font-weight: 500 !important;
+            color: rgba(255, 255, 255, 0.88) !important;
+            display: block !important;
+        }
+
+        .custom-modal-body {
+            padding: 20px 24px 22px 24px !important;
+            box-sizing: border-box !important;
+            background: #FFFFFF !important;
+        }
+
+        .modal-section-badge-label {
+            display: inline-flex !important;
+            align-items: center !important;
+            font-size: 12px !important;
+            font-weight: 700 !important;
+            color: #1E293B !important;
+            letter-spacing: 0.4px !important;
+            text-transform: uppercase !important;
+            margin-bottom: 6px !important;
+        }
+
+        .return-combobox {
+            width: 100% !important;
+        }
+        .return-combobox .z-combobox-inp {
+            height: 42px !important;
+            font-size: 14px !important;
+            border: 1.5px solid #CBD5E1 !important;
+            border-radius: 8px 0 0 8px !important;
+            padding: 8px 14px !important;
+            color: #0F172A !important;
+            background: #FFFFFF !important;
+            box-sizing: border-box !important;
+        }
+        .return-combobox .z-combobox-btn {
+            height: 42px !important;
+            border: 1.5px solid #CBD5E1 !important;
+            border-left: none !important;
+            border-radius: 0 8px 8px 0 !important;
+            background: #F8FAFC !important;
+        }
+        .return-combobox .z-combobox-inp:focus {
+            border-color: #7C3AED !important;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15) !important;
+        }
+
+        div.z-combobox-popup,
+        .z-combobox-popup {
+            max-height: 180px !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            border: 1.5px solid #CBD5E1 !important;
+            border-radius: 8px !important;
+            box-shadow: 0 12px 28px rgba(16, 24, 40, 0.18) !important;
+            background: #FFFFFF !important;
+            padding: 4px !important;
+        }
+
+        div.z-combobox-popup .z-comboitem,
+        .z-combobox-popup .z-comboitem {
+            font-size: 13.5px !important;
+            padding: 9px 12px !important;
+            color: #1E293B !important;
+            border-radius: 6px !important;
+            transition: background 0.15s ease !important;
+        }
+
+        div.z-combobox-popup .z-comboitem:hover,
+        div.z-combobox-popup .z-comboitem-selected,
+        .z-combobox-popup .z-comboitem:hover,
+        .z-combobox-popup .z-comboitem-selected {
+            background: #F5F3FF !important;
+            color: #6D28D9 !important;
+            font-weight: 600 !important;
+        }
+
+        .modal-custom-textarea {
+            width: 100% !important;
+            box-sizing: border-box !important;
+            border: 1.5px solid #CBD5E1 !important;
+            border-radius: 8px !important;
+            padding: 10px 14px !important;
+            font-size: 13.5px !important;
+            color: #0F172A !important;
+            background: #FFFFFF !important;
+            resize: vertical !important;
+            min-height: 68px !important;
+            line-height: 1.5 !important;
+            transition: all 0.15s ease !important;
+        }
+        .modal-custom-textarea:focus {
+            border-color: #7C3AED !important;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15) !important;
+            outline: none !important;
+        }
+
+        .modal-footer-row {
+            width: 100% !important;
+            margin-top: 10px !important;
+            padding-top: 14px !important;
+            border-top: 1px solid #E2E8F0 !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+
+        .modal-btn-cancel,
+        *.modal-btn-cancel {
+            height: 38px !important;
+            padding: 0 20px !important;
+            background: #FFFFFF !important;
+            color: #475569 !important;
+            border: 1.5px solid #CBD5E1 !important;
+            border-radius: 8px !important;
+            font-size: 13.5px !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+            transition: all 0.15s ease !important;
+        }
+        .modal-btn-cancel:hover {
+            background: #F1F5F9 !important;
+            color: #0F172A !important;
+            border-color: #94A3B8 !important;
+        }
+
+        .modal-btn-confirm-return,
+        *.modal-btn-confirm-return {
+            height: 38px !important;
+            padding: 0 24px !important;
+            background: linear-gradient(180deg, #8B5CF6 0%, #7C3AED 100%) !important;
+            color: #FFFFFF !important;
+            border: 1px solid #7C3AED !important;
+            border-radius: 8px !important;
+            font-size: 13.5px !important;
+            font-weight: 700 !important;
+            box-shadow: 0 2px 6px rgba(124, 58, 237, 0.3) !important;
+            cursor: pointer !important;
+            transition: all 0.15s ease !important;
+        }
+        .modal-btn-confirm-return:hover {
+            background: #6D28D9 !important;
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.45) !important;
+            transform: translateY(-1px) !important;
+        }
+    </style>
+
     <script src="/javascript/inward/maker/micr-repair.js"/>
 
     <div
@@ -579,44 +805,36 @@
             </hlayout>
 
             <!-- ================================================================
-                 Return Window (Modal Dialog)
+                 Send Back to Maker Modal Dialog (Exact Match to Checker Send Back)
                  ================================================================ -->
 
             <window
                 id="returnWindow"
-                title="Return Cheque"
-                border="normal"
-                width="540px"
+                width="560px"
+                border="none"
                 closable="false"
                 visible="false"
-                position="center"
-                sclass="return-window">
+                position="center,center"
+                sclass="checker-modal return-window">
 
-                <vlayout
-                    width="100%"
-                    spacing="18px"
-                    sclass="return-form">
+                <!-- Modal Header (Purple Gradient) -->
+                <hlayout width="100%" spacing="0" valign="middle" sclass="custom-modal-header header-purple">
+                    <div sclass="modal-header-icon-circle">
+                        <label value="↶" sclass="modal-header-icon"/>
+                    </div>
+                    <vlayout spacing="2px" hflex="1" style="margin-left: 14px;">
+                        <label value="Send Back to Maker" sclass="custom-modal-title"/>
+                        <label value="Send this cheque back to the Maker queue for required corrections" sclass="custom-modal-subtitle"/>
+                    </vlayout>
+                </hlayout>
 
-                    <label
-                        value="Select a return reason to send this cheque back to Maker queue:"
-                        sclass="return-description"/>
+                <!-- Modal Body -->
+                <vlayout width="100%" spacing="14px" sclass="custom-modal-body">
 
-                    <vlayout
-                        width="100%"
-                        spacing="6px">
-
-                        <hlayout
-                            spacing="4px"
-                            valign="middle">
-
-                            <label
-                                value="Return Reason"
-                                sclass="return-field-label"/>
-
-                            <label
-                                value=" *"
-                                sclass="micr-star"/>
-
+                    <vlayout width="100%" spacing="4px">
+                        <hlayout spacing="4px" valign="middle">
+                            <label value="SELECT RETURN REASON" sclass="modal-section-badge-label"/>
+                            <label value="*" style="color:#7C3AED; font-weight:bold; font-size:14px; margin-left: 3px;"/>
                         </hlayout>
 
                         <combobox
@@ -626,16 +844,10 @@
                             readonly="true"
                             placeholder="-- Select return reason --"
                             sclass="return-combobox"/>
-
                     </vlayout>
 
-                    <vlayout
-                        width="100%"
-                        spacing="6px">
-
-                        <label
-                            value="Remarks (Optional)"
-                            sclass="return-field-label"/>
+                    <vlayout width="100%" spacing="4px">
+                        <label value="MAKER INSTRUCTIONS / REMARK (OPTIONAL)" sclass="modal-section-badge-label"/>
 
                         <textbox
                             id="returnRemarks"
@@ -643,26 +855,22 @@
                             rows="3"
                             multiline="true"
                             maxlength="500"
-                            placeholder="Enter any maker remarks..."
-                            sclass="return-textbox"/>
-
+                            placeholder="Enter instructions or details for Maker..."
+                            sclass="modal-custom-textarea"/>
                     </vlayout>
 
-                    <hlayout
-                        width="100%"
-                        spacing="14px"
-                        sclass="return-window-buttons">
+                    <hlayout width="100%" spacing="12px" sclass="modal-footer-row">
+                        <hlayout hflex="1" spacing="0"/>
 
                         <button
                             id="cancelReturnButton"
                             label="Cancel"
-                            sclass="secondary-button"/>
+                            sclass="modal-btn-cancel"/>
 
                         <button
                             id="confirmReturnButton"
-                            label="Confirm Return"
-                            sclass="return-button"/>
-
+                            label="Confirm Send Back"
+                            sclass="modal-btn-confirm-return"/>
                     </hlayout>
 
                 </vlayout>

@@ -1,15 +1,11 @@
 package com.cts.inward.controller;
 
 import java.math.BigDecimal;
-import java.sql.Connection;
 import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Events;
@@ -19,21 +15,17 @@ import org.zkoss.zul.Checkbox;
 import org.zkoss.zul.Window;
 import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Messagebox;
-import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Vlayout;
-
-import com.cts.inward.config.ConnectionPool;
 import com.cts.inward.dao.BatchDetailsDaoImpl;
 import com.cts.inward.dao.ChequeImageDaoImpl;
 import com.cts.inward.model.ChequeImage;
 import com.cts.inward.service.BatchDetailsService;
 import com.cts.inward.service.BatchDetailsServiceImpl;
 
-public class BatchDetailsController
-        extends GenericForwardComposer<Component> {
+public class BatchDetailsController extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
     
@@ -44,10 +36,9 @@ public class BatchDetailsController
     private int currentChequeIndex = 0;
     private BatchDetailsService batchDetailsService;
 
-    // CHEQUE IMAGE & CONTROLS (Image 2)
+    // CHEQUE IMAGE & CONTROLS
 
     private Image chequeImage;
-    private Component chequeImageContainer;
     private Component chequePreview;
     private Button toggleImageButton;
     private Button zoomInButton;
@@ -63,36 +54,31 @@ public class BatchDetailsController
     private int currentRotation = 0;
     private ChequeImageDaoImpl chequeImageDao;
     
-    // HEADER & METRICS (Image 4)
+    // HEADER & METRICS
 
     private Label pageTitle;
-    private Button backToList;
     private Label batchLabel;
     private Label totalCountLabel;
     private Label completedCountLabel;
     private Label pendingCountLabel;
     private Label chequeCounter;
-    private Label makerId;
 
     // LEFT CHEQUE PREVIEW
 
-    private Label bankName;
-    private Label branchName;
     private Label imageChequeNumber;
     private Label imageChequeDate;
     private Label payeeImage;
-    private Label amountWordsImage;
     private Label amountImage;
     private Label micrImage;
     private Label chequeNumberLabel;
     private Label leftCbsStatus;
 
 
+
     // RIGHT VERIFICATION HEADER
 
     private Label rightChequeNumber;
     private Label chequePosition;
-    private Label rightBankName;
 
     // MICR SECTION
 
@@ -148,9 +134,6 @@ public class BatchDetailsController
     private Label cbsActionStatus;
     private Hlayout cbsFailure;
     private Label cbsFailureText;
-    private Label cbsAmountResult;
-    private Label cbsDateResult;
-    private Label cbsAccountResult;
 
     // CHEQUE NAVIGATION
 
@@ -212,13 +195,10 @@ public class BatchDetailsController
     private Vlayout makerReturnReasonsList;
     private Label lblMakerReturnRemarks;
     private Component boxMakerRemarks;
-    private Component boxMicrMasterVerification;
-    private Label badgeMicrMasterStatus;
     private Label lblNpciMicrValue;
     private Label lblNpciMicrCheck;
     private Label lblOcrMicrValue;
     private Label lblOcrMicrCheck;
-    private Component micrMasterSummaryBox;
     private Label lblMicrMasterSummary;
 
     @Override
@@ -649,8 +629,6 @@ public class BatchDetailsController
             }
 
             // Populate Maker Return info
-            String returnReasonCode = getString(cheque, "returnReasonCode");
-            String returnReasonDesc = getString(cheque, "returnReasonDescription");
             String makerRemarks = getString(cheque, "makerRemarks");
             String ocrMicrCode = getString(cheque, "ocrMicrCode");
 
@@ -1680,31 +1658,6 @@ public class BatchDetailsController
     // CBS RESULT UI
     // =========================================================
 
-    private void updateCbsResult(
-            Label resultLabel,
-            boolean passed) {
-
-        if (resultLabel == null) {
-            return;
-        }
-
-        if (passed) {
-
-            resultLabel.setValue(
-                    "Passed");
-
-            resultLabel.setSclass(
-                    "cbs-check-value");
-
-        } else {
-
-            resultLabel.setValue(
-                    "Failed");
-
-            resultLabel.setSclass(
-                    "cbs-fail-value");
-        }
-    }
 
     // =========================================================
     // CBS PASSED

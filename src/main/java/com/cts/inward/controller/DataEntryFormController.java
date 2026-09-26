@@ -3,7 +3,7 @@ package com.cts.inward.controller;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-
+import org.zkoss.zk.ui.util.Composer;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Session;
@@ -90,6 +90,7 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	private long batchId;
 	private Long loggedInUserId;
 	private List<InwardCheque> cheques;
+	private List<String> allBatchChequeNumbers;
 
 	private int currentIndex = 0;
 
@@ -168,11 +169,36 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		updateBatchSummaryCounts();
 
 		if (cheques != null && !cheques.isEmpty()) {
-			currentIndex = 0;
+			// Find the first pending cheque in the list to resume Data Entry based on DB status
+			int firstPendingIndex = 0;
+			for (int i = 0; i < cheques.size(); i++) {
+				String status = getChequeLatestStatus(cheques.get(i).getChequeNumber());
+				if (!"DATA_ENTRY_COMPLETED".equalsIgnoreCase(status)
+						&& !"RETURN_BY_MAKER".equalsIgnoreCase(status)
+						&& !"SENT_TO_CHECKER".equalsIgnoreCase(status)
+						&& !"ACCEPT".equalsIgnoreCase(status)
+						&& !"REJECT".equalsIgnoreCase(status)) {
+					firstPendingIndex = i;
+					break;
+				}
+			}
+			currentIndex = firstPendingIndex;
 			displayCurrentCheque();
 		} else {
-			Messagebox.show("No cheques found for Batch " + batchId + ".", "Data Entry", Messagebox.OK,
-					Messagebox.INFORMATION);
+			int pending = batchService.getDataEntryPendingCount(batchId);
+			if (pending == 0) {
+				batchService.completeDataEntry(batchId, loggedInUserId);
+				Messagebox.show(
+						"All cheques for Batch " + batchId + " have completed Data Entry.",
+						"Data Entry Completed",
+						Messagebox.OK,
+						Messagebox.INFORMATION,
+						e -> Executions.sendRedirect("/zul/inward-maker/send-to-checker.zul"));
+			} else {
+				Messagebox.show("No pending cheques found for Batch " + batchId + ".", "Data Entry", Messagebox.OK,
+						Messagebox.INFORMATION,
+						e -> Executions.sendRedirect("/zul/inward-maker/dashboard.zul"));
+			}
 		}
 	}
 
@@ -188,7 +214,11 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 
 		try {
 			InwardBatch batch = batchService.getBatch(String.valueOf(batchId));
-			int total = (cheques != null) ? cheques.size() : (batch != null ? batch.getTotalCheques() : 0);
+			int total = (allBatchChequeNumbers != null && !allBatchChequeNumbers.isEmpty())
+					? allBatchChequeNumbers.size()
+					: ((batch != null && batch.getTotalCheques() > 0)
+							? batch.getTotalCheques()
+							: ((cheques != null) ? cheques.size() : 0));
 			int pending = batchService.getDataEntryPendingCount(batchId);
 			int completed = Math.max(0, total - pending);
 
@@ -214,6 +244,13 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 
 	private void loadCheques() {
 		try {
+			List<InwardCheque> allBatchCheques = chequeService.getAllChequesForBatch(batchId);
+			if (allBatchCheques != null) {
+				allBatchChequeNumbers = new java.util.ArrayList<>();
+				for (InwardCheque c : allBatchCheques) {
+					allBatchChequeNumbers.add(c.getChequeNumber());
+				}
+			}
 			cheques = chequeService.getChequesForBatch(String.valueOf(batchId));
 		} catch (RuntimeException e) {
 			e.printStackTrace();
@@ -248,7 +285,16 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		updateBatchSummaryCounts();
 
 		if (lblChequeInfo != null) {
-			lblChequeInfo.setValue("Cheque " + (currentIndex + 1) + " of " + cheques.size());
+			int pos = (allBatchChequeNumbers != null && !allBatchChequeNumbers.isEmpty())
+					? (allBatchChequeNumbers.indexOf(cheque.getChequeNumber()) + 1)
+					: (currentIndex + 1);
+			if (pos <= 0) {
+				pos = currentIndex + 1;
+			}
+			int total = (allBatchChequeNumbers != null && !allBatchChequeNumbers.isEmpty())
+					? allBatchChequeNumbers.size()
+					: cheques.size();
+			lblChequeInfo.setValue("Cheque " + pos + " of " + total);
 		}
 
 		boolean isReturned = isChequeReturnedByMaker(cheque.getChequeNumber());
@@ -568,7 +614,7 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 				Checkbox cb = new Checkbox();
 				cb.setLabel(r.getReturnReasonCode() + " - " + r.getDescription());
 				cb.setAttribute("reasonCode", r.getReturnReasonCode());
-				cb.setStyle("display:block; margin-bottom:6px; font-size:13.5px; color:#1E293B; cursor:pointer;");
+				cb.setSclass("modal-reason-checkbox");
 				returnReasonsContainer.appendChild(cb);
 			}
 		}
@@ -652,6 +698,14 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		}
 		java.util.Map<String, String> returnInfo = chequeService.getChequeReturnInfo(chequeNumber);
 		return returnInfo != null && "RETURN_BY_MAKER".equalsIgnoreCase(returnInfo.get("status"));
+	}
+
+	private String getChequeLatestStatus(String chequeNumber) {
+		if (chequeNumber == null || chequeNumber.trim().isEmpty() || chequeService == null) {
+			return "";
+		}
+		java.util.Map<String, String> returnInfo = chequeService.getChequeReturnInfo(chequeNumber);
+		return (returnInfo != null && returnInfo.get("status") != null) ? returnInfo.get("status") : "";
 	}
 
 	// =========================================================

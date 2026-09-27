@@ -43,7 +43,7 @@ import com.cts.inward.dao.OcrBatchDaoImpl;
 import com.cts.inward.dao.OcrChequeDao;
 import com.cts.inward.dao.OcrChequeDaoImpl;
 import com.cts.inward.file.FileProcessingExecutorImpl;
-import com.cts.inward.file.IncomingFileWatcherImpl;
+//import com.cts.inward.file.IncomingFileWatcherImpl;
 import com.cts.inward.parser.OcrParserImpl;
 import com.cts.inward.parser.PibfProcessorImpl;
 import com.cts.inward.parser.PxfParserImpl;
@@ -160,24 +160,19 @@ public class SessionManagementController
                         fileSummaryService,
                         inwardFileDao);
 
-        // 6. Lightweight ingestion service — used only by executor
-        InwardIngestionServiceImpl ingestionForExecutor =
-                InwardIngestionServiceImpl.of(fileProcessingService);
-
-        // 7. Executor
+        // 6. Executor
         FileProcessingExecutorImpl executor =
-                FileProcessingExecutorImpl.of(
-                        threadPoolSize,
-                        ingestionForExecutor);
-
-        // 8. Full ingestion service — used by processSessionFiles()
+        FileProcessingExecutorImpl.of(
+        				threadPoolSize,
+        				fileProcessingService);
+                
+        // 7. Ingestion service — used by processSessionFiles()
         inwardIngestionService =
                 InwardIngestionServiceImpl.of(
-                        fileProcessingService,
-                        chiFileService,
-                        sessionFileService,
-                        executor,
-                        fileConfig);
+                           chiFileService,
+                           sessionFileService,
+                           executor,
+                           fileConfig);
 
 
         // Wire ZUL components

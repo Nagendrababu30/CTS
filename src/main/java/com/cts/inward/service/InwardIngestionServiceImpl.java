@@ -16,20 +16,17 @@ import com.cts.inward.model.InwardFile;
 public class InwardIngestionServiceImpl
         implements InwardIngestionService {
 
-    private final FileProcessingService fileProcessingService;
     private final CHIFileService chiFileService;
     private final InwardSessionFileService inwardSessionFileService;
     private final FileProcessingExecutor fileProcessingExecutor;
     private final FileConfiguration fileConfiguration;
 
     private InwardIngestionServiceImpl(
-            FileProcessingService fileProcessingService,
             CHIFileService chiFileService,
             InwardSessionFileService inwardSessionFileService,
             FileProcessingExecutor fileProcessingExecutor,
             FileConfiguration fileConfiguration) {
 
-        this.fileProcessingService = fileProcessingService;
         this.chiFileService = chiFileService;
         this.inwardSessionFileService = inwardSessionFileService;
         this.fileProcessingExecutor = fileProcessingExecutor;
@@ -37,34 +34,16 @@ public class InwardIngestionServiceImpl
     }
 
     public static InwardIngestionServiceImpl of(
-            FileProcessingService     fileProcessingService,
             CHIFileService            chiFileService,
             InwardSessionFileService  inwardSessionFileService,
             FileProcessingExecutor    fileProcessingExecutor,
             FileConfiguration         fileConfiguration) {
 
         return new InwardIngestionServiceImpl(
-                fileProcessingService,
                 chiFileService,
                 inwardSessionFileService,
                 fileProcessingExecutor,
                 fileConfiguration);
-    }
-
-    public static InwardIngestionServiceImpl of(
-            FileProcessingService fileProcessingService) {
-
-        return new InwardIngestionServiceImpl(
-                fileProcessingService,
-                null,
-                null,
-                null,
-                null);
-    }
-
-    @Override
-    public void processFile(String filePath) {
-        fileProcessingService.processFile(filePath);
     }
 
     @Override

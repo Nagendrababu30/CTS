@@ -642,51 +642,168 @@
 
 
 /* =============================================================
-   Return Window (Modal Dialog) - Highest Specificity
+   Return Window (Modal Dialog) - Styled matching Inward Checker Send Back
    ============================================================= */
 
 div.z-window-modal.return-window,
 div.return-window,
 *.return-window {
     background: #FFFFFF !important;
-    border-radius: 14px !important;
-    box-shadow: 0 24px 48px -12px rgba(16, 24, 40, 0.25), 0 12px 24px -8px rgba(16, 24, 40, 0.15) !important;
-    border: 1px solid #DCE5F0 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(15, 23, 42, 0.08) !important;
+    border: none !important;
+    padding: 0 !important;
     overflow: hidden !important;
 }
 
-div.z-window-modal.return-window .z-window-header,
+div.z-window-modal.return-window > .z-window-header,
 div.return-window .z-window-header,
 *.return-window .z-window-header {
-    background: #F8FAFC !important;
-    border-bottom: 1px solid #EAECF0 !important;
-    color: #0F172A !important;
-    font-size: 17px !important;
-    font-weight: 800 !important;
-    padding: 16px 24px !important;
+    display: none !important;
 }
 
-div.z-window-modal.return-window .z-window-content,
+div.z-window-modal.return-window > .z-window-content,
 div.return-window .z-window-content,
 *.return-window .z-window-content {
     background: #FFFFFF !important;
     padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
 }
 
+/* Custom Modal Header Bar (Purple Gradient) */
+.custom-modal-header {
+    width: 100% !important;
+    padding: 16px 22px !important;
+    box-sizing: border-box !important;
+    align-items: center !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+.custom-modal-header.header-purple {
+    background: linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%) !important;
+}
+
+.modal-header-icon-circle {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    backdrop-filter: blur(4px) !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+.modal-header-icon {
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    color: #FFFFFF !important;
+    line-height: 1 !important;
+}
+
+.custom-modal-title {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-size: 16.5px !important;
+    font-weight: 800 !important;
+    color: #FFFFFF !important;
+    letter-spacing: -0.01em !important;
+    display: block !important;
+}
+
+.custom-modal-subtitle {
+    font-size: 12.5px !important;
+    font-weight: 500 !important;
+    color: rgba(255, 255, 255, 0.88) !important;
+    display: block !important;
+}
+
+/* Modal Body */
+.custom-modal-body,
 *.return-form {
-    padding: 24px 28px !important;
+    padding: 20px 24px 22px 24px !important;
     box-sizing: border-box !important;
     background: #FFFFFF !important;
 }
 
-*.return-field-label {
-    font-size: 15px !important;
+.modal-section-badge-label {
+    display: inline-flex !important;
+    align-items: center !important;
+    font-size: 12px !important;
     font-weight: 700 !important;
     color: #1E293B !important;
-    display: block !important;
-    margin-bottom: 4px !important;
+    letter-spacing: 0.3px !important;
+    text-transform: uppercase !important;
+    margin-bottom: 6px !important;
 }
 
+/* Checkbox container card for multi-select (Data Entry) */
+.modal-reasons-card {
+    width: 100% !important;
+    max-height: 190px !important;
+    min-height: 48px !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+    border: 1.5px solid #CBD5E1 !important;
+    border-radius: 10px !important;
+    padding: 8px 10px !important;
+    background: #F8FAFC !important;
+}
+
+.modal-reasons-card::-webkit-scrollbar {
+    width: 6px !important;
+}
+
+.modal-reasons-card::-webkit-scrollbar-track {
+    background: #F1F5F9 !important;
+    border-radius: 4px !important;
+}
+
+.modal-reasons-card::-webkit-scrollbar-thumb {
+    background: #CBD5E1 !important;
+    border-radius: 4px !important;
+}
+
+.modal-reasons-card::-webkit-scrollbar-thumb:hover {
+    background: #94A3B8 !important;
+}
+
+.modal-reasons-card .z-checkbox {
+    display: flex !important;
+    align-items: center !important;
+    padding: 7px 10px !important;
+    margin-bottom: 3px !important;
+    border-radius: 7px !important;
+    border: 1px solid transparent !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+
+.modal-reasons-card .z-checkbox:hover {
+    background: #EEF2F6 !important;
+    border-color: #CBD5E1 !important;
+}
+
+.modal-reasons-card .z-checkbox .z-checkbox-cnt {
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+    color: #1E293B !important;
+    cursor: pointer !important;
+    line-height: 1.4 !important;
+}
+
+.modal-reasons-card .z-checkbox input[type="checkbox"] {
+    width: 17px !important;
+    height: 17px !important;
+    cursor: pointer !important;
+    accent-color: #7C3AED !important;
+    margin-right: 8px !important;
+}
+
+/* Combobox (MICR Repair) */
 *.return-combobox {
     width: 100% !important;
     max-width: 100% !important;
@@ -695,9 +812,9 @@ div.return-window .z-window-content,
 
 *.return-combobox *.z-combobox-inp {
     height: 42px !important;
-    font-size: 15px !important;
+    font-size: 14px !important;
     border: 1.5px solid #CBD5E1 !important;
-    border-radius: 8px !important;
+    border-radius: 8px 0 0 8px !important;
     padding: 8px 14px !important;
     color: #0F172A !important;
     background: #FFFFFF !important;
@@ -713,8 +830,8 @@ div.return-window .z-window-content,
 }
 
 *.return-combobox *.z-combobox-inp:focus {
-    border-color: #2457D6 !important;
-    box-shadow: 0 0 0 3px rgba(36, 87, 214, 0.15) !important;
+    border-color: #7C3AED !important;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15) !important;
 }
 
 /* Constrain Combobox Dropdown Popup */
@@ -732,7 +849,7 @@ div.z-combobox-popup,
 
 div.z-combobox-popup .z-comboitem,
 .z-combobox-popup .z-comboitem {
-    font-size: 14px !important;
+    font-size: 13.5px !important;
     padding: 9px 12px !important;
     color: #1E293B !important;
     border-radius: 6px !important;
@@ -743,27 +860,35 @@ div.z-combobox-popup .z-comboitem:hover,
 div.z-combobox-popup .z-comboitem-selected,
 .z-combobox-popup .z-comboitem:hover,
 .z-combobox-popup .z-comboitem-selected {
-    background: #EFF6FF !important;
-    color: #175CD3 !important;
+    background: #F5F3FF !important;
+    color: #6D28D9 !important;
     font-weight: 600 !important;
 }
 
+/* Textarea for Remarks */
+.modal-custom-textarea,
 *.return-textbox {
-    font-size: 15px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
     border: 1.5px solid #CBD5E1 !important;
     border-radius: 8px !important;
     padding: 10px 14px !important;
+    font-size: 13.5px !important;
     color: #0F172A !important;
     background: #FFFFFF !important;
-    box-sizing: border-box !important;
-    font-family: inherit !important;
     resize: vertical !important;
+    min-height: 68px !important;
+    line-height: 1.5 !important;
+    font-family: inherit !important;
+    transition: all 0.15s ease !important;
 }
 
+.modal-custom-textarea:focus,
 *.return-textbox:focus {
     background: #FFFFFF !important;
-    border-color: #2457D6 !important;
-    box-shadow: 0 0 0 3px rgba(36, 87, 214, 0.15) !important;
+    border-color: #7C3AED !important;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15) !important;
+    outline: none !important;
 }
 
 /* Suppress and hide Grammarly widgets on return remarks */
@@ -781,48 +906,61 @@ div.z-combobox-popup .z-comboitem-selected,
     height: 0 !important;
 }
 
+/* Modal Footer Actions */
+.modal-footer-row,
 *.return-window-buttons {
-    margin-top: 16px !important;
-    padding-top: 18px !important;
-    border-top: 1px solid #F1F5F9 !important;
+    width: 100% !important;
+    margin-top: 10px !important;
+    padding-top: 14px !important;
+    border-top: 1px solid #E2E8F0 !important;
+    display: flex !important;
+    align-items: center !important;
     justify-content: flex-end !important;
+    gap: 12px !important;
 }
 
+.modal-btn-cancel,
 *.secondary-button {
-    min-width: 110px !important;
-    height: 42px !important;
+    height: 38px !important;
+    min-width: 90px !important;
+    padding: 0 20px !important;
     background: #FFFFFF !important;
-    color: #475467 !important;
-    border: 1.5px solid #D0D5DD !important;
+    color: #475569 !important;
+    border: 1.5px solid #CBD5E1 !important;
     border-radius: 8px !important;
-    font-size: 15px !important;
+    font-size: 13.5px !important;
     font-weight: 600 !important;
-    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05) !important;
     cursor: pointer !important;
-    transition: all 0.2s ease !important;
+    box-shadow: none !important;
+    transition: all 0.15s ease !important;
 }
 
+.modal-btn-cancel:hover,
 *.secondary-button:hover {
-    background: #F9FAFB !important;
-    border-color: #98A2B3 !important;
-    color: #1D2939 !important;
+    background: #F1F5F9 !important;
+    color: #0F172A !important;
+    border-color: #94A3B8 !important;
 }
 
+.modal-btn-confirm-return,
 *.return-button {
-    min-width: 160px !important;
-    height: 42px !important;
-    background: #D92D20 !important;
+    height: 38px !important;
+    min-width: 140px !important;
+    padding: 0 24px !important;
+    background: linear-gradient(180deg, #8B5CF6 0%, #7C3AED 100%) !important;
     color: #FFFFFF !important;
-    border: none !important;
+    border: 1px solid #7C3AED !important;
     border-radius: 8px !important;
-    font-size: 15px !important;
+    font-size: 13.5px !important;
     font-weight: 700 !important;
-    box-shadow: 0 2px 6px rgba(217, 45, 32, 0.3) !important;
+    box-shadow: 0 2px 6px rgba(124, 58, 237, 0.3) !important;
     cursor: pointer !important;
-    transition: all 0.2s ease !important;
+    transition: all 0.15s ease !important;
 }
 
+.modal-btn-confirm-return:hover,
 *.return-button:hover {
-    background: #B42318 !important;
+    background: #6D28D9 !important;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.45) !important;
     transform: translateY(-1px) !important;
 }

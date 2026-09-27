@@ -35,10 +35,6 @@ public class MicrRepairServiceImpl implements MicrRepairService {
         this.micrMasterDao = MicrMasterDaoImpl.of();
     }
 
-    @Override
-    public List<MicrRepairBatchDto> getRepairBatches() {
-        return getRepairBatches(null);
-    }
 
     @Override
     public List<MicrRepairBatchDto> getRepairBatches(Long userId) {
@@ -92,28 +88,7 @@ public class MicrRepairServiceImpl implements MicrRepairService {
                 }
             }
 
-            /*
-             * Keep the batch in the MICR Repair queue
-             * while at least one cheque still needs repair.
-             *
-             * Example:
-             *
-             * Cheque 1 -> MICR_REPAIRED
-             * Cheque 2 -> MICR_REPAIR
-             * Cheque 3 -> MICR_REPAIR
-             *
-             * Batch remains in MICR Repair queue.
-             *
-             * When:
-             *
-             * Cheque 1 -> MICR_REPAIRED
-             * Cheque 2 -> MICR_REPAIRED
-             * Cheque 3 -> MICR_REPAIRED
-             *
-             * pendingMicrRepairCount becomes 0
-             * and the batch is removed from this queue.
-             */
-
+            // Keep batch in queue while at least one cheque still requires repair
             if (pendingMicrRepairCount > 0) {
 
                 result.add(
@@ -211,11 +186,7 @@ public class MicrRepairServiceImpl implements MicrRepairService {
         boolean isBatchReturned =
                 micrRepairDao.isBatchReturnedToMaker(batchId);
 
-        // =========================================================
-        // BATCH QUERY OPTIMIZATION (Option C)
-        // Pre-fetch statuses, repaired MICRs, and master validity
-        // in bulk instead of 5 individual queries per cheque.
-        // =========================================================
+        // Pre-fetch cheque statuses, repaired MICRs, and master validity in bulk
         List<String> allChequeNumbers = new ArrayList<>();
         Set<String> allMicrCodes = new HashSet<>();
 
@@ -473,31 +444,6 @@ public class MicrRepairServiceImpl implements MicrRepairService {
         return result;
     }
 
-    @Override
-    public int getBatchChequePosition(
-            long batchId,
-            String chequeNumber) {
-
-        if (batchId <= 0L
-                || chequeNumber == null
-                || chequeNumber.trim().isEmpty()) {
-            return 0;
-        }
-
-        return micrRepairDao.getBatchChequePosition(
-            batchId,
-            chequeNumber.trim()
-        );
-    }
-
-    @Override
-    public int getBatchTotalChequeCount(long batchId) {
-        if (batchId <= 0L) {
-            return 0;
-        }
-
-        return micrRepairDao.getBatchTotalChequeCount(batchId);
-    }
 
     @Override
     public String getFrontImagePath(String chequeNumber) {
@@ -709,58 +655,6 @@ public class MicrRepairServiceImpl implements MicrRepairService {
         );
     }
 
-    @Override
-    public int getBatchMicrCompletedCount(long batchId) {
-        List<MicrComparisonDto> comparisons =
-            compareBatch(batchId);
-
-        if (comparisons == null) {
-            return 0;
-        }
-
-        int count = 0;
-
-        for (MicrComparisonDto comparison : comparisons) {
-            if (comparison != null
-                    && !comparison.isNeedsMicrRepair()) {
-                count++;
-            }
-        }
-
-        return count;
-    }
-
-    private boolean isMicrReturnReason(String code) {
-        if (code == null) {
-            return false;
-        }
-        String upper = code.trim().toUpperCase();
-        return upper.startsWith("CR-MICR-")
-                || upper.startsWith("CR-IMG-")
-                || upper.startsWith("MR-MICR-")
-                || upper.startsWith("MICR_");
-    }
-
-    @Override
-    public int getBatchMicrPendingCount(long batchId) {
-        List<MicrComparisonDto> comparisons =
-            compareBatch(batchId);
-
-        if (comparisons == null) {
-            return 0;
-        }
-
-        int count = 0;
-
-        for (MicrComparisonDto comparison : comparisons) {
-            if (comparison != null
-                    && comparison.isNeedsMicrRepair()) {
-                count++;
-            }
-        }
-
-        return count;
-    }
 
     @Override
     public boolean hasChequesNeedingDataEntry(long batchId) {

@@ -645,6 +645,9 @@
    Return Window (Modal Dialog) - Styled matching Inward Checker Send Back
    ============================================================= */
 
+div.z-window-modal.checker-modal,
+div.checker-modal,
+*.checker-modal,
 div.z-window-modal.return-window,
 div.return-window,
 *.return-window {
@@ -656,12 +659,18 @@ div.return-window,
     overflow: hidden !important;
 }
 
+div.z-window-modal.checker-modal > .z-window-header,
+div.checker-modal .z-window-header,
+*.checker-modal .z-window-header,
 div.z-window-modal.return-window > .z-window-header,
 div.return-window .z-window-header,
 *.return-window .z-window-header {
     display: none !important;
 }
 
+div.z-window-modal.checker-modal > .z-window-content,
+div.checker-modal .z-window-content,
+*.checker-modal .z-window-content,
 div.z-window-modal.return-window > .z-window-content,
 div.return-window .z-window-content,
 *.return-window .z-window-content {
@@ -836,7 +845,12 @@ div.return-window .z-window-content,
 
 /* Constrain Combobox Dropdown Popup */
 div.z-combobox-popup,
-.z-combobox-popup {
+.z-combobox-popup,
+.z-combobox-shadow {
+    width: 512px !important;
+    max-width: min(512px, calc(100vw - 60px)) !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
     max-height: 180px !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
@@ -847,6 +861,13 @@ div.z-combobox-popup,
     padding: 4px !important;
 }
 
+div.z-combobox-popup .z-combobox-content,
+.z-combobox-popup .z-combobox-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
 div.z-combobox-popup .z-comboitem,
 .z-combobox-popup .z-comboitem {
     font-size: 13.5px !important;
@@ -854,6 +875,11 @@ div.z-combobox-popup .z-comboitem,
     color: #1E293B !important;
     border-radius: 6px !important;
     transition: background 0.15s ease !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    white-space: normal !important;
+    word-break: break-word !important;
 }
 
 div.z-combobox-popup .z-comboitem:hover,
@@ -964,3 +990,58 @@ div.z-combobox-popup .z-comboitem-selected,
     box-shadow: 0 4px 12px rgba(124, 58, 237, 0.45) !important;
     transform: translateY(-1px) !important;
 }
+
+/* Modal Title Layout & Required Asterisk */
+.modal-title-layout {
+    margin-left: 14px !important;
+}
+
+.modal-required-star {
+    color: #7C3AED !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    margin-left: 3px !important;
+}
+
+/* Checker Return Reason Alert Banner */
+.return-alert-banner {
+    background: #FFF4ED !important;
+    border: 1px solid #FECDCA !important;
+    border-radius: 8px !important;
+    padding: 10px 16px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+.return-alert-icon {
+    font-size: 18px !important;
+    color: #C4320A !important;
+}
+
+.return-alert-title {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: #B42318 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+.return-alert-reason {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #7A271A !important;
+}
+
+.return-alert-remarks-label {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #B42318 !important;
+}
+
+.return-alert-remarks-text {
+    font-size: 12.5px !important;
+    color: #344054 !important;
+}
+

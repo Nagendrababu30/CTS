@@ -2,29 +2,30 @@ package com.cts.inward.file;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.List;
 
-import com.cts.inward.service.InwardIngestionService;
+import com.cts.inward.service.FileProcessingService;
+
 
 public class FileProcessingExecutorImpl
         implements FileProcessingExecutor {
 
     private final ExecutorService executorService;
-    private final InwardIngestionService inwardIngestionService;
+    private final FileProcessingService fileProcessingService;
 
     private FileProcessingExecutorImpl(
             ExecutorService executorService,
-            InwardIngestionService inwardIngestionService) {
+            FileProcessingService fileProcessingService) {
 
         this.executorService =
                 executorService;
 
-        this.inwardIngestionService =
-                inwardIngestionService;
+        this.fileProcessingService = fileProcessingService;
     }
 
     public static FileProcessingExecutorImpl of(
             int threadPoolSize,
-            InwardIngestionService inwardIngestionService) {
+            FileProcessingService fileProcessingService) {
 
         ExecutorService executorService =
                 Executors.newFixedThreadPool(
@@ -32,26 +33,26 @@ public class FileProcessingExecutorImpl
 
         return new FileProcessingExecutorImpl(
                 executorService,
-                inwardIngestionService);
+                fileProcessingService);
     }
 
-    @Override
-    public void submit(String filePath) {
+//    @Override
+//    public void submit(String filePath) {
+//
+//        executorService.submit(() -> {
+//            try {
+//            	fileProcessingService.processFile(filePath);
+//            } catch (Exception e) {
+//                System.err.println(
+//                        "[FileProcessingExecutor] ERROR processing file: "
+//                        + filePath);
+//                e.printStackTrace();
+//            }
+//        });
+//    }
 
-        executorService.submit(() -> {
-            try {
-                inwardIngestionService.processFile(filePath);
-            } catch (Exception e) {
-                System.err.println(
-                        "[FileProcessingExecutor] ERROR processing file: "
-                        + filePath);
-                e.printStackTrace();
-            }
-        });
-    }
-
     @Override
-    public void submitBatch(java.util.List<String> orderedFilePaths) {
+    public void submitBatch(List<String> orderedFilePaths) {
 
         /*
          * All files of a batch run sequentially on ONE thread.
@@ -72,7 +73,7 @@ public class FileProcessingExecutorImpl
                     break;
                 }
                 try {
-                    inwardIngestionService.processFile(filePath);
+                	fileProcessingService.processFile(filePath);
                 } catch (Exception e) {
                     System.err.println(
                             "[FileProcessingExecutor] ERROR processing file: "

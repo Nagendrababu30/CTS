@@ -312,14 +312,17 @@
     box-sizing: border-box !important;
 }
 
+/* LABELS: UNIFIED TO REQUESTED STYLE */
+.checker-processing-page .single-field-label,
 .checker-processing-page .field-label{
-    width:100% !important;
-    margin:0 0 4px 0 !important;
-    padding:0 !important;
-    color:#111827 !important;
-    font-size:10px !important;
-    line-height:15px !important;
-    font-weight:700 !important;
+    display: block !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #475569 !important;
+    letter-spacing: 0.35px !important;
+    margin-top: 1 px !important;
+    margin-bottom: 0.25	px !important;
+    line-height: normal !important;
 }
 
 /* INPUT BOXES: LIGHT SOFT TINT TO BLEND BEAUTIFULLY */
@@ -447,9 +450,11 @@
 }
 
 .checker-processing-page .form-label{
-    color:#111827 !important;
+    color:#475569 !important;
     font-size:11px !important;
     font-weight:700 !important;
+    letter-spacing: 0.35px !important;
+    margin-bottom: 2px !important;
 }
 
 .checker-processing-page .form-control{

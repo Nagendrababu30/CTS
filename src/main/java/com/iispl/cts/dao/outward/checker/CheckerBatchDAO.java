@@ -43,12 +43,9 @@ public class CheckerBatchDAO {
                 + "  ON ob.batch_number = oba.batch_number "
                 + "WHERE oba.user_id = ? "
                 + "  AND UPPER(oba.assignment_role) = 'CHECKER' "
-                + "  AND UPPER(oba.assignment_status) "
-                + "      IN ('ASSIGNED', 'IN_PROGRESS') "
-                + "  AND UPPER(ob.batch_status) "
-                + "      NOT IN ('CHECKER_VERIFIED', 'CHECKER_COMPLETED') "
-                + "  AND (? IS NULL OR ? = '' OR "
-                + "       LOWER(ob.batch_number) LIKE LOWER(?)) "
+                + "  AND UPPER(oba.assignment_status) IN ('ASSIGNED', 'IN_PROGRESS') "
+                + "  AND UPPER(ob.batch_status) NOT IN ('CHECKER_VERIFIED', 'CHECKER_COMPLETED', 'NPCI_SENT') "
+                + "  AND (? IS NULL OR ? = '' OR LOWER(ob.batch_number) LIKE LOWER(?)) "
                 + "ORDER BY oba.assigned_at DESC "
                 + "LIMIT ? OFFSET ?";
 
@@ -515,21 +512,15 @@ public class CheckerBatchDAO {
             String checkerUserId,
             String searchText) {
 
-        String sql = "SELECT COUNT(*) "
-                + "FROM outward_batch ob "
-                + "JOIN outward_batch_assignment oba "
-                + "  ON ob.batch_number = oba.batch_number "
-                + "WHERE oba.user_id = ? "
-                + "  AND UPPER(oba.assignment_role) = "
-                + "      'CHECKER' "
-                + "  AND UPPER(oba.assignment_status) "
-                + "      IN ('ASSIGNED', 'IN_PROGRESS') "
-                + "  AND UPPER(ob.batch_status) "
-                + "      NOT IN "
-                + "      ('CHECKER_VERIFIED', 'CHECKER_COMPLETED') "
-                + "  AND (? IS NULL OR ? = '' OR "
-                + "       LOWER(ob.batch_number) "
-                + "       LIKE LOWER(?))";
+    	String sql = "SELECT COUNT(*) "
+    	        + "FROM outward_batch ob "
+    	        + "JOIN outward_batch_assignment oba "
+    	        + "  ON ob.batch_number = oba.batch_number "
+    	        + "WHERE oba.user_id = ? "
+    	        + "  AND UPPER(oba.assignment_role) = 'CHECKER' "
+    	        + "  AND UPPER(oba.assignment_status) IN ('ASSIGNED', 'IN_PROGRESS') "
+    	        + "  AND UPPER(ob.batch_status) NOT IN ('CHECKER_VERIFIED', 'CHECKER_COMPLETED', 'NPCI_SENT') "
+    	        + "  AND (? IS NULL OR ? = '' OR LOWER(ob.batch_number) LIKE LOWER(?))";
 
         try (Connection connection =
                      CTSStaticData.getConnection();

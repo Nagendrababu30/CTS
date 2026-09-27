@@ -425,54 +425,6 @@
 
             </hlayout>
 
-            <!-- ACTION REASON MODAL WINDOW -->
-            <window id="actionModalWindow"
-                    title="Select Reason"
-                    mode="modal"
-                    visible="false"
-                    closable="true"
-                    onClose="event.stopPropagation(); self.setVisible(false);"
-                    width="460px"
-                    border="normal"
-                    sclass="action-reason-modal">
-
-                <vlayout width="100%" spacing="12px" sclass="modal-body-layout">
-                    
-                    <vlayout width="100%" spacing="4px">
-                        <label value="Reason *" sclass="form-label"/>
-                        <combobox id="modalReasonCombobox"
-                                  width="100%"
-                                  placeholder="Select reason"
-                                  readonly="true"/>
-                    </vlayout>
-
-                    <vlayout width="100%" spacing="4px">
-                        <label value="Remarks" sclass="form-label"/>
-                        <textbox id="modalCheckerRemarksTextbox"
-                                 width="100%"
-                                 rows="3"
-                                 maxlength="1000"
-                                 placeholder="Enter remarks (optional)"
-                                 sclass="form-control"/>
-                    </vlayout>
-
-                    <separator height="10px"/>
-
-                    <hlayout width="100%" spacing="10px" valign="middle">
-                        <space hflex="1"/>
-                        <button id="modalCancelButton"
-                                label="Cancel"
-                                onClick="actionModalWindow.setVisible(false)"
-                                sclass="navigation-button"/>
-                        <button id="modalSubmitButton"
-                                label="Submit"
-                                sclass="complete-button modal-submit-button"/>
-                    </hlayout>
-
-                </vlayout>
-
-            </window>
-
         </vlayout>
 
     </div>

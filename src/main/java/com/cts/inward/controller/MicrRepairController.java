@@ -1,17 +1,24 @@
 package com.cts.inward.controller;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
-import org.zkoss.zk.ui.util.Clients;
-
+import org.zkoss.image.AImage;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Session;
+import org.zkoss.zk.ui.WebApp;
 import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Comboitem;
+import org.zkoss.zul.Div;
+import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
@@ -19,6 +26,7 @@ import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Window;
 
 import com.cts.admin.model.User;
+import com.cts.inward.dao.BatchDaoImpl;
 import com.cts.inward.dao.ChequeDaoImpl;
 import com.cts.inward.dto.MicrComparisonDto;
 import com.cts.inward.dto.ReturnReasonDto;
@@ -32,47 +40,27 @@ public class MicrRepairController
 
     private static final long serialVersionUID = 1L;
 
-    // =========================================================
     // Status constants
-    // =========================================================
+    private static final String STATUS_MICR_REPAIR = "MICR_REPAIR";
+    private static final String STATUS_MICR_REPAIRED = "MICR_REPAIRED";
+    private static final String STATUS_DATA_ENTRY = "DATA_ENTRY";
+    private static final String STATUS_RETURN_BY_MAKER = "RETURN_BY_MAKER";
 
-    private static final String STATUS_MICR_REPAIR =
-            "MICR_REPAIR";
-
-    private static final String STATUS_MICR_REPAIRED =
-            "MICR_REPAIRED";
-
-    private static final String STATUS_DATA_ENTRY =
-            "DATA_ENTRY";
-
-    private static final String STATUS_RETURN_BY_MAKER =
-            "RETURN_BY_MAKER";
-
-    // =========================================================
-    // ZUL components — top bar
-    // =========================================================
-
+    // ZUL components - top bar
     private Label batchLabel;
     private Label totalCountLabel;
     private Label completedCountLabel;
     private Label pendingCountLabel;
     private Label chequeCounter;
-
     private Button backToList;
 
-    // =========================================================
-    // ZUL components — return reason banner
-    // =========================================================
-
-    private org.zkoss.zul.Div returnReasonBanner;
+    // ZUL components - return reason banner
+    private Div returnReasonBanner;
     private Label lblReturnReason;
     private Label lblReturnRemarks;
-    private org.zkoss.zul.Hlayout rowReturnRemarks;
+    private Hlayout rowReturnRemarks;
 
-    // =========================================================
-    // ZUL components — image panel
-    // =========================================================
-
+    // ZUL components - image panel
     private Image chequeImage;
     private Button toggleImageButton;
     private Button zoomInButton;
@@ -80,85 +68,51 @@ public class MicrRepairController
     private Button rotateButton;
     private Button resetViewButton;
 
-    // =========================================================
-    // ZUL components — details panel
-    // =========================================================
-
+    // ZUL components - details panel
     private Textbox chequeNumber;
     private Label currentStatusLabel;
-
     private Textbox ocrCityCode;
     private Textbox ocrBankCode;
     private Textbox ocrBranchCode;
-
     private Button previousButton;
     private Button nextButton;
     private Button saveNextButton;
     private Button returnButton;
 
-    // =========================================================
-    // ZUL components — return window
-    // =========================================================
-
+    // ZUL components - return window
     private Window returnWindow;
     private Combobox returnReason;
     private Textbox returnRemarks;
-
     private Button cancelReturnButton;
     private Button confirmReturnButton;
 
-    // =========================================================
     // State
-    // =========================================================
-
     private MicrRepairService micrRepairService;
     private ChequeService chequeService;
-
     private long batchId;
-
-    /**
-     * Index in the complete comparison list.
-     */
     private int chequeIndex;
-
     private String source;
-
     private List<MicrComparisonDto> comparisons;
-
-    /**
-     * Number of cheques that originally entered
-     * MICR Repair when the page was opened.
-     */
     private int totalMicrErrors;
-
-    /**
-     * Current pending repair indexes.
-     */
     private List<Integer> originalRepairIndexes;
-
     private String frontImagePath;
     private String backImagePath;
-
     private boolean showingFront = true;
     private double currentScale = 1.0;
     private int currentRotation = 0;
-
     private String correctedMicr;
-
     private Long loggedInUserId;
 
+    // Load logged-in user from session
     private void loadLoggedInUser() {
-        org.zkoss.zk.ui.Session session = Executions.getCurrent().getSession();
+        Session session = Executions.getCurrent().getSession();
         User user = (User) session.getAttribute("loggedInUser");
         if (user != null) {
             loggedInUserId = user.getUserId();
         }
     }
 
-    // =========================================================
-    // Init
-    // =========================================================
-
+    // Initialize controller and batch context
     @Override
     public void doAfterCompose(Component comp)
             throws Exception {
@@ -214,9 +168,7 @@ public class MicrRepairController
             return;
         }
 
-        loadLoggedInUser();
-
-        Long lockOwner = com.cts.inward.dao.BatchDaoImpl.of().getBatchLockOwner(batchId);
+        Long lockOwner = BatchDaoImpl.of().getBatchLockOwner(batchId);
         if (lockOwner == null || loggedInUserId == null || !lockOwner.equals(loggedInUserId)) {
             String msg = (lockOwner == null)
                     ? "This batch is not locked. Please lock the batch from the dashboard first."
@@ -273,10 +225,7 @@ public class MicrRepairController
         registerEvents();
     }
 
-    // =========================================================
-    // Init Return Window
-    // =========================================================
-
+    // Initialize return window components
     private void initReturnWindow() {
 
         if (returnWindow == null) {
@@ -308,10 +257,7 @@ public class MicrRepairController
                                         "confirmReturnButton");
     }
 
-    // =========================================================
-    // Load Batch
-    // =========================================================
-
+    // Load batch comparison list and prepare repair queue
     private void loadBatch() {
 
         comparisons =
@@ -328,12 +274,7 @@ public class MicrRepairController
             return;
         }
 
-        /*
-         * Build the CURRENT pending MICR queue.
-         *
-         * Only isNeedsMicrRepair() determines whether
-         * the cheque is currently pending.
-         */
+        // Build current pending MICR queue based on isNeedsMicrRepair()
         buildRepairIndexes();
 
         if (totalMicrErrors == 0) {
@@ -345,11 +286,7 @@ public class MicrRepairController
             return;
         }
 
-        /*
-         * Issue 2: On landing or re-entry, target the first un-repaired cheque
-         * (e.g. Cheque 2 if Cheque 1 was already repaired).
-         * Keep Cheque 1 in originalRepairIndexes so user can click "Prev" to view/edit it.
-         */
+        // Target first un-repaired cheque while keeping previous cheques in originalRepairIndexes
         int firstPendingIndex = -1;
         for (int idx : originalRepairIndexes) {
             if (idx >= 0 && idx < comparisons.size()) {
@@ -362,8 +299,7 @@ public class MicrRepairController
         }
 
         if (firstPendingIndex >= 0) {
-            // If chequeIndex is invalid or points to an already-repaired cheque,
-            // advance automatically to the first un-repaired cheque
+            // Advance automatically to first un-repaired cheque if current index is invalid or already repaired
             if (!isValidRepairIndex(chequeIndex)
                     || chequeIndex >= comparisons.size()
                     || (comparisons.get(chequeIndex) != null && !comparisons.get(chequeIndex).isNeedsMicrRepair())) {
@@ -385,10 +321,7 @@ public class MicrRepairController
         loadCheque();
     }
 
-    // =========================================================
-    // Build Repair Indexes
-    // =========================================================
-
+    // Build original repair queue once; keep list fixed for proper counter progression
     private void buildRepairIndexes() {
 
         if (comparisons == null) {
@@ -399,28 +332,6 @@ public class MicrRepairController
 
             return;
         }
-
-        /*
-         * Build the original MICR repair queue only once.
-         *
-         * This list must NOT shrink after a cheque is repaired.
-         *
-         * Example:
-         *
-         * Original:
-         * 1, 2, 3
-         *
-         * After repairing cheque 1:
-         * Current pending:
-         * 2, 3
-         *
-         * But originalRepairIndexes must remain:
-         * 1, 2, 3
-         *
-         * This is required for the counter:
-         * Cheque 2 of 3
-         * Cheque 3 of 3
-         */
 
         if (originalRepairIndexes == null
                 || originalRepairIndexes.isEmpty()) {
@@ -439,22 +350,18 @@ public class MicrRepairController
                     continue;
                 }
 
-                // Keep pending, repaired, and return_by_maker cheques in the error list
+                // Keep pending, repaired, and return_by_maker cheques in error list
                 if (c.isNeedsMicrRepair() || c.isMicrRepaired() || c.isReturnByMaker()) {
                     originalRepairIndexes.add(i);
                 }
             }
-
 
             totalMicrErrors =
                     originalRepairIndexes.size();
         }
     }
 
-    // =========================================================
-    // Top Bar
-    // =========================================================
-
+    // Update top bar counts and labels
     private void updateTopBar() {
 
         if (batchLabel != null) {
@@ -535,10 +442,7 @@ public class MicrRepairController
         updateChequeCounter();
     }
 
-    // =========================================================
-    // Cheque Counter
-    // =========================================================
-
+    // Update current cheque counter position based on original repair queue
     private void updateChequeCounter() {
 
         if (chequeCounter == null) {
@@ -555,15 +459,6 @@ public class MicrRepairController
 
             return;
         }
-
-        /*
-         * The counter position is based on the ORIGINAL
-         * MICR repair queue.
-         *
-         * It must not be based on the current pending
-         * queue because repaired cheques disappear from
-         * the pending queue.
-         */
 
         int currentPosition = 0;
 
@@ -599,10 +494,7 @@ public class MicrRepairController
         }
     }
 
-    // =========================================================
-    // Load Cheque
-    // =========================================================
-
+    // Load cheque data, images, and status into view
     private void loadCheque() {
 
         if (comparisons == null
@@ -658,10 +550,7 @@ public class MicrRepairController
         updateNavigationButtons();
     }
 
-    // =========================================================
-    // Update Return Banner
-    // =========================================================
-
+    // Update return reason banner if cheque was returned to maker
     private void updateReturnBanner(String chqNo) {
         if (returnReasonBanner == null) {
             return;
@@ -672,7 +561,7 @@ public class MicrRepairController
             return;
         }
 
-        java.util.Map<String, String> returnInfo = chequeService.getChequeReturnInfo(chqNo);
+        Map<String, String> returnInfo = chequeService.getChequeReturnInfo(chqNo);
         if (returnInfo != null && "RETURN_TO_MAKER".equalsIgnoreCase(returnInfo.get("status"))) {
             returnReasonBanner.setVisible(true);
 
@@ -693,10 +582,7 @@ public class MicrRepairController
         }
     }
 
-    // =========================================================
-    // Current Status
-    // =========================================================
-
+    // Update current status label styling
     private void setCurrentStatus(
             String status) {
 
@@ -792,9 +678,7 @@ public class MicrRepairController
             ocrCityCode.setReadonly(!isCityEditable);
         }
 
-        // -----------------------------------------------------
         // Bank Code
-        // -----------------------------------------------------
         if (ocrBankCode != null) {
             ocrBankCode.setValue(bankValue);
             boolean isBankMismatch = c.isBankCodeMismatch();
@@ -807,9 +691,7 @@ public class MicrRepairController
             ocrBankCode.setReadonly(!isBankEditable);
         }
 
-        // -----------------------------------------------------
         // Branch Code
-        // -----------------------------------------------------
         if (ocrBranchCode != null) {
             ocrBranchCode.setValue(branchValue);
             boolean isBranchMismatch = c.isBranchCodeMismatch();
@@ -823,11 +705,7 @@ public class MicrRepairController
         }
     }
 
-
-    // =========================================================
-    // Images
-    // =========================================================
-
+    // Load front and back cheque images
     private void loadImages(
             String chequeNum) {
 
@@ -854,7 +732,8 @@ public class MicrRepairController
         }
     }
 
-    private java.io.File resolveImageFile(String path) {
+    // Resolve cheque image file from path
+    private File resolveImageFile(String path) {
         if (path == null || path.trim().isEmpty()) {
             return null;
         }
@@ -864,21 +743,21 @@ public class MicrRepairController
             normalized = normalized.substring(1);
         }
 
-        // 1. Direct file / absolute path
-        java.io.File directFile = new java.io.File(path);
+        // Direct file / absolute path
+        File directFile = new File(path);
         if (directFile.isAbsolute() && directFile.isFile()) {
             return directFile;
         }
 
-        // 2. Deployed webApp realPath
+        // Deployed webApp realPath
         try {
-            if (org.zkoss.zk.ui.Executions.getCurrent() != null
-                    && org.zkoss.zk.ui.Executions.getCurrent().getDesktop() != null) {
-                org.zkoss.zk.ui.WebApp webApp =
-                        org.zkoss.zk.ui.Executions.getCurrent().getDesktop().getWebApp();
+            if (Executions.getCurrent() != null
+                    && Executions.getCurrent().getDesktop() != null) {
+                WebApp webApp =
+                        Executions.getCurrent().getDesktop().getWebApp();
                 String realPath = webApp.getRealPath("/" + normalized);
                 if (realPath != null) {
-                    java.io.File realFile = new java.io.File(realPath);
+                    File realFile = new File(realPath);
                     if (realFile.isFile()) {
                         return realFile;
                     }
@@ -886,16 +765,16 @@ public class MicrRepairController
             }
         } catch (Exception ignored) {}
 
-        // 3. Local workspace development path: src/main/webapp/ + subPath
+        // Local workspace development path: src/main/webapp/ + subPath
         String subPath = normalized.startsWith("src/main/webapp/")
                 ? normalized.substring("src/main/webapp/".length())
                 : normalized;
-        java.io.File devFile = new java.io.File("src/main/webapp", subPath);
+        File devFile = new File("src/main/webapp", subPath);
         if (devFile.isFile()) {
             return devFile;
         }
 
-        // 4. Relative path as-is
+        // Relative path as-is
         if (directFile.isFile()) {
             return directFile;
         }
@@ -903,6 +782,7 @@ public class MicrRepairController
         return null;
     }
 
+    // Render current cheque image with rotation and scaling
     private void showCurrentImage() {
 
         if (chequeImage == null) {
@@ -918,9 +798,9 @@ public class MicrRepairController
                 && !path.trim().isEmpty()) {
 
             try {
-                java.io.File file = resolveImageFile(path);
+                File file = resolveImageFile(path);
                 if (file != null) {
-                    chequeImage.setContent(new org.zkoss.image.AImage(file));
+                    chequeImage.setContent(new AImage(file));
                 } else {
                     String clean = path.replace("\\", "/").trim();
                     if (clean.startsWith("/")) clean = clean.substring(1);
@@ -928,7 +808,7 @@ public class MicrRepairController
                         clean = clean.substring("src/main/webapp/".length());
                     }
                     String webSrc = "/" + clean;
-                    chequeImage.setContent((org.zkoss.image.AImage) null);
+                    chequeImage.setContent((AImage) null);
                     chequeImage.setSrc(webSrc);
                 }
             } catch (Exception e) {
@@ -938,35 +818,33 @@ public class MicrRepairController
                     clean = clean.substring("src/main/webapp/".length());
                 }
                 String webSrc = "/" + clean;
-                chequeImage.setContent((org.zkoss.image.AImage) null);
+                chequeImage.setContent((AImage) null);
                 chequeImage.setSrc(webSrc);
             }
 
         } else {
 
             chequeImage.setContent(
-                    (org.zkoss.image.AImage) null);
+                    (AImage) null);
             chequeImage.setSrc("");
         }
 
         applyImageStyle();
     }
 
+    // Apply scaling and rotation styles to cheque image
     private void applyImageStyle() {
 
         if (chequeImage != null) {
             chequeImage.setStyle(String.format(
-                    java.util.Locale.US,
+                    Locale.US,
                     "object-fit:contain; max-width:100%%; max-height:100%%; display:block; transform: scale(%.2f) rotate(%ddeg); transform-origin: center; transition: transform 0.2s;",
                     currentScale,
                     currentRotation));
         }
     }
 
-    // =========================================================
-    // Save & Next
-    // =========================================================
-
+    // Save repaired MICR and advance to next cheque
     private void saveAndNext() {
 
         if (comparisons == null
@@ -989,16 +867,7 @@ public class MicrRepairController
             return;
         }
 
-        /*
-         * A cheque already repaired should not be
-         * saved again.
-         */
-        
-        
-        /*
-         * Allow re-saving if user navigated back to an already repaired cheque
-         */
-
+        // Allow re-saving if user navigated back to an already repaired cheque
         String city =
                 ocrCityCode == null
                         || ocrCityCode.getValue() == null
@@ -1023,10 +892,7 @@ public class MicrRepairController
                                 .getValue()
                                 .trim();
 
-        // -----------------------------------------------------
         // Server-side validation
-        // -----------------------------------------------------
-
         if (!city.matches("\\d{3}")) {
 
             Messagebox.show(
@@ -1150,10 +1016,7 @@ public class MicrRepairController
         }
     }
 
-    // =========================================================
-    // Move After Save
-    // =========================================================
-
+    // Move to next cheque after saving MICR repair
     private void moveAfterSave() {
 
         comparisons =
@@ -1170,7 +1033,7 @@ public class MicrRepairController
         int currentPos = originalRepairIndexes.indexOf(chequeIndex);
 
         if (currentPos >= 0 && currentPos < originalRepairIndexes.size() - 1) {
-            // Advance to the next cheque in the error list
+            // Advance to next cheque in error list
             chequeIndex = originalRepairIndexes.get(currentPos + 1);
             updateTopBar();
             loadCheque();
@@ -1195,11 +1058,7 @@ public class MicrRepairController
         }
     }
 
-
-    // =========================================================
-    // Previous Cheque
-    // =========================================================
-
+    // Navigate to previous repair cheque
     private void goToPreviousCheque() {
 
         if (originalRepairIndexes == null || originalRepairIndexes.isEmpty()) {
@@ -1215,6 +1074,7 @@ public class MicrRepairController
         }
     }
 
+    // Navigate to next repair cheque
     private void goToNextCheque() {
 
         if (originalRepairIndexes == null || originalRepairIndexes.isEmpty()) {
@@ -1230,11 +1090,7 @@ public class MicrRepairController
         }
     }
 
-
-    // =========================================================
-    // Update Prev / Next Button State
-    // =========================================================
-
+    // Update previous, next, and action button states
     private void updateNavigationButtons() {
 
         if (previousButton == null
@@ -1251,10 +1107,10 @@ public class MicrRepairController
 
         int currentPos = originalRepairIndexes.indexOf(chequeIndex);
 
-        // Prev is disabled only on the very first cheque of the error list
+        // Prev is disabled only on the very first cheque of error list
         previousButton.setDisabled(currentPos <= 0);
 
-        // Next is disabled only on the very last cheque of the error list
+        // Next is disabled only on the very last cheque of error list
         nextButton.setDisabled(currentPos < 0 || currentPos >= originalRepairIndexes.size() - 1);
 
         boolean isReturned = false;
@@ -1274,11 +1130,7 @@ public class MicrRepairController
         }
     }
 
-
-    // =========================================================
-    // Return
-    // =========================================================
-
+    // Open return reason dialog
     private void openReturnWindow() {
 
         if (returnWindow == null) {
@@ -1298,11 +1150,12 @@ public class MicrRepairController
         }
 
         returnReason.getItems().clear();
-
         returnReason.setSelectedItem(null);
+        returnReason.setRawValue(null);
+        returnReason.setValue("");
 
         if (returnRemarks != null) {
-
+            returnRemarks.setRawValue(null);
             returnRemarks.setValue("");
         }
 
@@ -1332,18 +1185,25 @@ public class MicrRepairController
             }
         }
 
+        returnReason.setSelectedIndex(-1);
+        returnReason.setSelectedItem(null);
+        returnReason.setRawValue(null);
+        returnReason.setValue("");
+
         returnWindow.doModal();
     }
 
+    // Cancel return action and hide dialog
     private void cancelReturn() {
 
         if (returnReason != null) {
-
             returnReason.setSelectedItem(null);
+            returnReason.setRawValue(null);
+            returnReason.setValue("");
         }
 
         if (returnRemarks != null) {
-
+            returnRemarks.setRawValue(null);
             returnRemarks.setValue("");
         }
 
@@ -1353,6 +1213,7 @@ public class MicrRepairController
         }
     }
 
+    // Confirm cheque return with reason and remarks
     private void confirmReturn() {
 
         if (returnReason == null
@@ -1455,6 +1316,17 @@ public class MicrRepairController
                 returnWindow.setVisible(false);
             }
 
+            if (returnReason != null) {
+                returnReason.setSelectedItem(null);
+                returnReason.setRawValue(null);
+                returnReason.setValue("");
+            }
+
+            if (returnRemarks != null) {
+                returnRemarks.setRawValue(null);
+                returnRemarks.setValue("");
+            }
+
             Clients.showNotification(
                     "Cheque "
                             + c.getChequeNumber()
@@ -1477,10 +1349,7 @@ public class MicrRepairController
         }
     }
 
-    // =========================================================
-    // Move After Return
-    // =========================================================
-
+    // Advance queue after returning cheque
     private void moveAfterReturn() {
 
         int currentPos = originalRepairIndexes != null ? originalRepairIndexes.indexOf(chequeIndex) : -1;
@@ -1506,39 +1375,10 @@ public class MicrRepairController
 
         loadCheque();
 
-        if (!micrRepairService.needsMicrRepair(batchId)) {
-            if (micrRepairService.hasChequesNeedingDataEntry(batchId)) {
-                Clients.showNotification(
-                        "All cheques in this batch are completed or returned. Moving to Data Entry in 2 seconds...",
-                        Clients.NOTIFICATION_TYPE_INFO,
-                        null,
-                        "top_right",
-                        2000);
-                org.zkoss.zk.ui.util.Clients.evalJavaScript(
-                        "setTimeout(function() { window.location.href = '"
-                                + Executions.encodeURL("/zul/inward-maker/data-entryform.zul?batchId=" + batchId)
-                                + "'; }, 2000);"
-                );
-            } else {
-                Clients.showNotification(
-                        "MICR repair completed. Batch is ready to be sent to Checker.",
-                        Clients.NOTIFICATION_TYPE_INFO,
-                        null,
-                        "top_right",
-                        2000);
-                org.zkoss.zk.ui.util.Clients.evalJavaScript(
-                        "setTimeout(function() { window.location.href = '"
-                                + Executions.encodeURL("/zul/inward-maker/send-to-checker.zul")
-                                + "'; }, 2000);"
-                );
-            }
-        }
+        navigateAfterMicrCompletion();
     }
 
-    // =========================================================
-    // Navigation
-    // =========================================================
-
+    // Navigate to Data Entry or Send to Checker when all MICR repairs are complete
     private void navigateAfterMicrCompletion() {
         if (micrRepairService.needsMicrRepair(batchId)) {
             return;
@@ -1552,7 +1392,7 @@ public class MicrRepairController
                     null,
                     "top_right",
                     2000);
-            org.zkoss.zk.ui.util.Clients.evalJavaScript(
+            Clients.evalJavaScript(
                     "setTimeout(function() { window.location.href = '"
                             + Executions.encodeURL("/zul/inward-maker/send-to-checker.zul")
                             + "'; }, 2000);"
@@ -1560,6 +1400,7 @@ public class MicrRepairController
         }
     }
 
+    // Redirect to Data Entry screen
     private void goToDataEntry() {
         if (micrRepairService.needsMicrRepair(batchId)) {
             return;
@@ -1569,6 +1410,7 @@ public class MicrRepairController
                         + batchId);
     }
 
+    // Return to previous screen (dashboard or MICR repair list)
     private void goBack() {
 
         if ("dashboard"
@@ -1584,16 +1426,10 @@ public class MicrRepairController
         }
     }
 
-    // =========================================================
-    // Register Events
-    // =========================================================
-
+    // Register component event listeners
     private void registerEvents() {
 
-        // -----------------------------------------------------
         // Toggle Image
-        // -----------------------------------------------------
-
         if (toggleImageButton != null) {
 
             toggleImageButton.addEventListener(
@@ -1612,10 +1448,7 @@ public class MicrRepairController
                     });
         }
 
-        // -----------------------------------------------------
         // Zoom In
-        // -----------------------------------------------------
-
         if (zoomInButton != null) {
 
             zoomInButton.addEventListener(
@@ -1628,10 +1461,7 @@ public class MicrRepairController
                     });
         }
 
-        // -----------------------------------------------------
         // Zoom Out
-        // -----------------------------------------------------
-
         if (zoomOutButton != null) {
 
             zoomOutButton.addEventListener(
@@ -1644,10 +1474,7 @@ public class MicrRepairController
                     });
         }
 
-        // -----------------------------------------------------
         // Rotate
-        // -----------------------------------------------------
-
         if (rotateButton != null) {
 
             rotateButton.addEventListener(
@@ -1659,10 +1486,7 @@ public class MicrRepairController
                     });
         }
 
-        // -----------------------------------------------------
         // Reset View
-        // -----------------------------------------------------
-
         if (resetViewButton != null) {
 
             resetViewButton.addEventListener(
@@ -1674,10 +1498,7 @@ public class MicrRepairController
                     });
         }
 
-        // -----------------------------------------------------
         // Save & Next
-        // -----------------------------------------------------
-
         if (saveNextButton != null) {
 
             saveNextButton.addEventListener(
@@ -1685,10 +1506,7 @@ public class MicrRepairController
                     event -> saveAndNext());
         }
 
-        // -----------------------------------------------------
         // Return
-        // -----------------------------------------------------
-
         if (returnButton != null) {
 
             returnButton.addEventListener(
@@ -1696,10 +1514,7 @@ public class MicrRepairController
                     event -> openReturnWindow());
         }
 
-        // -----------------------------------------------------
         // Back
-        // -----------------------------------------------------
-
         if (backToList != null) {
 
             backToList.addEventListener(
@@ -1707,10 +1522,7 @@ public class MicrRepairController
                     event -> goBack());
         }
 
-        // -----------------------------------------------------
         // Previous
-        // -----------------------------------------------------
-
         if (previousButton != null) {
 
             previousButton.addEventListener(
@@ -1718,10 +1530,7 @@ public class MicrRepairController
                     event -> goToPreviousCheque());
         }
 
-        // -----------------------------------------------------
         // Next
-        // -----------------------------------------------------
-
         if (nextButton != null) {
 
             nextButton.addEventListener(
@@ -1729,10 +1538,7 @@ public class MicrRepairController
                     event -> goToNextCheque());
         }
 
-        // -----------------------------------------------------
         // Return Window
-        // -----------------------------------------------------
-
         if (cancelReturnButton != null) {
 
             cancelReturnButton.addEventListener(
@@ -1747,10 +1553,7 @@ public class MicrRepairController
                     event -> confirmReturn());
         }
 
-        // -----------------------------------------------------
         // MICR change events
-        // -----------------------------------------------------
-
         if (ocrCityCode != null) {
 
             ocrCityCode.addEventListener(
@@ -1781,10 +1584,7 @@ public class MicrRepairController
         updateNavigationButtons();
     }
 
-    // =========================================================
-    // Build MICR
-    // =========================================================
-
+    // Concatenate city, bank, and branch codes into 9-digit MICR
     private String buildMicr() {
 
         String c =
@@ -1821,89 +1621,14 @@ public class MicrRepairController
         return "";
     }
 
-    // =========================================================
-    // Check Valid Repair Index
-    // =========================================================
-
+    // Validate if given index is in the repair queue
     private boolean isValidRepairIndex(
             int index) {
 
         return originalRepairIndexes != null && originalRepairIndexes.contains(index);
     }
 
-
-    // =========================================================
-    // Find Next MICR Repair Cheque
-    // No wrapping
-    // =========================================================
-
-    private int findNextRepairIndexNoWrap(
-            int start) {
-
-        if (comparisons == null) {
-            return -1;
-        }
-
-        if (start < 0) {
-            start = 0;
-        }
-
-        for (int i = start;
-                i < comparisons.size();
-                i++) {
-
-            MicrComparisonDto c =
-                    comparisons.get(i);
-
-            if (c != null
-                    && c.isNeedsMicrRepair()) {
-
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
-    // =========================================================
-    // Find Previous MICR Repair Cheque
-    // No wrapping
-    // =========================================================
-
-    private int findPreviousRepairIndex(
-            int start) {
-
-        if (comparisons == null) {
-            return -1;
-        }
-
-        if (start >= comparisons.size()) {
-
-            start =
-                    comparisons.size() - 1;
-        }
-
-        for (int i = start;
-                i >= 0;
-                i--) {
-
-            MicrComparisonDto c =
-                    comparisons.get(i);
-
-            if (c != null
-                    && c.isNeedsMicrRepair()) {
-
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
-    // =========================================================
-    // Safe
-    // =========================================================
-
+    // Return empty string if value is null
     private String safe(String value) {
 
         return value == null

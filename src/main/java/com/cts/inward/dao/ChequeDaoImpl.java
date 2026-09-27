@@ -86,14 +86,15 @@ public class ChequeDaoImpl implements ChequeDao {
     	        + "    ORDER BY history_id DESC LIMIT 1 "
     	        + ") dt ON TRUE "
     	        + "LEFT JOIN LATERAL ( "
-    	        + "    SELECT h.status "
+    	        + "    SELECT h.status, h.return_reason_code "
     	        + "    FROM public.inward_cheque_status_history h "
     	        + "    WHERE h.cheque_number = c.cheque_number "
     	        + "    ORDER BY h.status_history_id DESC "
     	        + "    LIMIT 1 "
     	        + ") latest ON TRUE "
     	        + "WHERE c.batch_id = ? "
-    	        + "AND COALESCE(latest.status, '') NOT IN ('DATA_ENTRY_COMPLETED', 'ACCEPT', 'REJECT', 'RETURN_BY_MAKER', 'SENT_TO_CHECKER') "
+    	        + "AND COALESCE(latest.status, '') NOT IN ('ACCEPT', 'REJECT', 'SENT_TO_CHECKER') "
+    	        + "AND NOT (latest.status = 'RETURN_BY_MAKER' AND (latest.return_reason_code IS NULL OR latest.return_reason_code NOT LIKE 'MR-DATA-%')) "
     	        + "ORDER BY c.cheque_number";
 
         List<InwardCheque> cheques = new ArrayList<>();

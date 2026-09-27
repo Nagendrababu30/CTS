@@ -7,6 +7,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 import com.cts.inward.config.FileConfiguration;
+import com.cts.inward.dao.InwardFileDao;
 import com.cts.inward.dto.PxfParserResult;
 import com.cts.inward.enums.FileStage;
 import com.cts.inward.enums.FileType;
@@ -21,13 +22,6 @@ import com.cts.inward.model.PibfImageData;
 import com.cts.inward.parser.OcrParser;
 import com.cts.inward.parser.PibfProcessor;
 import com.cts.inward.parser.PxfParser;
-import com.cts.inward.service.BatchService;
-import com.cts.inward.service.ChequeImageService;
-import com.cts.inward.service.ChequeService;
-import com.cts.inward.service.FileProcessingService;
-import com.cts.inward.service.ImageService;
-import com.cts.inward.service.OcrBatchService;
-import com.cts.inward.service.OcrChequeService;
 
 public class FileProcessingServiceImpl
         implements FileProcessingService {
@@ -48,7 +42,7 @@ public class FileProcessingServiceImpl
     private final ChequeImageService chequeImageService;
 
     private final FileSummaryService fileSummaryService;
-    private final com.cts.inward.dao.InwardFileDao inwardFileDao;
+    private final InwardFileDao inwardFileDao;
 
     private FileProcessingServiceImpl(
             FileConfiguration fileConfiguration,
@@ -62,7 +56,7 @@ public class FileProcessingServiceImpl
             ImageService imageService,
             ChequeImageService chequeImageService,
             FileSummaryService fileSummaryService,
-            com.cts.inward.dao.InwardFileDao inwardFileDao) {
+            InwardFileDao inwardFileDao) {
 
         this.fileConfiguration = fileConfiguration;
         this.pxfParser = pxfParser;
@@ -90,7 +84,7 @@ public class FileProcessingServiceImpl
             ImageService imageService,
             ChequeImageService chequeImageService,
             FileSummaryService fileSummaryService,
-            com.cts.inward.dao.InwardFileDao inwardFileDao) {
+            InwardFileDao inwardFileDao) {
 
         return new FileProcessingServiceImpl(
                 fileConfiguration,
@@ -165,7 +159,7 @@ public class FileProcessingServiceImpl
 
         FileType fileType = resolveFileType(resolvedFilePath);
 
-        /* CATCH 1 — move to processing/{type}/ before parsing */
+        // Move file to processing directory before parsing
         String processingFilePath = moveToProcessing(resolvedFilePath, fileType);
 
         switch (fileType) {
@@ -191,11 +185,7 @@ public class FileProcessingServiceImpl
         }
     }
 
-    /* ------------------------------------------------------------------ */
-    /* Move file from incoming/{type}/ to processing/{type}/               */
-    /* Sets inward_file_summary stage to PROCESSING                       */
-    /* ------------------------------------------------------------------ */
-
+    // Move file from incoming to processing and update stage to PROCESSING
     private String moveToProcessing(String filePath, FileType fileType) {
 
         try {
@@ -215,10 +205,7 @@ public class FileProcessingServiceImpl
             System.out.println(
                     "[FileProcessing] Moved to processing: " + target);
 
-            /*
-             * Resolve file_id from the original incoming path
-             * and update inward_file_summary stage to PROCESSING.
-             */
+            // Resolve file_id from incoming path and update stage to PROCESSING
             long fileId = inwardFileDao.getFileIdByPath(
                     normalizePathForDb(filePath));
             if (fileId <= 0 && source != null) {
@@ -238,12 +225,7 @@ public class FileProcessingServiceImpl
         }
     }
 
-    /* ------------------------------------------------------------------ */
-    /* Move file from processing/{type}/ to archive/{type}/ after parsing  */
-    /* Called only after parse succeeds — failed files stay in processing  */
-    /* Image files are NOT archived — they stay in images/                 */
-    /* ------------------------------------------------------------------ */
-
+    // Move file from processing to archive directory after parsing succeeds
     private void moveToArchive(String filePath, FileType fileType) {
 
         try {
@@ -263,9 +245,7 @@ public class FileProcessingServiceImpl
             System.out.println(
                     "[FileProcessing] Archived: " + target);
 
-            /*
-             * Update inward_file_summary stage to ARCHIVE.
-             */
+            // Update inward_file_summary stage to ARCHIVE
             long fileId = inwardFileDao.getFileIdByPath(
                     normalizePathForDb(filePath));
             if (fileId <= 0 && source != null) {
@@ -283,17 +263,14 @@ public class FileProcessingServiceImpl
         }
     }
 
-    @Override
-    public void processPxfFile(String filePath) {
+    // Parses and persists PXF metadata and cheques
+    private void processPxfFile(String filePath) {
 
         PxfParserResult result = pxfParser.parse(filePath);
         NpciBatchData batchData = result.getBatchData();
         List<NpciChequeData> chequeDataList = result.getChequeDataList();
 
-        /*
-         * Resolve the actual file_id from inward_file table to prevent
-         * foreign key violations caused by erroneous file_id in XML.
-         */
+        // Resolve actual file_id from inward_file to prevent foreign key violations
         String fileName = Path.of(filePath).getFileName().toString();
         long actualFileId = inwardFileDao.getFileIdByFileName(fileName);
         if (actualFileId > 0) {
@@ -316,14 +293,10 @@ public class FileProcessingServiceImpl
         System.out.println("[PXF] All cheques saved for batch: " + batchData.getBatchId());
     }
 
-    @Override
-    public void processPibfFile(String filePath) {
+    // Extracts cheque images from PIBF container and links them to cheques
+    private void processPibfFile(String filePath) {
 
-        /*
-         * Extract batch name from filename e.g. "wPIBF_BATCH001_01.img" → "BATCH001"
-         * Then look up the numeric batch_id from DB by matching
-         * against the PXF file name in inward_file.
-         */
+        // Extract batch name from filename and resolve batch_id from DB
         String batchName = extractBatchId(filePath);
 
         long batchId = batchService.getBatchIdByFileName(batchName);
@@ -374,26 +347,20 @@ public class FileProcessingServiceImpl
         }
     }
 
-    @Override
-    public void processOcrFile(String filePath) {
+    // Parses OCR metadata and links to inward cheques
+    private void processOcrFile(String filePath) {
 
         OcrBatchData batchData =
                 ocrParser.parse(filePath);
 
-        /*
-         * Resolve the actual file_id from inward_file table for OCR.
-         */
+        // Resolve actual file_id from inward_file table for OCR
         String fileName = Path.of(filePath).getFileName().toString();
         long actualFileId = inwardFileDao.getFileIdByFileName(fileName);
         if (actualFileId > 0) {
             batchData.setFileId(actualFileId);
         }
 
-        /*
-         * saveBatch() returns the generated ocr_batch_id via RETURNING.
-         * Each cheque must use this ID — NOT the inward batch_id —
-         * because ocr_cheque_data.ocr_batch_id is a FK to ocr_batch.ocr_batch_id.
-         */
+        // Save batch and use generated ocr_batch_id for cheques
         long generatedOcrBatchId =
                 ocrBatchService.saveBatch(batchData);
 
@@ -406,22 +373,16 @@ public class FileProcessingServiceImpl
             ocrChequeService.saveCheque(chequeData);
         }
 
-        /*
-         * Link each ocr_cheque_data row to its corresponding
-         * inward_cheque row via inward_cheque_id.
-         * Uses cheque_number as the bridge — single UPDATE for the batch.
-         */
+        // Link ocr_cheque_data to inward_cheque via cheque_number
         ocrChequeService.linkInwardChequeIds(generatedOcrBatchId);
     }
 
-    /*
-     * Converts Windows backslash paths to forward slashes
-     * to match the file_path values stored in the DB.
-     */
+    // Converts Windows backslash paths to forward slashes for DB matching
     private String normalizePathForDb(String filePath) {
         return filePath.replace("\\", "/");
     }
 
+    // Extracts batch ID from supported filename patterns
     private String extractBatchId(String filePath) {
 
         Path file = Path.of(filePath);

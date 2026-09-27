@@ -1,33 +1,31 @@
 package com.cts.inward.dto;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+// Data Transfer Object for comparing NPCI vs OCR MICR data
 public class MicrComparisonDto {
 
     private long inwardChequeId;
 
     private String chequeNumber;
 
-    // -------------------------------------------------------------------------
     // NPCI data
-    // -------------------------------------------------------------------------
-
     private String npciAccountNumber;
     private String npciDrawerName;
-    private java.math.BigDecimal npciAmount;
-    private java.time.LocalDate npciChequeDate;
+    private BigDecimal npciAmount;
+    private LocalDate npciChequeDate;
 
     private String npciCityCode;
     private String npciBankCode;
     private String npciBranchCode;
     private String npciMicrCode;
 
-    // -------------------------------------------------------------------------
     // OCR data
-    // -------------------------------------------------------------------------
-
     private String ocrAccountNumber;
     private String ocrDrawerName;
-    private java.math.BigDecimal ocrAmount;
-    private java.time.LocalDate ocrChequeDate;
+    private BigDecimal ocrAmount;
+    private LocalDate ocrChequeDate;
 
     private String ocrCityCode;
     private String ocrBankCode;
@@ -130,29 +128,21 @@ public class MicrComparisonDto {
         this.npciDrawerName = npciDrawerName;
     }
 
-    // -------------------------------------------------------------------------
     // NPCI amount
-    // -------------------------------------------------------------------------
-
-    public java.math.BigDecimal getNpciAmount() {
+    public BigDecimal getNpciAmount() {
         return npciAmount;
     }
 
-    public void setNpciAmount(java.math.BigDecimal npciAmount) {
+    public void setNpciAmount(BigDecimal npciAmount) {
         this.npciAmount = npciAmount;
     }
 
-    // -------------------------------------------------------------------------
     // NPCI cheque date
-    // -------------------------------------------------------------------------
-
-    public java.time.LocalDate getNpciChequeDate() {
+    public LocalDate getNpciChequeDate() {
         return npciChequeDate;
     }
 
-    public void setNpciChequeDate(
-            java.time.LocalDate npciChequeDate) {
-
+    public void setNpciChequeDate(LocalDate npciChequeDate) {
         this.npciChequeDate = npciChequeDate;
     }
 
@@ -228,29 +218,21 @@ public class MicrComparisonDto {
         this.ocrDrawerName = ocrDrawerName;
     }
 
-    // -------------------------------------------------------------------------
     // OCR amount
-    // -------------------------------------------------------------------------
-
-    public java.math.BigDecimal getOcrAmount() {
+    public BigDecimal getOcrAmount() {
         return ocrAmount;
     }
 
-    public void setOcrAmount(java.math.BigDecimal ocrAmount) {
+    public void setOcrAmount(BigDecimal ocrAmount) {
         this.ocrAmount = ocrAmount;
     }
 
-    // -------------------------------------------------------------------------
     // OCR cheque date
-    // -------------------------------------------------------------------------
-
-    public java.time.LocalDate getOcrChequeDate() {
+    public LocalDate getOcrChequeDate() {
         return ocrChequeDate;
     }
 
-    public void setOcrChequeDate(
-            java.time.LocalDate ocrChequeDate) {
-
+    public void setOcrChequeDate(LocalDate ocrChequeDate) {
         this.ocrChequeDate = ocrChequeDate;
     }
 

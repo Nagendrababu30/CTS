@@ -1346,7 +1346,10 @@
 .z-window-modal,
 .z-window-modal.checker-modal,
 div.checker-modal,
-*.checker-modal {
+*.checker-modal,
+.z-window-modal.return-window,
+div.return-window,
+*.return-window {
     background: #FFFFFF !important;
     border-radius: 16px !important;
     box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(15, 23, 42, 0.08) !important;
@@ -1356,12 +1359,16 @@ div.checker-modal,
 }
 
 .z-window-modal > .z-window-header,
-.checker-modal > .z-window-header {
+.checker-modal > .z-window-header,
+.z-window-modal.return-window > .z-window-header,
+.return-window > .z-window-header {
     display: none !important;
 }
 
 .z-window-modal > .z-window-content,
-.checker-modal > .z-window-content {
+.checker-modal > .z-window-content,
+.z-window-modal.return-window > .z-window-content,
+.return-window > .z-window-content {
     background: #FFFFFF !important;
     padding: 0 !important;
     margin: 0 !important;
@@ -2292,3 +2299,60 @@ div.checker-modal,
             transform: none !important;
             pointer-events: none !important;
         }
+
+/* =========================================================
+   Checker Return Reason Alert Banner & Modal Utilities
+   ========================================================= */
+
+.modal-title-layout {
+    margin-left: 14px !important;
+}
+
+.modal-required-star {
+    color: #7C3AED !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    margin-left: 3px !important;
+}
+
+.return-alert-banner {
+    background: #FFF4ED !important;
+    border: 1px solid #FECDCA !important;
+    border-radius: 8px !important;
+    padding: 10px 16px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+.return-alert-icon {
+    font-size: 18px !important;
+    color: #C4320A !important;
+}
+
+.return-alert-title {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: #B42318 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+.return-alert-reason {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #7A271A !important;
+}
+
+.return-alert-remarks-label {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #B42318 !important;
+}
+
+.return-alert-remarks-text {
+    font-size: 12.5px !important;
+    color: #344054 !important;
+}
+

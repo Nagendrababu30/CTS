@@ -8,235 +8,11 @@
 <?init class="org.zkoss.zk.ui.util.Composition"
         arg0="/zul/common/layout.zul"?>
 
-<zk xmlns:w="client">
+<zk>
 
 	<style src="/css/inward/maker/micr-repair.css?v=20260926_6"/>
 	<style src="/css/inward/maker/data-entryform.css?v=20260926_6"/>
 	<style src="/css/inward/checker/batch-details.css?v=20260926_6"/>
-
-	<style>
-		/* Guarantee Modal Styling for Send Back / Return Dialog */
-		.z-window-modal.checker-modal,
-		div.checker-modal,
-		*.checker-modal,
-		.z-window-modal.return-window,
-		div.return-window,
-		*.return-window {
-			background: #FFFFFF !important;
-			border-radius: 16px !important;
-			box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(15, 23, 42, 0.08) !important;
-			border: none !important;
-			padding: 0 !important;
-			overflow: hidden !important;
-		}
-
-		.z-window-modal.checker-modal > .z-window-header,
-		.checker-modal > .z-window-header,
-		.z-window-modal.return-window > .z-window-header,
-		.return-window > .z-window-header {
-			display: none !important;
-		}
-
-		.z-window-modal.checker-modal > .z-window-content,
-		.checker-modal > .z-window-content,
-		.z-window-modal.return-window > .z-window-content,
-		.return-window > .z-window-content {
-			background: #FFFFFF !important;
-			padding: 0 !important;
-			margin: 0 !important;
-			border-radius: 16px !important;
-			overflow: hidden !important;
-		}
-
-		.custom-modal-header {
-			width: 100% !important;
-			padding: 16px 22px !important;
-			box-sizing: border-box !important;
-			display: flex !important;
-			align-items: center !important;
-			border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
-		}
-
-		.custom-modal-header.header-purple {
-			background: linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%) !important;
-		}
-
-		.modal-header-icon-circle {
-			width: 40px !important;
-			height: 40px !important;
-			min-width: 40px !important;
-			border-radius: 50% !important;
-			display: flex !important;
-			align-items: center !important;
-			justify-content: center !important;
-			background: rgba(255, 255, 255, 0.2) !important;
-			backdrop-filter: blur(4px) !important;
-			border: 1.5px solid rgba(255, 255, 255, 0.3) !important;
-		}
-
-		.modal-header-icon {
-			font-size: 18px !important;
-			font-weight: 800 !important;
-			color: #FFFFFF !important;
-			line-height: 1 !important;
-		}
-
-		.custom-modal-title {
-			font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-			font-size: 16.5px !important;
-			font-weight: 800 !important;
-			color: #FFFFFF !important;
-			letter-spacing: -0.01em !important;
-			display: block !important;
-		}
-
-		.custom-modal-subtitle {
-			font-size: 12.5px !important;
-			font-weight: 500 !important;
-			color: rgba(255, 255, 255, 0.88) !important;
-			display: block !important;
-		}
-
-		.custom-modal-body {
-			padding: 20px 24px 22px 24px !important;
-			box-sizing: border-box !important;
-			background: #FFFFFF !important;
-		}
-
-		.modal-section-badge-label {
-			display: inline-flex !important;
-			align-items: center !important;
-			font-size: 12px !important;
-			font-weight: 700 !important;
-			color: #1E293B !important;
-			letter-spacing: 0.4px !important;
-			text-transform: uppercase !important;
-			margin-bottom: 6px !important;
-		}
-
-		.modal-reasons-card {
-			width: 100% !important;
-			max-height: 190px !important;
-			min-height: 48px !important;
-			overflow-y: auto !important;
-			box-sizing: border-box !important;
-			border: 1.5px solid #CBD5E1 !important;
-			border-radius: 10px !important;
-			padding: 8px 10px !important;
-			background: #F8FAFC !important;
-		}
-
-		.modal-reason-item,
-		.modal-reason-checkbox,
-		.modal-reasons-card .z-checkbox {
-			display: flex !important;
-			align-items: center !important;
-			padding: 7px 10px !important;
-			margin-bottom: 3px !important;
-			border-radius: 7px !important;
-			border: 1px solid transparent !important;
-			cursor: pointer !important;
-			transition: all 0.15s ease !important;
-		}
-
-		.modal-reason-item:hover,
-		.modal-reason-checkbox:hover,
-		.modal-reasons-card .z-checkbox:hover {
-			background: #EEF2F6 !important;
-			border-color: #CBD5E1 !important;
-		}
-
-		.modal-reason-item .z-checkbox-cnt,
-		.modal-reason-checkbox .z-checkbox-cnt,
-		.modal-reasons-card .z-checkbox .z-checkbox-cnt {
-			font-size: 13.5px !important;
-			font-weight: 600 !important;
-			color: #1E293B !important;
-			cursor: pointer !important;
-			line-height: 1.4 !important;
-		}
-
-		.modal-reason-item input[type="checkbox"],
-		.modal-reason-checkbox input[type="checkbox"],
-		.modal-reasons-card .z-checkbox input[type="checkbox"] {
-			width: 17px !important;
-			height: 17px !important;
-			cursor: pointer !important;
-			accent-color: #7C3AED !important;
-			margin-right: 8px !important;
-		}
-
-		.modal-custom-textarea {
-			width: 100% !important;
-			box-sizing: border-box !important;
-			border: 1.5px solid #CBD5E1 !important;
-			border-radius: 8px !important;
-			padding: 10px 14px !important;
-			font-size: 13.5px !important;
-			color: #0F172A !important;
-			background: #FFFFFF !important;
-			resize: vertical !important;
-			min-height: 68px !important;
-			line-height: 1.5 !important;
-			transition: all 0.15s ease !important;
-		}
-		.modal-custom-textarea:focus {
-			border-color: #7C3AED !important;
-			box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15) !important;
-			outline: none !important;
-		}
-
-		.modal-footer-row {
-			width: 100% !important;
-			margin-top: 10px !important;
-			padding-top: 14px !important;
-			border-top: 1px solid #E2E8F0 !important;
-			display: flex !important;
-			align-items: center !important;
-		}
-
-		.modal-btn-cancel,
-		*.modal-btn-cancel {
-			height: 38px !important;
-			padding: 0 20px !important;
-			background: #FFFFFF !important;
-			color: #475569 !important;
-			border: 1.5px solid #CBD5E1 !important;
-			border-radius: 8px !important;
-			font-size: 13.5px !important;
-			font-weight: 600 !important;
-			cursor: pointer !important;
-			transition: all 0.15s ease !important;
-		}
-		.modal-btn-cancel:hover {
-			background: #F1F5F9 !important;
-			color: #0F172A !important;
-			border-color: #94A3B8 !important;
-		}
-
-		.modal-btn-confirm-return,
-		*.modal-btn-confirm-return {
-			height: 38px !important;
-			padding: 0 24px !important;
-			background: linear-gradient(180deg, #8B5CF6 0%, #7C3AED 100%) !important;
-			color: #FFFFFF !important;
-			border: 1px solid #7C3AED !important;
-			border-radius: 8px !important;
-			font-size: 13.5px !important;
-			font-weight: 700 !important;
-			box-shadow: 0 2px 6px rgba(124, 58, 237, 0.3) !important;
-			cursor: pointer !important;
-			transition: all 0.15s ease !important;
-		}
-		.modal-btn-confirm-return:hover {
-			background: #6D28D9 !important;
-			box-shadow: 0 4px 12px rgba(124, 58, 237, 0.45) !important;
-			transform: translateY(-1px) !important;
-		}
-	</style>
-
-	<!-- Client-side real-time number to Indian currency words converter -->
-	<script src="/javascript/inward/maker/data-entryform.js"/>
 
 	<!-- CONTENT ROOT -->
 	<div self="@define(content)"
@@ -245,7 +21,7 @@
 		width="100%" height="100%">
 
 		<vlayout spacing="12px" width="100%" height="100%"
-			style="padding:14px 20px; box-sizing:border-box;">
+			sclass="inward-data-entry-layout">
 
 			<!-- ============================================================
 			     BATCH HEADER STRIP (Floating Card - Matches MICR Repair)
@@ -298,17 +74,17 @@
 			<div id="returnReasonBanner"
 			     visible="false"
 			     width="100%"
-			     style="background:#FFF4ED; border:1px solid #FECDCA; border-radius:8px; padding:10px 16px; box-sizing:border-box; display:flex; align-items:center;">
+			     sclass="return-alert-banner">
 				<hlayout spacing="12px" valign="middle" width="100%">
-					<label sclass="z-icon-exclamation-triangle" style="font-size:18px; color:#C4320A;"/>
+					<label sclass="z-icon-exclamation-triangle return-alert-icon"/>
 					<vlayout spacing="3px" hflex="1">
 						<hlayout spacing="8px" valign="middle">
-							<label value="Checker Return Reason:" style="font-size:12px; font-weight:700; color:#B42318; text-transform:uppercase; letter-spacing:0.5px;"/>
-							<label id="lblReturnReason" value="—" style="font-size:13px; font-weight:700; color:#7A271A;"/>
+							<label value="Checker Return Reason:" sclass="return-alert-title"/>
+							<label id="lblReturnReason" value="—" sclass="return-alert-reason"/>
 						</hlayout>
 						<hlayout spacing="8px" valign="middle" id="rowReturnRemarks">
-							<label value="Checker Remarks:" style="font-size:12px; font-weight:600; color:#B42318;"/>
-							<label id="lblReturnRemarks" value="—" style="font-size:12.5px; color:#344054;"/>
+							<label value="Checker Remarks:" sclass="return-alert-remarks-label"/>
+							<label id="lblReturnRemarks" value="—" sclass="return-alert-remarks-text"/>
 						</hlayout>
 					</vlayout>
 				</hlayout>
@@ -326,19 +102,17 @@
 						<!-- Header with Blue Icon & Subtitle (Title: Cheque Image) -->
 						<hlayout spacing="10px" valign="middle" width="100%">
 							<div sclass="card-header-icon">
-								<label value="📄" style="font-size:14px;"/>
+								<label value="📄" sclass="card-header-icon-label"/>
 							</div>
 							<vlayout spacing="1px">
-								<label value="Cheque Image" style="font-size:14px; font-weight:700; color:#1E293B;"/>
-								<label value="Verify the scanned cheque image and enter the details" style="font-size:11.5px; color:#64748B;"/>
+								<label value="Cheque Image" sclass="card-title-text"/>
+								<label value="Verify the scanned cheque image and enter the details" sclass="card-subtitle-text"/>
 							</vlayout>
 						</hlayout>
 
 						<!-- Cheque Image Viewport -->
-						<div width="100%" vflex="1"
-							style="display:flex; align-items:center; justify-content:center; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; overflow:hidden; padding:4px; box-sizing:border-box;">
-							<image id="imgCheque"
-								style="max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; display:block !important; margin:auto;"/>
+						<div width="100%" vflex="1" sclass="cheque-image-viewport">
+							<image id="imgCheque" sclass="cheque-image-img"/>
 						</div>
 
 						<!-- Spacer -->
@@ -384,18 +158,18 @@
 					<vlayout width="100%" height="100%" spacing="10px">
 
 						<!-- Header with Blue Icon & Subtitle -->
-						<hlayout spacing="10px" valign="middle" width="100%" style="padding-top:24px;">
+						<hlayout spacing="10px" valign="middle" width="100%" sclass="card-header-padded">
 							<div sclass="card-header-icon">
-								<label value="🗂" style="font-size:14px;"/>
+								<label value="🗂" sclass="card-header-icon-label"/>
 							</div>
 							<vlayout spacing="1px">
-								<label value="Data Verification" style="font-size:14px; font-weight:700; color:#1E293B;"/>
-								<label value="Verify and confirm the extracted data from the cheque" style="font-size:11.5px; color:#64748B;"/>
+								<label value="Data Verification" sclass="card-title-text"/>
+								<label value="Verify and confirm the extracted data from the cheque" sclass="card-subtitle-text"/>
 							</vlayout>
 						</hlayout>
 
 						<!-- Form Fields with Generous Spacing -->
-						<vlayout width="100%" spacing="24px" style="margin-top:16px;">
+						<vlayout width="100%" spacing="24px" sclass="form-fields-container">
 
 							<!-- ROW 1: Cheque Number + Account Number (Side by Side) -->
 							<hlayout width="100%" spacing="16px">
@@ -444,7 +218,7 @@
 								<hlayout spacing="0" valign="middle">
 									<label value="AMOUNT IN WORDS" sclass="single-field-label"/>
 								</hlayout>
-								<textbox id="txtAmountInWords" width="100%" placeholder="Amount in words" readonly="true" sclass="single-field-box" style="text-transform: uppercase;"/>
+								<textbox id="txtAmountInWords" width="100%" placeholder="Amount in words" readonly="true" sclass="single-field-box amount-in-words-box"/>
 							</vlayout>
 
 						</vlayout>
@@ -453,7 +227,7 @@
 						<space height="6px"/>
 
 						<!-- Action Buttons: Prev, Next, Return, Save & Next (Matches MICR Repair) -->
-						<vlayout width="100%" spacing="8px" style="margin-top:auto;">
+						<vlayout width="100%" spacing="8px" sclass="action-bar-bottom">
 							<hlayout spacing="10px" valign="middle" width="100%">
 								<button id="btnPrev"
 									label="Prev"
@@ -498,9 +272,9 @@
 				<div sclass="modal-header-icon-circle">
 					<label value="↶" sclass="modal-header-icon"/>
 				</div>
-				<vlayout spacing="2px" hflex="1" style="margin-left: 14px;">
-					<label value="Send Back to Maker" sclass="custom-modal-title"/>
-					<label value="Send this cheque back to the Maker queue for required corrections" sclass="custom-modal-subtitle"/>
+				<vlayout spacing="2px" hflex="1" sclass="modal-title-layout">
+					<label value="Return Cheque" sclass="custom-modal-title"/>
+					<label value="Specify return reason(s) and remarks to return this cheque" sclass="custom-modal-subtitle"/>
 				</vlayout>
 			</hlayout>
 
@@ -509,8 +283,8 @@
 
 				<vlayout width="100%" spacing="4px">
 					<hlayout spacing="4px" valign="middle">
-						<label value="SELECT SEND BACK REASON(S)" sclass="modal-section-badge-label"/>
-						<label value="*" style="color:#7C3AED; font-weight:bold; font-size:14px; margin-left: 3px;"/>
+						<label value="SELECT RETURN REASON(S)" sclass="modal-section-badge-label"/>
+						<label value="*" sclass="modal-required-star"/>
 					</hlayout>
 
 					<div sclass="modal-reasons-card" width="100%">
@@ -521,14 +295,14 @@
 				</vlayout>
 
 				<vlayout width="100%" spacing="4px">
-					<label value="MAKER INSTRUCTIONS / REMARK (OPTIONAL)" sclass="modal-section-badge-label"/>
+					<label value="RETURN REMARKS (OPTIONAL)" sclass="modal-section-badge-label"/>
 
 					<textbox id="txtReturnRemarks"
 						width="100%"
 						rows="3"
 						multiline="true"
 						maxlength="500"
-						placeholder="Enter instructions or details for Maker..."
+						placeholder="Enter instructions or details..."
 						sclass="modal-custom-textarea"/>
 				</vlayout>
 
@@ -540,7 +314,7 @@
 						sclass="modal-btn-cancel"/>
 
 					<button id="btnConfirmReturn"
-						label="Confirm Send Back"
+						label="Confirm Return"
 						sclass="modal-btn-confirm-return"/>
 				</hlayout>
 

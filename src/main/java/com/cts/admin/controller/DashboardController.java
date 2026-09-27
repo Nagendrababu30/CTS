@@ -184,19 +184,57 @@ public class DashboardController extends GenericForwardComposer<Component> {
 				roleCell.appendChild(roleLabel);
 				item.appendChild(roleCell);
 
-				//Login
-				Listcell loginCell = new Listcell();
-				Label loginLabel = new Label(log.getLoginTime() == null ? "-" : DATE_FMT.format(log.getLoginTime()));
-				loginLabel.setSclass("audit-datetime-label");
-				loginCell.appendChild(loginLabel);
-				item.appendChild(loginCell);
+				//Login Date
+				Listcell loginDateCell = new Listcell();
+				String loginDateStr = "-";
+				if (log.getLoginTime() != null) {
+					SimpleDateFormat dateFmt = new SimpleDateFormat("dd/MM/yyyy");
+					dateFmt.setTimeZone(IST);
+					loginDateStr = dateFmt.format(log.getLoginTime());
+				}
+				Label loginDateLabel = new Label(loginDateStr);
+				loginDateLabel.setSclass("audit-datetime-label");
+				loginDateCell.appendChild(loginDateLabel);
+				item.appendChild(loginDateCell);
 
-				//Logout
-				Listcell logoutCell = new Listcell();
-				Label logoutLabel = new Label(log.getLogoutTime() == null ? "-" : DATE_FMT.format(log.getLogoutTime()));
-				logoutLabel.setSclass("audit-datetime-label");
-				logoutCell.appendChild(logoutLabel);
-				item.appendChild(logoutCell);
+				//Login Time
+				Listcell loginTimeCell = new Listcell();
+				String loginTimeStr = "-";
+				if (log.getLoginTime() != null) {
+					SimpleDateFormat timeFmt = new SimpleDateFormat("hh:mm a");
+					timeFmt.setTimeZone(IST);
+					loginTimeStr = timeFmt.format(log.getLoginTime());
+				}
+				Label loginTimeLabel = new Label(loginTimeStr);
+				loginTimeLabel.setSclass("audit-datetime-label");
+				loginTimeCell.appendChild(loginTimeLabel);
+				item.appendChild(loginTimeCell);
+
+				//Logout Date
+				Listcell logoutDateCell = new Listcell();
+				String logoutDateStr = "-";
+				if (log.getLogoutTime() != null) {
+					SimpleDateFormat dateFmt = new SimpleDateFormat("dd/MM/yyyy");
+					dateFmt.setTimeZone(IST);
+					logoutDateStr = dateFmt.format(log.getLogoutTime());
+				}
+				Label logoutDateLabel = new Label(logoutDateStr);
+				logoutDateLabel.setSclass("audit-datetime-label");
+				logoutDateCell.appendChild(logoutDateLabel);
+				item.appendChild(logoutDateCell);
+
+				//Logout Time
+				Listcell logoutTimeCell = new Listcell();
+				String logoutTimeStr = "-";
+				if (log.getLogoutTime() != null) {
+					SimpleDateFormat timeFmt = new SimpleDateFormat("hh:mm a");
+					timeFmt.setTimeZone(IST);
+					logoutTimeStr = timeFmt.format(log.getLogoutTime());
+				}
+				Label logoutTimeLabel = new Label(logoutTimeStr);
+				logoutTimeLabel.setSclass("audit-datetime-label");
+				logoutTimeCell.appendChild(logoutTimeLabel);
+				item.appendChild(logoutTimeCell);
 
 				item.setValue(log);
 				recentAuditListbox.appendChild(item);

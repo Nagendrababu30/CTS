@@ -2,7 +2,7 @@ package com.cts.inward.file;
 
 public interface FileProcessingExecutor {
 
-	void submit(String filePath);
+//	void submit(String filePath);
 
 	/**
 	 * Submits a group of files belonging to the same batch

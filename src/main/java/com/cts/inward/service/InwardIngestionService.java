@@ -4,8 +4,6 @@ public interface InwardIngestionService {
 
 	void processIncomingFiles();
 
-	void processFile(String filePath);
-
 	void processSessionFiles();
 	
 }

@@ -93,7 +93,7 @@ public class ChequeDaoImpl implements ChequeDao {
     	        + "    LIMIT 1 "
     	        + ") latest ON TRUE "
     	        + "WHERE c.batch_id = ? "
-    	        + "AND COALESCE(latest.status, '') NOT IN ('ACCEPT', 'REJECT', 'RETURN_BY_MAKER') "
+    	        + "AND COALESCE(latest.status, '') NOT IN ('DATA_ENTRY_COMPLETED', 'ACCEPT', 'REJECT', 'RETURN_BY_MAKER', 'SENT_TO_CHECKER') "
     	        + "ORDER BY c.cheque_number";
 
         List<InwardCheque> cheques = new ArrayList<>();

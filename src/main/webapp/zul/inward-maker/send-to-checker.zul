@@ -15,7 +15,29 @@
         height="100%"
         sclass="content">
 
-    <style src="/css/inward/maker/sendtochecker.css"/>
+    <style src="/css/inward/maker/sendtochecker.css?v=20260926_2"/>
+    <style>
+        .custom-grid .z-column,
+        .custom-grid .z-column-content,
+        .custom-grid .z-row-inner,
+        .custom-grid .z-row-content,
+        .custom-grid .z-cell,
+        .custom-grid .z-cell-content {
+            text-align: center !important;
+            vertical-align: middle !important;
+        }
+        .status-badge-ready {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin: 0 auto !important;
+        }
+        .btn-action-send,
+        .custom-grid .z-button {
+            margin: 0 auto !important;
+            display: inline-block !important;
+        }
+    </style>
     
     <window apply="com.cts.inward.controller.SendToCheckerController" 
         height="100%" sclass="main-window">
@@ -38,10 +60,10 @@
                 <grid id="batchesGrid" emptyMessage="No batches ready to be submitted." 
                     sclass="custom-grid" mold="paging" pageSize="10">
                     <columns sclass="custom-columns">
-                        <column label="Batch ID" sclass="custom-column" />
-                        <column label="Total Cheques" sclass="custom-column" />
-                        <column label="Status" sclass="custom-column" />
-                        <column label="Action" sclass="custom-column" />
+                        <column label="Batch ID" sclass="custom-column" width="25%" align="center" />
+                        <column label="Total Cheques" sclass="custom-column" width="25%" align="center" />
+                        <column label="Status" sclass="custom-column" width="25%" align="center" />
+                        <column label="Action" sclass="custom-column" width="25%" align="center" />
                     </columns>
                     <rows id="batchRows" />
                 </grid>

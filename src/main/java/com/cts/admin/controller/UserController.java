@@ -71,7 +71,6 @@ public class UserController extends GenericForwardComposer<Component> {
 			}
 		});
 
-		// Add auto-filter listeners to comboboxes
 		roleFilterCombobox.addEventListener("onSelect", new EventListener<Event>() {
 			@Override
 			public void onEvent(Event event) throws Exception {
@@ -171,9 +170,8 @@ public class UserController extends GenericForwardComposer<Component> {
 				editBtn.setSclass("action-button edit-button");
 				editBtn.setTooltiptext("Edit User");
 
-				Button statusBtn = new Button();
-				statusBtn.setIconSclass("z-icon-power-off");
-				statusBtn.setSclass("action-button power-button");
+				Button statusBtn = new Button("ACTIVE".equalsIgnoreCase(user.getStatus()) ? "Deactivate" : "Activate");
+				statusBtn.setSclass("ACTIVE".equalsIgnoreCase(user.getStatus()) ? "action-button user-deactivate-button" : "action-button user-activate-button");
 				statusBtn.setTooltiptext(
 						"ACTIVE".equalsIgnoreCase(user.getStatus()) ? "Deactivate User" : "Activate User");
 
@@ -185,7 +183,7 @@ public class UserController extends GenericForwardComposer<Component> {
 					editBtn.setSclass("action-button edit-button z-disabled");
 					editBtn.setTooltiptext("Cannot edit Admin user");
 					statusBtn.setDisabled(true);
-					statusBtn.setSclass("action-button power-button z-disabled");
+					statusBtn.setSclass("action-button user-deactivate-button z-disabled");
 					statusBtn.setTooltiptext("Cannot change Admin user status");
 				} else {
 					editBtn.addEventListener("onClick", new EventListener<Event>() {

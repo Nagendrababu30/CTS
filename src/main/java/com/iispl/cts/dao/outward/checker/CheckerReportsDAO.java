@@ -218,13 +218,13 @@ public class CheckerReportsDAO {
 			throw new RuntimeException("Error while fetching cheques for batch: " + batchNumber, e);
 		}
 
-        String sql =
-                "SELECT EXISTS ("
-                        + "SELECT 1 "
-                        + "FROM public.cheque_processing "
-                        + "WHERE batch_number = ? "
-                        + "AND UPPER(checker_action) = 'REJECT'"
-                        + ")";
+		String sql =
+		        "SELECT EXISTS (" +
+		        "    SELECT 1 " +
+		        "    FROM public.cheque_processing " +
+		        "    WHERE batch_number = ? " +
+		        "    AND UPPER(TRIM(checker_action)) = 'REJECT'" +
+		        ")";
         
         
 

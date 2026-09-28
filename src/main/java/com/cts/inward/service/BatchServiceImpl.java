@@ -32,6 +32,13 @@ public class BatchServiceImpl implements BatchService {
 		batchDao.saveBatch(batchData);
 	}
 
+	// Check if a batch already exists in database
+	@Override
+	public boolean isBatchExists(long batchId) {
+
+		return batchDao.isBatchExists(batchId);
+	}
+
 	// ---------------------------------------------------------
 	// Maker Data Entry queue
 	// ---------------------------------------------------------

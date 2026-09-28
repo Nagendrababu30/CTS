@@ -26,4 +26,10 @@ public class OcrBatchServiceImpl
     public long saveBatch(OcrBatchData batchData) {
         return ocrBatchDao.saveBatch(batchData);
     }
+
+    // Check if an OCR batch already exists in database
+    @Override
+    public boolean isBatchExists(long batchId) {
+        return ocrBatchDao.isBatchExists(batchId);
+    }
 }

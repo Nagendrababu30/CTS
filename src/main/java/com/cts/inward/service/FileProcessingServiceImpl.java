@@ -270,6 +270,12 @@ public class FileProcessingServiceImpl
         NpciBatchData batchData = result.getBatchData();
         List<NpciChequeData> chequeDataList = result.getChequeDataList();
 
+        // Check if batch already exists in database to avoid duplicate records
+        if (batchService.isBatchExists(batchData.getBatchId())) {
+            System.out.println("[PXF] Batch " + batchData.getBatchId() + " already exists in DB. Skipping duplicate PXF file: " + filePath);
+            return;
+        }
+
         // Resolve actual file_id from inward_file to prevent foreign key violations
         String fileName = Path.of(filePath).getFileName().toString();
         long actualFileId = inwardFileDao.getFileIdByFileName(fileName);
@@ -313,6 +319,12 @@ public class FileProcessingServiceImpl
         List<InwardCheque> cheques =
                 chequeService.getAllChequesForBatch(batchId);
 
+        // Check if cheque images for this batch already exist
+        if (!cheques.isEmpty() && chequeImageService.getImageByChequeNumber(cheques.get(0).getChequeNumber()) != null) {
+            System.out.println("[PIBF] Cheque images already saved for batch " + batchId + ". Skipping duplicate PIBF file: " + filePath);
+            return;
+        }
+
         if (imageDataList.size() != cheques.size()) {
             System.err.println(
                     "[PIBF] Image count mismatch — "
@@ -352,6 +364,12 @@ public class FileProcessingServiceImpl
 
         OcrBatchData batchData =
                 ocrParser.parse(filePath);
+
+        // Check if OCR batch already exists in database
+        if (ocrBatchService.isBatchExists(batchData.getBatchId())) {
+            System.out.println("[OCR] OCR batch " + batchData.getBatchId() + " already exists in DB. Skipping duplicate OCR file: " + filePath);
+            return;
+        }
 
         // Resolve actual file_id from inward_file table for OCR
         String fileName = Path.of(filePath).getFileName().toString();

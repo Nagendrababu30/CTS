@@ -598,143 +598,165 @@ public class OutwardMakerDataEntryDetailController
             // ONLY THE FILTERED RETURNED CHEQUES ARE USED
             // =====================================================
 
-            cheques =
-                    returnedCheques;
+         // =====================================================
+         // ONLY THE FILTERED RETURNED CHEQUES ARE USED
+         // =====================================================
+
+         cheques = returnedCheques;
+
+         // Make sure currentIndex is valid
+         if (currentIndex < 0
+                 || currentIndex >= cheques.size()) {
+
+             currentIndex = 0;
+         }
+
+         // Update summary for the returned queue
+         updateBatchSummaryMetrics();
+
+         // Load reject reasons
+         loadRejectReasonsIntoModal();
+
+         // Load the cheque at currentIndex
+         loadCheque();
+
+         /*
+          * DATA ENTRY RETURNED QUEUE
+          *
+          * If there are multiple returned cheques:
+          *
+          * CHQ001 -> CHQ002 -> CHQ003 -> ...
+          *
+          * Navigation is controlled by currentIndex.
+          */
+         if (dataEntryRepairQueue) {
+
+             updateNavButtons();
+
+         } else if (prevButton != null) {
+
+             /*
+              * Existing returned behavior is preserved
+              * when no repairType is supplied.
+              */
+
+             prevButton.setDisabled(true);
+
+             prevButton.setStyle(
+                     "background:#CBD5E1 !important; "
+                     + "color:#94A3B8 !important; "
+                     + "border:none !important; "
+                     + "font-size:12px !important; "
+                     + "font-weight:600 !important; "
+                     + "border-radius:6px !important; "
+                     + "cursor:not-allowed !important;"
+             );
+         }
+
+         return;
+         }
 
 
-            if (currentIndex < 0
-                    || currentIndex >= cheques.size()) {
+         // =====================================================
+         // NORMAL DATA ENTRY FLOW
+         //
+         // EXISTING LOGIC PRESERVED
+         // =====================================================
 
-                currentIndex = 0;
-            }
-
-
-            updateBatchSummaryMetrics();
-
-            loadRejectReasonsIntoModal();
-
-            loadCheque();
+         cheques = loadedCheques;
 
 
-            /*
-             * Returned Data Entry repair can contain multiple
-             * Data Entry cheques. Allow navigation inside only
-             * this filtered subset.
-             */
-            if (dataEntryRepairQueue) {
+         // =====================================================
+         // CHECK IF ALL INSTRUMENTS ARE ALREADY VERIFIED
+         // =====================================================
 
-                updateNavButtons();
+         boolean allVerified = true;
 
-            } else if (prevButton != null) {
+         for (OutwardCheque chq : cheques) {
 
-                /*
-                 * Existing returned behavior is preserved when
-                 * no repairType is supplied.
-                 */
-                prevButton.setDisabled(true);
+             String status =
+                     chq.getChequeStatus();
 
-                prevButton.setStyle(
-                        "background:#CBD5E1 !important; "
-                        + "color:#94A3B8 !important; "
-                        + "border:none !important; "
-                        + "font-size:12px !important; "
-                        + "font-weight:600 !important; "
-                        + "border-radius:6px !important; "
-                        + "cursor:not-allowed !important;"
-                );
-            }
+             if (!("VERIFIED".equalsIgnoreCase(status)
+                     || "COMPLETED".equalsIgnoreCase(status)
+                     || "REJECT_REQUESTED".equalsIgnoreCase(status))) {
+
+                 allVerified = false;
+                 break;
+             }
+         }
 
 
-            return;
-        }
+         // =====================================================
+         // ALL CHEQUES ALREADY VERIFIED
+         // =====================================================
+
+         if (allVerified) {
+
+             currentIndex =
+                     cheques.size() - 1;
+
+             updateBatchSummaryMetrics();
+
+             loadRejectReasonsIntoModal();
+
+             loadCheque();
+
+             Messagebox.show(
+                     "All cheques in batch "
+                             + batchId
+                             + " are already verified. "
+                             + "Proceed to Send to Checker?",
+
+                     "Batch Already Processed",
+
+                     Messagebox.YES | Messagebox.NO,
+
+                     Messagebox.QUESTION,
+
+                     event -> {
+
+                         if (Messagebox.ON_YES.equals(
+                                 event.getName())) {
+
+                             Executions.sendRedirect(
+                                     "outward-maker-send-to-checker.zul"
+                             );
+                         }
+                     }
+             );
+
+             return;
+         }
 
 
-        // =====================================================
-        // NORMAL DATA ENTRY FLOW
-        //
-        // EXISTING LOGIC PRESERVED
-        // =====================================================
+         // =====================================================
+         // FIND FIRST PENDING CHEQUE
+         // =====================================================
 
-        cheques = loadedCheques;
-
-
-        // =====================================================
-        // CHECK IF ALL INSTRUMENTS ARE ALREADY VERIFIED
-        // =====================================================
-
-        boolean allVerified = true;
-
-        for (OutwardCheque chq
-                : cheques) {
-
-            String status =
-                    chq.getChequeStatus();
+         currentIndex =
+                 findFirstPendingChequeIndex();
 
 
-            if (!("VERIFIED"
-                    .equalsIgnoreCase(status)
+         // =====================================================
+         // UPDATE SUMMARY
+         // =====================================================
 
-                    || "COMPLETED"
-                    .equalsIgnoreCase(status)
-
-                    || "REJECT_REQUESTED"
-                    .equalsIgnoreCase(status))) {
-
-                allVerified = false;
-
-                break;
-            }
-        }
+         updateBatchSummaryMetrics();
 
 
-        if (allVerified) {
+         // =====================================================
+         // LOAD REJECT REASONS
+         // =====================================================
 
-            currentIndex =
-                    cheques.size() - 1;
-
-            updateBatchSummaryMetrics();
-
-            loadRejectReasonsIntoModal();
-
-            loadCheque();
+         loadRejectReasonsIntoModal();
 
 
-            Messagebox.show(
-                    "All cheques in batch "
-                            + batchId
-                            + " are already verified. "
-                            + "Proceed to Send to Checker?",
-                    "Batch Already Processed",
-                    Messagebox.YES
-                            | Messagebox.NO,
-                    Messagebox.QUESTION,
-                    event -> {
+         // =====================================================
+         // LOAD FIRST PENDING CHEQUE
+         // =====================================================
 
-                        if (Messagebox.ON_YES
-                                .equals(
-                                        event.getName()
-                                )) {
-
-                            Executions.sendRedirect(
-                                    "outward-maker-send-to-checker.zul"
-                            );
-                        }
-                    }
-            );
-
-
-            return;
-        }
-
-
-        currentIndex =
-                findFirstPendingChequeIndex();
-
-        updateBatchSummaryMetrics();
-
-        loadRejectReasonsIntoModal();
-
-        loadCheque();
+         loadCheque();
     }
 
 
@@ -1413,46 +1435,44 @@ public class OutwardMakerDataEntryDetailController
             return;
         }
 
+        if (currentIndex < 0
+                || currentIndex >= cheques.size()) {
+
+            currentIndex = 0;
+        }
 
         OutwardCheque cheque =
                 cheques.get(currentIndex);
-
 
         String chqNo =
                 chequeNumberTextbox != null
                         ? chequeNumberTextbox.getValue()
                         : null;
 
-
         String account =
                 accountNumberTextbox != null
                         ? accountNumberTextbox.getValue()
                         : null;
-
 
         Date selectedDate =
                 chequeDatebox != null
                         ? chequeDatebox.getValue()
                         : null;
 
-
         String drawerName =
                 drawerNameTextbox != null
                         ? drawerNameTextbox.getValue()
                         : null;
-
 
         String payeeName =
                 payeeNameTextbox != null
                         ? payeeNameTextbox.getValue()
                         : null;
 
-
         BigDecimal amount =
                 amountTextbox != null
                         ? amountTextbox.getValue()
                         : null;
-
 
         String amountWords =
                 amountInWordsTextbox != null
@@ -1474,13 +1494,10 @@ public class OutwardMakerDataEntryDetailController
                     Messagebox.EXCLAMATION
             );
 
-
             if (chequeNumberTextbox != null) {
 
-                chequeNumberTextbox
-                        .setFocus(true);
+                chequeNumberTextbox.setFocus(true);
             }
-
 
             return;
         }
@@ -1496,13 +1513,10 @@ public class OutwardMakerDataEntryDetailController
                     Messagebox.EXCLAMATION
             );
 
-
             if (accountNumberTextbox != null) {
 
-                accountNumberTextbox
-                        .setFocus(true);
+                accountNumberTextbox.setFocus(true);
             }
-
 
             return;
         }
@@ -1517,22 +1531,17 @@ public class OutwardMakerDataEntryDetailController
                     Messagebox.EXCLAMATION
             );
 
-
             if (chequeDatebox != null) {
 
-                chequeDatebox
-                        .setFocus(true);
+                chequeDatebox.setFocus(true);
             }
-
 
             return;
         }
 
 
         if (amount == null
-                || amount.compareTo(
-                        BigDecimal.ZERO
-                ) <= 0) {
+                || amount.compareTo(BigDecimal.ZERO) <= 0) {
 
             Messagebox.show(
                     "Please enter a valid Amount.",
@@ -1541,13 +1550,10 @@ public class OutwardMakerDataEntryDetailController
                     Messagebox.EXCLAMATION
             );
 
-
             if (amountTextbox != null) {
 
-                amountTextbox
-                        .setFocus(true);
+                amountTextbox.setFocus(true);
             }
-
 
             return;
         }
@@ -1561,7 +1567,6 @@ public class OutwardMakerDataEntryDetailController
                 chqNo.trim()
         );
 
-
         cheque.setDrawerAccountNumber(
                 account.trim()
         );
@@ -1574,7 +1579,6 @@ public class OutwardMakerDataEntryDetailController
                                 ZoneId.systemDefault()
                         )
                         .toLocalDate();
-
 
         cheque.setChequeDate(
                 chequeDate
@@ -1638,10 +1642,8 @@ public class OutwardMakerDataEntryDetailController
                                 "userId"
                         );
 
-
         int makerId =
-                (sessionUserIdObj
-                        instanceof Number)
+                (sessionUserIdObj instanceof Number)
                         ? ((Number)
                                 sessionUserIdObj)
                                 .intValue()
@@ -1650,8 +1652,6 @@ public class OutwardMakerDataEntryDetailController
 
         // =====================================================
         // PERSIST CHEQUE
-        //
-        // Existing functionality preserved.
         // =====================================================
 
         service.saveAndVerifyCheque(
@@ -1662,10 +1662,6 @@ public class OutwardMakerDataEntryDetailController
 
         // =====================================================
         // RETURNED CHEQUE MODE
-        //
-        // DO NOT complete the original batch.
-        //
-        // This is a single returned-cheque repair.
         // =====================================================
 
         if (returnedMode) {
@@ -1673,26 +1669,19 @@ public class OutwardMakerDataEntryDetailController
             updateBatchSummaryMetrics();
 
 
-            /*
-             * =====================================================
-             * FILTERED DATA ENTRY RETURN QUEUE
-             * =====================================================
-             *
-             * Continue to the next Data Entry-reason cheque
-             * instead of returning to the batch after every
-             * cheque.
-             */
-            if ("DATA_ENTRY".equalsIgnoreCase(
-                    repairType == null
-                            ? ""
-                            : repairType.trim()
-            )) {
+            // =================================================
+            // DATA ENTRY RETURN QUEUE
+            // =================================================
+
+            if (returnedMode) {
 
                 if (currentIndex < cheques.size() - 1) {
 
                     currentIndex++;
 
                     loadCheque();
+
+                    updateNavButtons();
 
                     return;
                 }
@@ -1703,18 +1692,22 @@ public class OutwardMakerDataEntryDetailController
                         "Data Entry Repair",
                         Messagebox.OK,
                         Messagebox.INFORMATION,
-                        event -> Executions.sendRedirect(
-                                "outward-maker-dashboard.zul"
-                        )
+                        event -> {
+
+                            Executions.sendRedirect(
+                                    "outward-maker-dashboard.zul"
+                            );
+                        }
                 );
 
                 return;
             }
 
 
-            /*
-             * Existing returned one-cheque behavior preserved.
-             */
+            // =================================================
+            // EXISTING SINGLE RETURNED CHEQUE FLOW
+            // =================================================
+
             Messagebox.show(
                     "Returned cheque "
                             + cheque.getChequeNumber()
@@ -1731,15 +1724,12 @@ public class OutwardMakerDataEntryDetailController
                     }
             );
 
-
             return;
         }
 
 
         // =====================================================
         // NORMAL DATA ENTRY FLOW
-        //
-        // EXISTING FUNCTIONALITY PRESERVED.
         // =====================================================
 
         updateBatchSummaryMetrics();

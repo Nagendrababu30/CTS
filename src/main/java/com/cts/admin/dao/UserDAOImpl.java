@@ -218,7 +218,7 @@ public class UserDAOImpl {
 		}
 
 		try {
-			user.setLastLoginAt(rs.getTimestamp("last_login"));
+			user.setLastLogin(rs.getTimestamp("last_login"));
 		} catch (SQLException ignored) {
 		}
 

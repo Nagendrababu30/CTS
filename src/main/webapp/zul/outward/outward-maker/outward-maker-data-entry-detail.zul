@@ -8,11 +8,11 @@
 	<!-- =========================================================
 		CONTENT ROOT
 		========================================================= -->
-	<div self="@define(content)" width="100%" height="100%" sclass="data-entry-detail-wrapper">
-
+	<div self="@define(content)" width="100%" sclass="data-entry-detail-wrapper"
+style="overflow-y: auto !important; overflow-x: hidden !important; height: 100% !important; max-height: calc(100vh - 65px) !important;">
 		<vlayout
 			apply="com.iispl.cts.controller.outward.OutwardMakerDataEntryDetailController"
-			spacing="8px" width="100%" height="100%"
+			spacing="8px" width="100%"
 			sclass="data-entry-detail-vlayout">
 
 			<!-- =================================================

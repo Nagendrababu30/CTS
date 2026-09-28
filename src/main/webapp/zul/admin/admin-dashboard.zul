@@ -9,130 +9,136 @@
 
 <zk>
 
-    <style src="/css/admin/dashboard.css"/>
+	<style src="/css/admin/dashboard.css" />
 
-    <div
-        self="@define(content)"
-        width="100%"
-        height="100%"
-        sclass="content">
+	<div self="@define(content)" width="100%" height="100%"
+		sclass="content">
 
-        <vlayout
-            id="dashboardPage"
-            apply="com.cts.admin.controller.DashboardController"
-            width="100%"
-            spacing="0"
-            sclass="dashboard-page">
+		<vlayout id="dashboardPage"
+			apply="com.cts.admin.controller.DashboardController" width="100%"
+			spacing="0" sclass="dashboard-page">
 
-            <!-- PAGE HEADER -->
-            <div sclass="dashboard-header">
-                <div sclass="dashboard-header-left">
-                    <label sclass="dashboard-title" value="Admin Dashboard"/>
-                </div>
-            </div>
+			<!-- Page header -->
+			<div sclass="dashboard-header">
+				<div sclass="dashboard-header-left">
+					<label sclass="dashboard-title"
+						value="Admin Dashboard" />
+				</div>
+			</div>
 
-            <!-- OVERVIEW CARDS ROW -->
-            <div sclass="dashboard-cards-row">
+			<!-- Overview cards row -->
+			<div sclass="dashboard-cards-row">
 
-                <!-- CARD 1 — USER OVERVIEW -->
-                <vlayout spacing="0" sclass="overview-card">
-                    <div sclass="card-header-row">
-                        <div sclass="card-icon-wrap card-icon-blue">
-                            <label sclass="card-icon" value="&#x1F465;"/>
-                        </div>
-                        <div sclass="card-header-middle">
-                            <label sclass="card-title" value="User Overview"/>
-                        </div>
-                        <label id="userManageLink" sclass="card-link" value="Manage &#x2192;"/>
-                    </div>
-                    <div sclass="user-stats-row">
-                        <div sclass="user-stat-pill pill-grey">
-                            <label id="totalUsersValue"    sclass="pill-value-grey"  value="0"/>
-                            <label                         sclass="pill-label-grey"  value="Total Users"/>
-                        </div>
-                        <div sclass="user-stat-pill pill-green">
-                            <label id="activeUsersValue"   sclass="pill-value-green" value="0"/>
-                            <label                         sclass="pill-label-green" value="Active"/>
-                        </div>
-                        <div sclass="user-stat-pill pill-red">
-                            <label id="inactiveUsersValue" sclass="pill-value-red"   value="0"/>
-                            <label                         sclass="pill-label-red"   value="Inactive"/>
-                        </div>
-                    </div>
-                </vlayout>
+				<!-- user overview -->
+				<vlayout spacing="0" sclass="overview-card">
+					<div sclass="card-header-row">
+						<div sclass="card-icon-wrap card-icon-blue">
+							<label sclass="card-icon" value="&#x1F465;" />
+						</div>
+						<div sclass="card-header-middle">
+							<label sclass="card-title"
+								value="User Overview" />
+						</div>
+						<label id="userManageLink" sclass="card-link"
+							value="Manage &#x2192;" />
+					</div>
+					<div sclass="user-stats-row">
+						<div sclass="user-stat-pill pill-grey">
+							<label id="totalUsersValue"
+								sclass="pill-value-grey" value="0" />
+							<label sclass="pill-label-grey"
+								value="Total Users" />
+						</div>
+						<div sclass="user-stat-pill pill-green">
+							<label id="activeUsersValue"
+								sclass="pill-value-green" value="0" />
+							<label sclass="pill-label-green"
+								value="Active" />
+						</div>
+						<div sclass="user-stat-pill pill-red">
+							<label id="inactiveUsersValue"
+								sclass="pill-value-red" value="0" />
+							<label sclass="pill-label-red"
+								value="Inactive" />
+						</div>
+					</div>
+				</vlayout>
 
-                <!-- CARD 2 — SESSION OVERVIEW -->
-                <vlayout spacing="0" sclass="overview-card">
-                    <div sclass="card-header-row">
-                        <div sclass="card-icon-wrap card-icon-purple">
-                            <label sclass="card-icon" value="&#x23F0;"/>
-                        </div>
-                        <div sclass="card-header-middle">
-                            <label sclass="card-title" value="Session Overview"/>
-                        </div>
-                        <label id="sessionManageLink" sclass="card-link" value="Sessions &#x2192;"/>
-                    </div>
-                    <vlayout id="sessionStatusBox" spacing="0" sclass="session-status-box session-box-inactive">
-                        <hlayout sclass="current-session-top" spacing="8px" valign="middle">
-                            <label id="sessionCurrentLbl" sclass="session-current-label" value="CURRENT SESSION"/>
-                            <div id="sessionStatusBadge" sclass="status-badge status-inactive">
-                                <label id="sessionBadgeLbl" sclass="session-badge-label" value="NOT STARTED"/>
-                            </div>
-                        </hlayout>
-                        <label id="sessionNameLbl" sclass="session-name-label" value="No Active Session"/>
-                    </vlayout>
-                </vlayout>
+				<!--Session overview -->
+				<vlayout spacing="0" sclass="overview-card">
+					<div sclass="card-header-row">
+						<div sclass="card-icon-wrap card-icon-purple">
+							<label sclass="card-icon" value="&#x23F0;" />
+						</div>
+						<div sclass="card-header-middle">
+							<label sclass="card-title"
+								value="Session Overview" />
+						</div>
+						<label id="sessionManageLink" sclass="card-link"
+							value="Manage &#x2192;" />
+					</div>
+					<vlayout id="sessionStatusBox" spacing="0"
+						sclass="session-status-box session-box-inactive">
+						<hlayout sclass="current-session-top"
+							spacing="8px" valign="middle">
+							<label id="sessionCurrentLbl"
+								sclass="session-current-label" value="CURRENT SESSION" />
+							<div id="sessionStatusBadge"
+								sclass="status-badge status-inactive">
+								<label id="sessionBadgeLbl"
+									sclass="session-badge-label" value="NOT STARTED" />
+							</div>
+						</hlayout>
+						<label id="sessionNameLbl"
+							sclass="session-name-label" value="No Active Session" />
+					</vlayout>
+				</vlayout>
 
 
-            </div>
+			</div>
 
-            <!-- RECENT LOGS CARD -->
-            <div sclass="recent-activity-card">
+			<!-- recent logs card -->
+			<div sclass="recent-activity-card">
 
-                <hbox
-                    width="100%"
-                    align="middle"
-                    spacing="0"
-                    sclass="recent-activity-header">
+				<hbox width="100%" align="middle" spacing="0"
+					sclass="recent-activity-header">
 
-                    <vlayout hflex="1" spacing="0" sclass="recent-activity-header-left">
-                        <label sclass="recent-activity-title" value="Recent Logs"/>
-                        <label sclass="recent-activity-subtitle" value=""/>
-                    </vlayout>
+					<vlayout hflex="1" spacing="0"
+						sclass="recent-activity-header-left">
+						<label sclass="recent-activity-title"
+							value="Recent Logs" />
+						<label sclass="recent-activity-subtitle"
+							value="" />
+					</vlayout>
 
-                    <button
-                        id="viewAuditLogsBtn"
-                        sclass="view-audit-btn"
-                        label="View Full Audit Logs &#x2192;"/>
+					<button id="viewAuditLogsBtn"
+						sclass="view-audit-btn" label="View Full Audit Logs &#x2192;" />
 
-                </hbox>
+				</hbox>
 
-                <div sclass="recent-audit-listbox-wrap">
+				<div sclass="recent-audit-listbox-wrap">
 
-                    <listbox
-                        id="recentAuditListbox"
-                        sclass="recent-audit-listbox"
-                        sizedByContent="false"
-                        span="true"
-                        emptyMessage="No recent audit log entries">
+					<listbox id="recentAuditListbox"
+						sclass="recent-audit-listbox" sizedByContent="false" span="true"
+						emptyMessage="No recent audit log entries">
 
-                        <listhead sizable="false" menupopup="none">
-                            <listheader label="User ID" width="14%"/>
-                            <listheader label="Role" width="18%"/>
-                            <listheader label="Login Date" width="17%"/>
-                            <listheader label="Login Time" width="17%"/>
-                            <listheader label="Logout Date" width="17%"/>
-                            <listheader label="Logout Time" width="17%"/>
-                        </listhead>
+						<listhead sizable="false" menupopup="none">
+							<listheader label="User ID" width="14%" />
+							<listheader label="Role" width="18%" />
+							<listheader label="Login Date" width="17%" />
+							<listheader label="Login Time" width="17%" />
+							<listheader label="Logout Date" width="17%" />
+							<listheader label="Logout Time" width="17%" />
+						</listhead>
 
-                    </listbox>
+					</listbox>
 
-                </div>
+				</div>
 
-            </div>
+			</div>
 
-        </vlayout>
+		</vlayout>
 
-    </div>
+	</div>
 
 </zk>

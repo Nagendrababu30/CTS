@@ -23,9 +23,8 @@
 		<vlayout spacing="12px" width="100%" height="100%"
 			sclass="inward-data-entry-layout">
 
-			<!-- ============================================================
-			     BATCH HEADER STRIP (Floating Card - Matches MICR Repair)
-			     ============================================================ -->
+			
+
 			<hlayout width="100%" valign="middle" sclass="micr-header-card">
 
 				<!-- Left: Back Button & Batch Title -->
@@ -68,9 +67,7 @@
 				</hlayout>
 			</hlayout>
 
-			<!-- ============================================================
-			     RETURN REASON & REMARKS ALERT BANNER (Displayed when returned by Checker)
-			     ============================================================ -->
+			<!-- RETURN REASON & REMARKS ALERT BANNER (Displayed when returned by Checker) -->
 			<div id="returnReasonBanner"
 			     visible="false"
 			     width="100%"
@@ -90,9 +87,7 @@
 				</hlayout>
 			</div>
 
-			<!-- =====================================================
-			     MAIN SPLIT ROW (CHEQUE IMAGE + DATA VERIFICATION)
-			     ===================================================== -->
+			<!--  MAIN SPLIT ROW (CHEQUE IMAGE + DATA VERIFICATION)   -->
 			<hlayout width="100%" spacing="16px" valign="top">
 
 				<!-- LEFT CARD: CHEQUE IMAGE (MATCHES 2ND IMAGE) -->
@@ -267,9 +262,7 @@
 
 		</vlayout>
 
-		<!-- ================================================================
-		     Send Back to Maker Modal Dialog (Exact Match to Checker Send Back)
-		     ================================================================ -->
+		<!--Send Back to Maker Modal Dialog (Exact Match to Checker Send Back) -->
 		<window id="returnWindow"
 			width="560px"
 			border="none"

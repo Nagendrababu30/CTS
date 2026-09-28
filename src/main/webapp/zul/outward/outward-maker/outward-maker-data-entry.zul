@@ -11,79 +11,54 @@
 
 <zk>
 
- <style src="/css/outward/maker/dataentry.css?v=2"/>
+	<style src="/css/outward/maker/dataentry.css?v=2" />
+
+	<div self="@define(content)" sclass="data-entry-page-wrapper">
+
+		<!-- DATA ENTRY CONTROLLER -->
+
+		<vlayout
+			apply="com.iispl.cts.controller.outward.OutwardMakerDataEntryController"
+			spacing="18px" width="100%" height="100%" sclass="data-entry-vlayout">
 
 
-    <!-- ========================================================= -->
-    <!-- COMMON LAYOUT CONTENT                                      -->
-    <!-- Header + Sidebar come from /zul/common/layout.zul         -->
-    <!-- ========================================================= -->
 
-    <div
-        self="@define(content)"
-       
-        sclass="data-entry-page-wrapper">
-        <!-- ===================================================== -->
-        <!-- DATA ENTRY CONTROLLER                                  -->
-        <!-- ===================================================== -->
-
-        <vlayout
-            apply="com.iispl.cts.controller.outward.OutwardMakerDataEntryController"
-            spacing="18px"
-            width="100%"
-            height="100%"
-            sclass="data-entry-vlayout">
+			<!-- PAGE TITLE -->
 
 
-            <!-- ================================================= -->
-            <!-- PAGE TITLE                                         -->
-            <!-- ================================================= -->
-
-            <label
-                value="Data Entry"
-                sclass="data-entry-title"/>
+			<label value="Data Entry" sclass="data-entry-title" />
 
 
-            <!-- ================================================= -->
-            <!-- DATA ENTRY TABLE PANEL                            -->
-            <!-- ================================================= -->
 
-            <div
-                width="100%"
-                sclass="data-entry-card">
+			<!-- DATA ENTRY TABLE PANEL -->
 
 
-                <!-- ================================================= -->
-                <!-- IMPORTANT                                        -->
-                <!-- Keep your existing Data Entry listbox/table here -->
-                <!-- ================================================= -->
+			<div width="100%" sclass="data-entry-card">
 
-           <listbox
-                    id="batchListbox"
-                    width="100%"
-                    sclass="data-entry-listbox"
-                    emptyMessage="No batches available for Data Entry.">
 
-                    <listhead>
-                        <listheader label="Batch ID"      width="25%"/>
-                        <listheader label="Total Cheques" width="25%"/>
-                        <listheader label="Status"        width="25%"/>
-                        <listheader label="Action"        width="25%"/>
-                    </listhead>
 
-                </listbox>
+				<listbox id="batchListbox" width="100%"
+					sclass="data-entry-listbox"
+					emptyMessage="No batches available for Data Entry.">
 
-                <!-- Standalone right-aligned paging bar with detailed turned off -->
-                <paging 
-                    id="batchPaging" 
-                    pageSize="10" 
-                    detailed="false"
-                    sclass="data-entry-paging" />
+					<listhead>
+						<listheader label="Batch ID" width="20%" align="center" />
+						<listheader label="Total Cheques" width="20%"
+							align="center" />
+						<listheader label="Status" width="30%" align="center" />
+						<listheader label="Action" width="30%" align="center" />
+					</listhead>
 
-            </div>
+				</listbox>
 
-        </vlayout>
 
-    </div>
+				<paging id="batchPaging" pageSize="10" detailed="false"
+					sclass="data-entry-paging" />
+
+			</div>
+
+		</vlayout>
+
+	</div>
 
 </zk>

@@ -9,187 +9,126 @@
 
 <zk>
 
-    <style src="/css/admin/auditLog.css"/>
+	<style src="/css/admin/auditLog.css" />
 
-    <div
-        self="@define(content)"
-        width="100%"
-        height="100%"
-        sclass="content">
+	<div self="@define(content)" width="100%" height="100%"
+		sclass="content">
 
-        <vlayout
-            id="auditLogPage"
-            width="100%"
-            spacing="0"
-            sclass="audit-page"
-            apply="com.cts.admin.controller.AuditLogController">
+		<vlayout id="auditLogPage" width="100%" spacing="0"
+			sclass="audit-page"
+			apply="com.cts.admin.controller.AuditLogController">
 
-            <!-- PAGE HEADER -->
+			<!-- Page  header -->
 
-            <div sclass="audit-page-header">
+			<div sclass="audit-page-header">
 
-                <div sclass="audit-header-left">
+				<div sclass="audit-header-left">
 
-                    <label
-                        sclass="audit-page-title"
-                        value="Audit Logs"/>
+					<label sclass="audit-page-title" value="Audit Logs" />
 
-                </div>
-            </div>
+				</div>
+			</div>
 
 
-            <!-- FILTER CARD -->
+			<!-- Filter card -->
 
-            <div sclass="audit-filter-card">
+			<div sclass="audit-filter-card">
 
-                <!-- SEARCH -->
+				<!-- Search -->
 
-                <div sclass="audit-search-box">
+				<div sclass="audit-search-box">
 
-                    <label
-                        sclass="audit-search-icon"
-                        value="&#x2315;"/>
+					<label sclass="audit-search-icon" value="&#x2315;" />
 
-                    <textbox
-                        id="auditSearchTextbox"
-                        hflex="1"
-                        height="38px"
-                        placeholder="Search by username or user ID..."
-                        sclass="audit-search-textbox"
-                        style="border:none !important; box-shadow:none !important; outline:none !important; background:transparent !important;"/>
+					<textbox id="auditSearchTextbox" hflex="1"
+						height="38px" placeholder="Search by username or user ID..."
+						sclass="audit-search-textbox"
+						style="border:none !important; box-shadow:none !important; outline:none !important; background:transparent !important;" />
 
-                </div>
+				</div>
 
 
-                <!-- SEARCH BUTTON -->
+				<!-- Search button -->
 
-                <button
-                    id="auditSearchButton"
-                    sclass="audit-search-btn"
-                    label="Search"
-                    iconSclass="z-icon-search"/>
-                
-                 <!-- CLEAR BUTTON -->
-                <button
-                    id="auditClearButton"
-                    sclass="audit-clear-btn"
-                    label="Clear"/>
+				<button id="auditSearchButton" sclass="audit-search-btn"
+					label="Search" iconSclass="z-icon-search" />
+
+				<!-- Clear button -->
+				<button id="auditClearButton" sclass="audit-clear-btn"
+					label="Clear" />
 
 
-                <!-- ROLE FILTER -->
+				<!-- Role filter -->
 
-                <combobox
-                    id="auditRoleCombobox"
-                    readonly="true"
-                    value="All Roles"
-                    sclass="audit-filter-combobox audit-roles-combobox"/>
+				<combobox id="auditRoleCombobox" readonly="true"
+					value="All Roles"
+					sclass="audit-filter-combobox audit-roles-combobox" />
 
 
-                <!-- FROM DATE -->
+				<datebox id="auditFromDate" placeholder="From Date"
+					format="dd/MM/yyyy" width="145px" sclass="audit-datebox"
+					constraint="no future" />
 
-                <datebox
-                    id="auditFromDate"
-                    placeholder="From Date"
-                    format="dd/MM/yyyy"
-                    width="145px"
-                    sclass="audit-datebox" 
-                    constraint="no future"/>
+				<datebox id="auditToDate" placeholder="To Date"
+					format="dd/MM/yyyy" width="145px" sclass="audit-datebox"
+					constraint="no future" />
 
-
-                <!-- TO DATE -->
-
-                <datebox
-                    id="auditToDate"
-                    placeholder="To Date"
-                    format="dd/MM/yyyy"
-                    width="145px"
-                    sclass="audit-datebox"
-                    constraint="no future"/>
-
-            </div>
+			</div>
 
 
-            <!-- AUDIT TRAIL CARD -->
+			<!-- audit trail card -->
 
-            <vlayout
-                spacing="0"
-                sclass="audit-trail-card">
+			<vlayout spacing="0" sclass="audit-trail-card">
 
 
-                <!-- CARD HEADER -->
+				<!-- card header -->
 
-                <div sclass="audit-trail-header">
+				<div sclass="audit-trail-header">
 
-                    <label
-                        sclass="audit-trail-title"
-                        value="User Session Records"/>
-
-
-                    <!-- DOWNLOAD PDF -->
-
-                    <button
-                        id="auditDownloadPdfButton"
-                        label="Download PDF"
-                        iconSclass="z-icon-download"
-                        sclass="audit-download-btn"/>
-
-                </div>
+					<label sclass="audit-trail-title"
+						value="User Session Records" />
 
 
-                <!-- SESSION RECORDS TABLE -->
+					<!-- pdf download button -->
 
-                <listbox
-                    id="auditLogListbox"
-                    sclass="audit-listbox"
-                    sizedByContent="false"
-                    span="true"
-                    emptyMessage="No audit log records found">
+					<button id="auditDownloadPdfButton"
+						label="Download PDF" iconSclass="z-icon-download"
+						sclass="audit-download-btn" />
 
-                    <listhead
-                        sizable="false"
-                        menupopup="none">
-
-                        <listheader
-                            label="User ID"
-                            width="14%"/>
-
-                        <listheader
-                            label="Role"
-                            width="18%"/>
-
-                        <listheader
-                            label="Login Date"
-                            width="17%"/>
-
-                        <listheader
-                            label="Login Time"
-                            width="17%"/>
-
-                        <listheader
-                            label="Logout Date"
-                            width="17%"/>
-
-                        <listheader
-                            label="Logout Time"
-                            width="17%"/>
-
-                    </listhead>
-
-                </listbox>
+				</div>
 
 
-                <!-- PAGINATION -->
+				<!-- Session records table -->
 
-                <paging
-                    id="auditLogPaging"
-                    pageSize="10"
-                    detailed="true"
-                    sclass="audit-paging"/>
+				<listbox id="auditLogListbox" sclass="audit-listbox"
+					sizedByContent="false" span="true"
+					emptyMessage="No audit log records found">
 
-            </vlayout>
+					<listhead sizable="false" menupopup="none">
 
-        </vlayout>
+						<listheader label="User ID" width="14%" />
 
-    </div>
+						<listheader label="Role" width="18%" />
+
+						<listheader label="Login Date" width="17%" />
+
+						<listheader label="Login Time" width="17%" />
+
+						<listheader label="Logout Date" width="17%" />
+
+						<listheader label="Logout Time" width="17%" />
+
+					</listhead>
+
+				</listbox>
+
+				<paging id="auditLogPaging" pageSize="10"
+					detailed="true" sclass="audit-paging" />
+
+			</vlayout>
+
+		</vlayout>
+
+	</div>
 
 </zk>

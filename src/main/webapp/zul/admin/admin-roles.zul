@@ -24,7 +24,7 @@
             sclass="role-management-page"
             apply="com.cts.admin.controller.RoleController">
 
-            <!-- PAGE HEADER -->
+            <!-- page header -->
             <vlayout
                 id="rolePageHeader"
                 spacing="0"
@@ -37,7 +37,7 @@
 
             </vlayout>
 
-            <!-- SYSTEM ROLES CARD -->
+            <!-- system roles card -->
             <vlayout
                 id="systemRolesCard"
                 width="100%"

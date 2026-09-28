@@ -75,7 +75,7 @@
 								value="Session Overview" />
 						</div>
 						<label id="sessionManageLink" sclass="card-link"
-							value="Sessions &#x2192;" />
+							value="Manage &#x2192;" />
 					</div>
 					<vlayout id="sessionStatusBox" spacing="0"
 						sclass="session-status-box session-box-inactive">

@@ -106,20 +106,22 @@
 						</div>
 
 						<!-- Image Tools Toolbar -->
-						<hlayout width="100%" spacing="8px"
-							valign="middle">
-							<button id="frontImageButton" label="Front"
-								width="85px" height="32px" sclass="btn-cyan" />
-							<button id="backImageButton"
-								label="View Back" width="95px" height="32px"
-								sclass="btn-cyan-outline" />
-							<space width="4px" />
+						<hlayout width="100%" valign="middle">
+
+							<button id="imageToggleButton"
+								label="View Back" sclass="btn-cyan-outline" />
+
+							<space hflex="1" />
+
 							<button id="zoomInButton" label="+"
 								tooltiptext="Zoom In" sclass="icon-symbol-btn" />
+
 							<button id="zoomOutButton" label="−"
 								tooltiptext="Zoom Out" sclass="icon-symbol-btn" />
+
 							<button id="rotateButton" label="↻"
 								tooltiptext="Rotate" sclass="icon-symbol-btn" />
+
 						</hlayout>
 					</vlayout>
 				</groupbox>
@@ -162,7 +164,7 @@
 										sclass="label-star" />
 								</hlayout>
 								<textbox id="cityCodeTextbox"
-									width="100%" placeholder="Enter city code"
+									width="100%" placeholder="Enter city code" maxlength="3"
 									sclass="corrected-micr-box" />
 							</vlayout>
 							<vlayout hflex="1" spacing="4px">
@@ -173,7 +175,7 @@
 										sclass="label-star" />
 								</hlayout>
 								<textbox id="bankCodeTextbox"
-									width="100%" placeholder="Enter bank code"
+									width="100%" placeholder="Enter bank code" maxlength="3"
 									sclass="corrected-micr-box" />
 							</vlayout>
 						</hlayout>
@@ -188,7 +190,7 @@
 										sclass="label-star" />
 								</hlayout>
 								<textbox id="branchCodeTextbox"
-									width="100%" placeholder="Enter branch code"
+									width="100%" placeholder="Enter branch code" maxlength="3"
 									sclass="corrected-micr-box" />
 							</vlayout>
 							<vlayout hflex="1" />
@@ -201,7 +203,7 @@
 						<hlayout width="100%" valign="middle"
 							spacing="10px">
 							<button id="prevButton" label="Prev"
-								width="85px" height="36px" sclass="btn-cyan-outline" />
+								width="85px" height="36px" sclass="btn-prev" />
 							<button id="saveNextButton"
 								label="💾 Save &amp; Next" width="130px" height="36px"
 								sclass="btn-cyan" />

@@ -1,8 +1,22 @@
-/* =============================================================
-   INWARD SEND TO CHECKER QUEUE
-   CSS exactly matches Inward Data Entry styling
-   ============================================================= */
 
+.custom-grid .z-row {
+    text-align: center !important;
+}
+
+.custom-grid .z-row-inner {
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+.custom-grid .z-row-content {
+    text-align: center !important;
+    vertical-align: middle !important;
+}
+
+.custom-grid .z-row-content > * {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
  .custom-grid .z-column,
         .custom-grid .z-column-content,
         .custom-grid .z-row-inner,

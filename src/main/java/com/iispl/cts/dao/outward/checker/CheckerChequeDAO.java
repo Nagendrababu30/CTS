@@ -427,16 +427,13 @@ public class CheckerChequeDAO {
 		checkerAction = checkerAction.trim().toUpperCase();
 
 		if (checkerReasonCode != null) {
-
 			checkerReasonCode = checkerReasonCode.trim();
-
 			if (checkerReasonCode.isEmpty()) {
 				checkerReasonCode = null;
 			}
 		}
 
 		if (checkerRemarks != null && checkerRemarks.trim().isEmpty()) {
-
 			checkerRemarks = null;
 		}
 
@@ -449,8 +446,7 @@ public class CheckerChequeDAO {
 
 		} else if ("REJECT".equals(checkerAction)) {
 
-			if (checkerReasonCode == null || checkerReasonCode.trim().isEmpty()) {
-
+			if (checkerReasonCode == null) {
 				throw new IllegalArgumentException("Reject reason is mandatory");
 			}
 
@@ -458,8 +454,7 @@ public class CheckerChequeDAO {
 
 		} else if ("SEND_BACK".equals(checkerAction)) {
 
-			if (checkerReasonCode == null || checkerReasonCode.trim().isEmpty()) {
-
+			if (checkerReasonCode == null) {
 				throw new IllegalArgumentException("Send Back reason is mandatory");
 			}
 
@@ -473,41 +468,81 @@ public class CheckerChequeDAO {
 		if ("REJECT".equals(checkerAction) || "SEND_BACK".equals(checkerAction)) {
 
 			if (!isValidCheckerReason(checkerReasonCode, checkerAction)) {
-
 				throw new IllegalArgumentException("Invalid Checker reason: " + checkerReasonCode);
 			}
 		}
 
-		String previousCheckerActionSql = "SELECT checker_action " + "FROM cheque_processing "
-				+ "WHERE batch_number = ? " + "AND cheque_number = ? " + "FOR UPDATE";
+		String previousCheckerActionSql =
+				"SELECT checker_action " +
+				"FROM cheque_processing " +
+				"WHERE batch_number = ? " +
+				"AND cheque_number = ? " +
+				"FOR UPDATE";
 
-		String updateProcessingSql = "UPDATE cheque_processing " + "SET checker_id = ?, " + "    checker_action = ?, "
-				+ "    checker_reason_code = ? " + "WHERE batch_number = ? " + "AND cheque_number = ?";
+		String insertProcessingSql =
+				"INSERT INTO cheque_processing " +
+				"(batch_number, cheque_number, checker_id, checker_action, checker_reason_code) " +
+				"VALUES (?, ?, ?, ?, ?)";
 
-		String updateChequeSql = "UPDATE outward_cheque " + "SET cheque_status = ?, " + "    checker_remarks = ? "
-				+ "WHERE batch_number = ? " + "AND cheque_number = ?";
+		String updateProcessingSql =
+				"UPDATE cheque_processing " +
+				"SET checker_id = ?, checker_action = ?, checker_reason_code = ? " +
+				"WHERE batch_number = ? AND cheque_number = ?";
 
-		String remainingFirstCycleSql = "SELECT COUNT(*) " + "FROM cheque_processing " + "WHERE batch_number = ? "
-				+ "AND (checker_action IS NULL " + "OR UPPER(TRIM(checker_action)) NOT IN "
-				+ "('ACCEPT', 'REJECT', 'SEND_BACK'))";
+		String updateChequeSql =
+				"UPDATE outward_cheque " +
+				"SET cheque_status = ?, checker_remarks = ? " +
+				"WHERE batch_number = ? AND cheque_number = ?";
 
-		String sendBackFirstCycleSql = "SELECT COUNT(*) " + "FROM cheque_processing " + "WHERE batch_number = ? "
-				+ "AND UPPER(TRIM(checker_action)) = " + "'SEND_BACK'";
+		/*
+		 * Count every cheque in the batch that still has no final
+		 * Checker decision. A missing cheque_processing row is also
+		 * treated as pending.
+		 */
+		String remainingFirstCycleSql =
+				"SELECT COUNT(*) " +
+				"FROM outward_cheque oc " +
+				"LEFT JOIN cheque_processing cp " +
+				"ON cp.batch_number = oc.batch_number " +
+				"AND cp.cheque_number = oc.cheque_number " +
+				"WHERE oc.batch_number = ? " +
+				"AND (cp.checker_action IS NULL " +
+				"OR UPPER(TRIM(cp.checker_action)) NOT IN " +
+				"('ACCEPT', 'REJECT', 'SEND_BACK'))";
 
-		String updateBatchVerifiedSql = "UPDATE outward_batch " + "SET batch_status = 'CHECKER_VERIFIED' "
-				+ "WHERE batch_number = ?";
+		String sendBackFirstCycleSql =
+				"SELECT COUNT(*) " +
+				"FROM cheque_processing " +
+				"WHERE batch_number = ? " +
+				"AND UPPER(TRIM(checker_action)) = 'SEND_BACK'";
 
-		String updateBatchHoldSql = "UPDATE outward_batch " + "SET batch_status = 'ON_HOLD' "
-				+ "WHERE batch_number = ?";
+		String updateBatchVerifiedSql =
+				"UPDATE outward_batch " +
+				"SET batch_status = 'CHECKER_VERIFIED' " +
+				"WHERE batch_number = ?";
 
-		String updateBatchProcessingSql = "UPDATE outward_batch " + "SET batch_status = 'CHECKER_PROCESSING' "
-				+ "WHERE batch_number = ?";
+		String updateBatchHoldSql =
+				"UPDATE outward_batch " +
+				"SET batch_status = 'ON_HOLD' " +
+				"WHERE batch_number = ?";
 
-		String pendingMakerSql = "SELECT COUNT(*) " + "FROM outward_cheque " + "WHERE batch_number = ? "
-				+ "AND UPPER(TRIM(cheque_status)) = " + "'SENT_BACK_TO_MAKER'";
+		String updateBatchProcessingSql =
+				"UPDATE outward_batch " +
+				"SET batch_status = 'CHECKER_PROCESSING' " +
+				"WHERE batch_number = ?";
 
-		String pendingReVerificationSql = "SELECT COUNT(*) " + "FROM outward_cheque " + "WHERE batch_number = ? "
-				+ "AND UPPER(TRIM(cheque_status)) IN " + "('RE_VERIFIED', 'CHECKER_PROCESSING')";
+		String pendingMakerSql =
+				"SELECT COUNT(*) " +
+				"FROM outward_cheque " +
+				"WHERE batch_number = ? " +
+				"AND UPPER(TRIM(cheque_status)) = 'SENT_BACK_TO_MAKER'";
+
+		String pendingReVerificationSql =
+				"SELECT COUNT(*) " +
+				"FROM outward_cheque " +
+				"WHERE batch_number = ? " +
+				"AND UPPER(TRIM(cheque_status)) " +
+				"IN ('RE_VERIFIED', 'CHECKER_PROCESSING')";
 
 		try (Connection connection = dataSource.getConnection()) {
 
@@ -516,56 +551,99 @@ public class CheckerChequeDAO {
 			try {
 
 				String previousCheckerAction = null;
+				boolean processingExists = false;
 
-				try (PreparedStatement statement = connection.prepareStatement(previousCheckerActionSql)) {
+				try (PreparedStatement statement =
+						connection.prepareStatement(previousCheckerActionSql)) {
 
 					statement.setString(1, batchNumber);
 					statement.setString(2, chequeNumber);
 
 					try (ResultSet rs = statement.executeQuery()) {
 
-						if (!rs.next()) {
-							throw new RuntimeException("Cheque processing record not found");
+						if (rs.next()) {
+							processingExists = true;
+							previousCheckerAction =
+									rs.getString("checker_action");
+						}
+					}
+				}
+
+				boolean reVerification =
+						processingExists
+						&& previousCheckerAction != null
+						&& "SEND_BACK".equalsIgnoreCase(
+								previousCheckerAction.trim());
+
+				/*
+				 * FIRST CHECKER DECISION:
+				 * No processing row exists, so INSERT it.
+				 */
+				if (!processingExists) {
+
+					try (PreparedStatement statement =
+							connection.prepareStatement(insertProcessingSql)) {
+
+						statement.setString(1, batchNumber);
+						statement.setString(2, chequeNumber);
+						statement.setLong(3, checkerId);
+						statement.setString(4, checkerAction);
+
+						if (checkerReasonCode == null) {
+							statement.setNull(
+									5,
+									java.sql.Types.VARCHAR);
+						} else {
+							statement.setString(5, checkerReasonCode);
 						}
 
-						previousCheckerAction = rs.getString("checker_action");
-					}
-				}
-
-				boolean reVerification = previousCheckerAction != null
-						&& "SEND_BACK".equalsIgnoreCase(previousCheckerAction.trim());
-
-				int processingRows;
-
-				try (PreparedStatement statement = connection.prepareStatement(updateProcessingSql)) {
-
-					statement.setLong(1, checkerId);
-					statement.setString(2, checkerAction);
-
-					if (checkerReasonCode == null) {
-						statement.setNull(3, java.sql.Types.VARCHAR);
-					} else {
-						statement.setString(3, checkerReasonCode);
+						if (statement.executeUpdate() != 1) {
+							throw new RuntimeException(
+									"Unable to create cheque processing record");
+						}
 					}
 
-					statement.setString(4, batchNumber);
-					statement.setString(5, chequeNumber);
+				} else {
 
-					processingRows = statement.executeUpdate();
-				}
+					/*
+					 * EXISTING PROCESSING ROW:
+					 * Update Checker decision.
+					 */
+					try (PreparedStatement statement =
+							connection.prepareStatement(updateProcessingSql)) {
 
-				if (processingRows != 1) {
-					throw new RuntimeException("Cheque processing record not found");
+						statement.setLong(1, checkerId);
+						statement.setString(2, checkerAction);
+
+						if (checkerReasonCode == null) {
+							statement.setNull(
+									3,
+									java.sql.Types.VARCHAR);
+						} else {
+							statement.setString(3, checkerReasonCode);
+						}
+
+						statement.setString(4, batchNumber);
+						statement.setString(5, chequeNumber);
+
+						if (statement.executeUpdate() != 1) {
+							throw new RuntimeException(
+									"Unable to update cheque processing record");
+						}
+					}
 				}
 
 				int chequeRows;
 
-				try (PreparedStatement statement = connection.prepareStatement(updateChequeSql)) {
+				try (PreparedStatement statement =
+						connection.prepareStatement(updateChequeSql)) {
 
 					statement.setString(1, chequeStatus);
 
 					if (checkerRemarks == null) {
-						statement.setNull(2, java.sql.Types.VARCHAR);
+						statement.setNull(
+								2,
+								java.sql.Types.VARCHAR);
 					} else {
 						statement.setString(2, checkerRemarks);
 					}
@@ -577,21 +655,28 @@ public class CheckerChequeDAO {
 				}
 
 				if (chequeRows != 1) {
-					throw new RuntimeException("Cheque record not found");
+					throw new RuntimeException(
+							"Cheque record not found");
 				}
 
+				/*
+				 * RE-VERIFICATION FLOW
+				 */
 				if (reVerification) {
 
 					int pendingMakerCheques;
 
-					try (PreparedStatement statement = connection.prepareStatement(pendingMakerSql)) {
+					try (PreparedStatement statement =
+							connection.prepareStatement(pendingMakerSql)) {
 
 						statement.setString(1, batchNumber);
 
-						try (ResultSet rs = statement.executeQuery()) {
+						try (ResultSet rs =
+								statement.executeQuery()) {
 
 							if (!rs.next()) {
-								throw new RuntimeException("Unable to determine pending Maker cheques");
+								throw new RuntimeException(
+										"Unable to determine pending Maker cheques");
 							}
 
 							pendingMakerCheques = rs.getInt(1);
@@ -600,92 +685,97 @@ public class CheckerChequeDAO {
 
 					int pendingReVerificationCheques;
 
-					try (PreparedStatement statement = connection.prepareStatement(pendingReVerificationSql)) {
+					try (PreparedStatement statement =
+							connection.prepareStatement(
+									pendingReVerificationSql)) {
 
 						statement.setString(1, batchNumber);
 
-						try (ResultSet rs = statement.executeQuery()) {
+						try (ResultSet rs =
+								statement.executeQuery()) {
 
 							if (!rs.next()) {
-								throw new RuntimeException("Unable to determine pending re-verification cheques");
+								throw new RuntimeException(
+										"Unable to determine pending re-verification cheques");
 							}
 
-							pendingReVerificationCheques = rs.getInt(1);
+							pendingReVerificationCheques =
+									rs.getInt(1);
 						}
 					}
 
 					if (pendingMakerCheques > 0) {
 
-						try (PreparedStatement statement = connection.prepareStatement(updateBatchHoldSql)) {
+						try (PreparedStatement statement =
+								connection.prepareStatement(
+										updateBatchHoldSql)) {
 
 							statement.setString(1, batchNumber);
-
-							if (statement.executeUpdate() != 1) {
-								throw new RuntimeException("Batch record not found");
-							}
+							statement.executeUpdate();
 						}
 
 					} else if (pendingReVerificationCheques > 0) {
 
-						try (PreparedStatement statement = connection.prepareStatement(updateBatchProcessingSql)) {
+						try (PreparedStatement statement =
+								connection.prepareStatement(
+										updateBatchProcessingSql)) {
 
 							statement.setString(1, batchNumber);
-
-							if (statement.executeUpdate() != 1) {
-								throw new RuntimeException("Batch record not found");
-							}
+							statement.executeUpdate();
 						}
 
 					} else {
 
-						try (PreparedStatement statement = connection.prepareStatement(updateBatchVerifiedSql)) {
+						try (PreparedStatement statement =
+								connection.prepareStatement(
+										updateBatchVerifiedSql)) {
 
 							statement.setString(1, batchNumber);
-
-							if (statement.executeUpdate() != 1) {
-								throw new RuntimeException("Batch record not found");
-							}
+							statement.executeUpdate();
 						}
 					}
 
 					connection.commit();
-
 					return true;
 				}
 
+				/*
+				 * FIRST-CYCLE FLOW
+				 */
 				int remainingCheques;
 
-				try (PreparedStatement statement = connection.prepareStatement(remainingFirstCycleSql)) {
+				try (PreparedStatement statement =
+						connection.prepareStatement(
+								remainingFirstCycleSql)) {
 
 					statement.setString(1, batchNumber);
 
-					try (ResultSet rs = statement.executeQuery()) {
+					try (ResultSet rs =
+							statement.executeQuery()) {
 
 						if (!rs.next()) {
-							throw new RuntimeException("Unable to determine batch completion");
+							throw new RuntimeException(
+									"Unable to determine batch completion");
 						}
 
 						remainingCheques = rs.getInt(1);
 					}
 				}
 
-				if (remainingCheques > 0) {
-
-					connection.commit();
-
-					return true;
-				}
-
 				int sendBackCheques;
 
-				try (PreparedStatement statement = connection.prepareStatement(sendBackFirstCycleSql)) {
+				try (PreparedStatement statement =
+						connection.prepareStatement(
+								sendBackFirstCycleSql)) {
 
 					statement.setString(1, batchNumber);
 
-					try (ResultSet rs = statement.executeQuery()) {
+					try (ResultSet rs =
+							statement.executeQuery()) {
 
 						if (!rs.next()) {
-							throw new RuntimeException("Unable to determine Send Back status");
+							throw new RuntimeException(
+									"Unable to determine Send Back status");
 						}
 
 						sendBackCheques = rs.getInt(1);
@@ -694,35 +784,41 @@ public class CheckerChequeDAO {
 
 				if (sendBackCheques > 0) {
 
-					try (PreparedStatement statement = connection.prepareStatement(updateBatchHoldSql)) {
+					try (PreparedStatement statement =
+							connection.prepareStatement(
+									updateBatchHoldSql)) {
 
 						statement.setString(1, batchNumber);
+						statement.executeUpdate();
+					}
 
-						if (statement.executeUpdate() != 1) {
-							throw new RuntimeException("Batch record not found");
-						}
+				} else if (remainingCheques > 0) {
+
+					try (PreparedStatement statement =
+							connection.prepareStatement(
+									updateBatchProcessingSql)) {
+
+						statement.setString(1, batchNumber);
+						statement.executeUpdate();
 					}
 
 				} else {
 
-					try (PreparedStatement statement = connection.prepareStatement(updateBatchVerifiedSql)) {
+					try (PreparedStatement statement =
+							connection.prepareStatement(
+									updateBatchVerifiedSql)) {
 
 						statement.setString(1, batchNumber);
-
-						if (statement.executeUpdate() != 1) {
-							throw new RuntimeException("Batch record not found");
-						}
+						statement.executeUpdate();
 					}
 				}
 
 				connection.commit();
-
 				return true;
 
 			} catch (Exception e) {
 
 				connection.rollback();
-
 				throw e;
 			}
 
@@ -730,7 +826,8 @@ public class CheckerChequeDAO {
 
 			e.printStackTrace();
 
-			throw new RuntimeException("Error while saving Checker decision", e);
+			throw new RuntimeException(
+					"Error while saving Checker decision", e);
 		}
 	}
 

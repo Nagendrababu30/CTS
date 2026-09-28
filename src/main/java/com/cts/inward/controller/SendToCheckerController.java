@@ -101,15 +101,20 @@ public class SendToCheckerController extends GenericForwardComposer<Component> {
 
 			for (NpciBatchData batch : activeBatches) {
 				Row row = new Row();
+				row.setStyle("text-align:center;");
 
 				
-				row.appendChild(new Label(String.valueOf(batch.getBatchId())));
+				Label batchIdLabel = new Label(String.valueOf(batch.getBatchId()));
+				batchIdLabel.setStyle("display:block; width:100%; text-align:center;");
+				row.appendChild(batchIdLabel);
 
-				row.appendChild(new Label(String.valueOf(batch.getTotalCheques())));
-
+				Label totalChequesLabel = new Label(String.valueOf(batch.getTotalCheques()));
+				totalChequesLabel.setStyle("display:block; width:100%; text-align:center;");
+				row.appendChild(totalChequesLabel);
 				
 				Hlayout statusLayout = new Hlayout();
 				statusLayout.setSclass("status-badge-ready");
+				statusLayout.setStyle("margin:0 auto;");
 
 				Label checkIcon = new Label("✔");
 				checkIcon.setSclass("status-icon-ready");
@@ -119,11 +124,13 @@ public class SendToCheckerController extends GenericForwardComposer<Component> {
 
 				statusLayout.appendChild(checkIcon);
 				statusLayout.appendChild(statusLabel);
+
 				row.appendChild(statusLayout);
 
 				
 				Button sendBtn = new Button("Send to Checker");
 				sendBtn.setSclass("btn-action-send");
+				sendBtn.setStyle("display:block; margin:0 auto;");
 
 				sendBtn.addEventListener(Events.ON_CLICK, event -> {
 					selectedBatchId = batch.getBatchId(); 

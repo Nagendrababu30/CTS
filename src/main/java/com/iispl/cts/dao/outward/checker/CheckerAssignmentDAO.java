@@ -1,36 +1,16 @@
 package com.iispl.cts.dao.outward.checker;
 
 import java.sql.Connection;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-import com.iispl.cts.data.CTSStaticData;
+import com.cts.inward.config.ConnectionPool;
 
 public class CheckerAssignmentDAO {
 
-    // ============================================================
-    // TAKE BATCH FOR CHECKER
-    // ============================================================
-
-    /*
-     * Take a batch for Checker processing.
-     *
-     * A new CHECKER assignment is created.
-     *
-     * Existing MAKER assignment records are not changed.
-     *
-     * Batch status:
-     *
-     * SUBMITTED_TO_CHECKER
-     *          ↓
-     * CHECKER_PROCESSING
-     *
-     * This method is only for a newly submitted batch.
-     *
-     * ON_HOLD batches are NOT taken through this method.
-     * The same Checker continues ownership for re-verification.
-     */
-
+	 private final javax.sql.DataSource dataSource =
+	            ConnectionPool.getDataSource();
     public boolean takeBatch(
             String batchNumber,
             long checkerUserId) {
@@ -65,7 +45,7 @@ public class CheckerAssignmentDAO {
                 + "'SUBMITTED_TO_CHECKER'";
 
         try (Connection connection =
-                     CTSStaticData.getConnection()) {
+        		dataSource.getConnection()) {
 
             connection.setAutoCommit(false);
 
@@ -237,7 +217,7 @@ public class CheckerAssignmentDAO {
                 + "LIMIT 1";
 
         try (Connection connection =
-                     CTSStaticData.getConnection();
+        		dataSource.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
@@ -292,7 +272,7 @@ public class CheckerAssignmentDAO {
                 + "LIMIT 1";
 
         try (Connection connection =
-                     CTSStaticData.getConnection();
+        		dataSource.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
@@ -345,7 +325,7 @@ public class CheckerAssignmentDAO {
                 + "LIMIT 1";
 
         try (Connection connection =
-                     CTSStaticData.getConnection();
+        		dataSource.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
@@ -423,7 +403,7 @@ public class CheckerAssignmentDAO {
                 + "    IN ('ASSIGNED', 'IN_PROGRESS')";
 
         try (Connection connection =
-                     CTSStaticData.getConnection()) {
+        		dataSource.getConnection()) {
 
             connection.setAutoCommit(false);
 
@@ -577,7 +557,7 @@ public class CheckerAssignmentDAO {
                 + "LIMIT 1";
 
         try (Connection connection =
-                     CTSStaticData.getConnection();
+        		dataSource.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
@@ -630,7 +610,7 @@ public class CheckerAssignmentDAO {
                 batchNumber.trim();
 
         try (Connection connection =
-                     CTSStaticData.getConnection()) {
+        		dataSource.getConnection()) {
 
             connection.setAutoCommit(false);
 

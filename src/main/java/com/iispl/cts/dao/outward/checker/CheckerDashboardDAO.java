@@ -18,21 +18,7 @@ public class CheckerDashboardDAO {
      * ============================================================
      * GET CHECKER BATCHES
      * ============================================================
-     *
-     * Normal Checker batches are loaded here.
-     *
-     * Additionally, a batch containing RE_VERIFIED cheques is
-     * returned only for the Checker who originally performed
-     * the SEND_BACK action.
-     *
-     * Re-Verify eligibility is based ONLY on:
-     *
-     * 1. cheque_processing.checker_id
-     * 2. cheque_processing.checker_action = SEND_BACK
-     * 3. outward_cheque.cheque_status = RE_VERIFIED
-     *
-     * outward_batch.batch_status is NOT used for Re-Verify
-     * eligibility.
+    
      * ============================================================
      */
 

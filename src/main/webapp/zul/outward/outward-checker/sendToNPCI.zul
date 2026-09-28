@@ -12,27 +12,16 @@
 
 <zk>
 
-    <!-- =========================================================
-         SEND TO NPCI CSS
-         ========================================================= -->
-
+    <!-- Loads the Send to NPCI page styles. -->
     <style src="/css/outward/checker/send_to_npci.css"/>
 
-
-    <!-- =========================================================
-         PAGE CONTENT
-         ========================================================= -->
-
+    <!-- Defines the main Send to NPCI content container. -->
     <div self="@define(content)"
          width="100%"
          height="100%"
          sclass="send-npci-content">
 
-
-        <!-- =====================================================
-             MAIN LAYOUT
-             ===================================================== -->
-
+        <!-- Defines the main Send to NPCI layout. -->
         <vlayout id="sendToNPCILayout"
                  width="100%"
                  height="100%"
@@ -40,35 +29,21 @@
                  sclass="send-npci-layout"
                  apply="com.iispl.cts.controller.outward.checker.CheckerSendToNPCIController">
 
-
-            <!-- =================================================
-                 PAGE HEADER
-                 ================================================= -->
-
+            <!-- Displays the Send to NPCI page title. -->
             <vlayout spacing="5px"
                      sclass="npci-header">
 
                 <label value="Send to NPCI"
                        sclass="npci-title"/>
 
-               
-
             </vlayout>
 
-
-            <!-- =================================================
-                 BATCH SECTION
-                 ================================================= -->
-
+            <!-- Contains batches ready for NPCI submission. -->
             <vlayout width="100%"
                      spacing="0"
                      sclass="npci-section">
 
-
-                <!-- =================================================
-                     SECTION HEADER
-                     ================================================= -->
-
+                <!-- Displays the batch section title. -->
                 <hlayout width="100%"
                          valign="middle"
                          sclass="npci-section-header">
@@ -78,11 +53,7 @@
 
                 </hlayout>
 
-
-                <!-- =================================================
-                     NPCI BATCH TABLE
-                     ================================================= -->
-
+                <!-- Displays batches available for NPCI submission. -->
                 <listbox id="npciBatchListbox"
                          width="100%"
                          mold="paging"
@@ -102,10 +73,10 @@
                         <listheader label="Accepted Cheques"
                                     width="15%"
                                     align="center"/>
-						
-						<listheader label="File Name"
-                						width="25%"
-                						align="center"/>
+
+                        <listheader label="File Name"
+                                    width="25%"
+                                    align="center"/>
 
                         <listheader label="Action"
                                     width="30%"
@@ -115,9 +86,7 @@
 
                 </listbox>
 
-
             </vlayout>
-
 
         </vlayout>
 

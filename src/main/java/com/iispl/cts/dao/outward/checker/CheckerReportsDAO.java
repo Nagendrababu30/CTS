@@ -1,7 +1,6 @@
 package com.iispl.cts.dao.outward.checker;
 
 import java.math.BigDecimal;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,7 +17,7 @@ public class CheckerReportsDAO {
 
 	private final DataSource dataSource = ConnectionPool.getDataSource();
 
-	// Fetches batches completed by Checker and available for reports.
+	// Retrieves batches that have been verified by the Checker.
 	public List<OutwardBatch> getCheckerCompletedBatches() {
 
 		List<OutwardBatch> batches = new ArrayList<OutwardBatch>();
@@ -28,9 +27,7 @@ public class CheckerReportsDAO {
 				+ "WHERE UPPER(batch_status) = 'CHECKER_VERIFIED' " + "ORDER BY batch_number DESC";
 
 		try (Connection connection = dataSource.getConnection();
-
 				PreparedStatement statement = connection.prepareStatement(sql);
-
 				ResultSet rs = statement.executeQuery()) {
 
 			while (rs.next()) {
@@ -67,13 +64,12 @@ public class CheckerReportsDAO {
 		return batches;
 	}
 
-	// Returns the total number of cheques in the specified batch.
+	// Counts all cheques associated with the specified batch.
 	public int getTotalChequeCount(String batchNumber) {
 
 		String sql = "SELECT COUNT(*) " + "FROM public.outward_cheque " + "WHERE batch_number = ?";
 
 		try (Connection connection = dataSource.getConnection();
-
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setString(1, batchNumber);
@@ -96,14 +92,13 @@ public class CheckerReportsDAO {
 		return 0;
 	}
 
-	// Returns the number of accepted cheques in the specified batch.
+	// Counts the cheques accepted by the Checker for the specified batch.
 	public int getValidChequeCount(String batchNumber) {
 
 		String sql = "SELECT COUNT(*) " + "FROM public.outward_cheque " + "WHERE batch_number = ? "
 				+ "AND UPPER(cheque_status) = " + "'CHECKER_ACCEPTED'";
 
 		try (Connection connection = dataSource.getConnection();
-
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setString(1, batchNumber);
@@ -126,7 +121,7 @@ public class CheckerReportsDAO {
 		return 0;
 	}
 
-	// Fetches the batch details for the specified batch number.
+	// Retrieves batch details using the specified batch number.
 	public OutwardBatch getBatchByNumber(String batchNumber) {
 
 		if (batchNumber == null || batchNumber.trim().isEmpty()) {
@@ -139,7 +134,6 @@ public class CheckerReportsDAO {
 				+ "WHERE batch_number = ?";
 
 		try (Connection connection = dataSource.getConnection();
-
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setString(1, batchNumber.trim());
@@ -181,7 +175,7 @@ public class CheckerReportsDAO {
 		return null;
 	}
 
-	// Fetches all cheques belonging to the specified batch.
+	// Retrieves all cheque records belonging to the specified batch.
 	public List<OutwardCheque> getBatchCheques(String batchNumber) {
 
 		List<OutwardCheque> cheques = new ArrayList<OutwardCheque>();
@@ -198,7 +192,6 @@ public class CheckerReportsDAO {
 				+ "ORDER BY cheque_number";
 
 		try (Connection connection = dataSource.getConnection();
-
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setString(1, batchNumber.trim());
@@ -228,7 +221,7 @@ public class CheckerReportsDAO {
         
         
 
-	// Fetches cheques rejected by the Checker for the specified batch.
+	// Retrieves cheques rejected by the Checker for the specified batch.
 	public List<OutwardCheque> getRejectedCheques(String batchNumber) {
 
 		List<OutwardCheque> rejectedCheques = new ArrayList<OutwardCheque>();
@@ -248,7 +241,6 @@ public class CheckerReportsDAO {
 				+ "ORDER BY oc.cheque_number";
 
 		try (Connection connection = dataSource.getConnection();
-
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setString(1, batchNumber.trim());
@@ -271,7 +263,7 @@ public class CheckerReportsDAO {
 		return rejectedCheques;
 	}
 
-	// Checks whether the batch contains any Checker-rejected cheques.
+	// Checks whether the specified batch contains any rejected cheques.
 	public boolean hasRejectedCheques(String batchNumber) {
 
 		if (batchNumber == null || batchNumber.trim().isEmpty()) {
@@ -283,7 +275,6 @@ public class CheckerReportsDAO {
 				+ "AND UPPER(checker_action) = 'REJECT'" + ")";
 
 		try (Connection connection = dataSource.getConnection();
-
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setString(1, batchNumber.trim());
@@ -306,7 +297,7 @@ public class CheckerReportsDAO {
 		return false;
 	}
 
-	// Returns the number of Checker-rejected cheques in the specified batch.
+	// Counts the cheques rejected by the Checker for the specified batch.
 	public int getRejectedChequeCount(String batchNumber) {
 
 		if (batchNumber == null || batchNumber.trim().isEmpty()) {
@@ -318,7 +309,6 @@ public class CheckerReportsDAO {
 				+ "AND UPPER(checker_action) = 'REJECT'";
 
 		try (Connection connection = dataSource.getConnection();
-
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setString(1, batchNumber.trim());
@@ -341,7 +331,7 @@ public class CheckerReportsDAO {
 		return 0;
 	}
 
-	// Checks whether the specified batch is ready for NPCI submission.
+	// Verifies whether the specified batch has reached Checker verification status.
 	public boolean isBatchReadyForNPCI(String batchNumber) {
 
 		if (batchNumber == null || batchNumber.trim().isEmpty()) {
@@ -353,7 +343,6 @@ public class CheckerReportsDAO {
 				+ "AND UPPER(batch_status) = " + "'CHECKER_VERIFIED'" + ")";
 
 		try (Connection connection = dataSource.getConnection();
-
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setString(1, batchNumber.trim());
@@ -376,7 +365,7 @@ public class CheckerReportsDAO {
 		return false;
 	}
 
-	// Returns the valid XML file name for the specified batch.
+	// Builds the valid XML file name from the specified batch number.
 	public String getValidXmlFileName(String batchNumber) {
 
 		if (batchNumber == null || batchNumber.trim().isEmpty()) {
@@ -387,7 +376,7 @@ public class CheckerReportsDAO {
 		return batchNumber.trim() + "_valid.xml";
 	}
 
-	// Saves the NPCI submission details for the specified batch.
+	// Stores the NPCI submission details for the specified batch.
 	public boolean saveNPCISubmission(String batchNumber, int validChequeCount, int invalidChequeCount,
 			String validXmlPath) {
 
@@ -440,7 +429,6 @@ public class CheckerReportsDAO {
 				+ "invalid_cheque_count, " + "valid_xml_path) " + "VALUES (?, ?, ?, ?)";
 
 		try (Connection connection = dataSource.getConnection();
-
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setString(1, cleanBatchNumber);
@@ -459,9 +447,10 @@ public class CheckerReportsDAO {
 
 			throw new RuntimeException("Error while saving NPCI submission for batch: " + cleanBatchNumber, e);
 		}
+
 	}
 
-	// Marks the specified verified batch as sent to NPCI.
+	// Updates the specified verified batch status to NPCI_SENT.
 	public boolean markBatchAsNPCISent(String batchNumber) {
 
 		if (batchNumber == null || batchNumber.trim().isEmpty()) {
@@ -473,7 +462,6 @@ public class CheckerReportsDAO {
 				+ "AND UPPER(batch_status) = " + "'CHECKER_VERIFIED'";
 
 		try (Connection connection = dataSource.getConnection();
-
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setString(1, batchNumber.trim());
@@ -486,9 +474,10 @@ public class CheckerReportsDAO {
 
 			throw new RuntimeException("Error while marking batch as NPCI_SENT: " + batchNumber, e);
 		}
+
 	}
 
-	// Maps the current result set row to an OutwardCheque object.
+	// Converts the current database result row into an OutwardCheque object.
 	private OutwardCheque mapCheque(ResultSet rs) throws Exception {
 
 		OutwardCheque cheque = new OutwardCheque();
@@ -540,7 +529,7 @@ public class CheckerReportsDAO {
 		return cheque;
 	}
 
-	// Fetches the Checker rejection reason for the specified cheque.
+	// Retrieves the active Checker rejection reason name for a specific cheque.
 	public String getCheckerReasonName(String batchNumber, String chequeNumber) {
 
 		String sql = "SELECT r.reason_name " + "FROM cheque_processing cp " + "INNER JOIN return_reason_master r "
@@ -552,6 +541,7 @@ public class CheckerReportsDAO {
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setString(1, batchNumber);
+
 			statement.setString(2, chequeNumber);
 
 			try (ResultSet rs = statement.executeQuery()) {
@@ -571,4 +561,5 @@ public class CheckerReportsDAO {
 
 		return null;
 	}
+
 }

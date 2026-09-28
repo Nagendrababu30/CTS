@@ -1,9 +1,14 @@
 @charset "UTF-8";
 
-/*  SEND TO NPCI */
+/* =========================================================
+   SEND TO NPCI
+   Same design language as Inward Maker Dashboard
+   ========================================================= */
 
 
-/*  GLOBAL TOKENS */
+/* =========================================================
+   GLOBAL TOKENS
+   ========================================================= */
 
 :root {
 
@@ -238,28 +243,28 @@
    SECTION TITLE
    ========================================================= */
 
-/* =========================================================
-   SECTION TITLE
-   Same style as Checker Reports
-   ========================================================= */
-
 .npci-section-title {
+
     font-family:
-        'Inter',
-        'Segoe UI',
-        'Arial',
-        sans-serif !important;
+        'Times New Roman', serif !important;
 
-    font-size: 18px !important;
+    font-size:
+        18px !important;
 
-    font-weight: 800 !important;
+    font-weight:
+        800 !important;
 
-    color: var(--text-primary) !important;
+    color:
+        var(--text-primary) !important;
 
-    position: relative !important;
+    position:
+        relative !important;
 
-    padding-left: 14px !important;
+    padding-left:
+        14px !important;
 }
+
+
 /* =========================================================
    BLUE VERTICAL LINE
    ========================================================= */

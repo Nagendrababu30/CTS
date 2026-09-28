@@ -12,12 +12,16 @@
 
 <zk>
 
-    <!-- SEND TO NPCI CSS  -->
+    <!-- =========================================================
+         SEND TO NPCI CSS
+         ========================================================= -->
 
     <style src="/css/outward/checker/send_to_npci.css"/>
 
 
-    <!--  PAGE CONTENT  -->
+    <!-- =========================================================
+         PAGE CONTENT
+         ========================================================= -->
 
     <div self="@define(content)"
          width="100%"
@@ -25,7 +29,9 @@
          sclass="send-npci-content">
 
 
-        <!-- MAIN LAYOUT  -->
+        <!-- =====================================================
+             MAIN LAYOUT
+             ===================================================== -->
 
         <vlayout id="sendToNPCILayout"
                  width="100%"
@@ -35,7 +41,9 @@
                  apply="com.iispl.cts.controller.outward.checker.CheckerSendToNPCIController">
 
 
-            <!-- PAGE HEADER -->
+            <!-- =================================================
+                 PAGE HEADER
+                 ================================================= -->
 
             <vlayout spacing="5px"
                      sclass="npci-header">
@@ -48,14 +56,18 @@
             </vlayout>
 
 
-            <!-- BATCH SECTION -->
+            <!-- =================================================
+                 BATCH SECTION
+                 ================================================= -->
 
             <vlayout width="100%"
                      spacing="0"
                      sclass="npci-section">
 
 
-                <!-- SECTION HEADER -->
+                <!-- =================================================
+                     SECTION HEADER
+                     ================================================= -->
 
                 <hlayout width="100%"
                          valign="middle"
@@ -67,7 +79,9 @@
                 </hlayout>
 
 
-                <!-- NPCI BATCH TABLE -->
+                <!-- =================================================
+                     NPCI BATCH TABLE
+                     ================================================= -->
 
                 <listbox id="npciBatchListbox"
                          width="100%"

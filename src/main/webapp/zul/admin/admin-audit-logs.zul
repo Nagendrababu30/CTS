@@ -73,8 +73,7 @@
                 <button
                     id="auditClearButton"
                     sclass="audit-clear-btn"
-                    label="Clear"
-                    iconSclass="z-icon-undo"/>
+                    label="Clear"/>
 
 
                 <!-- ROLE FILTER -->

@@ -37,22 +37,15 @@ public class UserController extends GenericForwardComposer<Component> {
 
 	private static final int PAGE_SIZE = 10;
 
-
 	private Listbox userListbox;
 	private Paging userPaging;
-
-	private Button createUserButton;
-	private Button searchUserButton;
-	private Button clearUserFilterButton;
 
 	private Textbox userSearchTextbox;
 	private Combobox roleFilterCombobox;
 	private Combobox statusFilterCombobox;
 
-
 	private UserService userService;
 	private RoleService roleService;
-
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
@@ -96,7 +89,7 @@ public class UserController extends GenericForwardComposer<Component> {
 		});
 	}
 
-	// LOAD USERS
+	// Load Users
 
 	private void loadUsers(int offset) {
 
@@ -131,21 +124,18 @@ public class UserController extends GenericForwardComposer<Component> {
 
 				Listitem item = new Listitem();
 
-				// S.No
 				Listcell snCell = new Listcell();
 				Label snLabel = new Label(String.valueOf(serial));
 				snLabel.setSclass("user-id-label");
 				snCell.appendChild(snLabel);
 				item.appendChild(snCell);
 
-				//Username 
 				Listcell usernameCell = new Listcell();
 				Label usernameLabel = new Label(user.getUsername());
 				usernameLabel.setSclass("username-label");
 				usernameCell.appendChild(usernameLabel);
 				item.appendChild(usernameCell);
 
-				//Assigned Role 
 				Listcell roleCell = new Listcell();
 				String roleName = (user.getRole() != null && user.getRole().getRoleName() != null)
 						? user.getRole().getRoleName()
@@ -158,7 +148,6 @@ public class UserController extends GenericForwardComposer<Component> {
 				roleCell.appendChild(roleBox);
 				item.appendChild(roleCell);
 
-				//Status 
 				Listcell statusCell = new Listcell();
 				String userStatus = user.getStatus() != null ? user.getStatus() : "-";
 				String displayStatus = "-".equals(userStatus) ? "-"
@@ -171,7 +160,6 @@ public class UserController extends GenericForwardComposer<Component> {
 				statusCell.appendChild(statusContainer);
 				item.appendChild(statusCell);
 
-				//Actions 
 				Listcell actionCell = new Listcell();
 				Hbox actionBox = new Hbox();
 				actionBox.setSpacing("8px");
@@ -189,7 +177,7 @@ public class UserController extends GenericForwardComposer<Component> {
 				statusBtn.setTooltiptext(
 						"ACTIVE".equalsIgnoreCase(user.getStatus()) ? "Deactivate User" : "Activate User");
 
-				//Disable edit and status buttons for ADMIN role 
+				// Disable edit and status buttons for admin role
 				boolean isAdmin = (user.getRole() != null && "ADMIN".equalsIgnoreCase(user.getRole().getRoleName()));
 
 				if (isAdmin) {
@@ -230,8 +218,6 @@ public class UserController extends GenericForwardComposer<Component> {
 		}
 	}
 
-	// BUTTON EVENTS
-
 	public void onClick$createUserButton(Event event) throws Exception {
 		openUserModal(null);
 	}
@@ -252,7 +238,7 @@ public class UserController extends GenericForwardComposer<Component> {
 		loadUsers(0);
 	}
 
-	// FILTERS
+	// load role filter
 
 	private void loadRoleFilter() {
 
@@ -277,6 +263,8 @@ public class UserController extends GenericForwardComposer<Component> {
 		roleFilterCombobox.setSelectedIndex(0);
 	}
 
+	// load status filter
+
 	private void loadStatusFilter() {
 
 		statusFilterCombobox.getItems().clear();
@@ -296,8 +284,6 @@ public class UserController extends GenericForwardComposer<Component> {
 		statusFilterCombobox.setSelectedIndex(0);
 	}
 
-	// CREATE / EDIT MODAL
-
 	private void openUserModal(User existingUser) {
 
 		boolean editMode = existingUser != null;
@@ -315,7 +301,6 @@ public class UserController extends GenericForwardComposer<Component> {
 		mainBox.setHflex("1");
 		mainBox.setSclass("user-modal-main-box");
 
-		//Header 
 		Div headerDiv = new Div();
 		headerDiv.setHflex("1");
 		headerDiv.setSclass("user-modal-header-container");
@@ -341,7 +326,6 @@ public class UserController extends GenericForwardComposer<Component> {
 		headerLeftDiv.appendChild(iconDiv);
 		headerLeftDiv.appendChild(titleTextDiv);
 
-		//Close button 
 		Button closeBtn = new Button("✕");
 		closeBtn.setSclass("user-modal-close-button-styled");
 		closeBtn.addEventListener("onClick", new EventListener<Event>() {
@@ -355,7 +339,6 @@ public class UserController extends GenericForwardComposer<Component> {
 		headerDiv.appendChild(closeBtn);
 		mainBox.appendChild(headerDiv);
 
-		//Username
 		Label usernameLabel = new Label("Username");
 		usernameLabel.setSclass("user-form-label-styled");
 		Textbox usernameBox = new Textbox();
@@ -375,7 +358,6 @@ public class UserController extends GenericForwardComposer<Component> {
 		usernameGroup.appendChild(usernameBox);
 		mainBox.appendChild(usernameGroup);
 
-		//Password
 		Label passwordLabel = new Label("Password");
 		passwordLabel.setSclass("user-form-label-styled");
 
@@ -386,15 +368,12 @@ public class UserController extends GenericForwardComposer<Component> {
 		passwordBox.setPlaceholder(editMode ? "Leave blank to keep current password" : "Enter password");
 		passwordBox.setSclass("password-field-container");
 
-		// Password Eye Button 
-
 		Button passwordEyeButton = new Button();
 
 		passwordEyeButton.setIconSclass("z-icon-eye");
 		passwordEyeButton.setTooltiptext("Show password");
 		passwordEyeButton.setSclass("password-eye-button-styled");
 
-		//Password Input Layout 
 		Hbox passwordInputLayout = new Hbox();
 		passwordInputLayout.setHflex("1");
 		passwordInputLayout.setAlign("center");
@@ -403,7 +382,6 @@ public class UserController extends GenericForwardComposer<Component> {
 		passwordInputLayout.appendChild(passwordBox);
 		passwordInputLayout.appendChild(passwordEyeButton);
 
-		// Password Group
 		Vbox passwordGroup = new Vbox();
 		passwordGroup.setSpacing("0");
 		passwordGroup.setHflex("1");
@@ -411,13 +389,11 @@ public class UserController extends GenericForwardComposer<Component> {
 		passwordGroup.appendChild(passwordLabel);
 		passwordGroup.appendChild(passwordInputLayout);
 
-		// Password Requirements 
 		Label passwordHint = new Label(
 				"Minimum 8 characters, including uppercase, lowercase, number and special character.");
 		passwordHint.setSclass("password-hint-label");
 		passwordGroup.appendChild(passwordHint);
 
-		//Live Password Validation 
 		passwordBox.addEventListener("onChanging", new EventListener<Event>() {
 			@Override
 			public void onEvent(Event event) throws Exception {
@@ -429,7 +405,6 @@ public class UserController extends GenericForwardComposer<Component> {
 
 		mainBox.appendChild(passwordGroup);
 
-		// Eye Button Click Event
 		passwordEyeButton.addEventListener("onClick", new EventListener<Event>() {
 			@Override
 			public void onEvent(Event event) throws Exception {
@@ -437,7 +412,6 @@ public class UserController extends GenericForwardComposer<Component> {
 			}
 		});
 
-		//Role
 		Label roleLabel = new Label("Role");
 		roleLabel.setSclass("user-form-label-styled");
 		Combobox roleCombo = new Combobox();
@@ -470,7 +444,6 @@ public class UserController extends GenericForwardComposer<Component> {
 		roleGroup.appendChild(roleCombo);
 		mainBox.appendChild(roleGroup);
 
-		// Buttons
 		Hbox btnBox = new Hbox();
 		btnBox.setSpacing("10px");
 		btnBox.setAlign("end");
@@ -504,16 +477,12 @@ public class UserController extends GenericForwardComposer<Component> {
 		window.doModal();
 	}
 
-	// LIVE PASSWORD VALIDATION
-
 	private void updatePasswordValidation(String password, Label passwordHint, boolean editMode) {
 
 		if (password == null) {
 			password = "";
 		}
 
-		//During edit, an empty password means: Keep the existing password.
-		
 		if (editMode && password.isEmpty()) {
 			passwordHint.setValue("Leave blank to keep the current password.");
 			passwordHint.setSclass("password-hint-label");
@@ -543,7 +512,7 @@ public class UserController extends GenericForwardComposer<Component> {
 		}
 	}
 
-	// PASSWORD VISIBILITY
+	// Password visibility
 
 	private void togglePasswordVisibility(Textbox passwordBox, Button passwordEyeButton) {
 
@@ -565,7 +534,7 @@ public class UserController extends GenericForwardComposer<Component> {
 		}
 	}
 
-	// SAVE USER
+	// save user
 
 	private void saveUser(Window window, User existingUser, Textbox usernameBox, Textbox passwordBox,
 			Combobox roleCombo) {
@@ -587,7 +556,7 @@ public class UserController extends GenericForwardComposer<Component> {
 			return;
 		}
 
-		// PASSWORD STRENGTH VALIDATION
+		// Password strength validation
 
 		if (password != null && !password.isEmpty()) {
 
@@ -602,8 +571,6 @@ public class UserController extends GenericForwardComposer<Component> {
 			}
 		}
 
-		// ROLE VALIDATION
-
 		if (roleCombo.getSelectedItem() == null) {
 
 			Messagebox.show("Please select a role.", "Validation", Messagebox.OK, Messagebox.EXCLAMATION);
@@ -615,7 +582,7 @@ public class UserController extends GenericForwardComposer<Component> {
 
 		try {
 
-			// CREATE USER
+			// Create user
 
 			if (existingUser == null) {
 
@@ -644,7 +611,7 @@ public class UserController extends GenericForwardComposer<Component> {
 
 			} else {
 
-				// UPDATE USER
+				// Update user
 
 				Role role = new Role();
 				role.setRoleId(roleId);
@@ -675,8 +642,6 @@ public class UserController extends GenericForwardComposer<Component> {
 				Messagebox.show("User updated successfully.", "Success", Messagebox.OK, Messagebox.INFORMATION);
 			}
 
-			// REFRESH USER LIST
-
 			window.detach();
 
 			int activePage = userPaging.getActivePage();
@@ -693,7 +658,7 @@ public class UserController extends GenericForwardComposer<Component> {
 		}
 	}
 
-	// CHANGE STATUS
+	// Update user status
 
 	private void changeUserStatus(User user) {
 
@@ -722,33 +687,4 @@ public class UserController extends GenericForwardComposer<Component> {
 				});
 	}
 
-	// DELETE USER
-
-	private void confirmDeleteUser(User user) {
-
-		Messagebox.show("Are you sure you want to permanently delete user '" + user.getUsername() + "'?", "Delete User",
-				Messagebox.YES | Messagebox.NO, Messagebox.EXCLAMATION, new EventListener<Event>() {
-					@Override
-					public void onEvent(Event event) throws Exception {
-						if ("onYes".equals(event.getName())) {
-							try {
-								userService.deleteUser(user.getUserId());
-								Messagebox.show("User deleted successfully.", "Success", Messagebox.OK,
-										Messagebox.INFORMATION);
-								userPaging.setTotalSize(userService.getUserCount());
-								loadUsers(userPaging.getActivePage() * PAGE_SIZE);
-							} catch (Exception e) {
-								e.printStackTrace();
-								String msg = "Unable to delete user.";
-								if (e.getMessage() != null && e.getMessage().toLowerCase().contains("foreign key")) {
-									msg = "Cannot delete user — they have related records in the system (sessions, batches, or audit logs). Remove those records first.";
-								} else if (e instanceof IllegalStateException) {
-									msg = e.getMessage();
-								}
-								Messagebox.show(msg, "Error", Messagebox.OK, Messagebox.ERROR);
-							}
-						}
-					}
-				});
-	}
 }

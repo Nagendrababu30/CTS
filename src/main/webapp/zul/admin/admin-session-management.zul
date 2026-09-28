@@ -70,7 +70,7 @@
 
 					<button id="endSessionButton"
 						sclass="end-session-button"
-						label="&#x25A0;   End Current Session" />
+						label="End Session" />
 
 				</vlayout>
 

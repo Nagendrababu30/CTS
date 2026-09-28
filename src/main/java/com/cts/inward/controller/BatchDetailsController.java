@@ -1,26 +1,38 @@
 package com.cts.inward.controller;
 
+import java.io.File;
+import org.zkoss.zk.ui.util.Composer;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import org.zkoss.image.AImage;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
+import org.zkoss.zk.ui.Session;
+import org.zkoss.zk.ui.WebApp;
 import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
 import org.zkoss.zul.Checkbox;
-import org.zkoss.zul.Window;
-import org.zkoss.zul.Textbox;
-import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
+import org.zkoss.zul.Messagebox;
+import org.zkoss.zul.Textbox;
 import org.zkoss.zul.Vlayout;
+import org.zkoss.zul.Window;
+import com.cts.admin.model.User;
 import com.cts.inward.dao.BatchDetailsDaoImpl;
 import com.cts.inward.dao.ChequeImageDaoImpl;
+import com.cts.inward.dao.MicrMasterDaoImpl;
+import com.cts.inward.dao.MicrRepairDao;
+import com.cts.inward.dao.MicrRepairDaoImpl;
 import com.cts.inward.model.ChequeImage;
 import com.cts.inward.service.BatchDetailsService;
 import com.cts.inward.service.BatchDetailsServiceImpl;
@@ -28,16 +40,14 @@ import com.cts.inward.service.BatchDetailsServiceImpl;
 public class BatchDetailsController extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
-    
-    // BATCH
 
+    // BATCH
     private Long batchId;
     private List<Map<String, Object>> cheques = new ArrayList<>();
     private int currentChequeIndex = 0;
     private BatchDetailsService batchDetailsService;
 
     // CHEQUE IMAGE & CONTROLS
-
     private Image chequeImage;
     private Component chequePreview;
     private Button toggleImageButton;
@@ -53,15 +63,14 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
     private double currentScale = 1.0;
     private int currentRotation = 0;
     private ChequeImageDaoImpl chequeImageDao;
-    private final Map<String, ChequeImage> chequeImageCache = new java.util.HashMap<>();
-    private final Map<String, org.zkoss.image.AImage> aImageCache = new java.util.HashMap<>();
-    private final Map<String, Map<String, Object>> micrDetailsCache = new java.util.HashMap<>();
-    private final Map<String, Map<String, Object>> dataEntryDetailsCache = new java.util.HashMap<>();
-    private final Map<String, Map<String, Object>> cbsValidationCache = new java.util.HashMap<>();
-    private final Map<String, List<Map<String, String>>> makerReturnReasonsCache = new java.util.HashMap<>();
-    
-    // HEADER & METRICS
+    private final Map<String, ChequeImage> chequeImageCache = new HashMap<>();
+    private final Map<String, AImage> aImageCache = new HashMap<>();
+    private final Map<String, Map<String, Object>> micrDetailsCache = new HashMap<>();
+    private final Map<String, Map<String, Object>> dataEntryDetailsCache = new HashMap<>();
+    private final Map<String, Map<String, Object>> cbsValidationCache = new HashMap<>();
+    private final Map<String, List<Map<String, String>>> makerReturnReasonsCache = new HashMap<>();
 
+    // HEADER & METRICS
     private Label pageTitle;
     private Label batchLabel;
     private Label totalCountLabel;
@@ -70,7 +79,6 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
     private Label chequeCounter;
 
     // LEFT CHEQUE PREVIEW
-
     private Label imageChequeNumber;
     private Label imageChequeDate;
     private Label payeeImage;
@@ -79,15 +87,11 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
     private Label chequeNumberLabel;
     private Label leftCbsStatus;
 
-
-
     // RIGHT VERIFICATION HEADER
-
     private Label rightChequeNumber;
     private Label chequePosition;
 
     // MICR SECTION
-
     private Vlayout micrUnchanged;
     private Label micrValue;
     private Hlayout micrCorrection;
@@ -96,7 +100,6 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
     private Label micrStatus;
 
     // DATA ENTRY - ACCOUNT NUMBER
-
     private Label accountStatus;
     private Hlayout accountCorrection;
     private Label oldAccountNumber;
@@ -105,7 +108,6 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
     private Label accountNumber;
 
     // DATA ENTRY - AMOUNT
-
     private Label amountStatus;
     private Hlayout amountCorrection;
     private Label oldAmount;
@@ -113,9 +115,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
     private Hlayout amountUnchanged;
     private Label amount;
 
-
     // DATA ENTRY - CHEQUE DATE
-
     private Label dateStatus;
     private Hlayout dateCorrection;
     private Label oldChequeDate;
@@ -124,9 +124,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
     private Label chequeDate;
     private Label dataEntrySummary;
 
-    // DATA ENTRY - CHEQUE NUMBER
-    // DB FIELD = cheque_number
-
+    // DATA ENTRY - CHEQUE NUMBER (DB FIELD = cheque_number)
     private Label chequeNoStatus;
     private Hlayout chequeNoCorrection;
     private Label oldChequeNumber;
@@ -135,14 +133,12 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
     private Label chequeNumberVal;
 
     // CBS VALIDATION
-
     private Label cbsTitle;
     private Label cbsActionStatus;
     private Hlayout cbsFailure;
     private Label cbsFailureText;
 
     // CHEQUE NAVIGATION
-
     private Button cheque1;
     private Button cheque2;
     private Button cheque3;
@@ -166,7 +162,6 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
     // INIT
 
     // CHECKER DECISION
-
     private Integer userId;
 
     private Button acceptButton;
@@ -206,7 +201,6 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
     private Button batchSuccessOkBtn;
 
     // MAKER RETURN PANEL (RETURN_BY_MAKER)
-    
     private Vlayout makerReturnPanel;
     private Vlayout verificationFormContainer;
     private Vlayout makerReturnReasonsList;
@@ -228,8 +222,6 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         super.doAfterCompose(component);
 
         // POPUP CONTROLS
-        
-
         if (acceptConfirmWindow != null) {
             acceptCancelButton = (Button) acceptConfirmWindow.getFellow("acceptCancelButton");
 
@@ -242,15 +234,15 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
 
         if (rejectWindow != null) {
             rejectReasonsContainer =(Vlayout) rejectWindow.getFellowIfAny("rejectReasonsContainer");
-            
+
             rejectRemark = (Textbox) rejectWindow.getFellow("rejectRemark");
-            
+
             rejectCancelButton = (Button) rejectWindow.getFellow("rejectCancelButton");
-            
+
             rejectConfirmButton = (Button) rejectWindow.getFellow("rejectConfirmButton");
-            
+
             rejectCancelButton.addEventListener(Events.ON_CLICK, event -> handleRejectCancelButton());
-            
+
             rejectConfirmButton.addEventListener(Events.ON_CLICK, event -> handleRejectConfirmButton());
         }
 
@@ -300,8 +292,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             }
             batchCompleteSuccessWindow.setVisible(false);
         }
-        
-         
+
         if (acceptConfirmWindow != null) {
             acceptConfirmWindow.setVisible(false);
         }
@@ -312,8 +303,8 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             returnWindow.setVisible(false);
         }
 
-        org.zkoss.zk.ui.Session session = Executions.getCurrent().getSession();
-        com.cts.admin.model.User user = (com.cts.admin.model.User) session.getAttribute("loggedInUser");
+        Session session = Executions.getCurrent().getSession();
+        User user = (User) session.getAttribute("loggedInUser");
         if (user != null && user.getUserId() != null) {
             userId = user.getUserId().intValue();
         } else {
@@ -331,10 +322,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
 
         System.out.println("CHECKER USER ID = " + userId);
 
-        // -----------------------------------------------------
         // Existing DAO + Service
-        // -----------------------------------------------------
-
         batchDetailsService = BatchDetailsServiceImpl.of(
                 BatchDetailsDaoImpl.of());
 
@@ -395,10 +383,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             btnBack.addEventListener(Events.ON_CLICK, event -> showBackImage());
         }
 
-        // -----------------------------------------------------
         // Get batch ID from URL
-        // -----------------------------------------------------
-
         String batchIdParameter = Executions.getCurrent()
                 .getParameter("batchId");
 
@@ -433,19 +418,10 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             return;
         }
 
-        // -----------------------------------------------------
         // Load cheques
-        // -----------------------------------------------------
-
         loadCheques();
 
-        // -----------------------------------------------------
-        // Load first cheque
-        //
-        // IMPORTANT:
-        // loadCurrentCheque() also performs CBS validation.
-        // -----------------------------------------------------
-
+        // Load first cheque - loadCurrentCheque() also performs CBS validation.
         if (!cheques.isEmpty()) {
 
             int firstUnverified = findFirstUnverifiedChequeIndex();
@@ -463,10 +439,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         }
     }
 
-    // =========================================================
     // LOAD CHEQUES
-    // =========================================================
-
     private void loadCheques() {
 
         cheques = batchDetailsService
@@ -493,10 +466,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
                 "======================================");
     }
 
-    // =========================================================
     // LOAD CURRENT CHEQUE
-    // =========================================================
-
     private void loadCurrentCheque() {
 
         if (cheques == null
@@ -505,10 +475,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             return;
         }
 
-        // -----------------------------------------------------
         // Protect index
-        // -----------------------------------------------------
-
         if (currentChequeIndex < 0) {
 
             currentChequeIndex = 0;
@@ -519,10 +486,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             currentChequeIndex = cheques.size() - 1;
         }
 
-        // -----------------------------------------------------
         // Get current cheque
-        // -----------------------------------------------------
-
         Map<String, Object> cheque = cheques.get(currentChequeIndex);
         currentCbsFailedReasonCodes.clear();
 
@@ -535,10 +499,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             }
         }
 
-        // =====================================================
         // GET VALUES FROM inward_cheque
-        // =====================================================
-
         String chequeNumber = getString(
                 cheque,
                 "chequeNumber");
@@ -563,10 +524,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
                 cheque,
                 "amount");
 
-        // =====================================================
         // CONSOLE
-        // =====================================================
-
         System.out.println();
 
         System.out.println(
@@ -608,10 +566,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         System.out.println(
                 "====================================");
 
-        // =====================================================
         // UPDATE HEADER
-        // =====================================================
-
         if (pageTitle != null) {
 
             pageTitle.setValue(
@@ -630,10 +585,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             chequePosition.setValue(" | Bank:");
         }
 
-        // =====================================================
         // UPDATE LEFT CHEQUE INFORMATION
-        // =====================================================
-
         if (imageChequeNumber != null) {
 
             imageChequeNumber.setValue(
@@ -675,10 +627,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
                     nullToEmpty(micrCode));
         }
 
-        // =====================================================
         // CHECK IF CHEQUE WAS RETURNED BY MAKER
-        // =====================================================
-
         String status = getString(cheque, "status");
         boolean isReturnByMaker = "RETURN_BY_MAKER".equalsIgnoreCase(status);
 
@@ -765,44 +714,51 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
                 }
             }
 
-            // Verify MICR with MicrMaster (Image 2)
-            String checkMicr = (ocrMicrCode != null && !ocrMicrCode.trim().isEmpty()) ? ocrMicrCode.trim() : (micrCode != null ? micrCode.trim() : null);
-            boolean ocrExists = false;
-            if (checkMicr != null && !checkMicr.isEmpty()) {
-                try {
-                    ocrExists = com.cts.inward.dao.MicrMasterDaoImpl.of().exists(checkMicr);
-                } catch (Exception e) {
-                    System.err.println("Error verifying MICR in micr_master: " + e.getMessage());
-                }
-            }
-
-            if (boxMicrMasterVerification != null) {
-                boxMicrMasterVerification.setVisible(true);
-            }
-
-            if (lblOcrMicrValue != null) {
-                lblOcrMicrValue.setValue(checkMicr != null && !checkMicr.isEmpty() ? checkMicr : "Not Present");
-            }
-            if (lblOcrMicrCheck != null) {
+            // Verify MICR with MicrMaster (Image 2) - ONLY for MR-MICR-001
+            boolean isMrMicr001 = isMakerReturnReasonMrMicr001(cheque);
+            if (isMrMicr001) {
+                String checkMicr = (ocrMicrCode != null && !ocrMicrCode.trim().isEmpty()) ? ocrMicrCode.trim() : (micrCode != null ? micrCode.trim() : null);
+                boolean ocrExists = false;
                 if (checkMicr != null && !checkMicr.isEmpty()) {
-                    if (ocrExists) {
-                        lblOcrMicrCheck.setValue("✓ Found in Master");
-                        lblOcrMicrCheck.setStyle("color:#027A48; background:#ECFDF3; border:1px solid #A6F4C5; font-weight:700; padding:4px 10px; border-radius:6px;");
-                    } else {
-                        lblOcrMicrCheck.setValue("✗ NOT Found in Master");
-                        lblOcrMicrCheck.setStyle("color:#B42318; background:#FEF3F2; border:1px solid #FECDCA; font-weight:700; padding:4px 10px; border-radius:6px;");
+                    try {
+                        ocrExists = MicrMasterDaoImpl.of().exists(checkMicr);
+                    } catch (Exception e) {
+                        System.err.println("Error verifying MICR in micr_master: " + e.getMessage());
                     }
-                } else {
-                    lblOcrMicrCheck.setValue("— N/A");
-                    lblOcrMicrCheck.setStyle("color:#64748B; background:#F1F5F9; border:1px solid #E2E8F0; font-weight:700; padding:4px 10px; border-radius:6px;");
                 }
-            }
 
-            if (lblMicrMasterSummary != null) {
-                if (ocrExists) {
-                    lblMicrMasterSummary.setValue("System Verification: MICR code (" + checkMicr + ") was found in Master directory.");
-                } else {
-                    lblMicrMasterSummary.setValue("System Verification: MICR code is absent from the MICR Master Directory. Maker return is verified by system.");
+                if (boxMicrMasterVerification != null) {
+                    boxMicrMasterVerification.setVisible(true);
+                }
+
+                if (lblOcrMicrValue != null) {
+                    lblOcrMicrValue.setValue(checkMicr != null && !checkMicr.isEmpty() ? checkMicr : "Not Present");
+                }
+                if (lblOcrMicrCheck != null) {
+                    if (checkMicr != null && !checkMicr.isEmpty()) {
+                        if (ocrExists) {
+                            lblOcrMicrCheck.setValue("✓ Found in Master");
+                            lblOcrMicrCheck.setStyle("color:#027A48; background:#ECFDF3; border:1px solid #A6F4C5; font-weight:700; padding:4px 10px; border-radius:6px;");
+                        } else {
+                            lblOcrMicrCheck.setValue("✗ NOT Found in Master");
+                            lblOcrMicrCheck.setStyle("color:#B42318; background:#FEF3F2; border:1px solid #FECDCA; font-weight:700; padding:4px 10px; border-radius:6px;");
+                        }
+                    } else {
+                        lblOcrMicrCheck.setValue("— N/A");
+                        lblOcrMicrCheck.setStyle("color:#64748B; background:#F1F5F9; border:1px solid #E2E8F0; font-weight:700; padding:4px 10px; border-radius:6px;");
+                    }
+                }
+
+                if (lblMicrMasterSummary != null) {
+                    if (ocrExists) {
+                        lblMicrMasterSummary.setValue("System Verification: MICR code (" + checkMicr + ") was found in Master directory.");
+                    } else {
+                        lblMicrMasterSummary.setValue("System Verification: MICR code is absent from the MICR Master Directory. Maker return is verified by system.");
+                    }
+                }
+            } else {
+                if (boxMicrMasterVerification != null) {
+                    boxMicrMasterVerification.setVisible(false);
                 }
             }
 
@@ -814,8 +770,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             boolean currentVerified = isChequeVerified(cheque);
 
             if (currentVerified) {
-                // Cheque has already been verified (or entire batch complete)
-                // Lock all action buttons so checker cannot re-action it
+                // Cheque has already been verified (or entire batch complete) - Lock all action buttons so checker cannot re-action it
                 if (acceptButton != null) {
                     acceptButton.setDisabled(true);
                     acceptButton.setSclass("decision-button accept-button accept-button-dull");
@@ -843,20 +798,12 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
                     acceptButton.setTooltiptext("Cannot accept cheque returned by Maker.");
                 }
 
-                // Send Back button: Disabled ONLY if reason is MICR not available (MR-DATA-002 / MR-MICR-002)
-                boolean micrNotAvailable = isMicrNotAvailableReturn(cheque);
+                // Send Back button: Enabled
                 if (returnButton != null) {
-                    if (micrNotAvailable) {
-                        returnButton.setDisabled(true);
-                        returnButton.setSclass("decision-button return-button return-button-dull");
-                        returnButton.setStyle("cursor: not-allowed !important; opacity: 0.55 !important; pointer-events: auto !important;");
-                        returnButton.setTooltiptext("Cannot send back to maker: MICR details not available.");
-                    } else {
-                        returnButton.setDisabled(false);
-                        returnButton.setSclass("decision-button return-button");
-                        returnButton.setStyle(null);
-                        returnButton.setTooltiptext(null);
-                    }
+                    returnButton.setDisabled(false);
+                    returnButton.setSclass("decision-button return-button");
+                    returnButton.setStyle(null);
+                    returnButton.setTooltiptext(null);
                 }
                 if (rejectButton != null) {
                     rejectButton.setDisabled(false);
@@ -928,22 +875,15 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             loadCbsValidation(chequeNumber);
         }
 
-        // =====================================================
         // NAVIGATION
-        // =====================================================
-
         updateChequeNavigation();
 
         loadChequeImages(chequeNumber);
 
-        // =====================================================
         // BATCH HEADER COUNTS (Image 4)
-        // =====================================================
         updateBatchHeaderCounts();
 
-        // =====================================================
         // DECISION BADGE FOR CURRENT CHEQUE
-        // =====================================================
         if (selectedDecision != null && selectedDecisionText != null) {
             if (!isChequeVerified(cheque)) {
                 selectedDecision.setVisible(false);
@@ -984,10 +924,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         }
     }
 
-    // =========================================================
     // MICR DETAILS
-    // =========================================================
-
     private void loadMicrDetails(
             String chequeNumber) {
 
@@ -1077,10 +1014,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
                 && !correctedMicr.trim().isEmpty()
                 && !oldMicr.equals(correctedMicr);
 
-        // =====================================================
         // MICR CORRECTED
-        // =====================================================
-
         if (hasCorrection) {
 
             System.out.println(
@@ -1121,10 +1055,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
 
         }
 
-        // =====================================================
         // MICR NOT CORRECTED
-        // =====================================================
-
         else {
 
             System.out.println(
@@ -1163,10 +1094,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
                 "==================================");
     }
 
-    // =========================================================
     // DATA ENTRY DETAILS
-    // =========================================================
-
     private void loadDataEntryDetails(
             String chequeNumber) {
 
@@ -1207,10 +1135,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             return;
         }
 
-        // =====================================================
         // ACCOUNT NUMBER
-        // =====================================================
-
         String oldAccount = getString(
                 details,
                 "oldAccountNumber");
@@ -1290,10 +1215,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             }
         }
 
-        // =====================================================
         // AMOUNT
-        // =====================================================
-
         String oldAmountValue = getString(
                 details,
                 "oldAmount");
@@ -1373,10 +1295,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             }
         }
 
-        // =====================================================
         // CHEQUE DATE
-        // =====================================================
-
         String oldDate = getString(
                 details,
                 "oldChequeDate");
@@ -1453,11 +1372,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             }
         }
 
-        // =====================================================
-        // CHEQUE NUMBER
-        // DB FIELD = cheque_number
-        // =====================================================
-
+        // CHEQUE NUMBER - DB FIELD = cheque_number
         String oldChqNo = getString(
                 details,
                 "oldChequeNumber");
@@ -1540,9 +1455,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             }
         }
 
-        // =====================================================
         // DATA ENTRY SUMMARY BADGE (e.g. • 2 Fields Corrected)
-        // =====================================================
         int correctedFieldsCount = (accountCorrected ? 1 : 0)
                 + (amountCorrected ? 1 : 0)
                 + (dateCorrected ? 1 : 0)
@@ -1579,10 +1492,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
                 "==========================================");
     }
 
-    // =========================================================
     // CBS VALIDATION
-    // =========================================================
-
     private void loadCbsValidation(
             String chequeNumber) {
 
@@ -1603,10 +1513,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
                 "Cheque Number = "
                         + chequeNumber);
 
-        // -----------------------------------------------------
         // Invalid cheque number
-        // -----------------------------------------------------
-
         if (chequeNumber == null
                 || chequeNumber.trim().isEmpty()) {
 
@@ -1616,10 +1523,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             return;
         }
 
-        // -----------------------------------------------------
         // Get CBS data
-        // -----------------------------------------------------
-
         Map<String, Object> cbsDetails = cbsValidationCache.get(chequeNumber);
         if (cbsDetails == null) {
             cbsDetails = batchDetailsService.getCbsValidation(chequeNumber);
@@ -1637,10 +1541,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             return;
         }
 
-        // =====================================================
         // VALUES FROM DATABASE
-        // =====================================================
-
         BigDecimal chequeAmount = getBigDecimal(
                 cbsDetails,
                 "chequeAmount");
@@ -1657,24 +1558,13 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
                 cbsDetails,
                 "accountStatus");
 
-        // =====================================================
-        // 1. AMOUNT / FUNDS VALIDATION
-        //
-        // available balance MUST be greater than
-        // cheque amount.
-        // =====================================================
-
+        // 1. AMOUNT / FUNDS VALIDATION - available balance MUST be greater than cheque amount.
         boolean amountPassed = chequeAmount != null
                 && availableBalance != null
                 && availableBalance.compareTo(
                         chequeAmount) > 0;
 
-        // =====================================================
-        // 2. CHEQUE DATE VALIDATION
-        //
-        // Cheque date should NOT be before 3 months.
-        // =====================================================
-
+        // 2. CHEQUE DATE VALIDATION - Cheque date should NOT be before 3 months.
         boolean datePassed = false;
 
         if (chequeSqlDate != null) {
@@ -1688,28 +1578,17 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
                     minimumValidDate);
         }
 
-        // =====================================================
-        // 3. ACCOUNT STATUS VALIDATION
-        //
-        // Account must be ACTIVE.
-        // =====================================================
-
+        // 3. ACCOUNT STATUS VALIDATION - Account must be ACTIVE.
         boolean accountPassed = "ACTIVE".equalsIgnoreCase(
                 accountStatus);
 
-        // =====================================================
         // 4. DUPLICATE CHEQUE VALIDATION
-        // =====================================================
-
         boolean isDuplicate = Boolean.TRUE.equals(
                 cbsDetails.get("isDuplicate"));
 
         boolean duplicatePassed = !isDuplicate;
 
-        // =====================================================
         // PRINT VALUES
-        // =====================================================
-
         System.out.println(
                 "CBS Cheque Amount = "
                         + chequeAmount);
@@ -1746,10 +1625,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
                 "Duplicate Cheque = "
                         + duplicatePassed);
 
-        // =====================================================
         // FINAL RESULT
-        // =====================================================
-
         boolean allPassed = amountPassed
                 && datePassed
                 && accountPassed
@@ -1815,15 +1691,9 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
                 "====================================");
     }
 
-    // =========================================================
     // CBS RESULT UI
-    // =========================================================
 
-
-    // =========================================================
     // CBS PASSED
-    // =========================================================
-
     private void showCbsPassed() {
         cbsPassed = true;
         currentCbsFailedReasonCodes.clear();
@@ -1875,10 +1745,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         }
     }
 
-    // =========================================================
     // CBS FAILED
-    // =========================================================
-
     private void showCbsFailure(
             String message) {
 
@@ -1928,16 +1795,10 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         }
     }
 
-    // =========================================================
     // RESET DATA ENTRY UI
-    // =========================================================
-
     private void resetDataEntryUI() {
 
-        // -----------------------------------------------------
         // ACCOUNT
-        // -----------------------------------------------------
-
         if (accountStatus != null) {
 
             accountStatus.setValue(
@@ -1974,10 +1835,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             correctedAccountNumber.setValue("");
         }
 
-        // -----------------------------------------------------
         // AMOUNT
-        // -----------------------------------------------------
-
         if (amountStatus != null) {
 
             amountStatus.setValue(
@@ -2014,10 +1872,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             correctedAmount.setValue("");
         }
 
-        // -----------------------------------------------------
         // DATE
-        // -----------------------------------------------------
-
         if (dateStatus != null) {
 
             dateStatus.setValue(
@@ -2054,10 +1909,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             correctedChequeDate.setValue("");
         }
 
-        // -----------------------------------------------------
         // CHEQUE NUMBER
-        // -----------------------------------------------------
-
         if (chequeNoStatus != null) {
 
             chequeNoStatus.setValue(
@@ -2102,14 +1954,9 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         }
     }
 
-    // =========================================================
     // CHEQUE NAVIGATION
-    // =========================================================
 
-    // =========================================================
     // CHECKER DECISION - ACCEPT
-    // =========================================================
-
     public void onClick$acceptButton() {
         Map<String, Object> currentCheque = (cheques != null && currentChequeIndex >= 0 && currentChequeIndex < cheques.size())
                 ? cheques.get(currentChequeIndex) : null;
@@ -2161,10 +2008,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         saveDecision("ACCEPT", null, null, "Accepted", null, acceptConfirmWindow);
     }
 
-    // =========================================================
     // CHECKER DECISION - REJECT (RETURN)
-    // =========================================================
-
     public void onClick$rejectButton() {
         Map<String, Object> currentCheque = (cheques != null && currentChequeIndex >= 0 && currentChequeIndex < cheques.size())
                 ? cheques.get(currentChequeIndex) : null;
@@ -2278,22 +2122,13 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
                 rejectWindow);
     }
 
-    // =========================================================
     // CHECKER DECISION - RETURN TO MAKER (SEND BACK)
-    // =========================================================
-
     public void onClick$returnButton() {
         if (cheques != null && currentChequeIndex >= 0 && currentChequeIndex < cheques.size()) {
             Map<String, Object> currentCheque = cheques.get(currentChequeIndex);
             if (isChequeVerified(currentCheque)) {
                 Messagebox.show("This cheque has already been verified and cannot be modified.",
                         "Cheque Already Verified", Messagebox.OK, Messagebox.INFORMATION);
-                return;
-            }
-            String st = getString(currentCheque, "status");
-            if ("RETURN_BY_MAKER".equalsIgnoreCase(st) && isMicrNotAvailableReturn(currentCheque)) {
-                Messagebox.show("Cannot send back to maker: MICR details not available.",
-                        "Action Restricted", Messagebox.OK, Messagebox.EXCLAMATION);
                 return;
             }
         }
@@ -2377,10 +2212,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
                 returnWindow);
     }
 
-    // =========================================================
     // SAVE CHECKER DECISION
-    // =========================================================
-
     private void saveDecision(String status,
             List<String> rejectionReasonCodes,
             List<String> returnReasonCodes,
@@ -2498,10 +2330,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         }
     }
 
-    // =========================================================
     // CHEQUE IMAGE LOADING & TRANSFORMS (Image 2)
-    // =========================================================
-
     private void loadChequeImages(String chequeNumber) {
 
         currentFrontImagePath = null;
@@ -2524,7 +2353,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
                 currentBackImagePath = image.getBackPath();
             }
             if (currentFrontImagePath == null || currentFrontImagePath.trim().isEmpty()) {
-                com.cts.inward.dao.MicrRepairDao repairDao = new com.cts.inward.dao.MicrRepairDaoImpl();
+                MicrRepairDao repairDao = new MicrRepairDaoImpl();
                 currentFrontImagePath = repairDao.getFrontImagePath(chequeNumber);
                 currentBackImagePath = repairDao.getBackImagePath(chequeNumber);
             }
@@ -2557,7 +2386,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         }
     }
 
-    private java.io.File resolveImageFile(String path) {
+    private File resolveImageFile(String path) {
         if (path == null || path.trim().isEmpty()) {
             return null;
         }
@@ -2568,20 +2397,20 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         }
 
         // 1. Direct file / absolute path
-        java.io.File directFile = new java.io.File(path);
+        File directFile = new File(path);
         if (directFile.isAbsolute() && directFile.isFile()) {
             return directFile;
         }
 
         // 2. Deployed webApp realPath
         try {
-            if (org.zkoss.zk.ui.Executions.getCurrent() != null
-                    && org.zkoss.zk.ui.Executions.getCurrent().getDesktop() != null) {
-                org.zkoss.zk.ui.WebApp webApp =
-                        org.zkoss.zk.ui.Executions.getCurrent().getDesktop().getWebApp();
+            if (Executions.getCurrent() != null
+                    && Executions.getCurrent().getDesktop() != null) {
+                WebApp webApp =
+                        Executions.getCurrent().getDesktop().getWebApp();
                 String realPath = webApp.getRealPath("/" + normalized);
                 if (realPath != null) {
-                    java.io.File realFile = new java.io.File(realPath);
+                    File realFile = new File(realPath);
                     if (realFile.isFile()) {
                         return realFile;
                     }
@@ -2593,7 +2422,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         String subPath = normalized.startsWith("src/main/webapp/")
                 ? normalized.substring("src/main/webapp/".length())
                 : normalized;
-        java.io.File devFile = new java.io.File("src/main/webapp", subPath);
+        File devFile = new File("src/main/webapp", subPath);
         if (devFile.isFile()) {
             return devFile;
         }
@@ -2609,7 +2438,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
     private void renderChequeImage(String imagePath) {
         if (chequeImage == null) return;
         if (imagePath == null || imagePath.trim().isEmpty()) {
-            chequeImage.setContent((org.zkoss.image.AImage) null);
+            chequeImage.setContent((AImage) null);
             chequeImage.setSrc("");
             chequeImage.setVisible(false);
             if (chequePreview != null) {
@@ -2619,11 +2448,11 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         }
 
         try {
-            java.io.File file = resolveImageFile(imagePath);
+            File file = resolveImageFile(imagePath);
             if (file != null) {
-                org.zkoss.image.AImage aimg = aImageCache.get(file.getAbsolutePath());
+                AImage aimg = aImageCache.get(file.getAbsolutePath());
                 if (aimg == null) {
-                    aimg = new org.zkoss.image.AImage(file);
+                    aimg = new AImage(file);
                     aImageCache.put(file.getAbsolutePath(), aimg);
                 }
                 chequeImage.setContent(aimg);
@@ -2638,7 +2467,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
                     clean = clean.substring("src/main/webapp/".length());
                 }
                 String webSrc = "/" + clean;
-                chequeImage.setContent((org.zkoss.image.AImage) null);
+                chequeImage.setContent((AImage) null);
                 chequeImage.setSrc(webSrc);
                 chequeImage.setVisible(true);
                 if (chequePreview != null) {
@@ -2647,7 +2476,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            chequeImage.setContent((org.zkoss.image.AImage) null);
+            chequeImage.setContent((AImage) null);
             chequeImage.setVisible(false);
             if (chequePreview != null) {
                 chequePreview.setVisible(true);
@@ -2696,63 +2525,15 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
     private void applyImageStyle() {
         if (chequeImage != null) {
             chequeImage.setStyle(String.format(
-                    java.util.Locale.US,
+                    Locale.US,
                     "object-fit:contain; max-width:100%%; max-height:100%%; display:block; margin:auto; transform: scale(%.2f) rotate(%ddeg); transform-origin: center; transition: transform 0.2s;",
                     currentScale,
                     currentRotation));
         }
     }
 
-    // =========================================================
     // BATCH HEADER METRICS (Image 4)
-    // =========================================================
 
-    // =========================================================
-    // CHECK IF CHEQUE IS VERIFIED
-    // =========================================================
-
-    private boolean isMicrNotAvailableReturn(Map<String, Object> cheque) {
-        if (cheque == null) {
-            return false;
-        }
-        String code = getString(cheque, "returnReasonCode");
-        if (code == null) {
-            code = getString(cheque, "return_reason_code");
-        }
-        if (isMicrReasonCode(code)) {
-            return true;
-        }
-        String chequeNumber = getString(cheque, "chequeNumber");
-        if (chequeNumber != null) {
-            List<Map<String, String>> reasons = makerReturnReasonsCache.get(chequeNumber);
-            if (reasons == null) {
-                reasons = batchDetailsService.getMakerReturnReasons(chequeNumber);
-                if (reasons != null) {
-                    makerReturnReasonsCache.put(chequeNumber, reasons);
-                }
-            }
-            if (reasons != null) {
-                for (Map<String, String> r : reasons) {
-                    String rCode = r.get("returnReasonCode");
-                    if (rCode == null) {
-                        rCode = r.get("code");
-                    }
-                    if (isMicrReasonCode(rCode)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    private boolean isMicrReasonCode(String code) {
-        if (code == null) {
-            return false;
-        }
-        String trimmed = code.trim().toUpperCase();
-        return trimmed.equals("MR-MICR-001") || trimmed.equals("MR-MICR-01") || trimmed.equals("MR-DATA-002");
-    }
 
     private boolean isMakerReturnReasonMrMicr001(Map<String, Object> currentCheque) {
         if (currentCheque == null) {
@@ -2762,7 +2543,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         if (code == null) {
             code = getString(currentCheque, "return_reason_code");
         }
-        if (code != null && ("MR-MICR-001".equalsIgnoreCase(code.trim()) || "MR-MICR-01".equalsIgnoreCase(code.trim()) || "MR-DATA-002".equalsIgnoreCase(code.trim()))) {
+        if (code != null && ("MR-MICR-001".equalsIgnoreCase(code.trim()) || "MR-MICR-01".equalsIgnoreCase(code.trim()))) {
             return true;
         }
         String chequeNumber = getString(currentCheque, "chequeNumber");
@@ -2780,7 +2561,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
                     if (rCode == null) {
                         rCode = r.get("code");
                     }
-                    if (rCode != null && ("MR-MICR-001".equalsIgnoreCase(rCode.trim()) || "MR-MICR-01".equalsIgnoreCase(rCode.trim()) || "MR-DATA-002".equalsIgnoreCase(rCode.trim()))) {
+                    if (rCode != null && ("MR-MICR-001".equalsIgnoreCase(rCode.trim()) || "MR-MICR-01".equalsIgnoreCase(rCode.trim()))) {
                         return true;
                     }
                 }
@@ -2896,10 +2677,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         return false;
     }
 
-    // =========================================================
     // BATCH HEADER METRICS (Image 4)
-    // =========================================================
-
     private void updateBatchHeaderCounts() {
         if (batchLabel != null) {
             batchLabel.setValue("Batch No : " + (batchId != null ? batchId : "—"));
@@ -3016,10 +2794,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         updateCompleteVerificationButtonState();
     }
 
-    // =========================================================
     // NEXT CHEQUE
-    // =========================================================
-
     public void onClick$nextCheque() {
 
         if (cheques == null || cheques.isEmpty()) {
@@ -3042,10 +2817,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         onClick$nextCheque();
     }
 
-    // =========================================================
     // PREVIOUS CHEQUE
-    // =========================================================
-
     public void onClick$previousCheque() {
 
         int prevUnverified = findPreviousUnverifiedChequeIndex(currentChequeIndex);
@@ -3060,132 +2832,82 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         }
     }
 
-
-
-    // =========================================================
     // CHEQUE 1
-    // =========================================================
-
     public void onClick$cheque1() {
         selectCheque(0);
     }
 
-    // =========================================================
     // CHEQUE 2
-    // =========================================================
-
     public void onClick$cheque2() {
         selectCheque(1);
     }
 
-    // =========================================================
     // CHEQUE 3
-    // =========================================================
-
     public void onClick$cheque3() {
         selectCheque(2);
     }
 
-    // =========================================================
     // CHEQUE 4
-    // =========================================================
-
     public void onClick$cheque4() {
         selectCheque(3);
     }
 
-    // =========================================================
     // CHEQUE 5
-    // =========================================================
-
     public void onClick$cheque5() {
         selectCheque(4);
     }
 
-    // =========================================================
     // CHEQUE 6
-    // =========================================================
-
     public void onClick$cheque6() {
         selectCheque(5);
     }
 
-    // =========================================================
     // CHEQUE 7
-    // =========================================================
-
     public void onClick$cheque7() {
         selectCheque(6);
     }
 
-    // =========================================================
     // CHEQUE 8
-    // =========================================================
-
     public void onClick$cheque8() {
         selectCheque(7);
     }
 
-    // =========================================================
     // CHEQUE 9
-    // =========================================================
-
     public void onClick$cheque9() {
         selectCheque(8);
     }
 
-    // =========================================================
     // CHEQUE 10
-    // =========================================================
-
     public void onClick$cheque10() {
         selectCheque(9);
     }
 
-    // =========================================================
     // CHEQUE 11
-    // =========================================================
-
     public void onClick$cheque11() {
         selectCheque(10);
     }
 
-    // =========================================================
     // CHEQUE 12
-    // =========================================================
-
     public void onClick$cheque12() {
         selectCheque(11);
     }
 
-    // =========================================================
     // CHEQUE 13
-    // =========================================================
-
     public void onClick$cheque13() {
         selectCheque(12);
     }
 
-    // =========================================================
     // CHEQUE 14
-    // =========================================================
-
     public void onClick$cheque14() {
         selectCheque(13);
     }
 
-    // =========================================================
     // CHEQUE 15
-    // =========================================================
-
     public void onClick$cheque15() {
         selectCheque(14);
     }
 
-    // =========================================================
     // SELECT CHEQUE
-    // =========================================================
-
     private void selectCheque(int index) {
 
         if (index < 0
@@ -3208,20 +2930,14 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         loadCurrentCheque();
     }
 
-    // =========================================================
     // BACK TO LIST
-    // =========================================================
-
     public void onClick$backToList() {
 
         Executions.sendRedirect(
                 "/zul/inward-checker/verification.zul");
     }
 
-    // =========================================================
     // COMPLETE VERIFICATION - BUTTON STATE & CLICK
-    // =========================================================
-
     private void updateCompleteVerificationButtonState() {
 
         if (completeVerification == null) {
@@ -3345,10 +3061,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         }
     }
 
-    // =========================================================
     // GET STRING
-    // =========================================================
-
     private String getString(
             Map<String, Object> map,
             String key) {
@@ -3366,10 +3079,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         return String.valueOf(value);
     }
 
-    // =========================================================
     // GET BIG DECIMAL
-    // =========================================================
-
     private BigDecimal getBigDecimal(
             Map<String, Object> map,
             String key) {
@@ -3400,10 +3110,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         }
     }
 
-    // =========================================================
     // GET SQL DATE
-    // =========================================================
-
     private Date getSqlDate(
             Map<String, Object> map,
             String key) {
@@ -3441,10 +3148,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         }
     }
 
-    // =========================================================
     // APPEND FAILURE SEPARATOR
-    // =========================================================
-
     private void appendFailureSeparator(
             StringBuilder builder) {
 
@@ -3454,10 +3158,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         }
     }
 
-    // =========================================================
     // NULL TO EMPTY
-    // =========================================================
-
     private String nullToEmpty(
             String value) {
 
@@ -3466,10 +3167,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
                 : value;
     }
 
-    // =========================================================
     // FORMAT AMOUNT
-    // =========================================================
-
     private String formatAmount(String value) {
 
         if (value == null || value.trim().isEmpty()) {
@@ -3479,11 +3177,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         return "₹ " + value;
     }
 
-    // =========================================================
-    // FORMAT DATE — converts any date string to dd/MM/yyyy
-    // Handles: yyyy-MM-dd, yyyy-MM-dd HH:mm:ss, dd/MM/yyyy
-    // =========================================================
-
+    // FORMAT DATE — converts any date string to dd/MM/yyyy - Handles: yyyy-MM-dd, yyyy-MM-dd HH:mm:ss, dd/MM/yyyy
     private String formatDate(String value) {
 
         if (value == null || value.trim().isEmpty()) {
@@ -3494,20 +3188,20 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             // Strip time part if present
             String datePart = value.trim().split(" ")[0];
 
-            java.time.LocalDate date;
+            LocalDate date;
 
             if (datePart.contains("-")) {
                 // yyyy-MM-dd
-                date = java.time.LocalDate.parse(datePart);
+                date = LocalDate.parse(datePart);
             } else if (datePart.contains("/")) {
                 // already dd/MM/yyyy
                 return datePart;
             } else {
-                return value;
-            }
+				return value;
+			}
 
             return date.format(
-                    java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                    DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 
         } catch (Exception e) {
             return value;

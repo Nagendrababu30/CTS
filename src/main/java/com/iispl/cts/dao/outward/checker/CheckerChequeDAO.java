@@ -1,6 +1,7 @@
 package com.iispl.cts.dao.outward.checker;
 
 import java.sql.Connection;
+
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.iispl.cts.data.CTSStaticData;
+import com.cts.inward.config.ConnectionPool;
 import com.iispl.cts.model.outward.ChequeProcessing;
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.model.outward.OutwardCheque;
@@ -21,6 +22,9 @@ public class CheckerChequeDAO {
 	 * ============================================================ GET PARTICULAR
 	 * CHEQUE ============================================================
 	 */
+	 private final javax.sql.DataSource dataSource =
+	            ConnectionPool.getDataSource();
+
 
 	public OutwardCheque getCheque(String batchNumber, String chequeNumber) {
 
@@ -31,7 +35,7 @@ public class CheckerChequeDAO {
 				+ "       city_code, " + "       return_reason_id, " + "       checker_remarks "
 				+ "FROM outward_cheque " + "WHERE batch_number = ? " + "AND cheque_number = ?";
 
-		try (Connection connection = CTSStaticData.getConnection();
+		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setString(1, batchNumber);
@@ -116,7 +120,7 @@ public class CheckerChequeDAO {
 				+ "       city_code, " + "       return_reason_id, " + "       checker_remarks "
 				+ "FROM outward_cheque " + "WHERE batch_number = ? " + "ORDER BY cheque_number";
 
-		try (Connection connection = CTSStaticData.getConnection();
+		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setString(1, batchNumber);
@@ -200,7 +204,7 @@ public class CheckerChequeDAO {
 				+ "       ON ob.batch_number = oc.batch_number " + "WHERE UPPER(ob.batch_status) = 'CHECKER_VERIFIED' "
 				+ "GROUP BY ob.batch_number " + "ORDER BY ob.batch_number DESC";
 
-		try (Connection connection = CTSStaticData.getConnection();
+		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql);
 				ResultSet rs = statement.executeQuery()) {
 
@@ -255,7 +259,7 @@ public class CheckerChequeDAO {
 				+ "AND UPPER(TRIM(cp.checker_action)) = 'SEND_BACK' "
 				+ "AND UPPER(TRIM(oc.cheque_status)) = 'RE_VERIFIED' " + "ORDER BY oc.cheque_number";
 
-		try (Connection connection = CTSStaticData.getConnection();
+		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setString(1, batchNumber);
@@ -340,7 +344,7 @@ public class CheckerChequeDAO {
 		String sql = "UPDATE outward_cheque " + "SET cheque_status = 'CHECKER_PROCESSING' " + "WHERE batch_number = ? "
 				+ "AND cheque_number = ? " + "AND UPPER(TRIM(cheque_status)) = " + "'RE_VERIFIED'";
 
-		try (Connection connection = CTSStaticData.getConnection();
+		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setString(1, batchNumber);
@@ -372,7 +376,7 @@ public class CheckerChequeDAO {
 				+ "       checker_reason_code " + "FROM cheque_processing " + "WHERE batch_number = ? "
 				+ "AND cheque_number = ?";
 
-		try (Connection connection = CTSStaticData.getConnection();
+		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setString(1, batchNumber);
@@ -440,7 +444,7 @@ public class CheckerChequeDAO {
 		String sql = "SELECT reason_name " + "FROM return_reason_master " + "WHERE reason_code = ? "
 				+ "AND active = true";
 
-		try (Connection connection = CTSStaticData.getConnection();
+		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setString(1, reasonCode.trim());
@@ -477,7 +481,7 @@ public class CheckerChequeDAO {
 				+ "WHERE active = true " + "AND UPPER(TRIM(role_name)) = 'CHECKER' "
 				+ "AND UPPER(TRIM(reason_type)) = UPPER(TRIM(?)) " + "ORDER BY reason_name";
 
-		try (Connection connection = CTSStaticData.getConnection();
+		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setString(1, reasonType);
@@ -685,7 +689,7 @@ public class CheckerChequeDAO {
 		 * ========================================================
 		 */
 
-		try (Connection connection = CTSStaticData.getConnection()) {
+		try (Connection connection = dataSource.getConnection()) {
 
 			connection.setAutoCommit(false);
 
@@ -1039,7 +1043,7 @@ public class CheckerChequeDAO {
 				+ "AND active = true " + "AND UPPER(TRIM(role_name)) = 'CHECKER' "
 				+ "AND UPPER(TRIM(reason_type)) = UPPER(TRIM(?))";
 
-		try (Connection connection = CTSStaticData.getConnection();
+		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setString(1, reasonCode.trim());
@@ -1071,7 +1075,7 @@ public class CheckerChequeDAO {
 
 		Map<String, String> account = null;
 
-		try (Connection connection = CTSStaticData.getConnection();
+		try (Connection connection = dataSource.getConnection();
 				PreparedStatement statement = connection.prepareStatement(sql)) {
 
 			statement.setString(1, accountNumber);

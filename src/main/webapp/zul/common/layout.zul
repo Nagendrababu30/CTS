@@ -4,7 +4,7 @@
 
 
     <style src="/css/common/common.css" />
-    <style src="/css/common/loader.css?v=3" />
+    <style src="/css/common/loader.css?v=4" />
 
     <n:link
         rel="stylesheet"

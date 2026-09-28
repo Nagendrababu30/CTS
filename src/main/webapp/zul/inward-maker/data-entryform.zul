@@ -169,9 +169,9 @@
 						</hlayout>
 
 						<!-- Form Fields with Generous Spacing -->
-						<vlayout width="100%" spacing="24px" sclass="form-fields-container">
+						<vlayout width="100%" spacing="16px" sclass="form-fields-container">
 
-							<!-- ROW 1: Cheque Number + Account Number (Side by Side) -->
+							<!-- ROW 1: Cheque Number + Current Status (Side by Side) -->
 							<hlayout width="100%" spacing="16px">
 								<!-- Field 1: Cheque Number -->
 								<vlayout hflex="1" spacing="6px">
@@ -182,7 +182,18 @@
 									<textbox id="txtChequeNo" width="100%" placeholder="Enter cheque number" sclass="single-field-box"/>
 								</vlayout>
 
-								<!-- Field 2: Account Number -->
+								<!-- Field 2: Current Status -->
+								<vlayout hflex="1" spacing="6px">
+									<hlayout spacing="0" valign="middle">
+										<label value="CURRENT STATUS" sclass="single-field-label"/>
+									</hlayout>
+									<label id="currentStatusLabel" value="—" sclass="micr-status-error"/>
+								</vlayout>
+							</hlayout>
+
+							<!-- ROW 2: Account Number + Cheque Date (Side by Side) -->
+							<hlayout width="100%" spacing="16px">
+								<!-- Field 3: Account Number -->
 								<vlayout hflex="1" spacing="6px">
 									<hlayout spacing="0" valign="middle">
 										<label value="ACCOUNT NUMBER" sclass="single-field-label"/>
@@ -190,11 +201,8 @@
 									</hlayout>
 									<textbox id="txtAccountNo" width="100%" placeholder="Enter account number" sclass="single-field-box"/>
 								</vlayout>
-							</hlayout>
 
-							<!-- ROW 2: Cheque Date + Amount (Side by Side) -->
-							<hlayout width="100%" spacing="16px">
-								<!-- Field 3: Cheque Date -->
+								<!-- Field 4: Cheque Date -->
 								<vlayout hflex="1" spacing="6px">
 									<hlayout spacing="0" valign="middle">
 										<label value="CHEQUE DATE" sclass="single-field-label"/>
@@ -202,8 +210,11 @@
 									</hlayout>
 									<datebox id="dtChequeDate" width="100%" format="dd-MM-yyyy" buttonVisible="true" readonly="false" sclass="single-field-box"/>
 								</vlayout>
+							</hlayout>
 
-								<!-- Field 4: Cheque Amount (INR) -->
+							<!-- ROW 3: Amount + Amount In Words (Side by Side) -->
+							<hlayout width="100%" spacing="16px">
+								<!-- Field 5: Cheque Amount (INR) -->
 								<vlayout hflex="1" spacing="6px">
 									<hlayout spacing="0" valign="middle">
 										<label value="AMOUNT (₹)" sclass="single-field-label"/>
@@ -211,15 +222,15 @@
 									</hlayout>
 									<decimalbox id="decAmount" width="100%" placeholder="0.00" sclass="single-field-box"/>
 								</vlayout>
-							</hlayout>
 
-							<!-- ROW 3: Amount In Words (Full Width) -->
-							<vlayout width="100%" spacing="6px">
-								<hlayout spacing="0" valign="middle">
-									<label value="AMOUNT IN WORDS" sclass="single-field-label"/>
-								</hlayout>
-								<textbox id="txtAmountInWords" width="100%" placeholder="Amount in words" readonly="true" sclass="single-field-box amount-in-words-box"/>
-							</vlayout>
+								<!-- Field 6: Amount In Words -->
+								<vlayout hflex="1" spacing="6px">
+									<hlayout spacing="0" valign="middle">
+										<label value="AMOUNT IN WORDS" sclass="single-field-label"/>
+									</hlayout>
+									<textbox id="txtAmountInWords" width="100%" placeholder="Amount in words" readonly="true" sclass="single-field-box amount-in-words-box"/>
+								</vlayout>
+							</hlayout>
 
 						</vlayout>
 

@@ -105,7 +105,7 @@ public class SendBatchToCheckerDaoImpl implements SendBatchToCheckerDao {
             connection.setAutoCommit(false);
 
             try {
-                // 1. Check if this batch has a previous Checker (i.e. was returned to maker)
+                // 1. Check if this batch has a previous Checker 
                 Integer previousCheckerId = null;
                 String findCheckerSql = """
                         SELECT bl.user_id
@@ -200,7 +200,10 @@ public class SendBatchToCheckerDaoImpl implements SendBatchToCheckerDao {
                 // 5. Update existing status to SENT_TO_CHECKER for cheques in the batch (excluding RETURN_BY_MAKER, ACCEPT, REJECT)
                 String updateChequeSql = """
                         UPDATE inward_cheque_status_history
-                        SET status = 'SENT_TO_CHECKER'
+                        SET status = 'SENT_TO_CHECKER',
+                            checker_action = NULL,
+                            checker_id = NULL,
+                            checker_action_on = NULL
                         WHERE cheque_number IN (
                             SELECT c.cheque_number
                             FROM inward_cheque c

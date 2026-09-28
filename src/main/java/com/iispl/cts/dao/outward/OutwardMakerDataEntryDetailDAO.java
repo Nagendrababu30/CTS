@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.cts.inward.config.ConnectionPool;
-import com.iispl.cts.data.CTSStaticData;
 import com.iispl.cts.model.outward.OutwardCheque;
 
 public class OutwardMakerDataEntryDetailDAO {

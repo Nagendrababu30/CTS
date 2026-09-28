@@ -18,11 +18,7 @@ public class User implements Serializable {
 
 	private String status;
 
-	// Legacy lastLogin — used by existing auth
 	private Timestamp lastLogin;
-
-	// lastLoginAt — used by UserDAOImpl
-	private Timestamp lastLoginAt;
 
 	public User() {
 	}
@@ -85,21 +81,11 @@ public class User implements Serializable {
 	}
 
 	public Timestamp getLastLogin() {
-		return lastLogin != null ? lastLogin : lastLoginAt;
+		return lastLogin;
 	}
 
 	public void setLastLogin(Timestamp lastLogin) {
 		this.lastLogin = lastLogin;
-		this.lastLoginAt = lastLogin;
-	}
-
-	public Timestamp getLastLoginAt() {
-		return lastLoginAt != null ? lastLoginAt : lastLogin;
-	}
-
-	public void setLastLoginAt(Timestamp lastLoginAt) {
-		this.lastLoginAt = lastLoginAt;
-		this.lastLogin = lastLoginAt;
 	}
 
 	@Override

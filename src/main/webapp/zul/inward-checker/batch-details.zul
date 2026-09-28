@@ -9,8 +9,8 @@
 
 <zk>
 
-    <style src="/css/inward/checker/batch-details.css?v=2"/>
-    <style src="/css/common/loader.css?v=3"/>
+    <style src="/css/inward/checker/batch-details.css?v=10"/>
+    <style src="/css/common/loader.css?v=10"/>
 
     <!-- =========================================================
          PAGE CONTENT
@@ -1222,6 +1222,7 @@
                 width="480px"
                 sclass="checker-modal batch-confirm-modal"
                 border="none"
+
                 closable="false"
                 visible="false"
                 position="center,center">

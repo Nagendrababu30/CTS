@@ -23,7 +23,8 @@
 		<vlayout spacing="12px" width="100%" height="100%"
 			sclass="inward-data-entry-layout">
 
-			<!-- BATCH HEADER STRIP (Floating Card - Matches MICR Repair)-->
+			
+
 			<hlayout width="100%" valign="middle" sclass="micr-header-card">
 
 				<!-- Left: Back Button & Batch Title -->

@@ -39,15 +39,11 @@ public class DashboardController extends GenericForwardComposer<Component> {
 
 	private static final SimpleDateFormat DATE_FMT = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
 
-	//ZUL COMPONENTS
-
-	//User card
 	private Label totalUsersValue;
 	private Label activeUsersValue;
 	private Label inactiveUsersValue;
 	private Label userManageLink;
 
-	//Session card
 	private Vlayout sessionStatusBox;
 	private Label sessionCurrentLbl;
 	private Label sessionNameLbl;
@@ -55,16 +51,11 @@ public class DashboardController extends GenericForwardComposer<Component> {
 	private Label sessionBadgeLbl;
 	private Label sessionManageLink;
 
-	//Recent logs
 	private Button viewAuditLogsBtn;
 	private Listbox recentAuditListbox;
 
-	//SERVICES
-
 	private AuditLogService auditLogService;
 	private SessionService sessionService;
-
-	//LIFECYCLE
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
@@ -76,7 +67,6 @@ public class DashboardController extends GenericForwardComposer<Component> {
 		auditLogService = new AuditLogServiceImpl();
 		sessionService = new SessionServiceImpl();
 
-		//Navigation links
 		userManageLink.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
 			@Override
 			public void onEvent(Event e) throws Exception {
@@ -98,13 +88,12 @@ public class DashboardController extends GenericForwardComposer<Component> {
 			}
 		});
 
-		//Load all dashboard data
 		loadUserCounts();
 		loadSessionState();
 		loadRecentAuditLogs();
 	}
 
-	//USER COUNTS
+	// Load user counts
 
 	private void loadUserCounts() {
 
@@ -123,7 +112,7 @@ public class DashboardController extends GenericForwardComposer<Component> {
 		}
 	}
 
-	//SESSION STATE 
+	// load session state
 
 	private void loadSessionState() {
 
@@ -156,7 +145,7 @@ public class DashboardController extends GenericForwardComposer<Component> {
 		}
 	}
 
-	//RECENT AUDIT LOGS - top 5 from user_session 
+	// Recent audit logs - top 5 from user_session
 
 	private void loadRecentAuditLogs() {
 
@@ -170,33 +159,65 @@ public class DashboardController extends GenericForwardComposer<Component> {
 
 				Listitem item = new Listitem();
 
-				//User ID
 				Listcell userIdCell = new Listcell();
 				Label userIdLabel = new Label(log.getUserId() == null ? "-" : String.valueOf(log.getUserId()));
 				userIdLabel.setSclass("audit-user-label");
 				userIdCell.appendChild(userIdLabel);
 				item.appendChild(userIdCell);
 
-				//Role
 				Listcell roleCell = new Listcell();
 				Label roleLabel = new Label(log.getRoleName() == null ? "-" : log.getRoleName());
 				roleLabel.setSclass("audit-module-label");
 				roleCell.appendChild(roleLabel);
 				item.appendChild(roleCell);
 
-				//Login
-				Listcell loginCell = new Listcell();
-				Label loginLabel = new Label(log.getLoginTime() == null ? "-" : DATE_FMT.format(log.getLoginTime()));
-				loginLabel.setSclass("audit-datetime-label");
-				loginCell.appendChild(loginLabel);
-				item.appendChild(loginCell);
+				Listcell loginDateCell = new Listcell();
+				String loginDateStr = "-";
+				if (log.getLoginTime() != null) {
+					SimpleDateFormat dateFmt = new SimpleDateFormat("dd/MM/yyyy");
+					dateFmt.setTimeZone(IST);
+					loginDateStr = dateFmt.format(log.getLoginTime());
+				}
+				Label loginDateLabel = new Label(loginDateStr);
+				loginDateLabel.setSclass("audit-datetime-label");
+				loginDateCell.appendChild(loginDateLabel);
+				item.appendChild(loginDateCell);
 
-				//Logout
-				Listcell logoutCell = new Listcell();
-				Label logoutLabel = new Label(log.getLogoutTime() == null ? "-" : DATE_FMT.format(log.getLogoutTime()));
-				logoutLabel.setSclass("audit-datetime-label");
-				logoutCell.appendChild(logoutLabel);
-				item.appendChild(logoutCell);
+				Listcell loginTimeCell = new Listcell();
+				String loginTimeStr = "-";
+				if (log.getLoginTime() != null) {
+					SimpleDateFormat timeFmt = new SimpleDateFormat("hh:mm a");
+					timeFmt.setTimeZone(IST);
+					loginTimeStr = timeFmt.format(log.getLoginTime());
+				}
+				Label loginTimeLabel = new Label(loginTimeStr);
+				loginTimeLabel.setSclass("audit-datetime-label");
+				loginTimeCell.appendChild(loginTimeLabel);
+				item.appendChild(loginTimeCell);
+
+				Listcell logoutDateCell = new Listcell();
+				String logoutDateStr = "-";
+				if (log.getLogoutTime() != null) {
+					SimpleDateFormat dateFmt = new SimpleDateFormat("dd/MM/yyyy");
+					dateFmt.setTimeZone(IST);
+					logoutDateStr = dateFmt.format(log.getLogoutTime());
+				}
+				Label logoutDateLabel = new Label(logoutDateStr);
+				logoutDateLabel.setSclass("audit-datetime-label");
+				logoutDateCell.appendChild(logoutDateLabel);
+				item.appendChild(logoutDateCell);
+
+				Listcell logoutTimeCell = new Listcell();
+				String logoutTimeStr = "-";
+				if (log.getLogoutTime() != null) {
+					SimpleDateFormat timeFmt = new SimpleDateFormat("hh:mm a");
+					timeFmt.setTimeZone(IST);
+					logoutTimeStr = timeFmt.format(log.getLogoutTime());
+				}
+				Label logoutTimeLabel = new Label(logoutTimeStr);
+				logoutTimeLabel.setSclass("audit-datetime-label");
+				logoutTimeCell.appendChild(logoutTimeLabel);
+				item.appendChild(logoutTimeCell);
 
 				item.setValue(log);
 				recentAuditListbox.appendChild(item);

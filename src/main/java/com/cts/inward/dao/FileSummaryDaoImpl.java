@@ -2,6 +2,7 @@ package com.cts.inward.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
@@ -22,28 +23,48 @@ public class FileSummaryDaoImpl
         return new FileSummaryDaoImpl(ConnectionPool.getDataSource());
     }
 
-    /*
-     * Called once when a file is first moved to incoming/.
-     * Creates the tracking row with file_stage = INCOMING.
-     */
+    // Called once when a file is first moved to incoming/.
+    // Creates or updates the tracking row with file_stage = INCOMING.
     @Override
     public void insertFileSummary(long fileId, String fileName) {
 
-        String sql =
+        String checkSql = "SELECT 1 FROM inward_file_summary WHERE file_id = ?";
+        String insertSql =
                 "INSERT INTO inward_file_summary "
                 + "(file_id, file_name, file_stage) "
                 + "VALUES (?, ?, 'INCOMING')";
+        String updateSql =
+                "UPDATE inward_file_summary "
+                + "SET file_stage = 'INCOMING', file_name = ? "
+                + "WHERE file_id = ?";
 
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = dataSource.getConnection()) {
 
-            statement.setLong(1, fileId);
-            statement.setString(2, fileName);
-            statement.executeUpdate();
+            boolean exists = false;
+            try (PreparedStatement checkStatement = connection.prepareStatement(checkSql)) {
+                checkStatement.setLong(1, fileId);
+                try (ResultSet resultSet = checkStatement.executeQuery()) {
+                    exists = resultSet.next();
+                }
+            }
+
+            if (exists) {
+                try (PreparedStatement updateStatement = connection.prepareStatement(updateSql)) {
+                    updateStatement.setString(1, fileName);
+                    updateStatement.setLong(2, fileId);
+                    updateStatement.executeUpdate();
+                }
+            } else {
+                try (PreparedStatement insertStatement = connection.prepareStatement(insertSql)) {
+                    insertStatement.setLong(1, fileId);
+                    insertStatement.setString(2, fileName);
+                    insertStatement.executeUpdate();
+                }
+            }
 
         } catch (SQLException e) {
             throw new IllegalStateException(
-                    "Failed to insert inward_file_summary for fileId: "
+                    "Failed to save inward_file_summary for fileId: "
                     + fileId, e);
         }
     }

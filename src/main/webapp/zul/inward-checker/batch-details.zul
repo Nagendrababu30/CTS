@@ -9,8 +9,8 @@
 
 <zk>
 
-    <style src="/css/inward/checker/batch-details.css"/>
-    <style src="/css/common/loader.css?v=3"/>
+    <style src="/css/inward/checker/batch-details.css?v=10"/>
+    <style src="/css/common/loader.css?v=10"/>
 
     <!-- =========================================================
          PAGE CONTENT
@@ -389,10 +389,7 @@
                         <hlayout spacing="12px" valign="middle" width="100%">
                             <label sclass="z-icon-exclamation-triangle" style="font-size:22px; color:#B42318;"/>
                             <vlayout spacing="2px" hflex="1">
-                                <hlayout spacing="8px" valign="middle">
-                                    <label value="Cheque Returned by Maker" style="font-size:15px; font-weight:800; color:#B42318;"/>
-                                    <label value="RETURN_BY_MAKER" style="font-size:11px; font-weight:700; background:#FEE4E2; color:#B42318; border:1px solid #FECDCA; border-radius:12px; padding:2px 8px;"/>
-                                </hlayout>
+                                <label value="Cheque Returned by Maker" style="font-size:15px; font-weight:800; color:#B42318;"/>
                             </vlayout>
                         </hlayout>
                     </div>
@@ -402,7 +399,6 @@
                         <label value="Maker Return Reason(s) &amp; Remarks" style="font-size:13px; font-weight:800; color:#0F172A; text-transform:uppercase; letter-spacing:0.5px;"/>
                         
                         <vlayout width="100%" spacing="6px">
-                            <label value="Return Reasons:" style="font-size:12px; font-weight:600; color:#475467;"/>
                             <vlayout id="makerReturnReasonsList" width="100%" spacing="6px">
                                 <!-- Populated dynamically by BatchDetailsController -->
                             </vlayout>
@@ -1215,6 +1211,101 @@
                     <button id="returnConfirmButton"
                             label="Confirm Send Back"
                             sclass="modal-btn-confirm-return"/>
+                </hlayout>
+            </vlayout>
+        </window>
+
+        <!-- =====================================================
+             BATCH COMPLETE CONFIRMATION MODAL
+             ===================================================== -->
+        <window id="batchCompleteConfirmWindow"
+                width="480px"
+                sclass="checker-modal batch-confirm-modal"
+                border="none"
+
+                closable="false"
+                visible="false"
+                position="center,center">
+
+            <!-- Modal Header -->
+            <hlayout width="100%" spacing="0" valign="middle" sclass="custom-modal-header header-blue"
+                     style="background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%) !important; padding: 16px 22px !important; border-top-left-radius: 16px; border-top-right-radius: 16px; border-bottom: 1px solid rgba(0,0,0,0.08);">
+                <div sclass="modal-header-icon-circle"
+                     style="width: 38px; height: 38px; min-width: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.22); border: 1.5px solid rgba(255, 255, 255, 0.4);">
+                    <label value="?" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; font-weight: 800; color: #FFFFFF; line-height: 1;"/>
+                </div>
+                <vlayout spacing="2px" hflex="1" style="margin-left: 14px;">
+                    <label value="Batch Verification Complete"
+                           style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 800; color: #FFFFFF !important; letter-spacing: -0.01em; display: block;"/>
+                    <label value="All cheques in this batch have been verified"
+                           style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12.5px; font-weight: 500; color: rgba(255, 255, 255, 0.9) !important; display: block;"/>
+                </vlayout>
+            </hlayout>
+
+            <!-- Modal Body -->
+            <vlayout width="100%" spacing="16px" sclass="custom-modal-body" style="padding: 20px 24px !important; background: #FFFFFF !important;">
+                <div style="background: #F0F9FF; border: 1.5px solid #BAE6FD; border-radius: 10px; padding: 16px 18px;">
+                    <label value="All cheques in this batch have been verified. Do you want to complete batch verification now?"
+                           style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 500; color: #0C4A6E; line-height: 1.6; display: block;"/>
+                </div>
+
+                <!-- Footer Buttons -->
+                <hlayout width="100%" spacing="12px" sclass="modal-footer-row" style="margin-top: 4px; padding-top: 12px; border-top: 1px solid #E2E8F0;">
+                    <hlayout hflex="1" spacing="0"/>
+
+                    <button id="batchConfirmNoBtn"
+                            label="No"
+                            sclass="modal-btn-cancel"
+                            style="min-width: 90px !important; height: 38px !important; padding: 0 20px !important; border-radius: 8px !important; font-weight: 600 !important; font-size: 13.5px !important; background: #FFFFFF !important; color: #475569 !important; border: 1.5px solid #CBD5E1 !important; cursor: pointer !important;"/>
+
+                    <button id="batchConfirmYesBtn"
+                            label="Yes"
+                            sclass="modal-btn-confirm-complete"
+                            style="min-width: 100px !important; height: 38px !important; padding: 0 24px !important; border-radius: 8px !important; font-weight: 700 !important; font-size: 13.5px !important; background: linear-gradient(180deg, #0284C7 0%, #0369A1 100%) !important; color: #FFFFFF !important; border: 1px solid #0369A1 !important; box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3) !important; cursor: pointer !important;"/>
+                </hlayout>
+            </vlayout>
+        </window>
+
+        <!-- =====================================================
+             BATCH COMPLETE SUCCESS MODAL
+             ===================================================== -->
+        <window id="batchCompleteSuccessWindow"
+                width="460px"
+                sclass="checker-modal batch-success-modal"
+                border="none"
+                closable="false"
+                visible="false"
+                position="center,center">
+
+            <!-- Modal Header -->
+            <hlayout width="100%" spacing="0" valign="middle" sclass="custom-modal-header header-green"
+                     style="background: linear-gradient(135deg, #16A34A 0%, #166534 100%) !important; padding: 16px 22px !important; border-top-left-radius: 16px; border-top-right-radius: 16px; border-bottom: 1px solid rgba(0,0,0,0.08);">
+                <div sclass="modal-header-icon-circle"
+                     style="width: 38px; height: 38px; min-width: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.22); border: 1.5px solid rgba(255, 255, 255, 0.4);">
+                    <label value="✓" style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; font-weight: 800; color: #FFFFFF; line-height: 1;"/>
+                </div>
+                <vlayout spacing="2px" hflex="1" style="margin-left: 14px;">
+                    <label id="lblBatchSuccessTitle" value="Verification Completed"
+                           style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 800; color: #FFFFFF !important; letter-spacing: -0.01em; display: block;"/>
+                    <label id="lblBatchSuccessSubtitle" value="Batch clearing processed successfully"
+                           style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12.5px; font-weight: 500; color: rgba(255, 255, 255, 0.9) !important; display: block;"/>
+                </vlayout>
+            </hlayout>
+
+            <!-- Modal Body -->
+            <vlayout width="100%" spacing="16px" sclass="custom-modal-body" style="padding: 20px 24px !important; background: #FFFFFF !important;">
+                <div style="background: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: 10px; padding: 16px 18px;">
+                    <label id="lblBatchSuccessMessage"
+                           value="Verification completed successfully."
+                           style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 500; color: #166534; line-height: 1.6; display: block;"/>
+                </div>
+
+                <!-- Footer Button -->
+                <hlayout width="100%" spacing="12px" sclass="modal-footer-row" style="margin-top: 4px; padding-top: 12px; border-top: 1px solid #E2E8F0; justify-content: flex-end;">
+                    <button id="batchSuccessOkBtn"
+                            label="OK"
+                            sclass="modal-btn-confirm-accept"
+                            style="min-width: 100px !important; height: 38px !important; padding: 0 24px !important; border-radius: 8px !important; font-weight: 700 !important; font-size: 13.5px !important; background: linear-gradient(180deg, #16A34A 0%, #15803D 100%) !important; color: #FFFFFF !important; border: 1px solid #15803D !important; box-shadow: 0 2px 6px rgba(22, 163, 74, 0.3) !important; cursor: pointer !important;"/>
                 </hlayout>
             </vlayout>
         </window>

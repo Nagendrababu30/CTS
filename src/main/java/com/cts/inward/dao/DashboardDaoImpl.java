@@ -1,5 +1,4 @@
 package com.cts.inward.dao;
- 
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,6 +14,7 @@ public class DashboardDaoImpl implements DashboardDao {
 	@Override
 	public List<DashboardBatchDto> getDashboardBatches() {
 
+	    // Get latest batch status and latest lock information
 	    String sql = """
 	            SELECT
 	                b.batch_id,
@@ -27,9 +27,6 @@ public class DashboardDaoImpl implements DashboardDao {
 
 	            FROM public.inward_batch b
 
-	            /*
-	             * Get latest batch status.
-	             */
 	            LEFT JOIN (
 	                SELECT DISTINCT ON (batch_id)
 	                    batch_id,
@@ -42,10 +39,6 @@ public class DashboardDaoImpl implements DashboardDao {
 	            ) h
 	                ON b.batch_id = h.batch_id
 
-	            /*
-	             * Get active lock record for each batch (prioritize LOCKED),
-	             * or latest lock record if none is currently LOCKED.
-	             */
 	            LEFT JOIN (
 	                SELECT DISTINCT ON (batch_id)
 	                    batch_id,
@@ -56,16 +49,15 @@ public class DashboardDaoImpl implements DashboardDao {
 	                FROM public.inward_batch_lock
 	                ORDER BY
 	                    batch_id,
-	                    CASE WHEN lock_status = 'LOCKED' THEN 1 ELSE 2 END,
+	                    CASE
+	                        WHEN lock_status = 'LOCKED' THEN 1
+	                        ELSE 2
+	                    END,
 	                    locked_time DESC,
 	                    lock_id DESC
 	            ) l
 	                ON b.batch_id = l.batch_id
 
-	            /*
-	             * Get username of the user who owns
-	             * the latest lock.
-	             */
 	            LEFT JOIN public."user" u
 	                ON u.user_id = l.user_id
 
@@ -78,22 +70,17 @@ public class DashboardDaoImpl implements DashboardDao {
 	            ORDER BY b.batch_id
 	            """;
 
-
-	    List<DashboardBatchDto> batches =
-	            new ArrayList<>();
-
+	    List<DashboardBatchDto> batches = new ArrayList<>();
 
 	    try (
-	            Connection connection =
-	                    ConnectionPool
-	                            .getDataSource()
-	                            .getConnection();
+	        Connection connection =
+	                ConnectionPool.getDataSource().getConnection();
 
-	            PreparedStatement statement =
-	                    connection.prepareStatement(sql);
+	        PreparedStatement statement =
+	                connection.prepareStatement(sql);
 
-	            ResultSet rs =
-	                    statement.executeQuery()
+	        ResultSet rs =
+	                statement.executeQuery()
 	    ) {
 
 	        while (rs.next()) {
@@ -101,66 +88,37 @@ public class DashboardDaoImpl implements DashboardDao {
 	            Long lockUserId = null;
 
 	            if (rs.getObject("lock_user_id") != null) {
-
-	                lockUserId =
-	                        rs.getLong("lock_user_id");
+	                lockUserId = rs.getLong("lock_user_id");
 	            }
-
 
 	            String lockUserName =
 	                    rs.getString("lock_user_name");
 
-
 	            DashboardBatchDto batch =
 	                    new DashboardBatchDto(
-
 	                            rs.getLong("batch_id"),
-
 	                            rs.getInt("total_cheques"),
-
 	                            rs.getString("batch_status"),
-
 	                            lockUserId,
-
 	                            lockUserName,
-
 	                            rs.getString("lock_status")
 	                    );
-
 
 	            batches.add(batch);
 	        }
 
-
 	    } catch (Exception e) {
 
 	        throw new RuntimeException(
-	                "Error retrieving dashboard batches",
-	                e);
+	                "Error retrieving dashboard batches", e);
 	    }
-
 
 	    return batches;
 	}
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+	
+	
+	
+	
     
     @Override
     public boolean lockBatch(
@@ -217,87 +175,68 @@ public class DashboardDaoImpl implements DashboardDao {
                 )
                 """;
 
-        try (Connection connection =
-                ConnectionPool
-                        .getDataSource()
-                        .getConnection()) {
+		try (Connection connection = ConnectionPool.getDataSource().getConnection()) {
 
-            connection.setAutoCommit(false);
+			connection.setAutoCommit(false);
 
-            try (PreparedStatement ps =
-                    connection.prepareStatement(checkSql)) {
+			try (PreparedStatement ps = connection.prepareStatement(checkSql)) {
 
-                ps.setLong(1, batchId);
+				ps.setLong(1, batchId);
 
-                try (ResultSet rs =
-                        ps.executeQuery()) {
+				try (ResultSet rs = ps.executeQuery()) {
 
-                    if (rs.next()) {
-                        connection.rollback();
-                        return false;
-                    }
-                }
-            }
+					if (rs.next()) {
+						connection.rollback();
+						return false;
+					}
+				}
+			}
 
-            try (PreparedStatement ps =
-                    connection.prepareStatement(lockSql)) {
+			try (PreparedStatement ps = connection.prepareStatement(lockSql)) {
 
-                ps.setLong(1, batchId);
-                ps.setLong(2, userId);
+				ps.setLong(1, batchId);
+				ps.setLong(2, userId);
 
-                if (ps.executeUpdate() != 1) {
-                    connection.rollback();
-                    return false;
-                }
-            }
+				if (ps.executeUpdate() != 1) {
+					connection.rollback();
+					return false;
+				}
+			}
 
-            try (PreparedStatement ps =
-                    connection.prepareStatement(historySql)) {
+			try (PreparedStatement ps = connection.prepareStatement(historySql)) {
 
-                ps.setLong(1, batchId);
-                ps.setLong(2, userId);
+				ps.setLong(1, batchId);
+				ps.setLong(2, userId);
 
-                if (ps.executeUpdate() != 1) {
-                    connection.rollback();
-                    return false;
-                }
-            }
+				if (ps.executeUpdate() != 1) {
+					connection.rollback();
+					return false;
+				}
+			}
 
-            connection.commit();
-            return true;
+			connection.commit();
+			return true;
 
-        } catch (Exception e) {
+		} catch (Exception e) {
 
-            throw new RuntimeException(
-                    "Error locking batch: " + batchId,
-                    e);
-        }
-    }
+			throw new RuntimeException("Error locking batch: " + batchId, e);
+		}
+	}
 
+	@Override
+	public boolean updateBatchStatus(Long batchId, String batchStatus, Long userId) {
 
-    @Override
-    public boolean updateBatchStatus(
-            Long batchId,
-            String batchStatus,
-            Long userId) {
+		if (batchId == null || batchStatus == null || batchStatus.trim().isEmpty() || userId == null) {
 
-        if (batchId == null
-                || batchStatus == null
-                || batchStatus.trim().isEmpty()
-                || userId == null) {
+			return false;
+		}
 
-            return false;
-        }
+		String status = batchStatus.trim().toUpperCase();
 
-        String status =
-                batchStatus.trim().toUpperCase();
+		if (!status.equals("MICR_REPAIR") && !status.equals("DATA_ENTRY") && !status.equals("SENT_TO_CHECKER")) {
 
-        if (!status.equals("MICR_REPAIR")
-                && !status.equals("DATA_ENTRY")
-                && !status.equals("SENT_TO_CHECKER")) {
-
-            return false;
-        }
+			return false;
+		}
 
         String historySql = """
                 INSERT INTO public.inward_batch_history
@@ -320,56 +259,40 @@ public class DashboardDaoImpl implements DashboardDao {
                 )
                 """;
 
-        try (Connection connection =
-                ConnectionPool
-                        .getDataSource()
-                        .getConnection()) {
+		try (Connection connection = ConnectionPool.getDataSource().getConnection()) {
 
-            connection.setAutoCommit(false);
+			connection.setAutoCommit(false);
 
-            try (PreparedStatement ps =
-                    connection.prepareStatement(historySql)) {
+			try (PreparedStatement ps = connection.prepareStatement(historySql)) {
 
-                ps.setLong(1, batchId);
-                ps.setString(2, status);
-                ps.setLong(3, userId);
+				ps.setLong(1, batchId);
+				ps.setString(2, status);
+				ps.setLong(3, userId);
 
-                if (status.equals("MICR_REPAIR")) {
+				if (status.equals("MICR_REPAIR")) {
 
-                    ps.setString(
-                            4,
-                            "MICR validation requires repair");
+					ps.setString(4, "MICR validation requires repair");
 
-                    ps.setString(
-                            5,
-                            "Batch moved to MICR Repair");
+					ps.setString(5, "Batch moved to MICR Repair");
 
-                } else if (status.equals("DATA_ENTRY")) {
+				} else if (status.equals("DATA_ENTRY")) {
 
-                    ps.setString(
-                            4,
-                            "MICR validation completed");
+					ps.setString(4, "MICR validation completed");
 
-                    ps.setString(
-                            5,
-                            "Batch moved to Data Entry");
+					ps.setString(5, "Batch moved to Data Entry");
 
-                } else {
+				} else {
 
-                    ps.setString(
-                            4,
-                            "Maker processing completed");
+					ps.setString(4, "Maker processing completed");
 
-                    ps.setString(
-                            5,
-                            "Batch sent to Checker");
-                }
+					ps.setString(5, "Batch sent to Checker");
+				}
 
-                if (ps.executeUpdate() != 1) {
-                    connection.rollback();
-                    return false;
-                }
-            }
+				if (ps.executeUpdate() != 1) {
+					connection.rollback();
+					return false;
+				}
+			}
 
             if (status.equals("SENT_TO_CHECKER")) {
 
@@ -390,42 +313,35 @@ public class DashboardDaoImpl implements DashboardDao {
                         )
                         """;
 
-                try (PreparedStatement ps =
-                        connection.prepareStatement(unlockSql)) {
+				try (PreparedStatement ps = connection.prepareStatement(unlockSql)) {
 
-                    ps.setLong(1, batchId);
-                    ps.setLong(2, userId);
+					ps.setLong(1, batchId);
+					ps.setLong(2, userId);
 
-                    if (ps.executeUpdate() != 1) {
-                        connection.rollback();
-                        return false;
-                    }
-                }
-            }
+					if (ps.executeUpdate() != 1) {
+						connection.rollback();
+						return false;
+					}
+				}
+			}
 
-            connection.commit();
-            return true;
+			connection.commit();
+			return true;
 
-        } catch (Exception e) {
+		} catch (Exception e) {
 
-            throw new RuntimeException(
-                    "Error updating batch status: "
-                            + batchId,
-                    e);
-        }
-    }
+			throw new RuntimeException("Error updating batch status: " + batchId, e);
+		}
+	}
 
+	@Override
+	public List<String> getReturnedChequeReasons(Long batchId) {
 
-    @Override
-    public List<String> getReturnedChequeReasons(
-            Long batchId) {
+		List<String> reasons = new ArrayList<>();
 
-        List<String> reasons =
-                new ArrayList<>();
-
-        if (batchId == null) {
-            return reasons;
-        }
+		if (batchId == null) {
+			return reasons;
+		}
 
         String sql = """
                 SELECT DISTINCT latest.return_reason_code
@@ -445,41 +361,30 @@ public class DashboardDaoImpl implements DashboardDao {
                   AND latest.status = 'RETURN_TO_MAKER'
                 """;
 
-        try (
-                Connection connection =
-                        ConnectionPool
-                                .getDataSource()
-                                .getConnection();
+		try (Connection connection = ConnectionPool.getDataSource().getConnection();
 
-                PreparedStatement ps =
-                        connection.prepareStatement(sql)
-        ) {
+				PreparedStatement ps = connection.prepareStatement(sql)) {
 
-            ps.setLong(1, batchId);
+			ps.setLong(1, batchId);
 
-            try (ResultSet rs =
-                    ps.executeQuery()) {
+			try (ResultSet rs = ps.executeQuery()) {
 
-                while (rs.next()) {
+				while (rs.next()) {
 
-                    String reason =
-                            rs.getString(
-                                    "return_reason_code");
+					String reason = rs.getString("return_reason_code");
 
-                    if (reason != null
-                            && !reason.trim().isEmpty()) {
+					if (reason != null && !reason.trim().isEmpty()) {
 
-                        reasons.add(
-                                reason.trim());
-                    }
-                }
-            }
+						reasons.add(reason.trim());
+					}
+				}
+			}
 
-        } catch (Exception e) {
+		} catch (Exception e) {
 
-            e.printStackTrace();
-        }
+			e.printStackTrace();
+		}
 
-        return reasons;
-    }
+		return reasons;
+	}
 }

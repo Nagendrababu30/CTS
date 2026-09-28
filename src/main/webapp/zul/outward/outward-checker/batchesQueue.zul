@@ -12,17 +12,10 @@
 
 <zk>
 
-    <!-- =========================================================
-         BATCH QUEUE CSS
-         ========================================================= -->
-
+    <!-- Loads the Batch Queue page styles. -->
     <style src="/css/outward/checker/batch_queue.css"/>
 
-
-    <!-- =========================================================
-         PAGE CONTENT
-         ========================================================= -->
-
+    <!-- Defines the main Batch Queue content area. -->
     <div
         self="@define(content)"
         width="100%"
@@ -37,11 +30,7 @@
             sclass="checker-batch-layout"
             apply="com.iispl.cts.controller.outward.checker.CheckerBatchQueueController">
 
-
-            <!-- =================================================
-                 PAGE HEADER
-                 ================================================= -->
-
+            <!-- Displays the Batch Queue page header. -->
             <hlayout
                 width="100%"
                 valign="middle"
@@ -54,20 +43,10 @@
                     <label
                         value="Batch Queue"
                         sclass="batch-title"/>
-
-                    <label
-                        value="Batches assigned to you for Checker verification"
-                        sclass="batch-subtitle"/>
-
                 </vlayout>
-
             </hlayout>
 
-
-            <!-- =================================================
-                 SEARCH PANEL
-                 ================================================= -->
-
+            <!-- Provides batch search and refresh controls. -->
             <hlayout
                 width="100%"
                 valign="middle"
@@ -91,24 +70,15 @@
                     label="Refresh"
                     iconSclass="z-icon-refresh"
                     sclass="batch-refresh-button"/>
-
             </hlayout>
 
-
-            <!-- =================================================
-                 BATCH SECTION
-                 ================================================= -->
-
+            <!-- Displays the batches assigned to the current Checker. -->
             <vlayout
                 width="100%"
                 spacing="0"
                 sclass="batch-section">
 
-
-                <!-- =================================================
-                     SECTION HEADER
-                     ================================================= -->
-
+                <!-- Displays the batch list heading. -->
                 <hlayout
                     width="100%"
                     valign="middle"
@@ -117,14 +87,9 @@
                     <label
                         value="My Batches"
                         sclass="batch-section-title"/>
-
                 </hlayout>
 
-
-                <!-- =================================================
-                     BATCH TABLE
-                     ================================================= -->
-
+                <!-- Displays the assigned batches and available actions. -->
                 <listbox
                     id="batchListbox"
                     width="100%"
@@ -154,34 +119,23 @@
                             align="center"/>
 
                     </listhead>
-
                 </listbox>
 
+                <!-- Provides pagination for the batch list. -->
+                <hlayout
+                    width="100%"
+                    valign="middle"
+                    sclass="batch-pagination">
 
-                <!-- =================================================
-                     PAGINATION
-                     ================================================= -->
-
-             <hlayout
-    width="100%"
-    valign="middle"
-    sclass="batch-pagination">
-
-    <paging
-        id="batchPaging"
-        pageSize="10"
-        totalSize="0"
-         mold="default"
-        autohide="false"/>
-
-</hlayout>
-
-           
+                    <paging
+                        id="batchPaging"
+                        pageSize="10"
+                        totalSize="0"
+                        mold="default"
+                        autohide="false"/>
+                </hlayout>
 
             </vlayout>
-
         </vlayout>
-
     </div>
-
 </zk>

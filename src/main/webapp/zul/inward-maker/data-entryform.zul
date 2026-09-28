@@ -24,7 +24,7 @@
 			sclass="inward-data-entry-layout">
 
 			<!-- ============================================================
-			     BATCH HEADER STRIP (Floating Card - Matches MICR Repair)
+			     BATCH HEADER STRIP (Floating Card - Matches MICR Repair) 
 			     ============================================================ -->
 			<hlayout width="100%" valign="middle" sclass="micr-header-card">
 

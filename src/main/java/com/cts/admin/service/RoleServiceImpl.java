@@ -37,7 +37,7 @@ public class RoleServiceImpl implements RoleService {
 			role.setStatus("ACTIVE");
 		return roleDAO.createRole(role);
 	}
- 
+
 	@Override
 	public boolean updateRole(Role role) {
 		if (role == null || role.getRoleId() == null)

@@ -24,6 +24,9 @@ public interface BatchService {
 
 	void saveBatch(NpciBatchData batchData);
 
+	// Check if a batch already exists in database
+	boolean isBatchExists(long batchId);
+
 	boolean completeDataEntry(long batchId, long userId);
 
 	long getBatchIdByFileName(String batchName);

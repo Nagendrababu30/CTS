@@ -2,417 +2,332 @@
 
 <zk xmlns:n="native">
 
-    <div
-        sclass="sidebar">
-        <vlayout
-    visible="${arg.roleName eq 'Outward Checker'}"
-    width="100%"
-    spacing="0px">
+	<div sclass="sidebar">
+		<vlayout visible="${arg.roleName eq 'Outward Checker'}"
+			width="100%" spacing="0px">
 
-    <!-- DASHBOARD -->
-    <a
-        href="/zul/outward/outward-checker/dashboard.zul"
-        sclass="${arg.active eq 'dashboard'
+			<!-- Dashboard -->
+			<a href="/zul/outward/outward-checker/dashboard.zul"
+				sclass="${arg.active eq 'dashboard'
             ? 'menu-item active-menu'
             : 'menu-item'}">
 
-        <n:i
-            class="fa-solid fa-house menu-icon"/>
+				<n:i class="fa-solid fa-house menu-icon" />
 
-        <label
-            value="Dashboard"
-            sclass="menu-label"/>
+				<label value="Dashboard" sclass="menu-label" />
 
-    </a>
+			</a>
 
 
-    <!-- BATCHES QUEUE -->
-    <a
-        href="/zul/outward/outward-checker/batchesQueue.zul"
-        sclass="${arg.active eq 'batchesQueue'
+			<!-- Batches queue -->
+			<a href="/zul/outward/outward-checker/batchesQueue.zul"
+				sclass="${arg.active eq 'batchesQueue'
             ? 'menu-item active-menu'
             : 'menu-item'}">
 
-        <n:i
-            class="fa-solid fa-layer-group menu-icon"/>
+				<n:i class="fa-solid fa-layer-group menu-icon" />
 
-        <label
-            value="Batches Queue"
-            sclass="menu-label"/>
+				<label value="Batches Queue" sclass="menu-label" />
 
-    </a>
+			</a>
 
 
-    <!-- REPORTS -->
-    <a
-        href="/zul/outward/outward-checker/reports.zul"
-        sclass="${arg.active eq 'reports'
+			<!-- Reports -->
+			<a href="/zul/outward/outward-checker/reports.zul"
+				sclass="${arg.active eq 'reports'
             ? 'menu-item active-menu'
             : 'menu-item'}">
 
-        <n:i
-            class="fa-solid fa-chart-column menu-icon"/>
+				<n:i class="fa-solid fa-chart-column menu-icon" />
 
-        <label
-            value="Reports"
-            sclass="menu-label"/>
+				<label value="Reports" sclass="menu-label" />
 
-    </a>
+			</a>
 
 
-    <!-- SEND TO NPCI -->
-    <a
-        href="/zul/outward/outward-checker/sendToNPCI.zul"
-        sclass="${arg.active eq 'sendToNPCI'
+			<!-- Send to npci -->
+			<a href="/zul/outward/outward-checker/sendToNPCI.zul"
+				sclass="${arg.active eq 'sendToNPCI'
             ? 'menu-item active-menu'
             : 'menu-item'}">
 
-        <n:i
-            class="fa-solid fa-paper-plane menu-icon"/>
+				<n:i class="fa-solid fa-paper-plane menu-icon" />
 
-        <label
-            value="Send to NPCI"
-            sclass="menu-label"/>
+				<label value="Send to NPCI" sclass="menu-label" />
 
-    </a>
+			</a>
 
-</vlayout>
-        
- <!-- BATCH CAPTURE -->
+		</vlayout>
 
-<vlayout
-    visible="${arg.roleName eq 'Capture Operator'}"
-    width="100%"
-    spacing="0px">
+		<!-- Batch capture -->
 
-    <!-- BATCH CAPTURE -->
+		<vlayout visible="${arg.roleName eq 'Capture Operator'}"
+			width="100%" spacing="0px">
 
-    <a
-        href="/zul/outward/outward-maker/capture-operator-batch-capture.zul"
-        sclass="${arg.active eq 'batchCapture'
+
+			<a
+				href="/zul/outward/outward-maker/capture-operator-batch-capture.zul"
+				sclass="${arg.active eq 'batchCapture'
             ? 'menu-item active-menu'
             : 'menu-item'}">
 
-        <n:i
-            class="fa-solid fa-camera menu-icon"/>
+				<n:i class="fa-solid fa-camera menu-icon" />
 
-        <label
-            value="Batch Capture"
-            sclass="menu-label"/>
+				<label value="Batch Capture" sclass="menu-label" />
 
-    </a>
+			</a>
 
 
-    <!-- CAPTURED BATCHES -->
+			<!-- Captured batches -->
 
-    <a
-        href="/zul/outward/outward-maker/capture-operator-captured-batches.zul"
-        sclass="${arg.active eq 'capturedBatches'
+			<a
+				href="/zul/outward/outward-maker/capture-operator-captured-batches.zul"
+				sclass="${arg.active eq 'capturedBatches'
             ? 'menu-item active-menu'
             : 'menu-item'}">
 
-        <n:i
-            class="fa-solid fa-layer-group menu-icon"/>
+				<n:i class="fa-solid fa-layer-group menu-icon" />
 
-        <label
-            value="Captured Batches"
-            sclass="menu-label"/>
+				<label value="Captured Batches" sclass="menu-label" />
 
-    </a>
+			</a>
 
 
-    <!-- REPORTS -->
+			<!-- REPORTS -->
 
-   <!-- REPORTS -->
+			<!-- REPORTS -->
 
-<a
-    href="/zul/outward/outward-maker/capture-operator-reports.zul"
-    sclass="${arg.active eq 'captureReports'
+			<a
+				href="/zul/outward/outward-maker/capture-operator-reports.zul"
+				sclass="${arg.active eq 'captureReports'
         ? 'menu-item active-menu'
         : 'menu-item'}">
 
-    <n:i
-        class="fa-solid fa-chart-column menu-icon"/>
+				<n:i class="fa-solid fa-chart-column menu-icon" />
 
-    <label
-        value="Reports"
-        sclass="menu-label"/>
+				<label value="Reports" sclass="menu-label" />
 
-</a>
+			</a>
 
-</vlayout>
+		</vlayout>
 
-        <!-- OUTWARD MAKER -->
+		<!-- Outward maker -->
 
-<vlayout
-    visible="${arg.roleName eq 'Outward Maker'}"
-    width="100%"
-    spacing="0px">
+		<vlayout visible="${arg.roleName eq 'Outward Maker'}"
+			width="100%" spacing="0px">
 
 
-    <!-- DASHBOARD -->
+			<!-- Dashboard -->
 
-    <a
-        href="/zul/outward/outward-maker/outward-maker-dashboard.zul"
-        sclass="${arg.active eq 'dashboard'
+			<a
+				href="/zul/outward/outward-maker/outward-maker-dashboard.zul"
+				sclass="${arg.active eq 'dashboard'
             ? 'menu-item active-menu'
             : 'menu-item'}">
 
-        <n:i class="fa-solid fa-house menu-icon"/>
+				<n:i class="fa-solid fa-house menu-icon" />
 
-        <label
-            value="Dashboard"
-            sclass="menu-label"/>
+				<label value="Dashboard" sclass="menu-label" />
 
-    </a>
+			</a>
 
 
-    <!-- MICR REPAIR -->
+			<!-- Micr repair -->
 
-    <a
-        href="/zul/outward/outward-maker/outward-maker-micr-repair.zul"
-        sclass="${arg.active eq 'micrRepair'
+			<a
+				href="/zul/outward/outward-maker/outward-maker-micr-repair.zul"
+				sclass="${arg.active eq 'micrRepair'
             ? 'menu-item active-menu'
             : 'menu-item'}">
 
-        <n:i class="fa-solid fa-wrench menu-icon"/>
+				<n:i class="fa-solid fa-wrench menu-icon" />
 
-        <label
-            value="MICR Repair"
-            sclass="menu-label"/>
+				<label value="MICR Repair" sclass="menu-label" />
 
-    </a>
+			</a>
 
 
-    <!-- DATA ENTRY -->
 
-    <!-- DATA ENTRY -->
-<a
-    href="/zul/outward/outward-maker/outward-maker-data-entry.zul"
-    sclass="${arg.active eq 'dataEntry'
+			<!-- Data Entry -->
+			<a
+				href="/zul/outward/outward-maker/outward-maker-data-entry.zul"
+				sclass="${arg.active eq 'dataEntry'
         ? 'menu-item active-menu'
         : 'menu-item'}">
 
-    <n:i
-        class="fa-solid fa-pen-to-square menu-icon"/>
+				<n:i class="fa-solid fa-pen-to-square menu-icon" />
 
-    <label
-        value="Data Entry"
-        sclass="menu-label"/>
-</a>
+				<label value="Data Entry" sclass="menu-label" />
+			</a>
 
 
-    <!-- SEND TO CHECKER -->
+			<!-- Send to checker-->
 
-    <a
-        href="/zul/outward/outward-maker/outward-maker-send-to-checker.zul"
-        sclass="${arg.active eq 'sendToChecker'
+			<a
+				href="/zul/outward/outward-maker/outward-maker-send-to-checker.zul"
+				sclass="${arg.active eq 'sendToChecker'
             ? 'menu-item active-menu'
             : 'menu-item'}">
 
-        <n:i class="fa-solid fa-paper-plane menu-icon"/>
+				<n:i class="fa-solid fa-paper-plane menu-icon" />
 
-        <label
-            value="Send to Checker"
-            sclass="menu-label"/>
+				<label value="Send to Checker" sclass="menu-label" />
 
-    </a>
+			</a>
 
-</vlayout>
-         
-         
-         
-         
-   <!-- INWARD MAKER -->
-        <vlayout
-            visible="${arg.roleName eq 'Inward Maker'}"
-            width="100%"
-            spacing="0px">
+		</vlayout>
 
-            <!-- Dashboard -->
-            <a
-                href="/zul/inward-maker/dashboard.zul"
-                sclass="${arg.active eq 'dashboard' ? 'menu-item active-menu' : 'menu-item'}">
 
-                <n:i class="fa-solid fa-house menu-icon"></n:i>
 
-                <label
-                    value="Dashboard"
-                    sclass="menu-label" />
 
-            </a>
+		<!-- Inward maker -->
+		<vlayout visible="${arg.roleName eq 'Inward Maker'}"
+			width="100%" spacing="0px">
 
+			<!-- Dashboard -->
+			<a href="/zul/inward-maker/dashboard.zul"
+				sclass="${arg.active eq 'dashboard' ? 'menu-item active-menu' : 'menu-item'}">
 
-            <!-- MICR Repair -->
-            <a
-                href="/zul/inward-maker/micr-repair-list.zul"
-                sclass="${arg.active eq 'micr-repair' ? 'menu-item active-menu' : 'menu-item'}">
+				<n:i class="fa-solid fa-house menu-icon"></n:i>
 
-                <n:i class="fa-solid fa-wrench menu-icon"></n:i>
+				<label value="Dashboard" sclass="menu-label" />
 
-                <label
-                    value="MICR Repair"
-                    sclass="menu-label" />
+			</a>
 
-            </a>
 
+			<!-- Micr Repair -->
+			<a href="/zul/inward-maker/micr-repair-list.zul"
+				sclass="${arg.active eq 'micr-repair' ? 'menu-item active-menu' : 'menu-item'}">
 
-            <!-- Data Entry -->
-            <a
-                href="/zul/inward-maker/data-entry.zul"
-                sclass="${arg.active eq 'data-entry' ? 'menu-item active-menu' : 'menu-item'}">
+				<n:i class="fa-solid fa-wrench menu-icon"></n:i>
 
-                <n:i class="fa-regular fa-pen-to-square menu-icon"></n:i>
+				<label value="MICR Repair" sclass="menu-label" />
 
-                <label
-                    value="Data Entry"
-                    sclass="menu-label" />
+			</a>
 
-            </a>
 
+			<!-- Data Entry -->
+			<a href="/zul/inward-maker/data-entry.zul"
+				sclass="${arg.active eq 'data-entry' ? 'menu-item active-menu' : 'menu-item'}">
 
-            <!-- Send to Checker -->
-            <a
-                href="/zul/inward-maker/send-to-checker.zul"
-                sclass="${arg.active eq 'send-to-checker' ? 'menu-item active-menu' : 'menu-item'}">
+				<n:i class="fa-regular fa-pen-to-square menu-icon"></n:i>
 
-                <n:i class="fa-regular fa-paper-plane menu-icon"></n:i>
+				<label value="Data Entry" sclass="menu-label" />
 
-                <label
-                    value="Send to Checker"
-                    sclass="menu-label" />
+			</a>
 
-            </a>
-        </vlayout>
 
+			<!-- Send to Checker -->
+			<a href="/zul/inward-maker/send-to-checker.zul"
+				sclass="${arg.active eq 'send-to-checker' ? 'menu-item active-menu' : 'menu-item'}">
 
-        
-        <!-- INWARD CHECKER -->
+				<n:i class="fa-regular fa-paper-plane menu-icon"></n:i>
 
-        <vlayout
-            visible="${arg.roleName eq 'Inward Checker'}"
-            width="100%"
-            spacing="0px">
+				<label value="Send to Checker" sclass="menu-label" />
 
-            <!-- Dashboard -->
-            <a
-                href="/zul/inward-checker/dashboard.zul"
-                sclass="${arg.active eq 'dashboard' ? 'menu-item active-menu' : 'menu-item'}">
+			</a>
+		</vlayout>
 
-                <n:i class="fa-solid fa-house menu-icon"></n:i>
 
-                <label
-                    value="Dashboard"
-                    sclass="menu-label" />
 
-            </a>
+		<!-- Inward checker -->
 
+		<vlayout visible="${arg.roleName eq 'Inward Checker'}"
+			width="100%" spacing="0px">
 
-            <!-- Verify Batch -->
-            <a
-                href="/zul/inward-checker/verification.zul"
-                sclass="${arg.active eq 'verify-batch' ? 'menu-item active-menu' : 'menu-item'}">
+			<!-- Dashboard -->
+			<a href="/zul/inward-checker/dashboard.zul"
+				sclass="${arg.active eq 'dashboard' ? 'menu-item active-menu' : 'menu-item'}">
 
-                <n:i class="fa-regular fa-clipboard menu-icon"></n:i>
+				<n:i class="fa-solid fa-house menu-icon"></n:i>
 
-                <label
-                    value="Verify Batch"
-                    sclass="menu-label" />
+				<label value="Dashboard" sclass="menu-label" />
 
-            </a>
+			</a>
 
 
-            <!-- Reports -->
-            <a
-                href="/zul/inward-checker/reports.zul"
-                sclass="${arg.active eq 'reports' ? 'menu-item active-menu' : 'menu-item'}">
+			<!-- Verify Batch -->
+			<a href="/zul/inward-checker/verification.zul"
+				sclass="${arg.active eq 'verify-batch' ? 'menu-item active-menu' : 'menu-item'}">
 
-                <n:i class="fa-solid fa-chart-simple menu-icon"></n:i>
+				<n:i class="fa-regular fa-clipboard menu-icon"></n:i>
 
-                <label
-                    value="Reports"
-                    sclass="menu-label" />
+				<label value="Verify Batch" sclass="menu-label" />
 
-            </a>
+			</a>
 
-        </vlayout>
 
+			<!-- Reports -->
+			<a href="/zul/inward-checker/reports.zul"
+				sclass="${arg.active eq 'reports' ? 'menu-item active-menu' : 'menu-item'}">
 
-        
-        <!-- Admin -->
+				<n:i class="fa-solid fa-chart-simple menu-icon"></n:i>
 
-        <vlayout
-            visible="${arg.roleName eq 'Admin'}"
-            width="100%"
-            spacing="0px">
+				<label value="Reports" sclass="menu-label" />
 
-            <a
-                href="/zul/admin/admin-dashboard.zul"
-                sclass="${arg.active eq 'dashboard' ? 'menu-item active-menu' : 'menu-item'}">
+			</a>
 
-                <n:i class="fa-solid fa-house menu-icon"></n:i>
+		</vlayout>
 
-                <label
-                    value="Dashboard"
-                    sclass="menu-label" />
 
-            </a>
 
+		<!-- Admin -->
 
-            <a
-                href="/zul/admin/admin-roles.zul"
-                sclass="${arg.active eq 'role-management' ? 'menu-item active-menu' : 'menu-item'}">
+		<vlayout visible="${arg.roleName eq 'Admin'}" width="100%"
+			spacing="0px">
 
-                <n:i class="fa-solid fa-user-shield menu-icon"></n:i>
+			<a href="/zul/admin/admin-dashboard.zul"
+				sclass="${arg.active eq 'dashboard' ? 'menu-item active-menu' : 'menu-item'}">
 
-                <label
-                    value="Roles"
-                    sclass="menu-label" />
+				<n:i class="fa-solid fa-house menu-icon"></n:i>
 
-            </a>
+				<label value="Dashboard" sclass="menu-label" />
 
+			</a>
 
-            <a
-                href="/zul/admin/admin-user-management.zul"
-                sclass="${arg.active eq 'user-management' ? 'menu-item active-menu' : 'menu-item'}">
 
-                <n:i class="fa-solid fa-users menu-icon"></n:i>
+			<a href="/zul/admin/admin-roles.zul"
+				sclass="${arg.active eq 'role-management' ? 'menu-item active-menu' : 'menu-item'}">
 
-                <label
-                    value="User Management"
-                    sclass="menu-label" />
+				<n:i class="fa-solid fa-user-shield menu-icon"></n:i>
 
-            </a>
+				<label value="Roles" sclass="menu-label" />
 
+			</a>
 
 
-            <a
-                href="/zul/admin/admin-session-management.zul"
-                sclass="${arg.active eq 'session-management' ? 'menu-item active-menu' : 'menu-item'}">
+			<a href="/zul/admin/admin-user-management.zul"
+				sclass="${arg.active eq 'user-management' ? 'menu-item active-menu' : 'menu-item'}">
 
-                <n:i class="fa-solid fa-clock menu-icon"></n:i>
+				<n:i class="fa-solid fa-users menu-icon"></n:i>
 
-                <label
-                    value="Session Management"
-                    sclass="menu-label" />
+				<label value="User Management" sclass="menu-label" />
 
-            </a>
+			</a>
 
 
-            <a
-                href="/zul/admin/admin-audit-logs.zul"
-                sclass="${arg.active eq 'audit-logs' ? 'menu-item active-menu' : 'menu-item'}">
 
-                <n:i class="fa-solid fa-clock-rotate-left menu-icon"></n:i>
+			<a href="/zul/admin/admin-session-management.zul"
+				sclass="${arg.active eq 'session-management' ? 'menu-item active-menu' : 'menu-item'}">
 
-                <label
-                    value="Audit Logs"
-                    sclass="menu-label" />
+				<n:i class="fa-solid fa-clock menu-icon"></n:i>
 
-            </a>
+				<label value="Session Management" sclass="menu-label" />
 
-        </vlayout>
+			</a>
 
-    </div>
+
+			<a href="/zul/admin/admin-audit-logs.zul"
+				sclass="${arg.active eq 'audit-logs' ? 'menu-item active-menu' : 'menu-item'}">
+
+				<n:i class="fa-solid fa-clock-rotate-left menu-icon"></n:i>
+
+				<label value="Audit Logs" sclass="menu-label" />
+
+			</a>
+
+		</vlayout>
+
+	</div>
 
 </zk>

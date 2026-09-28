@@ -17,7 +17,7 @@ public class AuditLogDAOImpl implements AuditLogDAO {
 
 	private static final java.util.TimeZone IST = java.util.TimeZone.getTimeZone("Asia/Kolkata");
 
-	// GET AUDIT LOGS - WITHOUT FILTERS
+	// Get audit logs without filters
 
 	@Override
 	public List<AuditLog> getAuditLogs(int page, int pageSize) {
@@ -25,7 +25,7 @@ public class AuditLogDAOImpl implements AuditLogDAO {
 		return getAuditLogs(page, pageSize, null, null, null, null);
 	}
 
-	// GET FILTERED AUDIT LOGS
+	// Get filtered audit logs
 
 	@Override
 	public List<AuditLog> getAuditLogs(int page, int pageSize, String searchText, String roleName, Date fromDate,
@@ -44,8 +44,6 @@ public class AuditLogDAOImpl implements AuditLogDAO {
 
 		List<Object> parameters = new ArrayList<>();
 
-		// SEARCH BY USERNAME OR USER ID
-
 		if (searchText != null && !searchText.trim().isEmpty()) {
 
 			sql.append("AND (LOWER(u.username) LIKE LOWER(?) " + "OR CAST(u.user_id AS TEXT) LIKE ?) ");
@@ -56,16 +54,12 @@ public class AuditLogDAOImpl implements AuditLogDAO {
 			parameters.add(searchPattern);
 		}
 
-		// ROLE FILTER
-
 		if (roleName != null && !roleName.trim().isEmpty()) {
 
 			sql.append("AND r.role_name = ? ");
 
 			parameters.add(roleName.trim());
 		}
-
-		// FROM DATE
 
 		if (fromDate != null) {
 
@@ -74,23 +68,18 @@ public class AuditLogDAOImpl implements AuditLogDAO {
 			parameters.add(new java.sql.Timestamp(fromDate.getTime()));
 		}
 
-		// TO DATE - INCLUSIVE
-
 		if (toDate != null) {
 
 			java.util.Calendar calendar = java.util.Calendar.getInstance(IST);
 
 			calendar.setTime(toDate);
 
-			// Include the complete selected To Date
 			calendar.add(java.util.Calendar.DAY_OF_MONTH, 1);
 
 			sql.append("AND us.login_time < ? ");
 
 			parameters.add(new java.sql.Timestamp(calendar.getTimeInMillis()));
 		}
-
-		// PAGINATION
 
 		sql.append("ORDER BY us.login_time DESC " + "LIMIT ? OFFSET ?");
 
@@ -134,7 +123,7 @@ public class AuditLogDAOImpl implements AuditLogDAO {
 		return logs;
 	}
 
-	// GET ALL FILTERED AUDIT LOGS - FOR REPORT GENERATION
+	// Get all audit logs - for report generation
 
 	@Override
 	public List<AuditLog> getAllAuditLogs(String searchText, String roleName, Date fromDate, Date toDate) {
@@ -150,8 +139,6 @@ public class AuditLogDAOImpl implements AuditLogDAO {
 
 		List<Object> parameters = new ArrayList<>();
 
-		// SEARCH BY USERNAME OR USER ID
-
 		if (searchText != null && !searchText.trim().isEmpty()) {
 
 			sql.append("AND (LOWER(u.username) LIKE LOWER(?) " + "OR CAST(u.user_id AS TEXT) LIKE ?) ");
@@ -162,16 +149,12 @@ public class AuditLogDAOImpl implements AuditLogDAO {
 			parameters.add(searchPattern);
 		}
 
-		// ROLE FILTER
-
 		if (roleName != null && !roleName.trim().isEmpty()) {
 
 			sql.append("AND r.role_name = ? ");
 
 			parameters.add(roleName.trim());
 		}
-
-		// FROM DATE
 
 		if (fromDate != null) {
 
@@ -180,23 +163,18 @@ public class AuditLogDAOImpl implements AuditLogDAO {
 			parameters.add(new java.sql.Timestamp(fromDate.getTime()));
 		}
 
-		// TO DATE - INCLUSIVE
-
 		if (toDate != null) {
 
 			java.util.Calendar calendar = java.util.Calendar.getInstance(IST);
 
 			calendar.setTime(toDate);
 
-			// Include the complete selected To Date
 			calendar.add(java.util.Calendar.DAY_OF_MONTH, 1);
 
 			sql.append("AND us.login_time < ? ");
 
 			parameters.add(new java.sql.Timestamp(calendar.getTimeInMillis()));
 		}
-
-		// ORDERING - NO PAGINATION
 
 		sql.append("ORDER BY us.login_time DESC");
 
@@ -237,15 +215,11 @@ public class AuditLogDAOImpl implements AuditLogDAO {
 		return logs;
 	}
 
-	// GET TOTAL AUDIT LOG COUNT - WITHOUT FILTERS
-
 	@Override
 	public int getTotalAuditLogCount() {
 
 		return getTotalAuditLogCount(null, null, null, null);
 	}
-
-	// GET FILTERED AUDIT LOG COUNT
 
 	@Override
 	public int getTotalAuditLogCount(String searchText, String roleName, Date fromDate, Date toDate) {
@@ -257,8 +231,6 @@ public class AuditLogDAOImpl implements AuditLogDAO {
 
 		List<Object> parameters = new ArrayList<>();
 
-		// SEARCH BY USERNAME OR USER ID
-
 		if (searchText != null && !searchText.trim().isEmpty()) {
 
 			sql.append("AND (LOWER(u.username) LIKE LOWER(?) " + "OR CAST(u.user_id AS TEXT) LIKE ?) ");
@@ -269,16 +241,12 @@ public class AuditLogDAOImpl implements AuditLogDAO {
 			parameters.add(searchPattern);
 		}
 
-		// ROLE FILTER
-
 		if (roleName != null && !roleName.trim().isEmpty()) {
 
 			sql.append("AND r.role_name = ? ");
 
 			parameters.add(roleName.trim());
 		}
-
-		// FROM DATE
 
 		if (fromDate != null) {
 
@@ -287,15 +255,12 @@ public class AuditLogDAOImpl implements AuditLogDAO {
 			parameters.add(new java.sql.Timestamp(fromDate.getTime()));
 		}
 
-		// TO DATE - INCLUSIVE
-
 		if (toDate != null) {
 
 			java.util.Calendar calendar = java.util.Calendar.getInstance(IST);
 
 			calendar.setTime(toDate);
 
-			// Include the complete selected To Date
 			calendar.add(java.util.Calendar.DAY_OF_MONTH, 1);
 
 			sql.append("AND us.login_time < ? ");
@@ -327,7 +292,7 @@ public class AuditLogDAOImpl implements AuditLogDAO {
 		return 0;
 	}
 
-	// CREATE AUDIT LOG - INSERT ON LOGIN
+	// Create audit log - insert on login
 
 	@Override
 	public String createAuditLog(Long userId) {
@@ -357,7 +322,7 @@ public class AuditLogDAOImpl implements AuditLogDAO {
 		return sessionId;
 	}
 
-	// END AUDIT LOG - UPDATE ON LOGOUT
+	// end audit log - update on logout
 
 	@Override
 	public void endAuditLog(String sessionId) {

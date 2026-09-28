@@ -112,9 +112,12 @@ public class OutwardMakerDataEntryDetailService {
 
             dao.saveCheque(cheque);
 
-            String status = cheque.getChequeStatus();
+            String status =
+                    cheque.getChequeStatus();
 
-            if (status == null || status.trim().isEmpty()) {
+            if (status == null
+                    || status.trim().isEmpty()) {
+
                 status = "VERIFIED";
             }
 

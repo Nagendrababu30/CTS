@@ -22,15 +22,11 @@ public class DataEntryController extends GenericForwardComposer<Component> {
 
 	private static final long serialVersionUID = 1L;
 
-	// ZUL components
 	private Listbox batchListbox;
-	// Service
+	
 	private BatchService batchService;
 	private Long loggedInUserId;
 
-	// ---------------------------------------------------------
-	// Page lifecycle
-	// ---------------------------------------------------------
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
@@ -38,9 +34,7 @@ public class DataEntryController extends GenericForwardComposer<Component> {
 		super.doAfterCompose(comp);
 
 		batchService = BatchServiceImpl.of(BatchDaoImpl.of());
-
 		loadLoggedInUser();
-
 		loadBatches();
 	}
 
@@ -52,18 +46,13 @@ public class DataEntryController extends GenericForwardComposer<Component> {
 		}
 	}
 
-	// ---------------------------------------------------------
 	// Load batches
-	// ---------------------------------------------------------
-
 	private void loadBatches() {
 
 		batchListbox.getItems().clear();
-
 		loadLoggedInUser();
 
 		try {
-
 			String userIdStr = loggedInUserId != null ? String.valueOf(loggedInUserId) : null;
 			List<InwardBatch> batches = batchService.getAvailableBatchesForMaker(userIdStr);
 
@@ -76,88 +65,49 @@ public class DataEntryController extends GenericForwardComposer<Component> {
 			}
 
 		} catch (RuntimeException e) {
-
 			e.printStackTrace();
-
 			Messagebox.show("Unable to load batches from database.", "Data Entry", Messagebox.OK, Messagebox.ERROR);
 		}
 	}
 
-	// ---------------------------------------------------------
 	// Create batch row
-	// ---------------------------------------------------------
-
 	private void addBatchRow(InwardBatch batch) {
 
 		Listitem item = new Listitem();
 
-		// -----------------------------------------------------
 		// Batch No
-		// -----------------------------------------------------
-
 		Listcell batchCell = new Listcell();
-
 		batchCell.appendChild(new Label(String.valueOf(batch.getBatchId())));
-
 		item.appendChild(batchCell);
 
-		// -----------------------------------------------------
 		// Total Cheques
-		// -----------------------------------------------------
-
 		Listcell totalCell = new Listcell();
-
 		totalCell.appendChild(new Label(String.valueOf(batch.getTotalCheques())));
-
 		item.appendChild(totalCell);
 
-		// -----------------------------------------------------
 		// Data Entry Pending
-		// -----------------------------------------------------
-
 		Listcell pendingCell = new Listcell();
-
 		pendingCell.setStyle("text-align:center;");
-
-		int pendingCount =
-		        batchService.getDataEntryPendingCount(batch.getBatchId());
-
-		pendingCell.appendChild(
-		        new Label(String.valueOf(pendingCount) + " Cheques")
-		);
+		int pendingCount = batchService.getDataEntryPendingCount(batch.getBatchId());
+		
+		pendingCell.appendChild(new Label(String.valueOf(pendingCount) + " Cheques"));
 		item.appendChild(pendingCell);
-
-		// -----------------------------------------------------
+		
 		// Action
-		// -----------------------------------------------------
-
 		Listcell actionCell = new Listcell();
-
 		actionCell.setStyle("text-align:center;");
-
 		Button openButton = new Button("Open");
-
 		openButton.setSclass("btn btn-action");
-
 		long batchId = batch.getBatchId();
-
 		openButton.addEventListener(Events.ON_CLICK, event -> openBatch(batchId));
-
 		actionCell.appendChild(openButton);
-
 		item.appendChild(actionCell);
 
-		// -----------------------------------------------------
 		// Add row
-		// -----------------------------------------------------
-
 		batchListbox.appendChild(item);
 	}
 
-	// ---------------------------------------------------------
 	// Open batch
-	// ---------------------------------------------------------
-
 	private void openBatch(long batchId) {
 
 		String url = "/zul/inward-maker/data-entryform.zul" + "?batchId=" + batchId;

@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-@import url('loader.css?v=3');
+@import url('loader.css?v=10');
 
 .main-container {
     display: flex;
@@ -170,3 +170,21 @@
 .login-btn:hover {
     background-color: #0046d1;
 }
+
+/* =============================================================
+   BLUE THEME LOADER FOR LOGIN
+   ============================================================= */
+.loader::before,
+.z-loading-icon::before,
+.z-apply-loading-icon::before {
+    content: '' !important;
+    display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    height: 100% !important;
+    border-radius: 20px !important;
+    background: repeating-linear-gradient(135deg, #1D4ED8 0 10px, #60A5FA 0 20px) !important;
+    animation: candyLoad 2s infinite ease-in-out !important;
+}
+

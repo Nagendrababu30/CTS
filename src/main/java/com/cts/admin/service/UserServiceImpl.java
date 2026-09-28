@@ -14,8 +14,6 @@ public class UserServiceImpl implements UserService {
 		userDao = new UserDao();
 	}
 
-	// AUTH
-
 	@Override
 	public User authenticate(String username, String password) {
 		if (username == null || username.trim().isEmpty())
@@ -24,8 +22,6 @@ public class UserServiceImpl implements UserService {
 			return null;
 		return userDao.authenticate(username, password);
 	}
-
-	// CRUD
 
 	@Override
 	public List<User> getUsers(int limit, int offset, String searchText, Long roleId, String status) {
@@ -106,20 +102,13 @@ public class UserServiceImpl implements UserService {
 
 		user.setUsername(user.getUsername().trim());
 
-		// Fetch existing user from database. This is required to compare the old
-		// password.
-
 		User existingUser = userDao.getUserById(user.getUserId());
 
 		if (existingUser == null) {
 			return false;
 		}
 
-		// Read the new password entered in the UI.
-
 		String newPassword = user.getPasswordHash();
-
-		// If password is blank, keep the existing password.
 
 		if (newPassword == null || newPassword.trim().isEmpty()) {
 
@@ -128,24 +117,16 @@ public class UserServiceImpl implements UserService {
 			return userDao.updateUser(user);
 		}
 
-		// Validate password strength before hashing.
-
 		if (!PasswordUtil.isStrongPassword(newPassword)) {
 			return false;
 		}
 
-		// Get the existing BCrypt password hash.
-
 		String existingPasswordHash = existingUser.getPasswordHash();
-
-		// Check whether the new password is the same as the existing password.
 
 		if (PasswordUtil.verifyPassword(newPassword, existingPasswordHash)) {
 
 			return false;
 		}
-
-		// New password is different. Hash it before saving.
 
 		String hashedPassword = PasswordUtil.hashPassword(newPassword);
 

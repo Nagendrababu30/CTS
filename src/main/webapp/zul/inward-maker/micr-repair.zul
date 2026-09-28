@@ -29,10 +29,6 @@
             spacing="12px"
             sclass="micr-content-layout">
 
-            <!-- ============================================================
-                 BATCH HEADER STRIP (Floating Card)
-                 ============================================================ -->
-
             <hlayout
                 width="100%"
                 valign="middle"
@@ -57,7 +53,6 @@
 
                 </hlayout>
 
-                <!-- Center/Right: Badges Spread Horizontally in the Box -->
                 <hlayout
                     hflex="1"
                     valign="middle"
@@ -107,10 +102,6 @@
 
             </hlayout>
 
-
-            <!-- ============================================================
-                 RETURN REASON & REMARKS ALERT BANNER (Displayed when returned by Checker)
-                 ============================================================ -->
             <div id="returnReasonBanner"
                  visible="false"
                  width="100%"
@@ -130,11 +121,6 @@
                 </hlayout>
             </div>
 
-
-            <!-- ============================================================
-                 MAIN SPLIT ROW
-                 ============================================================ -->
-
             <hlayout
                 width="100%"
                 vflex="1"
@@ -142,10 +128,6 @@
                 valign="top"
                 sclass="micr-split-row">
 
-
-                <!-- =====================================================
-                     LEFT — Cheque (Floating Card)
-                     ===================================================== -->
 
                 <groupbox
                     hflex="1"
@@ -176,8 +158,6 @@
 
                         </div>
 
-
-                        <!-- Image toolbar -->
 
                         <hlayout
                             width="100%"
@@ -225,11 +205,6 @@
 
                 </groupbox>
 
-
-                <!-- =====================================================
-                     RIGHT — Cheque Data Verification
-                     ===================================================== -->
-
                 <groupbox
                     hflex="1"
                     vflex="1"
@@ -245,10 +220,6 @@
                         spacing="14px"
                         sclass="micr-form-body">
 
-
-                        <!-- =================================================
-                             Row 1
-                             ================================================= -->
 
                         <hlayout
                             width="100%"
@@ -289,18 +260,10 @@
                         </hlayout>
 
 
-                        <!-- =================================================
-                             Row 2 — City + Bank
-                             ================================================= -->
-
                         <hlayout
                             width="100%"
                             spacing="16px">
 
-
-                            <!-- =================================================
-                                 City Code
-                                 ================================================= -->
 
                             <vlayout
                                 hflex="1"
@@ -330,10 +293,6 @@
 
                             </vlayout>
 
-
-                            <!-- =================================================
-                                 Bank Code
-                                 ================================================= -->
 
                             <vlayout
                                 hflex="1"
@@ -365,10 +324,6 @@
 
                         </hlayout>
 
-
-                        <!-- =================================================
-                             Row 3 — Branch Code
-                             ================================================= -->
 
                         <hlayout
                             width="100%"
@@ -413,10 +368,6 @@
                         <space vflex="1"/>
 
 
-                        <!-- =================================================
-                             Action buttons
-                             ================================================= -->
-
                         <hlayout
                             width="100%"
                             spacing="10px"
@@ -432,7 +383,6 @@
                                 sclass="micr-prev-btn"/>
 
 
-                            <!-- Next -->
 
                             <button
                                 id="nextButton"
@@ -440,20 +390,14 @@
                                 sclass="micr-next-btn"/>
 
 
-                            <!-- Push Return / Save buttons to right -->
-
                             <space hflex="1"/>
 
-
-                            <!-- Return -->
 
                             <button
                                 id="returnButton"
                                 label="Return"
                                 sclass="micr-return-btn"/>
 
-
-                            <!-- Save & Next -->
 
                             <button
                                 id="saveNextButton"
@@ -468,10 +412,6 @@
 
             </hlayout>
 
-            <!-- ================================================================
-                 Return Cheque Modal Dialog
-                 ================================================================ -->
-
             <window
                 id="returnWindow"
                 width="560px"
@@ -481,7 +421,6 @@
                 position="center,center"
                 sclass="checker-modal return-window">
 
-                <!-- Modal Header (Purple Gradient) -->
                 <hlayout width="100%" spacing="0" valign="middle" sclass="custom-modal-header header-purple">
                     <div sclass="modal-header-icon-circle">
                         <label value="↶" sclass="modal-header-icon"/>
@@ -492,7 +431,6 @@
                     </vlayout>
                 </hlayout>
 
-                <!-- Modal Body -->
                 <vlayout width="100%" spacing="14px" sclass="custom-modal-body">
 
                     <vlayout width="100%" spacing="4px">

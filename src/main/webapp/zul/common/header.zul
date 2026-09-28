@@ -2,175 +2,103 @@
 
 <zk xmlns:n="native">
 
-    <div
-        sclass="app-header header-container"
-        apply="com.cts.admin.controller.LogoutComposer">
+	<div sclass="app-header header-container"
+		apply="com.cts.admin.controller.LogoutComposer">
 
-        <hlayout
-            spacing="12px"
-            valign="middle">
+		<hlayout spacing="12px" valign="middle">
 
-            <span
-                sclass="header-logo-icon">
+			<span sclass="header-logo-icon">
 
-                <n:i
-                    class="fa-solid fa-bars-staggered">
-                </n:i>
+				<n:i class="fa-solid fa-bars-staggered"></n:i>
 
-            </span>
+			</span>
 
-            <label
-                value="${arg.pageTitle}"
-                sclass="header-title"/>
+			<label value="CTS" sclass="header-title" />
 
-        </hlayout>
+		</hlayout>
 
-        <hlayout
-            spacing="25px"
-            valign="middle">
+		<hlayout spacing="25px" valign="middle">
 
-            <!-- =========================
-                 DATE
-            ========================== -->
+			<!-- Date-->
 
-            <hlayout
-                spacing="6px"
-                valign="middle">
+			<hlayout spacing="6px" valign="middle">
 
-                <n:i
-                    class="fa-regular fa-calendar header-icon-meta">
-                </n:i>
+				<n:i class="fa-regular fa-calendar header-icon-meta">
+				</n:i>
 
-                <label
-                    value="Date :"
-                    sclass="header-meta-text"/>
+				<label value="Date :" sclass="header-meta-text" />
 
-                <label
-                    id="headerDate"
-                    value=""
-                    sclass="header-meta-val"/>
+				<label id="headerDate" value=""
+					sclass="header-meta-val" />
 
-            </hlayout>
+			</hlayout>
 
 
-            <!-- =========================
-                 LAST LOGIN
-            ========================== -->
+			<!-- Last login-->
 
-            <hlayout
-                spacing="6px"
-                valign="middle">
+			<hlayout spacing="6px" valign="middle">
 
-                <n:i
-                    class="fa-regular fa-clock header-icon-meta">
-                </n:i>
+				<n:i class="fa-regular fa-clock header-icon-meta"></n:i>
 
-                <label
-                    value="Last Login :"
-                    sclass="header-meta-text"/>
+				<label value="Last Login :" sclass="header-meta-text" />
 
-                <label
-                    id="headerLastLogin"
-                    value=""
-                    sclass="header-meta-val"/>
+				<label id="headerLastLogin" value=""
+					sclass="header-meta-val" />
 
-            </hlayout>
+			</hlayout>
 
 
-            <!-- =========================
-                 USER
-            ========================== -->
+			<!-- User -->
 
-            <hlayout
-                spacing="6px"
-                valign="middle">
+			<hlayout spacing="6px" valign="middle">
 
-                <n:i
-                    class="fa-regular fa-user header-icon-meta">
-                </n:i>
+				<n:i class="fa-regular fa-user header-icon-meta"></n:i>
 
-                <label
-                    value="User :"
-                    sclass="header-meta-text"/>
+				<label value="User :" sclass="header-meta-text" />
 
-                <label
-                    id="headerUserName"
-                    value=""
-                    sclass="header-meta-val"/>
+				<label id="headerUserName" value=""
+					sclass="header-meta-val" />
 
-            </hlayout>
+			</hlayout>
 
 
-            <!-- =========================
-                 SESSION
-                 
-                 SHOW ONLY FOR:
-                 - Outward Maker
-                 - Outward Checker
-                 - Capture Operator
-                 
-                 HIDDEN FOR:
-                 - Admin
-                 - Inward Maker
-                 - Inward Checker
-            ========================== -->
+			<!-- Session -->
 
-            <hlayout
-                spacing="6px"
-                valign="middle"
-                visible="${sessionScope.roleName eq 'Outward Maker'
+			<hlayout spacing="6px" valign="middle"
+				visible="${sessionScope.roleName eq 'Outward Maker'
                           or sessionScope.roleName eq 'Outward Checker'
                           or sessionScope.roleName eq 'Capture Operator'}">
 
-                <n:i
-                    class="fa-solid fa-circle header-icon-meta">
-                </n:i>
+				<n:i class="fa-solid fa-circle header-icon-meta"></n:i>
 
-                <label
-                    value="Session :"
-                    sclass="header-meta-text"/>
+				<label value="Session :" sclass="header-meta-text" />
 
-                <label
-                    id="headerSessionStatus"
-                    value=""
-                    sclass="header-meta-val"/>
+				<label id="headerSessionStatus" value=""
+					sclass="header-meta-val" />
 
-            </hlayout>
+			</hlayout>
 
 
-            <!-- =========================
-                 USER ICON
-            ========================== -->
+			<!-- User icon-->
 
-            <div
-                id="userWrapper"
-                sclass="user-wrapper">
+			<div id="userWrapper" sclass="user-wrapper">
 
-                <n:i
-                    class="fa-regular fa-circle-user header-icon-user">
-                </n:i>
+				<n:i
+					class="fa-regular fa-circle-user header-icon-user">
+				</n:i>
 
-            </div>
+			</div>
 
+			<popup id="logoutPopup" sclass="logout-popup">
 
-            <!-- =========================
-                 LOGOUT POPUP
-            ========================== -->
+				<button id="logoutButton" label="Logout"
+					iconSclass="fa-solid fa-right-from-bracket"
+					sclass="popup-logout-button" />
 
-            <popup
-                id="logoutPopup"
-                sclass="logout-popup">
+			</popup>
 
-                <button
-                    id="logoutButton"
-                    label="Logout"
-                    iconSclass="fa-solid fa-right-from-bracket"
-                    sclass="popup-logout-button"/>
+		</hlayout>
 
-            </popup>
-
-        </hlayout>
-
-    </div>
+	</div>
 
 </zk>

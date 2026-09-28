@@ -41,8 +41,7 @@
                     <label value="Checker Reports"
                            sclass="reports-title"/>
 
-                    <label value="Download Valid and Rejected Cheque XML Reports"
-                           sclass="reports-subtitle"/>
+                   
 
                 </vlayout>
 

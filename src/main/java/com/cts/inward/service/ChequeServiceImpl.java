@@ -3,8 +3,10 @@ package com.cts.inward.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import com.cts.inward.dao.ChequeDao;
+import com.cts.inward.dto.ReturnReasonDto;
 import com.cts.inward.model.InwardCheque;
 import com.cts.inward.model.NpciChequeData;
 
@@ -77,9 +79,7 @@ public class ChequeServiceImpl implements ChequeService {
 		chequeDao.saveDataEntryCorrections(chequeNumber, batchId, correctedChequeNumber, accountNumber, amount, chequeDate, userId);
 	}
 
-	/*
-	 * Cheque status is saved into inward_cheque_status_history.
-	 */
+	// Cheque's status is saved into inward_cheque_status_history.
 	@Override
 	public void updateChequeStatus(String chequeNumber, String status, long userId) {
 
@@ -87,12 +87,12 @@ public class ChequeServiceImpl implements ChequeService {
 	}
 
 	@Override
-	public java.util.Map<String, String> getChequeReturnInfo(String chequeNumber) {
+	public Map<String, String> getChequeReturnInfo(String chequeNumber) {
 		return chequeDao.getChequeReturnInfo(chequeNumber);
 	}
 
 	@Override
-	public List<com.cts.inward.dto.ReturnReasonDto> getDataEntryReturnReasons() {
+	public List<ReturnReasonDto> getDataEntryReturnReasons() {
 		return chequeDao.getDataEntryReturnReasons();
 	}
 

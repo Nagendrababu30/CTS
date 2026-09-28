@@ -1,4 +1,4 @@
- package com.cts.inward.controller;
+package com.cts.inward.controller;
 
 import java.util.List;
 
@@ -23,1293 +23,756 @@ import com.cts.inward.service.DashboardServiceImpl;
 import com.cts.inward.service.MicrRepairService;
 import com.cts.inward.service.MicrRepairServiceImpl;
 
-public class DashboardController
-        extends GenericForwardComposer<Component> {
+public class DashboardController extends GenericForwardComposer<Component> {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    private static final String STATUS_RECEIVED =
-            "RECEIVED";
+	private static final String STATUS_RECEIVED = "RECEIVED";
 
-    private static final String STATUS_LOCKED =
-            "LOCKED";
+	private static final String STATUS_LOCKED = "LOCKED";
 
-    private static final String STATUS_MICR_REPAIR =
-            "MICR_REPAIR";
+	private static final String STATUS_MICR_REPAIR = "MICR_REPAIR";
 
-    private static final String STATUS_DATA_ENTRY =
-            "DATA_ENTRY";
+	private static final String STATUS_DATA_ENTRY = "DATA_ENTRY";
 
-    private static final String STATUS_DATA_ENTRY_COMPLETED =
-            "DATA_ENTRY_COMPLETED";
+	private static final String STATUS_DATA_ENTRY_COMPLETED = "DATA_ENTRY_COMPLETED";
 
-    private static final String STATUS_SENT_TO_CHECKER =
-            "SENT_TO_CHECKER";
+	private static final String STATUS_SENT_TO_CHECKER = "SENT_TO_CHECKER";
 
-    private static final String STATUS_RETURN_TO_MAKER =
-            "RETURN_TO_MAKER";
+	private static final String STATUS_RETURN_TO_MAKER = "RETURN_TO_MAKER";
 
-    private Grid batchesGrid;
+	private Grid batchesGrid;
 
-    private Button allBtn;
-    private Button availableBtn;
-    private Button myBatchesBtn;
-    private Button returnToMakerBtn;
+	private Button allBtn;
+	private Button availableBtn;
+	private Button myBatchesBtn;
+	private Button returnToMakerBtn;
 
-    private Label receivedCountLabel;
-    private Label pendingCountLabel;
-    private Label myBatchesCountLabel;
+	private Label receivedCountLabel;
+	private Label pendingCountLabel;
+	private Label myBatchesCountLabel;
 
-    private DashboardService dashboardService;
-    private MicrRepairService micrRepairService;
+	private DashboardService dashboardService;
+	private MicrRepairService micrRepairService;
 
-    private String selectedStatus = "All";
+	private String selectedStatus = "All";
 
-    /*
-     * This is still the logged-in user's ID.
-     *
-     * We continue using the ID internally for ownership
-     * checking. We only display the user's name on the UI.
-     */
-    private Long loggedInUserId;
+	private Long loggedInUserId;
 
+	@Override
+	public void doAfterCompose(Component comp) throws Exception {
 
-    // -------------------------------------------------------------------------
-    // Compose
-    // -------------------------------------------------------------------------
+		super.doAfterCompose(comp);
 
-    @Override
-    public void doAfterCompose(
-            Component comp) throws Exception {
+		dashboardService = new DashboardServiceImpl();
 
-        super.doAfterCompose(comp);
+		micrRepairService = new MicrRepairServiceImpl();
 
-        dashboardService =
-                new DashboardServiceImpl();
+		loadLoggedInUser();
 
-        micrRepairService =
-                new MicrRepairServiceImpl();
+		// ALL
 
-        loadLoggedInUser();
+		allBtn.addEventListener(Events.ON_CLICK, event -> {
 
+			selectedStatus = "All";
 
-        /*
-         * -----------------------------------------------------------------
-         * ALL
-         * -----------------------------------------------------------------
-         */
-        allBtn.addEventListener(
-                Events.ON_CLICK,
-                event -> {
+			updateFilterButtons();
 
-                    selectedStatus = "All";
+			loadBatches();
+		});
 
-                    updateFilterButtons();
+		// AVAILABLE
 
-                    loadBatches();
-                });
+		availableBtn.addEventListener(Events.ON_CLICK, event -> {
 
+			selectedStatus = "Available";
 
-        /*
-         * -----------------------------------------------------------------
-         * AVAILABLE
-         * -----------------------------------------------------------------
-         */
-        availableBtn.addEventListener(
-                Events.ON_CLICK,
-                event -> {
+			updateFilterButtons();
 
-                    selectedStatus = "Available";
+			loadBatches();
+		});
 
-                    updateFilterButtons();
+		// MY BATCHES
 
-                    loadBatches();
-                });
+		myBatchesBtn.addEventListener(Events.ON_CLICK, event -> {
 
+			selectedStatus = "My Batches";
 
-        /*
-         * -----------------------------------------------------------------
-         * MY BATCHES
-         * -----------------------------------------------------------------
-         */
-        myBatchesBtn.addEventListener(
-                Events.ON_CLICK,
-                event -> {
+			updateFilterButtons();
 
-                    selectedStatus = "My Batches";
+			loadBatches();
+		});
 
-                    updateFilterButtons();
+		// RETURN TO MAKER
 
-                    loadBatches();
-                });
+		if (returnToMakerBtn != null) {
 
+			returnToMakerBtn.addEventListener(Events.ON_CLICK, event -> {
 
-        /*
-         * -----------------------------------------------------------------
-         * RETURN TO MAKER
-         * -----------------------------------------------------------------
-         */
-        if (returnToMakerBtn != null) {
+				selectedStatus = "Return to Maker";
 
-            returnToMakerBtn.addEventListener(
-                    Events.ON_CLICK,
-                    event -> {
+				updateFilterButtons();
 
-                        selectedStatus =
-                                "Return to Maker";
+				loadBatches();
+			});
+		}
 
-                        updateFilterButtons();
+		loadBatches();
+	}
 
-                        loadBatches();
-                    });
-        }
+	// -------------------------------------------------------------------------
+	// Load logged in user
+	// -------------------------------------------------------------------------
 
+	private void loadLoggedInUser() {
 
-        loadBatches();
-    }
+		Session session = Executions.getCurrent().getSession();
 
+		User user = (User) session.getAttribute("loggedInUser");
 
-    // -------------------------------------------------------------------------
-    // Load logged in user
-    // -------------------------------------------------------------------------
+		if (user != null) {
 
-    private void loadLoggedInUser() {
+			loggedInUserId = user.getUserId();
+		}
+	}
 
-        Session session =
-                Executions.getCurrent()
-                        .getSession();
+	// Filter button styling
 
-        User user =
-                (User) session.getAttribute(
-                        "loggedInUser");
+	private void updateFilterButtons() {
 
-        if (user != null) {
+		allBtn.setSclass("filter-btn");
 
-            loggedInUserId =
-                    user.getUserId();
-        }
-    }
+		availableBtn.setSclass("filter-btn");
 
+		myBatchesBtn.setSclass("filter-btn");
 
-    // -------------------------------------------------------------------------
-    // Filter button styling
-    // -------------------------------------------------------------------------
+		if (returnToMakerBtn != null) {
 
-    private void updateFilterButtons() {
+			returnToMakerBtn.setSclass("filter-btn");
+		}
 
-        allBtn.setSclass(
-                "filter-btn");
+		if ("All".equals(selectedStatus)) {
 
-        availableBtn.setSclass(
-                "filter-btn");
+			allBtn.setSclass("filter-btn active-filter");
+		}
 
-        myBatchesBtn.setSclass(
-                "filter-btn");
+		if ("Available".equals(selectedStatus)) {
 
-        if (returnToMakerBtn != null) {
+			availableBtn.setSclass("filter-btn active-filter");
+		}
 
-            returnToMakerBtn.setSclass(
-                    "filter-btn");
-        }
+		if ("My Batches".equals(selectedStatus)) {
 
+			myBatchesBtn.setSclass("filter-btn active-filter");
+		}
 
-        if ("All".equals(selectedStatus)) {
+		if ("Return to Maker".equals(selectedStatus) && returnToMakerBtn != null) {
 
-            allBtn.setSclass(
-                    "filter-btn active-filter");
-        }
+			returnToMakerBtn.setSclass("filter-btn active-filter");
+		}
+	}
 
+	// Load dashboard batches
 
-        if ("Available".equals(selectedStatus)) {
+	private void loadBatches() {
 
-            availableBtn.setSclass(
-                    "filter-btn active-filter");
-        }
+		Rows rows = batchesGrid.getRows();
 
+		rows.getChildren().clear();
 
-        if ("My Batches".equals(selectedStatus)) {
+		List<DashboardBatchDto> batches = dashboardService.getDashboardBatches();
 
-            myBatchesBtn.setSclass(
-                    "filter-btn active-filter");
-        }
+		if (batches == null) {
 
+			batches = java.util.Collections.emptyList();
+		}
 
-        if ("Return to Maker".equals(
-                selectedStatus)
-                && returnToMakerBtn != null) {
+		int availableCount = 0;
 
-            returnToMakerBtn.setSclass(
-                    "filter-btn active-filter");
-        }
-    }
+		int myBatchesCount = 0;
 
+		for (DashboardBatchDto batch : batches) {
 
-    // -------------------------------------------------------------------------
-    // Load dashboard batches
-    // -------------------------------------------------------------------------
+			String batchStatus = safe(batch.getBatchStatus());
 
-    private void loadBatches() {
+			boolean locked = STATUS_LOCKED.equalsIgnoreCase(batch.getLockStatus());
 
-        Rows rows =
-                batchesGrid.getRows();
+			if (!locked && (STATUS_RECEIVED.equalsIgnoreCase(batchStatus) || batchStatus.isEmpty())) {
 
-        rows.getChildren().clear();
+				availableCount++;
+			}
 
-        List<DashboardBatchDto> batches =
-                dashboardService
-                        .getDashboardBatches();
+			if (isOwnedByCurrentUser(batch)) {
 
-        if (batches == null) {
+				myBatchesCount++;
+			}
+		}
 
-            batches =
-                    java.util.Collections.emptyList();
-        }
+		receivedCountLabel.setValue(String.valueOf(batches.size()));
 
+		pendingCountLabel.setValue(String.valueOf(availableCount));
 
-        int availableCount = 0;
+		myBatchesCountLabel.setValue(String.valueOf(myBatchesCount));
 
-        int myBatchesCount = 0;
+		for (DashboardBatchDto batch : batches) {
 
+			String batchStatus = safe(batch.getBatchStatus());
 
-        /*
-         * -----------------------------------------------------------------
-         * KPI counts
-         * -----------------------------------------------------------------
-         */
-        for (DashboardBatchDto batch :
-                batches) {
+			boolean locked = STATUS_LOCKED.equalsIgnoreCase(batch.getLockStatus());
 
-            String batchStatus =
-                    safe(
-                            batch.getBatchStatus());
+			String displayStatus = getDisplayStatus(batch);
 
-            boolean locked =
-                    STATUS_LOCKED.equalsIgnoreCase(
-                            batch.getLockStatus());
+			if (!matchesFilter(selectedStatus, batch, displayStatus)) {
 
+				continue;
+			}
 
-            if (!locked
-                    && (STATUS_RECEIVED.equalsIgnoreCase(
-                            batchStatus)
-                        || batchStatus.isEmpty())) {
+			Row row = new Row();
 
-                availableCount++;
-            }
+			// Batch ID
 
+			row.appendChild(new Label(String.valueOf(batch.getBatchId())));
 
-            if (isOwnedByCurrentUser(batch)) {
+			// Total cheque count
 
-                myBatchesCount++;
-            }
-        }
+			row.appendChild(new Label(String.valueOf(batch.getTotalCheques())));
 
+			// Status
 
-        receivedCountLabel.setValue(
-                String.valueOf(
-                        batches.size()));
+			Hlayout statusLayout = new Hlayout();
 
-        pendingCountLabel.setValue(
-                String.valueOf(
-                        availableCount));
+			Label statusLabel = new Label(displayStatus);
 
-        myBatchesCountLabel.setValue(
-                String.valueOf(
-                        myBatchesCount));
+			if ("Locked".equalsIgnoreCase(displayStatus)) {
 
+				statusLayout.setSclass("status-badge badge-locked");
 
-        /*
-         * -----------------------------------------------------------------
-         * Build rows
-         * -----------------------------------------------------------------
-         */
-        for (DashboardBatchDto batch :
-                batches) {
+				Label icon = new Label();
 
-            String batchStatus =
-                    safe(
-                            batch.getBatchStatus());
+				icon.setSclass("z-icon-lock");
 
-            boolean locked =
-                    STATUS_LOCKED.equalsIgnoreCase(
-                            batch.getLockStatus());
+				statusLayout.appendChild(icon);
 
-            String displayStatus =
-                    getDisplayStatus(
-                            batch);
+				statusLayout.appendChild(statusLabel);
 
+			} else if ("MICR Repair".equalsIgnoreCase(displayStatus)) {
 
-            if (!matchesFilter(
-                    selectedStatus,
-                    batch,
-                    displayStatus)) {
+				statusLayout.setSclass("status-badge badge-locked");
 
-                continue;
-            }
+				Label icon = new Label();
 
+				icon.setSclass("z-icon-wrench");
 
-            Row row =
-                    new Row();
+				statusLayout.appendChild(icon);
 
+				statusLayout.appendChild(statusLabel);
 
-            /*
-             * -------------------------------------------------------------
-             * Batch ID
-             * -------------------------------------------------------------
-             */
-            row.appendChild(
-                    new Label(
-                            String.valueOf(
-                                    batch.getBatchId())));
+			} else if ("Data Entry".equalsIgnoreCase(displayStatus)) {
 
+				statusLayout.setSclass("status-badge badge-locked");
 
-            /*
-             * -------------------------------------------------------------
-             * Total cheque count
-             * -------------------------------------------------------------
-             */
-            row.appendChild(
-                    new Label(
-                            String.valueOf(
-                                    batch.getTotalCheques())));
+				Label icon = new Label();
 
+				icon.setSclass("z-icon-edit");
 
-            /*
-             * -------------------------------------------------------------
-             * Status
-             * -------------------------------------------------------------
-             */
-            Hlayout statusLayout =
-                    new Hlayout();
+				statusLayout.appendChild(icon);
 
-            Label statusLabel =
-                    new Label(
-                            displayStatus);
+				statusLayout.appendChild(statusLabel);
 
+			} else if ("Data Entry Completed".equalsIgnoreCase(displayStatus)) {
 
-            if ("Locked".equalsIgnoreCase(
-                    displayStatus)) {
+				statusLayout.setSclass("status-badge badge-locked");
 
-                statusLayout.setSclass(
-                        "status-badge badge-locked");
+				Label icon = new Label();
 
-                Label icon =
-                        new Label();
+				icon.setSclass("z-icon-check");
 
-                icon.setSclass(
-                        "z-icon-lock");
+				statusLayout.appendChild(icon);
 
-                statusLayout.appendChild(icon);
+				statusLayout.appendChild(statusLabel);
 
-                statusLayout.appendChild(
-                        statusLabel);
+			} else if ("Return to Maker".equalsIgnoreCase(displayStatus)) {
 
+				statusLayout.setSclass("status-badge badge-return-to-maker");
 
-            } else if ("MICR Repair".equalsIgnoreCase(
-                    displayStatus)) {
+				Label icon = new Label();
 
-                statusLayout.setSclass(
-                        "status-badge badge-locked");
+				icon.setSclass("z-icon-reply");
 
-                Label icon =
-                        new Label();
+				statusLayout.appendChild(icon);
 
-                icon.setSclass(
-                        "z-icon-wrench");
+				statusLayout.appendChild(statusLabel);
 
-                statusLayout.appendChild(icon);
+			} else {
 
-                statusLayout.appendChild(
-                        statusLabel);
+				statusLayout.setSclass("status-badge badge-available");
 
+				statusLayout.appendChild(statusLabel);
+			}
 
-            } else if ("Data Entry".equalsIgnoreCase(
-                    displayStatus)) {
+			row.appendChild(statusLayout);
 
-                statusLayout.setSclass(
-                        "status-badge badge-locked");
+			// Locked By
 
-                Label icon =
-                        new Label();
+			Label userNameLabel = new Label("Not Assigned");
 
-                icon.setSclass(
-                        "z-icon-edit");
+			if (locked && batch.getLockUserName() != null && !batch.getLockUserName().trim().isEmpty()) {
 
-                statusLayout.appendChild(icon);
+				userNameLabel.setValue(batch.getLockUserName());
+			}
 
-                statusLayout.appendChild(
-                        statusLabel);
+			row.appendChild(userNameLabel);
 
+			// Action
 
-            } else if ("Data Entry Completed"
-                    .equalsIgnoreCase(
-                            displayStatus)) {
+			Button actionButton = new Button();
 
-                statusLayout.setSclass(
-                        "status-badge badge-locked");
+			configureActionButton(actionButton, batch, batchStatus, locked);
 
-                Label icon =
-                        new Label();
+			row.appendChild(actionButton);
 
-                icon.setSclass(
-                        "z-icon-check");
+			rows.appendChild(row);
+		}
 
-                statusLayout.appendChild(icon);
+		// Pagination
 
-                statusLayout.appendChild(
-                        statusLabel);
+		if (batchesGrid.getPaginal() != null) {
 
+			batchesGrid.getPaginal().setTotalSize(rows.getChildren().size());
+		}
 
-            } else if ("Return to Maker"
-                    .equalsIgnoreCase(
-                            displayStatus)) {
+		batchesGrid.setActivePage(0);
+	}
 
-                statusLayout.setSclass(
-                        "status-badge badge-return-to-maker");
+	// Display status
 
-                Label icon =
-                        new Label();
+	private String getDisplayStatus(DashboardBatchDto batch) {
 
-                icon.setSclass(
-                        "z-icon-reply");
+		String batchStatus = safe(batch.getBatchStatus());
 
-                statusLayout.appendChild(icon);
+		boolean locked = STATUS_LOCKED.equalsIgnoreCase(batch.getLockStatus());
 
-                statusLayout.appendChild(
-                        statusLabel);
+		// SENT TO CHECKER
 
+		if (STATUS_SENT_TO_CHECKER.equalsIgnoreCase(batchStatus)) {
 
-            } else {
+			return "Sent to Checker";
+		}
 
-                statusLayout.setSclass(
-                        "status-badge badge-available");
+		// RETURN TO MAKER
 
-                statusLayout.appendChild(
-                        statusLabel);
-            }
+		if (STATUS_RETURN_TO_MAKER.equalsIgnoreCase(batchStatus)) {
 
+			return "Return to Maker";
+		}
 
-            row.appendChild(
-                    statusLayout);
+		// DATA ENTRY COMPLETED
 
+		if (STATUS_DATA_ENTRY_COMPLETED.equalsIgnoreCase(batchStatus)) {
 
-            /*
-             * -------------------------------------------------------------
-             * Locked By
-             *
-             * IMPORTANT:
-             * Display maker NAME instead of maker ID.
-             *
-             * lockUserId is still retained inside the DTO
-             * for ownership checking.
-             * -------------------------------------------------------------
-             */
-            Label userNameLabel =
-                    new Label(
-                            "Not Assigned");
+			return "Data Entry Completed";
+		}
 
+		// MICR REPAIR
 
-            if (locked
-                    && batch.getLockUserName() != null
-                    && !batch.getLockUserName()
-                            .trim()
-                            .isEmpty()) {
+		if (STATUS_MICR_REPAIR.equalsIgnoreCase(batchStatus)) {
 
-                userNameLabel.setValue(
-                        batch.getLockUserName());
-            }
+			return "MICR Repair";
+		}
 
+		// DATA ENTRY
 
-            row.appendChild(
-                    userNameLabel);
+		if (STATUS_DATA_ENTRY.equalsIgnoreCase(batchStatus)) {
 
+			return "Data Entry";
+		}
 
-            /*
-             * -------------------------------------------------------------
-             * Action
-             * -------------------------------------------------------------
-             */
-            Button actionButton =
-                    new Button();
+		// LOCKED
 
-            configureActionButton(
-                    actionButton,
-                    batch,
-                    batchStatus,
-                    locked);
+		if (locked) {
 
-            row.appendChild(
-                    actionButton);
+			return "Locked";
+		}
 
+		// AVAILABLE
 
-            rows.appendChild(row);
-        }
+		return "Available";
+	}
 
+	// Filter matching
 
-        /*
-         * -----------------------------------------------------------------
-         * Pagination
-         * -----------------------------------------------------------------
-         */
-        if (batchesGrid.getPaginal()
-                != null) {
+	private boolean matchesFilter(String filter, DashboardBatchDto batch, String displayStatus) {
 
-            batchesGrid.getPaginal()
-                    .setTotalSize(
-                            rows.getChildren()
-                                    .size());
-        }
+		if ("All".equalsIgnoreCase(filter)) {
 
+			return true;
+		}
 
-        batchesGrid.setActivePage(0);
-    }
+		if ("Available".equalsIgnoreCase(filter)) {
 
+			return "Available".equalsIgnoreCase(displayStatus);
+		}
 
-    // -------------------------------------------------------------------------
-    // Determine display status
-    // -------------------------------------------------------------------------
+		if ("My Batches".equalsIgnoreCase(filter)) {
 
-    private String getDisplayStatus(
-            DashboardBatchDto batch) {
+			return isOwnedByCurrentUser(batch);
+		}
 
-        String batchStatus =
-                safe(
-                        batch.getBatchStatus());
+		if ("Return to Maker".equalsIgnoreCase(filter)) {
 
-        boolean locked =
-                STATUS_LOCKED.equalsIgnoreCase(
-                        batch.getLockStatus());
+			return "Return to Maker".equalsIgnoreCase(displayStatus);
+		}
 
+		return false;
+	}
 
-        /*
-         * SENT TO CHECKER
-         */
-        if (STATUS_SENT_TO_CHECKER.equalsIgnoreCase(
-                batchStatus)) {
+	// Configure action button
 
-            return "Sent to Checker";
-        }
+	private void configureActionButton(Button actionButton, DashboardBatchDto batch, String batchStatus,
+			boolean locked) {
 
+		long batchId = batch.getBatchId();
 
-        /*
-         * RETURN TO MAKER
-         */
-        if (STATUS_RETURN_TO_MAKER.equalsIgnoreCase(
-                batchStatus)) {
+		// AVAILABLE
 
-            return "Return to Maker";
-        }
+		if (!locked && (STATUS_RECEIVED.equalsIgnoreCase(batchStatus) || batchStatus.isEmpty())) {
 
+			actionButton.setLabel("Lock & Open");
 
-        /*
-         * DATA ENTRY COMPLETED
-         */
-        if (STATUS_DATA_ENTRY_COMPLETED.equalsIgnoreCase(
-                batchStatus)) {
+			actionButton.setIconSclass("z-icon-lock");
 
-            return "Data Entry Completed";
-        }
+			actionButton.setSclass("btn btn-action");
 
+			actionButton.setDisabled(false);
 
-        /*
-         * MICR REPAIR
-         */
-        if (STATUS_MICR_REPAIR.equalsIgnoreCase(
-                batchStatus)) {
+			actionButton.addEventListener(Events.ON_CLICK, event -> lockAndValidate(batchId));
 
-            return "MICR Repair";
-        }
+			return;
+		}
 
+		// RETURN TO MAKER
 
-        /*
-         * DATA ENTRY
-         */
-        if (STATUS_DATA_ENTRY.equalsIgnoreCase(
-                batchStatus)) {
+		if (STATUS_RETURN_TO_MAKER.equalsIgnoreCase(batchStatus)) {
 
-            return "Data Entry";
-        }
+			if (!isOwnedByCurrentUser(batch)) {
 
+				setLockedButton(actionButton);
 
-        /*
-         * LOCKED
-         */
-        if (locked) {
+				return;
+			}
 
-            return "Locked";
-        }
+			actionButton.setLabel("Re-verify");
 
+			actionButton.setIconSclass("z-icon-repeat");
 
-        /*
-         * AVAILABLE
-         */
-        return "Available";
-    }
+			actionButton.setSclass("btn btn-action");
 
+			actionButton.setDisabled(false);
 
-    // -------------------------------------------------------------------------
-    // Filter matching
-    // -------------------------------------------------------------------------
+			actionButton.addEventListener(Events.ON_CLICK, event -> openReturnToMakerBatch(batchId));
 
-    private boolean matchesFilter(
-            String filter,
-            DashboardBatchDto batch,
-            String displayStatus) {
+			return;
+		}
 
-        if ("All".equalsIgnoreCase(
-                filter)) {
+		// MICR REPAIR
 
-            return true;
-        }
+		if (STATUS_MICR_REPAIR.equalsIgnoreCase(batchStatus)) {
 
+			if (!isOwnedByCurrentUser(batch)) {
 
-        if ("Available".equalsIgnoreCase(
-                filter)) {
+				setLockedButton(actionButton);
 
-            return "Available".equalsIgnoreCase(
-                    displayStatus);
-        }
+				return;
+			}
 
+			int nextRepairIndex = micrRepairService.getNextRepairIndex(batchId);
 
-        if ("My Batches".equalsIgnoreCase(
-                filter)) {
+			actionButton.setLabel("MICR Repair");
 
-            return isOwnedByCurrentUser(
-                    batch);
-        }
+			actionButton.setIconSclass("z-icon-wrench");
 
+			actionButton.setSclass("btn btn-action");
 
-        if ("Return to Maker".equalsIgnoreCase(
-                filter)) {
+			actionButton.setDisabled(nextRepairIndex < 0);
 
-            return "Return to Maker".equalsIgnoreCase(
-                    displayStatus);
-        }
+			if (nextRepairIndex >= 0) {
 
+				actionButton.addEventListener(Events.ON_CLICK, event -> openMicrRepair(batchId, nextRepairIndex));
+			}
 
-        return false;
-    }
+			return;
+		}
 
+		// DATA ENTRY
 
-    // -------------------------------------------------------------------------
-    // Configure action button
-    // -------------------------------------------------------------------------
+		if (STATUS_DATA_ENTRY.equalsIgnoreCase(batchStatus)) {
 
-    private void configureActionButton(
-            Button actionButton,
-            DashboardBatchDto batch,
-            String batchStatus,
-            boolean locked) {
+			if (!isOwnedByCurrentUser(batch)) {
 
-        long batchId =
-                batch.getBatchId();
+				setLockedButton(actionButton);
 
+				return;
+			}
 
-        /*
-         * -----------------------------------------------------------------
-         * AVAILABLE
-         * -----------------------------------------------------------------
-         */
-        if (!locked
-                && (STATUS_RECEIVED.equalsIgnoreCase(
-                        batchStatus)
-                    || batchStatus.isEmpty())) {
+			actionButton.setLabel("Data Entry");
 
-            actionButton.setLabel(
-                    "Lock & Open");
+			actionButton.setIconSclass("z-icon-edit");
 
-            actionButton.setIconSclass(
-                    "z-icon-lock");
+			actionButton.setSclass("btn btn-action");
 
-            actionButton.setSclass(
-                    "btn btn-action");
+			actionButton.setDisabled(false);
 
-            actionButton.setDisabled(
-                    false);
+			actionButton.addEventListener(Events.ON_CLICK, event -> openDataEntry(batchId));
 
-            actionButton.addEventListener(
-                    Events.ON_CLICK,
-                    event ->
-                            lockAndValidate(
-                                    batchId));
+			return;
+		}
 
-            return;
-        }
+		// DATA ENTRY COMPLETED
 
+		if (STATUS_DATA_ENTRY_COMPLETED.equalsIgnoreCase(batchStatus)) {
 
-        /*
-         * -----------------------------------------------------------------
-         * RETURN TO MAKER
-         * -----------------------------------------------------------------
-         */
-        if (STATUS_RETURN_TO_MAKER.equalsIgnoreCase(
-                batchStatus)) {
+			actionButton.setLabel("Send to Checker");
 
-            if (!isOwnedByCurrentUser(batch)) {
+			actionButton.setIconSclass("z-icon-send");
 
-                setLockedButton(
-                        actionButton);
+			actionButton.setSclass("btn btn-action");
 
-                return;
-            }
+			actionButton.setDisabled(false);
 
+			actionButton.addEventListener(Events.ON_CLICK, event -> openSendToChecker(batchId));
 
-            actionButton.setLabel(
-                    "Re-verify");
+			return;
+		}
 
-            actionButton.setIconSclass(
-                    "z-icon-repeat");
+		// LOCKED
 
-            actionButton.setSclass(
-                    "btn btn-action");
+		if (locked) {
 
-            actionButton.setDisabled(
-                    false);
+			if (isOwnedByCurrentUser(batch)) {
 
-            actionButton.addEventListener(
-                    Events.ON_CLICK,
-                    event ->
-                            openReturnToMakerBatch(
-                                    batchId));
+				actionButton.setLabel("Open");
 
-            return;
-        }
+				actionButton.setIconSclass("z-icon-folder-open");
 
+				actionButton.setSclass("btn btn-action");
 
-        /*
-         * -----------------------------------------------------------------
-         * MICR REPAIR
-         * -----------------------------------------------------------------
-         */
-        if (STATUS_MICR_REPAIR.equalsIgnoreCase(
-                batchStatus)) {
+				actionButton.setDisabled(false);
 
-            if (!isOwnedByCurrentUser(batch)) {
+				actionButton.addEventListener(Events.ON_CLICK, event -> openBatch(batchId));
 
-                setLockedButton(
-                        actionButton);
+			} else {
 
-                return;
-            }
+				setLockedButton(actionButton);
+			}
 
+			return;
+		}
 
-            int nextRepairIndex =
-                    micrRepairService
-                            .getNextRepairIndex(
-                                    batchId);
+		setLockedButton(actionButton);
+	}
 
-            actionButton.setLabel(
-                    "MICR Repair");
+	// Check current user's ownership
 
-            actionButton.setIconSclass(
-                    "z-icon-wrench");
+	private boolean isOwnedByCurrentUser(DashboardBatchDto batch) {
 
-            actionButton.setSclass(
-                    "btn btn-action");
+		return loggedInUserId != null && batch != null && STATUS_LOCKED.equalsIgnoreCase(batch.getLockStatus())
+				&& batch.getLockUserId() != null && loggedInUserId.equals(batch.getLockUserId());
+	}
 
-            actionButton.setDisabled(
-                    nextRepairIndex < 0);
+	// Locked button
 
+	private void setLockedButton(Button actionButton) {
 
-            if (nextRepairIndex >= 0) {
+		actionButton.setLabel("Locked");
 
-                actionButton.addEventListener(
-                        Events.ON_CLICK,
-                        event ->
-                                openMicrRepair(
-                                        batchId,
-                                        nextRepairIndex));
-            }
+		actionButton.setIconSclass("z-icon-lock");
 
-            return;
-        }
+		actionButton.setSclass("btn btn-locked");
 
+		actionButton.setDisabled(true);
+	}
 
-        /*
-         * -----------------------------------------------------------------
-         * DATA ENTRY
-         * -----------------------------------------------------------------
-         */
-        if (STATUS_DATA_ENTRY.equalsIgnoreCase(
-                batchStatus)) {
+	// Batch repair status
 
-            if (!isOwnedByCurrentUser(batch)) {
+	private static class BatchRepairStatus {
 
-                setLockedButton(
-                        actionButton);
+		final boolean needsMicrRepair;
 
-                return;
-            }
+		final int nextRepairIndex;
 
+		BatchRepairStatus(boolean needsMicrRepair, int nextRepairIndex) {
 
-            actionButton.setLabel(
-                    "Data Entry");
+			this.needsMicrRepair = needsMicrRepair;
 
-            actionButton.setIconSclass(
-                    "z-icon-edit");
+			this.nextRepairIndex = nextRepairIndex;
+		}
+	}
 
-            actionButton.setSclass(
-                    "btn btn-action");
+	private BatchRepairStatus checkBatchRepairStatus(long batchId) {
 
-            actionButton.setDisabled(
-                    false);
+		List<MicrComparisonDto> comparisons = micrRepairService.compareBatch(batchId);
 
-            actionButton.addEventListener(
-                    Events.ON_CLICK,
-                    event ->
-                            openDataEntry(
-                                    batchId));
+		boolean needsRepair = false;
 
-            return;
-        }
+		int firstIndex = -1;
 
+		if (comparisons != null) {
 
-        /*
-         * -----------------------------------------------------------------
-         * DATA ENTRY COMPLETED
-         * -----------------------------------------------------------------
-         */
-        if (STATUS_DATA_ENTRY_COMPLETED.equalsIgnoreCase(
-                batchStatus)) {
+			for (int i = 0; i < comparisons.size(); i++) {
 
-            actionButton.setLabel(
-                    "Send to Checker");
+				MicrComparisonDto c = comparisons.get(i);
 
-            actionButton.setIconSclass(
-                    "z-icon-send");
+				if (c != null && c.isNeedsMicrRepair()) {
 
-            actionButton.setSclass(
-                    "btn btn-action");
+					needsRepair = true;
 
-            actionButton.setDisabled(
-                    false);
+					if (firstIndex < 0) {
 
-            actionButton.addEventListener(
-                    Events.ON_CLICK,
-                    event ->
-                            openSendToChecker(
-                                    batchId));
+						firstIndex = i;
+					}
+				}
+			}
+		}
 
-            return;
-        }
+		return new BatchRepairStatus(needsRepair, firstIndex);
+	}
 
+	// Lock & Validate
 
-        /*
-         * -----------------------------------------------------------------
-         * LOCKED
-         * -----------------------------------------------------------------
-         */
-        if (locked) {
+	private void lockAndValidate(long batchId) {
 
-            if (isOwnedByCurrentUser(batch)) {
+		if (loggedInUserId == null) {
 
-                actionButton.setLabel(
-                        "Open");
+			showError("Unable to identify the logged-in user.");
 
-                actionButton.setIconSclass(
-                        "z-icon-folder-open");
+			return;
+		}
 
-                actionButton.setSclass(
-                        "btn btn-action");
+		// 1. Lock
 
-                actionButton.setDisabled(
-                        false);
+		boolean locked = dashboardService.lockBatch(batchId, loggedInUserId);
 
-                actionButton.addEventListener(
-                        Events.ON_CLICK,
-                        event ->
-                                openBatch(
-                                        batchId));
+		if (!locked) {
 
-            } else {
+			showError("Unable to lock Batch ID " + batchId + ". It may already be locked.");
 
-                setLockedButton(
-                        actionButton);
-            }
+			loadBatches();
 
-            return;
-        }
+			return;
+		}
 
+		// 2. Run NPCI vs OCR MICR validation
 
-        /*
-         * -----------------------------------------------------------------
-         * FALLBACK
-         * -----------------------------------------------------------------
-         */
-        setLockedButton(
-                actionButton);
-    }
+		BatchRepairStatus repairStatus = checkBatchRepairStatus(batchId);
 
+		// 3. MICR REPAIR required
 
-    // -------------------------------------------------------------------------
-    // Check current user's ownership
-    // -------------------------------------------------------------------------
+		if (repairStatus.needsMicrRepair) {
 
-    private boolean isOwnedByCurrentUser(
-            DashboardBatchDto batch) {
+			boolean updated = dashboardService.updateBatchStatus(batchId, STATUS_MICR_REPAIR, loggedInUserId);
 
-        return loggedInUserId != null
-                && batch != null
-                && STATUS_LOCKED.equalsIgnoreCase(
-                        batch.getLockStatus())
-                && batch.getLockUserId() != null
-                && loggedInUserId.equals(
-                        batch.getLockUserId());
-    }
+			if (!updated) {
 
+				showError("Unable to move Batch ID " + batchId + " to MICR Repair.");
 
-    // -------------------------------------------------------------------------
-    // Locked button
-    // -------------------------------------------------------------------------
+				return;
+			}
 
-    private void setLockedButton(
-            Button actionButton) {
+			if (repairStatus.nextRepairIndex < 0) {
 
-        actionButton.setLabel(
-                "Locked");
+				showError("MICR validation indicates repair is needed, " + "but no repair cheque is available.");
 
-        actionButton.setIconSclass(
-                "z-icon-lock");
+				return;
+			}
 
-        actionButton.setSclass(
-                "btn btn-locked");
+			openMicrRepair(batchId, repairStatus.nextRepairIndex);
 
-        actionButton.setDisabled(
-                true);
-    }
+			return;
+		}
 
+		// 4. No MICR repair
 
-    // -------------------------------------------------------------------------
-    // Batch repair status
-    // -------------------------------------------------------------------------
+		boolean moved = micrRepairService.markBatchDataEntry(batchId, loggedInUserId);
 
-    private static class BatchRepairStatus {
+		if (!moved) {
 
-        final boolean needsMicrRepair;
+			showError("Unable to move Batch ID " + batchId + " to Data Entry.");
 
-        final int nextRepairIndex;
+			return;
+		}
 
+		openDataEntry(batchId);
+	}
 
-        BatchRepairStatus(
-                boolean needsMicrRepair,
-                int nextRepairIndex) {
+	// Open locked batch
 
-            this.needsMicrRepair =
-                    needsMicrRepair;
+	private void openBatch(long batchId) {
 
-            this.nextRepairIndex =
-                    nextRepairIndex;
-        }
-    }
+		BatchRepairStatus repairStatus = checkBatchRepairStatus(batchId);
 
+		if (repairStatus.needsMicrRepair && repairStatus.nextRepairIndex >= 0) {
 
-    private BatchRepairStatus checkBatchRepairStatus(
-            long batchId) {
+			openMicrRepair(batchId, repairStatus.nextRepairIndex);
 
-        List<MicrComparisonDto> comparisons =
-                micrRepairService
-                        .compareBatch(
-                                batchId);
+			return;
+		}
 
-        boolean needsRepair = false;
+		openDataEntry(batchId);
+	}
 
-        int firstIndex = -1;
+	// Open MICR Repair
 
+	private void openMicrRepair(long batchId, int chequeIndex) {
 
-        if (comparisons != null) {
+		String url = "/zul/inward-maker/" + "micr-repair.zul" + "?batchId=" + batchId + "&chequeIndex=" + chequeIndex
+				+ "&source=dashboard";
 
-            for (int i = 0;
-                    i < comparisons.size();
-                    i++) {
+		Executions.sendRedirect(url);
+	}
 
-                MicrComparisonDto c =
-                        comparisons.get(i);
+	// Open Data Entry
 
+	private void openDataEntry(long batchId) {
 
-                if (c != null
-                        && c.isNeedsMicrRepair()) {
+		String url = "/zul/inward-maker/" + "data-entryform.zul" + "?batchId=" + batchId + "&source=dashboard";
 
-                    needsRepair = true;
+		Executions.sendRedirect(url);
+	}
 
+	// Open Send to Checker
 
-                    if (firstIndex < 0) {
+	private void openSendToChecker(long batchId) {
 
-                        firstIndex = i;
-                    }
-                }
-            }
-        }
+		String url = "/zul/inward-maker/" + "send-to-checker.zul" + "?batchId=" + batchId + "&source=dashboard";
 
+		Executions.sendRedirect(url);
+	}
 
-        return new BatchRepairStatus(
-                needsRepair,
-                firstIndex);
-    }
+	// Show error
 
+	private void showError(String message) {
 
-    // -------------------------------------------------------------------------
-    // Lock & Validate
-    // -------------------------------------------------------------------------
+		Messagebox.show(message, "Dashboard", Messagebox.OK, Messagebox.ERROR);
+	}
 
-    private void lockAndValidate(
-            long batchId) {
+	// Open Return to Maker batch
 
-        if (loggedInUserId == null) {
+	private void openReturnToMakerBatch(long batchId) {
 
-            showError(
-                    "Unable to identify the logged-in user.");
+		BatchRepairStatus repairStatus = checkBatchRepairStatus(batchId);
 
-            return;
-        }
+		if (repairStatus.needsMicrRepair && repairStatus.nextRepairIndex >= 0) {
 
+			openMicrRepair(batchId, repairStatus.nextRepairIndex);
 
-        /*
-         * -----------------------------------------------------------------
-         * 1. Lock
-         * -----------------------------------------------------------------
-         */
-        boolean locked =
-                dashboardService.lockBatch(
-                        batchId,
-                        loggedInUserId);
+			return;
+		}
 
+		openDataEntry(batchId);
+	}
 
-        if (!locked) {
+	private String safe(String value) {
 
-            showError(
-                    "Unable to lock Batch ID "
-                            + batchId
-                            + ". It may already be locked.");
-
-            loadBatches();
-
-            return;
-        }
-
-
-        /*
-         * -----------------------------------------------------------------
-         * 2. Run NPCI vs OCR MICR validation
-         * -----------------------------------------------------------------
-         */
-        BatchRepairStatus repairStatus =
-                checkBatchRepairStatus(
-                        batchId);
-
-
-        /*
-         * -----------------------------------------------------------------
-         * 3. MICR REPAIR required
-         * -----------------------------------------------------------------
-         */
-        if (repairStatus.needsMicrRepair) {
-
-            boolean updated =
-                    dashboardService
-                            .updateBatchStatus(
-                                    batchId,
-                                    STATUS_MICR_REPAIR,
-                                    loggedInUserId);
-
-
-            if (!updated) {
-
-                showError(
-                        "Unable to move Batch ID "
-                                + batchId
-                                + " to MICR Repair.");
-
-                return;
-            }
-
-
-            if (repairStatus.nextRepairIndex < 0) {
-
-                showError(
-                        "MICR validation indicates repair is needed, "
-                                + "but no repair cheque is available.");
-
-                return;
-            }
-
-
-            openMicrRepair(
-                    batchId,
-                    repairStatus.nextRepairIndex);
-
-            return;
-        }
-
-
-        /*
-         * -----------------------------------------------------------------
-         * 4. No MICR repair
-         *
-         * Move batch and applicable cheques to DATA_ENTRY.
-         * -----------------------------------------------------------------
-         */
-        boolean moved =
-                micrRepairService
-                        .markBatchDataEntry(
-                                batchId,
-                                loggedInUserId);
-
-
-        if (!moved) {
-
-            showError(
-                    "Unable to move Batch ID "
-                            + batchId
-                            + " to Data Entry.");
-
-            return;
-        }
-
-
-        openDataEntry(
-                batchId);
-    }
-
-
-    // -------------------------------------------------------------------------
-    // Open locked batch
-    // -------------------------------------------------------------------------
-
-    private void openBatch(
-            long batchId) {
-
-        BatchRepairStatus repairStatus =
-                checkBatchRepairStatus(
-                        batchId);
-
-
-        if (repairStatus.needsMicrRepair
-                && repairStatus.nextRepairIndex >= 0) {
-
-            openMicrRepair(
-                    batchId,
-                    repairStatus.nextRepairIndex);
-
-            return;
-        }
-
-
-        openDataEntry(
-                batchId);
-    }
-
-
-    // -------------------------------------------------------------------------
-    // Open MICR Repair
-    // -------------------------------------------------------------------------
-
-    private void openMicrRepair(
-            long batchId,
-            int chequeIndex) {
-
-        String url =
-                "/zul/inward-maker/"
-                        + "micr-repair.zul"
-                        + "?batchId="
-                        + batchId
-                        + "&chequeIndex="
-                        + chequeIndex
-                        + "&source=dashboard";
-
-        Executions.sendRedirect(
-                url);
-    }
-
-
-    // -------------------------------------------------------------------------
-    // Open Data Entry
-    // -------------------------------------------------------------------------
-
-    private void openDataEntry(
-            long batchId) {
-
-        String url =
-                "/zul/inward-maker/"
-                        + "data-entryform.zul"
-                        + "?batchId="
-                        + batchId
-                        + "&source=dashboard";
-
-        Executions.sendRedirect(
-                url);
-    }
-
-
-    // -------------------------------------------------------------------------
-    // Open Send to Checker
-    // -------------------------------------------------------------------------
-
-    private void openSendToChecker(
-            long batchId) {
-
-        String url =
-                "/zul/inward-maker/"
-                        + "send-to-checker.zul"
-                        + "?batchId="
-                        + batchId
-                        + "&source=dashboard";
-
-        Executions.sendRedirect(
-                url);
-    }
-
-
-    // -------------------------------------------------------------------------
-    // Show error
-    // -------------------------------------------------------------------------
-
-    private void showError(
-            String message) {
-
-        Messagebox.show(
-                message,
-                "Dashboard",
-                Messagebox.OK,
-                Messagebox.ERROR);
-    }
-
-
-    // -------------------------------------------------------------------------
-    // Open Return to Maker batch
-    // -------------------------------------------------------------------------
-
-    private void openReturnToMakerBatch(
-            long batchId) {
-
-        BatchRepairStatus repairStatus =
-                checkBatchRepairStatus(
-                        batchId);
-
-
-        if (repairStatus.needsMicrRepair
-                && repairStatus.nextRepairIndex >= 0) {
-
-            openMicrRepair(
-                    batchId,
-                    repairStatus.nextRepairIndex);
-
-            return;
-        }
-
-
-        openDataEntry(
-                batchId);
-    }
-
-
-    // -------------------------------------------------------------------------
-    // Safe string
-    // -------------------------------------------------------------------------
-
-    private String safe(
-            String value) {
-
-        return value == null
-                ? ""
-                : value.trim();
-    }
+		return value == null ? "" : value.trim();
+	}
 }

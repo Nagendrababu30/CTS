@@ -1,7 +1,6 @@
 package com.iispl.cts.dao.outward;
 
 import com.cts.inward.config.ConnectionPool;
-import com.iispl.cts.data.CTSStaticData;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Session;
 import com.iispl.cts.model.outward.OutwardBatch;
@@ -57,7 +56,7 @@ public class OutwardMakerDashboardDAO {
 
                 "FROM public.outward_batch ob " +
 
-                // Count returned cheques
+                // count returned cheques
                 "LEFT JOIN ( " +
                 "    SELECT " +
                 "        batch_number, " +
@@ -68,7 +67,7 @@ public class OutwardMakerDashboardDAO {
                 ") rc " +
                 "ON rc.batch_number = ob.batch_number " +
 
-                // Get first/original Maker
+                // get first/original Maker
                 "LEFT JOIN LATERAL ( " +
                 "    SELECT oba.user_id " +
                 "    FROM public.outward_batch_assignment oba " +
@@ -78,7 +77,7 @@ public class OutwardMakerDashboardDAO {
                 "    LIMIT 1 " +
                 ") first_maker ON TRUE " +
 
-                // Get latest Maker assignment
+                // get latest Maker assignment
                 "LEFT JOIN LATERAL ( " +
                 "    SELECT mba.* " +
                 "    FROM public.outward_batch_assignment mba " +
@@ -492,7 +491,7 @@ public class OutwardMakerDashboardDAO {
             "SELECT 1 FROM public.outward_batch WHERE batch_number = ?";
 
         try (
-            Connection con = CTSStaticData.getConnection();
+            Connection con = dataSource.getConnection();
             PreparedStatement ps = con.prepareStatement(sql)
         ) {
             ps.setString(1, batchNumber.trim());
@@ -808,7 +807,7 @@ public class OutwardMakerDashboardDAO {
             }
         }
     }
-
+   // statics of batches
     public java.util.Map<String, Integer> getDashboardCounts() throws SQLException {
         Session session = Executions.getCurrent().getSession();
         Object sessionUserId = session != null

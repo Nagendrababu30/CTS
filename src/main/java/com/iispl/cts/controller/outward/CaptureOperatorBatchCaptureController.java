@@ -2,6 +2,7 @@ package com.iispl.cts.controller.outward;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.zkoss.util.media.Media;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
@@ -19,6 +20,7 @@ import org.zkoss.zul.Intbox;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
 import org.zkoss.zul.Textbox;
+
 import com.cts.admin.service.SessionService;
 import com.cts.admin.service.SessionServiceImpl;
 import com.iispl.cts.model.outward.OutwardBatch;
@@ -30,12 +32,16 @@ public class CaptureOperatorBatchCaptureController extends SelectorComposer<Comp
 
     @Wire
     private Combobox branchCodeCombo;
+
     @Wire
     private Textbox branchNameTextbox;
+
     @Wire
     private Intbox numberOfCheques;
+
     @Wire
     private Fileupload batchFilesUpload;
+
     @Wire
     private Label selectedFilesLabel;
 
@@ -48,18 +54,21 @@ public class CaptureOperatorBatchCaptureController extends SelectorComposer<Comp
         super.doAfterCompose(component);
 
         Session session = Executions.getCurrent().getSession();
+
         if (session == null) {
             Executions.sendRedirect("/login.zul");
             return;
         }
 
         Object sessionUserId = session.getAttribute("userId");
+
         if (sessionUserId == null) {
             Executions.sendRedirect("/login.zul");
             return;
         }
 
         long userId;
+
         if (sessionUserId instanceof Number) {
             userId = ((Number) sessionUserId).longValue();
         } else {
@@ -74,11 +83,14 @@ public class CaptureOperatorBatchCaptureController extends SelectorComposer<Comp
         System.out.println("CAPTURE OPERATOR SESSION: userId=" + userId);
 
         sessionService = new SessionServiceImpl();
-        com.cts.admin.model.Session clearingSession = sessionService.getActiveSession();
 
-        if (clearingSession == null ||
-            clearingSession.getStatus() == null ||
-            !"STARTED".equalsIgnoreCase(clearingSession.getStatus().trim())) {
+        com.cts.admin.model.Session clearingSession =
+            sessionService.getActiveSession();
+
+        // check clearing session
+        if (clearingSession == null
+                || clearingSession.getStatus() == null
+                || !"STARTED".equalsIgnoreCase(clearingSession.getStatus().trim())) {
 
             Messagebox.show(
                 "Clearing session is not started.\n\nCapture Operator operations are currently unavailable.",
@@ -105,6 +117,7 @@ public class CaptureOperatorBatchCaptureController extends SelectorComposer<Comp
         loadBranches();
     }
 
+    // load active branches
     private void loadBranches() {
         branchCodeCombo.getItems().clear();
 
@@ -127,9 +140,9 @@ public class CaptureOperatorBatchCaptureController extends SelectorComposer<Comp
                 item.setAttribute("branchName", branch[1]);
                 branchCodeCombo.appendChild(item);
             }
-
         } catch (Exception e) {
             e.printStackTrace();
+
             Messagebox.show(
                 "Unable to load branches from database.\n\n" + e.getMessage(),
                 "Database Error",
@@ -139,6 +152,7 @@ public class CaptureOperatorBatchCaptureController extends SelectorComposer<Comp
         }
     }
 
+    // load selected branch name
     @Listen("onSelect = #branchCodeCombo")
     public void onBranchSelected() {
         Comboitem selectedItem = branchCodeCombo.getSelectedItem();
@@ -155,9 +169,12 @@ public class CaptureOperatorBatchCaptureController extends SelectorComposer<Comp
             branchName = service.getBranchName(branchCode);
         }
 
-        branchNameTextbox.setValue(branchName == null ? "" : branchName);
+        branchNameTextbox.setValue(
+            branchName == null ? "" : branchName
+        );
     }
 
+    // handle uploaded files
     @Listen("onUpload = #batchFilesUpload")
     public void onBatchFilesUpload(UploadEvent event) {
         try {
@@ -181,9 +198,9 @@ public class CaptureOperatorBatchCaptureController extends SelectorComposer<Comp
             }
 
             for (Media existing : uploadedFiles) {
-                if (existing != null &&
-                    existing.getName() != null &&
-                    existing.getName().equalsIgnoreCase(fileName)) {
+                if (existing != null
+                        && existing.getName() != null
+                        && existing.getName().equalsIgnoreCase(fileName)) {
 
                     Messagebox.show(
                         "File already selected:\n\n" + fileName,
@@ -197,9 +214,9 @@ public class CaptureOperatorBatchCaptureController extends SelectorComposer<Comp
 
             if (fileName.toLowerCase().endsWith(".xml")) {
                 for (Media existing : uploadedFiles) {
-                    if (existing != null &&
-                        existing.getName() != null &&
-                        existing.getName().toLowerCase().endsWith(".xml")) {
+                    if (existing != null
+                            && existing.getName() != null
+                            && existing.getName().toLowerCase().endsWith(".xml")) {
 
                         Messagebox.show(
                             "Only one XML file is allowed.",
@@ -233,6 +250,7 @@ public class CaptureOperatorBatchCaptureController extends SelectorComposer<Comp
                     lowerName.endsWith(".tif") ||
                     lowerName.endsWith(".tiff") ||
                     lowerName.endsWith(".bmp")) {
+
                     imageCount++;
                 }
             }
@@ -244,9 +262,9 @@ public class CaptureOperatorBatchCaptureController extends SelectorComposer<Comp
             );
 
             System.out.println("FILE ADDED: " + fileName);
-
         } catch (Exception e) {
             e.printStackTrace();
+
             Messagebox.show(
                 "Unable to process selected file.\n\n" + e.getMessage(),
                 "Upload Error",
@@ -256,6 +274,7 @@ public class CaptureOperatorBatchCaptureController extends SelectorComposer<Comp
         }
     }
 
+    // capture new batch
     @Listen("onClick = #capturedBatchButton")
     public void captureBatch() {
         Comboitem selectedItem = branchCodeCombo.getSelectedItem();
@@ -296,9 +315,9 @@ public class CaptureOperatorBatchCaptureController extends SelectorComposer<Comp
         int xmlCount = 0;
 
         for (Media media : uploadedFiles) {
-            if (media != null &&
-                media.getName() != null &&
-                media.getName().toLowerCase().endsWith(".xml")) {
+            if (media != null
+                    && media.getName() != null
+                    && media.getName().toLowerCase().endsWith(".xml")) {
                 xmlCount++;
             }
         }
@@ -361,7 +380,6 @@ public class CaptureOperatorBatchCaptureController extends SelectorComposer<Comp
             }
 
             createdBy = Math.toIntExact(userId);
-
         } catch (Exception e) {
             Messagebox.show(
                 "Invalid user session. Please login again.",
@@ -383,9 +401,7 @@ public class CaptureOperatorBatchCaptureController extends SelectorComposer<Comp
             );
 
             showCaptureSuccess(batch);
-
         } catch (CaptureOperatorBatchService.ChequeCountMismatchException mismatch) {
-
             String message =
                 "The entered cheque count does not match the number of cheque objects parsed from the XML." +
                 "\n\nEntered Cheques : " + mismatch.getEnteredCount() +
@@ -420,16 +436,13 @@ public class CaptureOperatorBatchCaptureController extends SelectorComposer<Comp
                     }
                 }
             );
-
         } catch (IllegalArgumentException e) {
-
             Messagebox.show(
                 "Duplicate cheque found.\n\nBatch cannot be created.",
                 "Duplicate Cheque",
                 Messagebox.OK,
                 Messagebox.EXCLAMATION
             );
-
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -442,6 +455,7 @@ public class CaptureOperatorBatchCaptureController extends SelectorComposer<Comp
         }
     }
 
+    // continue after count mismatch
     private void continueAfterMismatch(
         String branchCode,
         Integer enteredChequeCount,
@@ -461,9 +475,7 @@ public class CaptureOperatorBatchCaptureController extends SelectorComposer<Comp
             );
 
             showCaptureSuccess(batch);
-
         } catch (CaptureOperatorBatchService.ChequeCountMismatchException mismatch) {
-
             Messagebox.show(
                 "Unable to continue because the XML cheque count changed.\n\n" +
                 "Entered Count: " + mismatch.getEnteredCount() +
@@ -473,16 +485,13 @@ public class CaptureOperatorBatchCaptureController extends SelectorComposer<Comp
                 Messagebox.OK,
                 Messagebox.EXCLAMATION
             );
-
         } catch (IllegalArgumentException e) {
-
             Messagebox.show(
                 "Duplicate cheque found.\n\nBatch cannot be created.",
                 "Duplicate Cheque",
                 Messagebox.OK,
                 Messagebox.EXCLAMATION
             );
-
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -495,6 +504,7 @@ public class CaptureOperatorBatchCaptureController extends SelectorComposer<Comp
         }
     }
 
+    // show capture success
     private void showCaptureSuccess(OutwardBatch batch) {
         Messagebox.show(
             "Batch captured successfully.\n\n" +

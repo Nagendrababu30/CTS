@@ -1439,13 +1439,11 @@ releaseButton.setStyle(
             );
         }
     }
-
     private void appendReturnedRepairButtons(
             Listcell actionCell,
             String batchNumber) {
 
-        if (actionCell == null
-                || !hasValue(batchNumber)) {
+        if (actionCell == null || !hasValue(batchNumber)) {
             return;
         }
 
@@ -1455,19 +1453,14 @@ releaseButton.setStyle(
         try {
 
             List<OutwardCheque> returnedCheques =
-                    service.getReturnedCheques(
-                            batchNumber.trim()
-                    );
+                    service.getReturnedCheques(batchNumber.trim());
 
             if (returnedCheques != null) {
 
-                for (OutwardCheque cheque :
-                        returnedCheques) {
+                for (OutwardCheque cheque : returnedCheques) {
 
                     if (cheque == null
-                            || !hasValue(
-                                    cheque.getChequeNumber()
-                            )) {
+                            || !hasValue(cheque.getChequeNumber())) {
                         continue;
                     }
 
@@ -1476,9 +1469,7 @@ releaseButton.setStyle(
 
                     if (!hasValue(chequeStatus)
                             || !"SENT_BACK_TO_MAKER"
-                                    .equalsIgnoreCase(
-                                            chequeStatus.trim()
-                                    )) {
+                            .equalsIgnoreCase(chequeStatus.trim())) {
                         continue;
                     }
 
@@ -1497,9 +1488,7 @@ releaseButton.setStyle(
 
                     if (!hasValue(checkerAction)
                             || !"SEND_BACK"
-                                    .equalsIgnoreCase(
-                                            checkerAction.trim()
-                                    )) {
+                            .equalsIgnoreCase(checkerAction.trim())) {
                         continue;
                     }
 
@@ -1507,11 +1496,11 @@ releaseButton.setStyle(
                             processing.getCheckerReasonCode();
 
                     if (isMicrReturnReason(reasonCode)) {
+
                         micrCount++;
-                    } else if (
-                            isDataEntryReturnReason(
-                                    reasonCode
-                            )) {
+
+                    } else if (isDataEntryReturnReason(reasonCode)) {
+
                         dataEntryCount++;
                     }
                 }
@@ -1533,46 +1522,59 @@ releaseButton.setStyle(
             return;
         }
 
+        /*
+         * Horizontal layout
+         * MICR and Data Entry buttons
+         * will appear side by side.
+         */
+        Hlayout buttonLayout = new Hlayout();
+
+        buttonLayout.setSpacing("6px");
+
         if (micrCount > 0) {
 
             Button micrButton =
                     createReturnedRepairButton(
-                            "MICR (" + micrCount + ")",
-                            "105px",
+                            "⚙ " + micrCount,
+                            "55px",
                             batchNumber,
                             "MICR"
                     );
 
-            actionCell.appendChild(micrButton);
+            micrButton.setTooltiptext(
+                    "MICR Repair (" + micrCount + ")"
+            );
+
+            buttonLayout.appendChild(micrButton);
         }
 
         if (dataEntryCount > 0) {
 
             Button dataEntryButton =
                     createReturnedRepairButton(
-                            "Data Entry (" + dataEntryCount + ")",
-                            "125px",
+                            "✎ " + dataEntryCount,
+                            "55px",
                             batchNumber,
                             "DATA_ENTRY"
                     );
 
-            if (micrCount > 0) {
-                dataEntryButton.setStyle(
-                        "background:#2E90FA;"
-                                + "color:white;"
-                                + "border:none;"
-                                + "border-radius:5px;"
-                                + "font-weight:bold;"
-                                + "cursor:pointer;"
-                                + "margin-top:4px;"
-                );
-            }
+            dataEntryButton.setTooltiptext(
+                    "Data Entry (" + dataEntryCount + ")"
+            );
 
-            actionCell.appendChild(dataEntryButton);
+            dataEntryButton.setStyle(
+                    "background:#2E90FA;"
+                            + "color:white;"
+                            + "border:none;"
+                            + "border-radius:5px;"
+                            + "font-weight:bold;"
+                            + "cursor:pointer;"
+            );
+
+            buttonLayout.appendChild(dataEntryButton);
         }
 
-        if (micrCount == 0
-                && dataEntryCount == 0) {
+        if (micrCount == 0 && dataEntryCount == 0) {
 
             Button openButton =
                     createReturnedRepairButton(
@@ -1582,8 +1584,10 @@ releaseButton.setStyle(
                             null
                     );
 
-            actionCell.appendChild(openButton);
+            buttonLayout.appendChild(openButton);
         }
+
+        actionCell.appendChild(buttonLayout);
     }
 
     private Button createReturnedRepairButton(
@@ -1838,12 +1842,13 @@ releaseButton.setStyle(
                             + targetPage
                             + "?batchNumber="
                             + encode(cleanBatchNumber)
-                            + "&returnMode=HOLD"
+                            + "&returnMode=RETURNED"
                             + "&repairType="
                             + encode(cleanRepairType)
                             + "&chequeNumber="
                             + encode(chequeNumber);
 
+          
             Executions.sendRedirect(url);
 
         } catch (Exception e) {

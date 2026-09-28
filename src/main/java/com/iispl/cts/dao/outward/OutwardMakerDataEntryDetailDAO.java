@@ -15,1333 +15,576 @@ import com.iispl.cts.model.outward.OutwardCheque;
 
 public class OutwardMakerDataEntryDetailDAO {
 
-    private final javax.sql.DataSource dataSource =
-            ConnectionPool.getDataSource();
+	private final javax.sql.DataSource dataSource = ConnectionPool.getDataSource();
 
+	// NORMAL DATA ENTRY
 
-    // =========================================================
-    // GET ALL CHEQUES
-    //
-    // NORMAL DATA ENTRY
-    //
-    // This method is intentionally unchanged.
-    //
-    // It returns all cheques belonging to the batch.
-    // =========================================================
+	public List<OutwardCheque> getCheques(String batchNumber) {
 
-    public List<OutwardCheque> getCheques(
-            String batchNumber) {
+		List<OutwardCheque> cheques = new ArrayList<>();
 
-        List<OutwardCheque> cheques =
-                new ArrayList<>();
+		String sql = "SELECT batch_number, cheque_number, " + "       drawer_account_number, drawer_name, "
+				+ "       payee_account_number, payee_name, " + "       amount, amount_in_words, "
+				+ "       cheque_date, front_image_path, " + "       back_image_path, cheque_status "
+				+ "FROM public.outward_cheque " + "WHERE batch_number = ? " + "ORDER BY cheque_number ASC";
 
+		try (Connection con = dataSource.getConnection();
 
-        String sql =
-                "SELECT batch_number, cheque_number, "
-              + "       drawer_account_number, drawer_name, "
-              + "       payee_account_number, payee_name, "
-              + "       amount, amount_in_words, "
-              + "       cheque_date, front_image_path, "
-              + "       back_image_path, cheque_status "
-              + "FROM public.outward_cheque "
-              + "WHERE batch_number = ? "
-              + "ORDER BY cheque_number ASC";
+				PreparedStatement ps = con.prepareStatement(sql)) {
 
+			ps.setString(1, batchNumber);
 
-        try (Connection con =
-                     dataSource.getConnection();
+			try (ResultSet rs = ps.executeQuery()) {
 
-             PreparedStatement ps =
-                     con.prepareStatement(sql)) {
+				while (rs.next()) {
 
+					OutwardCheque cheque = new OutwardCheque();
 
-            ps.setString(
-                    1,
-                    batchNumber
-            );
+					cheque.setBatchNumber(rs.getString("batch_number"));
 
+					cheque.setChequeNumber(rs.getString("cheque_number"));
 
-            try (ResultSet rs =
-                         ps.executeQuery()) {
+					cheque.setDrawerAccountNumber(rs.getString("drawer_account_number"));
 
+					cheque.setDrawerName(rs.getString("drawer_name"));
 
-                while (rs.next()) {
+					cheque.setPayeeAccountNumber(rs.getString("payee_account_number"));
 
-                    OutwardCheque cheque =
-                            new OutwardCheque();
+					cheque.setPayeeName(rs.getString("payee_name"));
 
+					cheque.setAmount(rs.getBigDecimal("amount"));
 
-                    cheque.setBatchNumber(
-                            rs.getString(
-                                    "batch_number"
-                            )
-                    );
+					cheque.setAmountInWords(rs.getString("amount_in_words"));
 
+					Date dt = rs.getDate("cheque_date");
 
-                    cheque.setChequeNumber(
-                            rs.getString(
-                                    "cheque_number"
-                            )
-                    );
+					if (dt != null) {
 
+						cheque.setChequeDate(dt.toLocalDate());
+					}
 
-                    cheque.setDrawerAccountNumber(
-                            rs.getString(
-                                    "drawer_account_number"
-                            )
-                    );
+					cheque.setFrontImagePath(rs.getString("front_image_path"));
 
+					cheque.setBackImagePath(rs.getString("back_image_path"));
 
-                    cheque.setDrawerName(
-                            rs.getString(
-                                    "drawer_name"
-                            )
-                    );
+					cheque.setChequeStatus(rs.getString("cheque_status"));
 
+					cheques.add(cheque);
+				}
+			}
 
-                    cheque.setPayeeAccountNumber(
-                            rs.getString(
-                                    "payee_account_number"
-                            )
-                    );
+		} catch (SQLException e) {
 
+			e.printStackTrace();
+		}
 
-                    cheque.setPayeeName(
-                            rs.getString(
-                                    "payee_name"
-                            )
-                    );
+		return cheques;
+	}
 
+	// GET RETURNED DATA ENTRY CHEQUES
 
-                    cheque.setAmount(
-                            rs.getBigDecimal(
-                                    "amount"
-                            )
-                    );
-
-
-                    cheque.setAmountInWords(
-                            rs.getString(
-                                    "amount_in_words"
-                            )
-                    );
-
-
-                    Date dt =
-                            rs.getDate(
-                                    "cheque_date"
-                            );
-
-
-                    if (dt != null) {
-
-                        cheque.setChequeDate(
-                                dt.toLocalDate()
-                        );
-                    }
-
-
-                    cheque.setFrontImagePath(
-                            rs.getString(
-                                    "front_image_path"
-                            )
-                    );
-
-
-                    cheque.setBackImagePath(
-                            rs.getString(
-                                    "back_image_path"
-                            )
-                    );
-
-
-                    cheque.setChequeStatus(
-                            rs.getString(
-                                    "cheque_status"
-                            )
-                    );
-
-
-                    cheques.add(
-                            cheque
-                    );
-                }
-            }
-
-
-        } catch (SQLException e) {
-
-            e.printStackTrace();
-        }
-
-
-        return cheques;
-    }
-
-
-    // =========================================================
-    // GET RETURNED DATA ENTRY CHEQUES
-    //
-    // USED ONLY FOR:
-    //
-    //     returnMode = RETURNED
-    //
-    //
-    // Actual outward_cheque status:
-    //
-    //     SENT_BACK_TO_MAKER
-    //
-    //
-    // Checker action:
-    //
-    //     SEND_BACK
-    //
-    //
-    // MICR reasons are excluded because those belong to
-    // MICR Repair.
-    //
-    // Therefore this method returns only the returned
-    // Data Entry cheques.
-    //
-    //
-    // Example:
-    //
-    // Original batch = 5
-    //
-    // Returned:
-    //
-    //     Cheque 2 = DATE_CORRECTION
-    //     Cheque 4 = DATE_MISMATCH
-    //
-    // Result:
-    //
-    //     2 cheques
-    //
-    // =========================================================
-
-    public List<OutwardCheque> getReturnedCheques(
-            String batchNumber) {
-
-        List<OutwardCheque> cheques =
-                new ArrayList<>();
-
-
-        String sql =
-                "SELECT "
-              + "    oc.batch_number, "
-              + "    oc.cheque_number, "
-              + "    oc.drawer_account_number, "
-              + "    oc.drawer_name, "
-              + "    oc.payee_account_number, "
-              + "    oc.payee_name, "
-              + "    oc.amount, "
-              + "    oc.amount_in_words, "
-              + "    oc.cheque_date, "
-              + "    oc.front_image_path, "
-              + "    oc.back_image_path, "
-              + "    oc.cheque_status "
-              + "FROM public.outward_cheque oc "
-              + "WHERE oc.batch_number = ? "
-
-              // =================================================
-              // ACTUAL RETURNED CHEQUE STATUS
-              // =================================================
-
-              + "  AND UPPER(TRIM(oc.cheque_status)) "
-              + "          = 'SENT_BACK_TO_MAKER' "
-
-              // =================================================
-              // CHECKER PROCESSING RECORD
-              // =================================================
-
-              + "  AND EXISTS ( "
-              + "      SELECT 1 "
-              + "      FROM public.cheque_processing cp "
-              + "      WHERE cp.batch_number "
-              + "                = oc.batch_number "
-
-              + "        AND cp.cheque_number "
-              + "                = oc.cheque_number "
+	public List<OutwardCheque> getReturnedCheques(String batchNumber) {
 
-              // =================================================
-              // CHECKER ACTION
-              // =================================================
+		List<OutwardCheque> cheques = new ArrayList<>();
 
-              + "        AND UPPER(TRIM(cp.checker_action)) "
-              + "                = 'SEND_BACK' "
-
-              // =================================================
-              // EXCLUDE MICR RETURNS
-              //
-              // MICR returns must go to MICR Repair.
-              // =================================================
+		String sql = "SELECT " + "    oc.batch_number, " + "    oc.cheque_number, " + "    oc.drawer_account_number, "
+				+ "    oc.drawer_name, " + "    oc.payee_account_number, " + "    oc.payee_name, " + "    oc.amount, "
+				+ "    oc.amount_in_words, " + "    oc.cheque_date, " + "    oc.front_image_path, "
+				+ "    oc.back_image_path, " + "    oc.cheque_status " + "FROM public.outward_cheque oc "
+				+ "WHERE oc.batch_number = ? "
 
-              + "        AND ( "
-              + "              cp.checker_reason_code IS NULL "
+				+ "  AND UPPER(TRIM(oc.cheque_status)) " + "          = 'SENT_BACK_TO_MAKER' "
 
-              + "              OR "
-
-              + "              UPPER(TRIM("
-              + "                  cp.checker_reason_code"
-              + "              )) NOT IN ( "
-              + "                  'MICR', "
-              + "                  'MICR_CORRECTION', "
-              + "                  'MICR_MISMATCH' "
-              + "              ) "
-              + "            ) "
-              + "  ) "
+				+ "  AND EXISTS ( " + "      SELECT 1 " + "      FROM public.cheque_processing cp "
+				+ "      WHERE cp.batch_number " + "                = oc.batch_number "
 
-              + "ORDER BY oc.cheque_number ASC";
-
+				+ "        AND cp.cheque_number " + "                = oc.cheque_number "
 
-        try (Connection con =
-                     dataSource.getConnection();
+				+ "        AND UPPER(TRIM(cp.checker_action)) " + "                = 'SEND_BACK' "
 
-             PreparedStatement ps =
-                     con.prepareStatement(sql)) {
+				+ "        AND ( " + "              cp.checker_reason_code IS NULL "
 
+				+ "              OR "
 
-            ps.setString(
-                    1,
-                    batchNumber
-            );
+				+ "              UPPER(TRIM(" + "                  cp.checker_reason_code"
+				+ "              )) NOT IN ( " + "                  'MICR', " + "                  'MICR_CORRECTION', "
+				+ "                  'MICR_MISMATCH' " + "              ) " + "            ) " + "  ) "
 
+				+ "ORDER BY oc.cheque_number ASC";
 
-            try (ResultSet rs =
-                         ps.executeQuery()) {
+		try (Connection con = dataSource.getConnection();
 
+				PreparedStatement ps = con.prepareStatement(sql)) {
 
-                while (rs.next()) {
+			ps.setString(1, batchNumber);
 
-                    OutwardCheque cheque =
-                            new OutwardCheque();
+			try (ResultSet rs = ps.executeQuery()) {
 
+				while (rs.next()) {
 
-                    // =============================================
-                    // BATCH NUMBER
-                    // =============================================
+					OutwardCheque cheque = new OutwardCheque();
 
-                    cheque.setBatchNumber(
-                            rs.getString(
-                                    "batch_number"
-                            )
-                    );
+					cheque.setBatchNumber(rs.getString("batch_number"));
 
+					cheque.setChequeNumber(rs.getString("cheque_number"));
 
-                    // =============================================
-                    // CHEQUE NUMBER
-                    // =============================================
+					cheque.setDrawerAccountNumber(rs.getString("drawer_account_number"));
 
-                    cheque.setChequeNumber(
-                            rs.getString(
-                                    "cheque_number"
-                            )
-                    );
+					cheque.setDrawerName(rs.getString("drawer_name"));
 
+					cheque.setPayeeAccountNumber(rs.getString("payee_account_number"));
 
-                    // =============================================
-                    // DRAWER ACCOUNT NUMBER
-                    // =============================================
+					cheque.setPayeeName(rs.getString("payee_name"));
 
-                    cheque.setDrawerAccountNumber(
-                            rs.getString(
-                                    "drawer_account_number"
-                            )
-                    );
+					cheque.setAmount(rs.getBigDecimal("amount"));
 
+					cheque.setAmountInWords(rs.getString("amount_in_words"));
 
-                    // =============================================
-                    // DRAWER NAME
-                    // =============================================
+					Date dt = rs.getDate("cheque_date");
 
-                    cheque.setDrawerName(
-                            rs.getString(
-                                    "drawer_name"
-                            )
-                    );
+					if (dt != null) {
 
+						cheque.setChequeDate(dt.toLocalDate());
+					}
 
-                    // =============================================
-                    // PAYEE ACCOUNT NUMBER
-                    // =============================================
+					cheque.setFrontImagePath(rs.getString("front_image_path"));
 
-                    cheque.setPayeeAccountNumber(
-                            rs.getString(
-                                    "payee_account_number"
-                            )
-                    );
+					cheque.setBackImagePath(rs.getString("back_image_path"));
 
+					cheque.setChequeStatus(rs.getString("cheque_status"));
 
-                    // =============================================
-                    // PAYEE NAME
-                    // =============================================
+					cheques.add(cheque);
+				}
+			}
 
-                    cheque.setPayeeName(
-                            rs.getString(
-                                    "payee_name"
-                            )
-                    );
+		} catch (SQLException e) {
 
+			System.err.println("Error loading returned Data Entry " + "cheques for batch: " + batchNumber);
 
-                    // =============================================
-                    // AMOUNT
-                    // =============================================
+			e.printStackTrace();
+		}
 
-                    cheque.setAmount(
-                            rs.getBigDecimal(
-                                    "amount"
-                            )
-                    );
+		return cheques;
+	}
 
+	public void saveCheque(OutwardCheque cheque) {
 
-                    // =============================================
-                    // AMOUNT IN WORDS
-                    // =============================================
+		String verificationStatus = "VERIFIED";
 
-                    cheque.setAmountInWords(
-                            rs.getString(
-                                    "amount_in_words"
-                            )
-                    );
+		String checkReturnedSql = "SELECT COUNT(*) " + "FROM public.outward_cheque " + "WHERE batch_number = ? "
+				+ "AND cheque_number = ? " + "AND UPPER(TRIM(cheque_status)) = 'SENT_BACK_TO_MAKER'";
 
+		String updateCheque = "UPDATE public.outward_cheque " + "SET drawer_account_number = ?, "
+				+ "    drawer_name = ?, " + "    payee_name = ?, " + "    amount = ?, " + "    amount_in_words = ?, "
+				+ "    cheque_date = ?, " + "    cheque_status = ? " + "WHERE batch_number = ? "
+				+ "AND cheque_number = ?";
 
-                    // =============================================
-                    // CHEQUE DATE
-                    // =============================================
+		String insertVerification = "INSERT INTO public.cheque_verification "
+				+ "(batch_number, cheque_number, verified_by, " + " verification_status, verified_at) "
+				+ "VALUES (?, ?, 103, ?, CURRENT_TIMESTAMP) " + "ON CONFLICT "
+				+ "(batch_number, cheque_number, verified_by) " + "DO UPDATE SET "
+				+ "verification_status = EXCLUDED.verification_status, " + "verified_at = CURRENT_TIMESTAMP";
 
-                    Date dt =
-                            rs.getDate(
-                                    "cheque_date"
-                            );
+		try (Connection con = dataSource.getConnection()) {
 
+			con.setAutoCommit(false);
 
-                    if (dt != null) {
+			try {
 
-                        cheque.setChequeDate(
-                                dt.toLocalDate()
-                        );
-                    }
+				try (PreparedStatement checkPs = con.prepareStatement(checkReturnedSql)) {
 
+					checkPs.setString(1, cheque.getBatchNumber());
 
-                    // =============================================
-                    // FRONT IMAGE
-                    // =============================================
+					checkPs.setString(2, cheque.getChequeNumber());
 
-                    cheque.setFrontImagePath(
-                            rs.getString(
-                                    "front_image_path"
-                            )
-                    );
-
-
-                    // =============================================
-                    // BACK IMAGE
-                    // =============================================
+					try (ResultSet rs = checkPs.executeQuery()) {
 
-                    cheque.setBackImagePath(
-                            rs.getString(
-                                    "back_image_path"
-                            )
-                    );
+						if (rs.next() && rs.getInt(1) > 0) {
 
-
-                    // =============================================
-                    // CHEQUE STATUS
-                    // =============================================
+							verificationStatus = "RE_VERIFIED";
+						}
+					}
+				}
 
-                    cheque.setChequeStatus(
-                            rs.getString(
-                                    "cheque_status"
-                            )
-                    );
+				try (PreparedStatement ps1 = con.prepareStatement(updateCheque)) {
 
+					ps1.setString(1, cheque.getDrawerAccountNumber());
 
-                    // =============================================
-                    // ADD RETURNED CHEQUE
-                    // =============================================
+					ps1.setString(2, cheque.getDrawerName());
 
-                    cheques.add(
-                            cheque
-                    );
-                }
-            }
-
+					ps1.setString(3, cheque.getPayeeName());
 
-        } catch (SQLException e) {
-
-            System.err.println(
-                    "Error loading returned Data Entry "
-                    + "cheques for batch: "
-                    + batchNumber
-            );
+					ps1.setBigDecimal(4, cheque.getAmount());
 
-            e.printStackTrace();
-        }
+					ps1.setString(5, cheque.getAmountInWords());
 
+					if (cheque.getChequeDate() != null) {
 
-        return cheques;
-    }
-
-    public void saveCheque(OutwardCheque cheque) {
+						ps1.setDate(6, Date.valueOf(cheque.getChequeDate()));
 
-        String verificationStatus = "VERIFIED";
-
-        /*
-         * =========================================================
-         * CHECK WHETHER THIS PARTICULAR CHEQUE WAS SENT BACK
-         * TO MAKER FOR RE-VERIFICATION
-         * =========================================================
-         */
-
-        String checkReturnedSql =
-                "SELECT COUNT(*) " +
-                "FROM public.outward_cheque " +
-                "WHERE batch_number = ? " +
-                "AND cheque_number = ? " +
-                "AND UPPER(TRIM(cheque_status)) = 'SENT_BACK_TO_MAKER'";
-
-        /*
-         * =========================================================
-         * UPDATE CHEQUE
-         * =========================================================
-         */
-
-        String updateCheque =
-                "UPDATE public.outward_cheque " +
-                "SET drawer_account_number = ?, " +
-                "    drawer_name = ?, " +
-                "    payee_name = ?, " +
-                "    amount = ?, " +
-                "    amount_in_words = ?, " +
-                "    cheque_date = ?, " +
-                "    cheque_status = ? " +
-                "WHERE batch_number = ? " +
-                "AND cheque_number = ?";
-
-        /*
-         * =========================================================
-         * UPDATE CHEQUE VERIFICATION
-         * =========================================================
-         */
-
-        String insertVerification =
-                "INSERT INTO public.cheque_verification " +
-                "(batch_number, cheque_number, verified_by, " +
-                " verification_status, verified_at) " +
-                "VALUES (?, ?, 103, ?, CURRENT_TIMESTAMP) " +
-                "ON CONFLICT " +
-                "(batch_number, cheque_number, verified_by) " +
-                "DO UPDATE SET " +
-                "verification_status = EXCLUDED.verification_status, " +
-                "verified_at = CURRENT_TIMESTAMP";
-
-        try (Connection con = dataSource.getConnection()) {
-
-            /*
-             * =====================================================
-             * START TRANSACTION
-             * =====================================================
-             */
-
-            con.setAutoCommit(false);
-
-            try {
-
-                /*
-                 * =================================================
-                 * 1. CHECK CURRENT CHEQUE STATUS
-                 * =================================================
-                 */
-
-                try (PreparedStatement checkPs =
-                             con.prepareStatement(checkReturnedSql)) {
-
-                    checkPs.setString(
-                            1,
-                            cheque.getBatchNumber()
-                    );
-
-                    checkPs.setString(
-                            2,
-                            cheque.getChequeNumber()
-                    );
-
-                    try (ResultSet rs =
-                                 checkPs.executeQuery()) {
-
-                        if (rs.next()
-                                && rs.getInt(1) > 0) {
-
-                            /*
-                             * Returned by Checker
-                             * and now verified again by Maker
-                             */
-
-                            verificationStatus = "RE_VERIFIED";
-                        }
-                    }
-                }
-
-                /*
-                 * =================================================
-                 * 2. UPDATE OUTWARD CHEQUE
-                 * =================================================
-                 */
-
-                try (PreparedStatement ps1 =
-                             con.prepareStatement(updateCheque)) {
-
-                    ps1.setString(
-                            1,
-                            cheque.getDrawerAccountNumber()
-                    );
-
-                    ps1.setString(
-                            2,
-                            cheque.getDrawerName()
-                    );
-
-                    ps1.setString(
-                            3,
-                            cheque.getPayeeName()
-                    );
-
-                    ps1.setBigDecimal(
-                            4,
-                            cheque.getAmount()
-                    );
-
-                    ps1.setString(
-                            5,
-                            cheque.getAmountInWords()
-                    );
-
-                    if (cheque.getChequeDate() != null) {
-
-                        ps1.setDate(
-                                6,
-                                Date.valueOf(
-                                        cheque.getChequeDate()
-                                )
-                        );
-
-                    } else {
-
-                        ps1.setNull(
-                                6,
-                                java.sql.Types.DATE
-                        );
-                    }
-
-                    /*
-                     * =================================================
-                     * NORMAL CHEQUE
-                     *     VERIFIED
-                     *
-                     * RETURNED CHEQUE
-                     *     RE_VERIFIED
-                     * =================================================
-                     */
-
-                    ps1.setString(
-                            7,
-                            verificationStatus
-                    );
-
-                    ps1.setString(
-                            8,
-                            cheque.getBatchNumber()
-                    );
-
-                    ps1.setString(
-                            9,
-                            cheque.getChequeNumber()
-                    );
-
-                    int updatedRows =
-                            ps1.executeUpdate();
-
-                    if (updatedRows != 1) {
-
-                        throw new SQLException(
-                                "Cheque update failed for batch "
-                                + cheque.getBatchNumber()
-                                + ", cheque "
-                                + cheque.getChequeNumber()
-                        );
-                    }
-                }
-
-                /*
-                 * =================================================
-                 * 3. UPDATE CHEQUE VERIFICATION
-                 * =================================================
-                 */
-
-                try (PreparedStatement ps2 =
-                             con.prepareStatement(
-                                     insertVerification
-                             )) {
-
-                    ps2.setString(
-                            1,
-                            cheque.getBatchNumber()
-                    );
-
-                    ps2.setString(
-                            2,
-                            cheque.getChequeNumber()
-                    );
-
-                    ps2.setString(
-                            3,
-                            verificationStatus
-                    );
-
-                    ps2.executeUpdate();
-                }
-
-                /*
-                 * =================================================
-                 * 4. COMMIT
-                 * =================================================
-                 */
-
-                con.commit();
-
-            } catch (Exception e) {
-
-                /*
-                 * =================================================
-                 * ROLLBACK IF ANYTHING FAILS
-                 * =================================================
-                 */
-
-                try {
-
-                    con.rollback();
-
-                } catch (SQLException rollbackException) {
-
-                    rollbackException.printStackTrace();
-                }
+					} else {
 
-                throw e;
-            }
-
-        } catch (Exception e) {
+						ps1.setNull(6, java.sql.Types.DATE);
+					}
 
-            e.printStackTrace();
+					ps1.setString(7, verificationStatus);
 
-            throw new RuntimeException(
-                    "Error while saving cheque verification for "
-                    + cheque.getBatchNumber()
-                    + " / "
-                    + cheque.getChequeNumber(),
-                    e
-            );
-        }
-    }
+					ps1.setString(8, cheque.getBatchNumber());
 
-    // =========================================================
-    // REJECT CHEQUE
-    //
-    // EXISTING FUNCTIONALITY
-    // =========================================================
+					ps1.setString(9, cheque.getChequeNumber());
 
-    public void rejectCheque(
-            OutwardCheque cheque,
-            String reason) {
-
-        String updateCheque =
-                "UPDATE public.outward_cheque "
-              + "SET cheque_status = 'REJECTED' "
-              + "WHERE batch_number = ? "
-              + "AND cheque_number = ?";
+					int updatedRows = ps1.executeUpdate();
 
+					if (updatedRows != 1) {
 
-        String insertRejection =
-                "INSERT INTO public.cheque_rejection "
-              + "(batch_number, cheque_number, rejected_by, "
-              + " rejection_reason) "
-              + "VALUES (?, ?, 103, ?) "
-              + "ON CONFLICT "
-              + "(batch_number, cheque_number) "
-              + "DO UPDATE SET "
-              + "rejected_by = EXCLUDED.rejected_by, "
-              + "rejection_reason = EXCLUDED.rejection_reason";
+						throw new SQLException("Cheque update failed for batch " + cheque.getBatchNumber() + ", cheque "
+								+ cheque.getChequeNumber());
+					}
+				}
 
+				try (PreparedStatement ps2 = con.prepareStatement(insertVerification)) {
 
-        try (Connection con =
-                     dataSource.getConnection();
+					ps2.setString(1, cheque.getBatchNumber());
 
-             PreparedStatement ps1 =
-                     con.prepareStatement(
-                             updateCheque
-                     );
+					ps2.setString(2, cheque.getChequeNumber());
 
-             PreparedStatement ps2 =
-                     con.prepareStatement(
-                             insertRejection
-                     )) {
+					ps2.setString(3, verificationStatus);
 
+					ps2.executeUpdate();
+				}
 
-            ps1.setString(
-                    1,
-                    cheque.getBatchNumber()
-            );
+				con.commit();
 
+			} catch (Exception e) {
 
-            ps1.setString(
-                    2,
-                    cheque.getChequeNumber()
-            );
+				try {
 
+					con.rollback();
 
-            ps1.executeUpdate();
+				} catch (SQLException rollbackException) {
 
+					rollbackException.printStackTrace();
+				}
 
-            ps2.setString(
-                    1,
-                    cheque.getBatchNumber()
-            );
+				throw e;
+			}
 
+		} catch (Exception e) {
 
-            ps2.setString(
-                    2,
-                    cheque.getChequeNumber()
-            );
+			e.printStackTrace();
 
+			throw new RuntimeException("Error while saving cheque verification for " + cheque.getBatchNumber() + " / "
+					+ cheque.getChequeNumber(), e);
+		}
+	}
 
-            ps2.setString(
-                    3,
-                    reason
-            );
+	public void rejectCheque(OutwardCheque cheque, String reason) {
 
+		String updateCheque = "UPDATE public.outward_cheque " + "SET cheque_status = 'REJECTED' "
+				+ "WHERE batch_number = ? " + "AND cheque_number = ?";
 
-            ps2.executeUpdate();
-        }
+		String insertRejection = "INSERT INTO public.cheque_rejection " + "(batch_number, cheque_number, rejected_by, "
+				+ " rejection_reason) " + "VALUES (?, ?, 103, ?) " + "ON CONFLICT " + "(batch_number, cheque_number) "
+				+ "DO UPDATE SET " + "rejected_by = EXCLUDED.rejected_by, "
+				+ "rejection_reason = EXCLUDED.rejection_reason";
 
+		try (Connection con = dataSource.getConnection();
 
-        catch (SQLException e) {
+				PreparedStatement ps1 = con.prepareStatement(updateCheque);
 
-            e.printStackTrace();
-        }
-    }
+				PreparedStatement ps2 = con.prepareStatement(insertRejection)) {
 
+			ps1.setString(1, cheque.getBatchNumber());
 
-    // =========================================================
-    // COMPLETE BATCH DATA ENTRY
-    //
-    // EXISTING FUNCTIONALITY
-    // =========================================================
+			ps1.setString(2, cheque.getChequeNumber());
 
-    public boolean completeBatchDataEntry(
-            String batchNumber,
-            int userId) {
+			ps1.executeUpdate();
 
-        String updateBatchSql =
-                "UPDATE public.outward_batch "
-              + "SET batch_status = 'READY_TO_SUBMIT' "
-              + "WHERE batch_number = ?";
+			ps2.setString(1, cheque.getBatchNumber());
 
+			ps2.setString(2, cheque.getChequeNumber());
 
-        String updateAssignmentSql =
-                "UPDATE public.outward_batch_assignment "
-              + "SET completed_at = ?, "
-              + "    assignment_status = 'COMPLETED' "
-              + "WHERE batch_number = ? "
-              + "AND user_id = ? "
-              + "AND assignment_role = 'MAKER'";
+			ps2.setString(3, reason);
 
+			ps2.executeUpdate();
+		}
 
-        Connection con = null;
+		catch (SQLException e) {
 
+			e.printStackTrace();
+		}
+	}
 
-        try {
+	public boolean completeBatchDataEntry(String batchNumber, int userId) {
 
-            con =
-                    dataSource.getConnection();
+		String updateBatchSql = "UPDATE public.outward_batch " + "SET batch_status = 'READY_TO_SUBMIT' "
+				+ "WHERE batch_number = ?";
 
+		String updateAssignmentSql = "UPDATE public.outward_batch_assignment " + "SET completed_at = ?, "
+				+ "    assignment_status = 'COMPLETED' " + "WHERE batch_number = ? " + "AND user_id = ? "
+				+ "AND assignment_role = 'MAKER'";
 
-            con.setAutoCommit(false);
+		Connection con = null;
 
+		try {
 
-            // =====================================================
-            // 1. UPDATE BATCH STATUS
-            // =====================================================
+			con = dataSource.getConnection();
 
-            try (PreparedStatement psBatch =
-                         con.prepareStatement(
-                                 updateBatchSql
-                         )) {
+			con.setAutoCommit(false);
 
+			try (PreparedStatement psBatch = con.prepareStatement(updateBatchSql)) {
 
-                psBatch.setString(
-                        1,
-                        batchNumber
-                );
+				psBatch.setString(1, batchNumber);
 
+				int batchRows = psBatch.executeUpdate();
 
-                int batchRows =
-                        psBatch.executeUpdate();
+				if (batchRows == 0) {
 
+					con.rollback();
 
-                if (batchRows == 0) {
+					return false;
+				}
+			}
 
-                    con.rollback();
+			try (PreparedStatement psAssign = con.prepareStatement(updateAssignmentSql)) {
 
-                    return false;
-                }
-            }
+				psAssign.setTimestamp(1, new java.sql.Timestamp(System.currentTimeMillis()));
 
+				psAssign.setString(2, batchNumber);
 
-            // =====================================================
-            // 2. UPDATE ASSIGNMENT
-            // =====================================================
+				psAssign.setInt(3, userId);
 
-            try (PreparedStatement psAssign =
-                         con.prepareStatement(
-                                 updateAssignmentSql
-                         )) {
+				int assignRows = psAssign.executeUpdate();
 
+				if (assignRows == 0) {
 
-                psAssign.setTimestamp(
-                        1,
-                        new java.sql.Timestamp(
-                                System.currentTimeMillis()
-                        )
-                );
+					con.rollback();
 
+					return false;
+				}
+			}
 
-                psAssign.setString(
-                        2,
-                        batchNumber
-                );
+			con.commit();
 
+			return true;
 
-                psAssign.setInt(
-                        3,
-                        userId
-                );
+		} catch (SQLException e) {
 
+			if (con != null) {
 
-                int assignRows =
-                        psAssign.executeUpdate();
+				try {
 
+					con.rollback();
 
-                if (assignRows == 0) {
+				} catch (SQLException ex) {
 
-                    con.rollback();
+					ex.printStackTrace();
+				}
+			}
 
-                    return false;
-                }
-            }
+			e.printStackTrace();
 
+			return false;
 
-            con.commit();
+		} finally {
 
-            return true;
+			if (con != null) {
 
+				try {
 
-        } catch (SQLException e) {
+					con.setAutoCommit(true);
 
-            if (con != null) {
+					con.close();
 
-                try {
+				} catch (SQLException e) {
 
-                    con.rollback();
+					e.printStackTrace();
+				}
+			}
+		}
+	}
 
-                } catch (SQLException ex) {
+	public boolean saveMakerVerify(String batchNumber, String chequeNumber, int makerId) throws SQLException {
 
-                    ex.printStackTrace();
-                }
-            }
+		String sql = "INSERT INTO public.cheque_processing " + "(batch_number, cheque_number, maker_id, "
+				+ " maker_action, maker_reason_code) " + "VALUES (?, ?, ?, 'VERIFY', NULL) " + "ON CONFLICT "
+				+ "(batch_number, cheque_number) " + "DO UPDATE SET " + "maker_id = EXCLUDED.maker_id, "
+				+ "maker_action = 'VERIFY', " + "maker_reason_code = NULL";
 
+		try (Connection con = dataSource.getConnection();
 
-            e.printStackTrace();
+				PreparedStatement ps = con.prepareStatement(sql)) {
 
-            return false;
+			ps.setString(1, batchNumber);
 
+			ps.setString(2, chequeNumber);
 
-        } finally {
+			ps.setInt(3, makerId);
 
-            if (con != null) {
+			return ps.executeUpdate() > 0;
+		}
+	}
 
-                try {
+	public Map<String, String> getReturnReasons() {
 
-                    con.setAutoCommit(true);
+		Map<String, String> reasons = new LinkedHashMap<>();
 
-                    con.close();
+		String sql = "SELECT reason_code, reason_name " + "FROM public.return_reason_master " + "WHERE active = true "
+				+ "  AND UPPER(TRIM(role_name)) = 'MAKER' " + "  AND UPPER(TRIM(reason_type)) = 'REJECT' "
+				+ "ORDER BY reason_code ASC";
 
-                } catch (SQLException e) {
+		try (Connection con = dataSource.getConnection();
+				PreparedStatement ps = con.prepareStatement(sql);
+				ResultSet rs = ps.executeQuery()) {
 
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
+			while (rs.next()) {
+				String code = rs.getString("reason_code");
+				String name = rs.getString("reason_name");
+				if (code != null && !code.trim().isEmpty()) {
+					reasons.put(code.trim(), name != null ? name.trim() : code.trim());
+				}
+			}
 
+			System.out.println(
+					"[DEBUG-CTS] Successfully loaded " + reasons.size() + " MAKER return reasons from database.");
 
-    // =========================================================
-    // SAVE MAKER VERIFY
-    //
-    // EXISTING FUNCTIONALITY
-    // =========================================================
+		} catch (Exception e) {
+			System.err.println("[DEBUG-CTS] Failed to load return reasons: " + e.getMessage());
+			e.printStackTrace();
+		}
 
-    public boolean saveMakerVerify(
-            String batchNumber,
-            String chequeNumber,
-            int makerId)
-            throws SQLException {
+		return reasons;
+	}
 
+	public boolean saveMakerReject(String batchNumber, String chequeNumber, int makerId, String reasonCode) {
 
-        String sql =
-                "INSERT INTO public.cheque_processing "
-              + "(batch_number, cheque_number, maker_id, "
-              + " maker_action, maker_reason_code) "
-              + "VALUES (?, ?, ?, 'VERIFY', NULL) "
-              + "ON CONFLICT "
-              + "(batch_number, cheque_number) "
-              + "DO UPDATE SET "
-              + "maker_id = EXCLUDED.maker_id, "
-              + "maker_action = 'VERIFY', "
-              + "maker_reason_code = NULL";
+		String insertProcessingSql = "INSERT INTO public.cheque_processing "
+				+ "(batch_number, cheque_number, maker_id, " + " maker_action, maker_reason_code) "
+				+ "VALUES (?, ?, ?, 'REJECT_REQUEST', ?) " + "ON CONFLICT " + "(batch_number, cheque_number) "
+				+ "DO UPDATE SET " + "maker_id = EXCLUDED.maker_id, " + "maker_action = 'REJECT_REQUEST', "
+				+ "maker_reason_code = EXCLUDED.maker_reason_code";
 
+		String updateChequeStatusSql = "UPDATE public.outward_cheque " + "SET cheque_status = 'REJECT_REQUESTED' "
+				+ "WHERE batch_number = ? " + "AND cheque_number = ?";
 
-        try (Connection con =
-                     dataSource.getConnection();
+		Connection con = null;
 
-             PreparedStatement ps =
-                     con.prepareStatement(sql)) {
+		try {
 
+			con = dataSource.getConnection();
 
-            ps.setString(
-                    1,
-                    batchNumber
-            );
+			con.setAutoCommit(false);
 
+			try (PreparedStatement ps1 = con.prepareStatement(insertProcessingSql)) {
 
-            ps.setString(
-                    2,
-                    chequeNumber
-            );
+				ps1.setString(1, batchNumber);
 
+				ps1.setString(2, chequeNumber);
 
-            ps.setInt(
-                    3,
-                    makerId
-            );
+				ps1.setInt(3, makerId);
 
+				ps1.setString(4, reasonCode);
 
-            return ps.executeUpdate() > 0;
-        }
-    }
+				ps1.executeUpdate();
+			}
 
+			try (PreparedStatement ps2 = con.prepareStatement(updateChequeStatusSql)) {
 
-    public Map<String, String> getReturnReasons() {
+				ps2.setString(1, batchNumber);
 
-        Map<String, String> reasons = new LinkedHashMap<>();
+				ps2.setString(2, chequeNumber);
 
-        String sql =
-                "SELECT reason_code, reason_name "
-              + "FROM public.return_reason_master "
-              + "WHERE active = true "
-              + "  AND UPPER(TRIM(role_name)) = 'MAKER' "
-              + "  AND UPPER(TRIM(reason_type)) = 'REJECT' "
-              + "ORDER BY reason_code ASC";
+				ps2.executeUpdate();
+			}
 
-        try (Connection con = dataSource.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+			con.commit();
 
-            while (rs.next()) {
-                String code = rs.getString("reason_code");
-                String name = rs.getString("reason_name");
-                if (code != null && !code.trim().isEmpty()) {
-                    reasons.put(code.trim(), name != null ? name.trim() : code.trim());
-                }
-            }
+			System.out.println("[DEBUG-CTS] Successfully recorded reject " + "for Cheque " + chequeNumber
+					+ " with reason: " + reasonCode);
 
-            System.out.println(
-                    "[DEBUG-CTS] Successfully loaded "
-                    + reasons.size()
-                    + " MAKER return reasons from database."
-            );
+			return true;
 
-        } catch (Exception e) {
-            System.err.println(
-                    "[DEBUG-CTS] Failed to load return reasons: "
-                    + e.getMessage()
-            );
-            e.printStackTrace();
-        }
+		} catch (SQLException e) {
 
-        return reasons;
-    }
+			System.err.println("[DEBUG-CTS] SQL Error in saveMakerReject: " + e.getMessage());
 
-    // =========================================================
-    // SAVE MAKER REJECT
-    //
-    // EXISTING FUNCTIONALITY
-    // =========================================================
+			e.printStackTrace();
 
-    public boolean saveMakerReject(
-            String batchNumber,
-            String chequeNumber,
-            int makerId,
-            String reasonCode) {
+			if (con != null) {
 
+				try {
 
-        String insertProcessingSql =
-                "INSERT INTO public.cheque_processing "
-              + "(batch_number, cheque_number, maker_id, "
-              + " maker_action, maker_reason_code) "
-              + "VALUES (?, ?, ?, 'REJECT_REQUEST', ?) "
-              + "ON CONFLICT "
-              + "(batch_number, cheque_number) "
-              + "DO UPDATE SET "
-              + "maker_id = EXCLUDED.maker_id, "
-              + "maker_action = 'REJECT_REQUEST', "
-              + "maker_reason_code = EXCLUDED.maker_reason_code";
+					con.rollback();
 
+				} catch (SQLException ex) {
 
-        String updateChequeStatusSql =
-                "UPDATE public.outward_cheque "
-              + "SET cheque_status = 'REJECT_REQUESTED' "
-              + "WHERE batch_number = ? "
-              + "AND cheque_number = ?";
+					ex.printStackTrace();
+				}
+			}
 
+			return false;
 
-        Connection con = null;
+		} finally {
 
+			if (con != null) {
 
-        try {
+				try {
 
-            con =
-                    dataSource.getConnection();
+					con.setAutoCommit(true);
 
+					con.close();
 
-            con.setAutoCommit(false);
+				} catch (SQLException ex) {
 
+					ex.printStackTrace();
+				}
+			}
+		}
+	}
 
-            // =====================================================
-            // 1. SAVE PROCESSING RECORD
-            // =====================================================
+	public boolean isReturnedCheque(String batchNumber, String chequeNumber) throws SQLException {
 
-            try (PreparedStatement ps1 =
-                         con.prepareStatement(
-                                 insertProcessingSql
-                         )) {
+		String sql = "SELECT COUNT(*) " + "FROM public.outward_cheque " + "WHERE batch_number = ? "
+				+ "AND cheque_number = ? " + "AND UPPER(TRIM(cheque_status)) " + "    = 'SENT_BACK_TO_MAKER'";
 
+		try (Connection con = dataSource.getConnection();
 
-                ps1.setString(
-                        1,
-                        batchNumber
-                );
+				PreparedStatement ps = con.prepareStatement(sql)) {
 
+			ps.setString(1, batchNumber);
 
-                ps1.setString(
-                        2,
-                        chequeNumber
-                );
+			ps.setString(2, chequeNumber);
 
+			try (ResultSet rs = ps.executeQuery()) {
 
-                ps1.setInt(
-                        3,
-                        makerId
-                );
+				if (rs.next()) {
 
+					return rs.getInt(1) > 0;
+				}
+			}
+		}
 
-                ps1.setString(
-                        4,
-                        reasonCode
-                );
+		return false;
+	}
 
+	
 
-                ps1.executeUpdate();
-            }
+	public boolean updateChequeStatus(String batchNumber, String chequeNumber, String status) throws SQLException {
 
+		String sql = "UPDATE public.outward_cheque " + "SET cheque_status = ? " + "WHERE batch_number = ? "
+				+ "AND cheque_number = ?";
 
-            // =====================================================
-            // 2. UPDATE CHEQUE STATUS
-            // =====================================================
+		try (Connection con = dataSource.getConnection();
 
-            try (PreparedStatement ps2 =
-                         con.prepareStatement(
-                                 updateChequeStatusSql
-                         )) {
+				PreparedStatement ps = con.prepareStatement(sql)) {
 
+			ps.setString(1, status);
 
-                ps2.setString(
-                        1,
-                        batchNumber
-                );
+			ps.setString(2, batchNumber);
 
+			ps.setString(3, chequeNumber);
 
-                ps2.setString(
-                        2,
-                        chequeNumber
-                );
-
-
-                ps2.executeUpdate();
-            }
-
-
-            con.commit();
-
-
-            System.out.println(
-                    "[DEBUG-CTS] Successfully recorded reject "
-                    + "for Cheque "
-                    + chequeNumber
-                    + " with reason: "
-                    + reasonCode
-            );
-
-
-            return true;
-
-
-        } catch (SQLException e) {
-
-            System.err.println(
-                    "[DEBUG-CTS] SQL Error in saveMakerReject: "
-                    + e.getMessage()
-            );
-
-
-            e.printStackTrace();
-
-
-            if (con != null) {
-
-                try {
-
-                    con.rollback();
-
-                } catch (SQLException ex) {
-
-                    ex.printStackTrace();
-                }
-            }
-
-
-            return false;
-
-
-        } finally {
-
-            if (con != null) {
-
-                try {
-
-                    con.setAutoCommit(true);
-
-                    con.close();
-
-                } catch (SQLException ex) {
-
-                    ex.printStackTrace();
-                }
-            }
-        }
-    }
-
-    public boolean isReturnedCheque(
-            String batchNumber,
-            String chequeNumber)
-            throws SQLException {
-
-        String sql =
-                "SELECT COUNT(*) "
-              + "FROM public.outward_cheque "
-              + "WHERE batch_number = ? "
-              + "AND cheque_number = ? "
-              + "AND UPPER(TRIM(cheque_status)) "
-              + "    = 'SENT_BACK_TO_MAKER'";
-
-
-        try (Connection con =
-                     dataSource.getConnection();
-
-             PreparedStatement ps =
-                     con.prepareStatement(sql)) {
-
-
-            ps.setString(
-                    1,
-                    batchNumber
-            );
-
-
-            ps.setString(
-                    2,
-                    chequeNumber
-            );
-
-
-            try (ResultSet rs =
-                         ps.executeQuery()) {
-
-                if (rs.next()) {
-
-                    return rs.getInt(1) > 0;
-                }
-            }
-        }
-
-
-        return false;
-    }
-
-    // =========================================================
-    // UPDATE CHEQUE STATUS
-    //
-    // EXISTING FUNCTIONALITY
-    // =========================================================
-
-    public boolean updateChequeStatus(
-            String batchNumber,
-            String chequeNumber,
-            String status)
-            throws SQLException {
-
-
-        String sql =
-                "UPDATE public.outward_cheque "
-              + "SET cheque_status = ? "
-              + "WHERE batch_number = ? "
-              + "AND cheque_number = ?";
-
-
-        try (Connection con =
-                     dataSource.getConnection();
-
-             PreparedStatement ps =
-                     con.prepareStatement(sql)) {
-
-
-            ps.setString(
-                    1,
-                    status
-            );
-
-
-            ps.setString(
-                    2,
-                    batchNumber
-            );
-
-
-            ps.setString(
-                    3,
-                    chequeNumber
-            );
-
-
-            return ps.executeUpdate() > 0;
-        }
-    }
+			return ps.executeUpdate() > 0;
+		}
+	}
 }

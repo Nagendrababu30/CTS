@@ -5,9 +5,7 @@
 <zk xmlns:w="client">
 	<style src="/css/outward/maker/dataentrydetail.css?v=3.9" />
 
-	<!-- =========================================================
-		CONTENT ROOT
-		========================================================= -->
+
 	<div self="@define(content)" width="100%" sclass="data-entry-detail-wrapper"
 style="overflow-y: auto !important; overflow-x: hidden !important; height: 100% !important; max-height: calc(100vh - 65px) !important;">
 		<vlayout
@@ -15,14 +13,7 @@ style="overflow-y: auto !important; overflow-x: hidden !important; height: 100% 
 			spacing="8px" width="100%"
 			sclass="data-entry-detail-vlayout">
 
-			<!-- =================================================
-				BATCH HEADER STRIP & METRICS
-				================================================= -->
 		
-
-				<!-- =================================================
-				BATCH HEADER STRIP & METRICS
-				================================================= -->
 			<div width="100%" sclass="data-entry-detail-header-strip">
 
 				<!-- Left Side: Back + Batch ID -->
@@ -67,9 +58,6 @@ style="overflow-y: auto !important; overflow-x: hidden !important; height: 100% 
 
 			</div>
 
-			<!-- =================================================
-				CHECKER RETURN INFORMATION
-				================================================= -->
 			<vlayout id="checkerReturnInformationPanel" visible="false"
 				width="100%" spacing="6px" sclass="checker-return-card">
 
@@ -88,14 +76,10 @@ style="overflow-y: auto !important; overflow-x: hidden !important; height: 100% 
 				</hlayout>
 			</vlayout>
 
-			<!-- =================================================
-				MAIN SPLIT ROW
-				================================================= -->
+	
 			<hlayout width="100%" spacing="16px" valign="top">
 
-				<!-- =================================================
-					LEFT CARD : SCANNED CHEQUE
-					================================================= -->
+				
 				<div hflex="1" sclass="equal-card">
 					<vlayout width="100%" height="100%" spacing="10px">
 
@@ -127,9 +111,7 @@ style="overflow-y: auto !important; overflow-x: hidden !important; height: 100% 
 					</vlayout>
 				</div>
 
-				<!-- =================================================
-					RIGHT CARD : DATA VERIFICATION
-					================================================= -->
+			
 				<div hflex="1" sclass="equal-card">
 					<vlayout width="100%" spacing="10px">
 
@@ -167,10 +149,7 @@ style="overflow-y: auto !important; overflow-x: hidden !important; height: 100% 
 							</vlayout>
 						</hlayout>
 
-		
-<!-- =============================================
-     ROW 2: CHEQUE DATE (LEFT) + DRAWER NAME (RIGHT)
-     ============================================= -->
+
 <hlayout width="100%" spacing="12px">
     <!-- LEFT COLUMN: CHEQUE DATE -->
     <vlayout hflex="1" spacing="4px">
@@ -258,9 +237,7 @@ style="overflow-y: auto !important; overflow-x: hidden !important; height: 100% 
 
 			</hlayout>
 
-			<!-- =========================================================
-				MODAL WINDOW: CHEQUE REJECTION
-				========================================================= -->
+			
 			<window id="rejectModalWindow" border="none" width="420px"
 				visible="false" closable="false" position="center,center"
 				sclass="reject-modal-window">

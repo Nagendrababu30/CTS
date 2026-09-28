@@ -25,7 +25,7 @@ html, body {
         radial-gradient(900px 700px at 100% 100%, rgba(18, 183, 106, 0.07), transparent 60%),
         linear-gradient(180deg, var(--bg-app-1, #F8FAFC) 0%, var(--bg-app-2, #EEF2F6) 100%) !important;
     position: relative !important;
-    overflow: hidden !important;
+   overflow-y: auto !important;
 }
 
 .data-entry-detail-vlayout {
@@ -33,7 +33,7 @@ html, body {
     padding: 10px 18px !important;
     box-sizing: border-box !important;
     overflow-y: hidden !important;
-    height: 100% !important;
+    height: auto !important;
 }
 /* ============================================================
    MODERN BANKING CLEAN CARDS

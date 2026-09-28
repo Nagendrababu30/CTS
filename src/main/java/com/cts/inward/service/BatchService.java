@@ -18,20 +18,14 @@ public interface BatchService {
 
 	boolean acquireLock(String batchId, String userId);
 
-	void releaseLock(String batchId, String userId);
-
-	void sendToChecker(String batchId, String userId);
-
 	void saveBatch(NpciBatchData batchData);
 
-	// Check if a batch already exists in database
 	boolean isBatchExists(long batchId);
 
 	boolean completeDataEntry(long batchId, long userId);
 
 	long getBatchIdByFileName(String batchName);
 
-	// Verify Batch
 	List<Map<String, Object>> getBatchesForVerification(Integer userId);
 
 	List<Map<String, Object>> searchBatchesForVerification(Long batchId, Integer userId);

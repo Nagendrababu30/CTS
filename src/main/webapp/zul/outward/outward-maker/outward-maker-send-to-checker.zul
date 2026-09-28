@@ -11,22 +11,11 @@
 
 <zk>
 
-    <!-- =========================================================
-         GLOBAL STYLING
-         ========================================================= -->
 
 <!-- Add ?v=2 to ensure the browser discards the cached CSS -->
 <style src="/css/outward/maker/sendtochecker.css?v=2"/>
 
 
-    <!-- =========================================================
-         CONTENT
-         
-         Header + Sidebar are provided by:
-         
-             /zul/common/layout.zul
-         
-         ========================================================= -->
 
     <div
         self="@define(content)"
@@ -35,9 +24,7 @@
         sclass="send-to-maker-wrapper">
 
 
-        <!-- =====================================================
-             SEND TO CHECKER CONTROLLER
-             ===================================================== -->
+     
 
         <vlayout
             apply="com.iispl.cts.controller.outward.OutwardMakerSendCheckerController"
@@ -47,25 +34,15 @@
             sclass="send-to-checker-vlayout">
 
 
-            <!-- =================================================
+            <!-- 
                  PAGE TITLE
-                 ================================================= -->
+                -->
 
             <label
                 value="Send to Checker"
                 sclass="send-to-checker-title"/>
 
 
-            <!-- =================================================
-                 INFORMATION CARD
-                 ================================================= -->
-
-       
-
-
-            <!-- =================================================
-                 BATCH LIST CARD
-                 ================================================= -->
 
             <div
                 width="100%"

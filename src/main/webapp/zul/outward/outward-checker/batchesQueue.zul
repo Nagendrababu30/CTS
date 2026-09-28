@@ -55,10 +55,6 @@
                         value="Batch Queue"
                         sclass="batch-title"/>
 
-                    <label
-                        value="Batches assigned to you for Checker verification"
-                        sclass="batch-subtitle"/>
-
                 </vlayout>
 
             </hlayout>

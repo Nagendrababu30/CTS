@@ -318,99 +318,94 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
 	private void openActionModal(String action) {
 
-		selectedAction = action;
+	    selectedAction = action;
 
-		// Clean up any previously created modal instance
-		if (actionModalWindow != null) {
-			actionModalWindow.detach();
-			actionModalWindow = null;
-		}
+	    // Clean up any previously created modal instance
+	    if (actionModalWindow != null) {
+	        actionModalWindow.detach();
+	        actionModalWindow = null;
+	    }
 
-		// 1. Create the Window modal
-		actionModalWindow = new Window();
-		actionModalWindow.setTitle("REJECT".equalsIgnoreCase(action) ? "Reject Cheque" : "Return Cheque to Maker");
-		actionModalWindow.setWidth("480px");
-		actionModalWindow.setBorder("normal");
-		actionModalWindow.setClosable(true);
-		actionModalWindow.setSclass("action-reason-modal");
-		actionModalWindow.addEventListener(Events.ON_CLOSE, event -> closeActionModal());
+	    // 1. Create the Window modal
+	    actionModalWindow = new Window();
+	    actionModalWindow.setTitle("REJECT".equalsIgnoreCase(action) ? "Reject Cheque" : "Return Cheque to Maker");
+	    actionModalWindow.setWidth("480px");
+	    actionModalWindow.setBorder("normal");
+	    actionModalWindow.setClosable(true);
+	    actionModalWindow.setSclass("action-reason-modal");
+	    actionModalWindow.addEventListener(Events.ON_CLOSE, event -> closeActionModal());
 
-		// 2. Main layout inside the modal
-		Vlayout modalBody = new Vlayout();
-		modalBody.setWidth("100%");
-		modalBody.setSpacing("12px");
-		modalBody.setStyle("padding: 16px;");
-		modalBody.setParent(actionModalWindow);
+	    // 2. Main layout inside the modal
+	    Vlayout modalBody = new Vlayout();
+	    modalBody.setWidth("100%");
+	    modalBody.setSpacing("12px");
+	    modalBody.setStyle("padding: 16px;");
+	    modalBody.setParent(actionModalWindow);
 
-		// Reason Field Section
-		Vlayout reasonSection = new Vlayout();
-		reasonSection.setWidth("100%");
-		reasonSection.setSpacing("4px");
-		reasonSection.setParent(modalBody);
+	    // Reason Field Section
+	    Vlayout reasonSection = new Vlayout();
+	    reasonSection.setWidth("100%");
+	    reasonSection.setSpacing("4px");
+	    reasonSection.setParent(modalBody);
 
-		Label reasonLabel = new Label("Reason *");
-		reasonLabel.setSclass("form-label");
-		reasonLabel.setParent(reasonSection);
+	    Label reasonLabel = new Label("Reason *");
+	    reasonLabel.setSclass("form-label");
+	    reasonLabel.setParent(reasonSection);
 
-		modalReasonCombobox = new Combobox();
-		modalReasonCombobox.setWidth("100%");
-		modalReasonCombobox.setPlaceholder("Select reason");
-		modalReasonCombobox.setReadonly(true);
-		modalReasonCombobox.setParent(reasonSection);
+	    modalReasonCombobox = new Combobox();
+	    modalReasonCombobox.setWidth("100%");
+	    modalReasonCombobox.setPlaceholder("Select reason");
+	    modalReasonCombobox.setReadonly(true);
+	    modalReasonCombobox.setParent(reasonSection);
 
-		loadModalReturnReasons(action);
+	    loadModalReturnReasons(action);
 
-		// Remarks Field Section
-		Vlayout remarksSection = new Vlayout();
-		remarksSection.setWidth("100%");
-		remarksSection.setSpacing("4px");
-		remarksSection.setParent(modalBody);
+	    // Remarks Field Section
+	    Vlayout remarksSection = new Vlayout();
+	    remarksSection.setWidth("100%");
+	    remarksSection.setSpacing("4px");
+	    remarksSection.setParent(modalBody);
 
-		Label remarksLabel = new Label("Remarks");
-		remarksLabel.setSclass("form-label");
-		remarksLabel.setParent(remarksSection);
+	    Label remarksLabel = new Label("Remarks");
+	    remarksLabel.setSclass("form-label");
+	    remarksLabel.setParent(remarksSection);
 
-		modalCheckerRemarksTextbox = new Textbox();
-		modalCheckerRemarksTextbox.setWidth("100%");
-		modalCheckerRemarksTextbox.setRows(3);
-		modalCheckerRemarksTextbox.setMaxlength(1000);
-		modalCheckerRemarksTextbox.setPlaceholder("Enter remarks (optional)");
-		modalCheckerRemarksTextbox.setSclass("form-control");
-		modalCheckerRemarksTextbox.setParent(remarksSection);
+	    modalCheckerRemarksTextbox = new Textbox();
+	    modalCheckerRemarksTextbox.setWidth("100%");
+	    modalCheckerRemarksTextbox.setRows(3);
+	    modalCheckerRemarksTextbox.setMaxlength(1000);
+	    modalCheckerRemarksTextbox.setPlaceholder("Enter remarks (optional)");
+	    modalCheckerRemarksTextbox.setSclass("form-control");
+	    modalCheckerRemarksTextbox.setParent(remarksSection);
 
-		Separator sep = new Separator();
-		sep.setHeight("10px");
-		sep.setParent(modalBody);
+	    Separator sep = new Separator();
+	    sep.setHeight("10px");
+	    sep.setParent(modalBody);
 
-		// Buttons Action Bar
-		Hlayout buttonBar = new Hlayout();
-		buttonBar.setWidth("100%");
-		buttonBar.setSpacing("10px");
-		buttonBar.setValign("middle");
-		buttonBar.setParent(modalBody);
+	    // Buttons Action Bar
+	    Hlayout buttonBar = new Hlayout();
+	    buttonBar.setWidth("100%");
+	    buttonBar.setSpacing("10px");
+	    buttonBar.setValign("middle");
+	    buttonBar.setParent(modalBody);
 
-		Space spacer = new Space();
-		spacer.setHflex("1");
-		spacer.setParent(buttonBar);
+	    Space spacer = new Space();
+	    spacer.setHflex("1");
+	    spacer.setParent(buttonBar);
 
-		Button modalCancelButton = new Button("Cancel");
-		modalCancelButton.setSclass("navigation-button");
-		modalCancelButton.addEventListener(Events.ON_CLICK, event -> closeActionModal());
-		modalCancelButton.setParent(buttonBar);
+	    Button modalCancelButton = new Button("Cancel");
+	    modalCancelButton.setSclass("navigation-button");
+	    modalCancelButton.addEventListener(Events.ON_CLICK, event -> closeActionModal());
+	    modalCancelButton.setParent(buttonBar);
 
-		Button modalSubmitButton = new Button("Submit");
-		modalSubmitButton.setSclass("complete-button modal-submit-button");
-		if ("REJECT".equalsIgnoreCase(action)) {
-			modalSubmitButton.setStyle("background: #ef233c !important; border-color: #ef233c !important; color: #ffffff !important;");
-		} else if ("SEND_BACK".equalsIgnoreCase(action)) {
-			modalSubmitButton.setStyle("background: #7c3aed !important; border-color: #7c3aed !important; color: #ffffff !important;");
-		}
-		modalSubmitButton.addEventListener(Events.ON_CLICK, event -> submitModalDecision());
-		modalSubmitButton.setParent(buttonBar);
+	    Button modalSubmitButton = new Button("Submit");
+	    modalSubmitButton.setSclass("complete-button modal-submit-button");
+	    modalSubmitButton.addEventListener(Events.ON_CLICK, event -> submitModalDecision());
+	    modalSubmitButton.setParent(buttonBar);
 
-		// Attach to parent root and show
-		actionModalWindow.setParent(getSelf());
-		actionModalWindow.doModal();
+	    // Attach to parent root and show
+	    actionModalWindow.setParent(getSelf());
+	    actionModalWindow.doModal();
 	}
 
 	private void closeActionModal() {

@@ -1,586 +1,350 @@
 @charset "UTF-8";
 
-        html, body {
-
-            margin: 0;
-
-            padding: 0;
-
-            height: 100%;
-
-            background: #EBF2F7;
-
-        }
-
-        /* Wrapper for detail page */
-
-        .micr-repair-detail-wrapper {
-
-            width: 100%;
-
-            height: 100%;
-
-            background: #EBF2F7;
-
-        }
-
-        /* VLayout wrapper */
-
-        .micr-repair-detail-vlayout {
-
-            padding: 12px 18px !important;
-
-            box-sizing: border-box !important;
-
-            overflow: auto !important;
-
-        }
-
-        /* Batch header strip */
-
-        .micr-batch-header-strip {
-
-            background: #FFFFFF !important;
-
-            border: 1px solid #D2E3EF !important;
-
-            border-radius: 10px !important;
-
-            padding: 10px 18px !important;
-
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
-
-        }
-
-        /* Back button styling */
-
-        .btn-back-to-queue {
-
-            cursor: pointer !important;
-
-            background: #FFFFFF !important;
-
-            border: 1px solid #C4DCEC !important;
-
-            border-radius: 6px !important;
-
-            font-size: 16px !important;
-
-            font-weight: bold !important;
-
-            color: #4A6572 !important;
-
-            height: 28px !important;
-
-            width: 28px !important;
-
-            line-height: 24px !important;
-
-            text-align: center !important;
-
-            padding: 0 !important;
-
-        }
-
-        /* Batch label */
-
-        .batch-label {
-
-            font-size: 13px !important;
-
-            font-weight: 700 !important;
-
-            color: #4A6572 !important;
-
-        }
-
-        /* Batch ID label */
-
-        .batch-id-label {
-
-            font-size: 13px !important;
-
-            font-weight: 800 !important;
-
-            color: #2B7A9E !important;
-
-        }
-
-        /* Metric label */
-
-        .metric-label {
-
-            font-weight: 600 !important;
-
-        }
-
-        /* Metric value */
-
-        .metric-value {
-
-            font-weight: 800 !important;
-
-            margin-left: 4px !important;
-
-        }
-
-        /* Cheque progress label */
-
-        .cheque-progress-label {
-
-            font-size: 13px !important;
-
-            font-weight: 800 !important;
-
-            color: #2B7A9E !important;
-
-        }
-
-        /* Cheque image viewport */
-
-        .cheque-image-viewport {
-
-            display: flex !important;
-
-            align-items: center !important;
-
-            justify-content: center !important;
-
-            background: #F4F8FA !important;
-
-            border: 1px solid #D2E3EF !important;
-
-            border-radius: 8px !important;
-
-            overflow: hidden !important;
-
-            padding: 4px !important;
-
-            box-sizing: border-box !important;
-
-        }
-
-        /* Current status label */
-
-        .current-status-label {
-
-            font-size: 13px !important;
-
-            font-weight: 800 !important;
-
-            color: #E74C3C !important;
-
-            margin-top: 8px !important;
-
-        }
-
-
-
-        .z-window-embedded-cnt,
-
-        .z-window-content {
-
-            padding: 0;
-
-        }
-
-
-
-        /* Soft Rounded Container Cards */
-
-        .template-card {
-
-            background: #FFFFFF;
-
-            border: 1px solid #D2E3EF;
-
-            border-radius: 12px;
-
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-
-        }
-
-
-
-        .template-card > .z-groupbox-content {
-
-            padding: 16px;
-
-            box-sizing: border-box;
-
-            height: 100%;
-
-        }
-
-
-
-        /* Soft Badge Titles */
-
-        .section-title-badge {
-
-            background: #E2F0F9;
-
-            color: #2B7A9E;
-
-            font-size: 13px;
-
-            font-weight: 700;
-
-            padding: 6px 16px;
-
-            border-radius: 20px;
-
-            display: inline-block;
-
-        }
-
-
-
-        /* Metric Pill Badges */
-
-        .metric-pill {
-
-            padding: 4px 12px;
-
-            border-radius: 12px;
-
-            font-size: 12px;
-
-            font-weight: 600;
-
-            display: inline-flex;
-
-            align-items: center;
-
-        }
-
-
-
-        .pill-total {
-
-            background: #D9EBF7;
-
-            color: #1D5C80;
-
-        }
-
-
-
-        .pill-completed {
-
-            background: #D2F1E4;
-
-            color: #156E43;
-
-        }
-
-
-
-        .pill-pending {
-
-            background: #FDE8D7;
-
-            color: #8C4710;
-
-        }
-
-
-
-        /* Template Form Controls */
-
-        input.single-field-box,
-
-        .corrected-micr-box {
-
-            height: 38px;
-
-            font-size: 13px;
-
-            border: 1px solid #C4DCEC;
-
-            border-radius: 8px;
-
-            padding: 6px 12px;
-
-            color: #2C3E50;
-
-            background: #F4F8FA;
-
-            font-weight: 500;
-
-            box-sizing: border-box;
-
-            transition: all 0.15s ease-in-out;
-
-        }
-
-
-
-        input.single-field-box:focus,
-
-        .corrected-micr-box:focus {
-
-            background: #FFFFFF;
-
-            border-color: #38A2D7;
-
-            box-shadow: 0 0 0 3px rgba(56, 162, 215, 0.2);
-
-            outline: none;
-
-        }
-
-
-
-        /* Field Labels */
-
-        .single-field-label {
-
-            font-size: 11px;
-
-            font-weight: 700;
-
-            color: #5A738E;
-
-            letter-spacing: 0.3px;
-
-        }
-
-
-
-        .label-star {
-
-            color: #E74C3C;
-
-            font-weight: 700;
-
-            font-size: 11px;
-
-            margin-left: 2px;
-
-        }
-
-
-
-        /* MICR Validation Highlighting */
-
-        .micr-component-error,
-
-        .micr-component-error .z-textbox-input {
-
-            background-color: #FCE8E6 !important;
-
-            border: 1px solid #E74C3C !important;
-
-        }
-
-
-
-        .micr-component-corrected,
-
-        .micr-component-corrected .z-textbox-input {
-
-            background-color: #E8F8F0 !important;
-
-            border: 1px solid #2ECC71 !important;
-
-        }
-
-
-
-        .status-label {
-
-            font-weight: bold;
-
-        }
-
-
-
-        .status-repaired {
-
-            color: #2ECC71 !important;
-
-        }
-
-
-
-        .status-error {
-
-            color: #E74C3C !important;
-
-        }
-
-
-
-        /* Template Buttons */
-
-        .btn-cyan {
-
-            background: #38A2D7;
-
-            color: #FFFFFF;
-
-            border: none;
-
-            border-radius: 6px;
-
-            font-size: 12px;
-
-            font-weight: 600;
-
-            cursor: pointer;
-
-            transition: background 0.15s ease;
-
-        }
-
-
-
-        .btn-cyan:hover {
-
-            background: #2D8ABA;
-
-        }
-
-
-
-        .btn-cyan-outline {
-
-            background: #EBF5FB;
-
-            color: #38A2D7;
-
-            border: 1px solid #BCE0F2;
-
-            border-radius: 6px;
-
-            font-size: 12px;
-
-            font-weight: 600;
-
-            cursor: pointer;
-
-        }
-
-
-
-        .icon-symbol-btn {
-
-            background: #FFFFFF;
-
-            border: 1px solid #C4DCEC;
-
-            border-radius: 6px;
-
-            color: #4A6572;
-
-            font-size: 15px;
-
-            font-weight: bold;
-
-            cursor: pointer;
-
-            height: 32px;
-
-            width: 32px;
-
-            display: inline-flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-        }
-
-
-
-        .cheque-image {
-
-            object-fit: contain;
-
-            max-width: 100%;
-
-            max-height: 100%;
-
-            display: block;
-
-            margin: auto;
-
-        }
-
-
-
-        /* =========================================================
+html, body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	background: #EBF2F7;
+}
+
+/* Wrapper for detail page */
+.micr-repair-detail-wrapper {
+	width: 100%;
+	height: 100%;
+	background: #EBF2F7;
+}
+
+/* VLayout wrapper */
+.micr-repair-detail-vlayout {
+	padding: 12px 18px !important;
+	box-sizing: border-box !important;
+	overflow: auto !important;
+}
+
+/* Batch header strip */
+.micr-batch-header-strip {
+	background: #FFFFFF !important;
+	border: 1px solid #D2E3EF !important;
+	border-radius: 10px !important;
+	padding: 10px 18px !important;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+}
+
+/* Back button styling */
+.btn-back-to-queue {
+	cursor: pointer !important;
+	background: #FFFFFF !important;
+	border: 1px solid #CBD5E1 !important;
+	border-radius: 6px !important;
+	font-size: 14px !important;
+	font-weight: 700 !important;
+	color: #475569 !important;
+	height: 30px !important;
+	width: 30px !important;
+	line-height: 28px !important;
+	text-align: center !important;
+	padding: 0 !important;
+}
+
+/* Batch label */
+.batch-label {
+	font-size: 12.5px !important;
+	font-weight: 600 !important;
+	color: #64748B !important;
+}
+
+.batch-id-label {
+	font-size: 13.5px !important;
+	font-weight: 700 !important;
+	color: #2563EB !important;
+}
+
+/* Metric label */
+.metric-label {
+	font-weight: 600 !important;
+}
+
+/* Metric value */
+.metric-value {
+	font-weight: 800 !important;
+	margin-left: 4px !important;
+}
+
+.cheque-progress-label {
+	font-size: 13.5px !important;
+	font-weight: 700 !important;
+	color: #2563EB !important;
+}
+
+/* Cheque image viewport */
+.cheque-image-viewport {
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	background: #F4F8FA !important;
+	border: 1px solid #D2E3EF !important;
+	border-radius: 8px !important;
+	overflow: hidden !important;
+	padding: 4px !important;
+	box-sizing: border-box !important;
+}
+
+/* Current status label */
+.current-status-label {
+	font-size: 13px !important;
+	font-weight: 800 !important;
+	color: #E74C3C !important;
+	margin-top: 8px !important;
+}
+
+.z-window-embedded-cnt, .z-window-content {
+	padding: 0;
+}
+
+/* Soft Rounded Container Cards */
+.template-card {
+	background: #FFFFFF;
+	border: 1px solid #D2E3EF;
+	border-radius: 12px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.template-card>.z-groupbox-content {
+	padding: 16px;
+	box-sizing: border-box;
+	height: 100%;
+}
+
+/* Soft Badge Titles */
+.section-title-badge {
+	background: #EFF6FF !important;
+	color: #2563EB !important;
+	border: 1px solid #BFDBFE !important;
+	font-size: 13px !important;
+	font-weight: 700 !important;
+	padding: 6px 16px !important;
+	border-radius: 8px !important;
+	display: inline-block;
+}
+
+/* Metric Pill Badges */
+.metric-pill {
+	padding: 4px 12px;
+	border-radius: 12px;
+	font-size: 12px;
+	font-weight: 600;
+	display: inline-flex;
+	align-items: center;
+}
+
+.pill-total {
+	background: #D9EBF7;
+	color: #1D5C80;
+}
+
+.pill-completed {
+	background: #D2F1E4;
+	color: #156E43;
+}
+
+.pill-pending {
+	background: #FDE8D7;
+	color: #8C4710;
+}
+
+/* Template Form Controls */
+input.single-field-box, .corrected-micr-box {
+	height: 38px;
+	font-size: 13px;
+	border: 1px solid #C4DCEC;
+	border-radius: 8px;
+	padding: 6px 12px;
+	color: #2C3E50;
+	background: #F4F8FA;
+	font-weight: 500;
+	box-sizing: border-box;
+	transition: all 0.15s ease-in-out;
+}
+
+input.single-field-box:focus, .corrected-micr-box:focus {
+	background: #FFFFFF;
+	border-color: #38A2D7;
+	box-shadow: 0 0 0 3px rgba(56, 162, 215, 0.2);
+	outline: none;
+}
+
+/* Field Labels */
+.single-field-label {
+	font-size: 11px;
+	font-weight: 700;
+	color: #5A738E;
+	letter-spacing: 0.3px;
+}
+
+.label-star {
+	color: #E74C3C;
+	font-weight: 700;
+	font-size: 11px;
+	margin-left: 2px;
+}
+
+/* MICR Validation Highlighting */
+.micr-component-error, .micr-component-error .z-textbox-input {
+	background-color: #FCE8E6 !important;
+	border: 1px solid #E74C3C !important;
+}
+
+.micr-component-corrected, .micr-component-corrected .z-textbox-input {
+	background-color: #E8F8F0 !important;
+	border: 1px solid #2ECC71 !important;
+}
+
+.status-label {
+	font-weight: bold;
+}
+
+.status-repaired {
+	color: #2ECC71 !important;
+}
+
+.status-error {
+	color: #E74C3C !important;
+}
+
+/* Template Buttons */
+.btn-cyan {
+	background: #2563EB !important;
+	color: #FFFFFF !important;
+	border: none !important;
+	border-radius: 6px !important;
+	font-size: 13px !important;
+	font-weight: 600 !important;
+	cursor: pointer !important;
+	height: 38px !important;
+}
+
+.btn-cyan-outline {
+	background: #2563EB !important;
+	color: #FFFFFF !important;
+	border: none !important;
+	border-radius: 6px !important;
+	font-size: 13px !important;
+	font-weight: 600 !important;
+	cursor: pointer !important;
+	height: 38px !important;
+}
+
+.btn-cyan-outline:hover {
+	background: #1D4ED8 !important;
+}
+
+.btn-prev {
+	background: #2563EB !important;
+	color: #FFFFFF !important;
+	border: none !important;
+	border-radius: 6px !important;
+	font-size: 13px !important;
+	font-weight: 600 !important;
+	cursor: pointer !important;
+	height: 38px !important;
+}
+
+.btn-prev:hover {
+	background: #1D4ED8 !important;
+}
+
+/* Disabled Previous button */
+.btn-prev.z-button-disabled, .btn-prev:disabled, .btn-prev[disabled] {
+	background: #CBD5E1 !important;
+	color: #94A3B8 !important;
+	border: none !important;
+	cursor: not-allowed !important;
+	opacity: 1 !important;
+}
+
+/* Disabled button must not become blue on hover */
+.btn-prev.z-button-disabled:hover, .btn-prev:disabled:hover, .btn-prev[disabled]:hover
+	{
+	background: #CBD5E1 !important;
+	color: #94A3B8 !important;
+	cursor: not-allowed !important;
+}
+
+.icon-symbol-btn {
+	background: #FFFFFF !important;
+	border: 1px solid #C4DCEC !important;
+	border-radius: 6px !important;
+	color: #2563EB !important;
+	font-size: 15px !important;
+	font-weight: bold !important;
+	cursor: pointer !important;
+	height: 32px !important;
+	width: 32px !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+}
+
+.icon-symbol-btn:hover {
+	background: #EFF6FF !important;
+	border-color: #93C5FD !important;
+}
+
+.cheque-image {
+	object-fit: contain;
+	max-width: 100%;
+	max-height: 100%;
+	display: block;
+	margin: auto;
+}
+
+.image-controls-row {
+	display: flex;
+	align-items: center;
+	width: 100%;
+}
+
+.image-control-buttons {
+	margin-left: auto;
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+
+/* =========================================================
 
            CHECKER RETURN INFORMATION
 
            ========================================================= */
+.checker-return-card {
+	background: #FFF7ED !important;
+	border: 1px solid #FED7AA !important;
+	border-radius: 8px !important;
+	padding: 12px !important;
+	box-sizing: border-box !important;
+}
 
+.checker-return-title {
+	font-size: 11px !important;
+	font-weight: 700 !important;
+	color: #9A3412 !important;
+	letter-spacing: 0.3px;
+}
 
+.checker-return-label {
+	font-size: 10px !important;
+	font-weight: 700 !important;
+	color: #7C2D12 !important;
+	letter-spacing: 0.2px;
+}
 
-        .checker-return-card {
-
-            background: #FFF7ED !important;
-
-            border: 1px solid #FED7AA !important;
-
-            border-radius: 8px !important;
-
-            padding: 12px !important;
-
-            box-sizing: border-box !important;
-
-        }
-
-
-
-        .checker-return-title {
-
-            font-size: 11px !important;
-
-            font-weight: 700 !important;
-
-            color: #9A3412 !important;
-
-            letter-spacing: 0.3px;
-
-        }
-
-
-
-        .checker-return-label {
-
-            font-size: 10px !important;
-
-            font-weight: 700 !important;
-
-            color: #7C2D12 !important;
-
-            letter-spacing: 0.2px;
-
-        }
-
-
-
-        .checker-return-value {
-
-            font-size: 12px !important;
-
-            font-weight: 600 !important;
-
-            color: #431407 !important;
-
-            background: #FFFFFF !important;
-
-            border: 1px solid #FED7AA !important;
-
-            border-radius: 5px !important;
-
-            padding: 6px 8px !important;
-
-            box-sizing: border-box !important;
-
-        }
-
-
-
+.checker-return-value {
+	font-size: 12px !important;
+	font-weight: 600 !important;
+	color: #431407 !important;
+	background: #FFFFFF !important;
+	border: 1px solid #FED7AA !important;
+	border-radius: 5px !important;
+	padding: 6px 8px !important;
+	box-sizing: border-box !important;
+}

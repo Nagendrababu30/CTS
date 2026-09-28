@@ -7,7 +7,7 @@
 <?init class="org.zkoss.zk.ui.util.Composition"
          arg0="/zul/common/layout.zul"?>
 
-<zk>
+<zk xmlns:n="native">
 
     <div
         self="@define(content)"
@@ -81,7 +81,7 @@
                 <!-- Icon Header -->
                 <div sclass="confirm-icon-wrapper">
                     <div sclass="confirm-icon-circle">
-                        <label sclass="z-icon-paper-plane confirm-icon" />
+                        <n:i class="fa-solid fa-paper-plane confirm-icon"></n:i>
                     </div>
                 </div>
                 

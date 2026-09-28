@@ -352,6 +352,7 @@
     width: 100% !important;
     box-sizing: border-box !important;
     text-align: center !important;
+    text-transform: none !important;
 }
 
 *.micr-status-repair {
@@ -379,6 +380,7 @@
     height: 44px !important;
     display: inline-flex !important;
     align-items: center !important;
+    text-transform: none !important;
 }
 
 

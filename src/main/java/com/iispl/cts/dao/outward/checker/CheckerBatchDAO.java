@@ -1,13 +1,14 @@
 package com.iispl.cts.dao.outward.checker;
 
 import java.math.BigDecimal;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.iispl.cts.data.CTSStaticData;
+import com.cts.inward.config.ConnectionPool;
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.model.outward.OutwardCheque;
 
@@ -18,6 +19,8 @@ public class CheckerBatchDAO {
      *
      * These batches come from outward_batch_assignment.
      */
+	  private final javax.sql.DataSource dataSource =
+	            ConnectionPool.getDataSource();
     public List<OutwardBatch> getCheckerBatches(
             String checkerUserId,
             String searchText,
@@ -49,7 +52,7 @@ public class CheckerBatchDAO {
                 + "ORDER BY oba.assigned_at DESC "
                 + "LIMIT ? OFFSET ?";
 
-        try (Connection connection = CTSStaticData.getConnection();
+        try (Connection connection = dataSource.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
@@ -171,7 +174,7 @@ public class CheckerBatchDAO {
                 + "ORDER BY ob.created_at ASC";
 
         try (Connection connection =
-                     CTSStaticData.getConnection();
+        		dataSource.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql);
              ResultSet rs =
@@ -242,7 +245,7 @@ public class CheckerBatchDAO {
                 + "WHERE batch_number = ?";
 
         try (Connection connection =
-                     CTSStaticData.getConnection();
+        		dataSource.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
@@ -339,7 +342,7 @@ public class CheckerBatchDAO {
                 + "ORDER BY cheque_number";
 
         try (Connection connection =
-                     CTSStaticData.getConnection();
+        		dataSource.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
@@ -478,7 +481,7 @@ public class CheckerBatchDAO {
                 + "WHERE account_number = ?";
 
         try (Connection connection =
-                     CTSStaticData.getConnection();
+        		dataSource.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 
@@ -523,7 +526,7 @@ public class CheckerBatchDAO {
     	        + "  AND (? IS NULL OR ? = '' OR LOWER(ob.batch_number) LIKE LOWER(?))";
 
         try (Connection connection =
-                     CTSStaticData.getConnection();
+        		dataSource.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 

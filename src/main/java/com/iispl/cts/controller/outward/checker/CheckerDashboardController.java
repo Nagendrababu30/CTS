@@ -699,49 +699,57 @@ public void render(
 			}
 
 			boolean reVerifyAllowed =
-					service.hasReVerifiedCheques(
-							batchNumber,
-							String.valueOf(
-									currentCheckerUser));
+			        service.hasReVerifiedCheques(
+			                batchNumber,
+			                String.valueOf(currentCheckerUser)
+			        );
 
 			if (reVerifyAllowed) {
 
-				List<String> reVerifiedChequeNumbers =
-						service.getReVerifiedChequeNumbers(
-								batchNumber,
-								String.valueOf(
-										currentCheckerUser));
+			    List<String> reVerifiedChequeNumbers =
+			            service.getReVerifiedChequeNumbers(
+			                    batchNumber,
+			                    String.valueOf(currentCheckerUser)
+			            );
 
-				if (reVerifiedChequeNumbers == null
-						|| reVerifiedChequeNumbers.isEmpty()) {
+			    if (reVerifiedChequeNumbers == null
+			            || reVerifiedChequeNumbers.isEmpty()) {
 
-					Clients.showNotification(
-							"No corrected cheque is available for re-verification.",
-							Clients.NOTIFICATION_TYPE_WARNING,
-							null,
-							"top_center",
-							4000);
+			        Clients.showNotification(
+			                "No corrected cheque is available for re-verification.",
+			                Clients.NOTIFICATION_TYPE_WARNING,
+			                null,
+			                "top_center",
+			                4000
+			        );
 
-					return;
-				}
+			        return;
+			    }
 
-				String chequeNumber =
-						reVerifiedChequeNumbers.get(0);
+			    /*
+			     * Always take the first cheque from the
+			     * CURRENT pending re-verification list.
+			     *
+			     * 1 cheque  -> [CHQ001] -> CHQ001
+			     * 2 cheques -> [CHQ001, CHQ002] -> CHQ001
+			     *
+			     * After CHQ001 is completed:
+			     *
+			     * [CHQ002] -> CHQ002
+			     */
+			    String chequeNumber =
+			            reVerifiedChequeNumbers.get(0);
 
-				String url =
-						"/zul/outward/outward-checker/processing.zul"
-								+ "?batchNumber="
-								+ Executions.encodeURL(
-										batchNumber)
-								+ "&chequeNumber="
-								+ Executions.encodeURL(
-										chequeNumber);
+			    String url =
+			            "/zul/outward/outward-checker/processing.zul"
+			                    + "?batchNumber="
+			                    + Executions.encodeURL(batchNumber)
+			                    + "&chequeNumber="
+			                    + Executions.encodeURL(chequeNumber);
 
-				Executions.sendRedirect(url);
-
-				return;
+			    Executions.sendRedirect(url);
+			    return;
 			}
-
 			boolean pendingMakerCheques =
 					service.hasPendingMakerCheques(
 							batchNumber,

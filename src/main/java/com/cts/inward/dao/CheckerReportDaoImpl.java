@@ -14,481 +14,393 @@ import com.cts.inward.config.ConnectionPool;
 
 public class CheckerReportDaoImpl implements CheckerReportDao {
 
-    private final DataSource dataSource;
-
-    private CheckerReportDaoImpl(DataSource dataSource) {
-        this.dataSource = dataSource;
-    }
-
-    public static CheckerReportDao of() {
-        return new CheckerReportDaoImpl(
-                ConnectionPool.getDataSource());
-    }
-
-    @Override
-    public List<Map<String, Object>> getRrfReportData() {
-
-        String sql = """
-                WITH latest_batch_status AS (
-                    SELECT
-                        batch_id,
-                        batch_status
-                    FROM (
-                        SELECT
-                            batch_id,
-                            batch_status,
-                            ROW_NUMBER() OVER (
-                                PARTITION BY batch_id
-                                ORDER BY changed_on DESC,
-                                         batch_history_id DESC
-                            ) AS rn
-                        FROM inward_batch_history
-                    ) x
-                    WHERE rn = 1
-                ),
-
-                latest_cheque_status AS (
-                    SELECT
-                        cheque_number,
-                        status_history_id,
-                        status,
-                        remarks,
-                        report_generated
-                    FROM (
-                        SELECT
-                            h.*,
-                            ROW_NUMBER() OVER (
-                                PARTITION BY cheque_number
-                                ORDER BY status_history_id DESC
-                            ) AS rn
-                        FROM inward_cheque_status_history h
-                    ) x
-                    WHERE rn = 1
-                ),
-
-                rejection_reasons AS (
-                    SELECT
-                        h.cheque_number,
-
-                        STRING_AGG(
-                            DISTINCT r.description,
-                            ', '
-                            ORDER BY r.description
-                        ) AS return_reason
-
-                    FROM inward_cheque_status_history h
-
-                    CROSS JOIN LATERAL regexp_split_to_table(
-                        COALESCE(h.rejection_reason_code, ''),
-                        '\\s*,\\s*'
-                    ) AS reason_code
-
-                    JOIN inward_cheque_rejection_reason r
-                        ON r.rejection_reason_code =
-                           TRIM(reason_code)
-
-                    WHERE UPPER(TRIM(h.status))
-                            IN ('REJECT', 'REJECTED')
-
-                      AND h.report_generated = 'N'
-
-                    GROUP BY h.cheque_number
-                ),
-
-                rejection_history AS (
-                    SELECT
-                        cheque_number,
-
-                        STRING_AGG(
-                            status_history_id::text,
-                            ','
-                            ORDER BY status_history_id
-                        ) AS status_history_ids
-
-                    FROM inward_cheque_status_history
-
-                    WHERE UPPER(TRIM(status))
-                            IN ('REJECT', 'REJECTED')
-
-                      AND report_generated = 'N'
-
-                    GROUP BY cheque_number
-                )
-
-                SELECT
-                    c.cheque_number AS cheque_no,
-                    c.batch_id,
-                    c.amount,
-                    c.account_number,
-                    c.payee_account_number,
-                    c.payee_name,
-                    c.drawer_name,
-                    c.cheque_date,
-                    b.presenting_bank_name,
+	private final DataSource dataSource;
+
+	private CheckerReportDaoImpl(DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
+
+	public static CheckerReportDao of() {
+		return new CheckerReportDaoImpl(ConnectionPool.getDataSource());
+	}
+
+	@Override
+	public List<Map<String, Object>> getRrfReportData() {
+
+		String sql = """
+				WITH latest_batch_status AS (
+				    SELECT
+				        batch_id,
+				        batch_status
+				    FROM (
+				        SELECT
+				            batch_id,
+				            batch_status,
+				            ROW_NUMBER() OVER (
+				                PARTITION BY batch_id
+				                ORDER BY changed_on DESC,
+				                         batch_history_id DESC
+				            ) AS rn
+				        FROM inward_batch_history
+				    ) x
+				    WHERE rn = 1
+				),
+
+				latest_cheque_status AS (
+				    SELECT
+				        cheque_number,
+				        status_history_id,
+				        status,
+				        remarks,
+				        report_generated
+				    FROM (
+				        SELECT
+				            h.*,
+				            ROW_NUMBER() OVER (
+				                PARTITION BY cheque_number
+				                ORDER BY status_history_id DESC
+				            ) AS rn
+				        FROM inward_cheque_status_history h
+				    ) x
+				    WHERE rn = 1
+				),
+
+				rejection_reasons AS (
+				    SELECT
+				        h.cheque_number,
+
+				        STRING_AGG(
+				            DISTINCT r.description,
+				            ', '
+				            ORDER BY r.description
+				        ) AS return_reason
 
-                    lcs.status_history_id,
+				    FROM inward_cheque_status_history h
 
-                    rr.return_reason,
+				    CROSS JOIN LATERAL regexp_split_to_table(
+				        COALESCE(h.rejection_reason_code, ''),
+				        '\\s*,\\s*'
+				    ) AS reason_code
 
-                    lcs.remarks,
+				    JOIN inward_cheque_rejection_reason r
+				        ON r.rejection_reason_code =
+				           TRIM(reason_code)
 
-                    rh.status_history_ids
+				    WHERE UPPER(TRIM(h.status))
+				            IN ('REJECT', 'REJECTED')
 
-                FROM inward_cheque c
+				      AND h.report_generated = 'N'
 
-                JOIN inward_batch b
-                    ON c.batch_id = b.batch_id
+				    GROUP BY h.cheque_number
+				),
 
-                JOIN latest_batch_status lbs
-                    ON lbs.batch_id = c.batch_id
+				rejection_history AS (
+				    SELECT
+				        cheque_number,
 
-                JOIN latest_cheque_status lcs
-                    ON lcs.cheque_number = c.cheque_number
+				        STRING_AGG(
+				            status_history_id::text,
+				            ','
+				            ORDER BY status_history_id
+				        ) AS status_history_ids
 
-                JOIN rejection_reasons rr
-                    ON rr.cheque_number = c.cheque_number
+				    FROM inward_cheque_status_history
 
-                JOIN rejection_history rh
-                    ON rh.cheque_number = c.cheque_number
+				    WHERE UPPER(TRIM(status))
+				            IN ('REJECT', 'REJECTED')
 
-                WHERE UPPER(TRIM(lbs.batch_status))
-                        = 'COMPLETED'
+				      AND report_generated = 'N'
 
-                  AND UPPER(TRIM(lcs.status))
-                        IN ('REJECT', 'REJECTED')
+				    GROUP BY cheque_number
+				)
 
-                  AND lcs.report_generated = 'N'
+				SELECT
+				    c.cheque_number AS cheque_no,
+				    c.batch_id,
+				    c.amount,
+				    c.account_number,
+				    c.payee_account_number,
+				    c.payee_name,
+				    c.drawer_name,
+				    c.cheque_date,
+				    b.presenting_bank_name,
 
-                ORDER BY
-                    c.batch_id,
-                    c.cheque_number
-                """;
+				    lcs.status_history_id,
 
-        List<Map<String, Object>> rrfList =
-                new ArrayList<>();
+				    rr.return_reason,
 
-        try (Connection connection =
-                     dataSource.getConnection();
+				    lcs.remarks,
 
-             PreparedStatement statement =
-                     connection.prepareStatement(sql);
+				    rh.status_history_ids
 
-             ResultSet rs =
-                     statement.executeQuery()) {
+				FROM inward_cheque c
 
-            while (rs.next()) {
+				JOIN inward_batch b
+				    ON c.batch_id = b.batch_id
 
-                Map<String, Object> row =
-                        new HashMap<>();
+				JOIN latest_batch_status lbs
+				    ON lbs.batch_id = c.batch_id
 
-                row.put(
-                        "statusHistoryId",
-                        rs.getLong("status_history_id"));
-
-                row.put(
-                        "statusHistoryIds",
-                        getStatusHistoryIds(
-                                rs.getString(
-                                        "status_history_ids")));
-
-                row.put(
-                        "batchId",
-                        rs.getLong("batch_id"));
-
-                row.put(
-                        "chequeNo",
-                        rs.getString("cheque_no"));
-
-                row.put(
-                        "amount",
-                        rs.getBigDecimal("amount"));
-
-                row.put(
-                        "drawerAccountNo",
-                        rs.getString("account_number"));
-
-                row.put(
-                        "payeeAccountNo",
-                        rs.getString(
-                                "payee_account_number"));
-
-                row.put(
-                        "payeeName",
-                        rs.getString("payee_name"));
-
-                row.put(
-                        "drawerName",
-                        rs.getString("drawer_name"));
-
-                row.put(
-                        "bankName",
-                        rs.getString(
-                                "presenting_bank_name"));
-
-                row.put(
-                        "chequeDate",
-                        rs.getDate("cheque_date"));
-
-                row.put(
-                        "returnReason",
-                        rs.getString("return_reason"));
-
-                row.put(
-                        "remark",
-                        rs.getString("remarks"));
-
-                rrfList.add(row);
-            }
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            throw new RuntimeException(
-                    "DB Error fetching RRF data: "
-                            + e.getMessage(),
-                    e);
-        }
+				JOIN latest_cheque_status lcs
+				    ON lcs.cheque_number = c.cheque_number
 
-        return rrfList;
-    }
+				JOIN rejection_reasons rr
+				    ON rr.cheque_number = c.cheque_number
 
-    @Override
-    public List<Map<String, Object>> getApprovedReportData() {
+				JOIN rejection_history rh
+				    ON rh.cheque_number = c.cheque_number
 
-        String sql = """
-                WITH latest_batch_status AS (
-                    SELECT
-                        batch_id,
-                        batch_status
-                    FROM (
-                        SELECT
-                            batch_id,
-                            batch_status,
-                            ROW_NUMBER() OVER (
-                                PARTITION BY batch_id
-                                ORDER BY changed_on DESC,
-                                         batch_history_id DESC
-                            ) AS rn
-                        FROM inward_batch_history
-                    ) x
-                    WHERE rn = 1
-                ),
+				WHERE UPPER(TRIM(lbs.batch_status))
+				        = 'COMPLETED'
 
-                latest_cheque_status AS (
-                    SELECT
-                        cheque_number,
-                        status_history_id,
-                        status,
-                        report_generated
-                    FROM (
-                        SELECT
-                            h.*,
-                            ROW_NUMBER() OVER (
-                                PARTITION BY cheque_number
-                                ORDER BY status_history_id DESC
-                            ) AS rn
-                        FROM inward_cheque_status_history h
-                    ) x
-                    WHERE rn = 1
-                )
+				  AND UPPER(TRIM(lcs.status))
+				        IN ('REJECT', 'REJECTED')
 
-                SELECT
-                    c.cheque_number AS cheque_no,
-                    c.batch_id,
-                    c.amount,
-                    c.account_number,
-                    c.payee_account_number,
-                    c.payee_name,
-                    c.drawer_name,
-                    c.cheque_date,
-                    b.presenting_bank_name,
+				  AND lcs.report_generated = 'N'
 
-                    lcs.status_history_id
+				ORDER BY
+				    c.batch_id,
+				    c.cheque_number
+				""";
 
-                FROM inward_cheque c
+		List<Map<String, Object>> rrfList = new ArrayList<>();
 
-                JOIN inward_batch b
-                    ON c.batch_id = b.batch_id
+		try (Connection connection = dataSource.getConnection();
 
-                JOIN latest_batch_status lbs
-                    ON lbs.batch_id = c.batch_id
+				PreparedStatement statement = connection.prepareStatement(sql);
 
-                JOIN latest_cheque_status lcs
-                    ON lcs.cheque_number = c.cheque_number
+				ResultSet rs = statement.executeQuery()) {
 
-                WHERE UPPER(TRIM(lbs.batch_status))
-                        = 'COMPLETED'
+			while (rs.next()) {
 
-                  AND UPPER(TRIM(lcs.status))
-                        IN ('ACCEPT', 'ACCEPTED', 'APPROVED')
+				Map<String, Object> row = new HashMap<>();
 
-                  AND lcs.report_generated = 'N'
+				row.put("statusHistoryId", rs.getLong("status_history_id"));
 
-                ORDER BY
-                    c.batch_id,
-                    c.cheque_number
-                """;
+				row.put("statusHistoryIds", getStatusHistoryIds(rs.getString("status_history_ids")));
 
-        List<Map<String, Object>> approvedList =
-                new ArrayList<>();
+				row.put("batchId", rs.getLong("batch_id"));
 
-        try (Connection connection =
-                     dataSource.getConnection();
+				row.put("chequeNo", rs.getString("cheque_no"));
 
-             PreparedStatement statement =
-                     connection.prepareStatement(sql);
+				row.put("amount", rs.getBigDecimal("amount"));
 
-             ResultSet rs =
-                     statement.executeQuery()) {
+				row.put("drawerAccountNo", rs.getString("account_number"));
 
-            while (rs.next()) {
+				row.put("payeeAccountNo", rs.getString("payee_account_number"));
 
-                Map<String, Object> row =
-                        new HashMap<>();
+				row.put("payeeName", rs.getString("payee_name"));
 
-                row.put(
-                        "statusHistoryId",
-                        rs.getLong("status_history_id"));
+				row.put("drawerName", rs.getString("drawer_name"));
 
-                row.put(
-                        "batchId",
-                        rs.getLong("batch_id"));
+				row.put("bankName", rs.getString("presenting_bank_name"));
 
-                row.put(
-                        "chequeNo",
-                        rs.getString("cheque_no"));
+				row.put("chequeDate", rs.getDate("cheque_date"));
 
-                row.put(
-                        "amount",
-                        rs.getBigDecimal("amount"));
+				row.put("returnReason", rs.getString("return_reason"));
 
-                row.put(
-                        "accountNumber",
-                        rs.getString("account_number"));
+				row.put("remark", rs.getString("remarks"));
 
-                row.put(
-                        "payeeAccountNo",
-                        rs.getString(
-                                "payee_account_number"));
+				rrfList.add(row);
+			}
 
-                row.put(
-                        "payeeName",
-                        rs.getString("payee_name"));
+		} catch (Exception e) {
 
-                row.put(
-                        "drawerName",
-                        rs.getString("drawer_name"));
+			e.printStackTrace();
 
-                row.put(
-                        "bankName",
-                        rs.getString(
-                                "presenting_bank_name"));
+			throw new RuntimeException("DB Error fetching RRF data: " + e.getMessage(), e);
+		}
 
-                row.put(
-                        "chequeDate",
-                        rs.getDate("cheque_date"));
+		return rrfList;
+	}
 
-                approvedList.add(row);
-            }
+	@Override
+	public List<Map<String, Object>> getApprovedReportData() {
 
-        } catch (Exception e) {
+		String sql = """
+				WITH latest_batch_status AS (
+				    SELECT
+				        batch_id,
+				        batch_status
+				    FROM (
+				        SELECT
+				            batch_id,
+				            batch_status,
+				            ROW_NUMBER() OVER (
+				                PARTITION BY batch_id
+				                ORDER BY changed_on DESC,
+				                         batch_history_id DESC
+				            ) AS rn
+				        FROM inward_batch_history
+				    ) x
+				    WHERE rn = 1
+				),
 
-            e.printStackTrace();
+				latest_cheque_status AS (
+				    SELECT
+				        cheque_number,
+				        status_history_id,
+				        status,
+				        report_generated
+				    FROM (
+				        SELECT
+				            h.*,
+				            ROW_NUMBER() OVER (
+				                PARTITION BY cheque_number
+				                ORDER BY status_history_id DESC
+				            ) AS rn
+				        FROM inward_cheque_status_history h
+				    ) x
+				    WHERE rn = 1
+				)
 
-            throw new RuntimeException(
-                    "DB Error fetching Approved data: "
-                            + e.getMessage(),
-                    e);
-        }
+				SELECT
+				    c.cheque_number AS cheque_no,
+				    c.batch_id,
+				    c.amount,
+				    c.account_number,
+				    c.payee_account_number,
+				    c.payee_name,
+				    c.drawer_name,
+				    c.cheque_date,
+				    b.presenting_bank_name,
 
-        return approvedList;
-    }
+				    lcs.status_history_id
 
-    @Override
-    public void updateRrfReportGenerated(
-            List<Long> statusHistoryIds) {
+				FROM inward_cheque c
 
-        updateReportGenerated(statusHistoryIds);
-    }
+				JOIN inward_batch b
+				    ON c.batch_id = b.batch_id
 
-    @Override
-    public void updateApprovedReportGenerated(
-            List<Long> statusHistoryIds) {
+				JOIN latest_batch_status lbs
+				    ON lbs.batch_id = c.batch_id
 
-        updateReportGenerated(statusHistoryIds);
-    }
+				JOIN latest_cheque_status lcs
+				    ON lcs.cheque_number = c.cheque_number
 
-    private void updateReportGenerated(
-            List<Long> statusHistoryIds) {
+				WHERE UPPER(TRIM(lbs.batch_status))
+				        = 'COMPLETED'
 
-        if (statusHistoryIds == null
-                || statusHistoryIds.isEmpty()) {
-            return;
-        }
+				  AND UPPER(TRIM(lcs.status))
+				        IN ('ACCEPT', 'ACCEPTED', 'APPROVED')
 
-        String sql = """
-                UPDATE inward_cheque_status_history
-                SET report_generated = 'Y'
-                WHERE status_history_id = ?
-                  AND report_generated = 'N'
-                """;
+				  AND lcs.report_generated = 'N'
 
-        try (Connection connection =
-                     dataSource.getConnection();
+				ORDER BY
+				    c.batch_id,
+				    c.cheque_number
+				""";
 
-             PreparedStatement statement =
-                     connection.prepareStatement(sql)) {
+		List<Map<String, Object>> approvedList = new ArrayList<>();
 
-            for (Long statusHistoryId :
-                    statusHistoryIds) {
+		try (Connection connection = dataSource.getConnection();
 
-                statement.setLong(
-                        1,
-                        statusHistoryId);
+				PreparedStatement statement = connection.prepareStatement(sql);
 
-                statement.addBatch();
-            }
+				ResultSet rs = statement.executeQuery()) {
 
-            statement.executeBatch();
+			while (rs.next()) {
 
-        } catch (Exception e) {
+				Map<String, Object> row = new HashMap<>();
 
-            e.printStackTrace();
+				row.put("statusHistoryId", rs.getLong("status_history_id"));
 
-            throw new RuntimeException(
-                    "DB Error updating report status: "
-                            + e.getMessage(),
-                    e);
-        }
-    }
+				row.put("batchId", rs.getLong("batch_id"));
 
-    private List<Long> getStatusHistoryIds(
-            String statusHistoryIds) {
+				row.put("chequeNo", rs.getString("cheque_no"));
 
-        List<Long> ids =
-                new ArrayList<>();
+				row.put("amount", rs.getBigDecimal("amount"));
 
-        if (statusHistoryIds == null
-                || statusHistoryIds.trim().isEmpty()) {
+				row.put("accountNumber", rs.getString("account_number"));
 
-            return ids;
-        }
+				row.put("payeeAccountNo", rs.getString("payee_account_number"));
 
-        String[] values =
-                statusHistoryIds.split(",");
+				row.put("payeeName", rs.getString("payee_name"));
 
-        for (String value : values) {
+				row.put("drawerName", rs.getString("drawer_name"));
 
-            if (value != null
-                    && !value.trim().isEmpty()) {
+				row.put("bankName", rs.getString("presenting_bank_name"));
 
-                ids.add(
-                        Long.parseLong(
-                                value.trim()));
-            }
-        }
+				row.put("chequeDate", rs.getDate("cheque_date"));
 
-        return ids;
-    }
+				approvedList.add(row);
+			}
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			throw new RuntimeException("DB Error fetching Approved data: " + e.getMessage(), e);
+		}
+
+		return approvedList;
+	}
+
+	@Override
+	public void updateRrfReportGenerated(List<Long> statusHistoryIds) {
+
+		updateReportGenerated(statusHistoryIds);
+	}
+
+	@Override
+	public void updateApprovedReportGenerated(List<Long> statusHistoryIds) {
+
+		updateReportGenerated(statusHistoryIds);
+	}
+
+	private void updateReportGenerated(List<Long> statusHistoryIds) {
+
+		if (statusHistoryIds == null || statusHistoryIds.isEmpty()) {
+			return;
+		}
+
+		String sql = """
+				UPDATE inward_cheque_status_history
+				SET report_generated = 'Y'
+				WHERE status_history_id = ?
+				  AND report_generated = 'N'
+				""";
+
+		try (Connection connection = dataSource.getConnection();
+
+				PreparedStatement statement = connection.prepareStatement(sql)) {
+
+			for (Long statusHistoryId : statusHistoryIds) {
+
+				statement.setLong(1, statusHistoryId);
+
+				statement.addBatch();
+			}
+
+			statement.executeBatch();
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			throw new RuntimeException("DB Error updating report status: " + e.getMessage(), e);
+		}
+	}
+
+	private List<Long> getStatusHistoryIds(String statusHistoryIds) {
+
+		List<Long> ids = new ArrayList<>();
+
+		if (statusHistoryIds == null || statusHistoryIds.trim().isEmpty()) {
+
+			return ids;
+		}
+
+		String[] values = statusHistoryIds.split(",");
+
+		for (String value : values) {
+
+			if (value != null && !value.trim().isEmpty()) {
+
+				ids.add(Long.parseLong(value.trim()));
+			}
+		}
+
+		return ids;
+	}
 }

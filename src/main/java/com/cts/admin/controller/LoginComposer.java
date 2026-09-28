@@ -23,512 +23,224 @@ import com.cts.inward.config.ConnectionPool;
 
 public class LoginComposer extends GenericForwardComposer<Component> {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    // =====================================================
-    // TIME ZONE
-    // =====================================================
+	private static final java.util.TimeZone IST = java.util.TimeZone.getTimeZone("Asia/Kolkata");
 
-    private static final java.util.TimeZone IST =
-            java.util.TimeZone.getTimeZone("Asia/Kolkata");
+	private Textbox username;
+	private Textbox password;
+	private Label loginMessage;
+	private A togglePasswordBtn;
 
+	private UserService userService;
+	private AuditLogService auditLogService;
+	private SessionService sessionService;
 
-    // =====================================================
-    // LOGIN COMPONENTS
-    // =====================================================
+	private boolean isPasswordVisible = false;
 
-    private Textbox username;
-    private Textbox password;
-    private Label loginMessage;
-    private A togglePasswordBtn;
+	@Override
+	public void doAfterCompose(Component comp) throws Exception {
 
+		super.doAfterCompose(comp);
 
-    // =====================================================
-    // SERVICES
-    // =====================================================
+		userService = new UserServiceImpl();
 
-    private UserService userService;
-    private AuditLogService auditLogService;
-    private SessionService sessionService;
+		auditLogService = new AuditLogServiceImpl();
 
+		sessionService = new SessionServiceImpl();
+	}
 
-    // =====================================================
-    // PASSWORD VISIBILITY
-    // =====================================================
+	// Login
 
-    private boolean isPasswordVisible = false;
+	public void onClick$loginButton(Event event) {
 
+		loginMessage.setValue("");
 
-    // =====================================================
-    // INITIALIZATION
-    // =====================================================
+		String usernameValue = username.getValue();
 
-    @Override
-    public void doAfterCompose(Component comp) throws Exception {
+		String passwordValue = password.getValue();
 
-        super.doAfterCompose(comp);
+		if (usernameValue == null || usernameValue.trim().isEmpty() || passwordValue == null
+				|| passwordValue.isEmpty()) {
 
-        userService =
-                new UserServiceImpl();
+			loginMessage.setValue("Please enter both User ID and Password.");
 
-        auditLogService =
-                new AuditLogServiceImpl();
+			return;
+		}
 
-        sessionService =
-                new SessionServiceImpl();
-    }
+		User user = userService.authenticate(usernameValue, passwordValue);
 
+		if (user == null) {
 
-    // =====================================================
-    // LOGIN
-    // =====================================================
+			loginMessage.setValue("Invalid username or password.");
 
-    public void onClick$loginButton(Event event) {
+			return;
+		}
 
-        loginMessage.setValue("");
+		String auditSessionId = auditLogService.createAuditLog(user.getUserId());
 
-        String usernameValue =
-                username.getValue();
+		java.sql.Timestamp nowIST = new java.sql.Timestamp(java.util.Calendar.getInstance(IST).getTimeInMillis());
 
-        String passwordValue =
-                password.getValue();
+		updateLastLogin(user.getUserId(), nowIST);
 
+		user.setLastLogin(nowIST);
 
-        // =================================================
-        // VALIDATE INPUT
-        // =================================================
+		Session session = Executions.getCurrent().getSession();
 
-        if (usernameValue == null
-                || usernameValue.trim().isEmpty()
-                || passwordValue == null
-                || passwordValue.isEmpty()) {
+		session.setAttribute("loggedInUser", user);
 
-            loginMessage.setValue(
-                    "Please enter both User ID and Password."
-            );
+		session.setAttribute("userId", user.getUserId());
 
-            return;
-        }
+		session.setAttribute("username", user.getUsername());
 
+		session.setAttribute("roleId", user.getRoleId());
 
-        // =================================================
-        // AUTHENTICATE USER
-        // =================================================
+		session.setAttribute("roleName", user.getRoleName());
 
-        User user =
-                userService.authenticate(
-                        usernameValue,
-                        passwordValue
-                );
+		session.setAttribute("auditSessionId", auditSessionId);
 
+		redirectUser(user);
+	}
 
-        if (user == null) {
+	// password visibility
 
-            loginMessage.setValue(
-                    "Invalid username or password."
-            );
+	public void onClick$togglePasswordBtn(Event event) {
 
-            return;
-        }
+		isPasswordVisible = !isPasswordVisible;
 
+		if (isPasswordVisible) {
 
-        // =================================================
-        // CREATE AUDIT SESSION
-        // =================================================
+			password.setType("text");
 
-        String auditSessionId =
-                auditLogService.createAuditLog(
-                        user.getUserId()
-                );
+			togglePasswordBtn.setIconSclass("z-icon-eye-slash");
 
+		} else {
 
-        // =================================================
-        // UPDATE LAST LOGIN
-        // =================================================
+			password.setType("password");
 
-        java.sql.Timestamp nowIST =
-                new java.sql.Timestamp(
-                        java.util.Calendar
-                                .getInstance(IST)
-                                .getTimeInMillis()
-                );
+			togglePasswordBtn.setIconSclass("z-icon-eye");
+		}
+	}
 
+	// Update last login
 
-        updateLastLogin(
-                user.getUserId(),
-                nowIST
-        );
+	private void updateLastLogin(Long userId, java.sql.Timestamp nowIST) {
 
+		String sql = "UPDATE \"user\" " + "SET last_login = ? " + "WHERE user_id = ?";
 
-        user.setLastLogin(nowIST);
+		try (Connection conn = ConnectionPool.getDataSource().getConnection();
 
+				PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-        // =================================================
-        // CREATE USER SESSION
-        // =================================================
+			stmt.setTimestamp(1, nowIST);
 
-        Session session =
-                Executions
-                        .getCurrent()
-                        .getSession();
+			stmt.setLong(2, userId);
 
+			stmt.executeUpdate();
 
-        session.setAttribute(
-                "loggedInUser",
-                user
-        );
+		} catch (Exception e) {
 
+			e.printStackTrace();
+		}
+	}
 
-        session.setAttribute(
-                "userId",
-                user.getUserId()
-        );
+	// Redirect user based on role
 
+	private void redirectUser(User user) {
 
-        session.setAttribute(
-                "username",
-                user.getUsername()
-        );
+		String roleName = user.getRoleName();
 
+		if (roleName == null || roleName.isBlank()) {
 
-        session.setAttribute(
-                "roleId",
-                user.getRoleId()
-        );
+			loginMessage.setValue("User role is not configured.");
 
+			return;
+		}
 
-        session.setAttribute(
-                "roleName",
-                user.getRoleName()
-        );
+		// Role-based redirection
 
+		switch (roleName) {
 
-        session.setAttribute(
-                "auditSessionId",
-                auditSessionId
-        );
+		case "Admin":
 
+			Executions.sendRedirect("/zul/admin/admin-dashboard.zul");
 
-        // =================================================
-        // REDIRECT USER BASED ON ROLE
-        // =================================================
+			break;
 
-        redirectUser(user);
-    }
+		case "Inward Maker":
 
+			Executions.sendRedirect("/zul/inward-maker/dashboard.zul");
 
-    // =====================================================
-    // TOGGLE PASSWORD VISIBILITY
-    // =====================================================
+			break;
 
-    public void onClick$togglePasswordBtn(Event event) {
+		case "Inward Checker":
 
-        isPasswordVisible =
-                !isPasswordVisible;
+			Executions.sendRedirect("/zul/inward-checker/dashboard.zul");
 
+			break;
 
-        if (isPasswordVisible) {
+		case "Outward Maker":
 
-            password.setType("text");
+			redirectOutwardUser("/zul/outward/outward-maker/" + "outward-maker-dashboard.zul");
 
-            togglePasswordBtn.setIconSclass(
-                    "z-icon-eye-slash"
-            );
+			break;
 
-        } else {
+		case "Outward Checker":
 
-            password.setType("password");
+			redirectOutwardUser("/zul/outward/outward-checker/" + "dashboard.zul");
 
-            togglePasswordBtn.setIconSclass(
-                    "z-icon-eye"
-            );
-        }
-    }
+			break;
 
+		case "Capture Operator":
 
-    // =====================================================
-    // UPDATE LAST LOGIN
-    // =====================================================
+			redirectOutwardUser("/zul/outward/outward-maker/" + "capture-operator-batch-capture.zul");
 
-    private void updateLastLogin(
-            Long userId,
-            java.sql.Timestamp nowIST) {
+			break;
 
-        String sql =
-                "UPDATE \"user\" "
-                + "SET last_login = ? "
-                + "WHERE user_id = ?";
+		default:
 
+			loginMessage.setValue("User role is not configured.");
 
-        try (
-                Connection conn =
-                        ConnectionPool
-                                .getDataSource()
-                                .getConnection();
+			break;
+		}
+	}
 
-                PreparedStatement stmt =
-                        conn.prepareStatement(sql)
-        ) {
+	// redirect only outward users
 
-            stmt.setTimestamp(
-                    1,
-                    nowIST
-            );
+	private void redirectOutwardUser(String dashboardPath) {
 
-            stmt.setLong(
-                    2,
-                    userId
-            );
+		if (isOutwardSessionActive()) {
 
-            stmt.executeUpdate();
+			Executions.sendRedirect(dashboardPath);
 
-        } catch (Exception e) {
+		} else {
 
-            e.printStackTrace();
-        }
-    }
+			Executions.sendRedirect("/zul/outward/outward-maker/" + "outward-clearing-session-wait.zul");
+		}
+	}
 
+	// check session status
 
-    // =====================================================
-    // REDIRECT USER BASED ON ROLE
-    // =====================================================
+	private boolean isOutwardSessionActive() {
 
-    private void redirectUser(User user) {
+		try {
 
-        String roleName =
-                user.getRoleName();
+			com.cts.admin.model.Session activeSession = sessionService.getActiveSession();
 
+			if (activeSession == null) {
 
-        // =================================================
-        // ROLE VALIDATION
-        // =================================================
+				return false;
+			}
 
-        if (roleName == null
-                || roleName.isBlank()) {
+			String status = activeSession.getStatus();
 
-            loginMessage.setValue(
-                    "User role is not configured."
-            );
+			return status != null && "STARTED".equalsIgnoreCase(status.trim());
 
-            return;
-        }
+		} catch (Exception e) {
 
+			e.printStackTrace();
 
-        // =================================================
-        // ROLE-BASED REDIRECTION
-        // =================================================
-
-        switch (roleName) {
-
-
-        // =================================================
-        // ADMIN
-        //
-        // NO OUTWARD SESSION CHECK
-        // =================================================
-
-        case "Admin":
-
-            Executions.sendRedirect(
-                    "/zul/admin/admin-dashboard.zul"
-            );
-
-            break;
-
-
-        // =================================================
-        // INWARD MAKER
-        //
-        // NO OUTWARD SESSION CHECK
-        // =================================================
-
-        case "Inward Maker":
-
-            Executions.sendRedirect(
-                    "/zul/inward-maker/dashboard.zul"
-            );
-
-            break;
-
-
-        // =================================================
-        // INWARD CHECKER
-        //
-        // NO OUTWARD SESSION CHECK
-        // =================================================
-
-        case "Inward Checker":
-
-            Executions.sendRedirect(
-                    "/zul/inward-checker/dashboard.zul"
-            );
-
-            break;
-
-
-        // =================================================
-        // OUTWARD MAKER
-        //
-        // OUTWARD SESSION CHECK REQUIRED
-        // =================================================
-
-        case "Outward Maker":
-
-            redirectOutwardUser(
-                    "/zul/outward/outward-maker/"
-                    + "outward-maker-dashboard.zul"
-            );
-
-            break;
-
-
-        // =================================================
-        // OUTWARD CHECKER
-        //
-        // OUTWARD SESSION CHECK REQUIRED
-        // =================================================
-
-        case "Outward Checker":
-
-            redirectOutwardUser(
-                    "/zul/outward/outward-checker/"
-                    + "dashboard.zul"
-            );
-
-            break;
-
-
-        // =================================================
-        // CAPTURE OPERATOR
-        //
-        // BATCH CAPTURE
-        //
-        // OUTWARD SESSION CHECK REQUIRED
-        // =================================================
-
-        case "Capture Operator":
-
-            redirectOutwardUser(
-                    "/zul/outward/outward-maker/"
-                    + "capture-operator-batch-capture.zul"
-            );
-
-            break;
-
-
-        // =================================================
-        // UNKNOWN ROLE
-        // =================================================
-
-        default:
-
-            loginMessage.setValue(
-                    "User role is not configured."
-            );
-
-            break;
-        }
-    }
-
-
-    // =====================================================
-    // OUTWARD USER REDIRECTION
-    //
-    // THIS METHOD IS CALLED ONLY FOR:
-    //
-    // 1. Outward Maker
-    // 2. Outward Checker
-    // 3. Capture Operator
-    // =====================================================
-
-    private void redirectOutwardUser(
-            String dashboardPath) {
-
-
-        // =================================================
-        // CHECK OUTWARD CLEARING SESSION
-        // =================================================
-
-        if (isOutwardSessionActive()) {
-
-
-            // =============================================
-            // SESSION STARTED
-            //
-            // GO TO REQUESTED OUTWARD PAGE
-            // =============================================
-
-            Executions.sendRedirect(
-                    dashboardPath
-            );
-
-        } else {
-
-
-            // =============================================
-            // SESSION NOT STARTED
-            //
-            // GO TO WAITING PAGE
-            // =============================================
-
-            Executions.sendRedirect(
-                    "/zul/outward/outward-maker/"
-                    + "outward-clearing-session-wait.zul"
-            );
-        }
-    }
-
-
-    // =====================================================
-    // CHECK OUTWARD CLEARING SESSION
-    // =====================================================
-
-    private boolean isOutwardSessionActive() {
-
-        try {
-
-
-            // =================================================
-            // GET ACTIVE SESSION
-            // =================================================
-
-            com.cts.admin.model.Session activeSession =
-                    sessionService.getActiveSession();
-
-
-            // =================================================
-            // NO ACTIVE SESSION
-            // =================================================
-
-            if (activeSession == null) {
-
-                return false;
-            }
-
-
-            // =================================================
-            // GET SESSION STATUS
-            // =================================================
-
-            String status =
-                    activeSession.getStatus();
-
-
-            // =================================================
-            // SESSION IS ACTIVE ONLY WHEN STATUS = STARTED
-            // =================================================
-
-            return status != null
-                    && "STARTED".equalsIgnoreCase(
-                            status.trim()
-                    );
-
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            return false;
-        }
-    }
+			return false;
+		}
+	}
 }

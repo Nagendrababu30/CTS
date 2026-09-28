@@ -132,16 +132,6 @@
 
 .checker-processing-page .zoom-level{color:#526b87 !important;font-size:11px !important;font-weight:500 !important;}
 
-.checker-processing-page .cbs-validation-row{width:100% !important;height:30px !important;min-height:30px !important;background:transparent !important;border:0 !important;}
-
-.checker-processing-page .cbs-validation-icon{color:#64748b !important;font-size:12px !important;}
-
-.checker-processing-page .cbs-validation-message{color:#60758d !important;font-size:11px !important;font-weight:500 !important;}
-
-.checker-processing-page .cbs-validation-reason{color:#8a97a7 !important;font-size:10px !important;}
-
-.checker-processing-page .cheque-date-validation-message{width:100% !important;padding:7px 9px !important;background:#fff1f3 !important;border:1px solid #efb2bb !important;border-radius:5px !important;color:#c51d34 !important;font-size:11px !important;font-weight:600 !important;line-height:16px !important;}
-
 /* HIDE SEPARATORS TO AVOID OFFSET LINES */
 .checker-processing-page .z-separator,
 .checker-processing-page .z-separator-horizontal {
@@ -399,6 +389,11 @@
     letter-spacing: 0.01em !important;
 }
 
+/* ============================================================ */
+/* STATUS & ALERT CARDS (MAKER RETURN, CBS & DATE VALIDATIONS)  */
+/* ============================================================ */
+
+/* MAKER RETURN CARD (RED) */
 .checker-processing-page .maker-return-card{
     width:100% !important;
     margin:0 0 16px 0 !important;
@@ -421,6 +416,9 @@
     line-height:22px !important;
     text-align:center !important;
     font-weight:700 !important;
+    display:inline-flex !important;
+    align-items:center !important;
+    justify-content:center !important;
 }
 
 .checker-processing-page .maker-return-title{
@@ -441,6 +439,108 @@
 
 .checker-processing-page .maker-return-reason{
     color:#8f2834 !important;
+    font-size:11px !important;
+    line-height:16px !important;
+    overflow-wrap:anywhere !important;
+}
+
+/* CBS VALIDATION CARD (BLUE / NAVY) */
+.checker-processing-page .cbs-return-card{
+    width:100% !important;
+    margin:0 0 16px 0 !important;
+    padding:11px 12px !important;
+    background:#f0f7ff !important;
+    border:1px solid #bfdbfe !important;
+    border-left: 4px solid #175CD3 !important;
+    border-radius:7px !important;
+    box-sizing:border-box !important;
+}
+
+.checker-processing-page .cbs-return-icon{
+    width:22px !important;
+    min-width:22px !important;
+    height:22px !important;
+    min-height:22px !important;
+    background:#175CD3 !important;
+    border-radius:50% !important;
+    color:#ffffff !important;
+    line-height:22px !important;
+    text-align:center !important;
+    font-weight:700 !important;
+    display:inline-flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+}
+
+.checker-processing-page .cbs-return-title{
+    color:#1e40af !important;
+    font-size:12px !important;
+    font-weight:700 !important;
+}
+
+.checker-processing-page .cbs-return-tag{
+    padding:3px 7px !important;
+    background:#dbeafe !important;
+    border:1px solid #bfdbfe !important;
+    border-radius:10px !important;
+    color:#1e40af !important;
+    font-size:9px !important;
+    font-weight:700 !important;
+}
+
+.checker-processing-page .cbs-return-reason{
+    color:#1e3a8a !important;
+    font-size:11px !important;
+    line-height:16px !important;
+    overflow-wrap:anywhere !important;
+}
+
+/* CHEQUE DATE VALIDATION CARD (AMBER / WARNING) */
+.checker-processing-page .date-return-card{
+    width:100% !important;
+    margin:0 0 16px 0 !important;
+    padding:11px 12px !important;
+    background:#fffbeb !important;
+    border:1px solid #fde68a !important;
+    border-left: 4px solid #d97706 !important;
+    border-radius:7px !important;
+    box-sizing:border-box !important;
+}
+
+.checker-processing-page .date-return-icon{
+    width:22px !important;
+    min-width:22px !important;
+    height:22px !important;
+    min-height:22px !important;
+    background:#d97706 !important;
+    border-radius:50% !important;
+    color:#ffffff !important;
+    line-height:22px !important;
+    text-align:center !important;
+    font-weight:700 !important;
+    display:inline-flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+}
+
+.checker-processing-page .date-return-title{
+    color:#92400e !important;
+    font-size:12px !important;
+    font-weight:700 !important;
+}
+
+.checker-processing-page .date-return-tag{
+    padding:3px 7px !important;
+    background:#fef3c7 !important;
+    border:1px solid #fde68a !important;
+    border-radius:10px !important;
+    color:#92400e !important;
+    font-size:9px !important;
+    font-weight:700 !important;
+}
+
+.checker-processing-page .date-return-reason{
+    color:#78350f !important;
     font-size:11px !important;
     line-height:16px !important;
     overflow-wrap:anywhere !important;

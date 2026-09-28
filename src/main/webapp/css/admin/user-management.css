@@ -164,11 +164,39 @@
 
 /* ── Password Eye Button Styled ── */
 .password-eye-button-styled {
-    width: auto;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 8px;
+    width: auto !important;
+    height: 100% !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    cursor: pointer !important;
+    padding: 0 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #64748B !important; /* Muted gray/slate stroke like image 3 */
+}
+
+
+.password-eye-button-styled:hover,
+.password-eye-button-styled:focus {
+    background: transparent !important;
+    color: #334155 !important;
+}
+
+
+/* Force child SVGs, images, or icon fonts inside the button to take the right color/size */
+.password-eye-button-styled svg,
+.password-eye-button-styled i {
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 18px !important;
+    line-height: 1 !important;
+    color: inherit !important;
+    fill: none !important;
+    stroke: currentColor !important;
 }
 
 /* ── Password Input Layout ── */
@@ -180,8 +208,13 @@
     box-sizing: border-box;
     border: 1.5px solid #CBD5E1;
     border-radius: 8px;
-    background: #F8FAFC;
+    background: #FFFFFF; /* Match clean white background */
     overflow: hidden;
+}
+
+
+.password-input-layout-styled:focus-within {
+    border-color: #93C5FD;
 }
 
 /* ── Password Group Container ── */

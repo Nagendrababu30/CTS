@@ -17,7 +17,6 @@ public class CheckerProcessingService {
     private final CheckerAssignmentDAO assignmentDao;
 
     public CheckerProcessingService() {
-
         this.chequeDao = new CheckerChequeDAO();
         this.assignmentDao = new CheckerAssignmentDAO();
     }
@@ -65,22 +64,6 @@ public class CheckerProcessingService {
     }
 
     // ============================================================
-    // GET RE-VERIFIED CHEQUES
-    // ============================================================
-
-    /*
-     * Re-Verify is based ONLY on:
-     *
-     * 1. Same batch
-     * 2. Same/original Checker
-     * 3. Previous Checker action = SEND_BACK
-     * 4. Cheque status = RE_VERIFIED
-     *
-     * Batch status is deliberately NOT checked.
-     */
-
-
-    // ============================================================
     // MAKER REJECTION INFORMATION
     // ============================================================
 
@@ -94,7 +77,6 @@ public class CheckerProcessingService {
                         chequeNumber);
 
         if (processing == null) {
-
             return false;
         }
 
@@ -141,7 +123,6 @@ public class CheckerProcessingService {
                         chequeNumber);
 
         if (processing == null) {
-
             return null;
         }
 
@@ -158,14 +139,6 @@ public class CheckerProcessingService {
     // CBS ACCOUNT VALIDATION
     // ============================================================
 
-    /*
-     * Possible results:
-     *
-     * ACCOUNT_NOT_FOUND
-     * ACCOUNT_INACTIVE
-     * PASS
-     */
-
     public String validateCbsAccount(
             String accountNumber) {
 
@@ -180,7 +153,6 @@ public class CheckerProcessingService {
                         accountNumber.trim());
 
         if (account == null) {
-
             return "ACCOUNT_NOT_FOUND";
         }
 
@@ -200,18 +172,10 @@ public class CheckerProcessingService {
     // CHEQUE DATE VALIDATION
     // ============================================================
 
-    /*
-     * Cheque date:
-     *
-     * - Must not be older than 3 months
-     * - Must not be future/post-dated
-     */
-
     public String validateChequeDate(
             LocalDate chequeDate) {
 
         if (chequeDate == null) {
-
             return "CHEQUE_DATE_EXPIRED";
         }
 
@@ -222,12 +186,10 @@ public class CheckerProcessingService {
                 today.minusMonths(3);
 
         if (chequeDate.isBefore(minimumDate)) {
-
             return "CHEQUE_DATE_EXPIRED";
         }
 
         if (chequeDate.isAfter(today)) {
-
             return "CHEQUE_DATE_POST_DATED";
         }
 
@@ -266,7 +228,6 @@ public class CheckerProcessingService {
         }
 
         if ("PASS".equals(validationResult)) {
-
             return "Validation successful.";
         }
 
@@ -287,13 +248,6 @@ public class CheckerProcessingService {
     // GET CHECKER RETURN / REJECTION REASONS
     // ============================================================
 
-    /*
-     * reasonType must be:
-     *
-     * SEND_BACK
-     * REJECT
-     */
-
     public List<ReturnReason> getReturnReasons(
             String reasonType) {
 
@@ -310,31 +264,6 @@ public class CheckerProcessingService {
     // ============================================================
     // SAVE CHECKER DECISION
     // ============================================================
-
-    /*
-     * ACCEPT:
-     * - CBS must PASS
-     * - Cheque date must PASS
-     * - No reason
-     *
-     * REJECT:
-     * - Reason mandatory
-     * - Final decision
-     * - CBS does not have to PASS
-     *
-     * SEND_BACK:
-     * - CBS must PASS
-     * - Cheque date must PASS
-     * - Reason mandatory
-     * - Not final
-     *
-     * Re-verification:
-     * - Same Checker
-     * - Same batch
-     * - Previous action SEND_BACK
-     * - Maker corrected cheque
-     * - Cheque status RE_VERIFIED
-     */
 
     public boolean saveCheckerDecision(
             String batchNumber,
@@ -361,7 +290,6 @@ public class CheckerProcessingService {
         }
 
         if (checkerId <= 0) {
-
             return false;
         }
 
@@ -412,7 +340,6 @@ public class CheckerProcessingService {
                         chequeNumber);
 
         if (cheque == null) {
-
             return false;
         }
 
@@ -425,29 +352,39 @@ public class CheckerProcessingService {
                         batchNumber,
                         chequeNumber);
 
-        if (processing == null) {
+        /*
+         * IMPORTANT:
+         *
+         * First Checker decision may not have a
+         * cheque_processing row yet.
+         *
+         * Do NOT return false when processing == null.
+         *
+         * CheckerChequeDAO.saveCheckerDecision()
+         * will create the row for the first decision.
+         */
 
-            return false;
-        }
+        if (processing != null) {
 
-        // --------------------------------------------------------
-        // PREVENT DUPLICATE FINAL DECISION
-        // --------------------------------------------------------
+            // ----------------------------------------------------
+            // PREVENT DUPLICATE FINAL DECISION
+            // ----------------------------------------------------
 
-        String existingCheckerAction =
-                processing.getCheckerAction();
+            String existingCheckerAction =
+                    processing.getCheckerAction();
 
-        if (existingCheckerAction != null) {
+            if (existingCheckerAction != null) {
 
-            existingCheckerAction =
-                    existingCheckerAction
-                            .trim()
-                            .toUpperCase();
+                existingCheckerAction =
+                        existingCheckerAction
+                                .trim()
+                                .toUpperCase();
 
-            if ("ACCEPT".equals(existingCheckerAction)
-                    || "REJECT".equals(existingCheckerAction)) {
+                if ("ACCEPT".equals(existingCheckerAction)
+                        || "REJECT".equals(existingCheckerAction)) {
 
-                return false;
+                    return false;
+                }
             }
         }
 
@@ -463,7 +400,6 @@ public class CheckerProcessingService {
                             cheque.getDrawerAccountNumber());
 
             if (!"PASS".equals(cbsResult)) {
-
                 return false;
             }
 
@@ -472,7 +408,6 @@ public class CheckerProcessingService {
                             cheque.getChequeDate());
 
             if (!"PASS".equals(chequeDateResult)) {
-
                 return false;
             }
         }
@@ -499,7 +434,6 @@ public class CheckerProcessingService {
         // --------------------------------------------------------
 
         if ("ACCEPT".equals(checkerAction)) {
-
             checkerReasonCode = null;
         }
 
@@ -513,7 +447,6 @@ public class CheckerProcessingService {
                     checkerRemarks.trim();
 
             if (checkerRemarks.isEmpty()) {
-
                 checkerRemarks = null;
             }
         }
@@ -563,7 +496,6 @@ public class CheckerProcessingService {
         }
 
         if (checkerUserId <= 0) {
-
             return Collections.emptyList();
         }
 

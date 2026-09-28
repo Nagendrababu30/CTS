@@ -31,7 +31,6 @@
 .checker-processing-page .summary-pill{height:36px !important;min-height:36px !important;padding:0 18px !important;border-radius:20px !important;font-size:12px !important;font-weight:600 !important;white-space:nowrap !important;display:flex !important;align-items:center !important;justify-content:center !important;}
 
 /* BATCH NUMBER PILL */
-
 .checker-processing-page .batch-number-pill {
     background:#f4f7fa !important;border:1px solid #d2dce7 !important;color:#5d7085 !important;
 }
@@ -42,7 +41,7 @@
 
 .checker-processing-page .pending-pill{background:#fff1da !important;border:1px solid #efc17c !important;color:#a75c17 !important;}
 
-.checker-processing-page .cheque-pill{height:38px !important;min-height:38px !important;padding:0 17px !important;background:#087be8 !important;border:1px solid #087be8 !important;border-radius:20px !important;color:#ffffff !important;font-size:12px !important;font-weight:700 !important;box-shadow:0 2px 6px rgba(8,123,232,0.18) !important;}
+.checker-processing-page .cheque-pill{height:38px !important;min-height:38px !important;padding:0 17px !important;background:#175CD3 !important;border:1px solid #175CD3 !important;border-radius:20px !important;color:#ffffff !important;font-size:12px !important;font-weight:700 !important;box-shadow:0 2px 6px rgba(23,92,211,0.18) !important;}
 
 .checker-processing-page .processing-main-area{width:100% !important;min-width:0 !important;min-height:0 !important;padding:14px 17px 18px 17px !important;background:#f2f6fb !important;overflow:hidden !important;}
 
@@ -60,18 +59,17 @@
 
 .checker-processing-page .image-side-button:hover{background:#f1f7fd !important;border-color:#8eacc9 !important;color:#075fae !important;}
 
-.checker-processing-page .image-side-button.selected{background:#087be8 !important;border:1px solid #087be8 !important;color:#ffffff !important;font-weight:700 !important;box-shadow:0 2px 5px rgba(8,123,232,0.18) !important;}
+.checker-processing-page .image-side-button.selected{background:#175CD3 !important;border:1px solid #175CD3 !important;color:#ffffff !important;font-weight:700 !important;box-shadow:0 2px 5px rgba(23,92,211,0.18) !important;}
 
-.checker-processing-page .image-side-button.selected:hover{background:#066fd2 !important;border-color:#066fd2 !important;color:#ffffff !important;}
+.checker-processing-page .image-side-button.selected:hover{background:#154EB5 !important;border-color:#154EB5 !important;color:#ffffff !important;}
 
 .checker-processing-page .image-tool-button{width:42px !important;min-width:42px !important;height:38px !important;min-height:38px !important;padding:0 !important;background:#ffffff !important;border:1px solid #c8d5e2 !important;border-radius:7px !important;color:#26394f !important;font-size:17px !important;font-weight:500 !important;text-shadow:none !important;box-shadow:0 1px 3px rgba(15,23,42,0.05) !important;}
 
-.checker-processing-page .image-tool-button:hover{background:#f2f7fc !important;border-color:#8ba9c7 !important;color:#087be8 !important;}
+.checker-processing-page .image-tool-button:hover{background:#f2f7fc !important;border-color:#8ba9c7 !important;color:#175CD3 !important;}
 
 .checker-processing-page .image-tool-button .z-button-content{color:inherit !important;font-size:17px !important;text-shadow:none !important;}
 
 /* CHEQUE IMAGE CONTAINER */
-
 .checker-processing-page .cheque-image-container{
     width:100% !important;
     min-width:0 !important;
@@ -89,7 +87,6 @@
 }
 
 /* BACKEND CHEQUE IMAGE - CENTERED */
-
 .checker-processing-page .cheque-image-container .z-image{
     width:auto !important;
     height:auto !important;
@@ -117,7 +114,6 @@
 }
 
 /* INNER BORDER */
-
 .checker-processing-page .cheque-image-container::after{
     content:"" !important;
     position:absolute !important;
@@ -187,25 +183,27 @@
 
 .checker-processing-page .accept-button .z-button-content{color:#ffffff !important;font-weight:700 !important;text-shadow:none !important;}
 
+/* RETURN / SENT BACK BUTTON -> #175CD3 */
 .checker-processing-page button.return-button,
 .checker-processing-page .return-button.z-button{
     background:#ffffff !important;
     background-image:none !important;
-    border:1px solid #7c3aed !important;
-    color:#6d28d9 !important;
+    border:1px solid #175CD3 !important;
+    color:#175CD3 !important;
     box-shadow:none !important;
 }
 
 .checker-processing-page button.return-button:hover,
 .checker-processing-page .return-button.z-button:hover{
-    background:#f6f1ff !important;
-    border-color:#6d28d9 !important;
-    color:#6d28d9 !important;
-    box-shadow:0 2px 5px rgba(124,58,237,0.10) !important;
+    background:#ebf2fd !important;
+    border-color:#154EB5 !important;
+    color:#154EB5 !important;
+    box-shadow:0 2px 5px rgba(23,92,211,0.10) !important;
 }
 
-.checker-processing-page .return-button .z-button-content{color:#6d28d9 !important;font-weight:700 !important;text-shadow:none !important;}
+.checker-processing-page .return-button .z-button-content{color:#175CD3 !important;font-weight:700 !important;text-shadow:none !important;}
 
+/* REJECT MAIN PAGE BUTTON (REMAINS RED OUTLINE) */
 .checker-processing-page button.reject-button,
 .checker-processing-page .reject-button.z-button{
     background:#ffffff !important;
@@ -275,7 +273,7 @@
 .checker-processing-page .cheque-details-scroll::-webkit-scrollbar-thumb{background:#aeb8c4 !important;border:2px solid #f5f7fa !important;border-radius:8px !important;}
 .checker-processing-page .cheque-details-scroll::-webkit-scrollbar-thumb:hover{background:#8d99a7 !important;}
 
-/* RIGHT CARD SECTIONS: ALL UNIFIED TO LIGHT BACKGROUND (#f8fbfe) */
+/* RIGHT CARD SECTIONS */
 .checker-processing-page .right-section,
 .checker-processing-page .details-box {
     width: 100% !important;
@@ -312,7 +310,7 @@
     box-sizing: border-box !important;
 }
 
-/* LABELS: UNIFIED TO REQUESTED STYLE */
+/* LABELS */
 .checker-processing-page .single-field-label,
 .checker-processing-page .field-label{
     display: block !important;
@@ -320,12 +318,12 @@
     font-weight: 700 !important;
     color: #475569 !important;
     letter-spacing: 0.35px !important;
-    margin-top: 1 px !important;
-    margin-bottom: 0.25	px !important;
+    margin-top: 1px !important;
+    margin-bottom: 0.25px !important;
     line-height: normal !important;
 }
 
-/* INPUT BOXES: LIGHT SOFT TINT TO BLEND BEAUTIFULLY */
+/* INPUT BOXES */
 .checker-processing-page .field-value,
 .checker-processing-page .field-value.z-textbox,
 .checker-processing-page input.field-value,
@@ -357,7 +355,7 @@
     vertical-align: middle !important;
 }
 
-/* MICR INPUT BOX: DISTINCT CLEAN WHITE BACKGROUND */
+/* MICR INPUT BOX */
 .checker-processing-page .micr-field,
 .checker-processing-page .micr-field.z-textbox,
 .checker-processing-page #micrLabel {
@@ -369,7 +367,6 @@
     letter-spacing: 0.02em !important;
 }
 
-/* INNER INPUT WRAPPERS IF APPLICABLE */
 .checker-processing-page .field-value .z-textbox-input {
     width: 100% !important;
     height: 100% !important;
@@ -386,9 +383,9 @@
 
 .checker-processing-page .field-value:focus,
 .checker-processing-page .field-value:focus-within {
-    border-color: #087be8 !important;
+    border-color: #175CD3 !important;
     background: #ffffff !important;
-    box-shadow: 0 0 0 2px rgba(8,123,232,0.08) !important;
+    box-shadow: 0 0 0 2px rgba(23,92,211,0.12) !important;
     outline: none !important;
 }
 
@@ -524,7 +521,7 @@
 .checker-processing-page .navigation-button:hover{
     background:#f3f8fd !important;
     border-color:#9bb5cf !important;
-    color:#0569ca !important;
+    color:#175CD3 !important;
 }
 
 .checker-processing-page .navigation-button .z-button-content{
@@ -533,28 +530,32 @@
     text-shadow:none !important;
 }
 
-.checker-processing-page .complete-button{
+/* SAVE & NEXT (COMPLETE) BUTTON -> #175CD3 */
+.checker-processing-page .complete-button,
+.checker-processing-page #saveNextButton{
     height:36px !important;
     min-height:36px !important;
     min-width:158px !important;
     padding:0 16px !important;
-    background:#087be8 !important;
-    border:1px solid #087be8 !important;
+    background:#175CD3 !important;
+    border:1px solid #175CD3 !important;
     border-radius:6px !important;
     color:#ffffff !important;
     font-size:12px !important;
     font-weight:700 !important;
     text-shadow:none !important;
-    box-shadow:0 2px 5px rgba(8,123,232,0.17) !important;
+    box-shadow:0 2px 5px rgba(23,92,211,0.20) !important;
 }
 
-.checker-processing-page .complete-button:hover{
-    background:#066fd2 !important;
-    border-color:#066fd2 !important;
+.checker-processing-page .complete-button:hover,
+.checker-processing-page #saveNextButton:hover{
+    background:#154EB5 !important;
+    border-color:#154EB5 !important;
     color:#ffffff !important;
 }
 
-.checker-processing-page .complete-button .z-button-content{
+.checker-processing-page .complete-button .z-button-content,
+.checker-processing-page #saveNextButton .z-button-content{
     color:#ffffff !important;
     font-weight:700 !important;
     text-shadow:none !important;
@@ -577,9 +578,9 @@
 }
 
 .checker-processing-page .return-button:disabled{
-    background:#f5f1ff !important;
-    border-color:#cfc0fa !important;
-    color:#9b83d5 !important;
+    background:#f1f5f9 !important;
+    border-color:#cbd5e1 !important;
+    color:#94a3b8 !important;
 }
 
 .checker-processing-page .reject-button:disabled{
@@ -588,9 +589,10 @@
     color:#db7180 !important;
 }
 
-.checker-processing-page .complete-button:disabled{
-    background:#8cb8e2 !important;
-    border-color:#8cb8e2 !important;
+.checker-processing-page .complete-button:disabled,
+.checker-processing-page #saveNextButton:disabled{
+    background:#93b4e6 !important;
+    border-color:#93b4e6 !important;
     color:#ffffff !important;
 }
 
@@ -602,14 +604,18 @@
 
 .checker-processing-page .z-button:focus{outline:none !important;}
 
-/* MODAL WINDOW STYLING */
-.action-reason-modal {
+/* ============================================================ */
+/* MODAL WINDOW & MODAL BUTTONS                                 */
+/* ============================================================ */
+.action-reason-modal,
+.z-window-modal {
     border-radius: 8px !important;
     overflow: hidden !important;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2) !important;
 }
 
-.action-reason-modal .z-window-header {
+.action-reason-modal .z-window-header,
+.z-window-modal .z-window-header {
     background: #f8fafc !important;
     color: #0f172a !important;
     font-weight: 700 !important;
@@ -617,25 +623,54 @@
     padding: 12px 16px !important;
 }
 
-.action-reason-modal .modal-body-layout {
-    padding: 16px !important;
-    background: #ffffff !important;
-    box-sizing: border-box !important;
+/* CANCEL BUTTON IN MODAL */
+.action-reason-modal .navigation-button,
+.action-reason-modal .navigation-button.z-button {
+    min-width: 90px !important;
+    height: 36px !important;
+    background: #175CD3 !important;
+    border: 1px solid #175CD3 !important;
+    border-radius: 6px !important;
+    color: #ffffff !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
 }
 
-.action-reason-modal .modal-combobox {
-    width: 100% !important;
+.action-reason-modal .navigation-button:hover,
+.action-reason-modal .navigation-button.z-button:hover {
+    background: #154EB5 !important;
+    border-color: #154EB5 !important;
+    color: #ffffff !important;
 }
 
-.action-reason-modal .modal-remarks-textbox {
-    width: 100% !important;
-    min-height: 75px !important;
-    padding: 8px 10px !important;
-    resize: none !important;
+.action-reason-modal .navigation-button .z-button-content {
+    color: #ffffff !important;
 }
 
-.action-reason-modal .modal-submit-button {
-    min-width: 110px !important;
+/* SUBMIT BUTTON IN MODAL */
+.action-reason-modal .modal-submit-button,
+.action-reason-modal .modal-submit-button.z-button {
+    min-width: 90px !important;
+    height: 36px !important;
+    background: #175CD3 !important;
+    border: 1px solid #175CD3 !important;
+    border-radius: 6px !important;
+    color: #ffffff !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+}
+
+.action-reason-modal .modal-submit-button:hover,
+.action-reason-modal .modal-submit-button.z-button:hover {
+    background: #154EB5 !important;
+    border-color: #154EB5 !important;
+    color: #ffffff !important;
+}
+
+.action-reason-modal .modal-submit-button .z-button-content {
+    color: #ffffff !important;
 }
 
 .checker-processing-page input::placeholder,

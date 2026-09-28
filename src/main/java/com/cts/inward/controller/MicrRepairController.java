@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.HashMap;
 
 import org.zkoss.image.AImage;
 import org.zkoss.zk.ui.Component;
@@ -19,7 +20,6 @@ import org.zkoss.zul.Button;
 import org.zkoss.zul.Combobox;
 import org.zkoss.zul.Comboitem;
 import org.zkoss.zul.Div;
-import org.zkoss.zul.Hlayout;
 import org.zkoss.zul.Image;
 import org.zkoss.zul.Label;
 import org.zkoss.zul.Messagebox;
@@ -59,7 +59,6 @@ public class MicrRepairController
     private Div returnReasonBanner;
     private Label lblReturnReason;
     private Label lblReturnRemarks;
-    private Hlayout rowReturnRemarks;
 
     // ZUL components - image panel
     private Image chequeImage;
@@ -103,7 +102,7 @@ public class MicrRepairController
     private int currentRotation = 0;
     private String correctedMicr;
     private Long loggedInUserId;
-    private final Map<String, AImage> aImageCache = new java.util.HashMap<>();
+    private final Map<String, AImage> aImageCache = new HashMap<>();
 
     // Load logged-in user from session
     private void loadLoggedInUser() {

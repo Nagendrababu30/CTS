@@ -105,7 +105,7 @@ public class SendBatchToCheckerDaoImpl implements SendBatchToCheckerDao {
             connection.setAutoCommit(false);
 
             try {
-                // 1. Check if this batch has a previous Checker (i.e. was returned to maker)
+                // 1. Check if this batch has a previous Checker 
                 Integer previousCheckerId = null;
                 String findCheckerSql = """
                         SELECT bl.user_id

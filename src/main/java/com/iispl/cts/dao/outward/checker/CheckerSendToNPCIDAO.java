@@ -9,46 +9,12 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * ============================================================
- * CHECKER SEND TO NPCI DAO
- * ============================================================
- *
- * Handles database operations for the Send to NPCI screen.
- *
- * Main responsibilities:
- *
- * 1. Get batches which are ready to be sent to NPCI.
- * 2. Get cheque counts for each batch.
- * 3. Check whether a particular batch is ready.
- * 4. Mark a batch as NPCI_SENT after successful submission.
- *
- * ============================================================
- */
-public class CheckerSendToNPCIDAO {
 
-    // ============================================================
-    // DATA SOURCE
-    // ============================================================
+public class CheckerSendToNPCIDAO {
 
     private final javax.sql.DataSource dataSource =
             ConnectionPool.getDataSource();
 
-
-    // ============================================================
-    // GET BATCHES READY FOR NPCI
-    // ============================================================
-
-    /**
-     * Gets batches which have completed Checker processing
-     * and are ready to be sent to NPCI.
-     *
-     * Current completed Checker status:
-     *
-     * CHECKER_COMPLETED
-     *
-     * @return list of batches ready for NPCI
-     */
     public List<OutwardBatch> getBatchesReadyForNPCI() {
 
         List<OutwardBatch> batches =
@@ -113,46 +79,22 @@ public class CheckerSendToNPCIDAO {
                 OutwardBatch batch =
                         new OutwardBatch();
 
-
-                // ====================================================
-                // BATCH NUMBER
-                // ====================================================
-
                 batch.setBatchNumber(
                         rs.getString("batch_number")
                 );
-
-
-                // ====================================================
-                // BRANCH
-                // ====================================================
 
                 batch.setBranchCode(
                         rs.getString("branch_code")
                 );
 
-
-                // ====================================================
-                // TOTAL CHEQUE COUNT
-                // ====================================================
-
                 batch.setNumberOfCheques(
                         rs.getInt("total_cheques")
                 );
-
-
-                // ====================================================
-                // FOLDER PATH
-                // ====================================================
 
                 batch.setBatchFolderPath(
                         rs.getString("batch_folder_path")
                 );
 
-
-                // ====================================================
-                // CREATED BY
-                // ====================================================
 
                 int createdBy =
                         rs.getInt("created_by");
@@ -165,10 +107,6 @@ public class CheckerSendToNPCIDAO {
                 }
 
 
-                // ====================================================
-                // CREATED AT
-                // ====================================================
-
                 if (rs.getTimestamp("created_at") != null) {
 
                     batch.setCreatedAt(
@@ -177,19 +115,9 @@ public class CheckerSendToNPCIDAO {
                     );
                 }
 
-
-                // ====================================================
-                // STATUS
-                // ====================================================
-
                 batch.setBatchStatus(
                         rs.getString("batch_status")
                 );
-
-
-                // ====================================================
-                // ADD BATCH
-                // ====================================================
 
                 batches.add(batch);
             }
@@ -199,29 +127,15 @@ public class CheckerSendToNPCIDAO {
             e.printStackTrace();
 
             throw new RuntimeException(
-                    "Unable to load batches ready for NPCI.",
-                    e
-            );
+                    "Unable to load batches ready for NPCI.", e );
         }
-
 
         return batches;
     }
 
 
-    // ============================================================
     // CHECK WHETHER BATCH IS READY
-    // ============================================================
 
-    /**
-     * Checks whether a particular batch is currently
-     * ready for NPCI submission.
-     *
-     * Batch must be in CHECKER_COMPLETED status.
-     *
-     * @param batchNumber batch number
-     * @return true when batch is ready
-     */
     public boolean isBatchReadyForNPCI(
             String batchNumber) {
 
@@ -237,28 +151,20 @@ public class CheckerSendToNPCIDAO {
                 "    SELECT 1 " +
                 "    FROM public.outward_batch " +
                 "    WHERE batch_number = ? " +
-                "      AND UPPER(batch_status) = 'CHECKER_VERIFIED' " +
-                ")";
+                "      AND UPPER(batch_status) = 'CHECKER_VERIFIED' " + ")";
 
 
-        try (
-                Connection con =
+        try ( 
+        		Connection con =
                         dataSource.getConnection();
 
                 PreparedStatement ps =
-                        con.prepareStatement(sql)
-        ) {
+                        con.prepareStatement(sql)) {
 
-            ps.setString(
-                    1,
-                    batchNumber.trim()
-            );
+            ps.setString( 1, batchNumber.trim());
 
-
-            try (
-                    ResultSet rs =
-                            ps.executeQuery()
-            ) {
+            try ( ResultSet rs =
+                            ps.executeQuery() ) {
 
                 if (rs.next()) {
 
@@ -271,36 +177,20 @@ public class CheckerSendToNPCIDAO {
             e.printStackTrace();
 
             throw new RuntimeException(
-                    "Unable to check NPCI batch status.",
-                    e
-            );
+                    "Unable to check NPCI batch status.",e );
         }
-
-
         return false;
     }
 
-
-    // ============================================================
     // MARK BATCH AS NPCI SENT
-    // ============================================================
 
-    /**
-     * Changes the batch status to NPCI_SENT.
-     *
-     * This must be called ONLY after the actual NPCI submission
-     * has succeeded.
-     *
-     * @param batchNumber batch to update
-     * @return true if successfully updated
-     */
     public boolean markBatchAsNPCISent(
             String batchNumber) {
 
         if (batchNumber == null ||
                 batchNumber.trim().isEmpty()) {
-
-            return false;
+        	
+        	return false;
         }
 
 
@@ -316,18 +206,12 @@ public class CheckerSendToNPCIDAO {
                         dataSource.getConnection();
 
                 PreparedStatement ps =
-                        con.prepareStatement(sql)
-        ) {
+                        con.prepareStatement(sql)) {
 
-            ps.setString(
-                    1,
-                    batchNumber.trim()
-            );
-
+            ps.setString( 1, batchNumber.trim() );
 
             int updated =
                     ps.executeUpdate();
-
 
             return updated == 1;
 
@@ -336,23 +220,14 @@ public class CheckerSendToNPCIDAO {
             e.printStackTrace();
 
             throw new RuntimeException(
-                    "Unable to mark batch as NPCI_SENT.",
-                    e
-            );
+                    "Unable to mark batch as NPCI_SENT.", e );
         }
     }
 
 
-    // ============================================================
     // GET BATCH STATUS
-    // ============================================================
 
-    /**
-     * Returns the current database status of a batch.
-     *
-     * @param batchNumber batch number
-     * @return current batch status, or null when not found
-     */
+    
     public String getBatchStatus(
             String batchNumber) {
 
@@ -374,25 +249,18 @@ public class CheckerSendToNPCIDAO {
                         dataSource.getConnection();
 
                 PreparedStatement ps =
-                        con.prepareStatement(sql)
-        ) {
+                        con.prepareStatement(sql) ) {
 
-            ps.setString(
-                    1,
-                    batchNumber.trim()
-            );
+            ps.setString( 1, batchNumber.trim() );
 
 
             try (
                     ResultSet rs =
-                            ps.executeQuery()
-            ) {
+                            ps.executeQuery()) {
 
                 if (rs.next()) {
-
-                    return rs.getString(
-                            "batch_status"
-                    );
+                	
+                	return rs.getString("batch_status" );
                 }
             }
 
@@ -401,12 +269,9 @@ public class CheckerSendToNPCIDAO {
             e.printStackTrace();
 
             throw new RuntimeException(
-                    "Unable to get batch status.",
-                    e
-            );
+                    "Unable to get batch status.", e );
         }
-
-
+        
         return null;
     }
 }

@@ -34,12 +34,18 @@ public class CheckerSendToNPCIController extends SelectorComposer<Component> {
 
 	private long currentUserId;
 
+	// ============================================================
+	// INIT
+	// ============================================================
+
 	@Override
 	public void doAfterCompose(Component component) throws Exception {
 
 		super.doAfterCompose(component);
 
+		// ========================================================
 		// GET SESSION
+		// ========================================================
 
 		Session session = Executions.getCurrent().getSession();
 
@@ -50,7 +56,9 @@ public class CheckerSendToNPCIController extends SelectorComposer<Component> {
 			return;
 		}
 
+		// ========================================================
 		// GET USER ID
+		// ========================================================
 
 		Object sessionUserId = session.getAttribute("userId");
 
@@ -60,6 +68,10 @@ public class CheckerSendToNPCIController extends SelectorComposer<Component> {
 
 			return;
 		}
+
+		// ========================================================
+		// CONVERT USER ID
+		// ========================================================
 
 		if (sessionUserId instanceof Number) {
 
@@ -79,7 +91,9 @@ public class CheckerSendToNPCIController extends SelectorComposer<Component> {
 			}
 		}
 
+		// ========================================================
 		// CHECK CLEARING SESSION
+		// ========================================================
 
 		SessionService sessionService = new SessionServiceImpl();
 
@@ -101,12 +115,22 @@ public class CheckerSendToNPCIController extends SelectorComposer<Component> {
 			return;
 		}
 
+		// ========================================================
+		// CREATE DAO
+		// ========================================================
+
 		reportsDAO = new CheckerReportsDAO();
+
+		// ========================================================
+		// LOAD BATCHES
+		// ========================================================
 
 		loadBatches();
 	}
 
+	// ============================================================
 	// LOAD BATCHES
+	// ============================================================
 
 	private void loadBatches() {
 
@@ -133,12 +157,21 @@ public class CheckerSendToNPCIController extends SelectorComposer<Component> {
 
 			e.printStackTrace();
 
-			Messagebox.show("Unable to load batches ready for NPCI.\n\n" + e.getMessage(), "Error", Messagebox.OK,
+			Messagebox.show(
+
+					"Unable to load batches ready for NPCI.\n\n" + e.getMessage(),
+
+					"Error",
+
+					Messagebox.OK,
+
 					Messagebox.ERROR);
 		}
 	}
 
+	// ============================================================
 	// ADD BATCH ROW
+	// ============================================================
 
 	private void addBatchRow(OutwardBatch batch) {
 
@@ -147,7 +180,9 @@ public class CheckerSendToNPCIController extends SelectorComposer<Component> {
 			return;
 		}
 
+		// ========================================================
 		// GET BATCH NUMBER
+		// ========================================================
 
 		String batchNumber = batch.getBatchNumber();
 
@@ -158,13 +193,23 @@ public class CheckerSendToNPCIController extends SelectorComposer<Component> {
 
 		batchNumber = batchNumber.trim();
 
+		// ========================================================
 		// GET COUNTS
+		// ========================================================
 
 		int totalCount = reportsDAO.getTotalChequeCount(batchNumber);
 
 		int validCount = reportsDAO.getValidChequeCount(batchNumber);
 
+		// ========================================================
+		// CREATE ROW
+		// ========================================================
+
 		Listitem item = new Listitem();
+
+		// ========================================================
+		// BATCH NUMBER
+		// ========================================================
 
 		Listcell batchCell = new Listcell();
 
@@ -176,21 +221,35 @@ public class CheckerSendToNPCIController extends SelectorComposer<Component> {
 
 		item.appendChild(batchCell);
 
+		// ========================================================
+		// TOTAL CHEQUES
+		// ========================================================
+
 		Listcell totalCell = new Listcell(String.valueOf(totalCount));
 
 		item.appendChild(totalCell);
+
+		// ========================================================
+		// ACCEPTED CHEQUES
+		// ========================================================
 
 		Listcell acceptedCell = new Listcell(String.valueOf(validCount));
 
 		item.appendChild(acceptedCell);
 
+		// ========================================================
 		// VALID XML FILE NAME
+		// ========================================================
 
 		String fileName = batchNumber + "_valid.xml";
 
 		Listcell fileNameCell = new Listcell(fileName);
 
 		item.appendChild(fileNameCell);
+
+		// ========================================================
+		// ACTION
+		// ========================================================
 
 		Listcell actionCell = new Listcell();
 
@@ -206,6 +265,7 @@ public class CheckerSendToNPCIController extends SelectorComposer<Component> {
 		final String selectedBatch = batchNumber;
 
 		sendButton.addEventListener("onClick", event -> {
+
 			sendToNPCI(selectedBatch);
 		});
 
@@ -218,7 +278,9 @@ public class CheckerSendToNPCIController extends SelectorComposer<Component> {
 		npciBatchListbox.appendChild(item);
 	}
 
+	// ============================================================
 	// SEND TO NPCI
+	// ============================================================
 
 	private void sendToNPCI(String batchNumber) {
 
@@ -250,7 +312,9 @@ public class CheckerSendToNPCIController extends SelectorComposer<Component> {
 				});
 	}
 
+	// ============================================================
 	// SUBMIT BATCH
+	// ============================================================
 
 	private void submitBatch(String batchNumber) {
 
@@ -273,13 +337,25 @@ public class CheckerSendToNPCIController extends SelectorComposer<Component> {
 
 			System.out.println("User ID = " + currentUserId);
 
+			// ====================================================
+			// STEP 1 - CREATE VALID XML FILE NAME
+			// ====================================================
+
 			String fileName = batchNumber + "_valid.xml";
 
 			System.out.println("Valid XML File = " + fileName);
 
+			// ====================================================
+			// STEP 2 - GET EXISTING VALID XML
+			// ====================================================
+
 			Path validXmlPath = getValidXmlPath(fileName);
 
 			System.out.println("Valid XML Path = " + validXmlPath.toAbsolutePath());
+
+			// ====================================================
+			// STEP 3 - CHECK FILE EXISTS
+			// ====================================================
 
 			if (!Files.exists(validXmlPath)) {
 
@@ -298,6 +374,10 @@ public class CheckerSendToNPCIController extends SelectorComposer<Component> {
 				return;
 			}
 
+			// ====================================================
+			// STEP 4 - CHECK IT IS A FILE
+			// ====================================================
+
 			if (!Files.isRegularFile(validXmlPath)) {
 
 				Messagebox.show(
@@ -312,6 +392,10 @@ public class CheckerSendToNPCIController extends SelectorComposer<Component> {
 
 				return;
 			}
+
+			// ====================================================
+			// STEP 5 - CHECK FILE SIZE
+			// ====================================================
 
 			long fileSize = Files.size(validXmlPath);
 
@@ -334,6 +418,10 @@ public class CheckerSendToNPCIController extends SelectorComposer<Component> {
 				return;
 			}
 
+			// ====================================================
+			// STEP 6 - MARK BATCH AS NPCI SENT
+			// ====================================================
+
 			boolean success = reportsDAO.markBatchAsNPCISent(batchNumber);
 
 			if (!success) {
@@ -351,6 +439,10 @@ public class CheckerSendToNPCIController extends SelectorComposer<Component> {
 
 				return;
 			}
+
+			// ====================================================
+			// STEP 7 - SUCCESS
+			// ====================================================
 
 			System.out.println("========================================");
 
@@ -400,9 +492,30 @@ public class CheckerSendToNPCIController extends SelectorComposer<Component> {
 		}
 	}
 
+	// ============================================================
+	// GET EXISTING VALID XML PATH
+	//
+	// IMPORTANT:
+	// The XML is stored in the Eclipse source project:
+	//
+	// CTS/src/main/webapp/css/outward/Archive/ValidCheques
+	//
+	// We therefore locate:
+	//
+	// Tomcat deployed application
+	// ↓
+	// Eclipse workspace
+	// ↓
+	// CTS project
+	// ↓
+	// src/main/webapp/css/outward/Archive/ValidCheques
+	// ============================================================
+
 	private Path getValidXmlPath(String fileName) throws Exception {
 
+		// ========================================================
 		// GET DEPLOYED APPLICATION PATH
+		// ========================================================
 
 		String deployedPath = Executions.getCurrent().getDesktop().getWebApp().getRealPath("/");
 
@@ -424,7 +537,9 @@ public class CheckerSendToNPCIController extends SelectorComposer<Component> {
 
 		System.out.println(deployedRoot);
 
+		// ========================================================
 		// FIND ECLIPSE WORKSPACE
+		// ========================================================
 
 		Path workspaceRoot = deployedRoot;
 
@@ -451,6 +566,10 @@ public class CheckerSendToNPCIController extends SelectorComposer<Component> {
 
 		System.out.println(workspaceRoot);
 
+		// ========================================================
+		// GET PROJECT NAME
+		// ========================================================
+
 		Path projectNamePath = deployedRoot.getFileName();
 
 		if (projectNamePath == null) {
@@ -464,7 +583,9 @@ public class CheckerSendToNPCIController extends SelectorComposer<Component> {
 
 		System.out.println(projectName);
 
+		// ========================================================
 		// SOURCE PROJECT ROOT
+		// ========================================================
 
 		Path projectRoot = workspaceRoot.resolve(projectName);
 
@@ -472,7 +593,9 @@ public class CheckerSendToNPCIController extends SelectorComposer<Component> {
 
 		System.out.println(projectRoot.toAbsolutePath());
 
+		// ========================================================
 		// VALID CHEQUES DIRECTORY
+		// ========================================================
 
 		Path validDirectory = projectRoot
 				.resolve(Paths.get("src", "main", "webapp", "css", "outward", "Archive", "ValidCheques"));
@@ -481,7 +604,9 @@ public class CheckerSendToNPCIController extends SelectorComposer<Component> {
 
 		System.out.println(validDirectory.toAbsolutePath());
 
+		// ========================================================
 		// FINAL XML FILE
+		// ========================================================
 
 		Path validXmlPath = validDirectory.resolve(fileName).normalize();
 

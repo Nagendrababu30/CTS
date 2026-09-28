@@ -11,16 +11,26 @@
 
 <zk>
 
- <style src="/css/outward/checker/checker_reports.css"/>
+    <!-- =========================================================
+         CHECKER REPORTS CSS
+         ========================================================= -->
 
-   <!--  PAGE CONTENT  -->
+    <style src="/css/outward/checker/checker_reports.css"/>
+
+
+    <!-- =========================================================
+         PAGE CONTENT
+         ========================================================= -->
 
     <div self="@define(content)"
          width="100%"
          height="100%"
          sclass="checker-reports-content">
 
-    <!--  MAIN LAYOUT -->
+
+        <!-- =====================================================
+             MAIN LAYOUT
+             ===================================================== -->
 
         <vlayout id="checkerReportsLayout"
                  width="100%"
@@ -29,7 +39,10 @@
                  sclass="checker-reports-layout"
                  apply="com.iispl.cts.controller.outward.checker.CheckerReportsController">
 
-    <!-- PAGE HEADER -->
+
+            <!-- =================================================
+                 PAGE HEADER
+                 ================================================= -->
 
             <hlayout width="100%"
                      valign="middle"
@@ -46,19 +59,28 @@
                 </vlayout>
 
 
-     <!-- REFRESH BUTTON -->
+                <!-- =================================================
+                     REFRESH BUTTON
+                     ================================================= -->
 
                 <space hflex="1"/>
 
+
             </hlayout>
 
-     <!--REPORT SECTION -->
+
+            <!-- =================================================
+                 REPORT SECTION
+                 ================================================= -->
 
             <vlayout width="100%"
                      spacing="0"
                      sclass="reports-section">
 
-      <!-- SECTION HEADER -->
+
+                <!-- =================================================
+                     SECTION HEADER
+                     ================================================= -->
 
                 <hlayout width="100%"
                          valign="middle"
@@ -70,7 +92,9 @@
                 </hlayout>
 
 
-      <!-- REPORT TABLE -->
+                <!-- =================================================
+                     REPORT TABLE
+                     ================================================= -->
 
                 <listbox id="reportList"
                          width="100%"

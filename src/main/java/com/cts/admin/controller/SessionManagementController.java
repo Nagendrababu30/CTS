@@ -43,7 +43,7 @@ import com.cts.inward.dao.OcrBatchDaoImpl;
 import com.cts.inward.dao.OcrChequeDao;
 import com.cts.inward.dao.OcrChequeDaoImpl;
 import com.cts.inward.file.FileProcessingExecutorImpl;
-//import com.cts.inward.file.IncomingFileWatcherImpl;
+
 import com.cts.inward.parser.OcrParserImpl;
 import com.cts.inward.parser.PibfProcessorImpl;
 import com.cts.inward.parser.PxfParserImpl;
@@ -105,14 +105,12 @@ public class SessionManagementController extends GenericForwardComposer<Componen
 
 		int threadPoolSize = appConfig.getFileProcessingThreadPoolSize();
 
-		// 2. Parsers
 		XMLInputFactory xmlFactory = XMLInputFactory.newInstance();
 
 		PxfParserImpl pxfParser = PxfParserImpl.of(xmlFactory);
 		OcrParserImpl ocrParser = OcrParserImpl.of(xmlFactory);
 		PibfProcessorImpl pibfProcessor = PibfProcessorImpl.of();
 
-		// 3. DAOs
 		BatchDao batchDao = BatchDaoImpl.of();
 		ChequeDao chequeDao = ChequeDaoImpl.of();
 		OcrBatchDao ocrBatchDao = OcrBatchDaoImpl.of();
@@ -121,7 +119,6 @@ public class SessionManagementController extends GenericForwardComposer<Componen
 		FileSummaryDaoImpl fileSummaryDao = FileSummaryDaoImpl.of();
 		InwardFileDaoImpl inwardFileDao = InwardFileDaoImpl.of();
 
-		// 4. Services
 		BatchServiceImpl batchService = BatchServiceImpl.of(batchDao);
 		ChequeServiceImpl chequeService = ChequeServiceImpl.of(chequeDao);
 		OcrBatchServiceImpl ocrBatchService = OcrBatchServiceImpl.of(ocrBatchDao);
@@ -133,19 +130,14 @@ public class SessionManagementController extends GenericForwardComposer<Componen
 		InwardSessionFileServiceImpl sessionFileService = InwardSessionFileServiceImpl.of(fileConfig,
 				fileSummaryService, inwardFileDao);
 
-		// 5. FileProcessingService
 		FileProcessingServiceImpl fileProcessingService = FileProcessingServiceImpl.of(fileConfig, pxfParser,
 				pibfProcessor, ocrParser, batchService, chequeService, ocrBatchService, ocrChequeService, imageService,
 				chequeImageService, fileSummaryService, inwardFileDao);
 
-		// 6. Executor
 		FileProcessingExecutorImpl executor = FileProcessingExecutorImpl.of(threadPoolSize, fileProcessingService);
 
-		// 7. Ingestion service — used by processSessionFiles()
 		inwardIngestionService = InwardIngestionServiceImpl.of(chiFileService, sessionFileService, executor,
 				fileConfig);
-
-		// Wire ZUL components
 
 		currentSessionCard = (Vlayout) comp.getFellow("currentSessionCard");
 		sessionStatusBadge = (Label) comp.getFellow("sessionStatusBadge");
@@ -311,13 +303,6 @@ public class SessionManagementController extends GenericForwardComposer<Componen
 				Messagebox.show("Session ended. File processing has started.", "Session Ended", Messagebox.OK,
 						Messagebox.INFORMATION);
 
-				/*
-				 * Trigger inward file processing: 1. getCHIFilePaths() — get files from
-				 * inward_file table 2. moveFilesToIncoming() — move to incoming/{type}/ dirs 3.
-				 * startWatching() — NIO watcher detects files 4. FileProcessingExecutor submits
-				 * each file 5. processFile() parses and saves to DB
-				 */
-
 				inwardIngestionService.processSessionFiles();
 
 			} else {
@@ -431,15 +416,11 @@ public class SessionManagementController extends GenericForwardComposer<Componen
 			return inwardPath.normalize();
 		}
 
-		// 1. Local development: check if workspace src/main/webapp exists relative to
-		// current working directory
 		Path devWebapp = Path.of("src/main/webapp");
 		if (Files.isDirectory(devWebapp)) {
 			return inwardPath.toAbsolutePath().normalize();
 		}
 
-		// 2. Eclipse WTP development: webAppRoot is under
-		// .metadata/.plugins/.../wtpwebapps/<project>
 		if (webAppRoot != null && !webAppRoot.isBlank()) {
 			String norm = webAppRoot.replace("\\", "/");
 			int metaIdx = norm.indexOf("/.metadata/");
@@ -449,12 +430,10 @@ public class SessionManagementController extends GenericForwardComposer<Componen
 				String projectName = wtpPath.getFileName() != null ? wtpPath.getFileName().toString() : "CTS";
 				Path workspaceWebapp = Path.of(workspaceDir, projectName, "src", "main", "webapp");
 				if (Files.isDirectory(workspaceWebapp)) {
-					// Resolves directly to <workspace>/<project>/src/main/webapp/inward-files
 					return workspaceWebapp.resolve("inward-files").normalize();
 				}
 			}
 
-			// 3. Deployed production/standalone environment:
 			Path base = Path.of(webAppRoot);
 			String baseStr = base.toString().replace("\\", "/");
 			if (baseStr.endsWith("/src/main/webapp") || baseStr.endsWith("/src/main/webapp/")) {

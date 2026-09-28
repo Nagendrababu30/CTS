@@ -10,8 +10,6 @@ public class PasswordUtil {
 
 	}
 
-	// PASSWORD STRENGTH VALIDATION
-
 	public static boolean isStrongPassword(String password) {
 
 		if (password == null || password.isEmpty()) {
@@ -27,8 +25,6 @@ public class PasswordUtil {
 		return hasMinimumLength && hasUppercase && hasLowercase && hasNumber && hasSpecial;
 	}
 
-	// HASH PASSWORD
-
 	public static String hashPassword(String plainPassword) {
 
 		if (plainPassword == null || plainPassword.isEmpty()) {
@@ -39,8 +35,6 @@ public class PasswordUtil {
 
 		return BCrypt.hashpw(plainPassword, BCrypt.gensalt(BCRYPT_ROUNDS));
 	}
-
-	// VERIFY PASSWORD
 
 	public static boolean verifyPassword(String plainPassword, String storedHash) {
 

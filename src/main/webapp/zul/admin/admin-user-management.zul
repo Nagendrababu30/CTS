@@ -25,9 +25,7 @@
             spacing="0"
             sclass="user-management-page">
 
-            <!-- ====================================================
-                 PAGE HEADER
-                 ==================================================== -->
+            <!-- page header -->
 
             <div sclass="user-page-header">
 
@@ -48,9 +46,7 @@
             </div>
 
 
-            <!-- ====================================================
-                 SEARCH / FILTER CARD
-                 ==================================================== -->
+            <!--search/filter card-->
 
             <div sclass="user-filter-card">
 
@@ -64,7 +60,7 @@
                     <textbox
                         id="userSearchTextbox"
                         hflex="1"
-                        placeholder="Search by username or user ID..."
+                        placeholder="Search by username..."
                         sclass="user-search-textbox"/>
 
                 </div>
@@ -105,9 +101,7 @@
             </div>
 
 
-            <!-- ====================================================
-                 SYSTEM USERS CARD
-                 ==================================================== -->
+            <!--  System users card-->
 
             <div
                 id="systemUsersCard"

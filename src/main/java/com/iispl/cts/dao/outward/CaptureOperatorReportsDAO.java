@@ -150,6 +150,7 @@ public class CaptureOperatorReportsDAO {
                 + "FROM capture_operator_download_history "
                 + "WHERE operator_id = ? "
                 + "ORDER BY download_date DESC";
+        
 
         try (
             Connection connection = dataSource.getConnection();

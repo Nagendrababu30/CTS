@@ -440,6 +440,8 @@ public class CheckerReportsDAO {
                         + "WHERE batch_number = ? "
                         + "AND UPPER(checker_action) = 'REJECT'"
                         + ")";
+        
+        
 
         try (Connection connection =
                      dataSource.getConnection();

@@ -34,6 +34,7 @@ public class CheckerSendToNPCIDAO {
     private final javax.sql.DataSource dataSource =
             ConnectionPool.getDataSource();
 
+    
 
     // ============================================================
     // GET BATCHES READY FOR NPCI

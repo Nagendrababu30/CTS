@@ -1,6 +1,7 @@
 package com.iispl.cts.dao.outward;
 
 import java.sql.Connection;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -8,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.cts.inward.config.ConnectionPool;
-import com.iispl.cts.data.CTSStaticData;
 import com.iispl.cts.model.outward.OutwardBatch;
 
 public class OutwardMakerSendCheckerDAO {
@@ -94,7 +94,7 @@ public class OutwardMakerSendCheckerDAO {
         System.out.println("Maker ID = " + userId);
         System.out.println("SQL = " + sql);
 
-        try (Connection con = CTSStaticData.getConnection();
+        try (Connection con = dataSource.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setString(1, "SUBMITTED_TO_CHECKER");

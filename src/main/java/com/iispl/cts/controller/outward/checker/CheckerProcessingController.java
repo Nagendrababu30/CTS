@@ -104,6 +104,9 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
 	@Wire
 	private Label chequeDateValidationMessage;
+	
+	@Wire
+	private Div dateValidationBlock;
 
 	@Wire
 	private Textbox micrLabel;
@@ -685,13 +688,17 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
 		boolean datePassed = "PASS".equalsIgnoreCase(chequeDateResult);
 
-		if (datePassed) {
-			chequeDateValidationMessage.setValue("");
-			chequeDateValidationMessage.setVisible(false);
-		} else {
-			chequeDateValidationMessage.setValue(
-					"✕ " + processingService.getCbsValidationMessage(chequeDateResult));
-			chequeDateValidationMessage.setVisible(true);
+		if (dateValidationBlock != null) {
+			if (datePassed) {
+				dateValidationBlock.setVisible(false);
+				chequeDateValidationMessage.setValue("");
+				chequeDateValidationMessage.setVisible(false);
+			} else {
+				dateValidationBlock.setVisible(true);
+				chequeDateValidationMessage.setValue(
+						"✕ " + processingService.getCbsValidationMessage(chequeDateResult));
+				chequeDateValidationMessage.setVisible(true);
+			}
 		}
 
 		boolean validationPassed = cbsPassed && datePassed;
@@ -705,7 +712,8 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 		}
 
 		if (sendBackButton != null) {
-			sendBackButton.setDisabled(!validationPassed);
+			// Checker must be able to return to maker even when validations fail
+			sendBackButton.setDisabled(false);
 		}
 	}
 
@@ -785,7 +793,7 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 					reasonCombobox != null
 					&& reasonCombobox.getSelectedItem() != null;
 
-			saveNextButton.setDisabled(!validationPassed || !reasonSelected);
+			saveNextButton.setDisabled(!reasonSelected);
 			return;
 		}
 
@@ -844,9 +852,7 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 				"PASS".equalsIgnoreCase(cbsResult)
 				&& "PASS".equalsIgnoreCase(chequeDateResult);
 
-		if (("ACCEPT".equalsIgnoreCase(selectedAction)
-				|| "SEND_BACK".equalsIgnoreCase(selectedAction))
-				&& !validationPassed) {
+		if ("ACCEPT".equalsIgnoreCase(selectedAction) && !validationPassed) {
 
 			StringBuilder message = new StringBuilder();
 
@@ -922,6 +928,10 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
 		if ("ACCEPT".equalsIgnoreCase(selectedAction)) {
 			cheque.setChequeStatus("CHECKER_ACCEPTED");
+		} else if ("REJECT".equalsIgnoreCase(selectedAction)) {
+			cheque.setChequeStatus("CHECKER_REJECTED");
+		} else if ("SEND_BACK".equalsIgnoreCase(selectedAction)) {
+			cheque.setChequeStatus("CHECKER_RETURNED");
 		}
 
 		boolean lastCheque = currentChequeIndex >= cheques.size() - 1;

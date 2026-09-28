@@ -13,7 +13,7 @@
 
 			</span>
 
-			<label value="${arg.pageTitle}" sclass="header-title" />
+			<label value="CTS" sclass="header-title" />
 
 		</hlayout>
 

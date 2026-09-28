@@ -26,8 +26,6 @@ public class AuditLogServiceImpl implements AuditLogService {
 		return auditLogDAO.getAuditLogs(page, pageSize);
 	}
 
-	// FILTERED AUDIT LOGS
-
 	@Override
 	public List<AuditLog> getAuditLogs(int page, int pageSize, String searchText, String roleName, Date fromDate,
 			Date toDate) {
@@ -40,15 +38,11 @@ public class AuditLogServiceImpl implements AuditLogService {
 		return auditLogDAO.getAuditLogs(page, pageSize, searchText, roleName, fromDate, toDate);
 	}
 
-	// COUNT
-
 	@Override
 	public int getTotalAuditLogCount() {
 
 		return auditLogDAO.getTotalAuditLogCount();
 	}
-
-	// GET ALL FILTERED AUDIT LOGS - FOR REPORT GENERATION
 
 	@Override
 	public List<AuditLog> getAllAuditLogs(String searchText, String roleName, Date fromDate, Date toDate) {
@@ -56,15 +50,11 @@ public class AuditLogServiceImpl implements AuditLogService {
 		return auditLogDAO.getAllAuditLogs(searchText, roleName, fromDate, toDate);
 	}
 
-	// FILTERED COUNT
-
 	@Override
 	public int getTotalAuditLogCount(String searchText, String roleName, Date fromDate, Date toDate) {
 
 		return auditLogDAO.getTotalAuditLogCount(searchText, roleName, fromDate, toDate);
 	}
-
-	// CREATE AUDIT LOG
 
 	@Override
 	public String createAuditLog(Long userId) {
@@ -75,8 +65,6 @@ public class AuditLogServiceImpl implements AuditLogService {
 
 		return auditLogDAO.createAuditLog(userId);
 	}
-
-	// END AUDIT LOG
 
 	@Override
 	public void endAuditLog(String sessionId) {

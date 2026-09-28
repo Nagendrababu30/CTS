@@ -43,7 +43,7 @@ import com.cts.inward.dao.OcrBatchDaoImpl;
 import com.cts.inward.dao.OcrChequeDao;
 import com.cts.inward.dao.OcrChequeDaoImpl;
 import com.cts.inward.file.FileProcessingExecutorImpl;
-//import com.cts.inward.file.IncomingFileWatcherImpl;
+
 import com.cts.inward.parser.OcrParserImpl;
 import com.cts.inward.parser.PibfProcessorImpl;
 import com.cts.inward.parser.PxfParserImpl;
@@ -60,502 +60,393 @@ import com.cts.inward.service.InwardSessionFileServiceImpl;
 import com.cts.inward.service.OcrBatchServiceImpl;
 import com.cts.inward.service.OcrChequeServiceImpl;
 
-public class SessionManagementController
-        extends GenericForwardComposer<Component> {
-
-    private static final long serialVersionUID = 1L;
-
-    // PAGE COMPONENTS
-
-    private Vlayout currentSessionCard;
-    private Label   sessionStatusBadge;
-    private Vlayout closedSessionContent;
-    private Vlayout activeSessionContent;
-    private Label   activeSessionName;
-    private Button  beginSessionButton;
-    private Button  endSessionButton;
-    private Listbox sessionHistoryListbox;
-    private Paging  sessionHistoryPaging;
-
-    private static final int PAGE_SIZE = 5;
-
-    private Window endSessionModal;
-    private Button modalCloseButton;
-    private Button modalCancelButton;
-    private Button modalConfirmButton;
-
-    private SessionService         sessionService;
-    private InwardIngestionService inwardIngestionService;
-
-    @Override
-    public void doAfterCompose(Component comp) throws Exception {
-
-        super.doAfterCompose(comp);
-
-        sessionService = new SessionServiceImpl();
-
-        /* --------------------------------------------------------
-          Build the full inward processing object graph.
-          This is manual DI since there is no IoC container.
-          -------------------------------------------------------- */
-
-        // 1. Config
-        ApplicationConfiguration appConfig =
-                ApplicationConfiguration.of();
-
-        String webAppRoot = (Executions.getCurrent() != null && Executions.getCurrent().getDesktop() != null)
-                ? Executions.getCurrent().getDesktop().getWebApp().getRealPath("/")
-                : "";
-        String inwardRoot = appConfig.getInwardRootPath();
-        Path rootPath = resolveInwardRootPath(inwardRoot, webAppRoot);
-
-        FileConfiguration fileConfig =
-                FileConfiguration.of(rootPath);
-        FileSystemInitializer.of(fileConfig).initialize();
-
-        int threadPoolSize =
-                appConfig.getFileProcessingThreadPoolSize();
-
-        // 2. Parsers
-        XMLInputFactory xmlFactory = XMLInputFactory.newInstance();
-
-        PxfParserImpl    pxfParser    = PxfParserImpl.of(xmlFactory);
-        OcrParserImpl    ocrParser    = OcrParserImpl.of(xmlFactory);
-        PibfProcessorImpl pibfProcessor = PibfProcessorImpl.of();
-
-        // 3. DAOs
-        BatchDao               batchDao       = BatchDaoImpl.of();
-        ChequeDao              chequeDao      = ChequeDaoImpl.of();
-        OcrBatchDao            ocrBatchDao    = OcrBatchDaoImpl.of();
-        OcrChequeDao           ocrChequeDao   = OcrChequeDaoImpl.of();
-        ChequeImageDaoImpl      chequeImageDao = ChequeImageDaoImpl.of();
-        FileSummaryDaoImpl      fileSummaryDao = FileSummaryDaoImpl.of();
-        InwardFileDaoImpl       inwardFileDao  = InwardFileDaoImpl.of();
-
-        // 4. Services
-        BatchServiceImpl      batchService      = BatchServiceImpl.of(batchDao);
-        ChequeServiceImpl     chequeService     = ChequeServiceImpl.of(chequeDao);
-        OcrBatchServiceImpl   ocrBatchService   = OcrBatchServiceImpl.of(ocrBatchDao);
-        OcrChequeServiceImpl  ocrChequeService  = OcrChequeServiceImpl.of(ocrChequeDao);
-        ChequeImageServiceImpl chequeImageService = ChequeImageServiceImpl.of(chequeImageDao);
-        ImageServiceImpl      imageService      = ImageServiceImpl.of(fileConfig);
-        FileSummaryServiceImpl fileSummaryService = FileSummaryServiceImpl.of(fileSummaryDao);
-        CHIFileServiceImpl    chiFileService    = CHIFileServiceImpl.of(inwardFileDao);
-        InwardSessionFileServiceImpl sessionFileService =
-                InwardSessionFileServiceImpl.of(fileConfig, fileSummaryService, inwardFileDao);
-
-        // 5. FileProcessingService
-        FileProcessingServiceImpl fileProcessingService =
-                FileProcessingServiceImpl.of(
-                        fileConfig,
-                        pxfParser,
-                        pibfProcessor,
-                        ocrParser,
-                        batchService,
-                        chequeService,
-                        ocrBatchService,
-                        ocrChequeService,
-                        imageService,
-                        chequeImageService,
-                        fileSummaryService,
-                        inwardFileDao);
-
-        // 6. Executor
-        FileProcessingExecutorImpl executor =
-        FileProcessingExecutorImpl.of(
-        				threadPoolSize,
-        				fileProcessingService);
-                
-        // 7. Ingestion service — used by processSessionFiles()
-        inwardIngestionService =
-                InwardIngestionServiceImpl.of(
-                           chiFileService,
-                           sessionFileService,
-                           executor,
-                           fileConfig);
-
-
-        // Wire ZUL components
-
-        currentSessionCard    = (Vlayout) comp.getFellow("currentSessionCard");
-        sessionStatusBadge    = (Label)   comp.getFellow("sessionStatusBadge");
-        closedSessionContent  = (Vlayout) comp.getFellow("closedSessionContent");
-        activeSessionContent  = (Vlayout) comp.getFellow("activeSessionContent");
-        activeSessionName     = (Label)   comp.getFellow("activeSessionName");
-        beginSessionButton    = (Button)  comp.getFellow("beginSessionButton");
-        endSessionButton      = (Button)  comp.getFellow("endSessionButton");
-        sessionHistoryListbox = (Listbox) comp.getFellow("sessionHistoryListbox");
-        sessionHistoryPaging  = (Paging)  comp.getFellow("sessionHistoryPaging");
-        sessionHistoryPaging.setPageSize(PAGE_SIZE);
-
-        endSessionModal    = (Window) comp.getFellow("endSessionModal");
-        modalCloseButton   = (Button) endSessionModal.getFellow("modalCloseButton");
-        modalCancelButton  = (Button) endSessionModal.getFellow("modalCancelButton");
-        modalConfirmButton = (Button) endSessionModal.getFellow("modalConfirmButton");
-
-        registerEvents();
-        loadSessionState();
-        loadSessionHistory(0);
-    }
-
-    // GET CURRENT USER ID FROM SESSION
-
-    private Long getCurrentUserId() {
-
-        org.zkoss.zk.ui.Session zkSession =
-                org.zkoss.zk.ui.Executions.getCurrent().getSession();
-
-        User loggedInUser = (User) zkSession.getAttribute("loggedInUser");
-
-        if (loggedInUser != null) {
-            return loggedInUser.getUserId();
-        }
-
-        return 1L;
-    }
-
-    // REGISTER EVENTS
-
-    private void registerEvents() {
-
-        beginSessionButton.addEventListener(Events.ON_CLICK,
-                new EventListener<Event>() {
-                    @Override
-                    public void onEvent(Event event) throws Exception {
-                        startSession();
-                    }
-                });
-
-        endSessionButton.addEventListener(Events.ON_CLICK,
-                new EventListener<Event>() {
-                    @Override
-                    public void onEvent(Event event) throws Exception {
-                        openEndSessionModal();
-                    }
-                });
-
-        modalCloseButton.addEventListener(Events.ON_CLICK,
-                new EventListener<Event>() {
-                    @Override
-                    public void onEvent(Event event) throws Exception {
-                        closeEndSessionModal();
-                    }
-                });
-
-        modalCancelButton.addEventListener(Events.ON_CLICK,
-                new EventListener<Event>() {
-                    @Override
-                    public void onEvent(Event event) throws Exception {
-                        closeEndSessionModal();
-                    }
-                });
-
-        modalConfirmButton.addEventListener(Events.ON_CLICK,
-                new EventListener<Event>() {
-                    @Override
-                    public void onEvent(Event event) throws Exception {
-                        endSession();
-                    }
-                });
-
-        sessionHistoryPaging.addEventListener("onPaging",
-                new EventListener<Event>() {
-                    @Override
-                    public void onEvent(Event event) throws Exception {
-                        int activePage = sessionHistoryPaging.getActivePage();
-                        loadSessionHistory(activePage * PAGE_SIZE);
-                    }
-                });
-    }
-
-    // START SESSION
-
-    private void startSession() {
+public class SessionManagementController extends GenericForwardComposer<Component> {
+
+	private static final long serialVersionUID = 1L;
+
+	private Vlayout currentSessionCard;
+	private Label sessionStatusBadge;
+	private Vlayout closedSessionContent;
+	private Vlayout activeSessionContent;
+	private Label activeSessionName;
+	private Button beginSessionButton;
+	private Button endSessionButton;
+	private Listbox sessionHistoryListbox;
+	private Paging sessionHistoryPaging;
+
+	private static final int PAGE_SIZE = 5;
 
-        try {
-
-            sessionService.startSession(getCurrentUserId());
-
-            Messagebox.show(
-                    "Internal processing session started successfully.",
-                    "Session Started",
-                    Messagebox.OK,
-                    Messagebox.INFORMATION);
-
-            loadSessionState();
-            loadSessionHistory(0);
-
-        } catch (IllegalStateException e) {
-
-            Messagebox.show(
-                    e.getMessage(),
-                    "Session Already Active",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
-
-            loadSessionState();
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            Messagebox.show(
-                    "Unable to start the internal processing session.",
-                    "Error",
-                    Messagebox.OK,
-                    Messagebox.ERROR);
-        }
-    }
-
-    // OPEN END SESSION MODAL
-
-    private void openEndSessionModal() {
-
-        com.cts.admin.model.Session activeSession =
-                sessionService.getActiveSession();
-
-        if (activeSession == null) {
-
-            Messagebox.show(
-                    "There is no active internal processing session.",
-                    "No Active Session",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION);
-
-            loadSessionState();
-            return;
-        }
-
-        endSessionModal.setVisible(true);
-        endSessionModal.doModal();
-    }
-
-    // CLOSE END SESSION MODAL
-
-    private void closeEndSessionModal() {
-
-        if (endSessionModal != null) {
-            endSessionModal.setVisible(false);
-        }
-    }
-
-    // END SESSION
-
-    private void endSession() {
-
-        try {
+	private Window endSessionModal;
+	private Button modalCloseButton;
+	private Button modalCancelButton;
+	private Button modalConfirmButton;
 
-            com.cts.admin.model.Session activeSession =
-                    sessionService.getActiveSession();
+	private SessionService sessionService;
+	private InwardIngestionService inwardIngestionService;
+
+	@Override
+	public void doAfterCompose(Component comp) throws Exception {
+
+		super.doAfterCompose(comp);
+
+		sessionService = new SessionServiceImpl();
+
+		// 1. Config
+		ApplicationConfiguration appConfig = ApplicationConfiguration.of();
+
+		String webAppRoot = (Executions.getCurrent() != null && Executions.getCurrent().getDesktop() != null)
+				? Executions.getCurrent().getDesktop().getWebApp().getRealPath("/")
+				: "";
+		String inwardRoot = appConfig.getInwardRootPath();
+		Path rootPath = resolveInwardRootPath(inwardRoot, webAppRoot);
+
+		FileConfiguration fileConfig = FileConfiguration.of(rootPath);
+		FileSystemInitializer.of(fileConfig).initialize();
+
+		int threadPoolSize = appConfig.getFileProcessingThreadPoolSize();
+
+		XMLInputFactory xmlFactory = XMLInputFactory.newInstance();
+
+		PxfParserImpl pxfParser = PxfParserImpl.of(xmlFactory);
+		OcrParserImpl ocrParser = OcrParserImpl.of(xmlFactory);
+		PibfProcessorImpl pibfProcessor = PibfProcessorImpl.of();
+
+		BatchDao batchDao = BatchDaoImpl.of();
+		ChequeDao chequeDao = ChequeDaoImpl.of();
+		OcrBatchDao ocrBatchDao = OcrBatchDaoImpl.of();
+		OcrChequeDao ocrChequeDao = OcrChequeDaoImpl.of();
+		ChequeImageDaoImpl chequeImageDao = ChequeImageDaoImpl.of();
+		FileSummaryDaoImpl fileSummaryDao = FileSummaryDaoImpl.of();
+		InwardFileDaoImpl inwardFileDao = InwardFileDaoImpl.of();
+
+		BatchServiceImpl batchService = BatchServiceImpl.of(batchDao);
+		ChequeServiceImpl chequeService = ChequeServiceImpl.of(chequeDao);
+		OcrBatchServiceImpl ocrBatchService = OcrBatchServiceImpl.of(ocrBatchDao);
+		OcrChequeServiceImpl ocrChequeService = OcrChequeServiceImpl.of(ocrChequeDao);
+		ChequeImageServiceImpl chequeImageService = ChequeImageServiceImpl.of(chequeImageDao);
+		ImageServiceImpl imageService = ImageServiceImpl.of(fileConfig);
+		FileSummaryServiceImpl fileSummaryService = FileSummaryServiceImpl.of(fileSummaryDao);
+		CHIFileServiceImpl chiFileService = CHIFileServiceImpl.of(inwardFileDao);
+		InwardSessionFileServiceImpl sessionFileService = InwardSessionFileServiceImpl.of(fileConfig,
+				fileSummaryService, inwardFileDao);
+
+		FileProcessingServiceImpl fileProcessingService = FileProcessingServiceImpl.of(fileConfig, pxfParser,
+				pibfProcessor, ocrParser, batchService, chequeService, ocrBatchService, ocrChequeService, imageService,
+				chequeImageService, fileSummaryService, inwardFileDao);
+
+		FileProcessingExecutorImpl executor = FileProcessingExecutorImpl.of(threadPoolSize, fileProcessingService);
+
+		inwardIngestionService = InwardIngestionServiceImpl.of(chiFileService, sessionFileService, executor,
+				fileConfig);
+
+		currentSessionCard = (Vlayout) comp.getFellow("currentSessionCard");
+		sessionStatusBadge = (Label) comp.getFellow("sessionStatusBadge");
+		closedSessionContent = (Vlayout) comp.getFellow("closedSessionContent");
+		activeSessionContent = (Vlayout) comp.getFellow("activeSessionContent");
+		activeSessionName = (Label) comp.getFellow("activeSessionName");
+		beginSessionButton = (Button) comp.getFellow("beginSessionButton");
+		endSessionButton = (Button) comp.getFellow("endSessionButton");
+		sessionHistoryListbox = (Listbox) comp.getFellow("sessionHistoryListbox");
+		sessionHistoryPaging = (Paging) comp.getFellow("sessionHistoryPaging");
+		sessionHistoryPaging.setPageSize(PAGE_SIZE);
+
+		endSessionModal = (Window) comp.getFellow("endSessionModal");
+		modalCloseButton = (Button) endSessionModal.getFellow("modalCloseButton");
+		modalCancelButton = (Button) endSessionModal.getFellow("modalCancelButton");
+		modalConfirmButton = (Button) endSessionModal.getFellow("modalConfirmButton");
 
-            if (activeSession == null) {
-
-                closeEndSessionModal();
+		registerEvents();
+		loadSessionState();
+		loadSessionHistory(0);
+	}
 
-                Messagebox.show(
-                        "There is no active internal processing session.",
-                        "No Active Session",
-                        Messagebox.OK,
-                        Messagebox.EXCLAMATION);
+	// Get current user id from session
 
-                loadSessionState();
-                loadSessionHistory(0);
-                return;
-            }
+	private Long getCurrentUserId() {
 
-            boolean ended = sessionService.endSession(
-                    activeSession.getSessionId(),
-                    getCurrentUserId());
+		org.zkoss.zk.ui.Session zkSession = org.zkoss.zk.ui.Executions.getCurrent().getSession();
 
-            closeEndSessionModal();
+		User loggedInUser = (User) zkSession.getAttribute("loggedInUser");
 
-            if (ended) {
+		if (loggedInUser != null) {
+			return loggedInUser.getUserId();
+		}
 
-                Messagebox.show(
-                        "Session ended. File processing has started.",
-                        "Session Ended",
-                        Messagebox.OK,
-                        Messagebox.INFORMATION);
+		return 1L;
+	}
 
-                /* Trigger inward file processing:
-                 *  1. getCHIFilePaths() — get files from inward_file table
-                 *  2. moveFilesToIncoming() — move to incoming/{type}/ dirs
-                 *  3. startWatching() — NIO watcher detects files
-                 *  4. FileProcessingExecutor submits each file
-                 *  5. processFile() parses and saves to DB */
-                
-                inwardIngestionService.processSessionFiles();
+	private void registerEvents() {
 
-            } else {
+		beginSessionButton.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
+			@Override
+			public void onEvent(Event event) throws Exception {
+				startSession();
+			}
+		});
 
-                Messagebox.show(
-                        "Unable to end the internal processing session.",
-                        "Error",
-                        Messagebox.OK,
-                        Messagebox.ERROR);
-            }
+		endSessionButton.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
+			@Override
+			public void onEvent(Event event) throws Exception {
+				openEndSessionModal();
+			}
+		});
 
-            loadSessionState();
-            loadSessionHistory(0);
+		modalCloseButton.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
+			@Override
+			public void onEvent(Event event) throws Exception {
+				closeEndSessionModal();
+			}
+		});
 
-        } catch (Exception e) {
+		modalCancelButton.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
+			@Override
+			public void onEvent(Event event) throws Exception {
+				closeEndSessionModal();
+			}
+		});
 
-            e.printStackTrace();
-            closeEndSessionModal();
+		modalConfirmButton.addEventListener(Events.ON_CLICK, new EventListener<Event>() {
+			@Override
+			public void onEvent(Event event) throws Exception {
+				endSession();
+			}
+		});
 
-            Messagebox.show(
-                    "Unable to end the internal processing session.",
-                    "Error",
-                    Messagebox.OK,
-                    Messagebox.ERROR);
-        }
-    }
-
-    // LOAD CURRENT SESSION STATE
+		sessionHistoryPaging.addEventListener("onPaging", new EventListener<Event>() {
+			@Override
+			public void onEvent(Event event) throws Exception {
+				int activePage = sessionHistoryPaging.getActivePage();
+				loadSessionHistory(activePage * PAGE_SIZE);
+			}
+		});
+	}
 
-    private void loadSessionState() {
-
-        com.cts.admin.model.Session activeSession =
-                sessionService.getActiveSession();
-
-        if (activeSession == null) {
-
-            closedSessionContent.setVisible(true);
-            activeSessionContent.setVisible(false);
-            sessionStatusBadge.setValue("NO ACTIVE SESSION");
-            sessionStatusBadge.setSclass("status-badge status-inactive");
-            return;
-        }
-
-        closedSessionContent.setVisible(false);
-        activeSessionContent.setVisible(true);
-        sessionStatusBadge.setValue("Active");
-        sessionStatusBadge.setSclass("status-badge status-active");
-
-        activeSessionName.setValue(
-                activeSession.getSessionName() != null
-                        ? activeSession.getSessionName()
-                        : "Clearing Session");
-    }
-
-    // LOAD SESSION HISTORY
-
-    private void loadSessionHistory(int offset) {
-
-        sessionHistoryListbox.getItems().clear();
-
-        int total = sessionService.getSessionCount();
-        sessionHistoryPaging.setTotalSize(total);
-
-        List<com.cts.admin.model.Session> sessions =
-                sessionService.getAllSessions(PAGE_SIZE, offset);
-
-        if (sessions == null || sessions.isEmpty()) {
-            return;
-        }
-
-        for (com.cts.admin.model.Session session : sessions) {
-
-            Listitem item = new Listitem();
-
-            item.appendChild(createCell(
-                    session.getSessionId() != null
-                            ? String.valueOf(session.getSessionId()) : "-"));
-
-            item.appendChild(createCell(
-                    session.getStartedAt() != null
-                            ? formatDate(session.getStartedAt()) : "-"));
-
-            item.appendChild(createCell(
-                    session.getStartedAt() != null
-                            ? formatTime(session.getStartedAt()) : "-"));
-
-            item.appendChild(createCell(
-                    session.getEndedAt() != null
-                            ? formatDate(session.getEndedAt()) : "-"));
-
-            item.appendChild(createCell(
-                    session.getEndedAt() != null
-                            ? formatTime(session.getEndedAt()) : "-"));
-
-            item.appendChild(createCell(
-                    session.getStatus() != null
-                            ? ("STARTED".equalsIgnoreCase(session.getStatus()) ? "Started" : "Ended") : "-"));
-
-            sessionHistoryListbox.appendChild(item);
-        }
-    }
-
-    // HELPERS
-
-    private Listcell createCell(String value) {
-        Listcell cell = new Listcell();
-        Label label = new Label();
-        label.setValue(value);
-        cell.appendChild(label);
-        return cell;
-    }
-
-    private static final java.util.TimeZone IST =
-            java.util.TimeZone.getTimeZone("Asia/Kolkata");
-
-    private String formatDate(Date date) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        sdf.setTimeZone(IST);
-        return sdf.format(date);
-    }
-
-    private String formatTime(Date date) {
-        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
-        sdf.setTimeZone(IST);
-        return sdf.format(date);
-    }
-
-    private Path resolveInwardRootPath(String inwardRoot, String webAppRoot) {
-        if (inwardRoot == null || inwardRoot.isBlank()) {
-            inwardRoot = "src/main/webapp/inward-files";
-        }
-
-        Path inwardPath = Path.of(inwardRoot);
-        if (inwardPath.isAbsolute()) {
-            return inwardPath.normalize();
-        }
-
-        // 1. Local development: check if workspace src/main/webapp exists relative to current working directory
-        Path devWebapp = Path.of("src/main/webapp");
-        if (Files.isDirectory(devWebapp)) {
-            return inwardPath.toAbsolutePath().normalize();
-        }
-
-        // 2. Eclipse WTP development: webAppRoot is under .metadata/.plugins/.../wtpwebapps/<project>
-        if (webAppRoot != null && !webAppRoot.isBlank()) {
-            String norm = webAppRoot.replace("\\", "/");
-            int metaIdx = norm.indexOf("/.metadata/");
-            if (metaIdx > 0) {
-                String workspaceDir = norm.substring(0, metaIdx);
-                Path wtpPath = Path.of(webAppRoot);
-                String projectName = wtpPath.getFileName() != null ? wtpPath.getFileName().toString() : "CTS";
-                Path workspaceWebapp = Path.of(workspaceDir, projectName, "src", "main", "webapp");
-                if (Files.isDirectory(workspaceWebapp)) {
-                    // Resolves directly to <workspace>/<project>/src/main/webapp/inward-files
-                    return workspaceWebapp.resolve("inward-files").normalize();
-                }
-            }
-
-            // 3. Deployed production/standalone environment:
-            Path base = Path.of(webAppRoot);
-            String baseStr = base.toString().replace("\\", "/");
-            if (baseStr.endsWith("/src/main/webapp") || baseStr.endsWith("/src/main/webapp/")) {
-                return base.resolve("inward-files").normalize();
-            }
-
-            String normalizedInward = inwardRoot.replace("\\", "/");
-            if (normalizedInward.startsWith("src/main/webapp/")) {
-                normalizedInward = normalizedInward.substring("src/main/webapp/".length());
-            }
-            return base.resolve(normalizedInward).normalize();
-        }
-
-        return inwardPath.toAbsolutePath().normalize();
-    }
+	// Start session
+
+	private void startSession() {
+
+		try {
+
+			sessionService.startSession(getCurrentUserId());
+
+			Messagebox.show("Internal processing session started successfully.", "Session Started", Messagebox.OK,
+					Messagebox.INFORMATION);
+
+			loadSessionState();
+			loadSessionHistory(0);
+
+		} catch (IllegalStateException e) {
+
+			Messagebox.show(e.getMessage(), "Session Already Active", Messagebox.OK, Messagebox.EXCLAMATION);
+
+			loadSessionState();
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			Messagebox.show("Unable to start the internal processing session.", "Error", Messagebox.OK,
+					Messagebox.ERROR);
+		}
+	}
+
+	private void openEndSessionModal() {
+
+		com.cts.admin.model.Session activeSession = sessionService.getActiveSession();
+
+		if (activeSession == null) {
+
+			Messagebox.show("There is no active internal processing session.", "No Active Session", Messagebox.OK,
+					Messagebox.EXCLAMATION);
+
+			loadSessionState();
+			return;
+		}
+
+		endSessionModal.setVisible(true);
+		endSessionModal.doModal();
+	}
+
+	private void closeEndSessionModal() {
+
+		if (endSessionModal != null) {
+			endSessionModal.setVisible(false);
+		}
+	}
+
+	// End session
+
+	private void endSession() {
+
+		try {
+
+			com.cts.admin.model.Session activeSession = sessionService.getActiveSession();
+
+			if (activeSession == null) {
+
+				closeEndSessionModal();
+
+				Messagebox.show("There is no active internal processing session.", "No Active Session", Messagebox.OK,
+						Messagebox.EXCLAMATION);
+
+				loadSessionState();
+				loadSessionHistory(0);
+				return;
+			}
+
+			boolean ended = sessionService.endSession(activeSession.getSessionId(), getCurrentUserId());
+
+			closeEndSessionModal();
+
+			if (ended) {
+
+				Messagebox.show("Session ended. File processing has started.", "Session Ended", Messagebox.OK,
+						Messagebox.INFORMATION);
+
+				inwardIngestionService.processSessionFiles();
+
+			} else {
+
+				Messagebox.show("Unable to end the internal processing session.", "Error", Messagebox.OK,
+						Messagebox.ERROR);
+			}
+
+			loadSessionState();
+			loadSessionHistory(0);
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+			closeEndSessionModal();
+
+			Messagebox.show("Unable to end the internal processing session.", "Error", Messagebox.OK, Messagebox.ERROR);
+		}
+	}
+
+	// Load current session state
+
+	private void loadSessionState() {
+
+		com.cts.admin.model.Session activeSession = sessionService.getActiveSession();
+
+		if (activeSession == null) {
+
+			closedSessionContent.setVisible(true);
+			activeSessionContent.setVisible(false);
+			sessionStatusBadge.setValue("NO ACTIVE SESSION");
+			sessionStatusBadge.setSclass("status-badge status-inactive");
+			return;
+		}
+
+		closedSessionContent.setVisible(false);
+		activeSessionContent.setVisible(true);
+		sessionStatusBadge.setValue("Active");
+		sessionStatusBadge.setSclass("status-badge status-active");
+
+		activeSessionName
+				.setValue(activeSession.getSessionName() != null ? activeSession.getSessionName() : "Clearing Session");
+	}
+
+	// Load session history
+
+	private void loadSessionHistory(int offset) {
+
+		sessionHistoryListbox.getItems().clear();
+
+		int total = sessionService.getSessionCount();
+		sessionHistoryPaging.setTotalSize(total);
+
+		List<com.cts.admin.model.Session> sessions = sessionService.getAllSessions(PAGE_SIZE, offset);
+
+		if (sessions == null || sessions.isEmpty()) {
+			return;
+		}
+
+		for (com.cts.admin.model.Session session : sessions) {
+
+			Listitem item = new Listitem();
+
+			item.appendChild(createCell(session.getSessionId() != null ? String.valueOf(session.getSessionId()) : "-"));
+
+			item.appendChild(createCell(session.getStartedAt() != null ? formatDate(session.getStartedAt()) : "-"));
+
+			item.appendChild(createCell(session.getStartedAt() != null ? formatTime(session.getStartedAt()) : "-"));
+
+			item.appendChild(createCell(session.getEndedAt() != null ? formatDate(session.getEndedAt()) : "-"));
+
+			item.appendChild(createCell(session.getEndedAt() != null ? formatTime(session.getEndedAt()) : "-"));
+
+			item.appendChild(createCell(session.getStatus() != null
+					? ("STARTED".equalsIgnoreCase(session.getStatus()) ? "Started" : "Ended")
+					: "-"));
+
+			sessionHistoryListbox.appendChild(item);
+		}
+	}
+
+	private Listcell createCell(String value) {
+		Listcell cell = new Listcell();
+		Label label = new Label();
+		label.setValue(value);
+		cell.appendChild(label);
+		return cell;
+	}
+
+	private static final java.util.TimeZone IST = java.util.TimeZone.getTimeZone("Asia/Kolkata");
+
+	private String formatDate(Date date) {
+		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+		sdf.setTimeZone(IST);
+		return sdf.format(date);
+	}
+
+	private String formatTime(Date date) {
+		SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a");
+		sdf.setTimeZone(IST);
+		return sdf.format(date);
+	}
+
+	private Path resolveInwardRootPath(String inwardRoot, String webAppRoot) {
+		if (inwardRoot == null || inwardRoot.isBlank()) {
+			inwardRoot = "src/main/webapp/inward-files";
+		}
+
+		Path inwardPath = Path.of(inwardRoot);
+		if (inwardPath.isAbsolute()) {
+			return inwardPath.normalize();
+		}
+
+		Path devWebapp = Path.of("src/main/webapp");
+		if (Files.isDirectory(devWebapp)) {
+			return inwardPath.toAbsolutePath().normalize();
+		}
+
+		if (webAppRoot != null && !webAppRoot.isBlank()) {
+			String norm = webAppRoot.replace("\\", "/");
+			int metaIdx = norm.indexOf("/.metadata/");
+			if (metaIdx > 0) {
+				String workspaceDir = norm.substring(0, metaIdx);
+				Path wtpPath = Path.of(webAppRoot);
+				String projectName = wtpPath.getFileName() != null ? wtpPath.getFileName().toString() : "CTS";
+				Path workspaceWebapp = Path.of(workspaceDir, projectName, "src", "main", "webapp");
+				if (Files.isDirectory(workspaceWebapp)) {
+					return workspaceWebapp.resolve("inward-files").normalize();
+				}
+			}
+
+			Path base = Path.of(webAppRoot);
+			String baseStr = base.toString().replace("\\", "/");
+			if (baseStr.endsWith("/src/main/webapp") || baseStr.endsWith("/src/main/webapp/")) {
+				return base.resolve("inward-files").normalize();
+			}
+
+			String normalizedInward = inwardRoot.replace("\\", "/");
+			if (normalizedInward.startsWith("src/main/webapp/")) {
+				normalizedInward = normalizedInward.substring("src/main/webapp/".length());
+			}
+			return base.resolve(normalizedInward).normalize();
+		}
+
+		return inwardPath.toAbsolutePath().normalize();
+	}
 }

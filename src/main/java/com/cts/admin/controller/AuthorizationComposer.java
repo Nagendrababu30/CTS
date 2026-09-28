@@ -21,7 +21,7 @@ public class AuthorizationComposer extends GenericForwardComposer<Component> {
 
 	static {
 
-		// ADMIN
+		// Admin
 
 		PAGE_PERMISSIONS.put("/zul/admin/admin-dashboard.zul", "Admin");
 
@@ -35,31 +35,25 @@ public class AuthorizationComposer extends GenericForwardComposer<Component> {
 
 		PAGE_PERMISSIONS.put("/zul/admin/admin-audit-logs.zul", "Admin");
 
-		// INWARD MAKER
+		// Inward maker
 
 		PAGE_PERMISSIONS.put("/zul/inward-maker/dashboard.zul", "Inward Maker");
 
-		// MICR Repair queue page.		 *
-		
 		PAGE_PERMISSIONS.put("/zul/inward-maker/micr-repair-l+ist.zul", "Inward Maker");
-
-		 // MICR Repair detail page.
 
 		PAGE_PERMISSIONS.put("/zul/inward-maker/micr-repair-list.zul", "Inward Maker");
 
 		PAGE_PERMISSIONS.put("/zul/inward-maker/micr-repair.zul", "Inward Maker");
 
-		 // Data Entry page.
-		
 		PAGE_PERMISSIONS.put("/zul/inward-maker/data-entry.zul", "Inward Maker");
-		
+
 		PAGE_PERMISSIONS.put("/zul/inward-maker/data-entryform.zul", "Inward Maker");
-		 
+
 		PAGE_PERMISSIONS.put("/zul/inward-maker/send-to-checker.zul", "Inward Maker");
 
 		PAGE_PERMISSIONS.put("/zul/inward-maker/reports.zul", "Inward Maker");
 
-		// INWARD CHECKER
+		// Inward checker
 
 		PAGE_PERMISSIONS.put("/zul/inward-checker/dashboard.zul", "Inward Checker");
 
@@ -69,28 +63,19 @@ public class AuthorizationComposer extends GenericForwardComposer<Component> {
 
 		PAGE_PERMISSIONS.put("/zul/inward-checker/reports.zul", "Inward Checker");
 
-		// OUTWARD MAKER
+		// Outward maker
 
 		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-dashboard.zul", "Outward Maker");
 
 		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-micr-repair.zul", "Outward Maker");
 		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-data-entry-detail.zul", "Outward Maker");
-		PAGE_PERMISSIONS.put(
-			    "/zul/outward/outward-maker/outward-clearing-session-wait.zul",
-			    "Outward Maker"
-			);
+		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-clearing-session-wait.zul", "Outward Maker");
 
-			PAGE_PERMISSIONS.put(
-			    "/zul/outward/outward-maker/outward-clearing-session-wait.zul",
-			    "Outward Checker"
-			);
+		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-clearing-session-wait.zul", "Outward Checker");
 
-			PAGE_PERMISSIONS.put(
-			    "/zul/outward/outward-maker/outward-clearing-session-wait.zul",
-			    "Capture Operator"
-			);
-			
-		// CAPTURE OPERATOR
+		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-clearing-session-wait.zul", "Capture Operator");
+
+		// Capture operator
 
 		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/capture-operator-batch-capture.zul", "Capture Operator");
 
@@ -106,8 +91,7 @@ public class AuthorizationComposer extends GenericForwardComposer<Component> {
 
 		PAGE_PERMISSIONS.put("/zul/outward/outward-maker/outward-maker-send-to-checker.zul", "Outward Maker");
 
-
-		// OUTWARD CHECKER PAGES
+		// Outward checker
 
 		PAGE_PERMISSIONS.put("/zul/outward/outward-checker/dashboard.zul", "Outward Checker");
 

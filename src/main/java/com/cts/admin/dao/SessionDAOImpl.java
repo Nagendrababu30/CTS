@@ -12,231 +12,159 @@ import com.cts.inward.config.ConnectionPool;
 
 public class SessionDAOImpl implements SessionDAO {
 
-    @Override
-    public boolean startSession(Long userId) {
+	@Override
+	public boolean startSession(Long userId) {
 
-        String sessionName = "Clearing Session - "
-                + new java.text.SimpleDateFormat("dd/MM/yyyy")
-                        .format(new java.util.Date());
+		String sessionName = "Clearing Session - "
+				+ new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date());
 
-        java.sql.Timestamp nowIST = new java.sql.Timestamp(
-                java.util.Calendar.getInstance(
-                        java.util.TimeZone.getTimeZone("Asia/Kolkata")
-                ).getTimeInMillis());
+		java.sql.Timestamp nowIST = new java.sql.Timestamp(
+				java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("Asia/Kolkata")).getTimeInMillis());
 
-        String sql =
-                "INSERT INTO sessions "
-                + "(session_name, status, started_at, started_by) "
-                + "VALUES (?, 'STARTED', ?, ?)";
+		String sql = "INSERT INTO sessions " + "(session_name, status, started_at, started_by) "
+				+ "VALUES (?, 'STARTED', ?, ?)";
 
-        try (
-                Connection connection =
-                        ConnectionPool.getDataSource().getConnection();
+		try (Connection connection = ConnectionPool.getDataSource().getConnection();
 
-                PreparedStatement statement =
-                        connection.prepareStatement(sql)
-        ) {
+				PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            statement.setString(1, sessionName);
-            statement.setTimestamp(2, nowIST);
-            statement.setLong(3, userId);
+			statement.setString(1, sessionName);
+			statement.setTimestamp(2, nowIST);
+			statement.setLong(3, userId);
 
-            return statement.executeUpdate() > 0;
+			return statement.executeUpdate() > 0;
 
-        } catch (SQLException e) {
+		} catch (SQLException e) {
 
-            throw new RuntimeException(
-                    "Unable to start internal processing session.",
-                    e
-            );
-        }
-    }
+			throw new RuntimeException("Unable to start internal processing session.", e);
+		}
+	}
 
+	@Override
+	public boolean endSession(Long sessionId, Long userId) {
 
-    @Override
-    public boolean endSession(Long sessionId, Long userId) {
+		java.sql.Timestamp nowIST = new java.sql.Timestamp(
+				java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("Asia/Kolkata")).getTimeInMillis());
 
-        java.sql.Timestamp nowIST = new java.sql.Timestamp(
-                java.util.Calendar.getInstance(
-                        java.util.TimeZone.getTimeZone("Asia/Kolkata")
-                ).getTimeInMillis());
+		String sql = "UPDATE sessions " + "SET status = 'ENDED', " + "    ended_at = ?, " + "    ended_by = ? "
+				+ "WHERE session_id = ? " + "AND status = 'STARTED'";
 
-        String sql =
-                "UPDATE sessions "
-                + "SET status = 'ENDED', "
-                + "    ended_at = ?, "
-                + "    ended_by = ? "
-                + "WHERE session_id = ? "
-                + "AND status = 'STARTED'";
+		try (Connection connection = ConnectionPool.getDataSource().getConnection();
 
-        try (
-                Connection connection =
-                        ConnectionPool.getDataSource().getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql)) {
 
-                PreparedStatement statement =
-                        connection.prepareStatement(sql)
-        ) {
+			statement.setTimestamp(1, nowIST);
+			statement.setLong(2, userId);
+			statement.setLong(3, sessionId);
 
-            statement.setTimestamp(1, nowIST);
-            statement.setLong(2, userId);
-            statement.setLong(3, sessionId);
+			return statement.executeUpdate() > 0;
 
-            return statement.executeUpdate() > 0;
+		} catch (SQLException e) {
 
-        } catch (SQLException e) {
+			throw new RuntimeException("Unable to end internal processing session.", e);
+		}
+	}
 
-            throw new RuntimeException(
-                    "Unable to end internal processing session.",
-                    e
-            );
-        }
-    }
+	@Override
+	public Session getActiveSession() {
 
+		String sql = "SELECT session_id, " + "       session_name, " + "       status, " + "       started_at, "
+				+ "       ended_at, " + "       started_by, " + "       ended_by " + "FROM sessions "
+				+ "WHERE status = 'STARTED' " + "ORDER BY session_id DESC " + "LIMIT 1";
 
-    @Override
-    public Session getActiveSession() {
+		try (Connection connection = ConnectionPool.getDataSource().getConnection();
 
-        String sql =
-                "SELECT session_id, "
-                + "       session_name, "
-                + "       status, "
-                + "       started_at, "
-                + "       ended_at, "
-                + "       started_by, "
-                + "       ended_by "
-                + "FROM sessions "
-                + "WHERE status = 'STARTED' "
-                + "ORDER BY session_id DESC "
-                + "LIMIT 1";
+				PreparedStatement statement = connection.prepareStatement(sql);
 
-        try (
-                Connection connection =
-                        ConnectionPool.getDataSource().getConnection();
+				ResultSet resultSet = statement.executeQuery()) {
 
-                PreparedStatement statement =
-                        connection.prepareStatement(sql);
+			if (resultSet.next()) {
 
-                ResultSet resultSet =
-                        statement.executeQuery()
-        ) {
+				return mapSession(resultSet);
+			}
 
-            if (resultSet.next()) {
+		} catch (SQLException e) {
 
-                return mapSession(resultSet);
-            }
+			throw new RuntimeException("Unable to fetch active internal processing session.", e);
+		}
 
-        } catch (SQLException e) {
+		return null;
+	}
 
-            throw new RuntimeException(
-                    "Unable to fetch active internal processing session.",
-                    e
-            );
-        }
+	@Override
+	public List<com.cts.admin.model.Session> getAllSessions(int limit, int offset) {
 
-        return null;
-    }
+		List<com.cts.admin.model.Session> sessions = new ArrayList<>();
 
+		String sql = "SELECT session_id, " + "       session_name, " + "       status, " + "       started_at, "
+				+ "       ended_at, " + "       started_by, " + "       ended_by " + "FROM sessions "
+				+ "ORDER BY session_id DESC " + "LIMIT ? OFFSET ?";
 
-    @Override
-    public List<com.cts.admin.model.Session> getAllSessions(int limit, int offset) {
+		try (Connection connection = ConnectionPool.getDataSource().getConnection();
 
-        List<com.cts.admin.model.Session> sessions = new ArrayList<>();
+				PreparedStatement statement = connection.prepareStatement(sql)) {
 
-        String sql =
-                "SELECT session_id, "
-                + "       session_name, "
-                + "       status, "
-                + "       started_at, "
-                + "       ended_at, "
-                + "       started_by, "
-                + "       ended_by "
-                + "FROM sessions "
-                + "ORDER BY session_id DESC "
-                + "LIMIT ? OFFSET ?";
+			statement.setInt(1, limit);
+			statement.setInt(2, offset);
 
-        try (
-                Connection connection =
-                        ConnectionPool.getDataSource().getConnection();
+			try (ResultSet resultSet = statement.executeQuery()) {
 
-                PreparedStatement statement =
-                        connection.prepareStatement(sql)
-        ) {
+				while (resultSet.next()) {
+					sessions.add(mapSession(resultSet));
+				}
+			}
 
-            statement.setInt(1, limit);
-            statement.setInt(2, offset);
+		} catch (SQLException e) {
 
-            try (ResultSet resultSet = statement.executeQuery()) {
+			throw new RuntimeException("Unable to fetch session history.", e);
+		}
 
-                while (resultSet.next()) {
-                    sessions.add(mapSession(resultSet));
-                }
-            }
+		return sessions;
+	}
 
-        } catch (SQLException e) {
+	@Override
+	public int getSessionCount() {
 
-            throw new RuntimeException(
-                    "Unable to fetch session history.",
-                    e
-            );
-        }
+		String sql = "SELECT COUNT(*) FROM sessions";
 
-        return sessions;
-    }
+		try (Connection connection = ConnectionPool.getDataSource().getConnection();
 
+				PreparedStatement statement = connection.prepareStatement(sql);
 
-    @Override
-    public int getSessionCount() {
+				ResultSet resultSet = statement.executeQuery()) {
 
-        String sql = "SELECT COUNT(*) FROM sessions";
+			if (resultSet.next()) {
+				return resultSet.getInt(1);
+			}
 
-        try (
-                Connection connection =
-                        ConnectionPool.getDataSource().getConnection();
+		} catch (SQLException e) {
 
-                PreparedStatement statement =
-                        connection.prepareStatement(sql);
+			throw new RuntimeException("Unable to count sessions.", e);
+		}
 
-                ResultSet resultSet =
-                        statement.executeQuery()
-        ) {
+		return 0;
+	}
 
-            if (resultSet.next()) {
-                return resultSet.getInt(1);
-            }
+	private Session mapSession(ResultSet resultSet) throws SQLException {
 
-        } catch (SQLException e) {
+		Session session = new Session();
 
-            throw new RuntimeException(
-                    "Unable to count sessions.",
-                    e
-            );
-        }
+		session.setSessionId(resultSet.getLong("session_id"));
+		session.setSessionName(resultSet.getString("session_name"));
+		session.setStatus(resultSet.getString("status"));
+		session.setStartedAt(resultSet.getTimestamp("started_at"));
+		session.setEndedAt(resultSet.getTimestamp("ended_at"));
 
-        return 0;
-    }
+		long startedByValue = resultSet.getLong("started_by");
+		if (!resultSet.wasNull()) {
+			session.setStartedBy(startedByValue);
+		}
 
+		long endedByValue = resultSet.getLong("ended_by");
+		if (!resultSet.wasNull()) {
+			session.setEndedBy(endedByValue);
+		}
 
-    private Session mapSession(ResultSet resultSet)
-            throws SQLException {
-
-        Session session = new Session();
-
-        session.setSessionId(resultSet.getLong("session_id"));
-        session.setSessionName(resultSet.getString("session_name"));
-        session.setStatus(resultSet.getString("status"));
-        session.setStartedAt(resultSet.getTimestamp("started_at"));
-        session.setEndedAt(resultSet.getTimestamp("ended_at"));
-
-        long startedByValue = resultSet.getLong("started_by");
-        if (!resultSet.wasNull()) {
-            session.setStartedBy(startedByValue);
-        }
-
-        long endedByValue = resultSet.getLong("ended_by");
-        if (!resultSet.wasNull()) {
-            session.setEndedBy(endedByValue);
-        }
-
-        return session;
-    }
+		return session;
+	}
 }

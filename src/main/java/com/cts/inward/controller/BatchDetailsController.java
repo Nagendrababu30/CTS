@@ -53,6 +53,12 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
     private double currentScale = 1.0;
     private int currentRotation = 0;
     private ChequeImageDaoImpl chequeImageDao;
+    private final Map<String, ChequeImage> chequeImageCache = new java.util.HashMap<>();
+    private final Map<String, org.zkoss.image.AImage> aImageCache = new java.util.HashMap<>();
+    private final Map<String, Map<String, Object>> micrDetailsCache = new java.util.HashMap<>();
+    private final Map<String, Map<String, Object>> dataEntryDetailsCache = new java.util.HashMap<>();
+    private final Map<String, Map<String, Object>> cbsValidationCache = new java.util.HashMap<>();
+    private final Map<String, List<Map<String, String>>> makerReturnReasonsCache = new java.util.HashMap<>();
     
     // HEADER & METRICS
 
@@ -188,6 +194,17 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
     private boolean cbsPassed = false;
     private List<String> currentCbsFailedReasonCodes = new ArrayList<>();
 
+    // BATCH COMPLETE MODALS
+    private Window batchCompleteConfirmWindow;
+    private Button batchConfirmYesBtn;
+    private Button batchConfirmNoBtn;
+
+    private Window batchCompleteSuccessWindow;
+    private Label lblBatchSuccessTitle;
+    private Label lblBatchSuccessSubtitle;
+    private Label lblBatchSuccessMessage;
+    private Button batchSuccessOkBtn;
+
     // MAKER RETURN PANEL (RETURN_BY_MAKER)
     
     private Vlayout makerReturnPanel;
@@ -195,10 +212,13 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
     private Vlayout makerReturnReasonsList;
     private Label lblMakerReturnRemarks;
     private Component boxMakerRemarks;
+    private Component boxMicrMasterVerification;
+    private Label badgeMicrMasterStatus;
     private Label lblNpciMicrValue;
     private Label lblNpciMicrCheck;
     private Label lblOcrMicrValue;
     private Label lblOcrMicrCheck;
+    private Component micrMasterSummaryBox;
     private Label lblMicrMasterSummary;
 
     @Override
@@ -246,6 +266,39 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             returnCancelButton.addEventListener(Events.ON_CLICK,event -> handleReturnCancelButton());
 
             returnConfirmButton.addEventListener(Events.ON_CLICK,event -> handleReturnConfirmButton());
+        }
+
+        if (batchCompleteConfirmWindow != null) {
+            batchConfirmYesBtn = (Button) batchCompleteConfirmWindow.getFellowIfAny("batchConfirmYesBtn");
+            batchConfirmNoBtn = (Button) batchCompleteConfirmWindow.getFellowIfAny("batchConfirmNoBtn");
+
+            if (batchConfirmYesBtn != null) {
+                batchConfirmYesBtn.addEventListener(Events.ON_CLICK, event -> {
+                    batchCompleteConfirmWindow.setVisible(false);
+                    onClick$completeVerification();
+                });
+            }
+            if (batchConfirmNoBtn != null) {
+                batchConfirmNoBtn.addEventListener(Events.ON_CLICK, event -> {
+                    batchCompleteConfirmWindow.setVisible(false);
+                });
+            }
+            batchCompleteConfirmWindow.setVisible(false);
+        }
+
+        if (batchCompleteSuccessWindow != null) {
+            lblBatchSuccessTitle = (Label) batchCompleteSuccessWindow.getFellowIfAny("lblBatchSuccessTitle");
+            lblBatchSuccessSubtitle = (Label) batchCompleteSuccessWindow.getFellowIfAny("lblBatchSuccessSubtitle");
+            lblBatchSuccessMessage = (Label) batchCompleteSuccessWindow.getFellowIfAny("lblBatchSuccessMessage");
+            batchSuccessOkBtn = (Button) batchCompleteSuccessWindow.getFellowIfAny("batchSuccessOkBtn");
+
+            if (batchSuccessOkBtn != null) {
+                batchSuccessOkBtn.addEventListener(Events.ON_CLICK, event -> {
+                    batchCompleteSuccessWindow.setVisible(false);
+                    Executions.sendRedirect("/zul/inward-checker/verification.zul");
+                });
+            }
+            batchCompleteSuccessWindow.setVisible(false);
         }
         
          
@@ -395,7 +448,8 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
 
         if (!cheques.isEmpty()) {
 
-            currentChequeIndex = 0;
+            int firstUnverified = findFirstUnverifiedChequeIndex();
+            currentChequeIndex = (firstUnverified != -1) ? firstUnverified : 0;
 
             loadCurrentCheque();
 
@@ -471,6 +525,15 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
 
         Map<String, Object> cheque = cheques.get(currentChequeIndex);
         currentCbsFailedReasonCodes.clear();
+
+        // If current cheque is already verified, redirect to first unverified cheque if available
+        if (isChequeVerified(cheque)) {
+            int firstUnverified = findFirstUnverifiedChequeIndex();
+            if (firstUnverified != -1 && firstUnverified != currentChequeIndex) {
+                currentChequeIndex = firstUnverified;
+                cheque = cheques.get(currentChequeIndex);
+            }
+        }
 
         // =====================================================
         // GET VALUES FROM inward_cheque
@@ -634,7 +697,13 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
 
             if (makerReturnReasonsList != null) {
                 makerReturnReasonsList.getChildren().clear();
-                List<Map<String, String>> returnReasons = batchDetailsService.getMakerReturnReasons(chequeNumber);
+                List<Map<String, String>> returnReasons = makerReturnReasonsCache.get(chequeNumber);
+                if (returnReasons == null) {
+                    returnReasons = batchDetailsService.getMakerReturnReasons(chequeNumber);
+                    if (returnReasons != null) {
+                        makerReturnReasonsCache.put(chequeNumber, returnReasons);
+                    }
+                }
                 if (returnReasons != null && !returnReasons.isEmpty()) {
                     for (Map<String, String> r : returnReasons) {
                         Hlayout row = new Hlayout();
@@ -696,35 +765,26 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
                 }
             }
 
-            // Verify MICR with MicrMaster
-            boolean npciExists = false;
-            if (micrCode != null && !micrCode.trim().isEmpty()) {
-                npciExists = com.cts.inward.dao.MicrMasterDaoImpl.of().exists(micrCode.trim());
-            }
-
+            // Verify MICR with MicrMaster (Image 2)
+            String checkMicr = (ocrMicrCode != null && !ocrMicrCode.trim().isEmpty()) ? ocrMicrCode.trim() : (micrCode != null ? micrCode.trim() : null);
             boolean ocrExists = false;
-            if (ocrMicrCode != null && !ocrMicrCode.trim().isEmpty()) {
-                ocrExists = com.cts.inward.dao.MicrMasterDaoImpl.of().exists(ocrMicrCode.trim());
-            }
-
-            if (lblNpciMicrValue != null) {
-                lblNpciMicrValue.setValue(micrCode != null && !micrCode.trim().isEmpty() ? micrCode : "Not Present");
-            }
-            if (lblNpciMicrCheck != null) {
-                if (npciExists) {
-                    lblNpciMicrCheck.setValue("✓ Found in Master");
-                    lblNpciMicrCheck.setStyle("color:#027A48; background:#ECFDF3; border:1px solid #A6F4C5; font-weight:700; padding:4px 10px; border-radius:6px;");
-                } else {
-                    lblNpciMicrCheck.setValue("✗ NOT Found in Master");
-                    lblNpciMicrCheck.setStyle("color:#B42318; background:#FEF3F2; border:1px solid #FECDCA; font-weight:700; padding:4px 10px; border-radius:6px;");
+            if (checkMicr != null && !checkMicr.isEmpty()) {
+                try {
+                    ocrExists = com.cts.inward.dao.MicrMasterDaoImpl.of().exists(checkMicr);
+                } catch (Exception e) {
+                    System.err.println("Error verifying MICR in micr_master: " + e.getMessage());
                 }
             }
 
+            if (boxMicrMasterVerification != null) {
+                boxMicrMasterVerification.setVisible(true);
+            }
+
             if (lblOcrMicrValue != null) {
-                lblOcrMicrValue.setValue(ocrMicrCode != null && !ocrMicrCode.trim().isEmpty() ? ocrMicrCode : "Not Present");
+                lblOcrMicrValue.setValue(checkMicr != null && !checkMicr.isEmpty() ? checkMicr : "Not Present");
             }
             if (lblOcrMicrCheck != null) {
-                if (ocrMicrCode != null && !ocrMicrCode.trim().isEmpty()) {
+                if (checkMicr != null && !checkMicr.isEmpty()) {
                     if (ocrExists) {
                         lblOcrMicrCheck.setValue("✓ Found in Master");
                         lblOcrMicrCheck.setStyle("color:#027A48; background:#ECFDF3; border:1px solid #A6F4C5; font-weight:700; padding:4px 10px; border-radius:6px;");
@@ -740,7 +800,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
 
             if (lblMicrMasterSummary != null) {
                 if (ocrExists) {
-                    lblMicrMasterSummary.setValue("System Verification: MICR code (" + ocrMicrCode + ") was found in Master directory.");
+                    lblMicrMasterSummary.setValue("System Verification: MICR code (" + checkMicr + ") was found in Master directory.");
                 } else {
                     lblMicrMasterSummary.setValue("System Verification: MICR code is absent from the MICR Master Directory. Maker return is verified by system.");
                 }
@@ -751,17 +811,59 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
                 leftCbsStatus.setSclass("cbs-fail-badge");
             }
 
-            // Action buttons: Accept is disabled, Return & Reject are enabled
-            if (acceptButton != null) {
-                acceptButton.setDisabled(true);
-                acceptButton.setSclass("decision-button accept-button accept-button-dull");
-                acceptButton.setTooltiptext("Cannot accept cheque returned by Maker. Please reject or return to Maker.");
-            }
-            if (returnButton != null) {
-                returnButton.setDisabled(false);
-            }
-            if (rejectButton != null) {
-                rejectButton.setDisabled(false);
+            boolean currentVerified = isChequeVerified(cheque);
+
+            if (currentVerified) {
+                // Cheque has already been verified (or entire batch complete)
+                // Lock all action buttons so checker cannot re-action it
+                if (acceptButton != null) {
+                    acceptButton.setDisabled(true);
+                    acceptButton.setSclass("decision-button accept-button accept-button-dull");
+                    acceptButton.setStyle("cursor: not-allowed !important; opacity: 0.55 !important; pointer-events: auto !important;");
+                    acceptButton.setTooltiptext("This cheque has already been verified and cannot be re-opened.");
+                }
+                if (returnButton != null) {
+                    returnButton.setDisabled(true);
+                    returnButton.setSclass("decision-button return-button return-button-dull");
+                    returnButton.setStyle("cursor: not-allowed !important; opacity: 0.55 !important; pointer-events: auto !important;");
+                    returnButton.setTooltiptext("This cheque has already been verified and cannot be re-opened.");
+                }
+                if (rejectButton != null) {
+                    rejectButton.setDisabled(true);
+                    rejectButton.setSclass("decision-button reject-button reject-button-dull");
+                    rejectButton.setStyle("cursor: not-allowed !important; opacity: 0.55 !important; pointer-events: auto !important;");
+                    rejectButton.setTooltiptext("This cheque has already been verified and cannot be re-opened.");
+                }
+            } else {
+                // Action buttons: Accept is disabled
+                if (acceptButton != null) {
+                    acceptButton.setDisabled(true);
+                    acceptButton.setSclass("decision-button accept-button accept-button-dull");
+                    acceptButton.setStyle("cursor: not-allowed !important; opacity: 0.55 !important; pointer-events: auto !important;");
+                    acceptButton.setTooltiptext("Cannot accept cheque returned by Maker.");
+                }
+
+                // Send Back button: Disabled ONLY if reason is MICR not available (MR-DATA-002 / MR-MICR-002)
+                boolean micrNotAvailable = isMicrNotAvailableReturn(cheque);
+                if (returnButton != null) {
+                    if (micrNotAvailable) {
+                        returnButton.setDisabled(true);
+                        returnButton.setSclass("decision-button return-button return-button-dull");
+                        returnButton.setStyle("cursor: not-allowed !important; opacity: 0.55 !important; pointer-events: auto !important;");
+                        returnButton.setTooltiptext("Cannot send back to maker: MICR details not available.");
+                    } else {
+                        returnButton.setDisabled(false);
+                        returnButton.setSclass("decision-button return-button");
+                        returnButton.setStyle(null);
+                        returnButton.setTooltiptext(null);
+                    }
+                }
+                if (rejectButton != null) {
+                    rejectButton.setDisabled(false);
+                    rejectButton.setSclass("decision-button reject-button");
+                    rejectButton.setStyle(null);
+                    rejectButton.setTooltiptext(null);
+                }
             }
 
         } else {
@@ -769,11 +871,51 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             if (makerReturnPanel != null) {
                 makerReturnPanel.setVisible(false);
             }
+            if (boxMicrMasterVerification != null) {
+                boxMicrMasterVerification.setVisible(false);
+            }
             if (verificationFormContainer != null) {
                 verificationFormContainer.setVisible(true);
             }
-            if (acceptButton != null) {
-                acceptButton.setTooltiptext(null);
+
+            boolean currentVerified = isChequeVerified(cheque);
+
+            if (currentVerified) {
+                // Already actioned/verified cheque - lock all decision buttons
+                if (acceptButton != null) {
+                    acceptButton.setDisabled(true);
+                    acceptButton.setSclass("decision-button accept-button accept-button-dull");
+                    acceptButton.setStyle("cursor: not-allowed !important; opacity: 0.55 !important; pointer-events: auto !important;");
+                    acceptButton.setTooltiptext("This cheque has already been verified and cannot be re-opened.");
+                }
+                if (returnButton != null) {
+                    returnButton.setDisabled(true);
+                    returnButton.setSclass("decision-button return-button return-button-dull");
+                    returnButton.setStyle("cursor: not-allowed !important; opacity: 0.55 !important; pointer-events: auto !important;");
+                    returnButton.setTooltiptext("This cheque has already been verified and cannot be re-opened.");
+                }
+                if (rejectButton != null) {
+                    rejectButton.setDisabled(true);
+                    rejectButton.setSclass("decision-button reject-button reject-button-dull");
+                    rejectButton.setStyle("cursor: not-allowed !important; opacity: 0.55 !important; pointer-events: auto !important;");
+                    rejectButton.setTooltiptext("This cheque has already been verified and cannot be re-opened.");
+                }
+            } else {
+                if (acceptButton != null) {
+                    acceptButton.setTooltiptext(null);
+                }
+                if (returnButton != null) {
+                    returnButton.setDisabled(false);
+                    returnButton.setSclass("decision-button return-button");
+                    returnButton.setStyle(null);
+                    returnButton.setTooltiptext(null);
+                }
+                if (rejectButton != null) {
+                    rejectButton.setDisabled(false);
+                    rejectButton.setSclass("decision-button reject-button");
+                    rejectButton.setStyle(null);
+                    rejectButton.setTooltiptext(null);
+                }
             }
 
             // MICR
@@ -803,36 +945,41 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         // DECISION BADGE FOR CURRENT CHEQUE
         // =====================================================
         if (selectedDecision != null && selectedDecisionText != null) {
-            String action = getString(cheque, "checker_action");
-            if (action == null) {
-                action = getString(cheque, "checkerAction");
-            }
-            if (action == null) {
-                String st = getString(cheque, "cheque_status");
-                if (st == null) st = getString(cheque, "status");
-                if ("ACCEPT".equalsIgnoreCase(st)) {
-                    action = "Accepted";
-                } else if ("REJECT".equalsIgnoreCase(st)) {
-                    action = "Returned";
-                } else if ("RETURN_TO_MAKER".equalsIgnoreCase(st)) {
-                    action = "Sent Back";
-                }
-            }
-            if (action != null && !action.trim().isEmpty()) {
-                selectedDecision.setVisible(true);
-                if ("Accepted".equalsIgnoreCase(action)) {
-                    selectedDecisionText.setValue("✓ Selected Decision: Accepted");
-                    selectedDecision.setSclass("selected-decision accepted");
-                } else if ("Returned".equalsIgnoreCase(action) || "Rejected".equalsIgnoreCase(action)) {
-                    selectedDecisionText.setValue("⚠ Selected Decision: Returned");
-                    selectedDecision.setSclass("selected-decision rejected");
-                } else {
-                    selectedDecisionText.setValue("↶ Selected Decision: Sent Back");
-                    selectedDecision.setSclass("selected-decision returned");
-                }
-            } else {
+            if (!isChequeVerified(cheque)) {
                 selectedDecision.setVisible(false);
                 selectedDecisionText.setValue("");
+            } else {
+                String action = getString(cheque, "checker_action");
+                if (action == null) {
+                    action = getString(cheque, "checkerAction");
+                }
+                if (action == null) {
+                    String st = getString(cheque, "cheque_status");
+                    if (st == null) st = getString(cheque, "status");
+                    if ("ACCEPT".equalsIgnoreCase(st)) {
+                        action = "Accepted";
+                    } else if ("REJECT".equalsIgnoreCase(st)) {
+                        action = "Returned";
+                    } else if ("RETURN_TO_MAKER".equalsIgnoreCase(st)) {
+                        action = "Sent Back";
+                    }
+                }
+                if (action != null && !action.trim().isEmpty()) {
+                    selectedDecision.setVisible(true);
+                    if ("Accepted".equalsIgnoreCase(action)) {
+                        selectedDecisionText.setValue("✓ Selected Decision: Accepted");
+                        selectedDecision.setSclass("selected-decision accepted");
+                    } else if ("Returned".equalsIgnoreCase(action) || "Rejected".equalsIgnoreCase(action)) {
+                        selectedDecisionText.setValue("⚠ Selected Decision: Returned");
+                        selectedDecision.setSclass("selected-decision rejected");
+                    } else {
+                        selectedDecisionText.setValue("↶ Selected Decision: Sent Back");
+                        selectedDecision.setSclass("selected-decision returned");
+                    }
+                } else {
+                    selectedDecision.setVisible(false);
+                    selectedDecisionText.setValue("");
+                }
             }
         }
     }
@@ -853,9 +1000,13 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             return;
         }
 
-        Map<String, Object> micrDetails = batchDetailsService
-                .getMicrDetails(
-                        chequeNumber);
+        Map<String, Object> micrDetails = micrDetailsCache.get(chequeNumber);
+        if (micrDetails == null) {
+            micrDetails = batchDetailsService.getMicrDetails(chequeNumber);
+            if (micrDetails != null) {
+                micrDetailsCache.put(chequeNumber, micrDetails);
+            }
+        }
 
         System.out.println();
 
@@ -1028,9 +1179,13 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             return;
         }
 
-        Map<String, Object> details = batchDetailsService
-                .getDataEntryDetails(
-                        chequeNumber);
+        Map<String, Object> details = dataEntryDetailsCache.get(chequeNumber);
+        if (details == null) {
+            details = batchDetailsService.getDataEntryDetails(chequeNumber);
+            if (details != null) {
+                dataEntryDetailsCache.put(chequeNumber, details);
+            }
+        }
 
         System.out.println();
 
@@ -1435,6 +1590,8 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
 
         if (acceptButton != null) {
             acceptButton.setDisabled(true);
+            acceptButton.setSclass("decision-button accept-button accept-button-dull");
+            acceptButton.setStyle("cursor: not-allowed !important; opacity: 0.55 !important; pointer-events: auto !important;");
         }
 
         System.out.println();
@@ -1463,9 +1620,13 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         // Get CBS data
         // -----------------------------------------------------
 
-        Map<String, Object> cbsDetails = batchDetailsService
-                .getCbsValidation(
-                        chequeNumber);
+        Map<String, Object> cbsDetails = cbsValidationCache.get(chequeNumber);
+        if (cbsDetails == null) {
+            cbsDetails = batchDetailsService.getCbsValidation(chequeNumber);
+            if (cbsDetails != null) {
+                cbsValidationCache.put(chequeNumber, cbsDetails);
+            }
+        }
 
         if (cbsDetails == null
                 || cbsDetails.isEmpty()) {
@@ -1698,9 +1859,19 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         }
 
         if (acceptButton != null) {
-            acceptButton.setDisabled(false);
-            acceptButton.setSclass(
-                    "decision-button accept-button");
+            if (cheques != null && currentChequeIndex >= 0 && currentChequeIndex < cheques.size()
+                    && isChequeVerified(cheques.get(currentChequeIndex))) {
+                acceptButton.setDisabled(true);
+                acceptButton.setSclass("decision-button accept-button accept-button-dull");
+                acceptButton.setStyle("cursor: not-allowed !important; opacity: 0.55 !important; pointer-events: auto !important;");
+                acceptButton.setTooltiptext("This cheque has already been verified and cannot be re-opened.");
+            } else {
+                acceptButton.setDisabled(false);
+                acceptButton.setSclass(
+                        "decision-button accept-button");
+                acceptButton.setStyle(null);
+                acceptButton.setTooltiptext(null);
+            }
         }
     }
 
@@ -1753,6 +1924,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             acceptButton.setDisabled(true);
             acceptButton.setSclass(
                     "decision-button accept-button accept-button-dull");
+            acceptButton.setStyle("cursor: not-allowed !important; opacity: 0.55 !important; pointer-events: auto !important;");
         }
     }
 
@@ -1941,6 +2113,11 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
     public void onClick$acceptButton() {
         Map<String, Object> currentCheque = (cheques != null && currentChequeIndex >= 0 && currentChequeIndex < cheques.size())
                 ? cheques.get(currentChequeIndex) : null;
+        if (currentCheque != null && isChequeVerified(currentCheque)) {
+            Messagebox.show("This cheque has already been verified and cannot be modified.",
+                    "Cheque Already Verified", Messagebox.OK, Messagebox.INFORMATION);
+            return;
+        }
         if (currentCheque != null && "RETURN_BY_MAKER".equalsIgnoreCase(getString(currentCheque, "status"))) {
             Messagebox.show("This cheque was returned by the Maker and cannot be accepted. Please select Return or Send Back to Maker.",
                     "Action Restricted", Messagebox.OK, Messagebox.EXCLAMATION);
@@ -1989,32 +2166,50 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
     // =========================================================
 
     public void onClick$rejectButton() {
+        Map<String, Object> currentCheque = (cheques != null && currentChequeIndex >= 0 && currentChequeIndex < cheques.size())
+                ? cheques.get(currentChequeIndex) : null;
+        if (currentCheque != null && isChequeVerified(currentCheque)) {
+            Messagebox.show("This cheque has already been verified and cannot be modified.",
+                    "Cheque Already Verified", Messagebox.OK, Messagebox.INFORMATION);
+            return;
+        }
         if (rejectReasonsContainer != null) {
             rejectReasonsContainer.getChildren().clear();
             List<Map<String, String>> reasons =
                     batchDetailsService.getCheckerRejectionReasons();
             if (reasons != null) {
+                boolean isMrMicr001 = isMakerReturnReasonMrMicr001(currentCheque);
+
                 for (Map<String, String> r : reasons) {
                     String code = r.get("rejection_reason_code");
                     if (code == null) {
                         code = r.get("code");
                     }
+                    String desc = r.get("description");
 
-                    // If CBS validation failed, display ONLY the reason(s) that caused CBS failure
-                    if (!cbsPassed && currentCbsFailedReasonCodes != null && !currentCbsFailedReasonCodes.isEmpty()) {
+                    // If Maker returned with MR-MICR-001, display ONLY RJ006 (MICR Not Available) and auto-select it
+                    if (isMrMicr001) {
+                        boolean isMicrRejection = (code != null && "RJ006".equalsIgnoreCase(code.trim()))
+                                || (desc != null && desc.toLowerCase().contains("micr"));
+                        if (!isMicrRejection) {
+                            continue; // Skip all other reasons
+                        }
+                    } else if (!cbsPassed && currentCbsFailedReasonCodes != null && !currentCbsFailedReasonCodes.isEmpty()) {
+                        // If CBS validation failed, display ONLY the reason(s) that caused CBS failure
                         if (!currentCbsFailedReasonCodes.contains(code)) {
                             continue; // Skip unrelated reasons
                         }
                     }
 
                     Checkbox cb = new Checkbox();
-                    String desc = r.get("description");
                     cb.setLabel((code != null ? code : "") + " - " + (desc != null ? desc : ""));
                     cb.setAttribute("reasonCode", code);
                     cb.setSclass("modal-reason-checkbox");
 
-                    // Pre-check the CBS failure reason automatically
-                    if (!cbsPassed && currentCbsFailedReasonCodes != null && currentCbsFailedReasonCodes.contains(code)) {
+                    // Pre-check if MR-MICR-001 or CBS failure reason
+                    if (isMrMicr001) {
+                        cb.setChecked(true);
+                    } else if (!cbsPassed && currentCbsFailedReasonCodes != null && currentCbsFailedReasonCodes.contains(code)) {
                         cb.setChecked(true);
                     }
 
@@ -2088,6 +2283,20 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
     // =========================================================
 
     public void onClick$returnButton() {
+        if (cheques != null && currentChequeIndex >= 0 && currentChequeIndex < cheques.size()) {
+            Map<String, Object> currentCheque = cheques.get(currentChequeIndex);
+            if (isChequeVerified(currentCheque)) {
+                Messagebox.show("This cheque has already been verified and cannot be modified.",
+                        "Cheque Already Verified", Messagebox.OK, Messagebox.INFORMATION);
+                return;
+            }
+            String st = getString(currentCheque, "status");
+            if ("RETURN_BY_MAKER".equalsIgnoreCase(st) && isMicrNotAvailableReturn(currentCheque)) {
+                Messagebox.show("Cannot send back to maker: MICR details not available.",
+                        "Action Restricted", Messagebox.OK, Messagebox.EXCLAMATION);
+                return;
+            }
+        }
         if (returnReasonsContainer != null) {
             returnReasonsContainer.getChildren().clear();
             List<Map<String, String>> reasons =
@@ -2211,6 +2420,7 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
                 curr.put("checkerAction", checkerAction);
                 curr.put("checker_id", userId);
                 curr.put("checkerId", userId);
+                curr.put("session_verified", Boolean.TRUE);
             }
 
             if (popupWindow != null) {
@@ -2256,26 +2466,34 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
     }
 
     private void moveToNextAfterDecision() {
-        updateBatchHeaderCounts();
-        updateCompleteVerificationButtonState();
-        updateChequeNavigation();
-
         if (isAllChequesVerified()) {
-            Messagebox.show(
-                    "All cheques in this batch have been verified. Do you want to complete batch verification now?",
-                    "Batch Verification Complete",
-                    Messagebox.YES | Messagebox.NO,
-                    Messagebox.QUESTION,
-                    event -> {
-                        if (Messagebox.ON_YES.equals(event.getName())) {
-                            onClick$completeVerification();
-                        }
-                    });
+            loadCurrentCheque();
+            updateBatchHeaderCounts();
+            updateCompleteVerificationButtonState();
+            updateChequeNavigation();
+            if (batchCompleteConfirmWindow != null) {
+                batchCompleteConfirmWindow.doModal();
+            } else {
+                Messagebox.show(
+                        "All cheques in this batch have been verified. Do you want to complete batch verification now?",
+                        "Batch Verification Complete",
+                        Messagebox.YES | Messagebox.NO,
+                        Messagebox.QUESTION,
+                        event -> {
+                            if (Messagebox.ON_YES.equals(event.getName())) {
+                                onClick$completeVerification();
+                            }
+                        });
+            }
         } else {
             int nextUnverified = findNextUnverifiedChequeIndex(currentChequeIndex);
             if (nextUnverified != -1 && nextUnverified != currentChequeIndex) {
                 currentChequeIndex = nextUnverified;
                 loadCurrentCheque();
+            } else {
+                updateBatchHeaderCounts();
+                updateCompleteVerificationButtonState();
+                updateChequeNavigation();
             }
         }
     }
@@ -2294,7 +2512,13 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         }
 
         try {
-            ChequeImage image = chequeImageDao.findByChequeNumber(chequeNumber);
+            ChequeImage image = chequeImageCache.get(chequeNumber);
+            if (image == null) {
+                image = chequeImageDao.findByChequeNumber(chequeNumber);
+                if (image != null) {
+                    chequeImageCache.put(chequeNumber, image);
+                }
+            }
             if (image != null) {
                 currentFrontImagePath = image.getFrontPath();
                 currentBackImagePath = image.getBackPath();
@@ -2397,7 +2621,12 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         try {
             java.io.File file = resolveImageFile(imagePath);
             if (file != null) {
-                chequeImage.setContent(new org.zkoss.image.AImage(file));
+                org.zkoss.image.AImage aimg = aImageCache.get(file.getAbsolutePath());
+                if (aimg == null) {
+                    aimg = new org.zkoss.image.AImage(file);
+                    aImageCache.put(file.getAbsolutePath(), aimg);
+                }
+                chequeImage.setContent(aimg);
                 chequeImage.setVisible(true);
                 if (chequePreview != null) {
                     chequePreview.setVisible(false);
@@ -2482,22 +2711,116 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
     // CHECK IF CHEQUE IS VERIFIED
     // =========================================================
 
+    private boolean isMicrNotAvailableReturn(Map<String, Object> cheque) {
+        if (cheque == null) {
+            return false;
+        }
+        String code = getString(cheque, "returnReasonCode");
+        if (code == null) {
+            code = getString(cheque, "return_reason_code");
+        }
+        if (isMicrReasonCode(code)) {
+            return true;
+        }
+        String chequeNumber = getString(cheque, "chequeNumber");
+        if (chequeNumber != null) {
+            List<Map<String, String>> reasons = makerReturnReasonsCache.get(chequeNumber);
+            if (reasons == null) {
+                reasons = batchDetailsService.getMakerReturnReasons(chequeNumber);
+                if (reasons != null) {
+                    makerReturnReasonsCache.put(chequeNumber, reasons);
+                }
+            }
+            if (reasons != null) {
+                for (Map<String, String> r : reasons) {
+                    String rCode = r.get("returnReasonCode");
+                    if (rCode == null) {
+                        rCode = r.get("code");
+                    }
+                    if (isMicrReasonCode(rCode)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isMicrReasonCode(String code) {
+        if (code == null) {
+            return false;
+        }
+        String trimmed = code.trim().toUpperCase();
+        return trimmed.equals("MR-MICR-001") || trimmed.equals("MR-MICR-01") || trimmed.equals("MR-DATA-002");
+    }
+
+    private boolean isMakerReturnReasonMrMicr001(Map<String, Object> currentCheque) {
+        if (currentCheque == null) {
+            return false;
+        }
+        String code = getString(currentCheque, "returnReasonCode");
+        if (code == null) {
+            code = getString(currentCheque, "return_reason_code");
+        }
+        if (code != null && ("MR-MICR-001".equalsIgnoreCase(code.trim()) || "MR-MICR-01".equalsIgnoreCase(code.trim()) || "MR-DATA-002".equalsIgnoreCase(code.trim()))) {
+            return true;
+        }
+        String chequeNumber = getString(currentCheque, "chequeNumber");
+        if (chequeNumber != null) {
+            List<Map<String, String>> reasons = makerReturnReasonsCache.get(chequeNumber);
+            if (reasons == null) {
+                reasons = batchDetailsService.getMakerReturnReasons(chequeNumber);
+                if (reasons != null) {
+                    makerReturnReasonsCache.put(chequeNumber, reasons);
+                }
+            }
+            if (reasons != null) {
+                for (Map<String, String> r : reasons) {
+                    String rCode = r.get("returnReasonCode");
+                    if (rCode == null) {
+                        rCode = r.get("code");
+                    }
+                    if (rCode != null && ("MR-MICR-001".equalsIgnoreCase(rCode.trim()) || "MR-MICR-01".equalsIgnoreCase(rCode.trim()) || "MR-DATA-002".equalsIgnoreCase(rCode.trim()))) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     private boolean isChequeVerified(Map<String, Object> chq) {
         if (chq == null) {
             return false;
         }
-        String action = getString(chq, "checker_action");
-        if (action == null) {
-            action = getString(chq, "checkerAction");
-        }
-        if (action != null && !action.trim().isEmpty()) {
+        if (Boolean.TRUE.equals(chq.get("session_verified"))) {
             return true;
         }
         String st = getString(chq, "cheque_status");
         if (st == null) {
             st = getString(chq, "status");
         }
-        if ("ACCEPT".equalsIgnoreCase(st) || "REJECT".equalsIgnoreCase(st) || "RETURN_TO_MAKER".equalsIgnoreCase(st)) {
+        // Cheques pending verification or waiting for maker are NOT verified
+        if (st != null && (
+                "SENT_TO_CHECKER".equalsIgnoreCase(st)
+                || "RETURN_TO_MAKER".equalsIgnoreCase(st)
+                || "RETURN_BY_MAKER".equalsIgnoreCase(st)
+                || "DATA_ENTRY".equalsIgnoreCase(st)
+                || "DATA_ENTRY_COMPLETED".equalsIgnoreCase(st)
+                || "PARSED".equalsIgnoreCase(st)
+                || "RECEIVED".equalsIgnoreCase(st))) {
+            return false;
+        }
+        if ("ACCEPT".equalsIgnoreCase(st) || "REJECT".equalsIgnoreCase(st)) {
+            return true;
+        }
+        String action = getString(chq, "checker_action");
+        if (action == null) {
+            action = getString(chq, "checkerAction");
+        }
+        if (action != null && !action.trim().isEmpty()
+                && !"Sent Back".equalsIgnoreCase(action.trim())
+                && !"RETURN_TO_MAKER".equalsIgnoreCase(action.trim())) {
             return true;
         }
         return false;
@@ -2543,6 +2866,34 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             }
         }
         return -1;
+    }
+
+    private int findPreviousUnverifiedChequeIndex(int fromIndex) {
+        if (cheques == null || cheques.isEmpty()) {
+            return -1;
+        }
+        for (int i = fromIndex - 1; i >= 0; i--) {
+            if (!isChequeVerified(cheques.get(i))) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private boolean hasUnverifiedChequeBefore(int index) {
+        return findPreviousUnverifiedChequeIndex(index) != -1;
+    }
+
+    private boolean hasUnverifiedChequeAfter(int index) {
+        if (cheques == null || cheques.isEmpty()) {
+            return false;
+        }
+        for (int i = index + 1; i < cheques.size(); i++) {
+            if (!isChequeVerified(cheques.get(i))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // =========================================================
@@ -2605,38 +2956,61 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             if (chequeButtons[i] != null) {
                 chequeButtons[i].setVisible(true);
                 chequeButtons[i].setLabel(String.valueOf(i + 1));
+                boolean verified = cheques != null && isChequeVerified(cheques.get(i));
                 if (i == currentChequeIndex) {
                     chequeButtons[i].setSclass("cheque-button cheque-button-selected");
-                } else if (cheques != null && isChequeVerified(cheques.get(i))) {
+                    chequeButtons[i].setDisabled(false);
+                    chequeButtons[i].setStyle(null);
+                } else if (verified) {
                     chequeButtons[i].setSclass("cheque-button cheque-button-verified");
+                    chequeButtons[i].setDisabled(true);
+                    chequeButtons[i].setStyle("cursor: not-allowed !important; opacity: 0.65 !important;");
+                    chequeButtons[i].setTooltiptext("Cheque " + (i + 1) + " has already been verified and cannot be re-opened.");
                 } else {
                     chequeButtons[i].setSclass("cheque-button");
+                    chequeButtons[i].setDisabled(false);
+                    chequeButtons[i].setStyle(null);
+                    chequeButtons[i].setTooltiptext(null);
                 }
             }
         }
 
+        // PREVIOUS CHEQUE: Only enable if an UNVERIFIED cheque exists before current index
+        boolean canGoPrev = hasUnverifiedChequeBefore(currentChequeIndex);
         if (previousCheque != null) {
-            previousCheque.setDisabled(currentChequeIndex <= 0);
-        }
-
-        boolean hasUnverifiedElsewhere = false;
-        if (cheques != null) {
-            for (int i = 0; i < cheques.size(); i++) {
-                if (i != currentChequeIndex && !isChequeVerified(cheques.get(i))) {
-                    hasUnverifiedElsewhere = true;
-                    break;
-                }
+            previousCheque.setDisabled(!canGoPrev);
+            if (!canGoPrev) {
+                previousCheque.setStyle("cursor: not-allowed !important; opacity: 0.5 !important;");
+            } else {
+                previousCheque.setStyle(null);
             }
         }
 
-        boolean canGoNext = (cheques != null) && ((currentChequeIndex < cheques.size() - 1) || hasUnverifiedElsewhere);
+        // NEXT CHEQUE: Only enable if an UNVERIFIED cheque exists after current index (or elsewhere)
+        boolean hasUnverifiedAhead = hasUnverifiedChequeAfter(currentChequeIndex);
+        boolean hasAnyUnverified = findFirstUnverifiedChequeIndex() != -1;
+        boolean canGoNext = hasUnverifiedAhead || (hasAnyUnverified && cheques != null && currentChequeIndex < cheques.size() && !isChequeVerified(cheques.get(currentChequeIndex)));
+        if (cheques != null && currentChequeIndex >= 0 && currentChequeIndex < cheques.size()
+                && isChequeVerified(cheques.get(currentChequeIndex)) && hasAnyUnverified) {
+            canGoNext = true;
+        }
 
         if (nextCheque != null) {
             nextCheque.setDisabled(!canGoNext);
+            if (!canGoNext) {
+                nextCheque.setStyle("cursor: not-allowed !important; opacity: 0.5 !important;");
+            } else {
+                nextCheque.setStyle(null);
+            }
         }
 
         if (nextChequeArrow != null) {
             nextChequeArrow.setDisabled(!canGoNext);
+            if (!canGoNext) {
+                nextChequeArrow.setStyle("cursor: not-allowed !important; opacity: 0.5 !important;");
+            } else {
+                nextChequeArrow.setStyle(null);
+            }
         }
 
         updateCompleteVerificationButtonState();
@@ -2652,15 +3026,14 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             return;
         }
 
-        if (currentChequeIndex < cheques.size() - 1) {
-            currentChequeIndex++;
+        int nextUnverified = findNextUnverifiedChequeIndex(currentChequeIndex);
+        if (nextUnverified != -1 && nextUnverified != currentChequeIndex) {
+            currentChequeIndex = nextUnverified;
             loadCurrentCheque();
         } else {
-            // At the last cheque: loop to the first unverified cheque if any exists
-            int unverified = findFirstUnverifiedChequeIndex();
-            if (unverified != -1 && unverified != currentChequeIndex) {
-                currentChequeIndex = unverified;
-                loadCurrentCheque();
+            if (nextCheque != null) {
+                nextCheque.setDisabled(true);
+                nextCheque.setStyle("cursor: not-allowed !important; opacity: 0.5 !important;");
             }
         }
     }
@@ -2675,11 +3048,15 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
 
     public void onClick$previousCheque() {
 
-        if (currentChequeIndex > 0) {
-
-            currentChequeIndex--;
-
+        int prevUnverified = findPreviousUnverifiedChequeIndex(currentChequeIndex);
+        if (prevUnverified != -1) {
+            currentChequeIndex = prevUnverified;
             loadCurrentCheque();
+        } else {
+            if (previousCheque != null) {
+                previousCheque.setDisabled(true);
+                previousCheque.setStyle("cursor: not-allowed !important; opacity: 0.5 !important;");
+            }
         }
     }
 
@@ -2817,6 +3194,15 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
             return;
         }
 
+        if (isChequeVerified(cheques.get(index))) {
+            Messagebox.show(
+                    "Cheque " + (index + 1) + " has already been verified and cannot be re-opened.",
+                    "Cheque Already Verified",
+                    Messagebox.OK,
+                    Messagebox.INFORMATION);
+            return;
+        }
+
         currentChequeIndex = index;
 
         loadCurrentCheque();
@@ -2906,20 +3292,47 @@ public class BatchDetailsController extends GenericForwardComposer<Component> {
         try {
             boolean returnedToMaker = batchDetailsService.completeVerification(batchId, userId);
 
-            if (returnedToMaker) {
-                Messagebox.show(
-                        "Batch contains returned cheque(s). Batch has been returned to Maker for reprocessing.",
-                        "Verification Completed - Returned to Maker",
-                        Messagebox.OK,
-                        Messagebox.INFORMATION,
-                        event -> Executions.sendRedirect("/zul/inward-checker/verification.zul"));
+            if (batchCompleteSuccessWindow != null) {
+                if (returnedToMaker) {
+                    if (lblBatchSuccessTitle != null) {
+                        lblBatchSuccessTitle.setValue("Returned to Maker");
+                    }
+                    if (lblBatchSuccessSubtitle != null) {
+                        lblBatchSuccessSubtitle.setValue("Batch contains returned cheques");
+                    }
+                    if (lblBatchSuccessMessage != null) {
+                        lblBatchSuccessMessage.setValue("Batch contains returned cheque(s). Batch has been returned to Maker for reprocessing.");
+                        lblBatchSuccessMessage.setStyle("font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 500; color: #B45309; line-height: 1.6; display: block;");
+                    }
+                } else {
+                    if (lblBatchSuccessTitle != null) {
+                        lblBatchSuccessTitle.setValue("Verification Completed");
+                    }
+                    if (lblBatchSuccessSubtitle != null) {
+                        lblBatchSuccessSubtitle.setValue("Batch clearing processed successfully");
+                    }
+                    if (lblBatchSuccessMessage != null) {
+                        lblBatchSuccessMessage.setValue("Verification completed successfully.");
+                        lblBatchSuccessMessage.setStyle("font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 500; color: #166534; line-height: 1.6; display: block;");
+                    }
+                }
+                batchCompleteSuccessWindow.doModal();
             } else {
-                Messagebox.show(
-                        "Verification completed successfully.",
-                        "Verification Completed",
-                        Messagebox.OK,
-                        Messagebox.INFORMATION,
-                        event -> Executions.sendRedirect("/zul/inward-checker/verification.zul"));
+                if (returnedToMaker) {
+                    Messagebox.show(
+                            "Batch contains returned cheque(s). Batch has been returned to Maker for reprocessing.",
+                            "Verification Completed - Returned to Maker",
+                            Messagebox.OK,
+                            Messagebox.INFORMATION,
+                            event -> Executions.sendRedirect("/zul/inward-checker/verification.zul"));
+                } else {
+                    Messagebox.show(
+                            "Verification completed successfully.",
+                            "Verification Completed",
+                            Messagebox.OK,
+                            Messagebox.INFORMATION,
+                            event -> Executions.sendRedirect("/zul/inward-checker/verification.zul"));
+                }
             }
 
         } catch (Exception e) {

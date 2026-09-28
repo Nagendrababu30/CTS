@@ -450,9 +450,10 @@
     display:
         flex !important;
 
-    text-transform: none !important;
-
-    justify-content:
+    text-transform: none;
+ display:
+    flex !important;
+    align-items:
         center !important;
 
     text-align:

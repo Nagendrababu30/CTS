@@ -435,6 +435,18 @@
     font-weight: 700 !important;
 }
 
+*.micr-field-success *.z-textbox-inp,
+*.micr-field-success *.z-textbox-inp:focus,
+*.micr-field-success {
+    background-color: #ECFDF3 !important;
+
+    border: 2px solid #12B76A !important;
+
+    color: #027A48 !important;
+
+    font-weight: 700 !important;
+}
+
 
 /* =============================================================
    Image Toggle Button

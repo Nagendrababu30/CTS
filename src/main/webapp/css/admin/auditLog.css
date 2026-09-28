@@ -209,15 +209,23 @@
 }
 
 .audit-clear-btn {
-    background-color: #175CD3 !important;
-    border-color: #175CD3 !important;
-    color: #ffffff !important;
+    flex-shrink: 0;
+    height: 42px;
+    padding: 0 16px;
+    background: #FFFFFF;
+    border: 1.5px solid #D1DBF0 !important;
+    border-radius: 8px;
+    color: #4B5E7A;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
     cursor: pointer;
 }
 
 .audit-clear-btn:hover {
-    background-color: #1349B8 !important;
-    border-color: #1349B8 !important;
+    background: #F0F4FD;
+    border-color: #A8B8D8 !important;
+    color: #1F2D45;
 }
 
 

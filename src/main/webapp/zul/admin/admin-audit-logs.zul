@@ -58,7 +58,7 @@
 					label="Clear" />
 
 
-				<!-- ROLE FILTER -->
+				<!-- Role filter -->
 
 				<combobox id="auditRoleCombobox" readonly="true"
 					value="All Roles"

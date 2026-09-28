@@ -11,27 +11,16 @@
 
 <zk>
 
-    <!-- =========================================================
-         CHECKER REPORTS CSS
-         ========================================================= -->
-
+    <!-- Checker reports page styles. -->
     <style src="/css/outward/checker/checker_reports.css"/>
 
-
-    <!-- =========================================================
-         PAGE CONTENT
-         ========================================================= -->
-
+    <!-- Main checker reports content container. -->
     <div self="@define(content)"
          width="100%"
          height="100%"
          sclass="checker-reports-content">
 
-
-        <!-- =====================================================
-             MAIN LAYOUT
-             ===================================================== -->
-
+        <!-- Main checker reports layout. -->
         <vlayout id="checkerReportsLayout"
                  width="100%"
                  height="100%"
@@ -39,49 +28,31 @@
                  sclass="checker-reports-layout"
                  apply="com.iispl.cts.controller.outward.checker.CheckerReportsController">
 
-
-            <!-- =================================================
-                 PAGE HEADER
-                 ================================================= -->
-
+            <!-- Page header containing the report title. -->
             <hlayout width="100%"
                      valign="middle"
                      sclass="reports-header-row">
 
+                <!-- Displays the checker reports page title. -->
                 <vlayout spacing="5px"
                          sclass="reports-header">
 
                     <label value="Checker Reports"
                            sclass="reports-title"/>
 
-                   
-
                 </vlayout>
 
-
-                <!-- =================================================
-                     REFRESH BUTTON
-                     ================================================= -->
-
+                <!-- Keeps the header content aligned to the left. -->
                 <space hflex="1"/>
-
 
             </hlayout>
 
-
-            <!-- =================================================
-                 REPORT SECTION
-                 ================================================= -->
-
+            <!-- Contains the checker reports table section. -->
             <vlayout width="100%"
                      spacing="0"
                      sclass="reports-section">
 
-
-                <!-- =================================================
-                     SECTION HEADER
-                     ================================================= -->
-
+                <!-- Displays the reports section title. -->
                 <hlayout width="100%"
                          valign="middle"
                          sclass="reports-section-header">
@@ -91,11 +62,7 @@
 
                 </hlayout>
 
-
-                <!-- =================================================
-                     REPORT TABLE
-                     ================================================= -->
-
+                <!-- Displays completed batches available for reporting. -->
                 <listbox id="reportList"
                          width="100%"
                          emptyMessage="No completed batches available for reports."
@@ -124,9 +91,7 @@
 
                 </listbox>
 
-
             </vlayout>
-
 
         </vlayout>
 

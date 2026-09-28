@@ -23,825 +23,486 @@ import com.cts.admin.service.SessionServiceImpl;
 import com.iispl.cts.dao.outward.checker.CheckerReportsDAO;
 import com.iispl.cts.model.outward.OutwardBatch;
 
-public class CheckerSendToNPCIController
-        extends SelectorComposer<Component> {
+public class CheckerSendToNPCIController extends SelectorComposer<Component> {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    @Wire
-    private Listbox npciBatchListbox;
+	@Wire
+	private Listbox npciBatchListbox;
 
-    private CheckerReportsDAO reportsDAO;
+	private CheckerReportsDAO reportsDAO;
 
-    private long currentUserId;
+	private long currentUserId;
 
-    // ============================================================
-    // INIT
-    // ============================================================
+	@Override
+	public void doAfterCompose(Component component) throws Exception {
 
-    @Override
-    public void doAfterCompose(
-            Component component)
-            throws Exception {
+		super.doAfterCompose(component);
 
-        super.doAfterCompose(component);
+		// GET SESSION
 
-        // ========================================================
-        // GET SESSION
-        // ========================================================
+		Session session = Executions.getCurrent().getSession();
 
-        Session session =
-                Executions.getCurrent()
-                        .getSession();
+		if (session == null) {
 
-        if (session == null) {
+			Executions.sendRedirect(Executions.getCurrent().getContextPath() + "/login.zul");
 
-            Executions.sendRedirect(
-                    Executions.getCurrent()
-                            .getContextPath()
-                            + "/login.zul");
+			return;
+		}
 
-            return;
-        }
+		// GET USER ID
 
-        // ========================================================
-        // GET USER ID
-        // ========================================================
+		Object sessionUserId = session.getAttribute("userId");
 
-        Object sessionUserId =
-                session.getAttribute("userId");
+		if (sessionUserId == null) {
 
-        if (sessionUserId == null) {
+			Executions.sendRedirect(Executions.getCurrent().getContextPath() + "/login.zul");
 
-            Executions.sendRedirect(
-                    Executions.getCurrent()
-                            .getContextPath()
-                            + "/login.zul");
+			return;
+		}
 
-            return;
-        }
+		if (sessionUserId instanceof Number) {
 
-        // ========================================================
-        // CONVERT USER ID
-        // ========================================================
+			currentUserId = ((Number) sessionUserId).longValue();
 
-        if (sessionUserId instanceof Number) {
+		} else {
 
-            currentUserId =
-                    ((Number) sessionUserId).longValue();
+			try {
 
-        } else {
+				currentUserId = Long.parseLong(sessionUserId.toString());
 
-            try {
+			} catch (NumberFormatException e) {
 
-                currentUserId =
-                        Long.parseLong(
-                                sessionUserId.toString());
+				Executions.sendRedirect(Executions.getCurrent().getContextPath() + "/login.zul");
 
-            } catch (NumberFormatException e) {
+				return;
+			}
+		}
 
-                Executions.sendRedirect(
-                        Executions.getCurrent()
-                                .getContextPath()
-                                + "/login.zul");
+		// CHECK CLEARING SESSION
 
-                return;
-            }
-        }
-        
-     // ========================================================
-        // CHECK CLEARING SESSION
-        // ========================================================
+		SessionService sessionService = new SessionServiceImpl();
 
-        SessionService sessionService =
-                new SessionServiceImpl();
+		com.cts.admin.model.Session clearingSession = sessionService.getActiveSession();
 
-        com.cts.admin.model.Session clearingSession =
-                sessionService.getActiveSession();
+		if (clearingSession == null || clearingSession.getStatus() == null
+				|| !"STARTED".equalsIgnoreCase(clearingSession.getStatus().trim())) {
 
-        if (clearingSession == null
-                || clearingSession.getStatus() == null
-                || !"STARTED".equalsIgnoreCase(
-                        clearingSession.getStatus().trim())) {
+			Messagebox.show(
+					"Clearing session is not started.\n\n" + "Checker operations " + "are currently unavailable.",
+					"Session Not Started", Messagebox.OK, Messagebox.EXCLAMATION, event -> {
 
-            Messagebox.show(
-                    "Clearing session is not started.\n\n"
-                            + "Checker operations "
-                            + "are currently unavailable.",
-                    "Session Not Started",
-                    Messagebox.OK,
-                    Messagebox.EXCLAMATION,
-                    event -> {
+						if (Messagebox.ON_OK.equals(event.getName())) {
 
-                        if (Messagebox.ON_OK.equals(
-                                event.getName())) {
+							Executions.sendRedirect("/login.zul");
+						}
+					});
 
-                            Executions.sendRedirect( "/login.zul");
-                        }
-                    });
+			return;
+		}
 
-            return;
-        }
+		reportsDAO = new CheckerReportsDAO();
 
-        // ========================================================
-        // CREATE DAO
-        // ========================================================
+		loadBatches();
+	}
 
-        reportsDAO =
-                new CheckerReportsDAO();
+	// LOAD BATCHES
 
-        // ========================================================
-        // LOAD BATCHES
-        // ========================================================
+	private void loadBatches() {
 
-        loadBatches();
-    }
-    
+		try {
 
-    // ============================================================
-    // LOAD BATCHES
-    // ============================================================
+			if (npciBatchListbox != null) {
 
-    private void loadBatches() {
+				npciBatchListbox.getItems().clear();
+			}
 
-        try {
+			List<OutwardBatch> batches = reportsDAO.getCheckerCompletedBatches();
 
-            if (npciBatchListbox != null) {
+			if (batches == null || batches.isEmpty()) {
 
-                npciBatchListbox
-                        .getItems()
-                        .clear();
-            }
+				return;
+			}
 
-            List<OutwardBatch> batches =
-                    reportsDAO
-                            .getCheckerCompletedBatches();
+			for (OutwardBatch batch : batches) {
 
-            if (batches == null
-                    || batches.isEmpty()) {
+				addBatchRow(batch);
+			}
 
-                return;
-            }
+		} catch (Exception e) {
 
-            for (OutwardBatch batch : batches) {
+			e.printStackTrace();
 
-                addBatchRow(batch);
-            }
+			Messagebox.show("Unable to load batches ready for NPCI.\n\n" + e.getMessage(), "Error", Messagebox.OK,
+					Messagebox.ERROR);
+		}
+	}
 
-        } catch (Exception e) {
+	// ADD BATCH ROW
 
-            e.printStackTrace();
+	private void addBatchRow(OutwardBatch batch) {
 
-            Messagebox.show(
+		if (batch == null) {
 
-                    "Unable to load batches ready for NPCI.\n\n"
-                            + e.getMessage(),
+			return;
+		}
 
-                    "Error",
+		// GET BATCH NUMBER
 
-                    Messagebox.OK,
+		String batchNumber = batch.getBatchNumber();
 
-                    Messagebox.ERROR);
-        }
-    }
+		if (batchNumber == null || batchNumber.trim().isEmpty()) {
 
-    // ============================================================
-    // ADD BATCH ROW
-    // ============================================================
+			return;
+		}
 
-    private void addBatchRow(
-            OutwardBatch batch) {
+		batchNumber = batchNumber.trim();
 
-        if (batch == null) {
+		// GET COUNTS
 
-            return;
-        }
+		int totalCount = reportsDAO.getTotalChequeCount(batchNumber);
 
-        // ========================================================
-        // GET BATCH NUMBER
-        // ========================================================
+		int validCount = reportsDAO.getValidChequeCount(batchNumber);
 
-        String batchNumber =
-                batch.getBatchNumber();
+		Listitem item = new Listitem();
 
-        if (batchNumber == null
-                || batchNumber.trim().isEmpty()) {
+		Listcell batchCell = new Listcell();
 
-            return;
-        }
+		Label batchLabel = new Label(batchNumber);
 
-        batchNumber =
-                batchNumber.trim();
+		batchLabel.setStyle("font-weight:bold;" + "color:#172B4D;");
 
-        // ========================================================
-        // GET COUNTS
-        // ========================================================
+		batchCell.appendChild(batchLabel);
 
-        int totalCount =
-                reportsDAO.getTotalChequeCount(
-                        batchNumber);
+		item.appendChild(batchCell);
 
-        int validCount =
-                reportsDAO.getValidChequeCount(
-                        batchNumber);
+		Listcell totalCell = new Listcell(String.valueOf(totalCount));
 
-        // ========================================================
-        // CREATE ROW
-        // ========================================================
+		item.appendChild(totalCell);
 
-        Listitem item =
-                new Listitem();
+		Listcell acceptedCell = new Listcell(String.valueOf(validCount));
 
-        // ========================================================
-        // BATCH NUMBER
-        // ========================================================
+		item.appendChild(acceptedCell);
 
-        Listcell batchCell =
-                new Listcell();
+		// VALID XML FILE NAME
 
-        Label batchLabel =
-                new Label(batchNumber);
+		String fileName = batchNumber + "_valid.xml";
 
-        batchLabel.setStyle(
-                "font-weight:bold;"
-                        + "color:#172B4D;");
+		Listcell fileNameCell = new Listcell(fileName);
 
-        batchCell.appendChild(
-                batchLabel);
+		item.appendChild(fileNameCell);
 
-        item.appendChild(
-                batchCell);
+		Listcell actionCell = new Listcell();
 
-        // ========================================================
-        // TOTAL CHEQUES
-        // ========================================================
+		Hbox actionBox = new Hbox();
 
-        Listcell totalCell =
-                new Listcell(
-                        String.valueOf(
-                                totalCount));
+		actionBox.setSpacing("8px");
 
-        item.appendChild(
-                totalCell);
+		Button sendButton = new Button("Send to NPCI");
 
-        // ========================================================
-        // ACCEPTED CHEQUES
-        // ========================================================
+		sendButton.setStyle("background:#172B4D;" + "color:white;" + "border:none;" + "border-radius:5px;"
+				+ "padding:7px 14px;" + "font-weight:bold;" + "cursor:pointer;");
 
-        Listcell acceptedCell =
-                new Listcell(
-                        String.valueOf(
-                                validCount));
+		final String selectedBatch = batchNumber;
 
-        item.appendChild(
-                acceptedCell);
+		sendButton.addEventListener("onClick", event -> {
+			sendToNPCI(selectedBatch);
+		});
 
-        // ========================================================
-        // VALID XML FILE NAME
-        // ========================================================
+		actionBox.appendChild(sendButton);
 
-        String fileName =
-                batchNumber + "_valid.xml";
+		actionCell.appendChild(actionBox);
 
-        Listcell fileNameCell =
-                new Listcell(fileName);
+		item.appendChild(actionCell);
 
-        item.appendChild(
-                fileNameCell);
+		npciBatchListbox.appendChild(item);
+	}
 
-        // ========================================================
-        // ACTION
-        // ========================================================
+	// SEND TO NPCI
 
-        Listcell actionCell =
-                new Listcell();
+	private void sendToNPCI(String batchNumber) {
 
-        Hbox actionBox =
-                new Hbox();
+		if (batchNumber == null || batchNumber.trim().isEmpty()) {
 
-        actionBox.setSpacing(
-                "8px");
+			return;
+		}
 
-        Button sendButton =
-                new Button(
-                        "Send to NPCI");
+		batchNumber = batchNumber.trim();
 
-        sendButton.setStyle(
-                "background:#172B4D;"
-                        + "color:white;"
-                        + "border:none;"
-                        + "border-radius:5px;"
-                        + "padding:7px 14px;"
-                        + "font-weight:bold;"
-                        + "cursor:pointer;");
+		final String confirmedBatchNumber = batchNumber;
 
-        final String selectedBatch =
-                batchNumber;
+		Messagebox.show(
 
-        sendButton.addEventListener(
-                "onClick",
-                event -> {
+				"Are you sure you want to send batch " + confirmedBatchNumber + " to NPCI?",
 
-                    sendToNPCI(
-                            selectedBatch);
-                });
+				"Confirm NPCI Submission",
 
-        actionBox.appendChild(
-                sendButton);
+				Messagebox.YES | Messagebox.NO,
 
-        actionCell.appendChild(
-                actionBox);
+				Messagebox.QUESTION,
 
-        item.appendChild(
-                actionCell);
+				event -> {
 
-        npciBatchListbox.appendChild(
-                item);
-    }
+					if (Messagebox.ON_YES.equals(event.getName())) {
 
-    // ============================================================
-    // SEND TO NPCI
-    // ============================================================
+						submitBatch(confirmedBatchNumber);
+					}
+				});
+	}
 
-    private void sendToNPCI(
-            String batchNumber) {
+	// SUBMIT BATCH
 
-        if (batchNumber == null
-                || batchNumber.trim().isEmpty()) {
+	private void submitBatch(String batchNumber) {
 
-            return;
-        }
+		if (batchNumber == null || batchNumber.trim().isEmpty()) {
 
-        batchNumber =
-                batchNumber.trim();
+			return;
+		}
 
-        final String confirmedBatchNumber =
-                batchNumber;
+		batchNumber = batchNumber.trim();
 
-        Messagebox.show(
+		try {
 
-                "Are you sure you want to send batch "
-                        + confirmedBatchNumber
-                        + " to NPCI?",
+			System.out.println("========================================");
 
-                "Confirm NPCI Submission",
+			System.out.println("       NPCI SUBMISSION STARTED");
 
-                Messagebox.YES
-                        | Messagebox.NO,
+			System.out.println("========================================");
 
-                Messagebox.QUESTION,
+			System.out.println("Batch Number = " + batchNumber);
 
-                event -> {
+			System.out.println("User ID = " + currentUserId);
 
-                    if (Messagebox.ON_YES.equals(
-                            event.getName())) {
+			String fileName = batchNumber + "_valid.xml";
 
-                        submitBatch(
-                                confirmedBatchNumber);
-                    }
-                });
-    }
+			System.out.println("Valid XML File = " + fileName);
 
-    // ============================================================
-    // SUBMIT BATCH
-    // ============================================================
+			Path validXmlPath = getValidXmlPath(fileName);
 
-    private void submitBatch(
-            String batchNumber) {
+			System.out.println("Valid XML Path = " + validXmlPath.toAbsolutePath());
 
-        if (batchNumber == null
-                || batchNumber.trim().isEmpty()) {
+			if (!Files.exists(validXmlPath)) {
 
-            return;
-        }
+				Messagebox.show(
 
-        batchNumber =
-                batchNumber.trim();
+						"Valid XML file was not found.\n\n" + "Batch Number: " + batchNumber + "\n\n"
+								+ "Expected File: " + fileName + "\n\n" + "Expected Location:\n"
+								+ validXmlPath.toAbsolutePath(),
 
-        try {
+						"NPCI Submission Failed",
 
-            System.out.println(
-                    "========================================");
+						Messagebox.OK,
 
-            System.out.println(
-                    "       NPCI SUBMISSION STARTED");
+						Messagebox.ERROR);
 
-            System.out.println(
-                    "========================================");
+				return;
+			}
 
-            System.out.println(
-                    "Batch Number = "
-                            + batchNumber);
+			if (!Files.isRegularFile(validXmlPath)) {
 
-            System.out.println(
-                    "User ID = "
-                            + currentUserId);
+				Messagebox.show(
 
-            // ====================================================
-            // STEP 1 - CREATE VALID XML FILE NAME
-            // ====================================================
+						"The valid XML path is not a file.\n\n" + validXmlPath.toAbsolutePath(),
 
-            String fileName =
-                    batchNumber + "_valid.xml";
+						"NPCI Submission Failed",
 
-            System.out.println(
-                    "Valid XML File = "
-                            + fileName);
+						Messagebox.OK,
 
-            // ====================================================
-            // STEP 2 - GET EXISTING VALID XML
-            // ====================================================
+						Messagebox.ERROR);
 
-            Path validXmlPath =
-                    getValidXmlPath(
-                            fileName);
+				return;
+			}
 
-            System.out.println(
-                    "Valid XML Path = "
-                            + validXmlPath
-                                    .toAbsolutePath());
+			long fileSize = Files.size(validXmlPath);
 
-            // ====================================================
-            // STEP 3 - CHECK FILE EXISTS
-            // ====================================================
+			System.out.println("Valid XML found successfully.");
 
-            if (!Files.exists(
-                    validXmlPath)) {
+			System.out.println("File Size = " + fileSize + " bytes");
 
-                Messagebox.show(
+			if (fileSize <= 0) {
 
-                        "Valid XML file was not found.\n\n"
-                                + "Batch Number: "
-                                + batchNumber
-                                + "\n\n"
-                                + "Expected File: "
-                                + fileName
-                                + "\n\n"
-                                + "Expected Location:\n"
-                                + validXmlPath
-                                        .toAbsolutePath(),
+				Messagebox.show(
 
-                        "NPCI Submission Failed",
+						"The valid XML file is empty.\n\n" + "File: " + fileName,
 
-                        Messagebox.OK,
+						"NPCI Submission Failed",
 
-                        Messagebox.ERROR);
+						Messagebox.OK,
 
-                return;
-            }
+						Messagebox.ERROR);
 
-            // ====================================================
-            // STEP 4 - CHECK IT IS A FILE
-            // ====================================================
+				return;
+			}
 
-            if (!Files.isRegularFile(
-                    validXmlPath)) {
+			boolean success = reportsDAO.markBatchAsNPCISent(batchNumber);
 
-                Messagebox.show(
+			if (!success) {
 
-                        "The valid XML path is not a file.\n\n"
-                                + validXmlPath
-                                        .toAbsolutePath(),
+				Messagebox.show(
 
-                        "NPCI Submission Failed",
+						"Unable to send batch " + batchNumber + " to NPCI.\n\n" + "Valid XML was found, "
+								+ "but the batch status " + "could not be updated.",
 
-                        Messagebox.OK,
+						"NPCI Submission Failed",
 
-                        Messagebox.ERROR);
+						Messagebox.OK,
 
-                return;
-            }
+						Messagebox.ERROR);
 
-            // ====================================================
-            // STEP 5 - CHECK FILE SIZE
-            // ====================================================
+				return;
+			}
 
-            long fileSize =
-                    Files.size(
-                            validXmlPath);
+			System.out.println("========================================");
 
-            System.out.println(
-                    "Valid XML found successfully.");
+			System.out.println("       NPCI SUBMISSION SUCCESS");
 
-            System.out.println(
-                    "File Size = "
-                            + fileSize
-                            + " bytes");
+			System.out.println("========================================");
 
-            if (fileSize <= 0) {
+			System.out.println("Batch Number = " + batchNumber);
 
-                Messagebox.show(
+			System.out.println("Valid XML = " + fileName);
 
-                        "The valid XML file is empty.\n\n"
-                                + "File: "
-                                + fileName,
+			System.out.println("User ID = " + currentUserId);
 
-                        "NPCI Submission Failed",
+			System.out.println("Batch Status = NPCI_SENT");
 
-                        Messagebox.OK,
+			Messagebox.show(
 
-                        Messagebox.ERROR);
+					"Batch " + batchNumber + " sent to NPCI successfully.\n\n" + "Valid XML:\n" + fileName,
 
-                return;
-            }
+					"NPCI Submission Successful",
 
-            // ====================================================
-            // STEP 6 - MARK BATCH AS NPCI SENT
-            // ====================================================
+					Messagebox.OK,
 
-            boolean success =
-                    reportsDAO
-                            .markBatchAsNPCISent(
-                                    batchNumber);
+					Messagebox.INFORMATION,
 
-            if (!success) {
+					event -> {
 
-                Messagebox.show(
+						if (Messagebox.ON_OK.equals(event.getName())) {
 
-                        "Unable to send batch "
-                                + batchNumber
-                                + " to NPCI.\n\n"
-                                + "Valid XML was found, "
-                                + "but the batch status "
-                                + "could not be updated.",
+							loadBatches();
+						}
+					});
 
-                        "NPCI Submission Failed",
+		} catch (Exception e) {
 
-                        Messagebox.OK,
+			e.printStackTrace();
 
-                        Messagebox.ERROR);
+			Messagebox.show(
 
-                return;
-            }
+					"Error while sending batch " + batchNumber + " to NPCI.\n\n" + e.getMessage(),
 
-            // ====================================================
-            // STEP 7 - SUCCESS
-            // ====================================================
+					"NPCI Submission Error",
 
-            System.out.println(
-                    "========================================");
+					Messagebox.OK,
 
-            System.out.println(
-                    "       NPCI SUBMISSION SUCCESS");
+					Messagebox.ERROR);
+		}
+	}
 
-            System.out.println(
-                    "========================================");
+	private Path getValidXmlPath(String fileName) throws Exception {
 
-            System.out.println(
-                    "Batch Number = "
-                            + batchNumber);
+		// GET DEPLOYED APPLICATION PATH
 
-            System.out.println(
-                    "Valid XML = "
-                            + fileName);
+		String deployedPath = Executions.getCurrent().getDesktop().getWebApp().getRealPath("/");
 
-            System.out.println(
-                    "User ID = "
-                            + currentUserId);
+		if (deployedPath == null) {
 
-            System.out.println(
-                    "Batch Status = NPCI_SENT");
+			throw new Exception("Unable to determine deployed application path.");
+		}
 
-            Messagebox.show(
+		Path deployedRoot = Paths.get(deployedPath).toAbsolutePath().normalize();
 
-                    "Batch "
-                            + batchNumber
-                            + " sent to NPCI successfully.\n\n"
-                            + "Valid XML:\n"
-                            + fileName,
+		System.out.println();
+		System.out.println("========================================");
 
-                    "NPCI Submission Successful",
+		System.out.println("NPCI VALID XML PATH RESOLUTION");
 
-                    Messagebox.OK,
+		System.out.println("========================================");
 
-                    Messagebox.INFORMATION,
+		System.out.println("Deployed application:");
 
-                    event -> {
+		System.out.println(deployedRoot);
 
-                        if (Messagebox.ON_OK.equals(
-                                event.getName())) {
+		// FIND ECLIPSE WORKSPACE
 
-                            loadBatches();
-                        }
-                    });
+		Path workspaceRoot = deployedRoot;
 
-        } catch (Exception e) {
+		while (workspaceRoot != null && workspaceRoot.getParent() != null) {
 
-            e.printStackTrace();
+			Path currentName = workspaceRoot.getFileName();
 
-            Messagebox.show(
+			if (currentName != null && ".metadata".equalsIgnoreCase(currentName.toString())) {
 
-                    "Error while sending batch "
-                            + batchNumber
-                            + " to NPCI.\n\n"
-                            + e.getMessage(),
+				workspaceRoot = workspaceRoot.getParent();
 
-                    "NPCI Submission Error",
+				break;
+			}
 
-                    Messagebox.OK,
+			workspaceRoot = workspaceRoot.getParent();
+		}
 
-                    Messagebox.ERROR);
-        }
-    }
+		if (workspaceRoot == null) {
 
-    // ============================================================
-    // GET EXISTING VALID XML PATH
-    //
-    // IMPORTANT:
-    // The XML is stored in the Eclipse source project:
-    //
-    // CTS/src/main/webapp/css/outward/Archive/ValidCheques
-    //
-    // We therefore locate:
-    //
-    // Tomcat deployed application
-    //        ↓
-    // Eclipse workspace
-    //        ↓
-    // CTS project
-    //        ↓
-    // src/main/webapp/css/outward/Archive/ValidCheques
-    // ============================================================
+			throw new Exception("Unable to locate Eclipse workspace.");
+		}
 
-    private Path getValidXmlPath(
-            String fileName)
-            throws Exception {
+		System.out.println("Eclipse workspace:");
 
-        // ========================================================
-        // GET DEPLOYED APPLICATION PATH
-        // ========================================================
+		System.out.println(workspaceRoot);
 
-        String deployedPath =
-                Executions.getCurrent()
-                        .getDesktop()
-                        .getWebApp()
-                        .getRealPath("/");
+		Path projectNamePath = deployedRoot.getFileName();
 
-        if (deployedPath == null) {
+		if (projectNamePath == null) {
 
-            throw new Exception(
-                    "Unable to determine deployed application path.");
-        }
+			throw new Exception("Unable to determine project name.");
+		}
 
-        Path deployedRoot =
-                Paths.get(
-                        deployedPath)
-                        .toAbsolutePath()
-                        .normalize();
+		String projectName = projectNamePath.toString();
 
-        System.out.println();
-        System.out.println(
-                "========================================");
+		System.out.println("Project name:");
 
-        System.out.println(
-                "NPCI VALID XML PATH RESOLUTION");
+		System.out.println(projectName);
 
-        System.out.println(
-                "========================================");
+		// SOURCE PROJECT ROOT
 
-        System.out.println(
-                "Deployed application:");
+		Path projectRoot = workspaceRoot.resolve(projectName);
 
-        System.out.println(
-                deployedRoot);
+		System.out.println("Project root:");
 
-        // ========================================================
-        // FIND ECLIPSE WORKSPACE
-        // ========================================================
+		System.out.println(projectRoot.toAbsolutePath());
 
-        Path workspaceRoot =
-                deployedRoot;
+		// VALID CHEQUES DIRECTORY
 
-        while (workspaceRoot != null
-                && workspaceRoot.getParent() != null) {
+		Path validDirectory = projectRoot
+				.resolve(Paths.get("src", "main", "webapp", "css", "outward", "Archive", "ValidCheques"));
 
-            Path currentName =
-                    workspaceRoot.getFileName();
+		System.out.println("ValidCheques directory:");
 
-            if (currentName != null
-                    && ".metadata"
-                            .equalsIgnoreCase(
-                                    currentName.toString())) {
+		System.out.println(validDirectory.toAbsolutePath());
 
-                workspaceRoot =
-                        workspaceRoot.getParent();
+		// FINAL XML FILE
 
-                break;
-            }
+		Path validXmlPath = validDirectory.resolve(fileName).normalize();
 
-            workspaceRoot =
-                    workspaceRoot.getParent();
-        }
+		System.out.println("Expected file:");
 
-        if (workspaceRoot == null) {
+		System.out.println(fileName);
 
-            throw new Exception(
-                    "Unable to locate Eclipse workspace.");
-        }
+		System.out.println("Final XML path:");
 
-        System.out.println(
-                "Eclipse workspace:");
+		System.out.println(validXmlPath.toAbsolutePath());
 
-        System.out.println(
-                workspaceRoot);
+		System.out.println("File exists:");
 
-        // ========================================================
-        // GET PROJECT NAME
-        // ========================================================
+		System.out.println(Files.exists(validXmlPath));
 
-        Path projectNamePath =
-                deployedRoot.getFileName();
+		System.out.println("Is regular file:");
 
-        if (projectNamePath == null) {
+		System.out.println(Files.isRegularFile(validXmlPath));
 
-            throw new Exception(
-                    "Unable to determine project name.");
-        }
+		System.out.println("========================================");
 
-        String projectName =
-                projectNamePath.toString();
-
-        System.out.println(
-                "Project name:");
-
-        System.out.println(
-                projectName);
-
-        // ========================================================
-        // SOURCE PROJECT ROOT
-        // ========================================================
-
-        Path projectRoot =
-                workspaceRoot.resolve(
-                        projectName);
-
-        System.out.println(
-                "Project root:");
-
-        System.out.println(
-                projectRoot.toAbsolutePath());
-
-        // ========================================================
-        // VALID CHEQUES DIRECTORY
-        // ========================================================
-
-        Path validDirectory =
-                projectRoot.resolve(
-                        Paths.get(
-                                "src",
-                                "main",
-                                "webapp",
-                                "css",
-                                "outward",
-                                "Archive",
-                                "ValidCheques"));
-
-        System.out.println(
-                "ValidCheques directory:");
-
-        System.out.println(
-                validDirectory
-                        .toAbsolutePath());
-
-        // ========================================================
-        // FINAL XML FILE
-        // ========================================================
-
-        Path validXmlPath =
-                validDirectory
-                        .resolve(fileName)
-                        .normalize();
-
-        System.out.println(
-                "Expected file:");
-
-        System.out.println(
-                fileName);
-
-        System.out.println(
-                "Final XML path:");
-
-        System.out.println(
-                validXmlPath
-                        .toAbsolutePath());
-
-        System.out.println(
-                "File exists:");
-
-        System.out.println(
-                Files.exists(
-                        validXmlPath));
-
-        System.out.println(
-                "Is regular file:");
-
-        System.out.println(
-                Files.isRegularFile(
-                        validXmlPath));
-
-        System.out.println(
-                "========================================");
-
-        return validXmlPath;
-    }
+		return validXmlPath;
+	}
 }

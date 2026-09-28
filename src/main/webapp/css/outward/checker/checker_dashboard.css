@@ -632,7 +632,8 @@
         center !important;
 
     text-transform: none;
-
+ display:
+    flex !important;
     align-items:
         center !important;
 

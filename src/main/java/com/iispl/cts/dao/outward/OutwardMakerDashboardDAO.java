@@ -57,7 +57,7 @@ public class OutwardMakerDashboardDAO {
 
                 "FROM public.outward_batch ob " +
 
-                // Count returned cheques
+                // count returned cheques
                 "LEFT JOIN ( " +
                 "    SELECT " +
                 "        batch_number, " +
@@ -68,7 +68,7 @@ public class OutwardMakerDashboardDAO {
                 ") rc " +
                 "ON rc.batch_number = ob.batch_number " +
 
-                // Get first/original Maker
+                // get first/original Maker
                 "LEFT JOIN LATERAL ( " +
                 "    SELECT oba.user_id " +
                 "    FROM public.outward_batch_assignment oba " +
@@ -78,7 +78,7 @@ public class OutwardMakerDashboardDAO {
                 "    LIMIT 1 " +
                 ") first_maker ON TRUE " +
 
-                // Get latest Maker assignment
+                // get latest Maker assignment
                 "LEFT JOIN LATERAL ( " +
                 "    SELECT mba.* " +
                 "    FROM public.outward_batch_assignment mba " +
@@ -808,7 +808,7 @@ public class OutwardMakerDashboardDAO {
             }
         }
     }
-
+   // statics of batches
     public java.util.Map<String, Integer> getDashboardCounts() throws SQLException {
         Session session = Executions.getCurrent().getSession();
         Object sessionUserId = session != null

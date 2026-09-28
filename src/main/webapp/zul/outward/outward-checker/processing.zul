@@ -203,10 +203,10 @@
                                 <label value="▤"
                                        sclass="maker-return-icon"/>
 
-                                <label value="Cheque Returned by Maker"
+                                <label value="Cheque Rejected by Maker"
                                        sclass="maker-return-title"/>
 
-                                <label value="RETURN_BY_MAKER"
+                                <label value="Rejected_By_MAKER"
                                        sclass="maker-return-tag"/>
 
                             </hlayout>

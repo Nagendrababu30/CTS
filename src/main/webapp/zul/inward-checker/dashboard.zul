@@ -17,7 +17,7 @@
 			width="100%" height="100%" spacing="0"
 			sclass="inward-dashboard-layout">
 
-			<!-- ==================== PAGE HEADER ==================== -->
+			<!--   PAGE HEADER  -->
 
 			<vlayout width="100%" spacing="0" sclass="page-header">
 
@@ -30,7 +30,7 @@
 			</vlayout>
 
 
-			<!-- ==================== SUMMARY CARDS ==================== -->
+			<!--  SUMMARY CARDS   -->
 
 			<hlayout width="100%" spacing="20px"
 				sclass="summary-container">
@@ -82,13 +82,10 @@
 			<separator height="20px" />
 
 
-            <vlayout
-                width="100%"
-                spacing="0"
-                sclass="table-panel">
+			<vlayout width="100%" spacing="0" sclass="table-panel">
 
 
-				<!-- ==================== TABLE HEADER ==================== -->
+				<!--   TABLE HEADER  -->
 
 				<hlayout width="100%" height="56px" spacing="0"
 					valign="middle" sclass="table-header">
@@ -113,19 +110,17 @@
 				</hlayout>
 
 
-				<!-- ==================== BATCH SCROLL AREA ==================== -->
+				<!--  BATCH SCROLL AREA   -->
 
 				<!--
 					ONLY THIS AREA IS SCROLLABLE.
 					Header, filters and pagination remain fixed.
 				-->
 
-                <div
-                    width="100%"
-                    sclass="batch-scroll-area">
+				<div width="100%" sclass="batch-scroll-area">
 
 
-					<!-- ==================== BATCH GRID ==================== -->
+					<!--   BATCH GRID  -->
 
 					<grid id="batchList" width="100%"
 						sclass="custom-grid" emptyMessage="No batches found.">
@@ -154,17 +149,16 @@
 				</div>
 
 
-				<!-- ==================== BOTTOM / PAGINATION ==================== -->
+				<!--  PAGINATION  -->
 
-				<hlayout width="100%" spacing="0"
-					valign="middle" sclass="bottom-row"
-					style="margin-top: 18px; padding-top: 6px;">
+				<hlayout width="100%" spacing="0" valign="middle"
+					sclass="bottom-row" style="margin-top: 18px; padding-top: 6px;">
 
 
 					<space hflex="1" />
 
 
-					<!-- ==================== PAGINATION ==================== -->
+					<!--  PAGINATION  -->
 
 					<hlayout id="pagination" spacing="6px"
 						valign="middle" sclass="pagination">

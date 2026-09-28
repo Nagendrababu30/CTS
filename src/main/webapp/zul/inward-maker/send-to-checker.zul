@@ -9,96 +9,84 @@
 
 <zk xmlns:n="native">
 
-    <div
-        self="@define(content)"
-        width="100%"
-        height="100%"
-        sclass="content">
+	<div self="@define(content)" width="100%" height="100%"
+		sclass="content">
 
-    <style src="/css/inward/maker/sendtochecker.css?v=20260926_2"/>
-    <style>
-        .custom-grid .z-column,
-        .custom-grid .z-column-content,
-        .custom-grid .z-row-inner,
-        .custom-grid .z-row-content,
-        .custom-grid .z-cell,
-        .custom-grid .z-cell-content {
-            text-align: center !important;
-            vertical-align: middle !important;
-        }
-        .status-badge-ready {
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            margin: 0 auto !important;
-        }
-        .btn-action-send,
-        .custom-grid .z-button {
-            margin: 0 auto !important;
-            display: inline-block !important;
-        }
-    </style>
-    
-    <window apply="com.cts.inward.controller.SendToCheckerController" 
-        height="100%" sclass="main-window">
-        
-        <vlayout width="100%" spacing="0px" sclass="content-layout">
+		<style src="/css/inward/maker/sendtochecker.css" />
 
-            <!-- PAGE HEADER -->
-            <label value="Send to Checker Queue"
-                sclass="page-title" />
+		<window
+			apply="com.cts.inward.controller.SendToCheckerController"
+			height="100%" sclass="main-window">
 
-            <!-- BATCH TABLE PANEL — wraps grid like dashboard wraps grid -->
-            <vlayout sclass="table-panel" spacing="0" width="100%">
+			<vlayout width="100%" spacing="0px"
+				sclass="content-layout">
 
-                <!-- Table Header -->
-                <hlayout valign="middle" width="100%" style="padding-bottom:16px;">
-                    <label value="Batches" sclass="table-title"/>
-                </hlayout>
+				<!-- PAGE HEADER -->
+				<label value="Send to Checker Queue"
+					sclass="page-title" />
 
-                <!-- Main Grid -->
-                <grid id="batchesGrid" emptyMessage="No batches ready to be submitted." 
-                    sclass="custom-grid" mold="paging" pageSize="10">
-                    <columns sclass="custom-columns">
-                        <column label="Batch ID" sclass="custom-column" width="25%" align="center" />
-                        <column label="Total Cheques" sclass="custom-column" width="25%" align="center" />
-                        <column label="Status" sclass="custom-column" width="25%" align="center" />
-                        <column label="Action" sclass="custom-column" width="25%" align="center" />
-                    </columns>
-                    <rows id="batchRows" />
-                </grid>
+				<!-- BATCH TABLE PANEL-->
+				<vlayout sclass="table-panel" spacing="0"
+					width="100%">
 
-            </vlayout>
+					<!-- Table Header -->
+					<hlayout valign="middle" width="100%"
+						style="padding-bottom:16px;">
+						<label value="Batches" sclass="table-title" />
+					</hlayout>
 
-        </vlayout>
-        
-        <!--  Confirmation Modal (Enterprise Banking Style) -->
-        <window id="confirmModal" visible="false" 
-                width="440px" border="none" position="center" closable="false"
-                sclass="confirm-modal-window">
-            <vlayout sclass="confirm-modal-vlayout" spacing="0">
-                
-                <!-- Icon Header -->
-                <div sclass="confirm-icon-wrapper">
-                    <div sclass="confirm-icon-circle">
-                        <n:i class="fa-solid fa-paper-plane confirm-icon"></n:i>
-                    </div>
-                </div>
-                
-                <!-- Title & Description -->
-                <label value="Submit Batch to Checker" sclass="confirm-title" />
-                <label id="confirmMessage" sclass="confirm-desc" />
-                
-                <!-- Buttons Bar -->
-                <hlayout sclass="confirm-btn-bar" spacing="12px">
-                    <button id="cancelBtn" label="Cancel" sclass="btn-modal-cancel" />
-                    <button id="confirmSendBtn" label="Confirm &amp; Send" sclass="btn-modal-confirm" />
-                </hlayout>
-            </vlayout>
-        </window>
-        
-    </window>
-        
-    </div>
+					<!-- Main Grid -->
+					<grid id="batchesGrid"
+						emptyMessage="No batches ready to be submitted."
+						sclass="custom-grid" mold="paging" pageSize="10">
+						<columns sclass="custom-columns">
+							<column label="Batch ID"
+								sclass="custom-column" />
+							<column label="Total Cheques"
+								sclass="custom-column" />
+							<column label="Status"
+								sclass="custom-column" />
+							<column label="Action"
+								sclass="custom-column" />
+						</columns>
+						<rows id="batchRows" />
+					</grid>
+
+				</vlayout>
+
+			</vlayout>
+
+			<!--  Confirmation Modal (Enterprise Banking Style) -->
+			<window id="confirmModal" visible="false" width="440px"
+				border="none" position="center" closable="false"
+				sclass="confirm-modal-window">
+				<vlayout sclass="confirm-modal-vlayout" spacing="0">
+
+					<!-- Icon Header -->
+					<div sclass="confirm-icon-wrapper">
+						<div sclass="confirm-icon-circle">
+							<label
+								sclass="z-icon-paper-plane confirm-icon" />
+						</div>
+					</div>
+
+					<!-- Title & Description -->
+					<label value="Submit Batch to Checker"
+						sclass="confirm-title" />
+					<label id="confirmMessage" sclass="confirm-desc" />
+
+					<!-- Buttons Bar -->
+					<hlayout sclass="confirm-btn-bar" spacing="12px">
+						<button id="cancelBtn" label="Cancel"
+							sclass="btn-modal-cancel" />
+						<button id="confirmSendBtn"
+							label="Confirm &amp; Send" sclass="btn-modal-confirm" />
+					</hlayout>
+				</vlayout>
+			</window>
+
+		</window>
+
+	</div>
 
 </zk>

@@ -2,9 +2,8 @@
 
 <zk xmlns:n="native">
 
-
-	<style src="/css/common/common.css" />
-	<style src="/css/common/loader.css?v=4" />
+	<style src="/css/common/common.css?v=10" />
+	<style src="/css/common/loader.css?v=10" />
 
 	<n:link rel="stylesheet"
 		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />

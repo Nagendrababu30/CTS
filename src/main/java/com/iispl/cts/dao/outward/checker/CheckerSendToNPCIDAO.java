@@ -9,14 +9,21 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class CheckerSendToNPCIDAO {
+
+	private final javax.sql.DataSource dataSource = ConnectionPool.getDataSource();
 
 	// Fetches batches that have completed Checker verification and are ready for
 	// NPCI.
 	public List<OutwardBatch> getBatchesReadyForNPCI() {
 
-    public List<OutwardBatch> getBatchesReadyForNPCI() {
+		List<OutwardBatch> batches = new ArrayList<>();
+
+		String sql = "SELECT " + "    ob.batch_number, " + "    ob.branch_code, " + "    ob.cheque_count, "
+				+ "    ob.batch_folder_path, " + "    ob.created_by, " + "    ob.created_at, " + "    ob.batch_status, "
+				+
+
+				"    COUNT(oc.cheque_number) AS total_cheques, " +
 
 				"    COUNT(CASE " + "        WHEN UPPER(COALESCE(oc.cheque_status, '')) "
 				+ "             = 'CHECKER_ACCEPTED' " + "        THEN 1 " + "    END) AS accepted_cheques, " +
@@ -54,26 +61,43 @@ public class CheckerSendToNPCIDAO {
 
 				batch.setBatchFolderPath(rs.getString("batch_folder_path"));
 
-                batch.setBatchNumber(
-                        rs.getString("batch_number")
-                );
+				int createdBy = rs.getInt("created_by");
 
-                batch.setBranchCode(
-                        rs.getString("branch_code")
-                );
+				if (!rs.wasNull()) {
 
-                batch.setNumberOfCheques(
-                        rs.getInt("total_cheques")
-                );
+					batch.setCreatedBy(String.valueOf(createdBy));
+				}
 
-                batch.setBatchFolderPath(
-                        rs.getString("batch_folder_path")
-                );
+				if (rs.getTimestamp("created_at") != null) {
+
+					batch.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+				}
+
+				batch.setBatchStatus(rs.getString("batch_status"));
+
+				batches.add(batch);
+			}
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+			throw new RuntimeException("Unable to load batches ready for NPCI.", e);
+		}
+
+		return batches;
+	}
+
+	// Checks whether the specified batch is ready for NPCI submission.
+	public boolean isBatchReadyForNPCI(String batchNumber) {
 
 		if (batchNumber == null || batchNumber.trim().isEmpty()) {
 
-                int createdBy =
-                        rs.getInt("created_by");
+			return false;
+		}
+
+		String sql = "SELECT EXISTS (" + "    SELECT 1 " + "    FROM public.outward_batch "
+				+ "    WHERE batch_number = ? " + "      AND UPPER(batch_status) = 'CHECKER_VERIFIED' " + ")";
 
 		try (Connection con = dataSource.getConnection();
 
@@ -81,18 +105,28 @@ public class CheckerSendToNPCIDAO {
 
 			ps.setString(1, batchNumber.trim());
 
-                if (rs.getTimestamp("created_at") != null) {
+			try (ResultSet rs = ps.executeQuery()) {
+
+				if (rs.next()) {
 
 					return rs.getBoolean(1);
 				}
 			}
 
-                batch.setBatchStatus(
-                        rs.getString("batch_status")
-                );
+		} catch (Exception e) {
 
-                batches.add(batch);
-            }
+			e.printStackTrace();
+
+			throw new RuntimeException("Unable to check NPCI batch status.", e);
+		}
+
+		return false;
+	}
+
+	// Marks the specified batch as sent to NPCI after successful submission.
+	public boolean markBatchAsNPCISent(String batchNumber) {
+
+		if (batchNumber == null || batchNumber.trim().isEmpty()) {
 
 			return false;
 		}
@@ -100,19 +134,17 @@ public class CheckerSendToNPCIDAO {
 		String sql = "UPDATE public.outward_batch " + "SET batch_status = 'NPCI_SENT' " + "WHERE batch_number = ? "
 				+ "  AND UPPER(batch_status) <> 'NPCI_SENT'";
 
-            throw new RuntimeException(
-                    "Unable to load batches ready for NPCI.", e );
-        }
+		try (Connection con = dataSource.getConnection();
 
-        return batches;
-    }
+				PreparedStatement ps = con.prepareStatement(sql)) {
+
+			ps.setString(1, batchNumber.trim());
 
 			int updated = ps.executeUpdate();
 
-    // CHECK WHETHER BATCH IS READY
+			return updated == 1;
 
-    public boolean isBatchReadyForNPCI(
-            String batchNumber) {
+		} catch (Exception e) {
 
 			e.printStackTrace();
 
@@ -123,27 +155,20 @@ public class CheckerSendToNPCIDAO {
 	// Returns the current database status of the specified batch.
 	public String getBatchStatus(String batchNumber) {
 
-        String sql =
-                "SELECT EXISTS (" +
-                "    SELECT 1 " +
-                "    FROM public.outward_batch " +
-                "    WHERE batch_number = ? " +
-                "      AND UPPER(batch_status) = 'CHECKER_VERIFIED' " + ")";
+		if (batchNumber == null || batchNumber.trim().isEmpty()) {
 
 			return null;
 		}
 
-        try ( 
-        		Connection con =
-                        dataSource.getConnection();
+		String sql = "SELECT batch_status " + "FROM public.outward_batch " + "WHERE batch_number = ?";
 
-                PreparedStatement ps =
-                        con.prepareStatement(sql)) {
+		try (Connection con = dataSource.getConnection();
 
-            ps.setString( 1, batchNumber.trim());
+				PreparedStatement ps = con.prepareStatement(sql)) {
 
-            try ( ResultSet rs =
-                            ps.executeQuery() ) {
+			ps.setString(1, batchNumber.trim());
+
+			try (ResultSet rs = ps.executeQuery()) {
 
 				if (rs.next()) {
 
@@ -155,102 +180,9 @@ public class CheckerSendToNPCIDAO {
 
 			e.printStackTrace();
 
-            throw new RuntimeException(
-                    "Unable to check NPCI batch status.",e );
-        }
-        return false;
-    }
+			throw new RuntimeException("Unable to get batch status.", e);
+		}
 
-    // MARK BATCH AS NPCI SENT
-
-    public boolean markBatchAsNPCISent(
-            String batchNumber) {
-
-        if (batchNumber == null ||
-                batchNumber.trim().isEmpty()) {
-        	
-        	return false;
-        }
-
-
-        String sql =
-                "UPDATE public.outward_batch " +
-                "SET batch_status = 'NPCI_SENT' " +
-                "WHERE batch_number = ? " +
-                "  AND UPPER(batch_status) <> 'NPCI_SENT'";
-
-
-        try (
-                Connection con =
-                        dataSource.getConnection();
-
-                PreparedStatement ps =
-                        con.prepareStatement(sql)) {
-
-            ps.setString( 1, batchNumber.trim() );
-
-            int updated =
-                    ps.executeUpdate();
-
-            return updated == 1;
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            throw new RuntimeException(
-                    "Unable to mark batch as NPCI_SENT.", e );
-        }
-    }
-
-
-    // GET BATCH STATUS
-
-    
-    public String getBatchStatus(
-            String batchNumber) {
-
-        if (batchNumber == null ||
-                batchNumber.trim().isEmpty()) {
-
-            return null;
-        }
-
-
-        String sql =
-                "SELECT batch_status " +
-                "FROM public.outward_batch " +
-                "WHERE batch_number = ?";
-
-
-        try (
-                Connection con =
-                        dataSource.getConnection();
-
-                PreparedStatement ps =
-                        con.prepareStatement(sql) ) {
-
-            ps.setString( 1, batchNumber.trim() );
-
-
-            try (
-                    ResultSet rs =
-                            ps.executeQuery()) {
-
-                if (rs.next()) {
-                	
-                	return rs.getString("batch_status" );
-                }
-            }
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            throw new RuntimeException(
-                    "Unable to get batch status.", e );
-        }
-        
-        return null;
-    }
+		return null;
+	}
 }

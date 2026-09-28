@@ -11,12 +11,19 @@ public class CheckerReportsService {
 
     private final CheckerReportsDAO dao;
 
+    // ============================================================
+    // CONSTRUCTOR
+    // ============================================================
+
     public CheckerReportsService() {
 
-        dao = new CheckerReportsDAO();
+        dao =
+                new CheckerReportsDAO();
     }
 
+    // ============================================================
     // GET AVAILABLE BATCHES
+    // ============================================================
 
     public List<OutwardBatch> getCheckerCompletedBatches() {
 
@@ -31,7 +38,9 @@ public class CheckerReportsService {
         return batches;
     }
 
+    // ============================================================
     // GET BATCH BY NUMBER
+    // ============================================================
 
     public OutwardBatch getBatchByNumber(
             String batchNumber) {
@@ -43,7 +52,9 @@ public class CheckerReportsService {
         );
     }
 
+    // ============================================================
     // GET ALL CHEQUES
+    // ============================================================
 
     public List<OutwardCheque> getBatchCheques(
             String batchNumber) {
@@ -63,7 +74,9 @@ public class CheckerReportsService {
         return cheques;
     }
 
+    // ============================================================
     // GET REJECTED CHEQUES
+    // ============================================================
 
     public List<OutwardCheque> getRejectedCheques(
             String batchNumber) {
@@ -83,7 +96,9 @@ public class CheckerReportsService {
         return rejectedCheques;
     }
 
+    // ============================================================
     // CHECK RRF AVAILABILITY
+    // ============================================================
 
     public boolean isRrfAvailable(
             String batchNumber) {
@@ -95,7 +110,9 @@ public class CheckerReportsService {
         );
     }
 
+    // ============================================================
     // GET REJECTED CHEQUE COUNT
+    // ============================================================
 
     public int getRejectedChequeCount(
             String batchNumber) {
@@ -107,7 +124,9 @@ public class CheckerReportsService {
         );
     }
 
+    // ============================================================
     // GET RRF CHEQUES
+    // ============================================================
 
     public List<OutwardCheque> getRrfCheques(
             String batchNumber) {
@@ -130,7 +149,9 @@ public class CheckerReportsService {
         return rejectedCheques;
     }
 
+    // ============================================================
     // CHECK BATCH EXISTS
+    // ============================================================
 
     public boolean batchExists(
             String batchNumber) {
@@ -146,7 +167,9 @@ public class CheckerReportsService {
         ) != null;
     }
 
+    // ============================================================
     // GET VALID CHEQUES
+    // ============================================================
 
     public List<OutwardCheque> getValidCheques(
             String batchNumber) {
@@ -172,7 +195,9 @@ public class CheckerReportsService {
         return validCheques;
     }
 
+    // ============================================================
     // SAVE NPCI SUBMISSION
+    // ============================================================
 
     public boolean saveNPCISubmission(
             String batchNumber,
@@ -201,7 +226,9 @@ public class CheckerReportsService {
         );
     }
 
-      // CHECK NPCI READINESS
+    // ============================================================
+    // CHECK NPCI READINESS
+    // ============================================================
 
     public boolean isBatchReadyForNPCI(
             String batchNumber) {
@@ -213,7 +240,9 @@ public class CheckerReportsService {
         );
     }
 
+    // ============================================================
     // MARK NPCI SENT
+    // ============================================================
 
     public boolean markBatchAsNPCISent(
             String batchNumber) {
@@ -225,7 +254,9 @@ public class CheckerReportsService {
         );
     }
 
+    // ============================================================
     // VALIDATE BATCH NUMBER
+    // ============================================================
 
     private void validateBatchNumber(
             String batchNumber) {

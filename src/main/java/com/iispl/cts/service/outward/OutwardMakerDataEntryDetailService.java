@@ -9,183 +9,81 @@ import com.iispl.cts.model.outward.OutwardCheque;
 
 public class OutwardMakerDataEntryDetailService {
 
-    private final OutwardMakerDataEntryDetailDAO dao;
+	private final OutwardMakerDataEntryDetailDAO dao;
 
+	public OutwardMakerDataEntryDetailService() {
 
-    public OutwardMakerDataEntryDetailService() {
+		dao = new OutwardMakerDataEntryDetailDAO();
+	}
 
-        dao =
-                new OutwardMakerDataEntryDetailDAO();
-    }
+	public List<OutwardCheque> getCheques(String batchId) {
 
+		return dao.getCheques(batchId);
+	}
 
-    // =========================================================
-    // NORMAL DATA ENTRY
-    //
-    // Existing functionality.
-    //
-    // Returns all cheques belonging to the batch.
-    // =========================================================
+	public List<OutwardCheque> getReturnedCheques(String batchId) {
 
-    public List<OutwardCheque> getCheques(
-            String batchId) {
+		return dao.getReturnedCheques(batchId);
+	}
 
-        return dao.getCheques(batchId);
-    }
+	public void saveCheque(OutwardCheque cheque) {
 
+		dao.saveCheque(cheque);
+	}
 
-    // =========================================================
-    // RETURNED DATA ENTRY CHEQUES
-    //
-    // Used ONLY when:
-    //
-    //     returnMode = RETURNED
-    //
-    // This returns only the cheques that were sent back
-    // by Checker for Data Entry correction.
-    // =========================================================
+	public void rejectCheque(OutwardCheque cheque, String reason) {
 
-    public List<OutwardCheque> getReturnedCheques(
-            String batchId) {
+		dao.rejectCheque(cheque, reason);
+	}
 
-        return dao.getReturnedCheques(batchId);
-    }
+	public boolean completeBatchDataEntry(String batchId, int currentUserId) {
 
+		return dao.completeBatchDataEntry(batchId, currentUserId);
+	}
 
-    // =========================================================
-    // SAVE CHEQUE
-    //
-    // Existing functionality unchanged.
-    // =========================================================
+	public boolean saveAndVerifyCheque(OutwardCheque cheque, int makerId) {
 
-    public void saveCheque(
-            OutwardCheque cheque) {
+		try {
 
-        dao.saveCheque(cheque);
-    }
+			dao.saveCheque(cheque);
 
+			String status = cheque.getChequeStatus();
 
-    // =========================================================
-    // REJECT CHEQUE
-    //
-    // Existing functionality unchanged.
-    // =========================================================
+			if (status == null || status.trim().isEmpty()) {
 
-    public void rejectCheque(
-            OutwardCheque cheque,
-            String reason) {
+				status = "VERIFIED";
+			}
 
-        dao.rejectCheque(
-                cheque,
-                reason
-        );
-    }
+			dao.updateChequeStatus(cheque.getBatchNumber(), cheque.getChequeNumber(), status);
 
+			return dao.saveMakerVerify(cheque.getBatchNumber(), cheque.getChequeNumber(), makerId);
 
-    // =========================================================
-    // COMPLETE BATCH DATA ENTRY
-    //
-    // Existing functionality unchanged.
-    // =========================================================
+		} catch (Exception e) {
 
-    public boolean completeBatchDataEntry(
-            String batchId,
-            int currentUserId) {
+			e.printStackTrace();
 
-        return dao.completeBatchDataEntry(
-                batchId,
-                currentUserId
-        );
-    }
+			return false;
+		}
+	}
 
+	public boolean recordMakerReject(String batchNumber, String chequeNumber, int makerId, String reasonId) {
 
-    // =========================================================
-    // SAVE AND VERIFY CHEQUE
-    //
-    // Existing functionality unchanged.
-    // =========================================================
-    public boolean saveAndVerifyCheque(
-            OutwardCheque cheque,
-            int makerId) {
+		try {
 
-        try {
+			dao.updateChequeStatus(batchNumber, chequeNumber, "REJECT_REQUESTED");
 
-            dao.saveCheque(cheque);
+			return dao.saveMakerReject(batchNumber, chequeNumber, makerId, reasonId);
 
-            String status =
-                    cheque.getChequeStatus();
+		} catch (Exception e) {
 
-            if (status == null
-                    || status.trim().isEmpty()) {
+			e.printStackTrace();
 
-                status = "VERIFIED";
-            }
+			return false;
+		}
+	}
 
-            dao.updateChequeStatus(
-                    cheque.getBatchNumber(),
-                    cheque.getChequeNumber(),
-                    status
-            );
+	public Map<String, String> getReturnReasons() {
 
-            return dao.saveMakerVerify(
-                    cheque.getBatchNumber(),
-                    cheque.getChequeNumber(),
-                    makerId
-            );
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            return false;
-        }
-    }
-    // =========================================================
-    // RECORD MAKER REJECT
-    //
-    // Existing functionality unchanged.
-    // =========================================================
-
-    public boolean recordMakerReject(
-            String batchNumber,
-            String chequeNumber,
-            int makerId,
-            String reasonId) {
-
-        try {
-
-            dao.updateChequeStatus(
-                    batchNumber,
-                    chequeNumber,
-                    "REJECT_REQUESTED"
-            );
-
-
-            return dao.saveMakerReject(
-                    batchNumber,
-                    chequeNumber,
-                    makerId,
-                    reasonId
-            );
-
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            return false;
-        }
-    }
-
-
-    // =========================================================
-    // GET RETURN REASONS
-    //
-    // Existing functionality unchanged.
-    // =========================================================
-
-    public Map<String, String> getReturnReasons() {
-
-        return dao.getReturnReasons();
-    }
+		return dao.getReturnReasons();
+	}
 }

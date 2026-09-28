@@ -29,9 +29,7 @@
             background:#F4F7FB;
         ">
 
-        <!-- ===================================================== -->
-        <!-- BATCH VERIFICATION CONTROLLER                         -->
-        <!-- ===================================================== -->
+        <!-- BATCH VERIFICATION CONTROLLER    -->
 
         <vlayout
             apply="com.iispl.cts.controller.outward.checker.CheckerBatchVerificationController"
@@ -44,10 +42,7 @@
                 overflow:auto;
             ">
 
-
-            <!-- ================================================= -->
-            <!-- PAGE HEADER                                        -->
-            <!-- ================================================= -->
+            <!-- PAGE HEADER   -->
 
             <hlayout
                 width="100%"
@@ -79,9 +74,7 @@
             </hlayout>
 
 
-            <!-- ================================================= -->
             <!-- BATCH SUMMARY                                      -->
-            <!-- ================================================= -->
 
             <div
                 sclass="batch-summary">
@@ -156,9 +149,7 @@
             </div>
 
 
-            <!-- ================================================= -->
-            <!-- CHEQUES IN BATCH                                   -->
-            <!-- ================================================= -->
+            <!-- CHEQUES IN BATCH     -->
 
             <div
                 sclass="section-card">

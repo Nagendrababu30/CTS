@@ -36,10 +36,7 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 
 	private SessionService sessionService;
 
-	// ================================================================
-	// INIT
-	// ================================================================
-
+	// Initializes the controller and loads report batches when the clearing session is active.
 	@Override
 	public void doAfterCompose(Component component) throws Exception {
 
@@ -60,41 +57,38 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 						if (Messagebox.ON_OK.equals(event.getName())) {
 
 							Executions.sendRedirect("/login.zul");
+
 						}
+
 					});
 
 			return;
 		}
 
 		loadReportBatches();
+
 	}
 
-	// ================================================================
-	// GET PROJECT ARCHIVE DIRECTORY
-	// ================================================================
-
+	// Resolves and creates the project archive directory for the specified folder.
 	private Path getArchiveDirectory(String folderName) throws Exception {
 
-		/*
-		 * Get the deployed web application path.
-		 *
-		 * Example: C:\Users\ginja\eclipse-workspace\.metadata\
-		 * .plugins\org.eclipse.wst.server.core\tmp1\ wtpwebapps\CTS_OUTWARD
-		 */
 
 		String deployedPath = Executions.getCurrent().getDesktop().getWebApp().getRealPath("/");
 
 		if (deployedPath == null) {
 
 			throw new Exception("Unable to determine deployed application path.");
+
 		}
 
 		Path deployedRoot = Paths.get(deployedPath).toAbsolutePath().normalize();
 
 		System.out.println();
+
 		System.out.println("========================================");
 		System.out.println("PROJECT ARCHIVE LOCATION");
 		System.out.println("========================================");
+
 		System.out.println("Deployed application:");
 		System.out.println(deployedRoot);
 
@@ -118,14 +112,17 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 				workspaceRoot = workspaceRoot.getParent();
 
 				break;
+
 			}
 
 			workspaceRoot = workspaceRoot.getParent();
+
 		}
 
 		if (workspaceRoot == null) {
 
 			throw new Exception("Unable to locate Eclipse workspace.");
+
 		}
 
 		System.out.println("Eclipse workspace:");
@@ -140,6 +137,7 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 		if (projectNamePath == null) {
 
 			throw new Exception("Unable to determine project name.");
+
 		}
 
 		String projectName = projectNamePath.toString();
@@ -147,22 +145,13 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 		System.out.println("Project name:");
 		System.out.println(projectName);
 
-		/*
-		 * Source project directory:
-		 *
-		 * <workspace>\<project>
-		 */
 
 		Path projectRoot = workspaceRoot.resolve(projectName);
 
 		System.out.println("Project root:");
 		System.out.println(projectRoot);
 
-		/*
-		 * Final location:
-		 *
-		 * <project> \src \main \webapp \css \outward \Archive \<folderName>
-		 */
+
 
 		Path archiveDirectory = projectRoot
 				.resolve(Paths.get("src", "main", "webapp", "css", "outward", "Archive", folderName));
@@ -177,10 +166,7 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 		return archiveDirectory;
 	}
 
-	// ================================================================
-	// LOAD REPORT BATCHES
-	// ================================================================
-
+	// Loads completed checker batches and populates the report list.
 	private void loadReportBatches() {
 
 		try {
@@ -195,10 +181,6 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 
 				Listitem item = new Listitem();
 
-				// =====================================================
-				// BATCH NUMBER
-				// =====================================================
-
 				Listcell batchCell = new Listcell();
 
 				Label batchLabel = new Label(batchNumber);
@@ -207,17 +189,9 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 
 				item.appendChild(batchCell);
 
-				// =====================================================
-				// TOTAL CHEQUES
-				// =====================================================
-
 				Listcell totalCell = new Listcell(String.valueOf(batch.getNumberOfCheques()));
 
 				item.appendChild(totalCell);
-
-				// =====================================================
-				// VALID XML
-				// =====================================================
 
 				Listcell validCell = new Listcell();
 
@@ -232,10 +206,6 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 				validCell.appendChild(validButton);
 
 				item.appendChild(validCell);
-
-				// =====================================================
-				// REJECTED XML
-				// =====================================================
 
 				Listcell rejectedCell = new Listcell();
 
@@ -254,6 +224,7 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 				item.appendChild(rejectedCell);
 
 				reportList.appendChild(item);
+
 			}
 
 		} catch (Exception e) {
@@ -262,17 +233,17 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 
 			Messagebox.show("Unable to load report batches.\n\n" + e.getMessage(), "Checker Reports", Messagebox.OK,
 					Messagebox.ERROR);
+
 		}
+
 	}
 
-	// ================================================================
-	// DOWNLOAD VALID XML
-	// ================================================================
-
+	// Generates, archives, and downloads the valid cheque XML for the specified batch.
 	private void downloadValidXml(String batchNumber) {
 
 		System.out.println();
 		System.out.println();
+
 		System.out.println("================================================");
 		System.out.println("          VALID XML DOWNLOAD STARTED");
 		System.out.println("================================================");
@@ -282,22 +253,13 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 
 		try {
 
-			// =========================================================
-			// STEP 1 - GET VALID CHEQUES
-			// =========================================================
-
 			System.out.println();
 			System.out.println("STEP 1 -> Getting valid cheques");
 
 			List<OutwardCheque> cheques = service.getValidCheques(batchNumber);
 
 			System.out.println("Valid cheque count:");
-
 			System.out.println(cheques == null ? "NULL" : cheques.size());
-
-			// =========================================================
-			// STEP 2 - BUILD XML
-			// =========================================================
 
 			System.out.println();
 			System.out.println("STEP 2 -> Building valid XML");
@@ -309,12 +271,12 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 				System.out.println("XML is NULL. Nothing to download.");
 
 				return;
+
 			}
 
 			System.out.println("XML generated successfully.");
 
 			System.out.println("XML size:");
-
 			System.out.println(xml.length());
 
 			byte[] xmlBytes = xml.getBytes(StandardCharsets.UTF_8);
@@ -322,12 +284,8 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 			String fileName = batchNumber + "_valid.xml";
 
 			System.out.println("File name:");
-
 			System.out.println(fileName);
 
-			// =========================================================
-			// STEP 3 - SAVE XML INSIDE PROJECT
-			// =========================================================
 
 			System.out.println();
 			System.out.println("STEP 3 -> Saving XML internally");
@@ -341,12 +299,7 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 			System.out.println("XML saved internally.");
 
 			System.out.println("Internal file path:");
-
 			System.out.println(internalFilePath.toAbsolutePath());
-
-			// =========================================================
-			// STEP 4 - DOWNLOAD XML TO BROWSER
-			// =========================================================
 
 			System.out.println();
 			System.out.println("STEP 4 -> Downloading XML to browser");
@@ -354,10 +307,6 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 			Filedownload.save(xmlBytes, "application/xml", fileName);
 
 			System.out.println("Browser download triggered.");
-
-			// =========================================================
-			// STEP 5 - SAVE NPCI INFORMATION
-			// =========================================================
 
 			System.out.println();
 			System.out.println("STEP 5 -> Saving NPCI submission information");
@@ -369,28 +318,20 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 			int invalidChequeCount = totalChequeCount - validChequeCount;
 
 			System.out.println("Total cheques:");
-
 			System.out.println(totalChequeCount);
 
 			System.out.println("Valid cheques:");
-
 			System.out.println(validChequeCount);
 
 			System.out.println("Invalid cheques:");
-
 			System.out.println(invalidChequeCount);
 
 			boolean saved = service.saveNPCISubmission(batchNumber, validChequeCount, invalidChequeCount, fileName);
 
 			System.out.println("NPCI submission saved:");
-
 			System.out.println(saved);
 
-			// =========================================================
-			// FINAL
-			// =========================================================
 
-			System.out.println();
 			System.out.println("================================================");
 			System.out.println("          VALID XML COMPLETED");
 			System.out.println("================================================");
@@ -406,21 +347,21 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 						"Valid Cheques XML downloaded successfully, "
 								+ "but NPCI submission details could not be saved.",
 						"Checker Reports", Messagebox.OK, Messagebox.EXCLAMATION);
+
 			}
 
 		} catch (Exception e) {
 
 			System.out.println();
+
 			System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 			System.out.println("       VALID XML FAILED");
 			System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
 			System.out.println("Exception:");
-
 			System.out.println(e.getClass().getName());
 
 			System.out.println("Message:");
-
 			System.out.println(e.getMessage());
 
 			e.printStackTrace();
@@ -429,30 +370,25 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 
 			Messagebox.show("Unable to download Valid XML.\n\n" + e.getMessage(), "Checker Reports", Messagebox.OK,
 					Messagebox.ERROR);
+
 		}
+
 	}
 
-	// ================================================================
-	// DOWNLOAD REJECTED XML
-	// ================================================================
-
+	// Generates, archives, and downloads the rejected cheque RRF XML for the specified batch.
 	private void downloadRejectedXml(String batchNumber) {
 
 		System.out.println();
 		System.out.println();
+
 		System.out.println("================================================");
 		System.out.println("        REJECTED XML DOWNLOAD STARTED");
 		System.out.println("================================================");
 
 		System.out.println("Batch number:");
-
 		System.out.println(batchNumber);
 
 		try {
-
-			// =========================================================
-			// STEP 1 - GET REJECTED CHEQUES
-			// =========================================================
 
 			System.out.println();
 			System.out.println("STEP 1 -> Getting rejected cheques");
@@ -460,12 +396,8 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 			List<OutwardCheque> cheques = service.getRrfCheques(batchNumber);
 
 			System.out.println("Rejected cheque count:");
-
 			System.out.println(cheques == null ? "NULL" : cheques.size());
 
-			// =========================================================
-			// STEP 2 - BUILD RRF XML
-			// =========================================================
 
 			System.out.println();
 			System.out.println("STEP 2 -> Building RRF XML");
@@ -477,15 +409,14 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 				System.out.println("RRF XML is NULL.");
 
 				return;
+
 			}
 
 			byte[] xmlBytes = xml.getBytes(StandardCharsets.UTF_8);
 
 			String fileName = batchNumber + "_invalid.xml";
 
-			// =========================================================
-			// STEP 3 - SAVE RRF XML INSIDE PROJECT
-			// =========================================================
+			
 
 			System.out.println();
 			System.out.println("STEP 3 -> Saving RRF XML internally");
@@ -499,12 +430,8 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 			System.out.println("RRF XML saved internally.");
 
 			System.out.println("Internal file path:");
-
 			System.out.println(internalFilePath.toAbsolutePath());
 
-			// =========================================================
-			// STEP 4 - DOWNLOAD RRF
-			// =========================================================
 
 			System.out.println();
 			System.out.println("STEP 4 -> Downloading RRF to browser");
@@ -514,6 +441,7 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 			System.out.println("Browser download triggered.");
 
 			System.out.println();
+
 			System.out.println("================================================");
 			System.out.println("        REJECTED XML COMPLETED");
 			System.out.println("================================================");
@@ -531,16 +459,15 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 		} catch (Exception e) {
 
 			System.out.println();
+
 			System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 			System.out.println("       RRF XML FAILED");
 			System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
 			System.out.println("Exception:");
-
 			System.out.println(e.getClass().getName());
 
 			System.out.println("Message:");
-
 			System.out.println(e.getMessage());
 
 			e.printStackTrace();
@@ -549,13 +476,12 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 
 			Messagebox.show("Unable to download RRF XML.\n\n" + e.getMessage(), "Checker Reports", Messagebox.OK,
 					Messagebox.ERROR);
+
 		}
+
 	}
 
-	// ================================================================
-	// BUILD VALID XML
-	// ================================================================
-
+	// Builds the valid cheque XML report for the specified batch.
 	private String buildValidXml(String batchNumber, List<OutwardCheque> cheques) {
 
 		StringBuilder xml = new StringBuilder();
@@ -567,7 +493,9 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 			if (cheque != null && "CHECKER_ACCEPTED".equalsIgnoreCase(cheque.getChequeStatus())) {
 
 				validCount++;
+
 			}
+
 		}
 
 		if (validCount == 0) {
@@ -576,6 +504,7 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 					Messagebox.OK, Messagebox.INFORMATION);
 
 			return null;
+
 		}
 
 		xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -593,9 +522,11 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 			if (!"CHECKER_ACCEPTED".equalsIgnoreCase(cheque.getChequeStatus())) {
 
 				continue;
+
 			}
 
 			appendChequeXml(xml, cheque, false);
+
 		}
 
 		xml.append("    </Cheques>\n");
@@ -603,12 +534,10 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 		xml.append("</ValidChequesReport>\n");
 
 		return xml.toString();
+
 	}
 
-	// ================================================================
-	// BUILD RRF XML
-	// ================================================================
-
+	// Builds the rejected cheque RRF XML report for the specified batch.
 	private String buildRejectedXml(String batchNumber, List<OutwardCheque> cheques) {
 
 		StringBuilder xml = new StringBuilder();
@@ -621,6 +550,7 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 					Messagebox.OK, Messagebox.INFORMATION);
 
 			return null;
+
 		}
 
 		xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -636,6 +566,7 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 		for (OutwardCheque cheque : cheques) {
 
 			appendChequeXml(xml, cheque, true);
+
 		}
 
 		xml.append("    </Cheques>\n");
@@ -643,12 +574,10 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 		xml.append("</RejectedChequesReport>\n");
 
 		return xml.toString();
+
 	}
 
-	// ================================================================
-	// APPEND CHEQUE XML
-	// ================================================================
-
+	// Appends the specified cheque details to the XML report.
 	private void appendChequeXml(StringBuilder xml, OutwardCheque cheque, boolean rejected) {
 
 		xml.append("        <Cheque>\n");
@@ -682,13 +611,6 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 
 		xml.append("            <ChequeStatus>").append(xmlValue(cheque.getChequeStatus())).append("</ChequeStatus>\n");
 
-		// ============================================================
-		// REJECTED CHEQUE INFORMATION
-		//
-		// return_reason_id and checker_remarks are loaded from
-		// cheque_processing by CheckerReportsDAO.
-		// ============================================================
-
 		if (rejected) {
 
 			xml.append("            <ReturnReasonId>")
@@ -697,35 +619,35 @@ public class CheckerReportsController extends SelectorComposer<Component> {
 
 			xml.append("            <CheckerRemarks>").append(xmlValue(cheque.getCheckerRemarks()))
 					.append("</CheckerRemarks>\n");
+
 		}
 
 		xml.append("        </Cheque>\n");
+
 	}
 
-	// ================================================================
-	// XML VALUE
-	// ================================================================
-
+	// Escapes a value for safe inclusion in XML.
 	private String xmlValue(Object value) {
 
 		if (value == null) {
 
 			return "";
+
 		}
 
 		String text = String.valueOf(value);
 
-		return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;").replace("'",
-				"&apos;");
+		return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;")
+				.replace("'", "&apos;");
+
 	}
 
-	// ================================================================
-	// REFRESH
-	// ================================================================
-
+	// Reloads the checker report batches.
 	@Listen("onClick = #refreshReportBtn")
 	public void refreshReports() {
 
 		loadReportBatches();
+
 	}
+
 }

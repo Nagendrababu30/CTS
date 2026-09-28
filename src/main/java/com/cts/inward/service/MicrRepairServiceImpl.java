@@ -416,6 +416,11 @@ public class MicrRepairServiceImpl implements MicrRepairService {
                 if (validMasterMicrs.contains(rep)) {
                     needsRepair = false;
                 }
+                micrRepaired = true;
+                comparison.setCityCodeMismatch(false);
+                comparison.setBankCodeMismatch(false);
+                comparison.setBranchCodeMismatch(false);
+                comparison.setMicrMismatch(false);
             }
 
             if (returnByMaker) {

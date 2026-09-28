@@ -65,19 +65,16 @@
    PAGE TITLE
    ========================================================= */
 .dashboard-title {
-	font-family: 'Times New Roman', serif;
-	font-size: 30px;
-	font-weight: 650;
-	letter-spacing: -0.035em;
-	position: relative;
-	display: inline-block;
-	animation: none;
-	background: transparent !important;
-	color: var(--text-primary) !important;
-	-webkit-text-fill-color: var(--text-primary) !important;
-	-webkit-background-clip: initial;
-	background-clip: initial;
-	margin-bottom: 4px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;;
+    font-size: 30px; font-weight: 650; letter-spacing: -0.035em;
+    position: relative; display: inline-block;
+    animation: none;
+    background: transparent !important;
+    color: var(--text-primary) !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
+    -webkit-background-clip: initial;
+    background-clip: initial;
+    margin-bottom: 4px;
 }
 
 /* =========================================================
@@ -117,30 +114,53 @@
 }
 
 /* =========================================================
-   SUMMARY CARD
+   SUMMARY CARD (CENTER ALIGNED)
    ========================================================= */
 .summary-card {
-	box-sizing: border-box !important;
-	min-height: 105px !important;
-	padding: 20px 24px !important;
-	background: #FFFFFF !important;
-	border: 1px solid #E4EAF3 !important;
-	border-radius: 10px !important;
-	box-shadow: 0 2px 8px rgba(16, 24, 40, 0.05) !important;
-	overflow: hidden !important;
+    box-sizing: border-box !important;
+    min-height: 105px !important;
+    padding: 20px 24px !important;
+    background: #FFFFFF !important;
+    border: 1px solid #E4EAF3 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 2px 8px rgba(16, 24, 40, 0.05) !important;
+    overflow: hidden !important;
+    
+    /* Center all card contents horizontally and vertically */
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
 }
 
 /* =========================================================
    SUMMARY CARD LABEL
    ========================================================= */
 .summary-card-label {
-	font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
-	font-size: 11px !important;
-	font-weight: 700 !important;
-	color: #667085 !important;
-	letter-spacing: 0.08em !important;
-	line-height: 1.4 !important;
-	text-transform: none;
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #667085 !important;
+    letter-spacing: 0.08em !important;
+    line-height: 1.4 !important;
+    text-align: center !important;
+    width: 100% !important;
+    display: block !important;
+}
+
+/* =========================================================
+   SUMMARY CARD VALUE
+   ========================================================= */
+
+.summary-card-value {
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
+    font-size: 34px !important;
+    font-weight: 700 !important;
+    line-height: 1.1 !important;
+    text-align: center !important;
+    width: 100% !important;
+    display: block !important;
 }
 
 /* =========================================================
@@ -316,17 +336,54 @@
 	box-shadow: none !important;
 	margin: 0 !important;
 }
-
 /* =========================================================
-   TABLE HEADER
+   TABLE HEADER (FORCE CENTERED)
    ========================================================= */
 .checker-batch-grid .z-listhead {
-	width: 100% !important;
-	height: 62px !important;
-	min-height: 62px !important;
-	background: #175CD3 !important;
-	border: none !important;
-	box-shadow: none !important;
+    background: #175CD3 !important;
+    border: none !important;
+}
+
+.checker-batch-grid .z-listheader {
+    height: 48px !important;
+    min-height: 48px !important;
+    background: #175CD3 !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-bottom: none !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.checker-batch-grid .z-listheader:last-child {
+    border-right: none !important;
+}
+
+/* Force block-level centering across all ZK internal wrapper nodes */
+.checker-batch-grid .z-listheader-content,
+.checker-batch-grid .z-listheader-content * {
+    display: block !important;
+    width: 100% !important;
+    text-align: center !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    line-height: 48px !important;
+    height: 48px !important;
+    color: #FFFFFF !important;
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em !important;
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
+}
+
+/* Strip ZK sort icon wrappers if present */
+.checker-batch-grid .z-listheader-sorticon,
+.checker-batch-grid .z-listheader::after {
+    display: none !important;
+    content: none !important;
 }
 
 /* =========================================================
@@ -353,27 +410,62 @@
 /* =========================================================
    TABLE HEADER TEXT
    ========================================================= */
+
+
+.checker-batch-grid .z-listheader {
+    text-align: center !important;
+}
+
 .checker-batch-grid
 .z-listheader-content {
-	width: 100% !important;
-	height: 62px !important;
-	min-height: 62px !important;
-	box-sizing: border-box !important;
-	padding: 0 20px !important;
-	background: transparent !important;
-	color: #FFFFFF !important;
-	font-family: 'Inter', 'Plus Jakarta Sans', 'Segoe UI', Arial,
-		sans-serif !important;
-	font-size: 13px !important;
-	font-weight: 700 !important;
-	line-height: 1.4 !important;
-	letter-spacing: 0.04em !important;
-	text-align: center !important;
-	text-transform: none;
-	align-items: center !important;
-	justify-content: center !important;
-	white-space: nowrap !important;
-	text-transform: none !important;
+
+    width: 100% !important;
+
+    height: 62px !important;
+
+    min-height: 62px !important;
+
+    box-sizing: border-box !important;
+
+    padding:
+        0 14px !important;
+
+    background: transparent !important;
+
+    color: #FFFFFF !important;
+
+    font-family:
+        'Inter',
+        'Plus Jakarta Sans',
+        'Segoe UI',
+        Arial,
+        sans-serif !important;
+
+    font-size: 13px !important;
+
+    letter-spacing:
+        0.04em !important;
+
+    /* REQUIRED FOR HORIZONTAL & VERTICAL CENTERING */
+    display:
+        flex !important;
+
+    text-transform: none !important;
+
+    justify-content:
+        center !important;
+
+    text-align:
+        center !important;
+
+    margin:
+        0 auto !important;
+
+    white-space:
+        nowrap !important;
+
+    text-transform:
+        none !important;
 }
 
 /* =========================================================
@@ -738,12 +830,24 @@
 	}
 	.checker-batch-grid
     .z-listcell-content {
-		height: 50px !important;
-		min-height: 50px !important;
-		padding: 0 8px !important;
-		font-size: 12px !important;
-	}
-	.pagination-wrapper {
-		text-align: right !important;
-	}
+
+        height:
+            50px !important;
+
+        min-height:
+            50px !important;
+
+        padding:
+            0 8px !important;
+
+        font-size:
+            12px !important;
+    }
+
+
+    .pagination-wrapper {
+
+        text-align:
+            right !important;
+    }
 }

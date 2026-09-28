@@ -6,7 +6,7 @@
    ============================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
-@import url('/css/common/loader.css?v=3');
+@import url('/css/common/loader.css?v=10');
 
 /* =========================================================
    PAGE & GLOBAL FONT
@@ -848,7 +848,13 @@
 .accept-button:disabled,
 .accept-button[disabled],
 .z-button-disd.accept-button,
-.accept-button-dull {
+.z-button-disabled.accept-button,
+.accept-button-dull,
+.accept-button:disabled:hover,
+.accept-button[disabled]:hover,
+.z-button-disd.accept-button:hover,
+.z-button-disabled.accept-button:hover,
+.accept-button-dull:hover {
     background: #A6F4C5 !important;
     background-color: #A6F4C5 !important;
     border: 1.5px solid #86EFAC !important;
@@ -856,6 +862,7 @@
     opacity: 0.55 !important;
     box-shadow: none !important;
     cursor: not-allowed !important;
+    pointer-events: auto !important;
     transform: none !important;
 }
 
@@ -872,6 +879,27 @@
     color: #6D28D9 !important;
 }
 
+.return-button:disabled,
+.return-button[disabled],
+.z-button-disd.return-button,
+.z-button-disabled.return-button,
+.return-button-dull,
+.return-button:disabled:hover,
+.return-button[disabled]:hover,
+.z-button-disd.return-button:hover,
+.z-button-disabled.return-button:hover,
+.return-button-dull:hover {
+    background: #EDE9FE !important;
+    background-color: #EDE9FE !important;
+    border: 1.5px solid #DDD6FE !important;
+    color: #A78BFA !important;
+    opacity: 0.55 !important;
+    box-shadow: none !important;
+    cursor: not-allowed !important;
+    pointer-events: auto !important;
+    transform: none !important;
+}
+
 .reject-button {
     border: 1.5px solid #CBD5E1 !important;
     background: #F8FAFC !important;
@@ -883,6 +911,27 @@
     background: #EEF2F6 !important;
     border-color: #64748B !important;
     color: #0F172A !important;
+}
+
+.reject-button:disabled,
+.reject-button[disabled],
+.z-button-disd.reject-button,
+.z-button-disabled.reject-button,
+.reject-button-dull,
+.reject-button:disabled:hover,
+.reject-button[disabled]:hover,
+.z-button-disd.reject-button:hover,
+.z-button-disabled.reject-button:hover,
+.reject-button-dull:hover {
+    background: #F1F5F9 !important;
+    background-color: #F1F5F9 !important;
+    border: 1.5px solid #CBD5E1 !important;
+    color: #94A3B8 !important;
+    opacity: 0.55 !important;
+    box-shadow: none !important;
+    cursor: not-allowed !important;
+    pointer-events: auto !important;
+    transform: none !important;
 }
 
 .selected-decision {
@@ -1280,6 +1329,24 @@
     color: #0F172A !important;
 }
 
+.prev-next:disabled,
+.prev-next[disabled],
+.z-button-disd.prev-next,
+.z-button-disabled.prev-next,
+.prev-next:disabled:hover,
+.prev-next[disabled]:hover,
+.z-button-disd.prev-next:hover,
+.z-button-disabled.prev-next:hover {
+    background: #F8FAFC !important;
+    background-color: #F8FAFC !important;
+    border-color: #E2E8F0 !important;
+    color: #94A3B8 !important;
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    pointer-events: auto !important;
+    box-shadow: none !important;
+}
+
 .complete-button {
     height: 34px !important;
     padding: 0 16px !important;
@@ -1396,6 +1463,10 @@ div.return-window,
 
 .custom-modal-header.header-green {
     background: linear-gradient(135deg, #16A34A 0%, #166534 100%) !important;
+}
+
+.custom-modal-header.header-blue {
+    background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%) !important;
 }
 
 .modal-header-icon-circle {
@@ -1629,6 +1700,144 @@ div.return-window,
     box-shadow: 0 4px 12px rgba(124, 58, 237, 0.45) !important;
     transform: translateY(-1px) !important;
 }
+
+.modal-btn-confirm-complete {
+    height: 38px !important;
+    padding: 0 24px !important;
+    background: linear-gradient(180deg, #0284C7 0%, #0369A1 100%) !important;
+    color: #FFFFFF !important;
+    border: 1px solid #0369A1 !important;
+    border-radius: 8px !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3) !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+
+.modal-btn-confirm-complete:hover {
+    background: #0284C7 !important;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.45) !important;
+    transform: translateY(-1px) !important;
+}
+
+.modal-close-icon {
+    font-size: 16px !important;
+    color: rgba(255, 255, 255, 0.75) !important;
+    cursor: pointer !important;
+    padding: 6px !important;
+    border-radius: 6px !important;
+    transition: all 0.15s ease !important;
+}
+
+.modal-close-icon:hover {
+    color: #FFFFFF !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+
+.modal-notice-box {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border-radius: 10px !important;
+    padding: 14px 16px !important;
+}
+
+.notice-box-blue {
+    background: #F0F9FF !important;
+    border: 1.5px solid #BAE6FD !important;
+}
+
+.notice-box-green {
+    background: #F0FDF4 !important;
+    border: 1.5px solid #BBF7D0 !important;
+}
+
+/* =========================================================
+   ZK MESSAGEBOX MODERN STYLING
+   ========================================================= */
+
+.z-messagebox-window {
+    background: #FFFFFF !important;
+    border-radius: 16px !important;
+    box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(15, 23, 42, 0.08) !important;
+    border: none !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+
+.z-messagebox-window .z-window-header {
+    background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%) !important;
+    color: #FFFFFF !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    padding: 14px 20px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.z-messagebox-window .z-window-header .z-window-title {
+    color: #FFFFFF !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+}
+
+.z-messagebox-window .z-window-header .z-window-close {
+    color: rgba(255, 255, 255, 0.7) !important;
+    font-size: 16px !important;
+}
+
+.z-messagebox-window .z-window-header .z-window-close:hover {
+    color: #FFFFFF !important;
+}
+
+.z-messagebox-window .z-window-content {
+    padding: 22px 24px 18px 24px !important;
+    background: #FFFFFF !important;
+}
+
+.z-messagebox-window .z-messagebox {
+    display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
+}
+
+.z-messagebox-window .z-messagebox-text {
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: #1E293B !important;
+    line-height: 1.55 !important;
+}
+
+.z-messagebox-window .z-messagebox-buttons {
+    padding: 14px 20px !important;
+    background: #F8FAFC !important;
+    border-top: 1px solid #E2E8F0 !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+}
+
+.z-messagebox-window .z-messagebox-buttons .z-button {
+    height: 38px !important;
+    min-width: 85px !important;
+    padding: 0 20px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 13.5px !important;
+    background: linear-gradient(180deg, #0284C7 0%, #0369A1 100%) !important;
+    color: #FFFFFF !important;
+    border: 1px solid #0369A1 !important;
+    box-shadow: 0 2px 5px rgba(2, 132, 199, 0.25) !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+}
+
+.z-messagebox-window .z-messagebox-buttons .z-button:hover {
+    background: #0284C7 !important;
+    box-shadow: 0 4px 10px rgba(2, 132, 199, 0.4) !important;
+}
+
 
 
 .batch-details-content {

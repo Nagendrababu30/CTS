@@ -58,4 +58,25 @@ public class OcrBatchDaoImpl implements OcrBatchDao {
                 "No ocr_batch_id returned after INSERT for batch: "
                 + batchData.getBatchId());
     }
+
+    // Check if an OCR batch already exists in ocr_batch table
+    @Override
+    public boolean isBatchExists(long batchId) {
+
+        String sql = "SELECT 1 FROM ocr_batch WHERE batch_id = ?";
+
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setLong(1, batchId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next();
+            }
+
+        } catch (SQLException e) {
+            throw new IllegalStateException(
+                    "Failed to check if OCR batch exists: " + batchId, e);
+        }
+    }
 }

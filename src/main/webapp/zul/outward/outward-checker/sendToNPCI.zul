@@ -51,8 +51,7 @@
                 <label value="Send to NPCI"
                        sclass="npci-title"/>
 
-                <label value="Only batches with completed Checker verification can be sent to NPCI."
-                       sclass="npci-subtitle"/>
+               
 
             </vlayout>
 

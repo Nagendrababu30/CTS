@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.cts.inward.config.ConnectionPool;
-import com.iispl.cts.data.CTSStaticData;
 import com.iispl.cts.model.outward.OutwardCheque;
 
 public class OutwardMakerDataEntryDetailDAO {
@@ -1045,9 +1044,11 @@ public class OutwardMakerDataEntryDetailDAO {
         Map<String, String> reasons = new LinkedHashMap<>();
 
         String sql =
-                "SELECT reason_code "
+                "SELECT reason_code, reason_name "
               + "FROM public.return_reason_master "
               + "WHERE active = true "
+              + "  AND UPPER(TRIM(role_name)) = 'MAKER' "
+              + "  AND UPPER(TRIM(reason_type)) = 'REJECT' "
               + "ORDER BY reason_code ASC";
 
         try (Connection con = dataSource.getConnection();
@@ -1056,15 +1057,16 @@ public class OutwardMakerDataEntryDetailDAO {
 
             while (rs.next()) {
                 String code = rs.getString("reason_code");
+                String name = rs.getString("reason_name");
                 if (code != null && !code.trim().isEmpty()) {
-                    reasons.put(code.trim(), code.trim());
+                    reasons.put(code.trim(), name != null ? name.trim() : code.trim());
                 }
             }
 
             System.out.println(
                     "[DEBUG-CTS] Successfully loaded "
                     + reasons.size()
-                    + " return reason codes from database."
+                    + " MAKER return reasons from database."
             );
 
         } catch (Exception e) {
@@ -1077,7 +1079,6 @@ public class OutwardMakerDataEntryDetailDAO {
 
         return reasons;
     }
-
 
     // =========================================================
     // SAVE MAKER REJECT

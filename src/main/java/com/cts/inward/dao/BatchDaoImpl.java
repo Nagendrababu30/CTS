@@ -55,6 +55,21 @@ public class BatchDaoImpl implements BatchDao {
 		}
 	}
 
+	// Check if a batch already exists in inward_batch table
+	@Override
+	public boolean isBatchExists(long batchId) {
+		String sql = "SELECT 1 FROM inward_batch WHERE batch_id = ?";
+		try (Connection connection = dataSource.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql)) {
+			statement.setLong(1, batchId);
+			try (ResultSet resultSet = statement.executeQuery()) {
+				return resultSet.next();
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Error checking if batch exists: " + batchId, e);
+		}
+	}
+
 	// =========================================================
 	// GET ALL BATCHES
 	// =========================================================

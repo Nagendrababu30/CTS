@@ -65,7 +65,7 @@
     max-height: 20px !important;
     border-radius: 20px !important;
     overflow: hidden !important;
-    background: repeating-linear-gradient(135deg, #ddd 0 10px, #eee 0 20px) !important;
+    background: repeating-linear-gradient(135deg, #E2E8F0 0 10px, #F1F5F9 0 20px) !important;
     margin: 0 auto !important;
     border: none !important;
     outline: none !important;
@@ -75,7 +75,7 @@
     color: transparent !important;
 }
 
-/* The Animated Candy Progress Fill (Red/Orange stripes growing from 0% to 100%) */
+/* The Animated Candy Progress Fill (Theme Blue stripes growing from 0% to 100%) */
 .loader::before,
 .z-loading-icon::before,
 .z-apply-loading-icon::before {
@@ -86,7 +86,7 @@
     left: 0 !important;
     height: 100% !important;
     border-radius: 20px !important;
-    background: repeating-linear-gradient(135deg, #f03355 0 10px, #ffa516 0 20px) !important;
+    background: repeating-linear-gradient(135deg, #1D4ED8 0 10px, #60A5FA 0 20px) !important;
     animation: candyLoad 2s infinite ease-in-out !important;
 }
 

@@ -6,7 +6,7 @@
     width: 100%;
     height: 100%;
     box-sizing: border-box;
-    background: #eaf0fa;
+    background: #EAF0FA;
     overflow: visible !important;
 }
 
@@ -29,21 +29,38 @@
    ===================================================== */
 
 .reports-header {
-    width: 100%;
-    height: 42px;
-    box-sizing: border-box;
-    display: flex;
-    align-items: flex-start;
-    border-bottom: 1px solid #2166d1;
-    margin-bottom: 14px;
+    width: 100% !important;
+    margin-bottom: 18px !important;
 }
 
 .reports-page-title {
-    font-family: Arial, sans-serif;
-    font-size: 19px;
-    font-weight: 500;
-    color: #102a43;
-    padding-top: 1px;
+    display: block !important;
+    position: relative;
+    width: fit-content;
+    padding-bottom: 10px !important;
+    margin-bottom: 7px !important;
+    color: #0B1F3F !important;
+    font-family: 'Times New Roman', serif !important;
+    font-size: 30px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.02em !important;
+}
+
+
+/* =====================================================
+   TITLE UNDERLINE
+   ===================================================== */
+
+.reports-page-title::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 72px;
+    height: 4px;
+    border-radius: 3px;
+    background: #175CD3 !important;
 }
 
 
@@ -54,8 +71,8 @@
 .reports-card {
     width: 100%;
     box-sizing: border-box;
-    background: #ffffff;
-    border: 1px solid #d5deec;
+    background: #FFFFFF;
+    border: 1px solid #D5DEEC;
     border-radius: 6px;
     padding: 18px 20px 14px 20px;
     margin-bottom: 16px;
@@ -81,7 +98,7 @@
 .reports-section-line {
     width: 3px;
     height: 16px;
-    background: #2166d1;
+    background: #2166D1;
     margin-right: 8px;
 }
 
@@ -89,7 +106,7 @@
     font-family: Arial, sans-serif;
     font-size: 13px;
     font-weight: 600;
-    color: #173b73;
+    color: #173B73;
 }
 
 
@@ -127,18 +144,13 @@
     width: 100%;
     height: 36px;
     box-sizing: border-box;
-
-    border: 1px solid #b9c7dc;
+    border: 1px solid #B9C7DC;
     border-radius: 4px;
-
-    background: #ffffff;
-
+    background: #FFFFFF;
     font-family: Arial, sans-serif;
     font-size: 12px;
     color: #334155;
-
     padding: 7px 10px;
-
     outline: none;
 }
 
@@ -148,7 +160,7 @@
    ===================================================== */
 
 .reports-datebox:focus {
-    border: 1px solid #2166d1;
+    border: 1px solid #2166D1;
     box-shadow: 0 0 0 1px rgba(33, 102, 209, 0.15);
 }
 
@@ -158,7 +170,7 @@
    ===================================================== */
 
 .reports-datebox::placeholder {
-    color: #9aa7b8;
+    color: #9AA7B8;
     opacity: 1;
 }
 
@@ -170,12 +182,9 @@
 .reports-combobox {
     height: 36px;
     box-sizing: border-box;
-
-    border: 1px solid #b9c7dc;
+    border: 1px solid #B9C7DC;
     border-radius: 4px;
-
-    background: #ffffff;
-
+    background: #FFFFFF;
     font-family: Arial, sans-serif;
     font-size: 12px;
 }
@@ -186,16 +195,13 @@
    ===================================================== */
 
 .reports-export-button {
-    background: #2166d1;
-    color: #ffffff;
-
-    border: 1px solid #2166d1;
+    background: #2166D1;
+    color: #FFFFFF;
+    border: 1px solid #2166D1;
     border-radius: 4px;
-
     font-family: Arial, sans-serif;
     font-size: 11px;
     font-weight: 600;
-
     cursor: pointer;
 }
 
@@ -205,7 +211,7 @@
    ===================================================== */
 
 .reports-export-button:hover {
-    background: #1557b8;
+    background: #1557B8;
 }
 
 
@@ -214,7 +220,7 @@
    ===================================================== */
 
 .reports-export-button:active {
-    background: #104a9e;
+    background: #104A9E;
 }
 
 
@@ -225,7 +231,6 @@
 .reports-hint {
     display: block;
     margin-top: 12px;
-
     font-family: Arial, sans-serif;
     font-size: 10px;
     color: #718096;
@@ -239,19 +244,13 @@
 .reports-history-card {
     width: 100%;
     box-sizing: border-box;
-
-    background: #ffffff;
-
-    border: 1px solid #d5deec;
+    background: #FFFFFF;
+    border: 1px solid #D5DEEC;
     border-radius: 6px;
-
     padding: 15px 16px 8px 16px;
-
     box-shadow: 0 1px 3px rgba(31, 55, 80, 0.08);
-
     position: relative;
     z-index: 1;
-
     overflow: visible !important;
 }
 
@@ -263,10 +262,8 @@
 .reports-history-table-container {
     width: 100%;
     box-sizing: border-box;
-
     position: relative;
     z-index: 1;
-
     overflow: visible !important;
 }
 
@@ -277,12 +274,9 @@
 
 .reports-history-listbox {
     width: 100%;
-
-    border: 1px solid #d4dce8;
-
+    border: 1px solid #D4DCE8;
     box-sizing: border-box;
-
-    background: #ffffff;
+    background: #FFFFFF;
 }
 
 
@@ -291,7 +285,7 @@
    ===================================================== */
 
 .reports-listhead {
-    background: #2166d1;
+    background: #2166D1;
 }
 
 
@@ -300,12 +294,9 @@
    ===================================================== */
 
 .reports-listheader {
-    background: #2166d1;
-
-    color: #ffffff;
-
-    border-right: 1px solid #4a82d6;
-
+    background: #2166D1;
+    color: #FFFFFF;
+    border-right: 1px solid #4A82D6;
     font-family: Arial, sans-serif;
     font-size: 11px;
     font-weight: 600;
@@ -317,7 +308,7 @@
    ===================================================== */
 
 .reports-history-listbox .z-listitem {
-    background: #ffffff;
+    background: #FFFFFF;
 }
 
 
@@ -326,7 +317,7 @@
    ===================================================== */
 
 .reports-history-listbox .z-listitem:hover {
-    background: #f4f8fd;
+    background: #F4F8FD;
 }
 
 
@@ -337,7 +328,7 @@
 .reports-history-listbox .z-listcell {
     font-family: Arial, sans-serif;
     font-size: 11px;
-    color: #1f2937;
+    color: #1F2937;
 }
 
 
@@ -359,13 +350,10 @@
 .reports-record-footer {
     width: 100%;
     height: 25px;
-
     box-sizing: border-box;
-
     display: flex;
     justify-content: flex-end;
     align-items: center;
-
     padding-right: 4px;
 }
 

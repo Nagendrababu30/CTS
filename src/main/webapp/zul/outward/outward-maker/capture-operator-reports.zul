@@ -14,28 +14,57 @@
 
     <style src="/zul/outward/capture-operator-CSS/capture_operator_reports.css"/>
 
+    <!-- REPORTS HEADER STYLE -->
+    <style>
+        .reports-header {
+            width: 100% !important;
+            margin-bottom: 18px !important;
+        }
+
+        .reports-page-title {
+            display: block !important;
+            position: relative;
+            width: fit-content;
+            padding-bottom: 10px !important;
+            margin-bottom: 7px !important;
+            color: #0B1F3F !important;
+            font-family: 'Times New Roman', serif !important;
+            font-size: 30px !important;
+            font-weight: 700 !important;
+            line-height: 1.2 !important;
+            letter-spacing: -0.02em !important;
+        }
+
+        .reports-page-title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 72px;
+            height: 4px;
+            border-radius: 3px;
+            background: #175CD3 !important;
+        }
+    </style>
+
+    <!-- PAGE CONTENT -->
     <div
         self="@define(content)"
         width="100%"
         height="100%"
-        sclass="reports-page"
-        style="overflow:visible;">
+        sclass="reports-page">
 
         <vlayout
             apply="com.iispl.cts.controller.outward.CaptureOperatorReportsController"
             width="100%"
             height="100%"
             spacing="0px"
-            sclass="reports-content"
-            style="overflow:visible;">
+            sclass="reports-content">
 
-            <!-- =========================
-                 PAGE HEADER
-            ========================== -->
-
+            <!-- PAGE HEADER -->
             <div
-                sclass="reports-header"
-                style="overflow:visible;">
+                width="100%"
+                sclass="reports-header">
 
                 <label
                     value="Batch Capture Reports"
@@ -43,18 +72,14 @@
 
             </div>
 
-
-            <!-- =========================
-                 EXPORT REPORT CARD
-            ========================== -->
-
+            <!-- EXPORT REPORT CARD -->
             <div
-                sclass="reports-card"
-                style="overflow:visible;">
+                width="100%"
+                sclass="reports-card">
 
                 <div
-                    sclass="reports-card-title"
-                    style="overflow:visible;">
+                    width="100%"
+                    sclass="reports-card-title">
 
                     <div sclass="reports-section-line"/>
 
@@ -64,25 +89,16 @@
 
                 </div>
 
-
-                <!-- =========================
-                     FILTER ROW
-                ========================== -->
-
+                <!-- FILTER ROW -->
                 <hlayout
                     width="100%"
                     spacing="18px"
-                    sclass="reports-filter-row"
-                    style="overflow:visible;">
+                    sclass="reports-filter-row">
 
-                    <!-- =========================
-                         FROM DATE
-                    ========================== -->
-
+                    <!-- FROM DATE -->
                     <vlayout
                         width="220px"
-                        spacing="5px"
-                        style="overflow:visible;">
+                        spacing="5px">
 
                         <label
                             value="From Date"
@@ -97,15 +113,10 @@
 
                     </vlayout>
 
-
-                    <!-- =========================
-                         TO DATE
-                    ========================== -->
-
+                    <!-- TO DATE -->
                     <vlayout
                         width="220px"
-                        spacing="5px"
-                        style="overflow:visible;">
+                        spacing="5px">
 
                         <label
                             value="To Date"
@@ -120,11 +131,7 @@
 
                     </vlayout>
 
-
-                    <!-- =========================
-                         EXPORT FORMAT
-                    ========================== -->
-
+                    <!-- EXPORT FORMAT -->
                     <vlayout
                         width="180px"
                         spacing="5px">
@@ -152,18 +159,10 @@
 
                     </vlayout>
 
-
-                    <!-- =========================
-                         SPACE
-                    ========================== -->
-
+                    <!-- FLEX SPACE -->
                     <div hflex="1"/>
 
-
-                    <!-- =========================
-                         EXPORT BUTTON
-                    ========================== -->
-
+                    <!-- EXPORT BUTTON -->
                     <button
                         id="exportButton"
                         label="Export"
@@ -173,27 +172,20 @@
 
                 </hlayout>
 
-
-                <!-- =========================
-                     DATE HINT
-                ========================== -->
-
+                <!-- DATE HINT -->
                 <label
-                    value="From Date and To Date are optional. Format: DD/MM/YYYY"
+                    value="From Date and To Date are required. Format: DD/MM/YYYY"
                     sclass="reports-hint"/>
 
             </div>
 
-
-            <!-- =========================
-                 DOWNLOAD HISTORY CARD
-            ========================== -->
-
+            <!-- DOWNLOAD HISTORY CARD -->
             <div
-                sclass="reports-history-card"
-                style="overflow:visible;">
+                width="100%"
+                sclass="reports-history-card">
 
                 <div
+                    width="100%"
                     sclass="reports-card-title">
 
                     <div sclass="reports-section-line"/>
@@ -204,15 +196,10 @@
 
                 </div>
 
-
-                <!-- =========================
-                     HISTORY TABLE
-                ========================== -->
-
+                <!-- HISTORY TABLE -->
                 <div
-                    sclass="reports-history-table-container"
-                    vflex="min"
-                    style="overflow:visible;">
+                    width="100%"
+                    sclass="reports-history-table-container">
 
                     <listbox
                         id="downloadHistoryList"
@@ -253,11 +240,7 @@
 
                     </listbox>
 
-
-                    <!-- =========================
-                         PAGINATION
-                    ========================== -->
-
+                    <!-- PAGINATION -->
                     <paging
                         id="historyPaging"
                         pageSize="5"
@@ -266,12 +249,9 @@
 
                 </div>
 
-
-                <!-- =========================
-                     RECORD COUNT
-                ========================== -->
-
+                <!-- RECORD COUNT -->
                 <div
+                    width="100%"
                     sclass="reports-record-footer">
 
                     <label

@@ -17,7 +17,7 @@ public class CheckerSendToNPCIDAO {
 	// NPCI.
 	public List<OutwardBatch> getBatchesReadyForNPCI() {
 
-		List<OutwardBatch> batches = new ArrayList<>();
+    
 
 		String sql = "SELECT " + "    ob.batch_number, " + "    ob.branch_code, " + "    ob.cheque_count, "
 				+ "    ob.batch_folder_path, " + "    ob.created_by, " + "    ob.created_at, " + "    ob.batch_status, "

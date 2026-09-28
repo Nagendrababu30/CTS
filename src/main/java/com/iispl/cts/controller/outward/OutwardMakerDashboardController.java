@@ -444,21 +444,13 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
             );
         } else if (isAvailable) {
             Button openButton = new Button("Open");
-            openButton.setWidth("75px");
-            openButton.setHeight("32px");
-            openButton.setStyle(
-                    "background:#175CD3;"
-                            + "color:#FFFFFF;"
-                            + "border:1px solid #175CD3;"
-                            + "border-radius:6px;"
-                            + "font-family:'Inter','Segoe UI',Arial,sans-serif;"
-                            + "font-size:13px;"
-                            + "font-weight:600;"
-                            + "line-height:1;"
-                            + "cursor:pointer;"
-                            + "padding:0;"
-                            + "white-space:nowrap;"
-            );
+        	openButton.setSclass("action-btn");
+
+
+
+			openButton.setWidth("75px");
+
+			openButton.setHeight("32px");
 
             openButton.addEventListener(
                     Events.ON_CLICK,
@@ -473,6 +465,13 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
             actionLayout.setSpacing("5px");
 
             Button openButton = new Button("Open");
+        
+
+			openButton.setSclass("action-btn");
+
+			openButton.setWidth("75px");
+
+			openButton.setHeight("36px");
 
             openButton.addEventListener(
                     Events.ON_CLICK,
@@ -482,6 +481,17 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
             );
 
             Button releaseButton = new Button("Release");
+        
+
+
+
+			releaseButton.setSclass("action-btn release-btn");
+
+
+
+			releaseButton.setWidth("125px");
+
+			releaseButton.setHeight("36px");
 
             releaseButton.addEventListener(
                     Events.ON_CLICK,
@@ -924,69 +934,160 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
 
     // open assigned batch
     private void openAssignedBatch(String batchNumber) {
-        if (!hasValue(batchNumber)) {
-            Messagebox.show(
-                    "Invalid batch number.",
-                    "Batch",
-                    Messagebox.OK,
-                    Messagebox.ERROR
-            );
-            return;
-        }
 
-        String cleanBatchNumber = batchNumber.trim();
 
-        try {
-            OutwardBatch batch = findBatch(cleanBatchNumber);
 
-            if (batch == null) {
-                Messagebox.show(
-                        "Batch " + cleanBatchNumber + " was not found.",
-                        "Batch Not Found",
-                        Messagebox.OK,
-                        Messagebox.ERROR
-                );
-                return;
-            }
+		if (!hasValue(batchNumber)) {
 
-            String makerUserNumber = batch.getMakerUserNumber();
+			Messagebox.show("Invalid batch number.", "Batch", Messagebox.OK, Messagebox.ERROR);
 
-            if (!hasValue(currentUserId)
-                    || !hasValue(makerUserNumber)
-                    || !currentUserId.trim()
-                            .equalsIgnoreCase(makerUserNumber.trim())) {
-                Messagebox.show(
-                        "This batch is assigned to Maker "
-                                + safeValue(makerUserNumber) + ".",
-                        "Batch Locked",
-                        Messagebox.OK,
-                        Messagebox.EXCLAMATION
-                );
-                return;
-            }
+			return;
 
-            if (hasValue(batch.getBatchStatus())
-                    && "SENT_TO_MAKER".equalsIgnoreCase(
-                            batch.getBatchStatus().trim())) {
-                openHoldBatch(cleanBatchNumber);
-                return;
-            }
+		}
 
-            openDataEntry(cleanBatchNumber);
-        } catch (Exception e) {
-            e.printStackTrace();
 
-            Messagebox.show(
-                    "Unable to open assigned batch "
-                            + cleanBatchNumber + ".\n\n"
-                            + "Error: "
-                            + safeExceptionMessage(e),
-                    "Open Batch Error",
-                    Messagebox.OK,
-                    Messagebox.ERROR
-            );
-        }
-    }
+
+		String cleanBatchNumber = batchNumber.trim();
+
+
+
+		try {
+
+			OutwardBatch batch = findBatch(cleanBatchNumber);
+
+
+
+			if (batch == null) {
+
+				Messagebox.show("Batch " + cleanBatchNumber + " was not found.", "Batch Not Found", Messagebox.OK,
+
+						Messagebox.ERROR);
+
+				return;
+
+			}
+
+
+
+			String makerUserNumber = batch.getMakerUserNumber();
+
+
+
+			if (!hasValue(currentUserId) || !hasValue(makerUserNumber)
+
+					|| !currentUserId.trim().equalsIgnoreCase(makerUserNumber.trim())) {
+
+
+
+				Messagebox.show("This batch is assigned to Maker " + safeValue(makerUserNumber) + ".", "Batch Locked",
+
+						Messagebox.OK, Messagebox.EXCLAMATION);
+
+				return;
+
+			}
+
+
+
+			if (hasValue(batch.getBatchStatus()) && "SENT_TO_MAKER".equalsIgnoreCase(batch.getBatchStatus().trim())) {
+
+
+
+				openHoldBatch(cleanBatchNumber);
+
+				return;
+
+			}
+
+
+
+			List<OutwardCheque> cheques = service.getCheques(cleanBatchNumber);
+
+
+
+			if (cheques == null || cheques.isEmpty()) {
+
+			    Messagebox.show(
+
+			            "No cheques were found for batch " + cleanBatchNumber + ".",
+
+			            "Batch Validation",
+
+			            Messagebox.OK,
+
+			            Messagebox.ERROR);
+
+			    return;
+
+			}
+
+
+
+			boolean hasMicrErrors = false;
+
+
+
+			for (OutwardCheque cheque : cheques) {
+
+
+
+			    if (cheque == null) {
+
+			        continue;
+
+			    }
+
+
+
+			    String chequeStatus = cheque.getChequeStatus();
+
+
+
+			    if (hasValue(chequeStatus)
+
+			            && "MICR_ERROR".equalsIgnoreCase(chequeStatus.trim())) {
+
+
+
+			        hasMicrErrors = true;
+
+			        break;
+
+			    }
+
+			}
+
+
+
+			if (hasMicrErrors) {
+
+			    openMicrRepair(cleanBatchNumber);
+
+			    return;
+
+			}
+
+
+
+			openDataEntry(cleanBatchNumber);
+
+
+
+		} catch (Exception e) {
+
+			e.printStackTrace();
+
+
+
+			Messagebox.show(
+
+					"Unable to open assigned batch " + cleanBatchNumber + ".\n\n" + "Error: " + safeExceptionMessage(e),
+
+					"Open Batch Error", Messagebox.OK, Messagebox.ERROR);
+
+		}
+
+	}
 
     // create returned repair buttons
     private void appendReturnedRepairButtons(

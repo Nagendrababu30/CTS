@@ -14,6 +14,42 @@
 
     <style src="/zul/outward/capture-operator-CSS/capture_operator_captured_batches.css"/>
 
+    <!-- ================================================= -->
+    <!-- CAPTURED BATCHES HEADER STYLE                    -->
+    <!-- ================================================= -->
+
+    <style>
+        .captured-batches-header {
+            width: 100% !important;
+            margin-bottom: 18px !important;
+        }
+
+        .captured-batches-page-title {
+            display: block !important;
+            position: relative;
+            width: fit-content;
+            padding-bottom: 10px !important;
+            margin-bottom: 7px !important;
+            color: #0B1F3F !important;
+            font-family: 'Times New Roman', serif !important;
+            font-size: 30px !important;
+            font-weight: 700 !important;
+            line-height: 1.2 !important;
+            letter-spacing: -0.02em !important;
+        }
+
+        .captured-batches-page-title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 72px;
+            height: 4px;
+            border-radius: 3px;
+            background: #175CD3 !important;
+        }
+    </style>
+
     <div
         self="@define(content)"
         width="100%"
@@ -26,18 +62,32 @@
             spacing="0px"
             sclass="captured-batches-content">
 
-            <div sclass="captured-batches-header">
+            <!-- ================================================= -->
+            <!-- PAGE HEADER                                      -->
+            <!-- ================================================= -->
+
+            <div
+                sclass="captured-batches-header">
+
                 <label
                     value="Captured Batches"
                     sclass="captured-batches-page-title"/>
+
             </div>
+
+            <!-- ================================================= -->
+            <!-- BATCHES CARD                                    -->
+            <!-- ================================================= -->
 
             <div
                 width="100%"
                 sclass="captured-batches-groupbox">
 
-                <div sclass="captured-batches-caption">
+                <div
+                    sclass="captured-batches-caption">
+
                     <label value="Batches"/>
+
                 </div>
 
                 <div

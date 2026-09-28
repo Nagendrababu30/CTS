@@ -218,8 +218,15 @@ public class CheckerReportsDAO {
 			throw new RuntimeException("Error while fetching cheques for batch: " + batchNumber, e);
 		}
 
-		return cheques;
-	}
+        String sql =
+                "SELECT EXISTS ("
+                        + "SELECT 1 "
+                        + "FROM public.cheque_processing "
+                        + "WHERE batch_number = ? "
+                        + "AND UPPER(checker_action) = 'REJECT'"
+                        + ")";
+        
+        
 
 	// Fetches cheques rejected by the Checker for the specified batch.
 	public List<OutwardCheque> getRejectedCheques(String batchNumber) {

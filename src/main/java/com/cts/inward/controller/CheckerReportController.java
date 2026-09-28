@@ -11,8 +11,7 @@ import com.cts.inward.service.CheckerReportService;
 import com.cts.inward.service.CheckerReportServiceImpl;
 
 
-public class CheckerReportController
-        extends GenericForwardComposer<Component> {
+public class CheckerReportController extends GenericForwardComposer<Component> {
 
     private static final long serialVersionUID = 1L;
 
@@ -20,13 +19,12 @@ public class CheckerReportController
 
     private Button generateApprovedBtn;
 
-    private CheckerReportService reportService =
-            CheckerReportServiceImpl.of();
+    private CheckerReportService reportService = CheckerReportServiceImpl.of();
 
 
     @Override
     public void doAfterCompose(Component comp)
-            throws Exception {
+        throws Exception {
 
         super.doAfterCompose(comp);
 

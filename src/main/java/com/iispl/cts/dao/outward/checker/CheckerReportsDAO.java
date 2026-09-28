@@ -10,206 +10,428 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import com.cts.inward.config.ConnectionPool;
+
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.model.outward.OutwardCheque;
 
 public class CheckerReportsDAO {
 
-	private final DataSource dataSource = ConnectionPool.getDataSource();
+    private final DataSource dataSource =
+            ConnectionPool.getDataSource();
 
-	// Retrieves batches that have been verified by the Checker.
-	public List<OutwardBatch> getCheckerCompletedBatches() {
+    // ============================================================
+    // GET BATCHES AVAILABLE FOR REPORTS
+    // ============================================================
 
-		List<OutwardBatch> batches = new ArrayList<OutwardBatch>();
+    public List<OutwardBatch> getCheckerCompletedBatches() {
 
-		String sql = "SELECT batch_number, " + "branch_code, " + "cheque_count, " + "batch_folder_path, "
-				+ "created_by, " + "created_at, " + "batch_status " + "FROM public.outward_batch "
-				+ "WHERE UPPER(batch_status) = 'CHECKER_VERIFIED' " + "ORDER BY batch_number DESC";
+        List<OutwardBatch> batches =
+                new ArrayList<OutwardBatch>();
 
-		try (Connection connection = dataSource.getConnection();
-				PreparedStatement statement = connection.prepareStatement(sql);
-				ResultSet rs = statement.executeQuery()) {
+        String sql =
+                "SELECT batch_number, "
+                        + "branch_code, "
+                        + "cheque_count, "
+                        + "batch_folder_path, "
+                        + "created_by, "
+                        + "created_at, "
+                        + "batch_status "
+                        + "FROM public.outward_batch "
+                        + "WHERE UPPER(batch_status) = 'CHECKER_VERIFIED' "
+                        + "ORDER BY batch_number DESC";
 
-			while (rs.next()) {
+        try (Connection connection =
+                     dataSource.getConnection();
 
-				OutwardBatch batch = new OutwardBatch();
+             PreparedStatement statement =
+                     connection.prepareStatement(sql);
 
-				batch.setBatchNumber(rs.getString("batch_number"));
+             ResultSet rs =
+                     statement.executeQuery()) {
 
-				batch.setBranchCode(rs.getString("branch_code"));
+            while (rs.next()) {
 
-				batch.setNumberOfCheques(rs.getInt("cheque_count"));
+                OutwardBatch batch =
+                        new OutwardBatch();
 
-				batch.setBatchFolderPath(rs.getString("batch_folder_path"));
+                batch.setBatchNumber(
+                        rs.getString("batch_number"));
 
-				batch.setCreatedBy(String.valueOf(rs.getInt("created_by")));
+                batch.setBranchCode(
+                        rs.getString("branch_code"));
 
-				if (rs.getTimestamp("created_at") != null) {
+                batch.setNumberOfCheques(
+                        rs.getInt("cheque_count"));
 
-					batch.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-				}
+                batch.setBatchFolderPath(
+                        rs.getString("batch_folder_path"));
 
-				batch.setBatchStatus(rs.getString("batch_status"));
+                batch.setCreatedBy(
+                        String.valueOf(
+                                rs.getInt("created_by")));
 
-				batches.add(batch);
-			}
+                if (rs.getTimestamp("created_at") != null) {
 
-		} catch (Exception e) {
+                    batch.setCreatedAt(
+                            rs.getTimestamp("created_at")
+                                    .toLocalDateTime());
+                }
 
-			e.printStackTrace();
+                batch.setBatchStatus(
+                        rs.getString("batch_status"));
 
-			throw new RuntimeException("Error while fetching Checker Reports batches", e);
-		}
+                batches.add(batch);
+            }
 
-		return batches;
-	}
+        } catch (Exception e) {
 
-	// Counts all cheques associated with the specified batch.
-	public int getTotalChequeCount(String batchNumber) {
+            e.printStackTrace();
 
-		String sql = "SELECT COUNT(*) " + "FROM public.outward_cheque " + "WHERE batch_number = ?";
+            throw new RuntimeException(
+                    "Error while fetching Checker Reports batches",
+                    e);
+        }
 
-		try (Connection connection = dataSource.getConnection();
-				PreparedStatement statement = connection.prepareStatement(sql)) {
+        return batches;
+    }
 
-			statement.setString(1, batchNumber);
+    // ============================================================
+    // GET TOTAL CHEQUE COUNT
+    // ============================================================
 
-			try (ResultSet rs = statement.executeQuery()) {
+    public int getTotalChequeCount(
+            String batchNumber) {
 
-				if (rs.next()) {
+        String sql =
+                "SELECT COUNT(*) "
+                        + "FROM public.outward_cheque "
+                        + "WHERE batch_number = ?";
 
-					return rs.getInt(1);
-				}
-			}
+        try (Connection connection =
+                     dataSource.getConnection();
 
-		} catch (Exception e) {
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
 
-			e.printStackTrace();
+            statement.setString(
+                    1,
+                    batchNumber);
 
-			throw new RuntimeException("Error while getting total cheque count for batch: " + batchNumber, e);
-		}
+            try (ResultSet rs =
+                         statement.executeQuery()) {
 
-		return 0;
-	}
+                if (rs.next()) {
 
-	// Counts the cheques accepted by the Checker for the specified batch.
-	public int getValidChequeCount(String batchNumber) {
+                    return rs.getInt(1);
+                }
+            }
 
-		String sql = "SELECT COUNT(*) " + "FROM public.outward_cheque " + "WHERE batch_number = ? "
-				+ "AND UPPER(cheque_status) = " + "'CHECKER_ACCEPTED'";
+        } catch (Exception e) {
 
-		try (Connection connection = dataSource.getConnection();
-				PreparedStatement statement = connection.prepareStatement(sql)) {
+            e.printStackTrace();
 
-			statement.setString(1, batchNumber);
+            throw new RuntimeException(
+                    "Error while getting total cheque count for batch: "
+                            + batchNumber,
+                    e);
+        }
 
-			try (ResultSet rs = statement.executeQuery()) {
+        return 0;
+    }
 
-				if (rs.next()) {
+    // ============================================================
+    // GET VALID CHEQUE COUNT
+    // ============================================================
 
-					return rs.getInt(1);
-				}
-			}
+    public int getValidChequeCount(
+            String batchNumber) {
 
-		} catch (Exception e) {
+        String sql =
+                "SELECT COUNT(*) "
+                        + "FROM public.outward_cheque "
+                        + "WHERE batch_number = ? "
+                        + "AND UPPER(cheque_status) = "
+                        + "'CHECKER_ACCEPTED'";
 
-			e.printStackTrace();
+        try (Connection connection =
+                     dataSource.getConnection();
 
-			throw new RuntimeException("Error while getting valid cheque count for batch: " + batchNumber, e);
-		}
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
 
-		return 0;
-	}
+            statement.setString(
+                    1,
+                    batchNumber);
 
-	// Retrieves batch details using the specified batch number.
-	public OutwardBatch getBatchByNumber(String batchNumber) {
+            try (ResultSet rs =
+                         statement.executeQuery()) {
 
-		if (batchNumber == null || batchNumber.trim().isEmpty()) {
+                if (rs.next()) {
 
-			return null;
-		}
+                    return rs.getInt(1);
+                }
+            }
 
-		String sql = "SELECT batch_number, " + "branch_code, " + "cheque_count, " + "batch_folder_path, "
-				+ "created_by, " + "created_at, " + "batch_status " + "FROM public.outward_batch "
-				+ "WHERE batch_number = ?";
+        } catch (Exception e) {
 
-		try (Connection connection = dataSource.getConnection();
-				PreparedStatement statement = connection.prepareStatement(sql)) {
+            e.printStackTrace();
 
-			statement.setString(1, batchNumber.trim());
+            throw new RuntimeException(
+                    "Error while getting valid cheque count for batch: "
+                            + batchNumber,
+                    e);
+        }
 
-			try (ResultSet rs = statement.executeQuery()) {
+        return 0;
+    }
 
-				if (rs.next()) {
+    // ============================================================
+    // GET SINGLE BATCH
+    // ============================================================
 
-					OutwardBatch batch = new OutwardBatch();
+    public OutwardBatch getBatchByNumber(
+            String batchNumber) {
 
-					batch.setBatchNumber(rs.getString("batch_number"));
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()) {
 
-					batch.setBranchCode(rs.getString("branch_code"));
+            return null;
+        }
 
-					batch.setNumberOfCheques(rs.getInt("cheque_count"));
+        String sql =
+                "SELECT batch_number, "
+                        + "branch_code, "
+                        + "cheque_count, "
+                        + "batch_folder_path, "
+                        + "created_by, "
+                        + "created_at, "
+                        + "batch_status "
+                        + "FROM public.outward_batch "
+                        + "WHERE batch_number = ?";
 
-					batch.setBatchFolderPath(rs.getString("batch_folder_path"));
+        try (Connection connection =
+                     dataSource.getConnection();
 
-					batch.setCreatedBy(String.valueOf(rs.getInt("created_by")));
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
 
-					if (rs.getTimestamp("created_at") != null) {
+            statement.setString(
+                    1,
+                    batchNumber.trim());
 
-						batch.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-					}
+            try (ResultSet rs =
+                         statement.executeQuery()) {
 
-					batch.setBatchStatus(rs.getString("batch_status"));
+                if (rs.next()) {
 
-					return batch;
-				}
-			}
+                    OutwardBatch batch =
+                            new OutwardBatch();
 
-		} catch (Exception e) {
+                    batch.setBatchNumber(
+                            rs.getString("batch_number"));
 
-			e.printStackTrace();
+                    batch.setBranchCode(
+                            rs.getString("branch_code"));
 
-			throw new RuntimeException("Error while fetching batch: " + batchNumber, e);
-		}
+                    batch.setNumberOfCheques(
+                            rs.getInt("cheque_count"));
 
-		return null;
-	}
+                    batch.setBatchFolderPath(
+                            rs.getString("batch_folder_path"));
 
-	// Retrieves all cheque records belonging to the specified batch.
-	public List<OutwardCheque> getBatchCheques(String batchNumber) {
+                    batch.setCreatedBy(
+                            String.valueOf(
+                                    rs.getInt("created_by")));
 
-		List<OutwardCheque> cheques = new ArrayList<OutwardCheque>();
+                    if (rs.getTimestamp("created_at") != null) {
 
-		if (batchNumber == null || batchNumber.trim().isEmpty()) {
+                        batch.setCreatedAt(
+                                rs.getTimestamp("created_at")
+                                        .toLocalDateTime());
+                    }
 
-			return cheques;
-		}
+                    batch.setBatchStatus(
+                            rs.getString("batch_status"));
 
-		String sql = "SELECT batch_number, " + "cheque_number, " + "city_code, " + "bank_code, " + "branch_code, "
-				+ "drawer_account_number, " + "drawer_name, " + "payee_account_number, " + "payee_name, " + "amount, "
-				+ "amount_in_words, " + "cheque_date, " + "front_image_path, " + "back_image_path, " + "cheque_status, "
-				+ "return_reason_id, " + "checker_remarks " + "FROM public.outward_cheque " + "WHERE batch_number = ? "
-				+ "ORDER BY cheque_number";
+                    return batch;
+                }
+            }
 
-		try (Connection connection = dataSource.getConnection();
-				PreparedStatement statement = connection.prepareStatement(sql)) {
+        } catch (Exception e) {
 
-			statement.setString(1, batchNumber.trim());
+            e.printStackTrace();
 
-			try (ResultSet rs = statement.executeQuery()) {
+            throw new RuntimeException(
+                    "Error while fetching batch: "
+                            + batchNumber,
+                    e);
+        }
 
-				while (rs.next()) {
+        return null;
+    }
 
-					cheques.add(mapCheque(rs));
-				}
-			}
+    // ============================================================
+    // GET ALL CHEQUES
+    // Used by CFX / CIBF
+    // ============================================================
 
-		} catch (Exception e) {
+    public List<OutwardCheque> getBatchCheques(
+            String batchNumber) {
 
-			e.printStackTrace();
+        List<OutwardCheque> cheques =
+                new ArrayList<OutwardCheque>();
 
-			throw new RuntimeException("Error while fetching cheques for batch: " + batchNumber, e);
-		}
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()) {
+
+            return cheques;
+        }
+
+        String sql =
+                "SELECT batch_number, "
+                        + "cheque_number, "
+                        + "city_code, "
+                        + "bank_code, "
+                        + "branch_code, "
+                        + "drawer_account_number, "
+                        + "drawer_name, "
+                        + "payee_account_number, "
+                        + "payee_name, "
+                        + "amount, "
+                        + "amount_in_words, "
+                        + "cheque_date, "
+                        + "front_image_path, "
+                        + "back_image_path, "
+                        + "cheque_status, "
+                        + "return_reason_id, "
+                        + "checker_remarks "
+                        + "FROM public.outward_cheque "
+                        + "WHERE batch_number = ? "
+                        + "ORDER BY cheque_number";
+
+        try (Connection connection =
+                     dataSource.getConnection();
+
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
+
+            statement.setString(
+                    1,
+                    batchNumber.trim());
+
+            try (ResultSet rs =
+                         statement.executeQuery()) {
+
+                while (rs.next()) {
+
+                    cheques.add(
+                            mapCheque(rs));
+                }
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            throw new RuntimeException(
+                    "Error while fetching cheques for batch: "
+                            + batchNumber,
+                    e);
+        }
+
+        return cheques;
+    }
+
+    // ============================================================
+    // GET REJECTED CHEQUES
+    // RRF
+    //
+    // Rejection is taken from cheque_processing.
+    // ============================================================
+
+    public List<OutwardCheque> getRejectedCheques(
+            String batchNumber) {
+
+        List<OutwardCheque> rejectedCheques =
+                new ArrayList<OutwardCheque>();
+
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()) {
+
+            return rejectedCheques;
+        }
+
+        String sql =
+                "SELECT oc.batch_number, "
+                        + "oc.cheque_number, "
+                        + "oc.city_code, "
+                        + "oc.bank_code, "
+                        + "oc.branch_code, "
+                        + "oc.drawer_account_number, "
+                        + "oc.drawer_name, "
+                        + "oc.payee_account_number, "
+                        + "oc.payee_name, "
+                        + "oc.amount, "
+                        + "oc.amount_in_words, "
+                        + "oc.cheque_date, "
+                        + "oc.front_image_path, "
+                        + "oc.back_image_path, "
+                        + "oc.cheque_status, "
+                        + "oc.return_reason_id, "
+                        + "oc.checker_remarks "
+                        + "FROM public.outward_cheque oc "
+                        + "INNER JOIN public.cheque_processing cp "
+                        + "ON cp.batch_number = oc.batch_number "
+                        + "AND cp.cheque_number = oc.cheque_number "
+                        + "WHERE oc.batch_number = ? "
+                        + "AND UPPER(cp.checker_action) = 'REJECT' "
+                        + "ORDER BY oc.cheque_number";
+
+        try (Connection connection =
+                     dataSource.getConnection();
+
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
+
+            statement.setString(
+                    1,
+                    batchNumber.trim());
+
+            try (ResultSet rs =
+                         statement.executeQuery()) {
+
+                while (rs.next()) {
+
+                    rejectedCheques.add(
+                            mapCheque(rs));
+                }
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            throw new RuntimeException(
+                    "Error while fetching rejected cheques for batch: "
+                            + batchNumber,
+                    e);
+        }
+
+        return rejectedCheques;
+    }
+
+    // ============================================================
+    // CHECK RRF AVAILABILITY
+    // ============================================================
+
+    public boolean hasRejectedCheques(
+            String batchNumber) {
+
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()) {
+
+            return false;
+        }
 
         String sql =
                 "SELECT EXISTS ("
@@ -218,348 +440,454 @@ public class CheckerReportsDAO {
                         + "WHERE batch_number = ? "
                         + "AND UPPER(checker_action) = 'REJECT'"
                         + ")";
-        
-        
 
-	// Retrieves cheques rejected by the Checker for the specified batch.
-	public List<OutwardCheque> getRejectedCheques(String batchNumber) {
+        try (Connection connection =
+                     dataSource.getConnection();
 
-		List<OutwardCheque> rejectedCheques = new ArrayList<OutwardCheque>();
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
 
-		if (batchNumber == null || batchNumber.trim().isEmpty()) {
+            statement.setString(
+                    1,
+                    batchNumber.trim());
 
-			return rejectedCheques;
-		}
+            try (ResultSet rs =
+                         statement.executeQuery()) {
 
-		String sql = "SELECT oc.batch_number, " + "oc.cheque_number, " + "oc.city_code, " + "oc.bank_code, "
-				+ "oc.branch_code, " + "oc.drawer_account_number, " + "oc.drawer_name, " + "oc.payee_account_number, "
-				+ "oc.payee_name, " + "oc.amount, " + "oc.amount_in_words, " + "oc.cheque_date, "
-				+ "oc.front_image_path, " + "oc.back_image_path, " + "oc.cheque_status, " + "oc.return_reason_id, "
-				+ "oc.checker_remarks " + "FROM public.outward_cheque oc " + "INNER JOIN public.cheque_processing cp "
-				+ "ON cp.batch_number = oc.batch_number " + "AND cp.cheque_number = oc.cheque_number "
-				+ "WHERE oc.batch_number = ? " + "AND UPPER(cp.checker_action) = 'REJECT' "
-				+ "ORDER BY oc.cheque_number";
+                if (rs.next()) {
 
-		try (Connection connection = dataSource.getConnection();
-				PreparedStatement statement = connection.prepareStatement(sql)) {
+                    return rs.getBoolean(1);
+                }
+            }
 
-			statement.setString(1, batchNumber.trim());
+        } catch (Exception e) {
 
-			try (ResultSet rs = statement.executeQuery()) {
+            e.printStackTrace();
 
-				while (rs.next()) {
+            throw new RuntimeException(
+                    "Error while checking RRF availability for batch: "
+                            + batchNumber,
+                    e);
+        }
 
-					rejectedCheques.add(mapCheque(rs));
-				}
-			}
+        return false;
+    }
 
-		} catch (Exception e) {
+    // ============================================================
+    // GET REJECTED CHEQUE COUNT
+    // ============================================================
 
-			e.printStackTrace();
+    public int getRejectedChequeCount(
+            String batchNumber) {
 
-			throw new RuntimeException("Error while fetching rejected cheques for batch: " + batchNumber, e);
-		}
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()) {
 
-		return rejectedCheques;
-	}
+            return 0;
+        }
 
-	// Checks whether the specified batch contains any rejected cheques.
-	public boolean hasRejectedCheques(String batchNumber) {
+        String sql =
+                "SELECT COUNT(*) "
+                        + "FROM public.cheque_processing "
+                        + "WHERE batch_number = ? "
+                        + "AND UPPER(checker_action) = 'REJECT'";
 
-		if (batchNumber == null || batchNumber.trim().isEmpty()) {
+        try (Connection connection =
+                     dataSource.getConnection();
 
-			return false;
-		}
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
 
-		String sql = "SELECT EXISTS (" + "SELECT 1 " + "FROM public.cheque_processing " + "WHERE batch_number = ? "
-				+ "AND UPPER(checker_action) = 'REJECT'" + ")";
+            statement.setString(
+                    1,
+                    batchNumber.trim());
 
-		try (Connection connection = dataSource.getConnection();
-				PreparedStatement statement = connection.prepareStatement(sql)) {
+            try (ResultSet rs =
+                         statement.executeQuery()) {
 
-			statement.setString(1, batchNumber.trim());
+                if (rs.next()) {
 
-			try (ResultSet rs = statement.executeQuery()) {
+                    return rs.getInt(1);
+                }
+            }
 
-				if (rs.next()) {
+        } catch (Exception e) {
 
-					return rs.getBoolean(1);
-				}
-			}
+            e.printStackTrace();
 
-		} catch (Exception e) {
+            throw new RuntimeException(
+                    "Error while counting rejected cheques for batch: "
+                            + batchNumber,
+                    e);
+        }
 
-			e.printStackTrace();
+        return 0;
+    }
 
-			throw new RuntimeException("Error while checking RRF availability for batch: " + batchNumber, e);
-		}
+    // ============================================================
+    // CHECK WHETHER BATCH IS READY FOR NPCI
+    // ============================================================
 
-		return false;
-	}
+    public boolean isBatchReadyForNPCI(
+            String batchNumber) {
 
-	// Counts the cheques rejected by the Checker for the specified batch.
-	public int getRejectedChequeCount(String batchNumber) {
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()) {
 
-		if (batchNumber == null || batchNumber.trim().isEmpty()) {
+            return false;
+        }
 
-			return 0;
-		}
+        String sql =
+                "SELECT EXISTS ("
+                        + "SELECT 1 "
+                        + "FROM public.outward_batch "
+                        + "WHERE batch_number = ? "
+                        + "AND UPPER(batch_status) = "
+                        + "'CHECKER_VERIFIED'"
+                        + ")";
 
-		String sql = "SELECT COUNT(*) " + "FROM public.cheque_processing " + "WHERE batch_number = ? "
-				+ "AND UPPER(checker_action) = 'REJECT'";
+        try (Connection connection =
+                     dataSource.getConnection();
 
-		try (Connection connection = dataSource.getConnection();
-				PreparedStatement statement = connection.prepareStatement(sql)) {
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
 
-			statement.setString(1, batchNumber.trim());
+            statement.setString(
+                    1,
+                    batchNumber.trim());
 
-			try (ResultSet rs = statement.executeQuery()) {
+            try (ResultSet rs =
+                         statement.executeQuery()) {
 
-				if (rs.next()) {
+                if (rs.next()) {
 
-					return rs.getInt(1);
-				}
-			}
+                    return rs.getBoolean(1);
+                }
+            }
 
-		} catch (Exception e) {
+        } catch (Exception e) {
 
-			e.printStackTrace();
+            e.printStackTrace();
 
-			throw new RuntimeException("Error while counting rejected cheques for batch: " + batchNumber, e);
-		}
+            throw new RuntimeException(
+                    "Error while checking NPCI readiness for batch: "
+                            + batchNumber,
+                    e);
+        }
 
-		return 0;
-	}
+        return false;
+    }
 
-	// Verifies whether the specified batch has reached Checker verification status.
-	public boolean isBatchReadyForNPCI(String batchNumber) {
+    // ============================================================
+    // GET VALID XML FILE NAME
+    // ============================================================
 
-		if (batchNumber == null || batchNumber.trim().isEmpty()) {
+    public String getValidXmlFileName(
+            String batchNumber) {
 
-			return false;
-		}
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()) {
 
-		String sql = "SELECT EXISTS (" + "SELECT 1 " + "FROM public.outward_batch " + "WHERE batch_number = ? "
-				+ "AND UPPER(batch_status) = " + "'CHECKER_VERIFIED'" + ")";
+            return null;
+        }
 
-		try (Connection connection = dataSource.getConnection();
-				PreparedStatement statement = connection.prepareStatement(sql)) {
+        return batchNumber.trim()
+                + "_valid.xml";
+    }
 
-			statement.setString(1, batchNumber.trim());
+    // ============================================================
+    // SAVE NPCI SUBMISSION
+    // outward_npci_submission
+    // ============================================================
 
-			try (ResultSet rs = statement.executeQuery()) {
+    public boolean saveNPCISubmission(
+            String batchNumber,
+            int validChequeCount,
+            int invalidChequeCount,
+            String validXmlPath) {
 
-				if (rs.next()) {
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()) {
 
-					return rs.getBoolean(1);
-				}
-			}
+            return false;
+        }
 
-		} catch (Exception e) {
+        if (validChequeCount <= 0) {
 
-			e.printStackTrace();
+            return false;
+        }
 
-			throw new RuntimeException("Error while checking NPCI readiness for batch: " + batchNumber, e);
-		}
+        String cleanBatchNumber =
+                batchNumber.trim();
 
-		return false;
-	}
+        // ========================================================
+        // ALWAYS USE _valid.xml
+        // ========================================================
 
-	// Builds the valid XML file name from the specified batch number.
-	public String getValidXmlFileName(String batchNumber) {
+        String validXmlFileName =
+                cleanBatchNumber + "_valid.xml";
 
-		if (batchNumber == null || batchNumber.trim().isEmpty()) {
+        String finalValidXmlPath;
 
-			return null;
-		}
+        if (validXmlPath != null &&
+                !validXmlPath.trim().isEmpty()) {
 
-		return batchNumber.trim() + "_valid.xml";
-	}
+            try {
 
-	// Stores the NPCI submission details for the specified batch.
-	public boolean saveNPCISubmission(String batchNumber, int validChequeCount, int invalidChequeCount,
-			String validXmlPath) {
+                java.nio.file.Path suppliedPath =
+                        java.nio.file.Paths.get(
+                                validXmlPath.trim());
 
-		if (batchNumber == null || batchNumber.trim().isEmpty()) {
+                java.nio.file.Path parent =
+                        suppliedPath.getParent();
 
-			return false;
-		}
+                if (parent != null) {
 
-		if (validChequeCount <= 0) {
+                    finalValidXmlPath =
+                            parent
+                                    .resolve(validXmlFileName)
+                                    .toString();
 
-			return false;
-		}
+                } else {
 
-		String cleanBatchNumber = batchNumber.trim();
+                    finalValidXmlPath =
+                            validXmlFileName;
+                }
 
-		String validXmlFileName = cleanBatchNumber + "_valid.xml";
+            } catch (Exception e) {
 
-		String finalValidXmlPath;
+                finalValidXmlPath =
+                        validXmlFileName;
+            }
 
-		if (validXmlPath != null && !validXmlPath.trim().isEmpty()) {
+        } else {
 
-			try {
+            finalValidXmlPath =
+                    "src"
+                            + java.io.File.separator
+                            + "main"
+                            + java.io.File.separator
+                            + "webapp"
+                            + java.io.File.separator
+                            + "css"
+                            + java.io.File.separator
+                            + "outward"
+                            + java.io.File.separator
+                            + "Archive"
+                            + java.io.File.separator
+                            + "ValidCheques"
+                            + java.io.File.separator
+                            + validXmlFileName;
+        }
 
-				java.nio.file.Path suppliedPath = java.nio.file.Paths.get(validXmlPath.trim());
+        // ========================================================
+        // SQL
+        // ========================================================
 
-				java.nio.file.Path parent = suppliedPath.getParent();
+        String sql =
+                "INSERT INTO public.outward_npci_submission "
+                        + "(batch_number, "
+                        + "valid_cheque_count, "
+                        + "invalid_cheque_count, "
+                        + "valid_xml_path) "
+                        + "VALUES (?, ?, ?, ?)";
 
-				if (parent != null) {
+        try (Connection connection =
+                     dataSource.getConnection();
 
-					finalValidXmlPath = parent.resolve(validXmlFileName).toString();
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
 
-				} else {
+            statement.setString(
+                    1,
+                    cleanBatchNumber);
 
-					finalValidXmlPath = validXmlFileName;
-				}
+            statement.setInt(
+                    2,
+                    validChequeCount);
 
-			} catch (Exception e) {
+            statement.setInt(
+                    3,
+                    invalidChequeCount);
 
-				finalValidXmlPath = validXmlFileName;
-			}
+            statement.setString(
+                    4,
+                    finalValidXmlPath);
 
-		} else {
+            return statement.executeUpdate() > 0;
 
-			finalValidXmlPath = "src" + java.io.File.separator + "main" + java.io.File.separator + "webapp"
-					+ java.io.File.separator + "css" + java.io.File.separator + "outward" + java.io.File.separator
-					+ "Archive" + java.io.File.separator + "ValidCheques" + java.io.File.separator + validXmlFileName;
-		}
+        } catch (Exception e) {
 
-		String sql = "INSERT INTO public.outward_npci_submission " + "(batch_number, " + "valid_cheque_count, "
-				+ "invalid_cheque_count, " + "valid_xml_path) " + "VALUES (?, ?, ?, ?)";
+            e.printStackTrace();
 
-		try (Connection connection = dataSource.getConnection();
-				PreparedStatement statement = connection.prepareStatement(sql)) {
+            throw new RuntimeException(
+                    "Error while saving NPCI submission for batch: "
+                            + cleanBatchNumber,
+                    e);
+        }
+    }
 
-			statement.setString(1, cleanBatchNumber);
+    // ============================================================
+    // MARK BATCH AS NPCI SENT
+    // ============================================================
 
-			statement.setInt(2, validChequeCount);
+    public boolean markBatchAsNPCISent(
+            String batchNumber) {
 
-			statement.setInt(3, invalidChequeCount);
+        if (batchNumber == null ||
+                batchNumber.trim().isEmpty()) {
 
-			statement.setString(4, finalValidXmlPath);
+            return false;
+        }
 
-			return statement.executeUpdate() > 0;
+        String sql =
+                "UPDATE public.outward_batch "
+                        + "SET batch_status = 'NPCI_SENT' "
+                        + "WHERE batch_number = ? "
+                        + "AND UPPER(batch_status) = "
+                        + "'CHECKER_VERIFIED'";
 
-		} catch (Exception e) {
+        try (Connection connection =
+                     dataSource.getConnection();
 
-			e.printStackTrace();
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
 
-			throw new RuntimeException("Error while saving NPCI submission for batch: " + cleanBatchNumber, e);
-		}
+            statement.setString(
+                    1,
+                    batchNumber.trim());
 
-	}
+            return statement.executeUpdate() > 0;
 
-	// Updates the specified verified batch status to NPCI_SENT.
-	public boolean markBatchAsNPCISent(String batchNumber) {
+        } catch (Exception e) {
 
-		if (batchNumber == null || batchNumber.trim().isEmpty()) {
+            e.printStackTrace();
 
-			return false;
-		}
+            throw new RuntimeException(
+                    "Error while marking batch as NPCI_SENT: "
+                            + batchNumber,
+                    e);
+        }
+    }
 
-		String sql = "UPDATE public.outward_batch " + "SET batch_status = 'NPCI_SENT' " + "WHERE batch_number = ? "
-				+ "AND UPPER(batch_status) = " + "'CHECKER_VERIFIED'";
+    // ============================================================
+    // MAP CHEQUE
+    // ============================================================
 
-		try (Connection connection = dataSource.getConnection();
-				PreparedStatement statement = connection.prepareStatement(sql)) {
+    private OutwardCheque mapCheque(
+            ResultSet rs)
+            throws Exception {
 
-			statement.setString(1, batchNumber.trim());
+        OutwardCheque cheque =
+                new OutwardCheque();
 
-			return statement.executeUpdate() > 0;
+        cheque.setBatchNumber(
+                rs.getString("batch_number"));
 
-		} catch (Exception e) {
+        cheque.setChequeNumber(
+                rs.getString("cheque_number"));
 
-			e.printStackTrace();
+        cheque.setCityCode(
+                rs.getString("city_code"));
 
-			throw new RuntimeException("Error while marking batch as NPCI_SENT: " + batchNumber, e);
-		}
+        cheque.setBankCode(
+                rs.getString("bank_code"));
 
-	}
+        cheque.setBranchCode(
+                rs.getString("branch_code"));
 
-	// Converts the current database result row into an OutwardCheque object.
-	private OutwardCheque mapCheque(ResultSet rs) throws Exception {
+        cheque.setDrawerAccountNumber(
+                rs.getString("drawer_account_number"));
 
-		OutwardCheque cheque = new OutwardCheque();
+        cheque.setDrawerName(
+                rs.getString("drawer_name"));
 
-		cheque.setBatchNumber(rs.getString("batch_number"));
+        cheque.setPayeeAccountNumber(
+                rs.getString("payee_account_number"));
 
-		cheque.setChequeNumber(rs.getString("cheque_number"));
+        cheque.setPayeeName(
+                rs.getString("payee_name"));
 
-		cheque.setCityCode(rs.getString("city_code"));
+        BigDecimal amount =
+                rs.getBigDecimal("amount");
 
-		cheque.setBankCode(rs.getString("bank_code"));
+        cheque.setAmount(amount);
 
-		cheque.setBranchCode(rs.getString("branch_code"));
+        cheque.setAmountInWords(
+                rs.getString("amount_in_words"));
 
-		cheque.setDrawerAccountNumber(rs.getString("drawer_account_number"));
+        if (rs.getDate("cheque_date") != null) {
 
-		cheque.setDrawerName(rs.getString("drawer_name"));
+            cheque.setChequeDate(
+                    rs.getDate("cheque_date")
+                            .toLocalDate());
+        }
 
-		cheque.setPayeeAccountNumber(rs.getString("payee_account_number"));
+        cheque.setFrontImagePath(
+                rs.getString("front_image_path"));
 
-		cheque.setPayeeName(rs.getString("payee_name"));
+        cheque.setBackImagePath(
+                rs.getString("back_image_path"));
 
-		BigDecimal amount = rs.getBigDecimal("amount");
+        cheque.setChequeStatus(
+                rs.getString("cheque_status"));
 
-		cheque.setAmount(amount);
+        Object reasonObject =
+                rs.getObject("return_reason_id");
 
-		cheque.setAmountInWords(rs.getString("amount_in_words"));
+        if (reasonObject != null) {
 
-		if (rs.getDate("cheque_date") != null) {
+            cheque.setReturnReasonId(
+                    ((Number) reasonObject).intValue());
+        }
 
-			cheque.setChequeDate(rs.getDate("cheque_date").toLocalDate());
-		}
+        cheque.setCheckerRemarks(
+                rs.getString("checker_remarks"));
 
-		cheque.setFrontImagePath(rs.getString("front_image_path"));
+        return cheque;
+    }
+    
+    
+    /*fpublicor xml to get reject reason*/
+    public String getCheckerReasonName(
+            String batchNumber,
+            String chequeNumber) {
 
-		cheque.setBackImagePath(rs.getString("back_image_path"));
+        String sql =
+                "SELECT r.reason_name "
+                + "FROM cheque_processing cp "
+                + "INNER JOIN return_reason_master r "
+                + "ON r.reason_code = cp.checker_reason_code "
+                + "WHERE cp.batch_number = ? "
+                + "AND cp.cheque_number = ? "
+                + "AND UPPER(TRIM(cp.checker_action)) = 'REJECT' "
+                + "AND r.active = true";
 
-		cheque.setChequeStatus(rs.getString("cheque_status"));
+        try (Connection connection =
+        		dataSource.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
 
-		Object reasonObject = rs.getObject("return_reason_id");
+            statement.setString(1, batchNumber);
+            statement.setString(2, chequeNumber);
 
-		if (reasonObject != null) {
+            try (ResultSet rs =
+                         statement.executeQuery()) {
 
-			cheque.setReturnReasonId(((Number) reasonObject).intValue());
-		}
+                if (rs.next()) {
+                    return rs.getString("reason_name");
+                }
+            }
 
-		cheque.setCheckerRemarks(rs.getString("checker_remarks"));
+        } catch (Exception e) {
 
-		return cheque;
-	}
+            e.printStackTrace();
 
-	// Retrieves the active Checker rejection reason name for a specific cheque.
-	public String getCheckerReasonName(String batchNumber, String chequeNumber) {
+            throw new RuntimeException(
+                    "Error while fetching Checker rejection reason",
+                    e);
+        }
 
-		String sql = "SELECT r.reason_name " + "FROM cheque_processing cp " + "INNER JOIN return_reason_master r "
-				+ "ON r.reason_code = cp.checker_reason_code " + "WHERE cp.batch_number = ? "
-				+ "AND cp.cheque_number = ? " + "AND UPPER(TRIM(cp.checker_action)) = 'REJECT' "
-				+ "AND r.active = true";
-
-		try (Connection connection = dataSource.getConnection();
-				PreparedStatement statement = connection.prepareStatement(sql)) {
-
-			statement.setString(1, batchNumber);
-
-			statement.setString(2, chequeNumber);
-
-			try (ResultSet rs = statement.executeQuery()) {
-
-				if (rs.next()) {
-
-					return rs.getString("reason_name");
-				}
-			}
-
-		} catch (Exception e) {
-
-			e.printStackTrace();
-
-			throw new RuntimeException("Error while fetching Checker rejection reason", e);
-		}
-
-		return null;
-	}
-
+        return null;
+    }
 }

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.cts.inward.dto.ReturnReasonDto;
 import com.cts.inward.model.InwardCheque;
 import com.cts.inward.model.NpciChequeData;
 
@@ -33,7 +34,7 @@ public interface ChequeService {
 
 	java.util.Map<String, String> getChequeReturnInfo(String chequeNumber);
 
-	List<com.cts.inward.dto.ReturnReasonDto> getDataEntryReturnReasons();
+	List<ReturnReasonDto> getDataEntryReturnReasons();
 
 	boolean saveMakerDataEntryReturn(String chequeNumber, List<String> reasonCodes, String remarks, Long userId);
 }

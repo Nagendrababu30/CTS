@@ -212,9 +212,24 @@
     overflow: hidden;
 }
 
-
 .password-input-layout-styled:focus-within {
     border-color: #93C5FD;
+}
+
+/* Suppress ZK textbox wrapper borders inside password layout */
+.password-input-layout-styled .z-textbox,
+.password-input-layout-styled .z-textbox-input,
+.password-input-layout-styled .password-field-container {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.password-input-layout-styled .z-textbox:focus,
+.password-input-layout-styled .z-textbox-input:focus {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
 }
 
 /* ── Password Group Container ── */
@@ -375,6 +390,46 @@
 
 .power-button:hover:not(.z-disabled) {
     color: #DC2626;
+}
+
+/* ============================================================
+   USER DEACTIVATE/ACTIVATE BUTTONS
+   ============================================================ */
+
+.user-activate-button {
+    color: #059669 !important;
+    border: 1px solid #A7F3D0 !important;
+    background: #F0FDF4 !important;
+    padding: 6px 14px !important;
+    border-radius: 6px !important;
+    font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    min-width: 90px;
+}
+
+.user-activate-button:hover:not(.z-disabled) {
+    background: #DCFCE7 !important;
+    border-color: #86EFAC !important;
+}
+
+.user-deactivate-button {
+    color: #DC2626 !important;
+    border: 1px solid #FECACA !important;
+    background: #FEF2F2 !important;
+    padding: 6px 14px !important;
+    border-radius: 6px !important;
+    font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    min-width: 90px;
+}
+
+.user-deactivate-button:hover:not(.z-disabled) {
+    background: #FEE2E2 !important;
+    border-color: #FCA5A5 !important;
 }
 
 .action-button.z-disabled {

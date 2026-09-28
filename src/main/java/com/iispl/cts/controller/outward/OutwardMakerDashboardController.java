@@ -84,7 +84,7 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
             return;
         }
 
-        long userId;
+			Executions.sendRedirect("/zul/login.zul");
 
         if (sessionUserId instanceof Number) {
             userId = ((Number) sessionUserId).longValue();
@@ -367,18 +367,11 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
             }
         }
 
-        String makerUserNumber = batch.getMakerUserNumber();
-        String lockedBy = batch.getLockedBy();
-        String lockStatus = batch.getLockStatus();
+				Messagebox.show(
 
-        boolean hasMakerAssignment = hasValue(makerUserNumber);
-        boolean hasLockedBy = hasValue(lockedBy);
-        boolean lockStatusLocked = isLockedStatus(lockStatus);
+						"Batch "
 
-        return !hasMakerAssignment
-                && !hasLockedBy
-                && !lockStatusLocked;
-    }
+								+ cleanBatchNumber
 
     // check batches assigned to current Maker
     private boolean isMyBatch(OutwardBatch batch) {
@@ -386,19 +379,13 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
             return false;
         }
 
-        if (!hasValue(currentUserId)) {
-            return false;
-        }
+								+ "\n\nCurrent status: "
 
-        String makerUserNumber = batch.getMakerUserNumber();
+								+ batchStatus,
 
-        if (!hasValue(makerUserNumber)) {
-            return false;
-        }
+						"Invalid Batch State",
 
-        return currentUserId.trim()
-                .equalsIgnoreCase(makerUserNumber.trim());
-    }
+						Messagebox.OK,
 
     // render batch row
     private void renderBatchRow(Listitem item, OutwardBatch batch) {
@@ -406,37 +393,21 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
             return;
         }
 
-        Listcell batchCell = new Listcell();
-        batchCell.appendChild(
-                new Label(safeValue(batch.getBatchNumber()))
-        );
-        item.appendChild(batchCell);
+				);
 
-        Listcell totalCell = new Listcell();
+				return;
 
-        String chequeCount =
-                batch.getNumberOfCheques() == null
-                        ? "0"
-                        : String.valueOf(batch.getNumberOfCheques());
+			}
 
-        totalCell.appendChild(new Label(chequeCount));
-        item.appendChild(totalCell);
+			String assignedMaker =
 
-        Listcell statusCell = new Listcell();
-        statusCell.appendChild(
-                new Label(safeValue(batch.getBatchStatus()))
-        );
-        item.appendChild(statusCell);
+					batch.getMakerUserNumber();
 
-        String makerUserNumber = batch.getMakerUserNumber();
-        String lockStatus = batch.getLockStatus();
-        String lockedBy = batch.getLockedBy();
+			if (!hasValue(assignedMaker)
 
-        boolean hasMakerAssignment = hasValue(makerUserNumber);
-        boolean hasLockedBy = hasValue(lockedBy);
-        boolean lockStatusLocked = isLockedStatus(lockStatus);
+					||
 
-        boolean isReturned = false;
+					!hasValue(currentUserId)
 
         if (hasValue(batch.getBatchStatus())) {
             String status = batch.getBatchStatus().trim();
@@ -699,11 +670,7 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
                 return;
             }
 
-            OutwardValidationResult result =
-                    service.assignAndValidate(
-                            cleanBatchNumber,
-                            userId
-                    );
+								+ safeValue(assignedMaker)
 
             if (result == null) {
                 Messagebox.show(
@@ -1544,26 +1511,17 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
             String batchNumber,
             OutwardValidationResult result) {
 
-        if (result == null) {
-            return;
-        }
+		int dataEntry = result.getDataEntryErrors();
+		int micr = result.getMicrErrors();
+		int amountAccount = result.getAmountAccountErrors();
 
         int dataEntry = result.getDataEntryErrors();
         int micr = result.getMicrErrors();
         int amountAccount = result.getAmountAccountErrors();
         int totalErrors = dataEntry + micr + amountAccount;
 
-        if (totalErrors == 0) {
-            Messagebox.show(
-                    "Batch " + batchNumber
-                            + " has no validation errors.\n\n"
-                            + "The batch is ready for Checker.",
-                    "Validation Successful",
-                    Messagebox.OK,
-                    Messagebox.INFORMATION
-            );
-            return;
-        }
+		String message = "Batch " + batchNumber + " validation completed.\n\n" + "Total Cheques: "
+				+ result.getTotalCheques() + "\n\n" + "MICR Errors: " + micr;
 
         String message = "Batch " + batchNumber
                 + " validation completed.\n\n"
@@ -1601,12 +1559,12 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
             return null;
         }
 
-        try {
-            List<OutwardBatch> batches = service.getBatches();
+		try {
+			List<OutwardBatch> batches = service.getBatches();
 
-            if (batches == null) {
-                return null;
-            }
+			if (batches == null) {
+				return null;
+			}
 
             for (OutwardBatch batch : batches) {
                 if (batch != null
@@ -1618,18 +1576,12 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
         } catch (Exception e) {
             e.printStackTrace();
 
-            Messagebox.show(
-                    "Unable to find batch.\n\n"
-                            + "Error: "
-                            + safeExceptionMessage(e),
-                    "Batch Error",
-                    Messagebox.OK,
-                    Messagebox.ERROR
-            );
-        }
+			Messagebox.show("Unable to find batch.\n\n" + "Error: " + safeExceptionMessage(e), "Batch Error",
+					Messagebox.OK, Messagebox.ERROR);
+		}
 
-        return null;
-    }
+		return null;
+	}
 
     // check locked status
     private boolean isLockedStatus(String status) {
@@ -1637,12 +1589,11 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
             return false;
         }
 
-        String cleanStatus = status.trim();
+		String cleanStatus = status.trim();
 
-        return "LOCKED".equalsIgnoreCase(cleanStatus)
-                || "IN_PROGRESS".equalsIgnoreCase(cleanStatus)
-                || "ASSIGNED".equalsIgnoreCase(cleanStatus);
-    }
+		return "LOCKED".equalsIgnoreCase(cleanStatus) || "IN_PROGRESS".equalsIgnoreCase(cleanStatus)
+				|| "ASSIGNED".equalsIgnoreCase(cleanStatus);
+	}
 
     // check valid value
     private boolean hasValue(String value) {
@@ -1660,7 +1611,7 @@ public class OutwardMakerDashboardController extends SelectorComposer<Component>
             return "Unknown error";
         }
 
-        String message = e.getMessage();
+		String message = e.getMessage();
 
         return hasValue(message)
                 ? message

@@ -23,7 +23,7 @@ public class OutwardMakerMicrRepairDAO {
 
         String sql = "SELECT ob.batch_number, " +
                 "       ob.cheque_count, " +
-                "       COUNT(oc.cheque_number) " +
+                "       COUNT(DISTINCT oc.cheque_number) " +
                 "       AS micr_error_count " +
                 "FROM outward_batch ob " +
                 "INNER JOIN outward_batch_assignment oba " +

@@ -10,13 +10,10 @@ public class User implements Serializable {
 	private Long userId;
 	private String username;
 
-	// password — used by existing auth (UserDao.authenticate)
 	private String password;
 
-	// passwordHash — used by new CRUD (UserDAOImpl)
 	private String passwordHash;
 
-	// Role object — OOP approach
 	private Role role;
 
 	private String status;

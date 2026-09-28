@@ -92,7 +92,8 @@
                     placeholder="From Date"
                     format="dd/MM/yyyy"
                     width="145px"
-                    sclass="audit-datebox"/>
+                    sclass="audit-datebox" 
+                    constraint="no future"/>
 
 
                 <!-- TO DATE -->
@@ -102,7 +103,8 @@
                     placeholder="To Date"
                     format="dd/MM/yyyy"
                     width="145px"
-                    sclass="audit-datebox"/>
+                    sclass="audit-datebox"
+                    constraint="no future"/>
 
             </div>
 

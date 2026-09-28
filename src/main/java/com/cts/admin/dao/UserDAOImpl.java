@@ -130,7 +130,6 @@ public class UserDAOImpl {
 
 	public boolean createUser(User user) {
 
-		
 		String sql = "INSERT INTO \"user\" " + "(username, password, role_id, status) " + "VALUES (?, ?, ?, ?)";
 
 		try (Connection conn = ConnectionPool.getDataSource().getConnection();
@@ -160,8 +159,6 @@ public class UserDAOImpl {
 
 			stmt.setLong(2, user.getRole().getRoleId());
 
-			// NULL means preserve the existing password. A new BCrypt hash updates the password.
-			
 			stmt.setString(3, user.getPasswordHash());
 
 			stmt.setLong(4, user.getUserId());
@@ -204,8 +201,6 @@ public class UserDAOImpl {
 		}
 	}
 
-	// MAPPER 
-
 	private User mapUser(ResultSet rs) throws SQLException {
 
 		User user = new User();
@@ -214,7 +209,6 @@ public class UserDAOImpl {
 		user.setUsername(rs.getString("username"));
 		user.setStatus(rs.getString("status"));
 
-		// password column — only present in getUserById query 
 		try {
 			String pwd = rs.getString("password");
 			if (pwd != null) {
@@ -223,13 +217,11 @@ public class UserDAOImpl {
 		} catch (SQLException ignored) {
 		}
 
-		// last_login 
 		try {
 			user.setLastLoginAt(rs.getTimestamp("last_login"));
 		} catch (SQLException ignored) {
 		}
 
-		// Role 
 		long roleIdValue = rs.getLong("role_id");
 		if (!rs.wasNull()) {
 			Role role = new Role();

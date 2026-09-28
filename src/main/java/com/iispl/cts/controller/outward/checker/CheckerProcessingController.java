@@ -491,37 +491,68 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
 	private void loadFirstCheque() {
 
-		currentChequeIndex = 0;
+	    currentChequeIndex = 0;
 
-		if (chequeNumber != null && !chequeNumber.isEmpty()) {
+	    if (chequeNumber != null
+	            && !chequeNumber.trim().isEmpty()) {
 
-			OutwardCheque cheque = processingService.getCheque(batchNumber, chequeNumber);
+	        List<OutwardCheque> reVerifiedCheques =
+	                processingService.getReVerifiedCheques(
+	                        batchNumber,
+	                        checkerUserId
+	                );
 
-			if (cheque == null) {
-				showError("Cheque " + chequeNumber + " not found.");
-				return;
-			}
+	        if (reVerifiedCheques == null
+	                || reVerifiedCheques.isEmpty()) {
 
-			cheques = new ArrayList<>();
-			cheques.add(cheque);
+	            showError(
+	                    "No corrected cheques are available for re-verification."
+	            );
 
-			reVerifyMode = "RE_VERIFIED".equalsIgnoreCase(cheque.getChequeStatus());
+	            return;
+	        }
 
-			displayCheque();
-			return;
-		}
+	        cheques = reVerifiedCheques;
 
-		cheques = batchService.getChequesByBatchNumber(batchNumber);
+	        reVerifyMode = true;
 
-		if (cheques == null || cheques.isEmpty()) {
-			showError("No cheques found for this batch.");
-			return;
-		}
+	        for (int i = 0; i < cheques.size(); i++) {
 
-		reVerifyMode = false;
-		displayCheque();
+	            OutwardCheque cheque =
+	                    cheques.get(i);
+
+	            if (cheque != null
+	                    && cheque.getChequeNumber() != null
+	                    && cheque.getChequeNumber()
+	                            .trim()
+	                            .equalsIgnoreCase(
+	                                    chequeNumber.trim()
+	                            )) {
+
+	                currentChequeIndex = i;
+	                break;
+	            }
+	        }
+
+	        displayCheque();
+	        return;
+	    }
+
+	    cheques =
+	            batchService.getChequesByBatchNumber(
+	                    batchNumber
+	            );
+
+	    if (cheques == null || cheques.isEmpty()) {
+
+	        showError("No cheques found for this batch.");
+	        return;
+	    }
+
+	    reVerifyMode = false;
+
+	    displayCheque();
 	}
-
 	// ============================================================
 	// DISPLAY CHEQUE
 	// ============================================================

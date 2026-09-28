@@ -1,6 +1,7 @@
 package com.iispl.cts.dao.outward.checker;
 
 import java.math.BigDecimal;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,7 +11,6 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import com.cts.inward.config.ConnectionPool;
-import com.iispl.cts.data.CTSStaticData;
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.model.outward.OutwardCheque;
 
@@ -864,7 +864,7 @@ public class CheckerReportsDAO {
                 + "AND r.active = true";
 
         try (Connection connection =
-                     CTSStaticData.getConnection();
+        		dataSource.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(sql)) {
 

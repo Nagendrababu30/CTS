@@ -10,19 +10,11 @@ public class CaptureOperatorReportsService {
 
     private final CaptureOperatorReportsDAO reportsDAO;
 
-    // =========================================================
-    // CONSTRUCTOR
-    // =========================================================
-
     public CaptureOperatorReportsService() {
 
         reportsDAO =
                 new CaptureOperatorReportsDAO();
     }
-
-    // =========================================================
-    // GET REPORT DATA
-    // =========================================================
 
     public List<OutwardBatch> getReportData(
             long operatorId,
@@ -35,10 +27,6 @@ public class CaptureOperatorReportsService {
                 toDate
         );
     }
-
-    // =========================================================
-    // SAVE DOWNLOAD HISTORY
-    // =========================================================
 
     public void saveDownloadHistory(
             long operatorId,
@@ -53,10 +41,6 @@ public class CaptureOperatorReportsService {
                 format
         );
     }
-
-    // =========================================================
-    // GET DOWNLOAD HISTORY
-    // =========================================================
 
     public List<Object[]> getDownloadHistory(
             long operatorId) {

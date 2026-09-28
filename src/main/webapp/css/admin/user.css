@@ -807,6 +807,10 @@
     height: 40px !important;
 
     border: none !important;
+    border-right: none !important;
+    border-left: none !important;
+    border-top: none !important;
+    border-bottom: none !important;
     outline: none !important;
     box-shadow: none !important;
 
@@ -825,6 +829,17 @@
     font-weight: 500 !important;
 }
 
+/* Suppress ZK's internal textbox styling */
+.password-input-layout .z-textbox {
+    border: none !important;
+    background: transparent !important;
+}
+
+.password-input-layout .z-textbox-input {
+    border: none !important;
+    background: transparent !important;
+}
+
 
 /* Remove focus styling from password textbox */
 
@@ -832,10 +847,20 @@
 .password-input-layout .z-textbox.password-field:focus {
 
     border: none !important;
+    border-right: none !important;
+    border-left: none !important;
+    border-top: none !important;
+    border-bottom: none !important;
     outline: none !important;
     box-shadow: none !important;
 
     background: transparent !important;
+}
+
+/* Focus styling on the container instead */
+.password-input-layout:focus-within {
+    border: 1.5px solid #175CD3 !important;
+    box-shadow: 0 0 0 2px rgba(23, 92, 211, 0.1) !important;
 }
 
 

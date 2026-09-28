@@ -171,7 +171,8 @@ public class UserController extends GenericForwardComposer<Component> {
 				editBtn.setTooltiptext("Edit User");
 
 				Button statusBtn = new Button("ACTIVE".equalsIgnoreCase(user.getStatus()) ? "Deactivate" : "Activate");
-				statusBtn.setSclass("ACTIVE".equalsIgnoreCase(user.getStatus()) ? "action-button user-deactivate-button" : "action-button user-activate-button");
+				statusBtn.setSclass("ACTIVE".equalsIgnoreCase(user.getStatus()) ? "action-button user-deactivate-button"
+						: "action-button user-activate-button");
 				statusBtn.setTooltiptext(
 						"ACTIVE".equalsIgnoreCase(user.getStatus()) ? "Deactivate User" : "Activate User");
 

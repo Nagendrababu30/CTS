@@ -212,9 +212,24 @@
     overflow: hidden;
 }
 
-
 .password-input-layout-styled:focus-within {
     border-color: #93C5FD;
+}
+
+/* Suppress ZK textbox wrapper borders inside password layout */
+.password-input-layout-styled .z-textbox,
+.password-input-layout-styled .z-textbox-input,
+.password-input-layout-styled .password-field-container {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.password-input-layout-styled .z-textbox:focus,
+.password-input-layout-styled .z-textbox-input:focus {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
 }
 
 /* ── Password Group Container ── */

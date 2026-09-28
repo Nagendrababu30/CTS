@@ -133,9 +133,14 @@ public class InwardIngestionServiceImpl
                     	// Extract the batch name from the file name
                         String batchName = extractBatchName(filePath.getFileName().toString());
                         
-                        // Add the file under its batch name and file type
-                        batchMap.computeIfAbsent(batchName, k -> new LinkedHashMap<>())
-                                .put(fileType, filePath.toString());
+                        // Add the file under its batch name and file type if not already present
+                        Map<String, String> files = batchMap.computeIfAbsent(batchName, k -> new LinkedHashMap<>());
+                        if (files.containsKey(fileType)) {
+                            // Avoid overwriting if duplicate file exists for same batch in incoming directory
+                            System.out.println("[InwardIngestion] Duplicate incoming file ignored for batch " + batchName + ": " + filePath.getFileName());
+                        } else {
+                            files.put(fileType, filePath.toString());
+                        }
                     });
             
         } catch (IOException e) {

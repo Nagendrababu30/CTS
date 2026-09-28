@@ -189,33 +189,39 @@ div[style*="background: white"]::before {
     box-shadow: none !important;
 }
 
-/* 2. Header Cells (th) and Inner Text */
+/* 2. Header Cells (th) and Inner Text - CENTERED */
 .data-entry-listbox .z-listheader,
-.data-entry-listbox .z-listhead th,
-.data-entry-listbox .z-listhead .z-listheader-content {
+.data-entry-listbox .z-listhead th {
+    background: transparent !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    padding: 0 !important;
+}
+
+.data-entry-listbox .z-listhead .z-listheader-content,
+.data-entry-listbox .z-listheader-content,
+.data-entry-listbox .z-listheader * {
+    display: block !important;
+    width: 100% !important;
+    text-align: center !important;
+    margin: 0 auto !important;
     background: transparent !important;
     font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
     font-weight: 700 !important;
-    font-size: 13px !important;                 /* Same font size as Inward */
+    font-size: 13px !important;
     letter-spacing: 0.06em !important;
     text-transform: none !important;
     color: #FFFFFF !important;
-    padding: 12px 14px !important;              /* Compact height matching Inward */
-    border-right: none !important;
-    border-bottom: none !important;
+    padding: 12px 14px !important;
     text-shadow: 0 1px 2px rgba(0,0,0,0.22);
     white-space: nowrap !important;
-    vertical-align: middle !important;
+    box-sizing: border-box !important;
 }
 
-.data-entry-listbox .z-listheader * {
-    color: #FFFFFF !important;
-    font-weight: 700 !important;
-    font-size: 13px !important;
-    background: transparent !important;
-}
-
-.data-entry-listbox .z-listheader::after {
+.data-entry-listbox .z-listheader::after,
+.data-entry-listbox .z-listheader-sorticon {
     display: none !important;
 }
 

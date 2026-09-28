@@ -12,72 +12,47 @@ import java.util.List;
 
 public class CheckerSendToNPCIDAO {
 
-    private final javax.sql.DataSource dataSource =
-            ConnectionPool.getDataSource();
+	// Fetches batches that have completed Checker verification and are ready for
+	// NPCI.
+	public List<OutwardBatch> getBatchesReadyForNPCI() {
 
     public List<OutwardBatch> getBatchesReadyForNPCI() {
 
-        List<OutwardBatch> batches =
-                new ArrayList<>();
+				"    COUNT(CASE " + "        WHEN UPPER(COALESCE(oc.cheque_status, '')) "
+				+ "             = 'CHECKER_ACCEPTED' " + "        THEN 1 " + "    END) AS accepted_cheques, " +
 
-        String sql =
-                "SELECT " +
-                "    ob.batch_number, " +
-                "    ob.branch_code, " +
-                "    ob.cheque_count, " +
-                "    ob.batch_folder_path, " +
-                "    ob.created_by, " +
-                "    ob.created_at, " +
-                "    ob.batch_status, " +
+				"    COUNT(CASE " + "        WHEN UPPER(COALESCE(oc.cheque_status, '')) "
+				+ "             = 'CHECKER_REJECTED' " + "        THEN 1 " + "    END) AS rejected_cheques " +
 
-                "    COUNT(oc.cheque_number) AS total_cheques, " +
+				"FROM public.outward_batch ob " +
 
-                "    COUNT(CASE " +
-                "        WHEN UPPER(COALESCE(oc.cheque_status, '')) " +
-                "             = 'CHECKER_ACCEPTED' " +
-                "        THEN 1 " +
-                "    END) AS accepted_cheques, " +
+				"LEFT JOIN public.outward_cheque oc " + "    ON ob.batch_number = oc.batch_number " +
 
-                "    COUNT(CASE " +
-                "        WHEN UPPER(COALESCE(oc.cheque_status, '')) " +
-                "             = 'CHECKER_REJECTED' " +
-                "        THEN 1 " +
-                "    END) AS rejected_cheques " +
+				"WHERE UPPER(ob.batch_status) = 'CHECKER_VERIFIED' " +
 
-                "FROM public.outward_batch ob " +
+				"GROUP BY " + "    ob.batch_number, " + "    ob.branch_code, " + "    ob.cheque_count, "
+				+ "    ob.batch_folder_path, " + "    ob.created_by, " + "    ob.created_at, " + "    ob.batch_status "
+				+
 
-                "LEFT JOIN public.outward_cheque oc " +
-                "    ON ob.batch_number = oc.batch_number " +
+				"ORDER BY ob.created_at DESC";
 
-                "WHERE UPPER(ob.batch_status) = 'CHECKER_VERIFIED' " +
+		try (Connection con = dataSource.getConnection();
 
-                "GROUP BY " +
-                "    ob.batch_number, " +
-                "    ob.branch_code, " +
-                "    ob.cheque_count, " +
-                "    ob.batch_folder_path, " +
-                "    ob.created_by, " +
-                "    ob.created_at, " +
-                "    ob.batch_status " +
+				PreparedStatement ps = con.prepareStatement(sql);
 
-                "ORDER BY ob.created_at DESC";
+				ResultSet rs = ps.executeQuery()) {
 
+			while (rs.next()) {
 
-        try (
-                Connection con =
-                        dataSource.getConnection();
+				OutwardBatch batch = new OutwardBatch();
 
-                PreparedStatement ps =
-                        con.prepareStatement(sql);
+				batch.setBatchNumber(rs.getString("batch_number"));
 
-                ResultSet rs =
-                        ps.executeQuery()
-        ) {
+				batch.setBranchCode(rs.getString("branch_code"));
 
-            while (rs.next()) {
+				batch.setNumberOfCheques(rs.getInt("total_cheques"));
 
-                OutwardBatch batch =
-                        new OutwardBatch();
+				batch.setBatchFolderPath(rs.getString("batch_folder_path"));
 
                 batch.setBatchNumber(
                         rs.getString("batch_number")
@@ -95,25 +70,22 @@ public class CheckerSendToNPCIDAO {
                         rs.getString("batch_folder_path")
                 );
 
+		if (batchNumber == null || batchNumber.trim().isEmpty()) {
 
                 int createdBy =
                         rs.getInt("created_by");
 
-                if (!rs.wasNull()) {
+		try (Connection con = dataSource.getConnection();
 
-                    batch.setCreatedBy(
-                            String.valueOf(createdBy)
-                    );
-                }
+				PreparedStatement ps = con.prepareStatement(sql)) {
 
+			ps.setString(1, batchNumber.trim());
 
                 if (rs.getTimestamp("created_at") != null) {
 
-                    batch.setCreatedAt(
-                            rs.getTimestamp("created_at")
-                                    .toLocalDateTime()
-                    );
-                }
+					return rs.getBoolean(1);
+				}
+			}
 
                 batch.setBatchStatus(
                         rs.getString("batch_status")
@@ -122,9 +94,11 @@ public class CheckerSendToNPCIDAO {
                 batches.add(batch);
             }
 
-        } catch (Exception e) {
+			return false;
+		}
 
-            e.printStackTrace();
+		String sql = "UPDATE public.outward_batch " + "SET batch_status = 'NPCI_SENT' " + "WHERE batch_number = ? "
+				+ "  AND UPPER(batch_status) <> 'NPCI_SENT'";
 
             throw new RuntimeException(
                     "Unable to load batches ready for NPCI.", e );
@@ -133,18 +107,21 @@ public class CheckerSendToNPCIDAO {
         return batches;
     }
 
+			int updated = ps.executeUpdate();
 
     // CHECK WHETHER BATCH IS READY
 
     public boolean isBatchReadyForNPCI(
             String batchNumber) {
 
-        if (batchNumber == null ||
-                batchNumber.trim().isEmpty()) {
+			e.printStackTrace();
 
-            return false;
-        }
+			throw new RuntimeException("Unable to mark batch as NPCI_SENT.", e);
+		}
+	}
 
+	// Returns the current database status of the specified batch.
+	public String getBatchStatus(String batchNumber) {
 
         String sql =
                 "SELECT EXISTS (" +
@@ -153,6 +130,8 @@ public class CheckerSendToNPCIDAO {
                 "    WHERE batch_number = ? " +
                 "      AND UPPER(batch_status) = 'CHECKER_VERIFIED' " + ")";
 
+			return null;
+		}
 
         try ( 
         		Connection con =
@@ -166,15 +145,15 @@ public class CheckerSendToNPCIDAO {
             try ( ResultSet rs =
                             ps.executeQuery() ) {
 
-                if (rs.next()) {
+				if (rs.next()) {
 
-                    return rs.getBoolean(1);
-                }
-            }
+					return rs.getString("batch_status");
+				}
+			}
 
-        } catch (Exception e) {
+		} catch (Exception e) {
 
-            e.printStackTrace();
+			e.printStackTrace();
 
             throw new RuntimeException(
                     "Unable to check NPCI batch status.",e );

@@ -9,6 +9,9 @@ public interface BatchDao {
 
     void saveBatch(NpciBatchData batchData);
 
+    // Check if a batch already exists in inward_batch table
+    boolean isBatchExists(long batchId);
+
 	 List<NpciBatchData> getAllBatches();
 	 
 	 int getDataEntryPendingCount(long batchId);

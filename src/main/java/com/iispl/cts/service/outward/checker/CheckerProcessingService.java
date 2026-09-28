@@ -67,6 +67,7 @@ public class CheckerProcessingService {
     // ============================================================
     // GET RE-VERIFIED CHEQUES
     // ============================================================
+
     /*
      * Re-Verify is based ONLY on:
      *
@@ -78,25 +79,6 @@ public class CheckerProcessingService {
      * Batch status is deliberately NOT checked.
      */
 
-    public List<OutwardCheque> getReVerifiedCheques(
-            String batchNumber,
-            long checkerUserId) {
-
-        if (batchNumber == null
-                || batchNumber.trim().isEmpty()) {
-
-            return Collections.emptyList();
-        }
-
-        if (checkerUserId <= 0) {
-
-            return Collections.emptyList();
-        }
-
-        return chequeDao.getReVerifiedCheques(
-                batchNumber.trim(),
-                checkerUserId);
-    }
 
     // ============================================================
     // MAKER REJECTION INFORMATION
@@ -564,5 +546,29 @@ public class CheckerProcessingService {
 
         return chequeDao.getReasonName(
                 reasonCode.trim());
+    }
+
+    // ============================================================
+    // GET ALL RE-VERIFIED CHEQUES
+    // ============================================================
+
+    public List<OutwardCheque> getReVerifiedCheques(
+            String batchNumber,
+            long checkerUserId) {
+
+        if (batchNumber == null
+                || batchNumber.trim().isEmpty()) {
+
+            return Collections.emptyList();
+        }
+
+        if (checkerUserId <= 0) {
+
+            return Collections.emptyList();
+        }
+
+        return chequeDao.getReVerifiedCheques(
+                batchNumber.trim(),
+                checkerUserId);
     }
 }

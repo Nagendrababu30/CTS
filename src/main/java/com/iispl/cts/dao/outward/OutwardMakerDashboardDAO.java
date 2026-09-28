@@ -1,7 +1,6 @@
 package com.iispl.cts.dao.outward;
 
 import com.cts.inward.config.ConnectionPool;
-import com.iispl.cts.data.CTSStaticData;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Session;
 import com.iispl.cts.model.outward.OutwardBatch;
@@ -39,75 +38,95 @@ public class OutwardMakerDashboardDAO {
         List<OutwardBatch> batches = new ArrayList<>();
 
         String sql =
-            "SELECT " +
-            "ob.batch_number, " +
-            "ob.branch_code, " +
-            "ob.cheque_count, " +
-            "COALESCE(rc.returned_cheque_count, 0) AS returned_cheque_count, " +
-            "(SELECT oba.user_id " +
-            " FROM public.outward_batch_assignment oba " +
-            " WHERE oba.batch_number = ob.batch_number " +
-            " AND UPPER(TRIM(oba.assignment_role)) = 'MAKER' " +
-            " ORDER BY oba.assigned_at ASC NULLS LAST " +
-            " LIMIT 1) AS returned_maker_user_id, " +
-            "ob.batch_folder_path, " +
-            "ob.created_by, " +
-            "ob.created_at, " +
-            "ob.batch_status, " +
-            "mba.user_id AS maker_user_id, " +
-            "mba.assigned_at AS maker_assigned_at, " +
-            "mba.started_at AS maker_started_at, " +
-            "mba.completed_at AS maker_completed_at, " +
-            "mba.assignment_status AS maker_assignment_status " +
-            "FROM public.outward_batch ob " +
-            "LEFT JOIN (" +
-            "SELECT batch_number, COUNT(*) AS returned_cheque_count " +
-            "FROM public.outward_cheque " +
-            "WHERE UPPER(TRIM(cheque_status)) = 'SENT_BACK_TO_MAKER' " +
-            "GROUP BY batch_number" +
-            ") rc ON rc.batch_number = ob.batch_number " +
-            "LEFT JOIN LATERAL (" +
-            "SELECT mba.* " +
-            "FROM public.outward_batch_assignment mba " +
-            "WHERE mba.batch_number = ob.batch_number " +
-            "AND UPPER(TRIM(mba.assignment_role)) = 'MAKER' " +
-            "ORDER BY mba.assigned_at DESC NULLS LAST " +
-            "LIMIT 1" +
-            ") mba ON TRUE " +
-            "WHERE (" +
-            "COALESCE(rc.returned_cheque_count, 0) = 0 " +
-            "AND UPPER(TRIM(ob.batch_status)) NOT IN " +
-            "('SUBMITTED_TO_CHECKER','CHECKER_COMPLETED','COMPLETED','REJECTED','HOLD'," +
-            "'ON_HOLD','NPCI_SENT','CHECKER_PROCESSING','CHECKER_VERIFIED') " +
-            "AND (" +
-            "UPPER(TRIM(ob.batch_status)) = 'CAPTURED' " +
-            "OR EXISTS (" +
-            "SELECT 1 FROM public.outward_batch_assignment current_maker " +
-            "WHERE current_maker.batch_number = ob.batch_number " +
-            "AND UPPER(TRIM(current_maker.assignment_role)) = 'MAKER'" +
-            ")" +
-            ")" +
-            ") " +
-            "OR (" +
-            "COALESCE(rc.returned_cheque_count, 0) > 0 " +
-            "AND EXISTS (" +
-            "SELECT 1 " +
-            "FROM public.outward_batch_assignment original_maker " +
-            "WHERE original_maker.batch_number = ob.batch_number " +
-            "AND UPPER(TRIM(original_maker.assignment_role)) = 'MAKER' " +
-            "AND original_maker.user_id = ? " +
-            "AND original_maker.user_id = (" +
-            "SELECT first_maker.user_id " +
-            "FROM public.outward_batch_assignment first_maker " +
-            "WHERE first_maker.batch_number = ob.batch_number " +
-            "AND UPPER(TRIM(first_maker.assignment_role)) = 'MAKER' " +
-            "ORDER BY first_maker.assigned_at ASC NULLS LAST " +
-            "LIMIT 1" +
-            ")" +
-            ")" +
-            ") " +
-            "ORDER BY ob.batch_number";
+                "SELECT " +
+                "    ob.batch_number, " +
+                "    ob.branch_code, " +
+                "    ob.cheque_count, " +
+                "    COALESCE(rc.returned_cheque_count, 0) AS returned_cheque_count, " +
+                "    first_maker.user_id AS returned_maker_user_id, " +
+                "    ob.batch_folder_path, " +
+                "    ob.created_by, " +
+                "    ob.created_at, " +
+                "    ob.batch_status, " +
+                "    mba.user_id AS maker_user_id, " +
+                "    mba.assigned_at AS maker_assigned_at, " +
+                "    mba.started_at AS maker_started_at, " +
+                "    mba.completed_at AS maker_completed_at, " +
+                "    mba.assignment_status AS maker_assignment_status " +
 
+                "FROM public.outward_batch ob " +
+
+                // count returned cheques
+                "LEFT JOIN ( " +
+                "    SELECT " +
+                "        batch_number, " +
+                "        COUNT(*) AS returned_cheque_count " +
+                "    FROM public.outward_cheque " +
+                "    WHERE UPPER(TRIM(cheque_status)) = 'SENT_BACK_TO_MAKER' " +
+                "    GROUP BY batch_number " +
+                ") rc " +
+                "ON rc.batch_number = ob.batch_number " +
+
+                // get first/original Maker
+                "LEFT JOIN LATERAL ( " +
+                "    SELECT oba.user_id " +
+                "    FROM public.outward_batch_assignment oba " +
+                "    WHERE oba.batch_number = ob.batch_number " +
+                "      AND UPPER(TRIM(oba.assignment_role)) = 'MAKER' " +
+                "    ORDER BY oba.assigned_at ASC NULLS LAST " +
+                "    LIMIT 1 " +
+                ") first_maker ON TRUE " +
+
+                // get latest Maker assignment
+                "LEFT JOIN LATERAL ( " +
+                "    SELECT mba.* " +
+                "    FROM public.outward_batch_assignment mba " +
+                "    WHERE mba.batch_number = ob.batch_number " +
+                "      AND UPPER(TRIM(mba.assignment_role)) = 'MAKER' " +
+                "    ORDER BY mba.assigned_at DESC NULLS LAST " +
+                "    LIMIT 1 " +
+                ") mba ON TRUE " +
+
+                "WHERE ( " +
+
+                // =================================================
+                // 1. NORMAL BATCH
+                // =================================================
+                "    COALESCE(rc.returned_cheque_count, 0) = 0 " +
+                "    AND UPPER(TRIM(ob.batch_status)) NOT IN ( " +
+                "        'SUBMITTED_TO_CHECKER', " +
+                "        'CHECKER_COMPLETED', " +
+                "        'COMPLETED', " +
+                "        'REJECTED', " +
+                "        'HOLD', " +
+                "        'ON_HOLD', " +
+                "        'NPCI_SENT', " +
+                "        'CHECKER_PROCESSING', " +
+                "        'CHECKER_VERIFIED' " +
+                "    ) " +
+                "    AND ( " +
+                "        UPPER(TRIM(ob.batch_status)) = 'CAPTURED' " +
+                "        OR EXISTS ( " +
+                "            SELECT 1 " +
+                "            FROM public.outward_batch_assignment a " +
+                "            WHERE a.batch_number = ob.batch_number " +
+                "              AND UPPER(TRIM(a.assignment_role)) = 'MAKER' " +
+                "        ) " +
+                "    ) " +
+
+                ") " +
+
+                "OR ( " +
+
+                // =================================================
+                // 2. RETURNED BATCH
+                // =================================================
+                "    COALESCE(rc.returned_cheque_count, 0) > 0 " +
+                "    AND first_maker.user_id = ? " +
+
+                ") " +
+
+                "ORDER BY ob.batch_number";
         try (
             Connection con = dataSource.getConnection();
             PreparedStatement ps = con.prepareStatement(sql)
@@ -472,7 +491,7 @@ public class OutwardMakerDashboardDAO {
             "SELECT 1 FROM public.outward_batch WHERE batch_number = ?";
 
         try (
-            Connection con = CTSStaticData.getConnection();
+            Connection con = dataSource.getConnection();
             PreparedStatement ps = con.prepareStatement(sql)
         ) {
             ps.setString(1, batchNumber.trim());
@@ -788,7 +807,7 @@ public class OutwardMakerDashboardDAO {
             }
         }
     }
-
+   // statics of batches
     public java.util.Map<String, Integer> getDashboardCounts() throws SQLException {
         Session session = Executions.getCurrent().getSession();
         Object sessionUserId = session != null

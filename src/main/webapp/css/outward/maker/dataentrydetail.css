@@ -30,11 +30,11 @@ html, body {
 
 .data-entry-detail-vlayout {
     background: transparent !important;
-    padding: 16px 24px !important;
+    padding: 10px 18px !important;
     box-sizing: border-box !important;
-    overflow-y: auto !important;
+    overflow-y: hidden !important;
+    height: 100% !important;
 }
-
 /* ============================================================
    MODERN BANKING CLEAN CARDS
    ============================================================ */
@@ -43,11 +43,13 @@ html, body {
     border: 1px solid #E2E8F0 !important;
     border-radius: 12px !important;
     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
-    padding: 0 20px 20px 20px !important; /* Top padding set to 0 to eliminate top space */
+    padding: 0 18px 14px 18px !important;
     box-sizing: border-box !important;
-    min-height: calc(100vh - 195px) !important;
+    height: calc(100vh - 145px) !important;
+    min-height: auto !important;
     display: flex !important;
     flex-direction: column !important;
+    justify-content: space-between !important;
 }
 
 /* Header inside equal-card starts immediately at top edge */
@@ -100,15 +102,15 @@ html, body {
     background: #FFFFFF !important;
     border: 1px solid #E2E8F0 !important;
     border-radius: 8px !important;
-    padding: 12px 20px !important;
+    padding: 8px 16px !important;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03) !important;
     box-sizing: border-box !important;
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
     width: 100% !important;
+    margin-bottom: 2px !important;
 }
-
 /* Left: Back Button + Batch Number */
 .header-strip-left {
     display: inline-flex !important;
@@ -232,8 +234,9 @@ html, body {
    ============================================================ */
 .cheque-image-container {
     width: 100% !important;
-    height: 380px !important;
-    min-height: 380px !important;
+    height: calc(100vh - 250px) !important;
+    min-height: 250px !important;
+    max-height: 330px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -241,10 +244,10 @@ html, body {
     border: 1px solid #E2E8F0 !important;
     border-radius: 8px !important;
     overflow: hidden !important;
-    padding: 10px !important;
+    padding: 8px !important;
     box-sizing: border-box !important;
     margin-top: 2px !important;
-    margin-bottom: 6px !important;
+    margin-bottom: 4px !important;
 }
 
 .cheque-image-element,
@@ -316,15 +319,17 @@ html, body {
 }
 
 input.single-field-box,
-.z-decimalbox.single-field-box {
-    height: 38px !important;
-    font-size: 13px !important;
+.z-decimalbox.single-field-box,
+.form-field-datebox {
+    height: 34px !important;
+    min-height: 34px !important;
+    font-size: 12.5px !important;
     font-weight: 500 !important;
     color: #0F172A !important;
     background: #FFFFFF !important;
     border: 1px solid #CBD5E1 !important;
     border-radius: 6px !important;
-    padding: 6px 12px !important;
+    padding: 4px 10px !important;
     box-sizing: border-box !important;
 }
 

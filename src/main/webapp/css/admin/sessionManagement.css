@@ -1,470 +1,443 @@
 /* ============================================================
    SESSION MANAGEMENT PAGE
    ============================================================ */
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import
+	url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap')
+	;
 
 .session-page {
-    width: 100%;
-    min-height: 100%;
-    padding: 20px 24px 24px 24px;
-    box-sizing: border-box;
-    background:
-        radial-gradient(1200px 600px at 0% 0%, rgba(23, 92, 211, 0.12), transparent 60%),
-        radial-gradient(1000px 600px at 100% 0%, rgba(122, 90, 248, 0.10), transparent 60%),
-        radial-gradient(900px 700px at 100% 100%, rgba(18, 183, 106, 0.07), transparent 60%),
-        linear-gradient(180deg, #EAF0FA 0%, #E4ECF8 100%);
+	width: 100%;
+	min-height: 100%;
+	padding: 20px 24px 24px 24px;
+	box-sizing: border-box;
+	background: radial-gradient(1200px 600px at 0% 0%, rgba(23, 92, 211, 0.12),
+		transparent 60%),
+		radial-gradient(1000px 600px at 100% 0%, rgba(122, 90, 248, 0.10),
+		transparent 60%),
+		radial-gradient(900px 700px at 100% 100%, rgba(18, 183, 106, 0.07),
+		transparent 60%), linear-gradient(180deg, #EAF0FA 0%, #E4ECF8 100%);
 }
-
 
 /* ============================================================
    PAGE HEADER
    ============================================================ */
-
 .session-page-title {
-    font-family: 'Times New Roman', serif;
-    color: #0B1F3F;
-    font-size: 30px;
-    font-weight: 650;
-    letter-spacing: -0.035em;
-    line-height: 1.1;
-    display: inline-block;
-    position: relative;
-    margin: 0 0 32px 0 !important;
-    padding: 0 !important;
-    white-space: nowrap;
+	font-family: 'Times New Roman', serif;
+	color: #0B1F3F;
+	font-size: 30px;
+	font-weight: 650;
+	letter-spacing: -0.035em;
+	line-height: 1.1;
+	display: inline-block;
+	position: relative;
+	margin: 0 0 32px 0 !important;
+	padding: 0 !important;
+	white-space: nowrap;
 }
 
 .session-page-title::after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    left: 0;
-    width: 56px;
-    height: 3px;
-    background: #175CD3;
-    border-radius: 2px;
+	content: '';
+	position: absolute;
+	bottom: -10px;
+	left: 0;
+	width: 56px;
+	height: 3px;
+	background: #175CD3;
+	border-radius: 2px;
 }
 
 .session-page-subtitle {
-    color: #60738F;
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 22px;
-    display: block;
-    margin-top: 3px;
-    margin-bottom: 28px;
-    white-space: nowrap;
+	color: #60738F;
+	font-size: 16px;
+	font-weight: 400;
+	line-height: 22px;
+	display: block;
+	margin-top: 3px;
+	margin-bottom: 28px;
+	white-space: nowrap;
 }
-
 
 /* ============================================================
    CURRENT SESSION CARD — BASE
    ============================================================ */
-
 .current-session-card {
-    width: 100%;
-    background: #FFFFFF;
-    border: 1px solid #DDE4ED;
-    border-radius: 12px;
-    padding: 24px 28px 28px 28px;
-    box-sizing: border-box;
-    margin-bottom: 24px;
+	width: 100%;
+	background: #FFFFFF;
+	border: 1px solid #DDE4ED;
+	border-radius: 12px;
+	padding: 24px 28px 28px 28px;
+	box-sizing: border-box;
+	margin-bottom: 24px;
 }
 
 .current-session-card.active {
-    background: #F0FDF4;
-    border-color: #BBF7D0;
+	background: #F0FDF4;
+	border-color: #BBF7D0;
 }
-
 
 /* ============================================================
    CURRENT SESSION — TOP ROW
    ============================================================ */
-
 .current-session-top {
-    width: 100%;
-    margin-bottom: 18px;
+	width: 100%;
+	margin-bottom: 18px;
 }
 
 .current-session-label {
-    color: #60738F;
-    font-size: 11px;
-    font-weight: 650;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    margin-right: 12px;
+	color: #60738F;
+	font-size: 11px;
+	font-weight: 650;
+	letter-spacing: 0.09em;
+	text-transform: uppercase;
+	margin-right: 12px;
 }
-
 
 /* ============================================================
    STATUS BADGE
    ============================================================ */
-
 .status-badge {
-    display: inline-block;
-    padding: 4px 13px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 650;
-    letter-spacing: 0.04em;
-    white-space: nowrap;
+	display: inline-block;
+	padding: 4px 13px;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 650;
+	letter-spacing: 0.04em;
+	white-space: nowrap;
 }
 
 .status-inactive {
-    background: #E5E7EB;
-    color: #4B5563;
+	background: #E5E7EB;
+	color: #4B5563;
 }
 
 .status-active {
-    background: #16A34A;
-    color: #FFFFFF;
+	background: #16A34A;
+	color: #FFFFFF;
 }
-
 
 /* ============================================================
    CLOSED SESSION STATE
    ============================================================ */
-
 .closed-session-content {
-    width: 100%;
+	width: 100%;
 }
 
 .closed-session-title {
-    color: #18243A;
-    font-size: 22px;
-    font-weight: 650;
-    display: block;
-    margin-bottom: 6px;
+	color: #18243A;
+	font-size: 22px;
+	font-weight: 650;
+	display: block;
+	margin-bottom: 6px;
 }
 
 .closed-session-description {
-    color: #60738F;
-    font-size: 15px;
-    display: block;
-    margin-bottom: 20px;
+	color: #60738F;
+	font-size: 15px;
+	display: block;
+	margin-bottom: 20px;
 }
 
 .begin-session-button {
-    height: 42px;
-    min-width: 174px;
-    background: #16A34A;
-    border: 1px solid #16A34A;
-    border-radius: 7px;
-    color: #FFFFFF;
-    font-size: 15px;
-    font-weight: 650;
-    padding: 0 20px;
-    box-sizing: border-box;
-    box-shadow: none;
+	height: 42px;
+	min-width: 174px;
+	background: #16A34A;
+	border: 1px solid #16A34A;
+	border-radius: 7px;
+	color: #FFFFFF;
+	font-size: 15px;
+	font-weight: 650;
+	padding: 0 20px;
+	box-sizing: border-box;
+	box-shadow: none;
 }
 
 .begin-session-button:hover {
-    background: #15803D;
-    border-color: #15803D;
+	background: #15803D;
+	border-color: #15803D;
 }
-
 
 /* ============================================================
    ACTIVE SESSION STATE
    ============================================================ */
-
 .active-session-content {
-    width: 100%;
+	width: 100%;
 }
 
 .active-session-name {
-    color: #18243A;
-    font-size: 22px;
-    font-weight: 650;
-    display: block;
-    margin-bottom: 10px;
+	color: #18243A;
+	font-size: 22px;
+	font-weight: 650;
+	display: block;
+	margin-bottom: 10px;
 }
 
 .session-detail {
-    color: #475467;
-    font-size: 15px;
-    display: block;
-    margin-bottom: 5px;
+	color: #475467;
+	font-size: 15px;
+	display: block;
+	margin-bottom: 5px;
 }
 
 .end-session-button {
-    height: 42px;
-    min-width: 200px;
-    background: #DC2626;
-    border: 1px solid #DC2626;
-    border-radius: 7px;
-    color: #FFFFFF;
-    font-size: 15px;
-    font-weight: 650;
-    padding: 0 20px;
-    box-sizing: border-box;
-    box-shadow: none;
-    margin-top: 16px;
+	height: 42px;
+	min-width: 150px;
+	background: #DC2626;
+	border: 1px solid #DC2626;
+	border-radius: 7px;
+	color: #FFFFFF;
+	font-size: 15px;
+	font-weight: 650;
+	padding: 0 20px;
+	box-sizing: border-box;
+	box-shadow: none;
+	margin-top: 16px;
 }
 
 .end-session-button:hover {
-    background: #B91C1C;
-    border-color: #B91C1C;
+	background: #B91C1C;
+	border-color: #B91C1C;
 }
-
 
 /* ============================================================
    SESSION HISTORY CARD
    ============================================================ */
-
 .history-card {
-    width: 100%;
-    background: #FFFFFF;
-    border: 1px solid #DDE4ED;
-    border-radius: 12px;
-    padding: 24px 28px 28px 28px;
-    box-sizing: border-box;
+	width: 100%;
+	background: #FFFFFF;
+	border: 1px solid #DDE4ED;
+	border-radius: 12px;
+	padding: 24px 28px 28px 28px;
+	box-sizing: border-box;
 }
-
 
 /* ============================================================
    HISTORY HEADER
    ============================================================ */
-
 .history-header {
-    width: 100%;
-    margin-bottom: 18px;
+	width: 100%;
+	margin-bottom: 18px;
 }
 
 .history-title {
-    color: #18243A;
-    font-size: 20px;
-    font-weight: 650;
+	color: #18243A;
+	font-size: 20px;
+	font-weight: 650;
 }
-
 
 /* ============================================================
    HISTORY LISTBOX
    ============================================================ */
-
 .history-listbox {
-    width: 100%;
-    border: 1px solid #D9E1EB;
-    border-radius: 8px;
-    box-sizing: border-box;
-    overflow: hidden;
+	width: 100%;
+	border: 1px solid #D9E1EB;
+	border-radius: 8px;
+	box-sizing: border-box;
+	overflow: hidden;
 }
 
 .history-listbox .z-listhead {
-    background: #175CD3 !important;
-    border-radius: 8px 8px 0 0 !important;
+	background: #175CD3 !important;
+	border-radius: 8px 8px 0 0 !important;
 }
 
 .history-listbox .z-listheader {
-    background: transparent !important;
-    border-bottom: none !important;
-    border-right: 1px solid rgba(255,255,255,0.25) !important;
-    padding: 12px 12px !important;
-    box-sizing: border-box;
-    box-shadow: none;
+	background: transparent !important;
+	border-bottom: none !important;
+	border-right: 1px solid rgba(255, 255, 255, 0.25) !important;
+	padding: 12px 12px !important;
+	box-sizing: border-box;
+	box-shadow: none;
 }
 
 .history-listbox .z-listheader:last-child {
-    border-right: none !important;
+	border-right: none !important;
 }
 
 .history-listbox .z-listheader-content {
-    color: #FFFFFF !important;
-    font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
-    font-size: 13px;
-    font-weight: 650;
-    padding: 12px 12px !important;
-    white-space: nowrap;
-    overflow: visible;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.22);
-    letter-spacing: 0.06em;
-    text-align: center;
+	color: #FFFFFF !important;
+	font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
+	font-size: 13px;
+	font-weight: 650;
+	padding: 12px 12px !important;
+	white-space: nowrap;
+	overflow: visible;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.22);
+	letter-spacing: 0.06em;
+	text-align: center;
 }
 
-.history-listbox .z-listheader::after,
-.history-listbox .z-listheader-content::after {
-    display: none !important;
-    content: none !important;
+.history-listbox .z-listheader::after, .history-listbox .z-listheader-content::after
+	{
+	display: none !important;
+	content: none !important;
 }
 
 .history-listbox .z-listitem {
-    height: auto;
-    background: #FFFFFF;
-    border-bottom: 1px solid #E4EAF3 !important;
+	height: auto;
+	background: #FFFFFF;
+	border-bottom: 1px solid #E4EAF3 !important;
 }
 
 .history-listbox .z-listitem:nth-child(even) {
-    background: linear-gradient(90deg, #FCFDFF 0%, #F9FBFF 100%) !important;
+	background: linear-gradient(90deg, #FCFDFF 0%, #F9FBFF 100%) !important;
 }
 
 .history-listbox .z-listitem:last-child {
-    border-bottom: none !important;
+	border-bottom: none !important;
 }
 
 .history-listbox .z-listitem:hover {
-    background: #F6F9FF !important;
-    box-shadow: inset 4px 0 0 #175CD3 !important;
+	background: #F6F9FF !important;
+	box-shadow: inset 4px 0 0 #175CD3 !important;
 }
 
 .history-listbox .z-listcell {
-    background: transparent !important;
-    border: none !important;
-    padding: 0 16px !important;
-    box-sizing: border-box !important;
-    box-shadow: none !important;
-    vertical-align: middle !important;
-    font-family: 'Inter', sans-serif !important;
+	background: transparent !important;
+	border: none !important;
+	padding: 0 16px !important;
+	box-sizing: border-box !important;
+	box-shadow: none !important;
+	vertical-align: middle !important;
+	font-family: 'Inter', sans-serif !important;
 }
 
 .history-listbox .z-listcell-content {
-    color: #1F2D45 !important;
-    font-family: 'Inter', sans-serif !important;
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    line-height: 2 !important;
-    text-align: center !important;
-    display: block !important;
-    -webkit-font-smoothing: antialiased !important;
-    -moz-osx-font-smoothing: grayscale !important;
+	color: #1F2D45 !important;
+	font-family: 'Inter', sans-serif !important;
+	font-size: 14px !important;
+	font-weight: 500 !important;
+	line-height: 2 !important;
+	text-align: center !important;
+	display: block !important;
+	-webkit-font-smoothing: antialiased !important;
+	-moz-osx-font-smoothing: grayscale !important;
 }
 
-.history-listbox .session-id,
-.history-listbox .session-name,
-.history-listbox .session-type,
-.history-listbox .session-date,
-.history-listbox .start-time,
-.history-listbox .end-time,
-.history-listbox .in-progress,
-.history-listbox .table-status-active,
-.history-listbox .table-status-ended {
-    font-family: 'Inter', sans-serif !important;
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    -webkit-font-smoothing: antialiased !important;
-    -moz-osx-font-smoothing: grayscale !important;
+.history-listbox .session-id, .history-listbox .session-name,
+	.history-listbox .session-type, .history-listbox .session-date,
+	.history-listbox .start-time, .history-listbox .end-time,
+	.history-listbox .in-progress, .history-listbox .table-status-active,
+	.history-listbox .table-status-ended {
+	font-family: 'Inter', sans-serif !important;
+	font-size: 14px !important;
+	font-weight: 500 !important;
+	-webkit-font-smoothing: antialiased !important;
+	-moz-osx-font-smoothing: grayscale !important;
 }
-
 
 /* ============================================================
    HISTORY CELL LABELS — REMOVED (use .history-listbox prefixed versions above)
    ============================================================ */
 
-
 /* ============================================================
    END SESSION MODAL
    ============================================================ */
-
 .end-session-modal {
-    width: 480px;
-    background: #FFFFFF;
-    border-radius: 12px;
-    border: 1px solid #DDE4ED;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-    overflow: hidden;
+	width: 480px;
+	background: #FFFFFF;
+	border-radius: 12px;
+	border: 1px solid #DDE4ED;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+	overflow: hidden;
 }
 
 .end-session-modal .z-window-content {
-    padding: 0;
+	padding: 0;
 }
 
 .modal-header {
-    width: 100%;
-    padding: 20px 24px 16px 24px;
-    border-bottom: 1px solid #E5E7EB;
-    box-sizing: border-box;
+	width: 100%;
+	padding: 20px 24px 16px 24px;
+	border-bottom: 1px solid #E5E7EB;
+	box-sizing: border-box;
 }
 
 .modal-title {
-    color: #18243A;
-    font-size: 18px;
-    font-weight: 650;
-    flex: 1;
+	color: #18243A;
+	font-size: 18px;
+	font-weight: 650;
+	flex: 1;
 }
 
 .modal-close {
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
-    background: #F3F4F6;
-    border: none;
-    border-radius: 6px;
-    color: #6B7280;
-    font-size: 18px;
-    font-weight: 400;
-    padding: 0;
-    box-shadow: none;
-    line-height: 1;
+	width: 32px;
+	height: 32px;
+	min-width: 32px;
+	background: #F3F4F6;
+	border: none;
+	border-radius: 6px;
+	color: #6B7280;
+	font-size: 18px;
+	font-weight: 400;
+	padding: 0;
+	box-shadow: none;
+	line-height: 1;
 }
 
 .modal-close:hover {
-    background: #E5E7EB;
-    color: #18243A;
+	background: #E5E7EB;
+	color: #18243A;
 }
 
 .modal-body {
-    width: 100%;
-    padding: 20px 24px;
-    box-sizing: border-box;
+	width: 100%;
+	padding: 20px 24px;
+	box-sizing: border-box;
 }
 
 .modal-question {
-    color: #18243A;
-    font-size: 15px;
-    font-weight: 650;
-    display: block;
-    margin-bottom: 10px;
+	color: #18243A;
+	font-size: 15px;
+	font-weight: 650;
+	display: block;
+	margin-bottom: 10px;
 }
 
 .modal-description {
-    color: #60738F;
-    font-size: 14px;
-    line-height: 1.5;
-    display: block;
+	color: #60738F;
+	font-size: 14px;
+	line-height: 1.5;
+	display: block;
 }
 
 .modal-footer {
-    width: 100%;
-    padding: 16px 24px 20px 24px;
-    border-top: 1px solid #E5E7EB;
-    box-sizing: border-box;
+	width: 100%;
+	padding: 16px 24px 20px 24px;
+	border-top: 1px solid #E5E7EB;
+	box-sizing: border-box;
 }
 
 .modal-cancel {
-    height: 40px;
-    min-width: 100px;
-    background: #FFFFFF;
-    border: 1px solid #D1D5DB;
-    border-radius: 7px;
-    color: #374151;
-    font-size: 14px;
-    font-weight: 650;
-    padding: 0 18px;
-    box-shadow: none;
+	height: 40px;
+	min-width: 100px;
+	background: #FFFFFF;
+	border: 1px solid #D1D5DB;
+	border-radius: 7px;
+	color: #374151;
+	font-size: 14px;
+	font-weight: 650;
+	padding: 0 18px;
+	box-shadow: none;
 }
 
 .modal-cancel:hover {
-    background: #F9FAFB;
+	background: #F9FAFB;
 }
 
 .modal-confirm {
-    height: 40px;
-    min-width: 190px;
-    background: #DC2626;
-    border: 1px solid #DC2626;
-    border-radius: 7px;
-    color: #FFFFFF;
-    font-size: 14px;
-    font-weight: 650;
-    padding: 0 18px;
-    box-shadow: none;
+	height: 40px;
+	min-width: 190px;
+	background: #DC2626;
+	border: 1px solid #DC2626;
+	border-radius: 7px;
+	color: #FFFFFF;
+	font-size: 14px;
+	font-weight: 650;
+	padding: 0 18px;
+	box-shadow: none;
 }
 
 .modal-confirm:hover {
-    background: #B91C1C;
-    border-color: #B91C1C;
+	background: #B91C1C;
+	border-color: #B91C1C;
 }
-
-
-
-

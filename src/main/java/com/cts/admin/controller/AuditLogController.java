@@ -7,7 +7,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.event.Event;
 import org.zkoss.zk.ui.event.EventListener;
@@ -48,7 +47,7 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 	private Textbox auditSearchTextbox;
 
 	private Button auditSearchButton;
-	
+
 	private Button auditClearButton;
 
 	private Combobox auditRoleCombobox;
@@ -59,13 +58,11 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 
 	private Button auditDownloadPdfButton;
 
-
 	private AuditLogService auditLogService;
 
 	private RoleService roleService;
 
 	private AuditLogReportService auditLogReportService;
-
 
 	@Override
 	public void doAfterCompose(Component comp) throws Exception {
@@ -78,18 +75,13 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 
 		auditLogReportService = new AuditLogReportService();
 
-		// Load role filter from database
 		loadRoleFilter();
 
-		// Configure pagination
 		auditLogPaging.setPageSize(PAGE_SIZE);
 
 		auditLogPaging.setTotalSize(auditLogService.getTotalAuditLogCount(null, null, null, null));
 
-		// Load initial records
 		loadAuditLogs(0);
-
-		// PAGING EVENT
 
 		auditLogPaging.addEventListener("onPaging", new EventListener<Event>() {
 
@@ -102,8 +94,6 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 			}
 		});
 
-		// SEARCH BUTTON
-
 		auditSearchButton.addEventListener("onClick", new EventListener<Event>() {
 
 			@Override
@@ -113,8 +103,6 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 			}
 		});
 
-		// SEARCH TEXTBOX - ENTER KEY
-
 		auditSearchTextbox.addEventListener("onOK", new EventListener<Event>() {
 
 			@Override
@@ -123,9 +111,7 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 				refreshAuditLogs();
 			}
 		});
-		
-		
-		// CLEAR BUTTON EVENT
+
 		if (auditClearButton != null) {
 			auditClearButton.addEventListener("onClick", new EventListener<Event>() {
 
@@ -137,7 +123,6 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 			});
 		}
 
-		// ROLE FILTER
 		auditRoleCombobox.addEventListener("onSelect", new EventListener<Event>() {
 
 			@Override
@@ -147,7 +132,6 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 			}
 		});
 
-		// FROM DATE FILTER
 		auditFromDate.addEventListener("onChange", new EventListener<Event>() {
 
 			@Override
@@ -156,8 +140,6 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 				refreshAuditLogs();
 			}
 		});
-
-		// TO DATE FILTER
 
 		auditToDate.addEventListener("onChange", new EventListener<Event>() {
 
@@ -168,8 +150,6 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 			}
 		});
 
-		// PDF DOWNLOAD BUTTON
-
 		auditDownloadPdfButton.addEventListener("onClick", new EventListener<Event>() {
 
 			@Override
@@ -179,8 +159,8 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 			}
 		});
 	}
-	
-	// CLEAR ALL FILTERS AND RESET TABLE
+
+	// Clear all filters and reset table
 	private void clearAuditFilters() {
 
 		if (auditSearchTextbox != null) {
@@ -201,15 +181,13 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 			auditToDate.setRawValue(null);
 		}
 
-		// Reset total size and page to initial unfiltered state
 		auditLogPaging.setTotalSize(auditLogService.getTotalAuditLogCount(null, null, null, null));
 		auditLogPaging.setActivePage(0);
 
-		// Reload default first page
 		loadAuditLogs(0);
 	}
 
-	// LOAD ROLE FILTER FROM DATABASE
+	// Load role filter from database
 
 	private void loadRoleFilter() {
 
@@ -240,7 +218,7 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 		auditRoleCombobox.setSelectedIndex(0);
 	}
 
-	// GET SELECTED ROLE
+	// Get selected role
 
 	private String getSelectedRole() {
 
@@ -258,7 +236,7 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 		return selected;
 	}
 
-	// REFRESH FILTERED AUDIT LOGS
+	// Refresh filtered audit logs
 
 	private void refreshAuditLogs() {
 
@@ -274,8 +252,6 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 
 		Date toDate = auditToDate.getValue();
 
-		// VALIDATE DATE RANGE
-
 		if (fromDate != null && toDate != null && fromDate.after(toDate)) {
 
 			Messagebox.show("From Date cannot be later than To Date.", "Invalid Date Range", Messagebox.OK,
@@ -284,20 +260,14 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 			return;
 		}
 
-		// UPDATE FILTERED PAGINATION COUNT
-
 		auditLogPaging.setTotalSize(auditLogService.getTotalAuditLogCount(searchText, roleFilter, fromDate, toDate));
 
-		// RESET TO FIRST PAGE
-
 		auditLogPaging.setActivePage(0);
-
-		// LOAD FIRST PAGE
 
 		loadAuditLogs(0);
 	}
 
-	// LOAD FILTERED AUDIT LOGS
+	// Load filtered audit logs
 
 	private void loadAuditLogs(int offset) {
 
@@ -305,45 +275,31 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 
 			int page = (offset / PAGE_SIZE) + 1;
 
-			// GET SEARCH FILTER
-
 			String searchText = auditSearchTextbox.getValue();
 
 			if (searchText != null) {
 				searchText = searchText.trim();
 			}
 
-			// GET ROLE FILTER
-
 			String roleFilter = getSelectedRole();
-
-			// GET DATE FILTERS
 
 			Date fromDate = auditFromDate.getValue();
 
 			Date toDate = auditToDate.getValue();
-
-			// VALIDATE DATE RANGE
 
 			if (fromDate != null && toDate != null && fromDate.after(toDate)) {
 
 				return;
 			}
 
-			// LOAD RECORDS FROM DATABASE
-
 			List<AuditLog> logs = auditLogService.getAuditLogs(page, PAGE_SIZE, searchText, roleFilter, fromDate,
 					toDate);
 
 			auditLogListbox.getItems().clear();
 
-			// DISPLAY RECORDS
-
 			for (AuditLog log : logs) {
 
 				Listitem item = new Listitem();
-
-				// USER ID
 
 				Listcell userIdCell = new Listcell();
 
@@ -355,8 +311,6 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 
 				item.appendChild(userIdCell);
 
-				// ROLE
-
 				Listcell roleCell = new Listcell();
 
 				Label roleLabel = new Label(log.getRoleName() != null ? log.getRoleName() : "-");
@@ -366,8 +320,6 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 				roleCell.appendChild(roleLabel);
 
 				item.appendChild(roleCell);
-
-				// LOGIN DATE
 
 				Listcell loginDateCell = new Listcell();
 
@@ -379,8 +331,6 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 
 				item.appendChild(loginDateCell);
 
-				// LOGIN TIME
-
 				Listcell loginTimeCell = new Listcell();
 
 				Label loginTimeLabel = new Label(log.getLoginTime() != null ? formatTime(log.getLoginTime()) : "-");
@@ -390,8 +340,6 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 				loginTimeCell.appendChild(loginTimeLabel);
 
 				item.appendChild(loginTimeCell);
-
-				// LOGOUT DATE
 
 				Listcell logoutDateCell = new Listcell();
 
@@ -403,8 +351,6 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 
 				item.appendChild(logoutDateCell);
 
-				// LOGOUT TIME
-
 				Listcell logoutTimeCell = new Listcell();
 
 				Label logoutTimeLabel = new Label(log.getLogoutTime() != null ? formatTime(log.getLogoutTime()) : "-");
@@ -414,8 +360,6 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 				logoutTimeCell.appendChild(logoutTimeLabel);
 
 				item.appendChild(logoutTimeCell);
-
-				// ADD ROW TO LISTBOX
 
 				auditLogListbox.appendChild(item);
 			}
@@ -428,13 +372,11 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 		}
 	}
 
-	// EXPORT AUDIT LOGS TO PDF
+	// Export audit logs to pdf
 
 	private void exportAuditLogsToPdf() {
 
 		try {
-
-			// GET CURRENT FILTER VALUES
 
 			String searchText = auditSearchTextbox.getValue();
 
@@ -448,8 +390,6 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 
 			Date toDate = auditToDate.getValue();
 
-			// VALIDATE DATE RANGE
-
 			if (fromDate != null && toDate != null && fromDate.after(toDate)) {
 
 				Messagebox.show("From Date cannot be later than To Date.", "Invalid Date Range", Messagebox.OK,
@@ -458,11 +398,13 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 				return;
 			}
 
-			// GET ALL FILTERED AUDIT LOGS
-
 			List<AuditLog> auditLogs = auditLogService.getAllAuditLogs(searchText, roleFilter, fromDate, toDate);
 
-			// FORMAT REPORT DATES
+			if (auditLogs == null || auditLogs.isEmpty()) {
+				Messagebox.show("Unable to download PDF: No records available for the selected filter.",
+						"Audit Log Export", Messagebox.OK, Messagebox.INFORMATION);
+				return;
+			}
 
 			SimpleDateFormat reportDateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
@@ -474,12 +416,8 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 
 			String reportToDate = toDate != null ? reportDateFormat.format(toDate) : "All";
 
-			// GENERATE PDF
-
 			byte[] pdfBytes = auditLogReportService.generateAuditLogPdf(auditLogs, generatedDate, reportFromDate,
 					reportToDate);
-
-			// DOWNLOAD PDF
 
 			String fileName = "Audit_Log_Report_" + generatedDate.replace("/", "-") + ".pdf";
 
@@ -494,8 +432,6 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 		}
 	}
 
-	// FORMAT DATE
-
 	private String formatDate(Timestamp timestamp) {
 
 		if (timestamp == null) {
@@ -508,8 +444,6 @@ public class AuditLogController extends GenericForwardComposer<Component> {
 
 		return sdf.format(timestamp);
 	}
-
-	// FORMAT TIME
 
 	private String formatTime(Timestamp timestamp) {
 

@@ -12,6 +12,7 @@ import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Session;
 import org.zkoss.zk.ui.WebApp;
 import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.event.InputEvent;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zk.ui.util.GenericForwardComposer;
 import org.zkoss.zul.Button;
@@ -102,6 +103,7 @@ public class MicrRepairController
     private int currentRotation = 0;
     private String correctedMicr;
     private Long loggedInUserId;
+    private final Map<String, AImage> aImageCache = new java.util.HashMap<>();
 
     // Load logged-in user from session
     private void loadLoggedInUser() {
@@ -582,6 +584,24 @@ public class MicrRepairController
         }
     }
 
+    // Format status: remove underscore, capitalize every word (Title Case)
+    private String formatStatus(String status) {
+        if (status == null || status.trim().isEmpty()) {
+            return "—";
+        }
+        String[] words = status.trim().replace('_', ' ').toLowerCase().split("\\s+");
+        StringBuilder sb = new StringBuilder();
+        for (String word : words) {
+            if (!word.isEmpty()) {
+                if (sb.length() > 0) {
+                    sb.append(" ");
+                }
+                sb.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1));
+            }
+        }
+        return sb.toString();
+    }
+
     // Update current status label styling
     private void setCurrentStatus(
             String status) {
@@ -597,7 +617,7 @@ public class MicrRepairController
                                 .toUpperCase();
 
         currentStatusLabel.setValue(
-                normalized);
+                formatStatus(status));
 
         if (STATUS_MICR_REPAIR.equals(
                 normalized)) {
@@ -635,7 +655,8 @@ public class MicrRepairController
     private void populateMicrFields(
             MicrComparisonDto c) {
 
-        boolean isRepaired = c.isMicrRepaired() && c.getRepairedMicrCode() != null;
+        boolean isRepaired = (c.isMicrRepaired() && c.getRepairedMicrCode() != null)
+                || (c.getRepairedMicrCode() != null && c.getRepairedMicrCode().trim().length() == 9);
 
         // Display saved values if repaired; otherwise display original NPCI values
         String cityValue = isRepaired ? c.getRepairedCityCode() : safe(c.getNpciCityCode());
@@ -663,15 +684,18 @@ public class MicrRepairController
 
         boolean anyFieldMismatch = c.isCityCodeMismatch() || c.isBankCodeMismatch() || c.isBranchCodeMismatch();
 
-        // -----------------------------------------------------
         // City Code
-        // -----------------------------------------------------
         if (ocrCityCode != null) {
             ocrCityCode.setValue(cityValue);
-            boolean isCityMismatch = c.isCityCodeMismatch();
-            boolean isCityEditable = isCityMismatch || (!anyFieldMismatch && !c.isNpciMicrFoundInMaster());
-            if (isCityMismatch && !isRepaired) {
-                ocrCityCode.setSclass("micr-editable-field micr-field-error");
+            boolean wasCityMismatched = c.isCityCodeMismatch()
+                    || !safe(c.getNpciCityCode()).equals(safe(c.getOcrCityCode()));
+            boolean isCityEditable = wasCityMismatched || (!anyFieldMismatch && !c.isNpciMicrFoundInMaster());
+            if (wasCityMismatched) {
+                if (isRepaired) {
+                    ocrCityCode.setSclass("micr-editable-field micr-field-success");
+                } else {
+                    ocrCityCode.setSclass("micr-editable-field micr-field-error");
+                }
             } else {
                 ocrCityCode.setSclass("micr-editable-field");
             }
@@ -681,10 +705,15 @@ public class MicrRepairController
         // Bank Code
         if (ocrBankCode != null) {
             ocrBankCode.setValue(bankValue);
-            boolean isBankMismatch = c.isBankCodeMismatch();
-            boolean isBankEditable = isBankMismatch || (!anyFieldMismatch && !c.isNpciMicrFoundInMaster());
-            if (isBankMismatch && !isRepaired) {
-                ocrBankCode.setSclass("micr-editable-field micr-field-error");
+            boolean wasBankMismatched = c.isBankCodeMismatch()
+                    || !safe(c.getNpciBankCode()).equals(safe(c.getOcrBankCode()));
+            boolean isBankEditable = wasBankMismatched || (!anyFieldMismatch && !c.isNpciMicrFoundInMaster());
+            if (wasBankMismatched) {
+                if (isRepaired) {
+                    ocrBankCode.setSclass("micr-editable-field micr-field-success");
+                } else {
+                    ocrBankCode.setSclass("micr-editable-field micr-field-error");
+                }
             } else {
                 ocrBankCode.setSclass("micr-editable-field");
             }
@@ -694,10 +723,15 @@ public class MicrRepairController
         // Branch Code
         if (ocrBranchCode != null) {
             ocrBranchCode.setValue(branchValue);
-            boolean isBranchMismatch = c.isBranchCodeMismatch();
-            boolean isBranchEditable = isBranchMismatch || (!anyFieldMismatch && !c.isNpciMicrFoundInMaster());
-            if (isBranchMismatch && !isRepaired) {
-                ocrBranchCode.setSclass("micr-editable-field micr-field-error");
+            boolean wasBranchMismatched = c.isBranchCodeMismatch()
+                    || !safe(c.getNpciBranchCode()).equals(safe(c.getOcrBranchCode()));
+            boolean isBranchEditable = wasBranchMismatched || (!anyFieldMismatch && !c.isNpciMicrFoundInMaster());
+            if (wasBranchMismatched) {
+                if (isRepaired) {
+                    ocrBranchCode.setSclass("micr-editable-field micr-field-success");
+                } else {
+                    ocrBranchCode.setSclass("micr-editable-field micr-field-error");
+                }
             } else {
                 ocrBranchCode.setSclass("micr-editable-field");
             }
@@ -800,7 +834,12 @@ public class MicrRepairController
             try {
                 File file = resolveImageFile(path);
                 if (file != null) {
-                    chequeImage.setContent(new AImage(file));
+                    AImage cached = aImageCache.get(file.getAbsolutePath());
+                    if (cached == null) {
+                        cached = new AImage(file);
+                        aImageCache.put(file.getAbsolutePath(), cached);
+                    }
+                    chequeImage.setContent(cached);
                 } else {
                     String clean = path.replace("\\", "/").trim();
                     if (clean.startsWith("/")) clean = clean.substring(1);
@@ -991,6 +1030,29 @@ public class MicrRepairController
                     2000
             );
 
+            // Update in-memory DTO immediately to avoid full-batch re-comparison query
+            c.setRepairedMicrCode(correctedMicr);
+            c.setNeedsMicrRepair(false);
+            c.setMicrRepaired(true);
+            c.setCityCodeMismatch(false);
+            c.setBankCodeMismatch(false);
+            c.setBranchCodeMismatch(false);
+            c.setMicrMismatch(false);
+            if (correctedMicr != null && correctedMicr.trim().length() == 9) {
+                c.setRepairedCityCode(correctedMicr.substring(0, 3));
+                c.setRepairedBankCode(correctedMicr.substring(3, 6));
+                c.setRepairedBranchCode(correctedMicr.substring(6, 9));
+            }
+            if (ocrCityCode != null) {
+                ocrCityCode.setSclass("micr-editable-field micr-field-success");
+            }
+            if (ocrBankCode != null) {
+                ocrBankCode.setSclass("micr-editable-field micr-field-success");
+            }
+            if (ocrBranchCode != null) {
+                ocrBranchCode.setSclass("micr-editable-field micr-field-success");
+            }
+
             // Advance immediately to next cheque without requiring OK click
             moveAfterSave();
 
@@ -1016,15 +1078,23 @@ public class MicrRepairController
         }
     }
 
+    private boolean hasAnyChequeNeedingMicrRepair() {
+        if (comparisons == null) {
+            return false;
+        }
+        for (MicrComparisonDto item : comparisons) {
+            if (item != null && item.isNeedsMicrRepair()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // Move to next cheque after saving MICR repair
     private void moveAfterSave() {
 
-        comparisons =
-                micrRepairService
-                        .compareBatch(batchId);
-
         if (originalRepairIndexes == null || originalRepairIndexes.isEmpty()) {
-            if (!micrRepairService.needsMicrRepair(batchId)) {
+            if (!hasAnyChequeNeedingMicrRepair()) {
                 navigateAfterMicrCompletion();
             }
             return;
@@ -1039,7 +1109,7 @@ public class MicrRepairController
             loadCheque();
         } else {
             // End of error list reached; check if any cheque still needs repair
-            if (micrRepairService.needsMicrRepair(batchId)) {
+            if (hasAnyChequeNeedingMicrRepair()) {
                 int nextPending = -1;
                 for (int idx : originalRepairIndexes) {
                     if (idx >= 0 && idx < comparisons.size() && comparisons.get(idx).isNeedsMicrRepair()) {
@@ -1380,7 +1450,7 @@ public class MicrRepairController
 
     // Navigate to Data Entry or Send to Checker when all MICR repairs are complete
     private void navigateAfterMicrCompletion() {
-        if (micrRepairService.needsMicrRepair(batchId)) {
+        if (hasAnyChequeNeedingMicrRepair()) {
             return;
         }
         if (micrRepairService.hasChequesNeedingDataEntry(batchId)) {
@@ -1553,35 +1623,93 @@ public class MicrRepairController
                     event -> confirmReturn());
         }
 
-        // MICR change events
+        // MICR change and typing events for instant green/red styling
         if (ocrCityCode != null) {
+            ocrCityCode.addEventListener(Events.ON_CHANGING, event -> {
+                InputEvent inputEvent = (InputEvent) event;
+                MicrComparisonDto current = getCurrentComparison();
+                boolean isMismatched = current != null && (current.isCityCodeMismatch()
+                        || !safe(current.getNpciCityCode()).equals(safe(current.getOcrCityCode()))
+                        || !current.isNpciMicrFoundInMaster());
+                updateFieldValidationStyle(ocrCityCode, inputEvent.getValue(), isMismatched);
+            });
 
-            ocrCityCode.addEventListener(
-                    Events.ON_CHANGE,
-                    event ->
-                            correctedMicr =
-                                    buildMicr());
+            ocrCityCode.addEventListener(Events.ON_CHANGE, event -> {
+                MicrComparisonDto current = getCurrentComparison();
+                boolean isMismatched = current != null && (current.isCityCodeMismatch()
+                        || !safe(current.getNpciCityCode()).equals(safe(current.getOcrCityCode()))
+                        || !current.isNpciMicrFoundInMaster());
+                updateFieldValidationStyle(ocrCityCode, ocrCityCode.getValue(), isMismatched);
+                correctedMicr = buildMicr();
+            });
         }
 
         if (ocrBankCode != null) {
+            ocrBankCode.addEventListener(Events.ON_CHANGING, event -> {
+                InputEvent inputEvent = (InputEvent) event;
+                MicrComparisonDto current = getCurrentComparison();
+                boolean isMismatched = current != null && (current.isBankCodeMismatch()
+                        || !safe(current.getNpciBankCode()).equals(safe(current.getOcrBankCode()))
+                        || !current.isNpciMicrFoundInMaster());
+                updateFieldValidationStyle(ocrBankCode, inputEvent.getValue(), isMismatched);
+            });
 
-            ocrBankCode.addEventListener(
-                    Events.ON_CHANGE,
-                    event ->
-                            correctedMicr =
-                                    buildMicr());
+            ocrBankCode.addEventListener(Events.ON_CHANGE, event -> {
+                MicrComparisonDto current = getCurrentComparison();
+                boolean isMismatched = current != null && (current.isBankCodeMismatch()
+                        || !safe(current.getNpciBankCode()).equals(safe(current.getOcrBankCode()))
+                        || !current.isNpciMicrFoundInMaster());
+                updateFieldValidationStyle(ocrBankCode, ocrBankCode.getValue(), isMismatched);
+                correctedMicr = buildMicr();
+            });
         }
 
         if (ocrBranchCode != null) {
+            ocrBranchCode.addEventListener(Events.ON_CHANGING, event -> {
+                InputEvent inputEvent = (InputEvent) event;
+                MicrComparisonDto current = getCurrentComparison();
+                boolean isMismatched = current != null && (current.isBranchCodeMismatch()
+                        || !safe(current.getNpciBranchCode()).equals(safe(current.getOcrBranchCode()))
+                        || !current.isNpciMicrFoundInMaster());
+                updateFieldValidationStyle(ocrBranchCode, inputEvent.getValue(), isMismatched);
+            });
 
-            ocrBranchCode.addEventListener(
-                    Events.ON_CHANGE,
-                    event ->
-                            correctedMicr =
-                                    buildMicr());
+            ocrBranchCode.addEventListener(Events.ON_CHANGE, event -> {
+                MicrComparisonDto current = getCurrentComparison();
+                boolean isMismatched = current != null && (current.isBranchCodeMismatch()
+                        || !safe(current.getNpciBranchCode()).equals(safe(current.getOcrBranchCode()))
+                        || !current.isNpciMicrFoundInMaster());
+                updateFieldValidationStyle(ocrBranchCode, ocrBranchCode.getValue(), isMismatched);
+                correctedMicr = buildMicr();
+            });
         }
 
         updateNavigationButtons();
+    }
+
+    // Validate field input and update green or red styling dynamically
+    private void updateFieldValidationStyle(Textbox field, String value, boolean isMismatched) {
+        if (field == null) {
+            return;
+        }
+        String text = value == null ? "" : value.trim();
+        if (text.matches("\\d{3}")) {
+            // Exactly 3 numeric digits entered: turn box green
+            field.setSclass("micr-editable-field micr-field-success");
+        } else if (isMismatched) {
+            // Incomplete or invalid: keep or revert box to red
+            field.setSclass("micr-editable-field micr-field-error");
+        } else {
+            field.setSclass("micr-editable-field");
+        }
+    }
+
+    // Get current comparison DTO for the active cheque
+    private MicrComparisonDto getCurrentComparison() {
+        if (comparisons != null && chequeIndex >= 0 && chequeIndex < comparisons.size()) {
+            return comparisons.get(chequeIndex);
+        }
+        return null;
     }
 
     // Concatenate city, bank, and branch codes into 9-digit MICR

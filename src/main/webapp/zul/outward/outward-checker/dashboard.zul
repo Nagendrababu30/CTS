@@ -12,7 +12,7 @@
 
 <zk>
 
-    <style src="/css/outward/checker/checker_dashboard.css"/>
+    <style src="/css/outward/checker/checker_dashboard.css?v=3.1"/>
 
     <div
         self="@define(content)"
@@ -35,10 +35,6 @@
                 <label
                     value="Checker Dashboard"
                     sclass="dashboard-title"/>
-
-                <label
-                    value="Monitor and verify outward batches"
-                    sclass="dashboard-subtitle"/>
 
             </vlayout>
 
@@ -152,7 +148,8 @@
 
                         <listheader
                             label="Batch Number"
-                            width="20%"/>
+                            width="20%"
+                            align="center"/>
 
                         <listheader
                             label="Total Cheques"

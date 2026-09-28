@@ -9,7 +9,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import com.cts.inward.config.ConnectionPool;
-import com.iispl.cts.data.CTSStaticData;
 import com.iispl.cts.model.outward.OutwardBatch;
 import com.iispl.cts.model.outward.OutwardCheque;
 

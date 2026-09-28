@@ -67,76 +67,61 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 	public void doAfterCompose(Component comp) throws Exception {
 
 		super.doAfterCompose(comp);
-	     SessionService sessionService;
+		SessionService sessionService;
 
-		Session session =
-		        Executions.getCurrent().getSession();
+		Session session = Executions.getCurrent().getSession();
 
 		if (session == null) {
 
-		    Executions.sendRedirect("/login.zul");
+			Executions.sendRedirect("/login.zul");
 
-		    return;
+			return;
 		}
 
-		Object sessionUserId =
-		        session.getAttribute("userId");
+		Object sessionUserId = session.getAttribute("userId");
 
 		if (sessionUserId == null) {
 
-		    Executions.sendRedirect("/login.zul");
+			Executions.sendRedirect("/login.zul");
 
-		    return;
+			return;
 		}
 
 		if (sessionUserId instanceof Number) {
 
-		    currentCheckerUser =
-		            ((Number) sessionUserId).longValue();
+			currentCheckerUser = ((Number) sessionUserId).longValue();
 
 		} else {
 
-		    try {
+			try {
 
-		        currentCheckerUser =
-		                Long.parseLong(
-		                        sessionUserId.toString());
+				currentCheckerUser = Long.parseLong(sessionUserId.toString());
 
-		    } catch (NumberFormatException e) {
+			} catch (NumberFormatException e) {
 
-		        Executions.sendRedirect("/login.zul");
+				Executions.sendRedirect("/login.zul");
 
-		        return;
-		    }
+				return;
+			}
 		}
 
 		sessionService = new SessionServiceImpl();
 
-		com.cts.admin.model.Session clearingSession =
-		        sessionService.getActiveSession();
+		com.cts.admin.model.Session clearingSession = sessionService.getActiveSession();
 
-		if (clearingSession == null
-		        || clearingSession.getStatus() == null
-		        || !"STARTED".equalsIgnoreCase(
-		                clearingSession.getStatus().trim())) {
+		if (clearingSession == null || clearingSession.getStatus() == null
+				|| !"STARTED".equalsIgnoreCase(clearingSession.getStatus().trim())) {
 
-		    Messagebox.show(
-		            "Clearing session is not started.\n\n"
-		            + "Checker operations are currently unavailable.",
-		            "Session Not Started",
-		            Messagebox.OK,
-		            Messagebox.EXCLAMATION,
-		            event -> {
+			Messagebox.show("Clearing session is not started.\n\n" + "Checker operations are currently unavailable.",
+					"Session Not Started", Messagebox.OK, Messagebox.EXCLAMATION, event -> {
 
-		                if (Messagebox.ON_OK.equals(
-		                        event.getName())) {
+						if (Messagebox.ON_OK.equals(event.getName())) {
 
-		                    Executions.sendRedirect(
-		                            "/login.zul");
-		                }
-		            });
+							Executions.sendRedirect("/login.zul");
+						}
+					});
 
-		    return;
+			return;
 		}
 
 		service = new CheckerDashboardService();
@@ -201,38 +186,23 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 
 		if (allBtn != null) {
 
-			allBtn.setSclass(
-					"filter-btn"
-							+ ("ALL".equals(currentFilter)
-									? " active-filter"
-									: ""));
+			allBtn.setSclass("filter-btn" + ("ALL".equals(currentFilter) ? " active-filter" : ""));
 		}
 
 		if (availableBtn != null) {
 
-			availableBtn.setSclass(
-					"filter-btn"
-							+ ("AVAILABLE".equals(currentFilter)
-									? " active-filter"
-									: ""));
+			availableBtn.setSclass("filter-btn" + ("AVAILABLE".equals(currentFilter) ? " active-filter" : ""));
 		}
 
 		if (myBatchesBtn != null) {
 
-			myBatchesBtn.setSclass(
-					"filter-btn"
-							+ ("MY_BATCHES".equals(currentFilter)
-									? " active-filter"
-									: ""));
+			myBatchesBtn.setSclass("filter-btn" + ("MY_BATCHES".equals(currentFilter) ? " active-filter" : ""));
 		}
 
 		if (reVerifyBatchesBtn != null) {
 
-			reVerifyBatchesBtn.setSclass(
-					"filter-btn"
-							+ ("RE_VERIFY_BATCHES".equals(currentFilter)
-									? " active-filter"
-									: ""));
+			reVerifyBatchesBtn
+					.setSclass("filter-btn" + ("RE_VERIFY_BATCHES".equals(currentFilter) ? " active-filter" : ""));
 		}
 	}
 
@@ -249,20 +219,14 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 
 			e.printStackTrace();
 
-			Clients.showNotification(
-					"Unable to load Checker Dashboard.",
-					Clients.NOTIFICATION_TYPE_ERROR,
-					null,
-					"top_center",
-					4000);
+			Clients.showNotification("Unable to load Checker Dashboard.", Clients.NOTIFICATION_TYPE_ERROR, null,
+					"top_center", 4000);
 		}
 	}
 
 	private List<OutwardBatch> getDashboardBatches() {
 
-		List<OutwardBatch> batches =
-				service.getBatches(
-						String.valueOf(currentCheckerUser));
+		List<OutwardBatch> batches = service.getBatches(String.valueOf(currentCheckerUser));
 
 		if (batches == null) {
 
@@ -271,16 +235,13 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 
 		for (OutwardBatch batch : batches) {
 
-			if (batch == null
-					|| batch.getBatchNumber() == null) {
+			if (batch == null || batch.getBatchNumber() == null) {
 
 				continue;
 			}
 
-			boolean reVerified =
-					service.hasReVerifiedCheques(
-							batch.getBatchNumber(),
-							String.valueOf(currentCheckerUser));
+			boolean reVerified = service.hasReVerifiedCheques(batch.getBatchNumber(),
+					String.valueOf(currentCheckerUser));
 
 			if (reVerified) {
 
@@ -293,62 +254,55 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 
 	private void loadCounts(List<OutwardBatch> batches) {
 
-	    int pending = 0;
-	    int completedToday = 0;
-	    int readyToSend = 0;
+		int pending = 0;
+		int completedToday = 0;
+		int readyToSend = 0;
 
-	    if (batches != null) {
+		if (batches != null) {
 
-	        for (OutwardBatch batch : batches) {
+			for (OutwardBatch batch : batches) {
 
-	            if (batch == null) {
-	                continue;
-	            }
+				if (batch == null) {
+					continue;
+				}
 
-	            String status = batch.getBatchStatus();
+				String status = batch.getBatchStatus();
 
-	            if (status == null) {
-	                continue;
-	            }
+				if (status == null) {
+					continue;
+				}
 
-	            status = status.trim().toUpperCase();
+				status = status.trim().toUpperCase();
 
-	            if ("READY_FOR_CHECKER".equals(status)
-	                    || "SUBMITTED".equals(status)
-	                    || "SUBMITTED_TO_CHECKER".equals(status)
-	                    || "CHECKER_PENDING".equals(status)
-	                    || "PENDING_CHECKER".equals(status)
-	                    || "CHECKER_PROCESSING".equals(status)) {
+				if ("READY_FOR_CHECKER".equals(status) || "SUBMITTED".equals(status)
+						|| "SUBMITTED_TO_CHECKER".equals(status) || "CHECKER_PENDING".equals(status)
+						|| "PENDING_CHECKER".equals(status) || "CHECKER_PROCESSING".equals(status)) {
 
-	                pending++;
-	            }
+					pending++;
+				}
 
-	            if ("NPCI_SENT".equals(status)) {
-	                completedToday++;
-	            }
+				if ("NPCI_SENT".equals(status)) {
+					completedToday++;
+				}
 
-	            if ("READY_TO_SEND".equals(status)
-	                    || "READY_FOR_NPCI".equals(status)) {
+				if ("READY_TO_SEND".equals(status) || "READY_FOR_NPCI".equals(status)) {
 
-	                readyToSend++;
-	            }
-	        }
-	    }
+					readyToSend++;
+				}
+			}
+		}
 
-	    if (pendingVerificationCount != null) {
-	        pendingVerificationCount.setValue(
-	                String.valueOf(pending));
-	    }
+		if (pendingVerificationCount != null) {
+			pendingVerificationCount.setValue(String.valueOf(pending));
+		}
 
-	    if (cbsValidationCount != null) {
-	        cbsValidationCount.setValue(
-	                String.valueOf(completedToday));
-	    }
+		if (cbsValidationCount != null) {
+			cbsValidationCount.setValue(String.valueOf(completedToday));
+		}
 
-	    if (readyToSendCount != null) {
-	        readyToSendCount.setValue(
-	                String.valueOf(readyToSend));
-	    }
+		if (readyToSendCount != null) {
+			readyToSendCount.setValue(String.valueOf(readyToSend));
+		}
 	}
 
 	private void loadBatchList(List<OutwardBatch> batches) {
@@ -362,13 +316,11 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 			}
 		}
 
-		ListModelList<OutwardBatch> model =
-				new ListModelList<>();
+		ListModelList<OutwardBatch> model = new ListModelList<>();
 
 		model.addAll(filteredBatches);
 
-		batchListbox.setItemRenderer(
-				new CheckerBatchRenderer());
+		batchListbox.setItemRenderer(new CheckerBatchRenderer());
 
 		batchListbox.setModel(model);
 
@@ -379,8 +331,7 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 		}
 	}
 
-	private boolean matchesCurrentFilter(
-			OutwardBatch batch) {
+	private boolean matchesCurrentFilter(OutwardBatch batch) {
 
 		if (batch == null) {
 
@@ -410,287 +361,195 @@ public class CheckerDashboardController extends SelectorComposer<Component> {
 		return true;
 	}
 
-	private boolean isBatchAvailable(
-			OutwardBatch batch) {
+	private boolean isBatchAvailable(OutwardBatch batch) {
 
 		if (batch == null) {
 
 			return false;
 		}
 
-		String lockStatus =
-				batch.getLockStatus();
+		String lockStatus = batch.getLockStatus();
 
-		return "AVAILABLE".equalsIgnoreCase(
-				safe(lockStatus));
+		return "AVAILABLE".equalsIgnoreCase(safe(lockStatus));
 	}
 
-	private boolean isMyBatch(
-			OutwardBatch batch) {
+	private boolean isMyBatch(OutwardBatch batch) {
 
 		if (batch == null) {
 
 			return false;
 		}
 
-		String checkerUser =
-				batch.getCheckerUserNumber();
+		String checkerUser = batch.getCheckerUserNumber();
 
-		if (checkerUser == null
-				|| checkerUser.trim().isEmpty()) {
+		if (checkerUser == null || checkerUser.trim().isEmpty()) {
 
 			return false;
 		}
 
-		return String.valueOf(
-				currentCheckerUser)
-				.equalsIgnoreCase(
-						checkerUser.trim());
+		return String.valueOf(currentCheckerUser).equalsIgnoreCase(checkerUser.trim());
 	}
 
-	private boolean isReVerifyBatch(
-			OutwardBatch batch) {
+	private boolean isReVerifyBatch(OutwardBatch batch) {
 
 		if (batch == null) {
 
 			return false;
 		}
 
-		return "RE_VERIFY".equalsIgnoreCase(
-				safe(batch.getLockStatus()));
+		return "RE_VERIFY".equalsIgnoreCase(safe(batch.getLockStatus()));
 	}
 
-	private class CheckerBatchRenderer
-    implements ListitemRenderer<OutwardBatch> {
+	private class CheckerBatchRenderer implements ListitemRenderer<OutwardBatch> {
 
-@Override
-public void render(
-        Listitem item,
-        OutwardBatch batch,
-        int index) throws Exception {
+		@Override
+		public void render(Listitem item, OutwardBatch batch, int index) throws Exception {
 
-    Listcell batchCell =
-            new Listcell();
+			Listcell batchCell = new Listcell();
 
-    batchCell.setLabel(
-            safe(batch.getBatchNumber()));
+			batchCell.setLabel(safe(batch.getBatchNumber()));
 
-    item.appendChild(batchCell);
+			item.appendChild(batchCell);
 
-    Listcell chequeCell =
-            new Listcell();
+			Listcell chequeCell = new Listcell();
 
-    int chequeCount =
-            batch.getNumberOfCheques();
+			int chequeCount = batch.getNumberOfCheques();
 
-    if ("RE_VERIFY".equalsIgnoreCase(
-            batch.getLockStatus())) {
+			if ("RE_VERIFY".equalsIgnoreCase(batch.getLockStatus())) {
 
-        chequeCount =
-                service.getReVerifiedChequeCount(
-                        batch.getBatchNumber(),
-                        String.valueOf(
-                                currentCheckerUser));
-    }
+				chequeCount = service.getReVerifiedChequeCount(batch.getBatchNumber(),
+						String.valueOf(currentCheckerUser));
+			}
 
-    chequeCell.setLabel(
-            String.valueOf(chequeCount));
+			chequeCell.setLabel(String.valueOf(chequeCount));
 
-    item.appendChild(chequeCell);
+			item.appendChild(chequeCell);
 
-    Listcell statusCell =
-            new Listcell();
+			Listcell statusCell = new Listcell();
 
-    boolean reVerifyStatus =
-            "RE_VERIFY".equalsIgnoreCase(
-                    batch.getLockStatus());
+			boolean reVerifyStatus = "RE_VERIFY".equalsIgnoreCase(batch.getLockStatus());
 
-    if (reVerifyStatus) {
+			if (reVerifyStatus) {
 
-        statusCell.setLabel(
-                "RE-VERIFIED");
+				statusCell.setLabel("RE-VERIFIED");
 
-    } else {
+			} else {
 
-        statusCell.setLabel(
-                safe(batch.getBatchStatus()));
-    }
+				statusCell.setLabel(safe(batch.getBatchStatus()));
+			}
 
-    item.appendChild(statusCell);
+			item.appendChild(statusCell);
 
-    Listcell assignmentCell =
-            new Listcell();
+			Listcell assignmentCell = new Listcell();
 
-    String lockStatus =
-            batch.getLockStatus();
+			String lockStatus = batch.getLockStatus();
 
-    if (lockStatus == null) {
+			if (lockStatus == null) {
 
-        assignmentCell.setLabel(
-                "AVAILABLE");
+				assignmentCell.setLabel("AVAILABLE");
 
-    } else if ("AVAILABLE"
-            .equalsIgnoreCase(lockStatus)) {
+			} else if ("AVAILABLE".equalsIgnoreCase(lockStatus)) {
 
-        assignmentCell.setLabel(
-                "Available");
+				assignmentCell.setLabel("Available");
 
-    } else if ("RE_VERIFY"
-            .equalsIgnoreCase(lockStatus)
-            && "RE_VERIFY_BATCHES"
-                    .equals(currentFilter)) {
+			} else if ("RE_VERIFY".equalsIgnoreCase(lockStatus) && "RE_VERIFY_BATCHES".equals(currentFilter)) {
 
-        assignmentCell.setLabel(
-                "Re-Verify");
+				assignmentCell.setLabel("Re-Verify");
 
-    } else {
+			} else {
 
-        String checker =
-                batch.getCheckerUserNumber();
+				String checker = batch.getCheckerUserNumber();
 
-        if (checker != null
-                && !checker.trim().isEmpty()) {
+				if (checker != null && !checker.trim().isEmpty()) {
 
-            assignmentCell.setLabel(
-                    "Locked by Checker "
-                            + checker);
+					assignmentCell.setLabel("Locked by Checker " + checker);
 
-        } else {
+				} else {
 
-            assignmentCell.setLabel(
-                    "Locked");
-        }
-    }
+					assignmentCell.setLabel("Locked");
+				}
+			}
 
-    item.appendChild(assignmentCell);
+			item.appendChild(assignmentCell);
 
- Listcell actionCell =
-         new Listcell();
+			Listcell actionCell = new Listcell();
 
- boolean available =
-         "AVAILABLE".equalsIgnoreCase(
-                 batch.getLockStatus());
+			boolean available = "AVAILABLE".equalsIgnoreCase(batch.getLockStatus());
 
- boolean reVerify =
-         "RE_VERIFY_BATCHES".equals(currentFilter)
-                 && "RE_VERIFY".equalsIgnoreCase(
-                         batch.getLockStatus());
+			boolean reVerify = "RE_VERIFY_BATCHES".equals(currentFilter)
+					&& "RE_VERIFY".equalsIgnoreCase(batch.getLockStatus());
 
- boolean assignedToCurrentChecker =
-         service.isAssignedToChecker(
-                 batch.getBatchNumber(),
-                 String.valueOf(
-                         currentCheckerUser));
+			boolean assignedToCurrentChecker = service.isAssignedToChecker(batch.getBatchNumber(),
+					String.valueOf(currentCheckerUser));
 
- boolean originalCheckerCanReVerify =
-         service.hasReVerifiedCheques(
-                 batch.getBatchNumber(),
-                 String.valueOf(
-                         currentCheckerUser));
+			boolean originalCheckerCanReVerify = service.hasReVerifiedCheques(batch.getBatchNumber(),
+					String.valueOf(currentCheckerUser));
 
- if (assignedToCurrentChecker) {
+			if (assignedToCurrentChecker) {
 
-     Button openButton =
-             new Button("Open");
+				Button openButton = new Button("Open");
 
-     openButton.setSclass(
-             "action-btn");
+				openButton.setSclass("action-btn");
 
-     openButton.addEventListener(
-             Events.ON_CLICK,
-             event -> openBatch(batch));
+				openButton.addEventListener(Events.ON_CLICK, event -> openBatch(batch));
 
-     Button releaseButton =
-             new Button("Release Lock");
+				Button releaseButton = new Button("Release Lock");
 
-     releaseButton.setSclass(
-             "action-btn release-btn");
+				releaseButton.setSclass("action-btn release-btn");
 
-     releaseButton.addEventListener(
-             Events.ON_CLICK,
-             event -> releaseBatchLock(
-                     batch.getBatchNumber()));
+				releaseButton.addEventListener(Events.ON_CLICK, event -> releaseBatchLock(batch.getBatchNumber()));
 
-     Hlayout actionLayout =
-             new Hlayout();
+				Hlayout actionLayout = new Hlayout();
 
-     actionLayout.setSpacing(
-             "4px");
+				actionLayout.setSpacing("4px");
 
-     actionLayout.appendChild(
-             openButton);
+				actionLayout.appendChild(openButton);
 
-     actionLayout.appendChild(
-             releaseButton);
+				actionLayout.appendChild(releaseButton);
 
-     actionCell.appendChild(
-             actionLayout);
+				actionCell.appendChild(actionLayout);
 
- } else if (available
-         || reVerify
-         || originalCheckerCanReVerify) {
+			} else if (available || reVerify || originalCheckerCanReVerify) {
 
-     Button openButton =
-             new Button("Open");
+				Button openButton = new Button("Open");
 
-     openButton.setSclass(
-             "action-btn");
+				openButton.setSclass("action-btn");
 
-     openButton.addEventListener(
-             Events.ON_CLICK,
-             event -> openBatch(batch));
+				openButton.addEventListener(Events.ON_CLICK, event -> openBatch(batch));
 
-     actionCell.appendChild(
-             openButton);
+				actionCell.appendChild(openButton);
 
- } else {
+			} else {
 
-     Button lockedButton =
-             new Button("🔒 Locked");
+				Button lockedButton = new Button("🔒 Locked");
 
-     lockedButton.setDisabled(
-             true);
+				lockedButton.setDisabled(true);
 
-     actionCell.appendChild(
-             lockedButton);
- }
+				actionCell.appendChild(lockedButton);
+			}
 
- item.appendChild(
-         actionCell);
-}
-}
+			item.appendChild(actionCell);
+		}
+	}
 
-	private void openBatch(
-			OutwardBatch batch) {
+	private void openBatch(OutwardBatch batch) {
 
-		if (batch == null
-				|| batch.getBatchNumber() == null) {
+		if (batch == null || batch.getBatchNumber() == null) {
 
-			Clients.showNotification(
-					"Invalid batch.",
-					Clients.NOTIFICATION_TYPE_ERROR,
-					null,
-					"top_center",
-					3000);
+			Clients.showNotification("Invalid batch.", Clients.NOTIFICATION_TYPE_ERROR, null, "top_center", 3000);
 
 			return;
 		}
 
-		String batchNumber =
-				batch.getBatchNumber();
+		String batchNumber = batch.getBatchNumber();
 
 		try {
 
-			OutwardBatch latest =
-					service.findBatch(batchNumber);
+			OutwardBatch latest = service.findBatch(batchNumber);
 
 			if (latest == null) {
 
-				Clients.showNotification(
-						"Batch no longer exists.",
-						Clients.NOTIFICATION_TYPE_ERROR,
-						null,
-						"top_center",
+				Clients.showNotification("Batch no longer exists.", Clients.NOTIFICATION_TYPE_ERROR, null, "top_center",
 						3000);
 
 				loadDashboard();
@@ -698,239 +557,169 @@ public void render(
 				return;
 			}
 
-			boolean reVerifyAllowed =
-					service.hasReVerifiedCheques(
-							batchNumber,
-							String.valueOf(
-									currentCheckerUser));
+			boolean reVerifyAllowed = service.hasReVerifiedCheques(batchNumber, String.valueOf(currentCheckerUser));
 
 			if (reVerifyAllowed) {
 
-				List<String> reVerifiedChequeNumbers =
-						service.getReVerifiedChequeNumbers(
-								batchNumber,
-								String.valueOf(
-										currentCheckerUser));
+				List<String> reVerifiedChequeNumbers = service.getReVerifiedChequeNumbers(batchNumber,
+						String.valueOf(currentCheckerUser));
 
-				if (reVerifiedChequeNumbers == null
-						|| reVerifiedChequeNumbers.isEmpty()) {
+				if (reVerifiedChequeNumbers == null || reVerifiedChequeNumbers.isEmpty()) {
 
-					Clients.showNotification(
-							"No corrected cheque is available for re-verification.",
-							Clients.NOTIFICATION_TYPE_WARNING,
-							null,
-							"top_center",
-							4000);
+					Clients.showNotification("No corrected cheque is available for re-verification.",
+							Clients.NOTIFICATION_TYPE_WARNING, null, "top_center", 4000);
 
 					return;
 				}
 
-				String chequeNumber =
-						reVerifiedChequeNumbers.get(0);
+				/*
+				 * Always take the first cheque from the CURRENT pending re-verification list.
+				 *
+				 * 1 cheque -> [CHQ001] -> CHQ001 2 cheques -> [CHQ001, CHQ002] -> CHQ001
+				 *
+				 * After CHQ001 is completed:
+				 *
+				 * [CHQ002] -> CHQ002
+				 */
+				String chequeNumber = reVerifiedChequeNumbers.get(0);
 
-				String url =
-						"/zul/outward/outward-checker/processing.zul"
-								+ "?batchNumber="
-								+ Executions.encodeURL(
-										batchNumber)
-								+ "&chequeNumber="
-								+ Executions.encodeURL(
-										chequeNumber);
+				String url = "/zul/outward/outward-checker/processing.zul" + "?batchNumber="
+						+ Executions.encodeURL(batchNumber) + "&chequeNumber=" + Executions.encodeURL(chequeNumber);
 
 				Executions.sendRedirect(url);
-
 				return;
 			}
-
-			boolean pendingMakerCheques =
-					service.hasPendingMakerCheques(
-							batchNumber,
-							String.valueOf(
-									currentCheckerUser));
+			boolean pendingMakerCheques = service.hasPendingMakerCheques(batchNumber,
+					String.valueOf(currentCheckerUser));
 
 			if (pendingMakerCheques) {
 
-				Clients.showNotification(
-						"Still in process by Maker.",
-						Clients.NOTIFICATION_TYPE_WARNING,
-						null,
-						"top_center",
-						4000);
+				Clients.showNotification("Still in process by Maker.", Clients.NOTIFICATION_TYPE_WARNING, null,
+						"top_center", 4000);
 
 				return;
 			}
 
-			boolean assignedToCurrentChecker =
-					service.isAssignedToChecker(
-							batchNumber,
-							String.valueOf(
-									currentCheckerUser));
+			boolean assignedToCurrentChecker = service.isAssignedToChecker(batchNumber,
+					String.valueOf(currentCheckerUser));
 
 			if (assignedToCurrentChecker) {
 
-				Executions.sendRedirect(
-						"/zul/outward/outward-checker/batchesQueue.zul"
-								+ "?batchNumber="
-								+ Executions.encodeURL(
-										batchNumber));
+				Executions.sendRedirect("/zul/outward/outward-checker/batchesQueue.zul" + "?batchNumber="
+						+ Executions.encodeURL(batchNumber));
 
 				return;
 			}
 
-			if (!"AVAILABLE".equalsIgnoreCase(
-					latest.getLockStatus())) {
+			if (!"AVAILABLE".equalsIgnoreCase(latest.getLockStatus())) {
 
-				Clients.showNotification(
-						"Batch is already locked.",
-						Clients.NOTIFICATION_TYPE_WARNING,
-						null,
-						"top_center",
-						3000);
+				Clients.showNotification("Batch is already locked.", Clients.NOTIFICATION_TYPE_WARNING, null,
+						"top_center", 3000);
 
 				loadDashboard();
 
 				return;
 			}
 
-			boolean assigned =
-					service.assignBatch(
-							batchNumber,
-							currentCheckerUser);
+			boolean assigned = service.assignBatch(batchNumber, currentCheckerUser);
 
 			if (!assigned) {
 
-				Clients.showNotification(
-						"Batch was already assigned to another Checker.",
-						Clients.NOTIFICATION_TYPE_WARNING,
-						null,
-						"top_center",
-						4000);
+				Clients.showNotification("Batch was already assigned to another Checker.",
+						Clients.NOTIFICATION_TYPE_WARNING, null, "top_center", 4000);
 
 				loadDashboard();
 
 				return;
 			}
 
-			Clients.showNotification(
-					"Batch assigned successfully.",
-					Clients.NOTIFICATION_TYPE_INFO,
-					null,
-					"top_center",
+			Clients.showNotification("Batch assigned successfully.", Clients.NOTIFICATION_TYPE_INFO, null, "top_center",
 					2000);
 
-			Executions.sendRedirect(
-					"/zul/outward/outward-checker/batchesQueue.zul"
-							+ "?batchNumber="
-							+ Executions.encodeURL(
-									batchNumber));
+			Executions.sendRedirect("/zul/outward/outward-checker/batchesQueue.zul" + "?batchNumber="
+					+ Executions.encodeURL(batchNumber));
 
 		} catch (Exception e) {
 
 			e.printStackTrace();
 
-			Clients.showNotification(
-					"Unable to open batch.",
-					Clients.NOTIFICATION_TYPE_ERROR,
-					null,
-					"top_center",
+			Clients.showNotification("Unable to open batch.", Clients.NOTIFICATION_TYPE_ERROR, null, "top_center",
 					4000);
 		}
 	}
 
-	private void releaseBatchLock(
-	        String batchNumber) {
+	private void releaseBatchLock(String batchNumber) {
 
-	    if (batchNumber == null
-	            || batchNumber.trim().isEmpty()) {
+		if (batchNumber == null || batchNumber.trim().isEmpty()) {
 
-	        Messagebox.show(
-	                "Invalid batch number.",
-	                "Release Lock",
-	                Messagebox.OK,
-	                Messagebox.ERROR);
+			Messagebox.show("Invalid batch number.", "Release Lock", Messagebox.OK, Messagebox.ERROR);
 
-	        return;
-	    }
+			return;
+		}
 
-	    final String cleanBatchNumber =
-	            batchNumber.trim();
+		final String cleanBatchNumber = batchNumber.trim();
 
-	    Messagebox.show(
-	            "Are you sure you want to release the lock for batch "
-	                    + cleanBatchNumber
-	                    + "?\n\n"
-	                    + "The batch will become available again "
-	                    + "for Checker processing.",
+		Messagebox.show(
+				"Are you sure you want to release the lock for batch " + cleanBatchNumber + "?\n\n"
+						+ "The batch will become available again " + "for Checker processing.",
 
-	            "Confirm Release Lock",
+				"Confirm Release Lock",
 
-	            Messagebox.YES | Messagebox.NO,
+				Messagebox.YES | Messagebox.NO,
 
-	            Messagebox.QUESTION,
+				Messagebox.QUESTION,
 
-	            event -> {
+				event -> {
 
-	                if (!Messagebox.ON_YES.equals(
-	                        event.getName())) {
+					if (!Messagebox.ON_YES.equals(event.getName())) {
 
-	                    return;
-	                }
+						return;
+					}
 
-	                try {
+					try {
 
-	                    boolean released =
-	                            service.releaseBatchLock(
-	                                    cleanBatchNumber,
-	                                    currentCheckerUser);
+						boolean released = service.releaseBatchLock(cleanBatchNumber, currentCheckerUser);
 
-	                    if (released) {
+						if (released) {
 
-	                        Messagebox.show(
-	                                "Batch "
-	                                        + cleanBatchNumber
-	                                        + " has been released successfully.",
+							Messagebox.show("Batch " + cleanBatchNumber + " has been released successfully.",
 
-	                                "Release Lock",
+									"Release Lock",
 
-	                                Messagebox.OK,
+									Messagebox.OK,
 
-	                                Messagebox.INFORMATION);
+									Messagebox.INFORMATION);
 
-	                        loadDashboard();
+							loadDashboard();
 
-	                    } else {
+						} else {
 
-	                        Messagebox.show(
-	                                "Unable to release the batch.\n\n"
-	                                        + "The batch may no longer "
-	                                        + "be assigned to you.",
+							Messagebox.show(
+									"Unable to release the batch.\n\n" + "The batch may no longer "
+											+ "be assigned to you.",
 
-	                                "Release Lock",
+									"Release Lock",
 
-	                                Messagebox.OK,
+									Messagebox.OK,
 
-	                                Messagebox.ERROR);
+									Messagebox.ERROR);
 
-	                        loadDashboard();
-	                    }
+							loadDashboard();
+						}
 
-	                } catch (Exception e) {
+					} catch (Exception e) {
 
-	                    e.printStackTrace();
+						e.printStackTrace();
 
-	                    Messagebox.show(
-	                            "Error while releasing batch "
-	                                    + cleanBatchNumber
-	                                    + ".\n\n"
-	                                    + e.getMessage(),
+						Messagebox.show("Error while releasing batch " + cleanBatchNumber + ".\n\n" + e.getMessage(),
 
-	                            "Release Lock",
+								"Release Lock",
 
-	                            Messagebox.OK,
+								Messagebox.OK,
 
-	                            Messagebox.ERROR);
-	                }
-	            });
+								Messagebox.ERROR);
+					}
+				});
 	}
 
 	private String safe(String value) {

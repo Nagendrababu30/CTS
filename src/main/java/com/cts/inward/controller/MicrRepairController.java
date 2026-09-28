@@ -102,6 +102,7 @@ public class MicrRepairController
     private int currentRotation = 0;
     private String correctedMicr;
     private Long loggedInUserId;
+    private final Map<String, AImage> aImageCache = new java.util.HashMap<>();
 
     // Load logged-in user from session
     private void loadLoggedInUser() {
@@ -582,6 +583,24 @@ public class MicrRepairController
         }
     }
 
+    // Format status: remove underscore, capitalize every word (Title Case)
+    private String formatStatus(String status) {
+        if (status == null || status.trim().isEmpty()) {
+            return "—";
+        }
+        String[] words = status.trim().replace('_', ' ').toLowerCase().split("\\s+");
+        StringBuilder sb = new StringBuilder();
+        for (String word : words) {
+            if (!word.isEmpty()) {
+                if (sb.length() > 0) {
+                    sb.append(" ");
+                }
+                sb.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1));
+            }
+        }
+        return sb.toString();
+    }
+
     // Update current status label styling
     private void setCurrentStatus(
             String status) {
@@ -597,7 +616,7 @@ public class MicrRepairController
                                 .toUpperCase();
 
         currentStatusLabel.setValue(
-                normalized);
+                formatStatus(status));
 
         if (STATUS_MICR_REPAIR.equals(
                 normalized)) {
@@ -800,7 +819,12 @@ public class MicrRepairController
             try {
                 File file = resolveImageFile(path);
                 if (file != null) {
-                    chequeImage.setContent(new AImage(file));
+                    AImage cached = aImageCache.get(file.getAbsolutePath());
+                    if (cached == null) {
+                        cached = new AImage(file);
+                        aImageCache.put(file.getAbsolutePath(), cached);
+                    }
+                    chequeImage.setContent(cached);
                 } else {
                     String clean = path.replace("\\", "/").trim();
                     if (clean.startsWith("/")) clean = clean.substring(1);
@@ -991,6 +1015,16 @@ public class MicrRepairController
                     2000
             );
 
+            // Update in-memory DTO immediately to avoid full-batch re-comparison query
+            c.setRepairedMicrCode(correctedMicr);
+            c.setNeedsMicrRepair(false);
+            c.setMicrRepaired(true);
+            if (correctedMicr != null && correctedMicr.trim().length() == 9) {
+                c.setRepairedCityCode(correctedMicr.substring(0, 3));
+                c.setRepairedBankCode(correctedMicr.substring(3, 6));
+                c.setRepairedBranchCode(correctedMicr.substring(6, 9));
+            }
+
             // Advance immediately to next cheque without requiring OK click
             moveAfterSave();
 
@@ -1016,15 +1050,23 @@ public class MicrRepairController
         }
     }
 
+    private boolean hasAnyChequeNeedingMicrRepair() {
+        if (comparisons == null) {
+            return false;
+        }
+        for (MicrComparisonDto item : comparisons) {
+            if (item != null && item.isNeedsMicrRepair()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // Move to next cheque after saving MICR repair
     private void moveAfterSave() {
 
-        comparisons =
-                micrRepairService
-                        .compareBatch(batchId);
-
         if (originalRepairIndexes == null || originalRepairIndexes.isEmpty()) {
-            if (!micrRepairService.needsMicrRepair(batchId)) {
+            if (!hasAnyChequeNeedingMicrRepair()) {
                 navigateAfterMicrCompletion();
             }
             return;
@@ -1039,7 +1081,7 @@ public class MicrRepairController
             loadCheque();
         } else {
             // End of error list reached; check if any cheque still needs repair
-            if (micrRepairService.needsMicrRepair(batchId)) {
+            if (hasAnyChequeNeedingMicrRepair()) {
                 int nextPending = -1;
                 for (int idx : originalRepairIndexes) {
                     if (idx >= 0 && idx < comparisons.size() && comparisons.get(idx).isNeedsMicrRepair()) {
@@ -1380,7 +1422,7 @@ public class MicrRepairController
 
     // Navigate to Data Entry or Send to Checker when all MICR repairs are complete
     private void navigateAfterMicrCompletion() {
-        if (micrRepairService.needsMicrRepair(batchId)) {
+        if (hasAnyChequeNeedingMicrRepair()) {
             return;
         }
         if (micrRepairService.hasChequesNeedingDataEntry(batchId)) {

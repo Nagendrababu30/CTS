@@ -78,6 +78,7 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	private Image imgCheque;
 
 	private Textbox txtChequeNo;
+	private Label currentStatusLabel;
 	private Textbox txtAccountNo;
 	private Decimalbox decAmount;
 	private Textbox txtAmountInWords;
@@ -107,6 +108,10 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	private BatchService batchService;
 	private ChequeService chequeService;
 	private ChequeImageDaoImpl chequeImageDao;
+	private final java.util.Map<String, String> chequeStatusCache = new java.util.concurrent.ConcurrentHashMap<>();
+	private final java.util.Map<String, org.zkoss.image.AImage> aImageCache = new java.util.HashMap<>();
+	private final java.util.Map<String, ChequeImage> chequeImageCache = new java.util.HashMap<>();
+	private final java.util.Map<String, java.util.Map<String, String>> returnInfoCache = new java.util.HashMap<>();
 
 	// =========================================================
 	// PAGE INITIALIZATION
@@ -253,6 +258,23 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 			cheques = new java.util.ArrayList<>();
 			allBatchChequeNumbers = new java.util.ArrayList<>();
 			if (loaded != null) {
+				// Pre-populate status cache in a single bulk query
+				List<String> rawChequeNumbers = new java.util.ArrayList<>();
+				for (InwardCheque c : loaded) {
+					if (c != null && c.getChequeNumber() != null) {
+						rawChequeNumbers.add(c.getChequeNumber().trim());
+					}
+				}
+				try {
+					com.cts.inward.dao.MicrRepairDao repairDao = new com.cts.inward.dao.MicrRepairDaoImpl();
+					java.util.Map<String, String> statuses = repairDao.getLatestChequeStatuses(rawChequeNumbers);
+					if (statuses != null) {
+						chequeStatusCache.putAll(statuses);
+					}
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+
 				for (InwardCheque c : loaded) {
 					if (!isChequeReturnedInMicr(c.getChequeNumber())) {
 						cheques.add(c);
@@ -308,13 +330,19 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		boolean isReturned = isChequeReturnedByMaker(cheque.getChequeNumber());
 
 		// -----------------------------------------------------
-		// CHEQUE NUMBER
+		// CHEQUE NUMBER & CURRENT STATUS
 		// -----------------------------------------------------
 
 		if (txtChequeNo != null) {
 			txtChequeNo.setValue(safeString(cheque.getChequeNumber()));
 			txtChequeNo.setReadonly(isReturned);
 		}
+
+		String latestStatus = getChequeLatestStatus(cheque.getChequeNumber());
+		if (latestStatus == null || latestStatus.trim().isEmpty()) {
+			latestStatus = "DATA_ENTRY";
+		}
+		setCurrentStatus(latestStatus);
 
 		// -----------------------------------------------------
 		// ACCOUNT NUMBER
@@ -393,7 +421,7 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 			return;
 		}
 
-		java.util.Map<String, String> returnInfo = chequeService.getChequeReturnInfo(chqNo);
+		java.util.Map<String, String> returnInfo = getCachedReturnInfo(chqNo);
 		if (returnInfo != null && "RETURN_TO_MAKER".equalsIgnoreCase(returnInfo.get("status"))) {
 			returnReasonBanner.setVisible(true);
 
@@ -568,8 +596,9 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 			// 3. CHANGE CHEQUE STATUS ONLY IF NOT ALREADY RETURN_BY_MAKER
 			if (!isChequeReturnedByMaker(currentCheque.getChequeNumber())) {
 				chequeService.updateChequeStatus(currentCheque.getChequeNumber(), "DATA_ENTRY_COMPLETED", loggedInUserId);
+				chequeStatusCache.put(currentCheque.getChequeNumber().trim(), "DATA_ENTRY_COMPLETED");
+				setCurrentStatus("DATA_ENTRY_COMPLETED");
 			}
-			updateBatchSummaryCounts();
 
 			// 4. UPDATE IN-MEMORY CHEQUE SO NAVIGATING BACK REFLECTS SAVED VALUES
 			InwardCheque updatedCheque = InwardCheque.of(
@@ -592,6 +621,7 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 					2000);
 
 			if (currentIndex == cheques.size() - 1) {
+				updateBatchSummaryCounts();
 				batchService.completeDataEntry(batchId, loggedInUserId);
 
 				String redirectUrl = Executions.encodeURL("/zul/inward-maker/send-to-checker.zul");
@@ -685,6 +715,8 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 				Messagebox.show("Unable to save return for cheque " + currentCheque.getChequeNumber() + ".", "Error", Messagebox.OK, Messagebox.ERROR);
 				return;
 			}
+			chequeStatusCache.put(currentCheque.getChequeNumber().trim(), "RETURN_BY_MAKER");
+			returnInfoCache.remove(currentCheque.getChequeNumber().trim());
 
 			if (returnWindow != null) {
 				returnWindow.setVisible(false);
@@ -714,11 +746,24 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		}
 	}
 
+	private java.util.Map<String, String> getCachedReturnInfo(String chequeNumber) {
+		if (chequeNumber == null || chequeNumber.trim().isEmpty() || chequeService == null) {
+			return null;
+		}
+		String trimmed = chequeNumber.trim();
+		if (returnInfoCache.containsKey(trimmed)) {
+			return returnInfoCache.get(trimmed);
+		}
+		java.util.Map<String, String> info = chequeService.getChequeReturnInfo(trimmed);
+		returnInfoCache.put(trimmed, info);
+		return info;
+	}
+
 	private boolean isChequeReturnedInMicr(String chequeNumber) {
 		if (chequeNumber == null || chequeNumber.trim().isEmpty() || chequeService == null) {
 			return false;
 		}
-		java.util.Map<String, String> returnInfo = chequeService.getChequeReturnInfo(chequeNumber);
+		java.util.Map<String, String> returnInfo = getCachedReturnInfo(chequeNumber);
 		if (returnInfo == null) {
 			return false;
 		}
@@ -734,19 +779,66 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 	}
 
 	private boolean isChequeReturnedByMaker(String chequeNumber) {
-		if (chequeNumber == null || chequeNumber.trim().isEmpty() || chequeService == null) {
+		if (chequeNumber == null || chequeNumber.trim().isEmpty()) {
 			return false;
 		}
-		java.util.Map<String, String> returnInfo = chequeService.getChequeReturnInfo(chequeNumber);
-		return returnInfo != null && "RETURN_BY_MAKER".equalsIgnoreCase(returnInfo.get("status"));
+		String status = getChequeLatestStatus(chequeNumber);
+		return "RETURN_BY_MAKER".equalsIgnoreCase(status);
+	}
+
+	// Format status: remove underscore, capitalize every word (Title Case)
+	private String formatStatus(String status) {
+		if (status == null || status.trim().isEmpty()) {
+			return "—";
+		}
+		String[] words = status.trim().replace('_', ' ').toLowerCase().split("\\s+");
+		StringBuilder sb = new StringBuilder();
+		for (String word : words) {
+			if (!word.isEmpty()) {
+				if (sb.length() > 0) {
+					sb.append(" ");
+				}
+				sb.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1));
+			}
+		}
+		return sb.toString();
+	}
+
+	private void setCurrentStatus(String status) {
+		if (currentStatusLabel == null) {
+			return;
+		}
+
+		String normalized = status == null ? "" : status.trim().toUpperCase();
+
+		currentStatusLabel.setValue(formatStatus(status));
+
+		if ("MICR_REPAIR".equals(normalized)) {
+			currentStatusLabel.setSclass("micr-status-value micr-status-repair");
+		} else if ("MICR_REPAIRED".equals(normalized)) {
+			currentStatusLabel.setSclass("micr-status-value micr-status-repaired");
+		} else if ("DATA_ENTRY".equals(normalized) || "DATA_ENTRY_COMPLETED".equals(normalized)) {
+			currentStatusLabel.setSclass("micr-status-value micr-status-data-entry");
+		} else {
+			currentStatusLabel.setSclass("micr-status-value micr-status-error");
+		}
 	}
 
 	private String getChequeLatestStatus(String chequeNumber) {
 		if (chequeNumber == null || chequeNumber.trim().isEmpty() || chequeService == null) {
 			return "";
 		}
-		java.util.Map<String, String> returnInfo = chequeService.getChequeReturnInfo(chequeNumber);
-		return (returnInfo != null && returnInfo.get("status") != null) ? returnInfo.get("status") : "";
+		String trimmed = chequeNumber.trim();
+		String cached = chequeStatusCache.get(trimmed);
+		if (cached != null && !cached.isEmpty()) {
+			return cached;
+		}
+		java.util.Map<String, String> returnInfo = getCachedReturnInfo(trimmed);
+		String status = (returnInfo != null && returnInfo.get("status") != null) ? returnInfo.get("status") : "";
+		if (!status.isEmpty()) {
+			chequeStatusCache.put(trimmed, status);
+		}
+		return status;
 	}
 
 	// =========================================================
@@ -758,7 +850,13 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		currentBackImagePath = null;
 
 		try {
-			ChequeImage image = chequeImageDao.findByChequeNumber(chequeNumber);
+			ChequeImage image = chequeImageCache.get(chequeNumber);
+			if (image == null) {
+				image = chequeImageDao.findByChequeNumber(chequeNumber);
+				if (image != null) {
+					chequeImageCache.put(chequeNumber, image);
+				}
+			}
 			if (image != null) {
 				currentFrontImagePath = image.getFrontPath();
 				currentBackImagePath = image.getBackPath();
@@ -839,7 +937,12 @@ public class DataEntryFormController extends GenericForwardComposer<Component> {
 		try {
 			java.io.File file = resolveImageFile(imagePath);
 			if (file != null) {
-				imgCheque.setContent(new org.zkoss.image.AImage(file));
+				org.zkoss.image.AImage aimg = aImageCache.get(file.getAbsolutePath());
+				if (aimg == null) {
+					aimg = new org.zkoss.image.AImage(file);
+					aImageCache.put(file.getAbsolutePath(), aimg);
+				}
+				imgCheque.setContent(aimg);
 			} else {
 				String clean = imagePath.replace("\\", "/").trim();
 				if (clean.startsWith("/")) clean = clean.substring(1);

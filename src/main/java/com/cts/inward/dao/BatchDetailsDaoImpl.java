@@ -122,7 +122,10 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
 					    r.description AS return_reason_description,
 					    latest.remarks AS maker_remarks,
 					    ocr.micr_code AS ocr_micr_code,
-					    latest.checker_action,
+					    CASE 
+					        WHEN latest.status = 'SENT_TO_CHECKER' THEN NULL 
+					        ELSE latest.checker_action 
+					    END AS checker_action,
 					    latest.checker_id
 					FROM inward_cheque c
 					LEFT JOIN LATERAL (
@@ -168,7 +171,10 @@ public class BatchDetailsDaoImpl implements BatchDetailsDao {
 					    r.description AS return_reason_description,
 					    latest.remarks AS maker_remarks,
 					    ocr.micr_code AS ocr_micr_code,
-					    latest.checker_action,
+					    CASE 
+					        WHEN latest.status = 'SENT_TO_CHECKER' THEN NULL 
+					        ELSE latest.checker_action 
+					    END AS checker_action,
 					    latest.checker_id
 					FROM inward_cheque c
 					LEFT JOIN LATERAL (

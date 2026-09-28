@@ -503,4 +503,52 @@ div.return-window,
 .return-alert-remarks-text {
     font-size: 12.5px !important;
     color: #344054 !important;
+}
+
+/* =============================================================
+   Current Status - Floating Pill
+   ============================================================= */
+
+*.micr-status-value {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 36px !important;
+    padding: 6px 14px !important;
+    border-radius: 6px !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+    text-transform: none !important;
+}
+
+*.micr-status-repair {
+    color: #B54708 !important;
+    background: #FEF0C7 !important;
+    border: 1.5px solid #FEC84B !important;
+}
+
+*.micr-status-repaired {
+    color: #027A48 !important;
+    background: #ECFDF3 !important;
+    border: 1.5px solid #6CE9A6 !important;
+}
+
+*.micr-status-data-entry {
+    color: #175CD3 !important;
+    background: #EFF8FF !important;
+    border: 1.5px solid #84CAFF !important;
+}
+
+*.micr-status-error {
+    color: #D92D20 !important;
+    font-weight: 700 !important;
+    font-size: 13.5px !important;
+    height: 36px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-transform: none !important;
 }

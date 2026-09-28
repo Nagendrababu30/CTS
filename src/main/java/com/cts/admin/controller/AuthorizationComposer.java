@@ -29,8 +29,6 @@ public class AuthorizationComposer extends GenericForwardComposer<Component> {
 
 		PAGE_PERMISSIONS.put("/zul/admin/admin-user-management.zul", "Admin");
 
-		PAGE_PERMISSIONS.put("/zul/admin/admin-batch-monitoring.zul", "Admin");
-
 		PAGE_PERMISSIONS.put("/zul/admin/admin-session-management.zul", "Admin");
 
 		PAGE_PERMISSIONS.put("/zul/admin/admin-audit-logs.zul", "Admin");

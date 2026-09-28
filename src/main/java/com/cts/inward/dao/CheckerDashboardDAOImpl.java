@@ -1,4 +1,4 @@
- package com.cts.inward.dao;
+package com.cts.inward.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,26 +11,21 @@ import javax.sql.DataSource;
 
 import com.cts.inward.model.CheckerBatch;
 
-public class CheckerDashboardDAOImpl
-        implements CheckerDashboardDAO {
+public class CheckerDashboardDAOImpl implements CheckerDashboardDAO {
 
-    private final DataSource dataSource;
+	private final DataSource dataSource;
 
+	public CheckerDashboardDAOImpl(DataSource dataSource) {
 
-    public CheckerDashboardDAOImpl(
-            DataSource dataSource) {
+		this.dataSource = dataSource;
+	}
 
-        this.dataSource = dataSource;
-    }
+	// Total batches received by Checker.
 
+	@Override
+	public int getReceivedBatchCount() {
 
-    /*
-     * Total batches received by Checker.
-     */
-    @Override
-    public int getReceivedBatchCount() {
-
-        String sql =
+		String sql =
                 "SELECT COUNT(*) "
                 + "FROM ( "
                 + "    SELECT DISTINCT ON (batch_id) "
@@ -46,36 +41,26 @@ public class CheckerDashboardDAOImpl
                 + " 'RETURN_TO_MAKER', "
                 + " 'ON_HOLD')";
 
+		try (Connection connection = dataSource.getConnection();
 
-        try (
-                Connection connection =
-                        dataSource.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql);
 
-                PreparedStatement statement =
-                        connection.prepareStatement(sql);
+				ResultSet rs = statement.executeQuery()) {
 
-                ResultSet rs =
-                        statement.executeQuery()
-        ) {
+			if (rs.next()) {
+				return rs.getInt(1);
+			}
 
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
+			return 0;
 
-            return 0;
+		} catch (SQLException e) {
 
-        } catch (SQLException e) {
+			throw new IllegalStateException("Failed to get received batch count", e);
+		}
+	}
 
-            throw new IllegalStateException(
-                    "Failed to get received batch count",
-                    e);
-        }
-    }
-
-
-    /*
-     * Available batches for Checker.
-     */
+     // Available batches for Checker.
+   
     @Override
     public int getAvailableBatchCount() {
 
@@ -97,37 +82,28 @@ public class CheckerDashboardDAOImpl
                 + "AND hs.batch_status = 'SENT_TO_CHECKER'";
 
 
-        try (
-                Connection connection =
-                        dataSource.getConnection();
+		try (Connection connection = dataSource.getConnection();
 
-                PreparedStatement statement =
-                        connection.prepareStatement(sql);
+				PreparedStatement statement = connection.prepareStatement(sql);
 
-                ResultSet rs =
-                        statement.executeQuery()
-        ) {
+				ResultSet rs = statement.executeQuery()) {
 
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
+			if (rs.next()) {
+				return rs.getInt(1);
+			}
 
-            return 0;
+			return 0;
 
-        } catch (SQLException e) {
+		} catch (SQLException e) {
 
-            throw new IllegalStateException(
-                    "Failed to get available batch count",
-                    e);
-        }
-    }
+			throw new IllegalStateException("Failed to get available batch count", e);
+		}
+	}
 
+	// Batches locked by current Checker.
 
-    /*
-     * Batches locked by current Checker.
-     */
-    @Override
-    public int getMyBatchCount(long userId) {
+	@Override
+	public int getMyBatchCount(long userId) {
 
         String sql =
                 "SELECT COUNT(*) "
@@ -135,43 +111,31 @@ public class CheckerDashboardDAOImpl
                 + "WHERE user_id = ? "
                 + "AND lock_status = 'LOCKED'";
 
+		try (Connection connection = dataSource.getConnection();
 
-        try (
-                Connection connection =
-                        dataSource.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql)) {
 
-                PreparedStatement statement =
-                        connection.prepareStatement(sql)
-        ) {
+			statement.setLong(1, userId);
 
-            statement.setLong(1, userId);
+			try (ResultSet rs = statement.executeQuery()) {
 
-            try (
-                    ResultSet rs =
-                            statement.executeQuery()
-            ) {
+				if (rs.next()) {
+					return rs.getInt(1);
+				}
 
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
+				return 0;
+			}
 
-                return 0;
-            }
+		} catch (SQLException e) {
 
-        } catch (SQLException e) {
+			throw new IllegalStateException("Failed to get my batch count", e);
+		}
+	}
 
-            throw new IllegalStateException(
-                    "Failed to get my batch count",
-                    e);
-        }
-    }
+	// Get all batches required by Checker dashboard.
 
-
-    /*
-     * Get all batches required by Checker dashboard.
-     */
-    @Override
-    public List<CheckerBatch> getBatches() {
+	@Override
+	public List<CheckerBatch> getBatches() {
 
         String sql =
                 "SELECT "
@@ -222,9 +186,9 @@ public class CheckerDashboardDAOImpl
 
                 + "FROM inward_batch b "
 
-                /*
-                 * Latest lock record.
-                 */
+                 
+                 // Latest lock record.
+                 
                 + "LEFT JOIN ( "
                 + "    SELECT DISTINCT ON (batch_id) "
                 + "        batch_id, "
@@ -241,9 +205,8 @@ public class CheckerDashboardDAOImpl
                 + ") l "
                 + "ON l.batch_id = b.batch_id "
 
-                /*
-                 * Latest Checker.
-                 */
+              //  Latest Checker.
+                 
                 + "LEFT JOIN ( "
                 + "    SELECT DISTINCT ON (bl.batch_id) "
                 + "        bl.batch_id, "
@@ -260,9 +223,9 @@ public class CheckerDashboardDAOImpl
                 + ") l_chk "
                 + "ON l_chk.batch_id = b.batch_id "
 
-                /*
-                 * Maker who sent the batch to Checker.
-                 */
+             
+                 // Maker who sent the batch to Checker.
+               
                 + "LEFT JOIN ( "
                 + "    SELECT "
                 + "        bh.batch_id, "
@@ -278,9 +241,9 @@ public class CheckerDashboardDAOImpl
                 + ") h "
                 + "ON h.batch_id = b.batch_id "
 
-                /*
-                 * Latest batch status.
-                 */
+                
+                // Latest batch status.
+               
                 + "JOIN ( "
                 + "    SELECT DISTINCT ON (batch_id) "
                 + "        batch_id, "
@@ -293,9 +256,9 @@ public class CheckerDashboardDAOImpl
                 + ") hs "
                 + "ON hs.batch_id = b.batch_id "
 
-                /*
-                 * Checker should see these batches.
-                 */
+               
+                 // Checker should see these batches.
+                
                 + "WHERE hs.batch_status IN "
                 + "('SENT_TO_CHECKER', "
                 + " 'RETURN_TO_MAKER', "
@@ -304,176 +267,112 @@ public class CheckerDashboardDAOImpl
                 + "ORDER BY b.batch_id";
 
 
-        List<CheckerBatch> batches =
-                new ArrayList<>();
+		List<CheckerBatch> batches = new ArrayList<>();
 
+		try (Connection connection = dataSource.getConnection();
 
-        try (
-                Connection connection =
-                        dataSource.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql);
 
-                PreparedStatement statement =
-                        connection.prepareStatement(sql);
+				ResultSet rs = statement.executeQuery()) {
 
-                ResultSet rs =
-                        statement.executeQuery()
-        ) {
+			while (rs.next()) {
 
-            while (rs.next()) {
+				CheckerBatch batch = new CheckerBatch();
 
-                CheckerBatch batch =
-                        new CheckerBatch();
+				batch.setBatchId(rs.getLong("batch_id"));
 
+				batch.setTotalCheques(rs.getInt("total_cheques"));
 
-                batch.setBatchId(
-                        rs.getLong("batch_id"));
+				// Maker name.
 
+				String makerName = rs.getString("maker_name");
 
-                batch.setTotalCheques(
-                        rs.getInt("total_cheques"));
+				if (makerName == null || makerName.trim().isEmpty()) {
 
+					makerName = "Not Assigned";
+				}
 
-                /*
-                 * Maker name.
-                 */
-                String makerName =
-                        rs.getString("maker_name");
+				batch.setMaker(makerName);
 
-                if (makerName == null
-                        || makerName.trim().isEmpty()) {
+				// Checker ID.
 
-                    makerName =
-                            "Not Assigned";
-                }
+				Object checkerId = rs.getObject("checker_id");
 
-                batch.setMaker(makerName);
+				if (checkerId != null) {
 
+					batch.setUserId(((Number) checkerId).longValue());
 
-                /*
-                 * Checker ID.
-                 *
-                 * This is NOT displayed.
-                 * It is used internally for ownership.
-                 */
-                Object checkerId =
-                        rs.getObject("checker_id");
+				} else {
 
-                if (checkerId != null) {
+					batch.setUserId(null);
+				}
 
-                    batch.setUserId(
-                            ((Number) checkerId)
-                                    .longValue());
+				// Checker name.
 
-                } else {
+				String checkerName = rs.getString("checker_name");
 
-                    batch.setUserId(null);
-                }
+				if (checkerName == null || checkerName.trim().isEmpty()) {
 
+					checkerName = "Not Assigned";
+				}
 
-                /*
-                 * Checker name.
-                 */
-                String checkerName =
-                        rs.getString("checker_name");
+				batch.setCheckerName(checkerName);
 
-                if (checkerName == null
-                        || checkerName.trim().isEmpty()) {
+				// Lock status.
 
-                    checkerName =
-                            "Not Assigned";
-                }
+				String lockStatus = rs.getString("lock_status");
 
-                batch.setCheckerName(
-                        checkerName);
+				if (lockStatus == null || lockStatus.trim().isEmpty()) {
 
+					lockStatus = "UNLOCKED";
+				}
 
-                /*
-                 * Lock status.
-                 */
-                String lockStatus =
-                        rs.getString("lock_status");
+				batch.setLockStatus(lockStatus);
 
-                if (lockStatus == null
-                        || lockStatus.trim().isEmpty()) {
+				// Batch status.
 
-                    lockStatus =
-                            "UNLOCKED";
-                }
+				batch.setBatchStatus(rs.getString("batch_status"));
 
-                batch.setLockStatus(
-                        lockStatus);
+				// Re-verify
 
+				batch.setReVerify(rs.getBoolean("is_reverify"));
 
-                /*
-                 * Batch status.
-                 */
-                batch.setBatchStatus(
-                        rs.getString("batch_status"));
+				batches.add(batch);
+			}
 
+			return batches;
 
-                /*
-                 * Re-verify flag.
-                 */
-                batch.setReVerify(
-                        rs.getBoolean("is_reverify"));
+		} catch (SQLException e) {
 
+			throw new IllegalStateException("Failed to retrieve checker batches", e);
+		}
+	}
 
-                batches.add(batch);
-            }
+	// Lock batch for current Checker.
 
-
-            return batches;
-
-        } catch (SQLException e) {
-
-            throw new IllegalStateException(
-                    "Failed to retrieve checker batches",
-                    e);
-        }
-    }
-
-
-    /*
-     * Lock batch for current Checker.
-     */
-    @Override
-    public boolean lockBatch(
-            long batchId,
-            long userId) {
+	@Override
+	public boolean lockBatch(long batchId, long userId) {
 
         String sql =
                 "INSERT INTO inward_batch_lock "
                 + "(batch_id, user_id, locked_time, lock_status) "
                 + "VALUES (?, ?, CURRENT_TIMESTAMP, 'LOCKED')";
 
+		try (Connection connection = dataSource.getConnection();
 
-        try (
-                Connection connection =
-                        dataSource.getConnection();
+				PreparedStatement statement = connection.prepareStatement(sql)) {
 
-                PreparedStatement statement =
-                        connection.prepareStatement(sql)
-        ) {
+			statement.setLong(1, batchId);
 
-            statement.setLong(
-                    1,
-                    batchId);
+			statement.setLong(2, userId);
 
-            statement.setLong(
-                    2,
-                    userId);
+			int rowsInserted = statement.executeUpdate();
 
-            int rowsInserted =
-                    statement.executeUpdate();
+			return rowsInserted == 1;
 
-            return rowsInserted == 1;
+		} catch (SQLException e) {
 
-        } catch (SQLException e) {
-
-            throw new IllegalStateException(
-                    "Failed to lock batch: "
-                    + batchId,
-                    e);
-        }
-    }
+			throw new IllegalStateException("Failed to lock batch: " + batchId, e);
+		}
+	}
 }

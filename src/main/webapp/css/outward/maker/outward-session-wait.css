@@ -1,45 +1,84 @@
-
-.outward-session-page {
+html,
+body {
     width: 100%;
     height: 100%;
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    background: #f4f6f8;
-    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
 }
 
-.outward-session-card {
-    width: 420px;
-    min-height: 350px;
+*,
+*::before,
+*::after {
     box-sizing: border-box;
-    padding: 35px;
+}
+
+/* ---------- Page wrapper: centers the card ---------- */
+.outward-session-page {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;          /* vertical center */
+    justify-content: center;      /* horizontal center */
+    padding: 20px;
+    background: #f4f6f8;
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Card ---------- */
+.outward-session-card {
+    position: relative;
+    width: 420px;
+    max-width: 100%;
+    min-height: 350px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 35px 35px 35px;
     text-align: center;
     background: #ffffff;
     border: 1px solid #d9dee5;
-    border-radius: 8px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    box-shadow:
+        0 1px 2px rgba(16, 24, 40, 0.04),
+        0 8px 24px rgba(16, 24, 40, 0.08);
+    overflow: hidden;
 }
 
+/* Accent top border */
+.outward-session-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #2563eb, #60a5fa);
+}
+
+/* ---------- Icon ---------- */
 .outward-session-icon {
     width: 65px;
     height: 65px;
     margin: 0 auto 18px auto;
-    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 50%;
     background: #eaf2ff;
     color: #2563eb;
     font-size: 28px;
+    line-height: 1;
+    flex-shrink: 0;
+    border: 1px solid #cbdcfb;
 }
 
+/* ---------- Text ---------- */
 .outward-session-title {
     display: block;
-    margin-bottom: 10px;
-    color: #222222;
+    margin: 0 0 10px 0;
+    color: #1f2937;
     font-size: 20px;
     font-weight: 600;
     line-height: 1.3;
@@ -49,69 +88,90 @@
     display: block;
     margin: 0 auto 22px auto;
     max-width: 340px;
-    color: #666666;
+    color: #6b7280;
     font-size: 13px;
     line-height: 1.6;
 }
 
+/* ---------- Status badge ---------- */
 .outward-session-status {
     display: inline-block;
-    margin-bottom: 10px;
+    margin: 0 0 12px 0;
     padding: 6px 12px;
     background: #eef4ff;
     border: 1px solid #cbdcfb;
-    border-radius: 4px;
+    border-radius: 999px;
     color: #2563eb;
     font-size: 11px;
     font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
 }
 
+/* ---------- Timer ---------- */
 .outward-session-timer {
     display: block;
-    margin-bottom: 25px;
+    margin: 0 0 28px 0;
     color: #1d4ed8;
-    font-family: Consolas, monospace;
+    font-family: Consolas, "Courier New", monospace;
     font-size: 42px;
     font-weight: 600;
     line-height: 1;
+    letter-spacing: 1px;
+    font-variant-numeric: tabular-nums;
 }
 
+/* ---------- Buttons ---------- */
 .outward-session-buttons {
     width: 100%;
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
     gap: 10px;
 }
 
-.outward-session-try-button {
+.outward-session-try-button,
+.outward-session-logout-button {
     height: 42px;
-    min-width: 120px;
     padding: 0 18px;
-    background: #2563eb;
-    border: 1px solid #2563eb;
-    border-radius: 5px;
-    color: #ffffff;
+    border-radius: 6px;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
+    transition: background 0.18s ease, color 0.18s ease,
+                border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.outward-session-try-button {
+    min-width: 120px;
+    background: #2563eb;
+    border: 1px solid #2563eb;
+    color: #ffffff;
+    box-shadow: 0 1px 2px rgba(37, 99, 235, 0.25);
 }
 
 .outward-session-try-button:hover {
     background: #1d4ed8;
     border-color: #1d4ed8;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
+}
+
+.outward-session-try-button:active {
+    background: #1a45c0;
+    border-color: #1a45c0;
+    box-shadow: none;
+}
+
+.outward-session-try-button:focus-visible {
+    outline: 2px solid #93b4fb;
+    outline-offset: 2px;
 }
 
 .outward-session-logout-button {
-    height: 42px;
     min-width: 110px;
-    padding: 0 18px;
     background: #ffffff;
     border: 1px solid #dc3545;
-    border-radius: 5px;
     color: #dc3545;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
 }
 
 .outward-session-logout-button:hover {
@@ -119,15 +179,28 @@
     color: #ffffff;
 }
 
+.outward-session-logout-button:active {
+    background: #b02a37;
+    border-color: #b02a37;
+}
+
+.outward-session-logout-button:focus-visible {
+    outline: 2px solid #f1aeb5;
+    outline-offset: 2px;
+}
+
+/* ---------- Responsive ---------- */
 @media (max-width: 480px) {
+    .outward-session-page {
+        padding: 15px;
+        align-items: flex-start;   /* top-align on tiny screens so tall content scrolls */
+    }
 
     .outward-session-card {
         width: 100%;
+        min-height: auto;
         padding: 28px 20px;
-    }
-
-    .outward-session-timer {
-        font-size: 36px;
+        margin-top: 10px;
     }
 
     .outward-session-icon {
@@ -135,5 +208,21 @@
         height: 58px;
         font-size: 25px;
     }
-}
 
+    .outward-session-timer {
+        font-size: 36px;
+    }
+
+    .outward-session-message {
+        font-size: 12.5px;
+    }
+
+    .outward-session-buttons {
+        flex-direction: column-reverse;
+    }
+
+    .outward-session-try-button,
+    .outward-session-logout-button {
+        width: 100%;
+    }
+}

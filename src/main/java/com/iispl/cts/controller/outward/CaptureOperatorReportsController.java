@@ -57,6 +57,7 @@ public class CaptureOperatorReportsController extends SelectorComposer<Component
     private long currentUserId;
     private CaptureOperatorReportsService service;
 
+    // initialize controller
     @Override
     public void doAfterCompose(Component comp) throws Exception {
         super.doAfterCompose(comp);
@@ -74,7 +75,9 @@ public class CaptureOperatorReportsController extends SelectorComposer<Component
             if (sessionUserId instanceof Number) {
                 currentUserId = ((Number) sessionUserId).longValue();
             } else {
-                currentUserId = Long.parseLong(sessionUserId.toString().trim());
+                currentUserId = Long.parseLong(
+                    sessionUserId.toString().trim()
+                );
             }
         } catch (NumberFormatException e) {
             Executions.sendRedirect("/zul/login.zul");
@@ -82,6 +85,7 @@ public class CaptureOperatorReportsController extends SelectorComposer<Component
         }
 
         service = new CaptureOperatorReportsService();
+
         registerEvents();
         loadDownloadHistory();
     }
@@ -89,16 +93,77 @@ public class CaptureOperatorReportsController extends SelectorComposer<Component
     // register export events
     private void registerEvents() {
         if (exportButton != null) {
-            exportButton.addEventListener(Events.ON_CLICK, event -> exportReport());
+            exportButton.addEventListener(
+                Events.ON_CLICK,
+                event -> exportReport()
+            );
         }
     }
 
-    // export selected report
+    // validate and export report
     private void exportReport() {
-        Date from = getFromDate();
-        Date to = getToDate();
+        String fromValue =
+            fromDate != null ? fromDate.getValue() : null;
 
-        if (!isValidDateRange(from, to)) {
+        String toValue =
+            toDate != null ? toDate.getValue() : null;
+
+        if (fromValue == null ||
+            fromValue.trim().isEmpty()) {
+
+            Messagebox.show(
+                "Please enter From Date.",
+                "Date Required",
+                Messagebox.OK,
+                Messagebox.EXCLAMATION
+            );
+            return;
+        }
+
+        if (toValue == null ||
+            toValue.trim().isEmpty()) {
+
+            Messagebox.show(
+                "Please enter To Date.",
+                "Date Required",
+                Messagebox.OK,
+                Messagebox.EXCLAMATION
+            );
+            return;
+        }
+
+        if (!isValidDateInput(fromValue) ||
+            !isValidDateInput(toValue)) {
+
+            Messagebox.show(
+                "Please enter a proper date in DD/MM/YYYY format.",
+                "Invalid Date",
+                Messagebox.OK,
+                Messagebox.EXCLAMATION
+            );
+            return;
+        }
+
+        Date from = parseDate(fromValue);
+        Date to = parseDate(toValue);
+
+        if (from == null || to == null) {
+            Messagebox.show(
+                "Please enter a proper date in DD/MM/YYYY format.",
+                "Invalid Date",
+                Messagebox.OK,
+                Messagebox.EXCLAMATION
+            );
+            return;
+        }
+
+        if (from.after(to)) {
+            Messagebox.show(
+                "From Date cannot be later than To Date.",
+                "Invalid Date Range",
+                Messagebox.OK,
+                Messagebox.EXCLAMATION
+            );
             return;
         }
 
@@ -129,9 +194,14 @@ public class CaptureOperatorReportsController extends SelectorComposer<Component
         List<OutwardBatch> batches;
 
         try {
-            batches = service.getReportData(currentUserId, from, to);
+            batches = service.getReportData(
+                currentUserId,
+                from,
+                to
+            );
         } catch (Exception e) {
             e.printStackTrace();
+
             Messagebox.show(
                 "Unable to load report data for export.",
                 "Export Report",
@@ -143,7 +213,7 @@ public class CaptureOperatorReportsController extends SelectorComposer<Component
 
         if (batches == null || batches.isEmpty()) {
             Messagebox.show(
-                "No data available for export.",
+                "No data available for the selected date range.",
                 "Export Report",
                 Messagebox.OK,
                 Messagebox.INFORMATION
@@ -159,6 +229,7 @@ public class CaptureOperatorReportsController extends SelectorComposer<Component
             }
         } catch (Exception e) {
             e.printStackTrace();
+
             Messagebox.show(
                 "Unable to generate report file.",
                 "Export Report",
@@ -168,63 +239,151 @@ public class CaptureOperatorReportsController extends SelectorComposer<Component
         }
     }
 
-    // generate CSV report
-    private void downloadCSV(List<OutwardBatch> batches, Date from, Date to) throws Exception {
-        StringBuilder csv = new StringBuilder();
-        csv.append("Batch Number,Date,Total Cheques,Batch Status\r\n");
+    // validate date format
+    private boolean isValidDateInput(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return false;
+        }
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_TIME_FORMAT);
+        String cleanValue = value.trim();
+
+        SimpleDateFormat dateFormat =
+            new SimpleDateFormat(DATE_FORMAT);
+
+        dateFormat.setLenient(false);
+
+        try {
+            Date parsedDate = dateFormat.parse(cleanValue);
+
+            return cleanValue.equals(
+                dateFormat.format(parsedDate)
+            );
+        } catch (ParseException e) {
+            return false;
+        }
+    }
+
+    // parse valid date
+    private Date parseDate(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+
+        SimpleDateFormat dateFormat =
+            new SimpleDateFormat(DATE_FORMAT);
+
+        dateFormat.setLenient(false);
+
+        try {
+            return dateFormat.parse(value.trim());
+        } catch (ParseException e) {
+            return null;
+        }
+    }
+
+    // generate CSV report
+    private void downloadCSV(
+            List<OutwardBatch> batches,
+            Date from,
+            Date to) throws Exception {
+
+        StringBuilder csv = new StringBuilder();
+
+        csv.append(
+            "Batch Number,Date,Total Cheques,Batch Status\r\n"
+        );
+
+        SimpleDateFormat dateFormat =
+            new SimpleDateFormat(DATE_TIME_FORMAT);
 
         for (OutwardBatch batch : batches) {
             String createdDate = "";
 
             if (batch.getCreatedAt() != null) {
                 createdDate = dateFormat.format(
-                    java.sql.Timestamp.valueOf(batch.getCreatedAt())
+                    java.sql.Timestamp.valueOf(
+                        batch.getCreatedAt()
+                    )
                 );
             }
 
-            csv.append(csvValue(batch.getBatchNumber()))
-                .append(",")
-                .append(csvValue(createdDate))
-                .append(",")
-                .append(batch.getNumberOfCheques())
-                .append(",")
-                .append(csvValue(batch.getBatchStatus()))
-                .append("\r\n");
+            csv.append(
+                csvValue(batch.getBatchNumber())
+            )
+            .append(",")
+            .append(csvValue(createdDate))
+            .append(",")
+            .append(batch.getNumberOfCheques())
+            .append(",")
+            .append(csvValue(batch.getBatchStatus()))
+            .append("\r\n");
         }
 
-        byte[] data = csv.toString().getBytes(StandardCharsets.UTF_8);
-        String fileName = createFileName("capture_operator_report", "csv");
+        byte[] data =
+            csv.toString().getBytes(StandardCharsets.UTF_8);
 
-        downloadFile(data, fileName, "text/csv");
-        service.saveDownloadHistory(currentUserId, from, to, "CSV");
+        String fileName =
+            createFileName(
+                "capture_operator_report",
+                "csv"
+            );
+
+        downloadFile(
+            data,
+            fileName,
+            "text/csv"
+        );
+
+        service.saveDownloadHistory(
+            currentUserId,
+            from,
+            to,
+            "CSV"
+        );
+
         loadDownloadHistory();
     }
 
     // generate XML report
-    private void downloadXML(List<OutwardBatch> batches, Date from, Date to) throws Exception {
+    private void downloadXML(
+            List<OutwardBatch> batches,
+            Date from,
+            Date to) throws Exception {
+
         StringBuilder xml = new StringBuilder();
 
-        xml.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n")
-           .append("<captureOperatorReport>\r\n")
-           .append("    <operatorId>")
-           .append(escapeXml(String.valueOf(currentUserId)))
-           .append("</operatorId>\r\n");
+        xml.append(
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
+        )
+        .append("<captureOperatorReport>\r\n")
+        .append("    <operatorId>")
+        .append(
+            escapeXml(
+                String.valueOf(currentUserId)
+            )
+        )
+        .append("</operatorId>\r\n");
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_TIME_FORMAT);
+        SimpleDateFormat dateFormat =
+            new SimpleDateFormat(DATE_TIME_FORMAT);
 
         for (OutwardBatch batch : batches) {
             xml.append("    <batch>\r\n")
                .append("        <batchNumber>")
-               .append(escapeXml(batch.getBatchNumber()))
+               .append(
+                   escapeXml(
+                       batch.getBatchNumber()
+                   )
+               )
                .append("</batchNumber>\r\n")
                .append("        <date>");
 
             if (batch.getCreatedAt() != null) {
                 xml.append(
                     dateFormat.format(
-                        java.sql.Timestamp.valueOf(batch.getCreatedAt())
+                        java.sql.Timestamp.valueOf(
+                            batch.getCreatedAt()
+                        )
                     )
                 );
             }
@@ -234,23 +393,48 @@ public class CaptureOperatorReportsController extends SelectorComposer<Component
                .append(batch.getNumberOfCheques())
                .append("</totalCheques>\r\n")
                .append("        <batchStatus>")
-               .append(escapeXml(batch.getBatchStatus()))
+               .append(
+                   escapeXml(
+                       batch.getBatchStatus()
+                   )
+               )
                .append("</batchStatus>\r\n")
                .append("    </batch>\r\n");
         }
 
         xml.append("</captureOperatorReport>\r\n");
 
-        byte[] data = xml.toString().getBytes(StandardCharsets.UTF_8);
-        String fileName = createFileName("capture_operator_report", "xml");
+        byte[] data =
+            xml.toString().getBytes(StandardCharsets.UTF_8);
 
-        downloadFile(data, fileName, "application/xml");
-        service.saveDownloadHistory(currentUserId, from, to, "XML");
+        String fileName =
+            createFileName(
+                "capture_operator_report",
+                "xml"
+            );
+
+        downloadFile(
+            data,
+            fileName,
+            "application/xml"
+        );
+
+        service.saveDownloadHistory(
+            currentUserId,
+            from,
+            to,
+            "XML"
+        );
+
         loadDownloadHistory();
     }
 
     // download generated file
-    private void downloadFile(byte[] data, String fileName, String contentType) throws Exception {
+    private void downloadFile(
+            byte[] data,
+            String fileName,
+            String contentType) throws Exception {
+
         AMedia media = new AMedia(
             fileName,
             null,
@@ -267,7 +451,9 @@ public class CaptureOperatorReportsController extends SelectorComposer<Component
             return "";
         }
 
-        return "\"" + value.replace("\"", "\"\"") + "\"";
+        return "\"" +
+            value.replace("\"", "\"\"") +
+            "\"";
     }
 
     // escape XML value
@@ -285,81 +471,29 @@ public class CaptureOperatorReportsController extends SelectorComposer<Component
     }
 
     // create report file name
-    private String createFileName(String prefix, String extension) {
-        String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss")
-            .format(new Date());
+    private String createFileName(
+            String prefix,
+            String extension) {
 
-        return prefix + "_" + timestamp + "." + extension;
-    }
+        String timestamp =
+            new SimpleDateFormat("yyyyMMdd_HHmmss")
+                .format(new Date());
 
-    // get from date
-    private Date getFromDate() {
-        if (fromDate == null) {
-            return null;
-        }
-
-        return parseDate(fromDate.getValue(), "From Date");
-    }
-
-    // get to date
-    private Date getToDate() {
-        if (toDate == null) {
-            return null;
-        }
-
-        return parseDate(toDate.getValue(), "To Date");
-    }
-
-    // parse report date
-    private Date parseDate(String value, String fieldName) {
-        if (value == null || value.trim().isEmpty()) {
-            return null;
-        }
-
-        value = value.trim();
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
-        dateFormat.setLenient(false);
-
-        try {
-            return dateFormat.parse(value);
-        } catch (ParseException e) {
-            Messagebox.show(
-                fieldName + " must be in DD/MM/YYYY format.",
-                "Invalid Date",
-                Messagebox.OK,
-                Messagebox.EXCLAMATION
-            );
-            return null;
-        }
+        return prefix + "_" +
+               timestamp + "." +
+               extension;
     }
 
     // get selected export format
     private String getSelectedFormat() {
-        if (formatCombo == null || formatCombo.getSelectedItem() == null) {
+        if (formatCombo == null ||
+            formatCombo.getSelectedItem() == null) {
             return null;
         }
 
-        return formatCombo.getSelectedItem().getValue();
-    }
-
-    // validate report date range
-    private boolean isValidDateRange(Date from, Date to) {
-        if (from == null || to == null) {
-            return true;
-        }
-
-        if (from.after(to)) {
-            Messagebox.show(
-                "From Date cannot be later than To Date.",
-                "Invalid Date Range",
-                Messagebox.OK,
-                Messagebox.EXCLAMATION
-            );
-            return false;
-        }
-
-        return true;
+        return formatCombo
+            .getSelectedItem()
+            .getValue();
     }
 
     // load download history
@@ -371,34 +505,63 @@ public class CaptureOperatorReportsController extends SelectorComposer<Component
         try {
             downloadHistoryList.getItems().clear();
 
-            List<Object[]> history = service.getDownloadHistory(currentUserId);
+            List<Object[]> history =
+                service.getDownloadHistory(
+                    currentUserId
+                );
 
             if (historyPaging != null) {
                 historyPaging.setPageSize(5);
-                historyPaging.setTotalSize(history != null ? history.size() : 0);
+
+                historyPaging.setTotalSize(
+                    history != null
+                        ? history.size()
+                        : 0
+                );
+
                 historyPaging.setDetailed(false);
                 historyPaging.setActivePage(0);
-                downloadHistoryList.setPaginal(historyPaging);
+
+                downloadHistoryList.setPaginal(
+                    historyPaging
+                );
             }
 
-            if (history == null || history.isEmpty()) {
+            if (history == null ||
+                history.isEmpty()) {
+
                 if (historyCountLabel != null) {
-                    historyCountLabel.setValue("Showing 0 records");
+                    historyCountLabel.setValue(
+                        "Showing 0 records"
+                    );
                 }
+
                 return;
             }
 
-            SimpleDateFormat dateTimeFormat = new SimpleDateFormat(DATE_TIME_FORMAT);
-            SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
+            SimpleDateFormat dateTimeFormat =
+                new SimpleDateFormat(
+                    DATE_TIME_FORMAT
+                );
+
+            SimpleDateFormat dateFormat =
+                new SimpleDateFormat(
+                    DATE_FORMAT
+                );
 
             for (Object[] row : history) {
                 Listitem item = new Listitem();
 
-                Listcell downloadDateCell = new Listcell();
+                Listcell downloadDateCell =
+                    new Listcell();
 
-                if (row.length > 0 && row[0] != null) {
+                if (row.length > 0 &&
+                    row[0] != null) {
+
                     downloadDateCell.setLabel(
-                        dateTimeFormat.format((Date) row[0])
+                        dateTimeFormat.format(
+                            (Date) row[0]
+                        )
                     );
                 } else {
                     downloadDateCell.setLabel("-");
@@ -406,11 +569,16 @@ public class CaptureOperatorReportsController extends SelectorComposer<Component
 
                 item.appendChild(downloadDateCell);
 
-                Listcell fromDateCell = new Listcell();
+                Listcell fromDateCell =
+                    new Listcell();
 
-                if (row.length > 1 && row[1] != null) {
+                if (row.length > 1 &&
+                    row[1] != null) {
+
                     fromDateCell.setLabel(
-                        dateFormat.format((Date) row[1])
+                        dateFormat.format(
+                            (Date) row[1]
+                        )
                     );
                 } else {
                     fromDateCell.setLabel("-");
@@ -418,11 +586,16 @@ public class CaptureOperatorReportsController extends SelectorComposer<Component
 
                 item.appendChild(fromDateCell);
 
-                Listcell toDateCell = new Listcell();
+                Listcell toDateCell =
+                    new Listcell();
 
-                if (row.length > 2 && row[2] != null) {
+                if (row.length > 2 &&
+                    row[2] != null) {
+
                     toDateCell.setLabel(
-                        dateFormat.format((Date) row[2])
+                        dateFormat.format(
+                            (Date) row[2]
+                        )
                     );
                 } else {
                     toDateCell.setLabel("-");
@@ -430,28 +603,39 @@ public class CaptureOperatorReportsController extends SelectorComposer<Component
 
                 item.appendChild(toDateCell);
 
-                Listcell formatCell = new Listcell();
+                Listcell formatCell =
+                    new Listcell();
 
-                if (row.length > 3 && row[3] != null) {
-                    formatCell.setLabel(row[3].toString());
+                if (row.length > 3 &&
+                    row[3] != null) {
+
+                    formatCell.setLabel(
+                        row[3].toString()
+                    );
                 } else {
                     formatCell.setLabel("-");
                 }
 
                 item.appendChild(formatCell);
+
                 downloadHistoryList.appendChild(item);
             }
 
             if (historyCountLabel != null) {
                 historyCountLabel.setValue(
-                    "Showing " + history.size() + " records"
+                    "Showing " +
+                    history.size() +
+                    " records"
                 );
             }
+
         } catch (Exception e) {
             e.printStackTrace();
 
             if (historyCountLabel != null) {
-                historyCountLabel.setValue("Unable to load history");
+                historyCountLabel.setValue(
+                    "Unable to load history"
+                );
             }
 
             Messagebox.show(

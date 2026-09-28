@@ -1,7 +1,6 @@
 package com.iispl.cts.dao.outward;
 
 import com.cts.inward.config.ConnectionPool;
-import com.iispl.cts.data.CTSStaticData;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.Session;
 import com.iispl.cts.model.outward.OutwardBatch;
@@ -492,7 +491,7 @@ public class OutwardMakerDashboardDAO {
             "SELECT 1 FROM public.outward_batch WHERE batch_number = ?";
 
         try (
-            Connection con = CTSStaticData.getConnection();
+            Connection con = dataSource.getConnection();
             PreparedStatement ps = con.prepareStatement(sql)
         ) {
             ps.setString(1, batchNumber.trim());

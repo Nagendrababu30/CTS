@@ -9,104 +9,95 @@
 
 <zk>
 
-    <style src="/css/inward/maker/dashboard.css"/>
+	<style src="/css/inward/maker/dashboard.css" />
 
-    <div
-        self="@define(content)"
-        width="100%"
-        height="100%"
-        sclass="inward-dashboard-content">
+	<div self="@define(content)" width="100%" height="100%"
+		sclass="inward-dashboard-content">
 
-        <vlayout
-            apply="com.cts.inward.controller.DashboardController"
-            spacing="20px"
-            sclass="inward-dashboard-layout"
-            hflex="1">
+		<vlayout apply="com.cts.inward.controller.DashboardController"
+			spacing="20px" sclass="inward-dashboard-layout" hflex="1">
 
-            <!-- Page Title -->
-            <label
-                value="Inward Maker Dashboard"
-                sclass="page-title"/>
+			<!-- Page Title -->
+			<label value="Inward Maker Dashboard" sclass="page-title" />
 
-            <!-- =====================================================
-                 SUMMARY CARDS
-                 ===================================================== -->
-            <hlayout spacing="20px" width="100%">
+			<!--  
+				SUMMARY CARDS
+			-->
+			<hlayout spacing="20px" width="100%">
 
-            <!-- All Batches -->
-                <vlayout
-                    hflex="1"
-                    sclass="summary-card"
-                    style="align-items:center; justify-content:center; text-align:center;">
-                    <label value="ALL BATCHES" sclass="card-label"/>
-                    <label id="receivedCountLabel" value="0" sclass="card-value text-blue"/>
-                </vlayout>
+				<!-- All Batches -->
+				<vlayout hflex="1" sclass="summary-card"
+					style="align-items:center; justify-content:center; text-align:center;">
+					<label value="ALL BATCHES" sclass="card-label" />
+					<label id="receivedCountLabel" value="0"
+						sclass="card-value text-blue" />
+				</vlayout>
 
-                <!-- Available Batches -->
-                <vlayout
-                    hflex="1"
-                    sclass="summary-card"
-                    style="align-items:center; justify-content:center; text-align:center;">
-                    <label value="AVAILABLE BATCHES" sclass="card-label"/>
-                    <label id="pendingCountLabel" value="0" sclass="card-value text-purple"/>
-                </vlayout>
+				<!-- Available Batches -->
+				<vlayout hflex="1" sclass="summary-card"
+					style="align-items:center; justify-content:center; text-align:center;">
+					<label value="AVAILABLE BATCHES"
+						sclass="card-label" />
+					<label id="pendingCountLabel" value="0"
+						sclass="card-value text-purple" />
+				</vlayout>
 
-                <!-- My Batches -->
-                <vlayout
-                    hflex="1"
-                    sclass="summary-card"
-                    style="align-items:center; justify-content:center; text-align:center;">
-                    <label value="MY BATCHES" sclass="card-label"/>
-                    <label id="myBatchesCountLabel" value="0" sclass="card-value text-green"/>
-                </vlayout>
+				<!-- My Batches -->
+				<vlayout hflex="1" sclass="summary-card"
+					style="align-items:center; justify-content:center; text-align:center;">
+					<label value="MY BATCHES" sclass="card-label" />
+					<label id="myBatchesCountLabel" value="0"
+						sclass="card-value text-green" />
+				</vlayout>
 
-            </hlayout>
+			</hlayout>
 
-            <!-- =====================================================
-                 BATCH TABLE PANEL
-                 ===================================================== -->
-            <vlayout sclass="table-panel" spacing="0" width="100%">
+			<!-- 
+				BATCH TABLE PANEL
+			-->
+			<vlayout sclass="table-panel" spacing="0" width="100%">
 
-                <!-- Table Header -->
-                <hlayout valign="middle" width="100%" style="padding-bottom:16px;">
+				<!-- Table Header -->
+				<hlayout valign="middle" width="100%"
+					style="padding-bottom:16px;">
 
-                    <label value="Batches" sclass="table-title"/>
+					<label value="Batches" sclass="table-title" />
 
-                    <space hflex="1"/>
+					<space hflex="1" />
 
-                    <label value="Filter Status:" sclass="filter-label"/>
+					<label value="Filter Status:" sclass="filter-label" />
 
-                    <button id="allBtn"           label="All"             sclass="filter-btn active-filter"/>
-                    <button id="availableBtn"     label="Available"       sclass="filter-btn"/>
-                    <button id="myBatchesBtn"     label="My Batches"      sclass="filter-btn"/>
-                    <button id="returnToMakerBtn" label="Re-Verify Batches" sclass="filter-btn"/>
+					<button id="allBtn" label="All"
+						sclass="filter-btn active-filter" />
+					<button id="availableBtn" label="Available"
+						sclass="filter-btn" />
+					<button id="myBatchesBtn" label="My Batches"
+						sclass="filter-btn" />
+					<button id="returnToMakerBtn"
+						label="Re-Verify Batches" sclass="filter-btn" />
 
-                </hlayout>
+				</hlayout>
 
-                <!-- Grid -->
-                <grid
-                    id="batchesGrid"
-                    sclass="custom-grid"
-                    emptyMessage="No batches found."
-                    mold="paging"
-                    pageSize="10">
+				<!-- Grid -->
+				<grid id="batchesGrid" sclass="custom-grid"
+					emptyMessage="No batches found." mold="paging" pageSize="10">
 
-                    <columns>
-                        <column label="Batch ID"/>
-                        <column label="Total Cheques"  align="center"/>
-                        <column label="Status"         align="center"/>
-                        <column label="Locked By"      align="center"/>
-                        <column label="Action"         align="center"/>
-                    </columns>
+					<columns>
+						<column label="Batch ID" />
+						<column label="Total Cheques" align="center" />
+						<column label="Status" align="center" />
+						<column label="Locked By" align="center" />
+						<column label="Action" align="center" />
+					</columns>
 
-                    <rows/>
+					<rows />
 
-                </grid>
+				</grid>
 
-            </vlayout>
+			</vlayout>
 
-        </vlayout>
+		</vlayout>
 
-    </div>
+	</div>
 
 </zk>

@@ -59,13 +59,11 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 			returnMode = Executions.getCurrent().getParameter("amp;returnMode");
 		}
 
-		returnedMode = "RETURNED".equalsIgnoreCase(returnMode)
-				|| "HOLD".equalsIgnoreCase(returnMode);
+		returnedMode = "RETURNED".equalsIgnoreCase(returnMode) || "HOLD".equalsIgnoreCase(returnMode);
 
 		returnedChequeNumber = Executions.getCurrent().getParameter("chequeNumber");
 		repairType = Executions.getCurrent().getParameter("repairType");
 
-		// NORMAL MICR REPAIR QUEUE
 		setListItemRenderer();
 		loadMicrErrorBatches();
 	}
@@ -82,26 +80,18 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 			public void render(Listitem item, OutwardBatch batch, int index) {
 
 				item.setValue(batch);
-
-				// BATCH NUMBER
 				item.appendChild(new Listcell(batch.getBatchNumber()));
+				item.appendChild(new Listcell(String.valueOf(batch.getNumberOfCheques())));
 
-				// TOTAL CHEQUES
-				item.appendChild(new Listcell(
-						String.valueOf(batch.getNumberOfCheques())));
-
-				// MICR ERROR COUNT
 				int micrErrorCount = service.getMicrErrorCount(batch.getBatchNumber());
 				item.appendChild(new Listcell(String.valueOf(micrErrorCount)));
 
-				// STATUS
 				Listcell statusCell = new Listcell();
 				Label statusLabel = new Label("MICR REPAIR");
 				statusLabel.setSclass("micr-repair-status");
 				statusCell.appendChild(statusLabel);
 				item.appendChild(statusCell);
 
-				// ACTION
 				Listcell actionCell = new Listcell();
 				Button openButton = new Button("OPEN");
 
@@ -114,7 +104,6 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 	}
 
 	private void loadMicrErrorBatches() {
-
 		Long userId = getLoggedInUserId();
 
 		if (userId == null) {
@@ -122,20 +111,13 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		}
 
 		sessionService = new SessionServiceImpl();
-
 		com.cts.admin.model.Session clearingSession = sessionService.getActiveSession();
 
-		if (clearingSession == null
-				|| clearingSession.getStatus() == null
+		if (clearingSession == null || clearingSession.getStatus() == null
 				|| !"STARTED".equalsIgnoreCase(clearingSession.getStatus().trim())) {
-
 			Messagebox.show(
-					"Clearing session is not started.\n\n"
-							+ "Micr Repair operations are currently unavailable.",
-					"Session Not Started",
-					Messagebox.OK,
-					Messagebox.EXCLAMATION,
-					event -> {
+					"Clearing session is not started.\n\n" + "Micr Repair operations are currently unavailable.",
+					"Session Not Started", Messagebox.OK, Messagebox.EXCLAMATION, event -> {
 						if (Messagebox.ON_OK.equals(event.getName())) {
 							Executions.sendRedirect("/login.zul");
 						}
@@ -144,6 +126,7 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 			return;
 		}
 
+		
 		// DYNAMIC LOGGED-IN USER ID
 		String currentUserId = String.valueOf(userId);
 
@@ -153,29 +136,25 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 		System.out.println("Returned Mode      : " + returnedMode);
 		System.out.println("Returned Cheque    : " + returnedChequeNumber);
 
-		// LOAD MICR ERROR BATCHES FOR LOGGED-IN USER
+		
 		List<OutwardBatch> batches = service.getMicrErrorBatches(userId);
-
-		System.out.println("MICR REPAIR - BATCHES FOUND = "
-				+ (batches == null ? 0 : batches.size()));
+		System.out.println("MICR REPAIR - BATCHES FOUND = " + (batches == null ? 0 : batches.size()));
 
 		if (batches != null) {
 			for (OutwardBatch batch : batches) {
-				System.out.println(
-						"MICR REPAIR - BATCH = " + batch.getBatchNumber());
+				System.out.println("MICR REPAIR - BATCH = " + batch.getBatchNumber());
 			}
 		}
 
 		ListModelList<OutwardBatch> model = new ListModelList<>(batches);
-
 		if (batchListbox != null) {
 			batchListbox.setModel(model);
 		}
 	}
 
+	
+	// GET LOGGED-IN USER FROM SESSION
 	private Long getLoggedInUserId() {
-
-		// GET LOGGED-IN USER FROM SESSION
 		Session sessionUser = Executions.getCurrent().getSession();
 
 		if (sessionUser == null) {
@@ -207,18 +186,14 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 	}
 
 	private void openBatch(OutwardBatch batch) {
-
 		if (batch == null || batch.getBatchNumber() == null) {
 			return;
 		}
 
 		String batchNumber = batch.getBatchNumber().trim();
 
-		// RETURNED MICR CHEQUE
 		if (returnedMode) {
-
-			StringBuilder url = new StringBuilder(
-					"outward-maker-micr-repair-detail.zul");
+			StringBuilder url = new StringBuilder("outward-maker-micr-repair-detail.zul");
 
 			url.append("?batchNumber=").append(batchNumber);
 			url.append("&returnMode=HOLD");
@@ -227,11 +202,8 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 				url.append("&repairType=").append(repairType.trim());
 			}
 
-			if (returnedChequeNumber != null
-					&& !returnedChequeNumber.trim().isEmpty()) {
-
-				url.append("&chequeNumber=")
-						.append(returnedChequeNumber.trim());
+			if (returnedChequeNumber != null && !returnedChequeNumber.trim().isEmpty()) {
+				url.append("&chequeNumber=").append(returnedChequeNumber.trim());
 			}
 
 			System.out.println("OPENING RETURNED MICR BATCH");
@@ -241,13 +213,9 @@ public class OutwardMakerMicrRepairController extends GenericForwardComposer<Com
 			System.out.println("URL          : " + url.toString());
 
 			Executions.sendRedirect(url.toString());
-
 			return;
 		}
 
-		// NORMAL MICR REPAIR
-		Executions.sendRedirect(
-				"outward-maker-micr-repair-detail.zul"
-						+ "?batchNumber=" + batchNumber);
+		Executions.sendRedirect("outward-maker-micr-repair-detail.zul" + "?batchNumber=" + batchNumber);
 	}
 }

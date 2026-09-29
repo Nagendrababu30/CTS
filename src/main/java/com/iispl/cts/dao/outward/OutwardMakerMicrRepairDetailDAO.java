@@ -40,7 +40,6 @@ public class OutwardMakerMicrRepairDetailDAO {
             ps.setString(1, batchNumber);
 
             try (ResultSet rs = ps.executeQuery()) {
-
                 while (rs.next()) {
 
                OutwardCheque cheque = new OutwardCheque();
@@ -72,6 +71,8 @@ public class OutwardMakerMicrRepairDetailDAO {
         return cheques;
     }
 
+    
+    
     public boolean updateCorrectedMicr(String batchNumber,String chequeNumber,String cityCode,String bankCode,String branchCode,boolean returnedMode) {
         String verificationStatus = returnedMode ? "RE_VERIFIED" : "MICR_REPAIRED";
         String sql = "UPDATE outward_cheque "
@@ -142,8 +143,9 @@ public class OutwardMakerMicrRepairDetailDAO {
     }
 
 
+    
+    
     public boolean hasRemainingMicrErrors(String batchNumber) {
-
         String sql = "SELECT COUNT(*) "
                 + "FROM outward_cheque "
                 + "WHERE batch_number = ? "
@@ -151,9 +153,8 @@ public class OutwardMakerMicrRepairDetailDAO {
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
-
+        	
             ps.setString(1, batchNumber);
-
             try (ResultSet rs = ps.executeQuery()) {
 
                 if (rs.next()) {
@@ -164,20 +165,18 @@ public class OutwardMakerMicrRepairDetailDAO {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return false;
     }
 
 
+    
+    
     public boolean updateBatchStatus(String batchNumber) {
-
         String sql = "UPDATE outward_batch "
                 + "SET batch_status = 'MICR_REPAIR_COMPLETED' "
                 + "WHERE batch_number = ? "
                 + "AND batch_status = 'MICR_REPAIR'";
-
         Connection connection = null;
-
         try {
 
             connection = dataSource.getConnection();
@@ -188,7 +187,6 @@ public class OutwardMakerMicrRepairDetailDAO {
                 ps.setString(1, batchNumber);
 
                 int rowsUpdated = ps.executeUpdate();
-
                 boolean updated = rowsUpdated > 0;
 
                 if (updated) {
@@ -196,10 +194,8 @@ public class OutwardMakerMicrRepairDetailDAO {
                 } else {
                     connection.rollback();
                 }
-
                 return updated;
             }
-
         } catch (Exception e) {
 
             if (connection != null) {
@@ -213,7 +209,6 @@ public class OutwardMakerMicrRepairDetailDAO {
             e.printStackTrace();
 
         } finally {
-
             if (connection != null) {
                 try {
                     connection.close();
@@ -222,7 +217,6 @@ public class OutwardMakerMicrRepairDetailDAO {
                 }
             }
         }
-
         return false;
     }
 }

@@ -12,7 +12,7 @@ import com.cts.inward.config.ConnectionPool;
 import com.iispl.cts.model.outward.OutwardBatch;
 
 public class OutwardMakerMicrRepairDAO {
-
+	
     private final javax.sql.DataSource dataSource = ConnectionPool.getDataSource();
 
     //Stores MICR error count 
@@ -38,12 +38,9 @@ public class OutwardMakerMicrRepairDAO {
                 "AND oba.assignment_status " +
                 "    IN ('ASSIGNED', 'IN_PROGRESS', 'RELEASED') " +
                 "AND ( " +
-               
-                // EXISTING NORMAL MICR REPAIR
+                        //NORMAL MICR
                 "       oc.cheque_status = 'MICR_ERROR' " +
-
                 "       OR " +
-
                  // RETURNED FROM CHECKER FOR MICR REPAIR
                 "       ( " +
                 "           UPPER(TRIM(oc.cheque_status)) = " +
@@ -59,26 +56,22 @@ public class OutwardMakerMicrRepairDAO {
                 "       ) " +
 
                 ") " +
-                
                 // NORMAL MICR BATCH
                 "AND ( " +
                 "       UPPER(TRIM(ob.batch_status)) = " +
                 "           'MICR_REPAIR' " +
 
                 "       OR " +
-
                  // RETURNED BATCH FROM CHECKER
                 "       UPPER(TRIM(ob.batch_status)) = " +
                 "           'SENT_TO_MAKER' " +
                 ") " +
-
                 "GROUP BY ob.batch_number, " +
                 "         ob.cheque_count " +
                 "ORDER BY ob.batch_number";
 
         try (Connection connection = dataSource.getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
-            // LOGGED-IN USER ID
             ps.setLong(1, userId);
 
             try (ResultSet rs = ps.executeQuery()) {

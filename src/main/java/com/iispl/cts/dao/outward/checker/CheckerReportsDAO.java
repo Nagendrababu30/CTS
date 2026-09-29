@@ -19,10 +19,7 @@ public class CheckerReportsDAO {
     private final DataSource dataSource =
             ConnectionPool.getDataSource();
 
-    // ============================================================
     // GET BATCHES AVAILABLE FOR REPORTS
-    // ============================================================
-
     public List<OutwardBatch> getCheckerCompletedBatches() {
 
         List<OutwardBatch> batches =
@@ -95,10 +92,7 @@ public class CheckerReportsDAO {
         return batches;
     }
 
-    // ============================================================
     // GET TOTAL CHEQUE COUNT
-    // ============================================================
-
     public int getTotalChequeCount(
             String batchNumber) {
 
@@ -139,10 +133,7 @@ public class CheckerReportsDAO {
         return 0;
     }
 
-    // ============================================================
     // GET VALID CHEQUE COUNT
-    // ============================================================
-
     public int getValidChequeCount(
             String batchNumber) {
 
@@ -185,10 +176,7 @@ public class CheckerReportsDAO {
         return 0;
     }
 
-    // ============================================================
     // GET SINGLE BATCH
-    // ============================================================
-
     public OutwardBatch getBatchByNumber(
             String batchNumber) {
 
@@ -270,11 +258,8 @@ public class CheckerReportsDAO {
         return null;
     }
 
-    // ============================================================
     // GET ALL CHEQUES
     // Used by CFX / CIBF
-    // ============================================================
-
     public List<OutwardCheque> getBatchCheques(
             String batchNumber) {
 
@@ -342,13 +327,8 @@ public class CheckerReportsDAO {
         return cheques;
     }
 
-    // ============================================================
     // GET REJECTED CHEQUES
     // RRF
-    //
-    // Rejection is taken from cheque_processing.
-    // ============================================================
-
     public List<OutwardCheque> getRejectedCheques(
             String batchNumber) {
 
@@ -420,10 +400,7 @@ public class CheckerReportsDAO {
         return rejectedCheques;
     }
 
-    // ============================================================
     // CHECK RRF AVAILABILITY
-    // ============================================================
-
     public boolean hasRejectedCheques(
             String batchNumber) {
 
@@ -473,10 +450,7 @@ public class CheckerReportsDAO {
         return false;
     }
 
-    // ============================================================
     // GET REJECTED CHEQUE COUNT
-    // ============================================================
-
     public int getRejectedChequeCount(
             String batchNumber) {
 
@@ -524,10 +498,7 @@ public class CheckerReportsDAO {
         return 0;
     }
 
-    // ============================================================
     // CHECK WHETHER BATCH IS READY FOR NPCI
-    // ============================================================
-
     public boolean isBatchReadyForNPCI(
             String batchNumber) {
 
@@ -578,10 +549,7 @@ public class CheckerReportsDAO {
         return false;
     }
 
-    // ============================================================
     // GET VALID XML FILE NAME
-    // ============================================================
-
     public String getValidXmlFileName(
             String batchNumber) {
 
@@ -594,12 +562,8 @@ public class CheckerReportsDAO {
         return batchNumber.trim()
                 + "_valid.xml";
     }
-
-    // ============================================================
-    // SAVE NPCI SUBMISSION
-    // outward_npci_submission
-    // ============================================================
-
+    
+    
     public boolean saveNPCISubmission(
             String batchNumber,
             int validChequeCount,
@@ -619,10 +583,6 @@ public class CheckerReportsDAO {
 
         String cleanBatchNumber =
                 batchNumber.trim();
-
-        // ========================================================
-        // ALWAYS USE _valid.xml
-        // ========================================================
 
         String validXmlFileName =
                 cleanBatchNumber + "_valid.xml";
@@ -679,11 +639,6 @@ public class CheckerReportsDAO {
                             + java.io.File.separator
                             + validXmlFileName;
         }
-
-        // ========================================================
-        // SQL
-        // ========================================================
-
         String sql =
                 "INSERT INTO public.outward_npci_submission "
                         + "(batch_number, "
@@ -727,10 +682,7 @@ public class CheckerReportsDAO {
         }
     }
 
-    // ============================================================
     // MARK BATCH AS NPCI SENT
-    // ============================================================
-
     public boolean markBatchAsNPCISent(
             String batchNumber) {
 
@@ -770,10 +722,7 @@ public class CheckerReportsDAO {
         }
     }
 
-    // ============================================================
     // MAP CHEQUE
-    // ============================================================
-
     private OutwardCheque mapCheque(
             ResultSet rs)
             throws Exception {

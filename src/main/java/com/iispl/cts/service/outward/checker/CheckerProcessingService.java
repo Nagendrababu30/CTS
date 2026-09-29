@@ -21,10 +21,7 @@ public class CheckerProcessingService {
         this.assignmentDao = new CheckerAssignmentDAO();
     }
 
-    // ============================================================
     // GET CURRENT CHEQUE
-    // ============================================================
-
     public OutwardCheque getCheque(
             String batchNumber,
             String chequeNumber) {
@@ -42,9 +39,7 @@ public class CheckerProcessingService {
                 chequeNumber.trim());
     }
 
-    // ============================================================
     // GET PROCESSING DETAILS
-    // ============================================================
 
     public ChequeProcessing getChequeProcessing(
             String batchNumber,
@@ -63,9 +58,7 @@ public class CheckerProcessingService {
                 chequeNumber.trim());
     }
 
-    // ============================================================
     // MAKER REJECTION INFORMATION
-    // ============================================================
 
     public boolean isMakerRejected(
             String batchNumber,
@@ -84,10 +77,7 @@ public class CheckerProcessingService {
                 processing.getMakerAction());
     }
 
-    // ============================================================
     // START CHECKER PROCESSING
-    // ============================================================
-
     public boolean startCheckerProcessing(
             String batchNumber,
             String chequeNumber) {
@@ -109,10 +99,7 @@ public class CheckerProcessingService {
                 chequeNumber.trim());
     }
 
-    // ============================================================
     // GET MAKER REASON CODE
-    // ============================================================
-
     public String getMakerReasonCode(
             String batchNumber,
             String chequeNumber) {
@@ -135,10 +122,7 @@ public class CheckerProcessingService {
         return processing.getMakerReasonCode();
     }
 
-    // ============================================================
     // CBS ACCOUNT VALIDATION
-    // ============================================================
-
     public String validateCbsAccount(
             String accountNumber) {
 
@@ -168,9 +152,7 @@ public class CheckerProcessingService {
         return "PASS";
     }
 
-    // ============================================================
     // CHEQUE DATE VALIDATION
-    // ============================================================
 
     public String validateChequeDate(
             LocalDate chequeDate) {
@@ -196,10 +178,7 @@ public class CheckerProcessingService {
         return "PASS";
     }
 
-    // ============================================================
     // CBS / CHEQUE VALIDATION MESSAGE
-    // ============================================================
-
     public String getCbsValidationMessage(
             String validationResult) {
 
@@ -234,9 +213,7 @@ public class CheckerProcessingService {
         return "Validation failed.";
     }
 
-    // ============================================================
     // ACCEPT ALLOWED
-    // ============================================================
 
     public boolean isAcceptAllowed(
             String validationResult) {
@@ -244,10 +221,7 @@ public class CheckerProcessingService {
         return "PASS".equals(validationResult);
     }
 
-    // ============================================================
     // GET CHECKER RETURN / REJECTION REASONS
-    // ============================================================
-
     public List<ReturnReason> getReturnReasons(
             String reasonType) {
 
@@ -261,10 +235,7 @@ public class CheckerProcessingService {
                 reasonType.trim().toUpperCase());
     }
 
-    // ============================================================
     // SAVE CHECKER DECISION
-    // ============================================================
-
     public boolean saveCheckerDecision(
             String batchNumber,
             String chequeNumber,
@@ -273,10 +244,7 @@ public class CheckerProcessingService {
             String checkerReasonCode,
             String checkerRemarks) {
 
-        // --------------------------------------------------------
         // BASIC VALIDATION
-        // --------------------------------------------------------
-
         if (batchNumber == null
                 || batchNumber.trim().isEmpty()) {
 
@@ -308,10 +276,7 @@ public class CheckerProcessingService {
         checkerAction =
                 checkerAction.trim().toUpperCase();
 
-        // --------------------------------------------------------
         // VALID ACTION
-        // --------------------------------------------------------
-
         if (!"ACCEPT".equals(checkerAction)
                 && !"REJECT".equals(checkerAction)
                 && !"SEND_BACK".equals(checkerAction)) {
@@ -319,10 +284,7 @@ public class CheckerProcessingService {
             return false;
         }
 
-        // --------------------------------------------------------
         // CHECK CURRENT BATCH ASSIGNMENT
-        // --------------------------------------------------------
-
         if (!assignmentDao.isBatchAssignedToChecker(
                 batchNumber,
                 checkerId)) {
@@ -330,10 +292,7 @@ public class CheckerProcessingService {
             return false;
         }
 
-        // --------------------------------------------------------
         // GET CHEQUE
-        // --------------------------------------------------------
-
         OutwardCheque cheque =
                 chequeDao.getCheque(
                         batchNumber,
@@ -343,33 +302,15 @@ public class CheckerProcessingService {
             return false;
         }
 
-        // --------------------------------------------------------
         // GET PROCESSING RECORD
-        // --------------------------------------------------------
-
         ChequeProcessing processing =
                 chequeDao.getChequeProcessing(
                         batchNumber,
                         chequeNumber);
 
-        /*
-         * IMPORTANT:
-         *
-         * First Checker decision may not have a
-         * cheque_processing row yet.
-         *
-         * Do NOT return false when processing == null.
-         *
-         * CheckerChequeDAO.saveCheckerDecision()
-         * will create the row for the first decision.
-         */
-
         if (processing != null) {
 
-            // ----------------------------------------------------
             // PREVENT DUPLICATE FINAL DECISION
-            // ----------------------------------------------------
-
             String existingCheckerAction =
                     processing.getCheckerAction();
 
@@ -388,10 +329,7 @@ public class CheckerProcessingService {
             }
         }
 
-        // --------------------------------------------------------
         // ACCEPT / SEND_BACK VALIDATION
-        // --------------------------------------------------------
-
         if ("ACCEPT".equals(checkerAction)
                 || "SEND_BACK".equals(checkerAction)) {
 
@@ -412,10 +350,7 @@ public class CheckerProcessingService {
             }
         }
 
-        // --------------------------------------------------------
         // REASON VALIDATION
-        // --------------------------------------------------------
-
         if ("REJECT".equals(checkerAction)
                 || "SEND_BACK".equals(checkerAction)) {
 
@@ -429,18 +364,12 @@ public class CheckerProcessingService {
                     checkerReasonCode.trim();
         }
 
-        // --------------------------------------------------------
         // ACCEPT HAS NO REASON
-        // --------------------------------------------------------
-
         if ("ACCEPT".equals(checkerAction)) {
             checkerReasonCode = null;
         }
 
-        // --------------------------------------------------------
         // NORMALIZE REMARKS
-        // --------------------------------------------------------
-
         if (checkerRemarks != null) {
 
             checkerRemarks =
@@ -451,10 +380,7 @@ public class CheckerProcessingService {
             }
         }
 
-        // --------------------------------------------------------
         // SAVE
-        // --------------------------------------------------------
-
         return chequeDao.saveCheckerDecision(
                 batchNumber,
                 chequeNumber,
@@ -464,10 +390,7 @@ public class CheckerProcessingService {
                 checkerRemarks);
     }
 
-    // ============================================================
     // GET MAKER REASON NAME
-    // ============================================================
-
     public String getMakerReasonName(
             String reasonCode) {
 
@@ -481,10 +404,7 @@ public class CheckerProcessingService {
                 reasonCode.trim());
     }
 
-    // ============================================================
     // GET ALL RE-VERIFIED CHEQUES
-    // ============================================================
-
     public List<OutwardCheque> getReVerifiedCheques(
             String batchNumber,
             long checkerUserId) {

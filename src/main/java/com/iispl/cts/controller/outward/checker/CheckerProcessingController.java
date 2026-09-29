@@ -583,14 +583,14 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 
 		if (cheque.getBankCode() != null) {
 			if (!micr.isEmpty()) {
-				micr += " ";
+				micr += "";
 			}
 			micr += cheque.getBankCode();
 		}
 
 		if (cheque.getBranchCode() != null) {
 			if (!micr.isEmpty()) {
-				micr += " ";
+				micr += "";
 			}
 			micr += cheque.getBranchCode();
 		}

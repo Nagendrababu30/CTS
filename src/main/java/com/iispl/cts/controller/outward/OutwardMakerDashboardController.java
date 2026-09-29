@@ -1490,7 +1490,8 @@ public class OutwardMakerDashboardController
 
 				|| "DATE_CORRECTION".equalsIgnoreCase(cleanReasonCode)
 
-				|| "DATE_MISMATCH".equalsIgnoreCase(cleanReasonCode);
+				|| "DATE_MISMATCH".equalsIgnoreCase(cleanReasonCode) || "ACCOUNT_DETAIL_CORRECTION".equalsIgnoreCase(cleanReasonCode) ||"AMOUNT_CORRECTION".equalsIgnoreCase(cleanReasonCode)
+				|| "PAYEE_DETAILS_CORRECTION".equalsIgnoreCase(cleanReasonCode);
 
 	}
 

@@ -12,10 +12,6 @@
     <style src="/css/inward/maker/micr-repair.css?v=20260926_6"/>
     <style src="/css/inward/checker/batch-details.css?v=20260926_6"/>
 
-
-
-    <script src="/javascript/inward/maker/micr-repair.js"/>
-
     <div
         self="@define(content)"
         width="100%"

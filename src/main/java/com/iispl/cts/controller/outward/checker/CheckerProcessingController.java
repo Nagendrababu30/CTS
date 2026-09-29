@@ -666,7 +666,7 @@ public class CheckerProcessingController extends SelectorComposer<Vlayout> {
 	private void validateCbs(OutwardCheque cheque) {
 
 		cbsResult =
-				processingService.validateCbsAccount(cheque.getDrawerAccountNumber());
+				processingService.validateCbsAccount(cheque.getPayeeAccountNumber());
 
 		boolean cbsPassed = "PASS".equalsIgnoreCase(cbsResult);
 

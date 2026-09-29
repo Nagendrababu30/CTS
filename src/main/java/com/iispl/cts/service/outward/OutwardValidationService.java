@@ -7,9 +7,7 @@ import com.iispl.cts.model.outward.OutwardValidationResult;
 
 public class OutwardValidationService {
 
-    // =========================================================
     // VALIDATE CHEQUES
-    // =========================================================
     public OutwardValidationResult validate(List<OutwardCheque> cheques) {
 
         OutwardValidationResult result = new OutwardValidationResult();

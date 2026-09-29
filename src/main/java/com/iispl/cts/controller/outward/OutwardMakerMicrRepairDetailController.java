@@ -150,7 +150,7 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 			returnedChequeNumber = Executions.getCurrent().getParameter("amp;chequeNumber");
 		}
 
-		// GET REPAIR TYPE
+	
 		repairType = Executions.getCurrent().getParameter("repairType");
 
 		if (repairType == null || repairType.trim().isEmpty()) {
@@ -169,7 +169,6 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 	// LOAD CHEQUES
 	private void loadCheques() throws SQLException {
 
-		// NORMAL MICR REPAIR
 		if (!returnedMode) {
 
 			cheques = service.getMicrErrorCheques(batchNumber);
@@ -189,7 +188,7 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 			return;
 		}
 
-		// RETURNED MICR CHEQUE FLOW
+		
 		List<OutwardCheque> loadedCheques = new OutwardMakerDashboardService().getCheques(batchNumber);
 
 		if (loadedCheques == null || loadedCheques.isEmpty()) {
@@ -201,7 +200,7 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 		List<OutwardCheque> returnedCheques = new ArrayList<>();
 		OutwardMakerDashboardService dashboardService = new OutwardMakerDashboardService();
 
-		// SENT_BACK_TO_MAKER + SEND_BACK + MICR
+		// SENT_BACK_TO_MAKER
 		for (OutwardCheque cheque : loadedCheques) {
 
 			if (cheque == null) {
@@ -281,7 +280,7 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 		}
 	}
 
-	// MICR REPAIR REASON CHECK
+
 	private boolean isMicrRepairReason(String reasonCode) {
 
 		if (reasonCode == null || reasonCode.trim().isEmpty()) {
@@ -294,14 +293,15 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 				|| "MICR_MISMATCH".equals(cleanReason);
 	}
 
-	// NORMALIZE REASON CODE
+	
+	
 	private String normalizeReason(String value) {
 		return value.trim().toUpperCase().replace("-", "_").replace(" ", "_");
 	}
 
-	// HEADER METRICS
+	
+	
 	private void updateHeaderPillMetrics() {
-
 		if (totalPillLabel != null) {
 			totalPillLabel.setValue(String.valueOf(totalChequesCount));
 		}
@@ -315,14 +315,13 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 		}
 	}
 
-	// LOAD CURRENT CHEQUE
+	
+	
 	private void loadCurrentCheque() {
-
 		if (cheques == null || cheques.isEmpty()) {
 			return;
 		}
-
-		// STRICTLY ENFORCE BOUNDS
+		
 		if (currentIndex < 0) {
 			currentIndex = 0;
 		}
@@ -349,30 +348,26 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 
 		// VALIDATE MICR COMPONENTS
 		boolean cityValid = validationService.isValidMicrCode(cheque.getCityCode());
-
 		boolean bankValid = validationService.isValidMicrCode(cheque.getBankCode());
-
 		boolean branchValid = validationService.isValidMicrCode(cheque.getBranchCode());
 
 		// LOAD MICR VALUES
 		setMicrField(cityCodeTextbox, cheque.getCityCode(), cityValid);
-
 		setMicrField(bankCodeTextbox, cheque.getBankCode(), bankValid);
-
 		setMicrField(branchCodeTextbox, cheque.getBranchCode(), branchValid);
 
-		// IMAGES
+		
 		loadImages(cheque);
 		resetImageTransformations();
 
-		// STATUS
+		
 		updateStatusLabel(cityValid && bankValid && branchValid);
 
 		if (saveNextButton != null) {
 			saveNextButton.setDisabled(false);
 		}
 
-		// CHECKER RETURN INFORMATION
+		
 		if (returnedMode) {
 			loadCheckerReturnInformation(cheque);
 		} else {
@@ -393,7 +388,6 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 
 	// LOAD CHECKER RETURN INFORMATION
 	private void loadCheckerReturnInformation(OutwardCheque cheque) {
-
 		checkerReasonCode = null;
 		checkerRemarks = null;
 
@@ -412,18 +406,14 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 		try {
 
 			OutwardMakerDashboardService dashboardService = new OutwardMakerDashboardService();
-
 			ChequeProcessing processing = dashboardService.getChequeProcessing(batchNumber, chequeNumber.trim());
 
 			if (processing != null) {
 
 				checkerReasonCode = processing.getCheckerReasonCode();
-
 				String checkerAction = processing.getCheckerAction();
 
-				// Returned cheque must have SEND_BACK action.
 				if (checkerAction != null && !"SEND_BACK".equalsIgnoreCase(checkerAction.trim())) {
-
 					System.out.println("WARNING: Checker action for " + chequeNumber + " is " + checkerAction);
 				}
 			}
@@ -439,9 +429,7 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 			updateCheckerReturnPanel();
 
 		} catch (Exception e) {
-
 			e.printStackTrace();
-
 			System.err.println("Unable to load Checker return information for cheque " + chequeNumber);
 
 			hideCheckerReturnInformation();
@@ -450,7 +438,6 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 
 	// UPDATE CHECKER RETURN PANEL
 	private void updateCheckerReturnPanel() {
-
 		if (checkerReturnInformationPanel == null) {
 			return;
 		}
@@ -463,7 +450,6 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 		checkerReturnInformationPanel.setVisible(true);
 
 		if (checkerReasonLabel != null) {
-
 			String reason = getDisplayReason(checkerReasonCode);
 
 			if (reason == null || reason.trim().isEmpty()) {
@@ -474,7 +460,6 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 		}
 
 		if (checkerRemarksLabel != null) {
-
 			String remarks = checkerRemarks;
 
 			if (remarks == null || remarks.trim().isEmpty()) {
@@ -496,7 +481,6 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 
 		if ("MICR".equals(cleanReason) || "MICR_CORRECTION".equals(cleanReason)
 				|| "MICR_MISMATCH".equals(cleanReason)) {
-
 			return "MICR correction required";
 		}
 
@@ -519,9 +503,9 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 		}
 	}
 
-	// LOAD IMAGES
+	
+	
 	private void loadImages(OutwardCheque cheque) {
-
 	    if (cheque == null) {
 	        return;
 	    }
@@ -595,7 +579,8 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 	    }
 	}
 
-	// ZOOM IN
+	
+	
 	@Listen("onClick = #zoomInButton")
 	public void zoomIn() {
 
@@ -603,7 +588,8 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 		applyImageStyle();
 	}
 
-	// ZOOM OUT
+
+	
 	@Listen("onClick = #zoomOutButton")
 	public void zoomOut() {
 
@@ -613,7 +599,8 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 		}
 	}
 
-	// ROTATE IMAGE
+	
+	
 	@Listen("onClick = #rotateButton")
 	public void rotateImage() {
 
@@ -621,6 +608,8 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 		applyImageStyle();
 	}
 
+	
+	
 	// RESET IMAGE TRANSFORMATIONS
 	private void resetImageTransformations() {
 
@@ -630,9 +619,10 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 		applyImageStyle();
 	}
 
+	
+	
 	// APPLY IMAGE STYLE
 	private void applyImageStyle() {
-
 		String transformStyle = String.format("transform: scale(%.2f) rotate(%ddeg);", currentScale, currentRotation);
 
 		if (frontImage != null) {
@@ -644,32 +634,24 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 		}
 	}
 
+	
 	// MICR FIELD INPUT VALIDATION
 	@Listen("onChanging = #cityCodeTextbox, " + "#bankCodeTextbox, " + "#branchCodeTextbox; "
 			+ "onChange = #cityCodeTextbox, " + "#bankCodeTextbox, " + "#branchCodeTextbox")
 	public void checkMicrFields(Event event) {
-
-		/*
-		 * Remove every character except 0-9 while the user is typing or pasting into a
-		 * MICR textbox.
-		 */
 		if (event instanceof InputEvent) {
-
 			InputEvent inputEvent = (InputEvent) event;
 			Component target = event.getTarget();
 
 			String numericValue = numericOnly(inputEvent.getValue());
 
 			if (target == cityCodeTextbox) {
-
 				cityCodeTextbox.setValue(numericValue);
 
 			} else if (target == bankCodeTextbox) {
-
 				bankCodeTextbox.setValue(numericValue);
 
 			} else if (target == branchCodeTextbox) {
-
 				branchCodeTextbox.setValue(numericValue);
 			}
 		}
@@ -677,9 +659,9 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 		updateMicrValidationStyles();
 	}
 
+	
 	// REMOVE NON-NUMERIC CHARACTERS
 	private String numericOnly(String value) {
-
 		if (value == null) {
 			return "";
 		}
@@ -687,6 +669,8 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 		return value.replaceAll("[^0-9]", "");
 	}
 
+	
+	
 	// UPDATE MICR VALIDATION STYLES
 	private void updateMicrValidationStyles() {
 
@@ -695,9 +679,7 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 		String branchCode = getMicrValue(branchCodeTextbox);
 
 		boolean cityValid = validationService.isValidMicrCode(cityCode);
-
 		boolean bankValid = validationService.isValidMicrCode(bankCode);
-
 		boolean branchValid = validationService.isValidMicrCode(branchCode);
 
 		updateMicrFieldStyle(cityCodeTextbox, cityValid);
@@ -707,17 +689,17 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 		updateStatusLabel(cityValid && bankValid && branchValid);
 	}
 
+	
 	// UPDATE SINGLE MICR FIELD STYLE
 	private void updateMicrFieldStyle(Textbox textbox, boolean valid) {
-
 		if (textbox != null) {
 			textbox.setSclass(valid ? "micr-component-corrected" : "micr-component-error");
 		}
 	}
 
+	
 	// GET MICR FIELD VALUE
 	private String getMicrValue(Textbox textbox) {
-
 		if (textbox == null || textbox.getValue() == null) {
 			return "";
 		}
@@ -727,7 +709,6 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 
 	// VALIDATE ALL MICR FIELDS
 	private boolean validateMicrFields(String cityCode, String bankCode, String branchCode) {
-
 		return validationService.isValidMicrCode(cityCode) && validationService.isValidMicrCode(bankCode)
 				&& validationService.isValidMicrCode(branchCode);
 	}
@@ -750,21 +731,22 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 		}
 	}
 
-	// SAFE STRING
+
+	
 	private String safe(String value) {
 		return value == null ? "" : value;
 	}
 
 	// GET CURRENT MICR VALUES
 	private String[] getCurrentMicrValues() {
-
 		return new String[] { getMicrValue(cityCodeTextbox), getMicrValue(bankCodeTextbox),
 				getMicrValue(branchCodeTextbox) };
 	}
 
+	
+	
 	// SAVE CURRENT CHEQUE MICR VALUES
 	private boolean saveCurrentCheque() {
-
 		if (cheques == null || cheques.isEmpty()) {
 			return false;
 		}
@@ -799,7 +781,7 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 			return false;
 		}
 
-		// UPDATE CURRENT OBJECT
+		
 		cheque.setCityCode(cityCode);
 		cheque.setBankCode(bankCode);
 		cheque.setBranchCode(branchCode);
@@ -809,16 +791,15 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 
 	// SET STATUS AFTER SAVE
 	private void updateChequeStatusAfterSave(OutwardCheque cheque, String status) {
-
 		if (cheque != null) {
 			cheque.setChequeStatus(status);
 		}
 	}
 
-	// SAVE & NEXT
+
+	
 	@Listen("onClick = #saveNextButton")
 	public void saveAndNext() {
-
 		if (cheques == null || cheques.isEmpty()) {
 			return;
 		}
@@ -829,26 +810,20 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 			return;
 		}
 
-		// KEEP EXISTING STATUS LOGIC
 		if (returnedMode) {
-
 			updateChequeStatusAfterSave(cheque, "RE_VERIFIED");
 
 		} else {
-
 			updateChequeStatusAfterSave(cheque, "MICR_REPAIRED");
 		}
 
-		// MOVE TO NEXT CHEQUE
 		if (currentIndex < cheques.size() - 1) {
-
 			currentIndex++;
 			loadCurrentCheque();
 
 		} else {
 
 			if (!returnedMode) {
-
 				boolean remaining = service.hasRemainingMicrErrors(batchNumber);
 
 				if (!remaining) {
@@ -866,16 +841,15 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 		}
 	}
 
-	// PREVIOUS CHEQUE
+	
+
 	@Listen("onClick = #prevButton")
 	public void previousCheque() {
-
 		if (cheques == null || cheques.isEmpty()) {
 			return;
 		}
 
 		if (currentIndex > 0) {
-
 			OutwardCheque cheque = cheques.get(currentIndex);
 
 			// SAVE CURRENT VALUES BEFORE MOVING
@@ -883,13 +857,11 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 				return;
 			}
 
-			// KEEP EXISTING STATUS LOGIC
+			
 			if (returnedMode) {
-
 				updateChequeStatusAfterSave(cheque, "RE_VERIFIED");
 
 			} else {
-
 				updateChequeStatusAfterSave(cheque, "MICR_REPAIRED");
 			}
 
@@ -902,7 +874,7 @@ public class OutwardMakerMicrRepairDetailController extends SelectorComposer<Com
 		}
 	}
 
-	// BACK TO MICR QUEUE
+
 	@Listen("onClick = #btnBackToQueue")
 	public void backToMicrQueue() {
 		Executions.getCurrent().sendRedirect("outward-maker-micr-repair.zul");

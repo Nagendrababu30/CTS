@@ -43,7 +43,7 @@
         <div sclass="login-section">
             <div sclass="login-card">
                 <vlayout spacing="15px">
-                    <label sclass="card-title" value="Welcome Back" />
+                    <label sclass="card-title" value="Welcome " />
                     <label sclass="card-subtitle" value="Sign in to your account" />
                     
                     <label id="loginMessage" sclass="error-message" />

@@ -186,7 +186,7 @@
                     <label value="Verification &amp; Corrections"
                            sclass="verification-title"/>
 
-                    <!-- INDEPENDENT SCROLL (SCROLLS UNDER FIXED HEADER) -->
+                    <!-- INDEPENDENT SCROLL -->
                     <div width="100%"
                          vflex="1"
                          sclass="cheque-details-scroll">
@@ -220,7 +220,7 @@
 
                         </div>
 
-                        <!-- CBS VALIDATION (NEW LOCATION - SAME AS MAKER RETURN) -->
+                        <!-- CBS VALIDATION -->
                         <div id="cbsValidationRow"
                              visible="true"
                              sclass="cbs-return-card">
@@ -252,7 +252,7 @@
 
                         </div>
 
-                        <!-- DATE VALIDATION (NEW LOCATION - SAME AS MAKER RETURN) -->
+                        <!-- DATE VALIDATION -->
                         <div id="dateValidationBlock"
                              visible="false"
                              sclass="date-return-card">
